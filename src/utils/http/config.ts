@@ -11,8 +11,8 @@ let baseUrlApi;
 if (process.env.NODE_ENV === "production") {
   baseUrlApi = (url: string) => location.origin + `/api/${url}`;
 } else {
-  baseUrlApi = (url: string) => `http://localhost:8091/api/${url}`;
-  // baseUrlApi = (url: string) => `https://wallpaper.anheyu.com/api/${url}`;
+  // baseUrlApi = (url: string) => `http://localhost:8091/api/${url}`;
+  baseUrlApi = (url: string) => `https://wallpaper.anheyu.com/api/${url}`;
 }
 
 export { baseUrlApi };

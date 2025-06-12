@@ -45,7 +45,6 @@ export const addWallpapert = data => {
 export const publicWallpapert = async params => {
   let requestUrl: string;
 
-  // *** 关键改动：在函数内部获取 Pinia Store 实例 ***
   const siteConfigStore = useSiteConfigStore();
   const backendConfiguredApiUrl = siteConfigStore.getWallpaperBackendApiUrl;
 

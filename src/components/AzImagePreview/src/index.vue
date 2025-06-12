@@ -1,7 +1,14 @@
+<!--
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-11 11:59:32
+ * @LastEditTime: 2025-06-12 11:10:09
+ * @LastEditors: 安知鱼
+-->
 <template>
   <Teleport to="body">
     <Transition name="az-fade">
-      <div v-if="visible" class="az-preview-overlay" @click.self="close">
+      <div v-show="visible" class="az-preview-overlay" @click.self="close">
         <div
           style="display: inline-block; height: 100%; vertical-align: middle"
         />
@@ -29,10 +36,10 @@
                 class="az-preview-image"
                 :class="{ 'az-image-enter': showTransition }"
                 :src="
-                  previewSrcList[previewIndex].bigParam
-                    ? previewSrcList[previewIndex].imageUrl +
-                      `?${previewSrcList[previewIndex].bigParam}`
-                    : previewSrcList[previewIndex].imageUrl
+                  previewSrcList[previewIndex]?.bigParam
+                    ? previewSrcList[previewIndex]?.imageUrl +
+                      `?${previewSrcList[previewIndex]?.bigParam}`
+                    : previewSrcList[previewIndex]?.imageUrl
                 "
                 @click.stop
                 @load="imgLoad()"
