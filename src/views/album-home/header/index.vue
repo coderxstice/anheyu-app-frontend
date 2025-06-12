@@ -108,23 +108,6 @@ const icpNumber = computed(() => siteConfig.value?.ICP_NUMBER || "");
     animation: none;
   }
 
-  @media screen and (width <= 736px) {
-    top: 0;
-    bottom: auto;
-    height: 60px;
-    padding: 0 1em;
-    transform: translateY(0);
-
-    .nav-item {
-      font-size: 0.7em;
-    }
-
-    h1 {
-      font-size: 0.8em;
-      color: #fff;
-    }
-  }
-
   h1 {
     display: flex;
     align-items: center;
@@ -264,6 +247,24 @@ const icpNumber = computed(() => siteConfig.value?.ICP_NUMBER || "");
     height: 30px;
     margin-right: 1rem;
     border-radius: 20px;
+  }
+
+  @media screen and (width <= 736px) {
+    top: 0;
+    bottom: auto;
+    height: 60px;
+    padding: 0 1em;
+    transform: translateY(0);
+
+    .nav-item {
+      font-size: 0.7em;
+    }
+
+    h1 {
+      font-size: 0.8em;
+      color: #fff;
+      display: none !important;
+    }
   }
 }
 </style>
