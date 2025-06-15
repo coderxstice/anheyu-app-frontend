@@ -1,21 +1,20 @@
 /*
- * @Description:
+ * @Description: 主入口文件
  * @Author: 安知鱼
  * @Date: 2025-06-11 11:59:32
- * @LastEditTime: 2025-06-11 13:13:55
+ * @LastEditTime: 2025-06-15 13:47:08
  * @LastEditors: 安知鱼
  */
 import App from "./App.vue";
 import router from "./router";
 import { setupStore } from "@/store";
-import { getPlatformConfig } from "./config";
+import { initializeConfigs } from "./config";
 import { MotionPlugin } from "@vueuse/motion";
 import { createApp, type Directive } from "vue";
 import { useElementPlus } from "@/plugins/elementPlus";
 import { injectResponsiveStorage } from "@/utils/responsive";
 
 import Table from "@pureadmin/table";
-// import PureDescriptions from "@pureadmin/descriptions";
 
 // 引入重置样式
 import "./style/reset.scss";
@@ -58,12 +57,27 @@ import "tippy.js/themes/light.css";
 import VueTippy from "vue-tippy";
 app.use(VueTippy);
 
-getPlatformConfig(app).then(async config => {
-  setupStore(app);
-  app.use(router);
-  await router.isReady();
-  injectResponsiveStorage(app, config);
-  app.use(MotionPlugin).use(useElementPlus).use(Table);
-  // .use(PureDescriptions)
-  app.mount("#app");
-});
+// 确保 Pinia 在任何 Store 被使用之前就被安装到 Vue 应用中
+setupStore(app);
+
+initializeConfigs(app)
+  .then(async () => {
+    app.use(router);
+    await router.isReady(); // 等待路由就绪
+
+    // 从 app.config.globalProperties.$config 获取配置
+    // 注入响应式存储，确保 config 的类型匹配
+    const platformConfig = app.config.globalProperties
+      .$config as PlatformConfigs;
+    if (!platformConfig) {
+      console.error("Platform config is not available.");
+      throw new Error("平台配置未成功加载。");
+    }
+    injectResponsiveStorage(app, platformConfig);
+
+    app.use(MotionPlugin).use(useElementPlus).use(Table);
+    app.mount("#app");
+  })
+  .catch(error => {
+    console.error("应用程序初始化失败:", error);
+  });

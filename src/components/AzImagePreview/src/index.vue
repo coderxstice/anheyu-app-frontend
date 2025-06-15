@@ -1,10 +1,3 @@
-<!--
- * @Description:
- * @Author: 安知鱼
- * @Date: 2025-06-11 11:59:32
- * @LastEditTime: 2025-06-12 11:10:09
- * @LastEditors: 安知鱼
--->
 <template>
   <Teleport to="body">
     <Transition name="az-fade">
@@ -89,10 +82,25 @@
               </span>
             </div>
           </div>
-          <span class="az-preview-close closer" @click="close" />
-          <template v-if="previewSrcList.length > 1">
-            <div class="az-nav nav-previous" @click.stop="prev" />
-            <div class="az-nav nav-next" @click.stop="next" />
+
+          <span
+            class="az-preview-close closer"
+            :class="{ 'delayed-hidden': !showControls }"
+            v-show="showControls"
+            @click="close"
+          />
+
+          <template v-if="previewSrcList.length > 1 && showControls">
+            <div
+              class="az-nav nav-previous"
+              :class="{ 'delayed-hidden': !showControls }"
+              @click.stop="prev"
+            />
+            <div
+              class="az-nav nav-next"
+              :class="{ 'delayed-hidden': !showControls }"
+              @click.stop="next"
+            />
           </template>
         </div>
       </div>
@@ -128,8 +136,10 @@ const containerEnter = ref(false);
 const loading = ref(true);
 const showTransition = ref(false);
 const currentIndex = ref(0);
-
 const downloadCount = ref(0);
+
+// 新增：控制按钮显示和点击的变量
+const showControls = ref(false);
 
 let currentImgSize = { width: 0, height: 0 };
 
@@ -139,7 +149,8 @@ const siteName = computed(
   () => siteConfigStore.getSiteConfig?.APP_NAME || "鱼鱼相册"
 );
 
-const formatFileSize = size => {
+const formatFileSize = (size: number) => {
+  // 添加 size 的类型标注
   if (size >= 1024 * 1024) {
     return (size / 1024 / 1024).toFixed(2) + " MB";
   } else if (size >= 1024) {
@@ -149,7 +160,8 @@ const formatFileSize = size => {
   }
 };
 
-const downImage = imageInfo => {
+const downImage = (imageInfo: any) => {
+  // 添加 imageInfo 的类型标注
   updateWallpaperStat({
     id: imageInfo.id,
     type: "download"
@@ -208,6 +220,8 @@ const handleResize = () => {
 
 const handleKeydown = (e: KeyboardEvent) => {
   if (!visible.value) return;
+  // 仅当 showControls 为 true 时才响应键盘事件
+  if (!showControls.value) return;
   switch (e.key) {
     case "Escape":
       close();
@@ -248,6 +262,7 @@ const open = async (list: Array<any>, index = 0, next = false) => {
     isSwitch.value = true;
   } else {
     isSwitch.value = false;
+    showControls.value = false;
   }
 
   const imgUrl = list[index].bigParam
@@ -257,6 +272,9 @@ const open = async (list: Array<any>, index = 0, next = false) => {
   // 预加载
   const size = await getImageSize(imgUrl);
   currentImgSize = size;
+
+  // 动画调整完毕以后显示按钮
+  showControls.value = true;
 
   await nextTick();
   updateContainerSize();
@@ -286,6 +304,7 @@ const close = () => {
   containerEnter.value = false;
   imageReady.value = false;
   showTransition.value = false;
+  showControls.value = false;
 };
 
 const next = () => {
@@ -524,6 +543,12 @@ $transition: opacity 0.2s ease-in-out;
       background-position: center;
       opacity: 0;
       transition: $transition;
+    }
+
+    /* 新增类：延迟显示时隐藏和禁用点击 */
+    .delayed-hidden {
+      opacity: 0 !important;
+      pointer-events: none !important;
     }
 
     .closer {
