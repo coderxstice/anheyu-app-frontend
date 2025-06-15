@@ -82,13 +82,8 @@ export const useSiteConfigStore = defineStore("pure-site-config", {
           this.siteConfig.APP_NAME = value; // 更新 APP_NAME 确保与后端对应
           this.siteConfig.title = value; // 更新本地 title 属性
         } else if (Reflect.has(this.siteConfig, key)) {
-          // 对于其他属性，直接更新
-          // 这里进行类型断言，因为 key 的具体类型在运行时才能确定
           (this.siteConfig as any)[key] = value;
         }
-        // 如果需要将设置的更改持久化到 localStorage，可以在这里添加逻辑
-        // const dataToCache = { config: this.siteConfig, timestamp: Date.now() };
-        // localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToCache));
       }
     },
     // 从 useSettingStore 继承的 action: 封装 CHANGE_SETTING
