@@ -10,8 +10,10 @@ import {
 import {
   type UserResult,
   type RefreshTokenResult,
+  type CheckEmailExistsResult,
   getLogin,
-  refreshTokenApi
+  refreshTokenApi,
+  checkEmailExistsApi
 } from "@/api/user";
 import { useMultiTagsStoreHook } from "./multiTags";
 import { type DataInfo, setToken, removeToken, userKey } from "@/utils/auth";
@@ -65,11 +67,11 @@ export const useUserStore = defineStore({
       this.loginDay = Number(value);
     },
     /** 登入 */
-    async loginByUsername(data) {
+    async loginByEmail(data) {
       return new Promise<UserResult>((resolve, reject) => {
         getLogin(data)
           .then(data => {
-            if (data?.success) setToken(data.data);
+            if (data?.code === 200) setToken(data.data);
             resolve(data);
           })
           .catch(error => {
@@ -96,6 +98,18 @@ export const useUserStore = defineStore({
               setToken(data.data);
               resolve(data);
             }
+          })
+          .catch(error => {
+            reject(error);
+          });
+      });
+    },
+    // 邮箱校验用户是否注册
+    async checkEmailRegistered(email: string) {
+      return new Promise<CheckEmailExistsResult>((resolve, reject) => {
+        checkEmailExistsApi(email)
+          .then(data => {
+            resolve(data);
           })
           .catch(error => {
             reject(error);

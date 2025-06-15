@@ -1,14 +1,49 @@
 <script setup lang="ts">
-import { ref, reactive, nextTick } from "vue";
+import {
+  ref,
+  reactive,
+  nextTick,
+  onMounted,
+  onBeforeUnmount,
+  computed
+} from "vue";
 import type { FormInstance, FormRules } from "element-plus";
 
+import { useLayout } from "@/layout/hooks/useLayout";
+import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
+import { initRouter, getTopMenu } from "@/router/utils";
 import MailFill from "@iconify-icons/ri/mail-fill";
 import LockFill from "@iconify-icons/ri/lock-password-fill";
 import ArrowLeftSLine from "@iconify-icons/ri/arrow-left-s-line";
+import dayIcon from "@/assets/svg/day.svg?component";
+import darkIcon from "@/assets/svg/dark.svg?component";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { message } from "@/utils/message";
+import { useUserStoreHook } from "@/store/modules/user";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import { useRouter } from "vue-router";
 
 defineOptions({ name: "Login" });
+
+const siteConfigStore = useSiteConfigStore();
+
+const router = useRouter();
+
+const { initStorage } = useLayout();
+initStorage();
+const { dataTheme, overallStyle, dataThemeChange } = useDataThemeChange();
+dataThemeChange(overallStyle.value);
+
+const siteIcon = computed(
+  () =>
+    siteConfigStore.getSiteConfig?.LOGO_HORIZONTAL_DAY ||
+    "/static/img/logo-horizontal-day.png"
+);
+const siteDark = computed(
+  () =>
+    siteConfigStore.getSiteConfig?.LOGO_HORIZONTAL_NIGHT ||
+    "/static/img/logo-horizontal-night.png"
+);
 
 type Step =
   | "check-email"
@@ -22,7 +57,6 @@ const transitionName = ref("slide-next");
 
 const formRef = ref<FormInstance>();
 const formContentRef = ref<HTMLDivElement>();
-
 const form = reactive({
   email: "",
   password: "",
@@ -85,14 +119,45 @@ const handleSubmit = async (
 };
 
 const checkEmailExists = async (email: string): Promise<boolean> => {
-  const mockEmails = ["me@anheyu.com", "anzhiyu-c@qq.com"];
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return mockEmails.includes(email);
+  try {
+    const res = await useUserStoreHook().checkEmailRegistered(email);
+    if (res.code === 200) {
+      return res.data.exists;
+    } else {
+      message("检查邮箱失败 - " + res.message, { type: "error" });
+      return false;
+    }
+  } catch (error: any) {
+    // 捕获网络错误或其他异常
+    message("检查邮箱时发生错误 - " + error.message, { type: "error" });
+    return false;
+  }
 };
 
+// 修改 apiLogin 函数，整合你提供的登录逻辑
 const apiLogin = async () => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  message("登录成功", { type: "success" });
+  const formEl = formRef.value;
+  if (!formEl) return;
+  await formEl.validate(valid => {
+    if (valid) {
+      useUserStoreHook()
+        .loginByEmail({
+          email: form.email,
+          password: form.password
+        })
+        .then(res => {
+          if (res.code === 200) {
+            return initRouter().then(() => {
+              router.push(getTopMenu(true).path).then(() => {
+                message("登录成功", { type: "success" });
+              });
+            });
+          } else {
+            message("登录失败 - " + res.message, { type: "error" });
+          }
+        });
+    }
+  });
 };
 
 const apiRegister = async () => {
@@ -111,6 +176,7 @@ const handleNextStep = async () => {
   );
 };
 
+// handleLogin 现在会调用新的 apiLogin
 const handleLogin = async () => {
   await handleSubmit(() => formRef.value!.validate(), apiLogin);
 };
@@ -119,17 +185,52 @@ const handleRegister = async () => {
   await handleSubmit(() => formRef.value!.validate(), apiRegister);
 };
 
+// --- 键盘事件逻辑 ---
+/** 使用公共函数，避免`removeEventListener`失效 */
+const onkeypress = ({ code }: KeyboardEvent) => {
+  if (["Enter", "NumpadEnter"].includes(code)) {
+    switch (step.value) {
+      case "check-email":
+        handleNextStep();
+        break;
+      case "login-password":
+        handleLogin();
+        break;
+      case "register-form":
+        handleRegister();
+        break;
+      // "register-prompt" 页面不需要回车键触发操作
+      default:
+        break;
+    }
+  }
+};
 
+onMounted(() => {
+  window.document.addEventListener("keypress", onkeypress);
+});
+
+onBeforeUnmount(() => {
+  window.document.removeEventListener("keypress", onkeypress);
+});
 </script>
 
 <template>
-  <div class="flex items-center justify-center w-full min-h-screen bg-gray-50">
+  <div class="flex items-center justify-center w-full min-h-screen">
     <div
-      class="w-full max-w-sm p-8 space-y-6 bg-white border border-gray-200 rounded-xl shadow-sm"
+      class="w-full max-w-sm p-8 space-y-6 bg-[--anzhiyu-card-bg] border border-gray-200 rounded-xl shadow-sm mx-4"
     >
-      <div class="flex justify-center">
-        <img src="" />
-        <span class="ml-2 text-2xl font-bold">ANZHIYU</span>
+      <div class="flex-c absolute right-5 top-3">
+        <el-switch
+          v-model="dataTheme"
+          inline-prompt
+          :active-icon="dayIcon"
+          :inactive-icon="darkIcon"
+          @change="dataThemeChange"
+        />
+      </div>
+      <div class="flex justify-center w-40 h-10 mx-auto">
+        <img :src="siteIcon" alt="网站logo" />
       </div>
 
       <el-form ref="formRef" :model="form" :rules="rules" size="large">
@@ -138,9 +239,10 @@ const handleRegister = async () => {
         >
           <transition :name="transitionName" mode="out-in">
             <div :key="step" ref="formContentRef">
-              <!-- 输入邮箱 -->
               <div v-if="step === 'check-email'">
-                <h2 class="text-xl font-semibold text-center text-gray-800">
+                <h2
+                  class="text-xl font-semibold text-center text-[--anzhiyu-fontcolor]"
+                >
                   登录你的账号
                 </h2>
                 <div class="mt-6">
@@ -173,7 +275,6 @@ const handleRegister = async () => {
                 </div>
               </div>
 
-              <!-- 输入密码 -->
               <div v-else-if="step === 'login-password'">
                 <h2 class="text-xl font-semibold text-center text-gray-800">
                   请输入密码
@@ -218,14 +319,15 @@ const handleRegister = async () => {
                 </div>
               </div>
 
-              <!-- 注册提示 -->
               <div v-else-if="step === 'register-prompt'">
-                <h2 class="text-xl font-semibold text-center text-gray-800">
+                <h2
+                  class="text-xl font-semibold text-center text-[--anzhiyu-fontcolor]"
+                >
                   登录你的账号
                 </h2>
-                <p class="mt-4 text-center text-gray-600">
+                <p class="mt-4 text-center text-[--anzhiyu-fontcolor]">
                   你输入的账户
-                  <span class="font-medium text-gray-800">{{
+                  <span class="font-medium text-[--anzhiyu-fontcolor]">{{
                     form.email
                   }}</span>
                   不存在，是否立即注册？
@@ -247,7 +349,6 @@ const handleRegister = async () => {
                 </div>
               </div>
 
-              <!-- 注册表单 -->
               <div v-else-if="step === 'register-form'">
                 <h2 class="text-xl font-semibold text-center text-gray-800">
                   创建新账号
@@ -289,7 +390,7 @@ const handleRegister = async () => {
                     >
                   </el-form-item>
                   <div class="text-sm text-center">
-                    <span class="text-gray-600">已有账号？</span>
+                    <span class="text-[--anzhiyu-secondtext]">已有账号？</span>
                     <a
                       href="#"
                       class="font-medium text-blue-600 hover:text-blue-500"

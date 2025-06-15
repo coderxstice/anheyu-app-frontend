@@ -51,7 +51,7 @@
     background: #f0f2f5;
 
     /* main-content 属性动画 */
-    transition: margin-left var(--pure-transition-duration);
+    transition: margin-left var(--anzhiyu-transition-duration);
 
     .el-scrollbar__wrap {
       height: 100%;
@@ -67,7 +67,7 @@
     width: calc(100% - #{$sideBarWidth});
 
     /* fixed-header 属性左上角动画 */
-    transition: width var(--pure-transition-duration);
+    transition: width var(--anzhiyu-transition-duration);
   }
 
   .main-hidden {
@@ -93,10 +93,10 @@
     overflow: visible;
     font-size: 0;
     background: var(--anzhiyu-theme-menu-bg) !important;
-    border-right: 1px solid var(--pure-border-color);
+    border-right: 1px solid var(--anzhiyu-border-color);
 
     /* 展开动画 */
-    transition: width var(--pure-transition-duration);
+    transition: width var(--anzhiyu-transition-duration);
 
     .scrollbar-wrapper {
       overflow-x: hidden !important;
@@ -217,7 +217,7 @@
       clear: both;
       content: "";
       background-color: var(--anzhiyu-theme-menu-active-before);
-      transition: all var(--pure-transition-duration) ease-in-out;
+      transition: all var(--anzhiyu-transition-duration) ease-in-out;
       transform: translateY(0);
     }
 
@@ -423,7 +423,7 @@
       height: 100%;
       padding-left: 10px;
       cursor: pointer;
-      transition: all var(--pure-transition-duration) ease;
+      transition: all var(--anzhiyu-transition-duration) ease;
 
       img {
         display: inline-block;
@@ -550,7 +550,7 @@
   .mobile {
     .fixed-header {
       width: 100% !important;
-      transition: width var(--pure-transition-duration);
+      transition: width var(--anzhiyu-transition-duration);
     }
 
     .main-container {
@@ -560,7 +560,7 @@
     .sidebar-container {
       z-index: 2001;
       width: $sideBarWidth;
-      transition: transform var(--pure-transition-duration);
+      transition: transform var(--anzhiyu-transition-duration);
     }
 
     &.hideSidebar {
@@ -589,12 +589,12 @@ body[layout="vertical"] {
   .hideSidebar {
     .fixed-header {
       width: calc(100% - 54px);
-      transition: width var(--pure-transition-duration);
+      transition: width var(--anzhiyu-transition-duration);
     }
 
     .sidebar-container {
       width: 54px !important;
-      transition: width var(--pure-transition-duration);
+      transition: width var(--anzhiyu-transition-duration);
 
       .is-active.submenu-title-noDropdown.outer-most {
         background: transparent !important;
@@ -679,12 +679,12 @@ body[layout="mix"] {
   .hideSidebar {
     .fixed-header {
       width: calc(100% - 54px);
-      transition: width var(--pure-transition-duration);
+      transition: width var(--anzhiyu-transition-duration);
     }
 
     .sidebar-container {
       width: 54px !important;
-      transition: width var(--pure-transition-duration);
+      transition: width var(--anzhiyu-transition-duration);
 
       .is-active.submenu-title-noDropdown.outer-most {
         background: transparent !important;

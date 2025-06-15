@@ -9,10 +9,51 @@ html.dark {
   // --el-bg-color: #020409;
 
   /* 常用border-color 需要时可取用 */
-  --pure-border-color: rgb(253 253 253 / 12%);
+  --anzhiyu-border-color: rgb(253 253 253 / 12%);
 
   /* switch关闭状态下的color 需要时可取用 */
-  --pure-switch-off-color: #ffffff3f;
+  --anzhiyu-switch-off-color: #ffffff3f;
+
+  --anzhiyu-theme: #dfa621;
+  --anzhiyu-theme-op: #dfa62123;
+  --anzhiyu-theme-op-deep: #dfa621dd;
+  --anzhiyu-theme-none: #dfa62100;
+  --anzhiyu-blue: #0084ff;
+  --anzhiyu-red: #ff3842;
+  --anzhiyu-pink: #d44040;
+  --anzhiyu-green: #3e9f50;
+  --anzhiyu-purple: #7a60d2;
+  --anzhiyu-yellow: #ffc93e;
+  --anzhiyu-yellow-op: #ffc93e30;
+  --anzhiyu-orange: #ff953e;
+  --anzhiyu-fontcolor: #f7f7fa;
+  --anzhiyu-background: #18171d;
+  --anzhiyu-reverse: #fff;
+  --anzhiyu-maskbg: rgba(0, 0, 0, 0.6);
+  --anzhiyu-maskbgdeep: rgba(0, 0, 0, 0.85);
+  --anzhiyu-hovertext: #0a84ff;
+  --anzhiyu-ahoverbg: #fff;
+  --anzhiyu-lighttext: var(--anzhiyu-theme);
+  --anzhiyu-secondtext: #a1a2b8;
+  --anzhiyu-scrollbar: rgba(200, 200, 223, 0.4);
+  --anzhiyu-card-btn-bg: #30343f;
+  --anzhiyu-post-blockquote-bg: #000;
+  --anzhiyu-post-tabs-bg: #121212;
+  --anzhiyu-secondbg: #21232a;
+  --anzhiyu-shadow-nav: 0 5px 20px 0px rgba(28, 28, 28, 0.4);
+  --anzhiyu-card-bg: #1d1e22;
+  --anzhiyu-card-bg-op: var(--anzhiyu-white-op);
+  --anzhiyu-card-bg-none: #1d1b2600;
+  --anzhiyu-shadow-lightblack: 0 5px 12px -5px rgba(102, 68, 68, 0);
+  --anzhiyu-shadow-light2black: 0 5px 12px -5px rgba(102, 68, 68, 0);
+  --anzhiyu-card-border: #3d3d3f;
+  --anzhiyu-shadow-border: 0 8px 16px -4px #00000050;
+  --style-border: 1px solid var(--anzhiyu-card-border);
+  --style-border-always: 1px solid var(--anzhiyu-card-border);
+  --style-border-hover: 1px solid var(--anzhiyu-lighttext);
+  --style-border-hover-always: 1px solid var(--anzhiyu-lighttext);
+  --style-border-dashed: 1px dashed var(--anzhiyu-theme-op);
+  --style-border-forever: 2px solid var(--anzhiyu-lighttext);
 
   .navbar,
   .tags-view,

@@ -414,7 +414,7 @@ onUnmounted(() => removeMatchMedia);
         <button
           v-else
           v-ripple="{ class: 'text-gray-300' }"
-          class="bg-transparent flex-c w-full h-20 rounded-md border border-[var(--pure-border-color)]"
+          class="bg-transparent flex-c w-full h-20 rounded-md border border-[var(--anzhiyu-border-color)]"
           @click="setStretch(!settings.stretch)"
         >
           <div
@@ -523,7 +523,7 @@ onUnmounted(() => removeMatchMedia);
 }
 
 :deep(.el-switch__core) {
-  --el-switch-off-color: var(--pure-switch-off-color);
+  --el-switch-off-color: var(--anzhiyu-switch-off-color);
 
   min-width: 36px;
   height: 18px;

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-11 11:59:32
- * @LastEditTime: 2025-06-11 13:43:08
+ * @LastEditTime: 2025-06-16 00:07:23
  * @LastEditors: 安知鱼
  */
 // src/api/user.ts
@@ -10,7 +10,7 @@ import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
 
 export type UserResult = {
-  success: boolean;
+  code: number;
   data: {
     /** 头像 */
     avatar: string;
@@ -33,7 +33,7 @@ export type UserResult = {
 };
 
 export type RefreshTokenResult = {
-  success: boolean;
+  code: number;
   data: {
     /** `token` */
     accessToken: string;
@@ -53,6 +53,12 @@ export type SiteConfig = {
   API_URL: string;
   LOGO_URL: string;
   ICON_URL: string;
+  LOGO_HORIZONTAL_DAY: string;
+  LOGO_HORIZONTAL_NIGHT: string;
+  LOGO_URL_192x192: string;
+  LOGO_URL_512x512: string;
+  DEFAULT_THUMB_PARAM: string;
+  DEFAULT_BIG_PARAM: string;
 };
 
 export type SiteConfigResult = {
@@ -61,16 +67,24 @@ export type SiteConfigResult = {
   data: SiteConfig;
 };
 
+export type CheckEmailExistsResult = {
+  code: number;
+  data: {
+    exists: boolean;
+  };
+  message?: string;
+};
+
 /** 登录 */
 export const getLogin = (data?: object) => {
-  return http.request<UserResult>("post", baseUrlApi("login"), { data });
+  return http.request<UserResult>("post", baseUrlApi("user/login"), { data });
 };
 
 /** 刷新`token` */
 export const refreshTokenApi = (data?: object) => {
   return http.request<RefreshTokenResult>(
     "post",
-    baseUrlApi("/refresh-token"),
+    baseUrlApi("user/refresh-token"),
     { data }
   );
 };
@@ -80,5 +94,16 @@ export const getSiteConfigApi = () => {
   return http.request<SiteConfigResult>(
     "get",
     baseUrlApi("public/site-config")
+  );
+};
+
+/** 检查邮箱是否存在 */
+export const checkEmailExistsApi = (email: string) => {
+  return http.request<CheckEmailExistsResult>(
+    "get",
+    baseUrlApi("user/check-email"),
+    {
+      params: { email }
+    }
   );
 };

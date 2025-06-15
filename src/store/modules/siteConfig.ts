@@ -11,11 +11,9 @@ const CACHE_EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 24小时
 
 // 将 SiteConfig 的所有属性设为可选，因为它们会通过合并逐步填充
 interface CombinedSiteSettings extends Partial<SiteConfig> {
-  // <--- **已修改**：使用 Partial<SiteConfig> 使所有继承属性可选
-  title?: string; // 对应 APP_NAME，但作为独立的设置属性
+  title?: string;
   fixedHeader?: boolean;
   hiddenSideBar?: boolean;
-  // 如果还有其他需要从前端或后端动态管理的设置，可以继续添加到这里
 }
 
 export const useSiteConfigStore = defineStore("pure-site-config", {
