@@ -10,7 +10,7 @@ import {
 import type { tagsViewsType } from "../types";
 import { useRoute, useRouter } from "vue-router";
 import { responsiveStorageNameSpace } from "@/config";
-import { useSettingStoreHook } from "@/store/modules/settings";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 import {
   isEqual,
@@ -32,7 +32,7 @@ export function useTags() {
   const route = useRoute();
   const router = useRouter();
   const instance = getCurrentInstance();
-  const pureSetting = useSettingStoreHook();
+  const pureSetting = useSiteConfigStore();
 
   const buttonTop = ref(0);
   const buttonLeft = ref(0);
@@ -195,7 +195,7 @@ export function useTags() {
   }
 
   function onContentFullScreen() {
-    pureSetting.hiddenSideBar
+    pureSetting.getHiddenSideBar
       ? pureSetting.changeSetting({ key: "hiddenSideBar", value: false })
       : pureSetting.changeSetting({ key: "hiddenSideBar", value: true });
   }

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-04-08 17:29:06
- * @LastEditTime: 2025-06-11 13:05:26
+ * @LastEditTime: 2025-06-15 14:29:10
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
@@ -40,7 +40,7 @@ export default [
     name: "AlbumHome",
     component: () => import("@/views/album-home/index.vue"),
     meta: {
-      title: "壁纸",
+      title: "相册图片",
       showLink: false,
       rank: 103
     }

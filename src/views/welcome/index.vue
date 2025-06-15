@@ -72,7 +72,7 @@ function onFullscreen() {
     </el-form>
 
     <PureTableBar
-      title="壁纸管理"
+      title="相册图片管理"
       :columns="columns"
       :tableRef="tableRef?.getTableRef()"
       @refresh="onSearch"
@@ -84,7 +84,7 @@ function onFullscreen() {
           :icon="useRenderIcon(AddFill)"
           @click="openDialog()"
         >
-          新增壁纸
+          新增相册图片
         </el-button>
       </template>
       <template v-slot="{ size, dynamicColumns }">
@@ -122,7 +122,7 @@ function onFullscreen() {
               修改
             </el-button>
             <el-popconfirm
-              :title="`是否确认删除壁纸这条数据`"
+              :title="`是否确认删除相册图片这条数据`"
               @confirm="handleDelete(row)"
             >
               <template #reference>

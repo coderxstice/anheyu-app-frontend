@@ -5,7 +5,7 @@ import "@/components/ReIcon/src/offlineIcon";
 import { setType } from "./types";
 import { useLayout } from "./hooks/useLayout";
 import { useAppStoreHook } from "@/store/modules/app";
-import { useSettingStoreHook } from "@/store/modules/settings";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 import {
   h,
@@ -35,7 +35,7 @@ const appWrapperRef = ref();
 const { isDark } = useDark();
 const { layout } = useLayout();
 const isMobile = deviceDetection();
-const pureSetting = useSettingStoreHook();
+const pureSetting = useSiteConfigStore();
 const { $storage } = useGlobal<GlobalPropertiesApi>();
 
 const set: setType = reactive({
@@ -48,7 +48,7 @@ const set: setType = reactive({
   }),
 
   fixedHeader: computed(() => {
-    return pureSetting.fixedHeader;
+    return pureSetting.getFixedHeader;
   }),
 
   classes: computed(() => {
@@ -141,11 +141,11 @@ const LayHeader = defineComponent({
       },
       {
         default: () => [
-          !pureSetting.hiddenSideBar &&
+          !pureSetting.getHiddenSideBar &&
           (layout.value.includes("vertical") || layout.value.includes("mix"))
             ? h(LayNavbar)
             : null,
-          !pureSetting.hiddenSideBar && layout.value.includes("horizontal")
+          !pureSetting.getHiddenSideBar && layout.value.includes("horizontal")
             ? h(NavHorizontal)
             : null,
           h(LayTag)
@@ -169,14 +169,14 @@ const LayHeader = defineComponent({
     />
     <NavVertical
       v-show="
-        !pureSetting.hiddenSideBar &&
+        !pureSetting.getHiddenSideBar &&
         (layout.includes('vertical') || layout.includes('mix'))
       "
     />
     <div
       :class="[
         'main-container',
-        pureSetting.hiddenSideBar ? 'main-hidden' : ''
+        pureSetting.getHiddenSideBar ? 'main-hidden' : ''
       ]"
     >
       <div v-if="set.fixedHeader">

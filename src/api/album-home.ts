@@ -49,31 +49,31 @@ const getDynamicApiUrl = (endpointPath: string): string => {
   }
 };
 
-// 获取壁纸列表
+// 获取相册图片列表
 export const getWallpapertList = (params: any) => {
   return http.request<Result>("get", baseUrlApi("wallpapers"), {
     params
   });
 };
 
-// 删除壁纸
+// 删除相册图片
 export const deleteWallpaper = (data: { id: string }) => {
   return http.request<addResult>("delete", baseUrlApi(`wallpapers/${data.id}`));
 };
 
-// 更新壁纸信息
+// 更新相册图片信息
 export const updateWallpaper = (data: any) => {
   return http.request<addResult>("put", baseUrlApi(`wallpapers/${data.id}`), {
     data
   });
 };
 
-// 添加壁纸
+// 添加相册图片
 export const addWallpapert = (data: any) => {
   return http.request<addResult>("post", baseUrlApi("wallpapers"), { data });
 };
 
-// 获取公共壁纸列表
+// 获取公共相册图片列表
 export const publicWallpapert = (params: any) => {
   const requestUrl = getDynamicApiUrl("api/public/wallpapers"); // 使用抽离的逻辑
 
@@ -83,7 +83,7 @@ export const publicWallpapert = (params: any) => {
   });
 };
 
-// 更新壁纸统计信息 (浏览量、下载量等)
+// 更新相册图片统计信息 (浏览量、下载量等)
 export const updateWallpaperStat = (params: { id: string; type: string }) => {
   const requestUrl = getDynamicApiUrl(`api/public/stat/${params.id}`); // 使用抽离的逻辑
 

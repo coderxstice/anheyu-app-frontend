@@ -6,7 +6,7 @@ import { routerArrays } from "@/layout/types";
 import { onClickOutside } from "@vueuse/core";
 import TagChrome from "./components/TagChrome.vue";
 import { handleAliveRoute, getTopMenu } from "@/router/utils";
-import { useSettingStoreHook } from "@/store/modules/settings";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 import { usePermissionStoreHook } from "@/store/modules/permission";
 import { ref, watch, unref, toRaw, nextTick, onBeforeUnmount } from "vue";
@@ -340,7 +340,7 @@ function onClickDrop(key, item, selectRoute?: RouteConfigs) {
       // 内容区全屏
       onContentFullScreen();
       setTimeout(() => {
-        if (pureSetting.hiddenSideBar) {
+        if (pureSetting.getHiddenSideBar) {
           tagsViews[6].icon = ExitFullscreen;
           tagsViews[6].text = "内容区退出全屏";
         } else {
@@ -481,7 +481,7 @@ function openMenu(tag, e) {
   } else {
     buttonLeft.value = left;
   }
-  useSettingStoreHook().hiddenSideBar
+  useSiteConfigStore().getHiddenSideBar
     ? (buttonTop.value = e.clientY)
     : (buttonTop.value = e.clientY - 40);
   nextTick(() => {

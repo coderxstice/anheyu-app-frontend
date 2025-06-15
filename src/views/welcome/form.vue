@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-04-11 15:37:10
- * @LastEditTime: 2025-04-11 17:35:31
+ * @LastEditTime: 2025-06-15 14:28:55
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -44,11 +44,11 @@ defineExpose({ getRef });
   >
     <el-row :gutter="30">
       <re-col :value="12" :xs="24" :sm="24">
-        <el-form-item label="壁纸图链接" prop="imageUrl">
+        <el-form-item label="图片链接" prop="imageUrl">
           <el-input
             v-model="newFormInline.imageUrl"
             clearable
-            placeholder="请输入壁纸图链接"
+            placeholder="请输入图片图链接"
             type="textarea"
             :rows="8"
           />

@@ -24,14 +24,14 @@ const handleImageLoad = () => {
   loadedImages.value.splice(0, 24, ...Array(24).fill(true));
 };
 
-// 存储壁纸数据
+// 存储相册图片数据
 const wallpapers = ref<any[]>([]);
 // 分页相关
 const totalItems = ref<number>(0);
 const currentPage = ref<number>(1);
 const pageSize = ref<number>(24);
 
-// 请求壁纸列表
+// 请求相册图片列表
 const fetchWallpapers = async () => {
   try {
     const params = {

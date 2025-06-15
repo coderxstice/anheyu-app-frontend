@@ -29,7 +29,7 @@ export function useDept() {
       minWidth: 70
     },
     {
-      label: "壁纸图",
+      label: "图片URL",
       prop: "imageUrl",
       minWidth: 70
     },
@@ -138,7 +138,7 @@ export function useDept() {
 
   function openDialog(title = "新增", row?: FormItemProps) {
     addDialog({
-      title: `${title}壁纸`,
+      title: `${title}图片`,
       props: {
         formInline: {
           id: row?.id ?? 0,
@@ -173,7 +173,7 @@ export function useDept() {
         const FormRef = formRef.value.getRef();
         const curData = options.props.formInline as FormItemProps;
         function chores() {
-          message(`您${title}了一张壁纸`, {
+          message(`您${title}了一张图片`, {
             type: "success"
           });
           done(); // 关闭弹框
@@ -334,7 +334,7 @@ export function useDept() {
   function handleDelete(row) {
     deleteWallpaper(row).then(res => {
       if (res.code === 200) {
-        message(`您删除了壁纸id为${row.id}的这条数据`, {
+        message(`您删除了图片id为${row.id}的这条数据`, {
           type: "success"
         });
         onSearch();
@@ -405,9 +405,9 @@ export function useDept() {
     onSearch,
     /** 重置 */
     resetForm,
-    /** 新增、修改壁纸 */
+    /** 新增、修改图片 */
     openDialog,
-    /** 删除壁纸 */
+    /** 删除图片 */
     handleDelete
   };
 }

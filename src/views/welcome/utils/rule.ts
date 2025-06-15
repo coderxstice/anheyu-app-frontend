@@ -11,7 +11,7 @@ import type { FormRules } from "element-plus";
 /** 自定义表单规则校验 */
 export const formRules = reactive(<FormRules>{
   imageUrl: [
-    { required: true, message: "壁纸图链接为必填项", trigger: "blur" },
+    { required: true, message: "图片链接为必填项", trigger: "blur" },
     {
       pattern: /^(https?|http):\/\/[^\s/$.?#].[^\s]*$/i,
       message: "请输入有效的链接地址",
