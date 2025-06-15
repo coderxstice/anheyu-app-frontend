@@ -8,16 +8,11 @@
       name="viewport"
       content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=0"
     />
-    <title id="app-title">云上相册</title>
-    <meta
-      name="keywords"
-      content="鱼鱼相册,简壁纸,桌面壁纸,高清壁纸,电脑桌面壁纸,4k高清,4k超清,壁纸桌面,壁纸网站,最潮壁纸,桌面,壁纸,美图,小姐姐,二次元,4K壁纸,高清壁纸,极简壁纸,风景壁纸,美女壁纸,动漫壁纸,手机壁纸,电脑壁纸,高清电脑壁纸,4K电脑壁纸,4k"
-    />
-    <meta
-      name="description"
-      content="鱼鱼相册,极简壁纸,4K高清电脑桌面壁纸图库,海量4K电脑壁纸,壁纸网站,美女,动漫,风景,4k高清,4k超清,电脑壁纸桌面"
-    />
-    <meta name="author" content="安知鱼" />
+    <!-- 关键：确保这里使用了 Go 模板占位符 -->
+    <title id="app-title">{{.siteName}}</title>
+    <meta name="keywords" content="{{.keywords}}" />
+    <meta name="description" content="{{.description}}" />
+    <meta name="author" content="安知鱼1" />
     <meta name="theme-color" content="#406eeb" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta
@@ -25,8 +20,10 @@
       content="telephone=no, email=no, address=no"
     />
     <meta name="msapplication-TileColor" content="#406eeb" />
-    <meta name="msapplication-TileImage" content="/logo.svg" />
-    <link rel="icon" href="/logo.svg" />
+    <!-- 关键：确保这里使用了 Go 模板占位符 -->
+    <meta name="msapplication-TileImage" content="{{.favicon}}" />
+    <!-- 关键：确保这里使用了 Go 模板占位符 -->
+    <link rel="icon" href="{{.favicon}}" />
     <script>
       window.process = {};
     </script>

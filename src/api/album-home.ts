@@ -30,13 +30,10 @@ type addResult = {
  */
 const getDynamicApiUrl = (endpointPath: string): string => {
   const siteConfigStore = useSiteConfigStore();
-  const backendConfiguredApiUrl = siteConfigStore.getWallpaperBackendApiUrl;
+  const backendConfiguredApiUrl =
+    siteConfigStore.getWallpaperBackendApiUrl + "api/";
 
   if (backendConfiguredApiUrl) {
-    // 假设后端配置的 API_URL 已经包含基础路径，这里只需拼接具体接口路径
-    // 例如：backendConfiguredApiUrl = "https://album.anheyu.com/"
-    // endpointPath = "api/public/wallpapers"
-    // 最终是 "https://album.anheyu.com/api/public/wallpapers"
     console.log(
       `使用后端配置的API地址: ${backendConfiguredApiUrl}${endpointPath}`
     );
@@ -75,7 +72,7 @@ export const addWallpapert = (data: any) => {
 
 // 获取公共相册图片列表
 export const publicWallpapert = (params: any) => {
-  const requestUrl = getDynamicApiUrl("api/public/wallpapers"); // 使用抽离的逻辑
+  const requestUrl = getDynamicApiUrl("public/wallpapers"); // 使用抽离的逻辑
 
   // 执行请求
   return http.request<Result>("get", requestUrl, {
@@ -85,7 +82,7 @@ export const publicWallpapert = (params: any) => {
 
 // 更新相册图片统计信息 (浏览量、下载量等)
 export const updateWallpaperStat = (params: { id: string; type: string }) => {
-  const requestUrl = getDynamicApiUrl(`api/public/stat/${params.id}`); // 使用抽离的逻辑
+  const requestUrl = getDynamicApiUrl(`public/stat/${params.id}`); // 使用抽离的逻辑
 
   return http.request<Result>(
     "put",
