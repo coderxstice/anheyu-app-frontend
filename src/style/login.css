@@ -1,20 +1,12 @@
-.wave {
-  position: fixed;
-  height: 100%;
-  width: 80%;
-  left: 0;
-  bottom: 0;
-  z-index: -1;
-}
-
 .login-container {
   width: 100vw;
   height: 100vh;
   max-width: 100%;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-gap: 18rem;
-  padding: 0 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  grid-gap: 2rem;
 }
 
 .img {
@@ -35,7 +27,16 @@
 }
 
 .login-form {
-  width: 360px;
+  width: 460px;
+  background-color: var(--anzhiyu-card-bg);
+  padding: 40px 60px;
+  display: flex;
+  flex-direction: column;
+  justify-self: center;
+  align-items: center;
+  border-radius: 40px;
+  box-shadow: var(--anzhiyu-shadow-border);
+  border: var(--style-border-always);
 }
 
 .avatar {
@@ -46,7 +47,7 @@
 .login-form h2 {
   text-transform: uppercase;
   margin: 15px 0;
-  color: #999;
+  color: #272727;
   font:
     bold 200% Consolas,
     Monaco,
@@ -55,11 +56,7 @@
 
 @media screen and (max-width: 1180px) {
   .login-container {
-    grid-gap: 9rem;
-  }
-
-  .login-form {
-    width: 290px;
+    grid-gap: 2rem;
   }
 
   .login-form h2 {
@@ -78,10 +75,6 @@
 }
 
 @media screen and (max-width: 968px) {
-  .wave {
-    display: none;
-  }
-
   .img {
     display: none;
   }

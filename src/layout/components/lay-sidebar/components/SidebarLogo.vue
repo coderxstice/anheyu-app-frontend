@@ -72,7 +72,7 @@ const appLogo = computed(
       font-size: 18px;
       font-weight: 600;
       line-height: 32px;
-      color: var(--pure-theme-sub-menu-active-text);
+      color: var(--anzhiyu-theme-sub-menu-active-text);
       text-overflow: ellipsis;
       white-space: nowrap;
     }
