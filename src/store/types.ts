@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-15 11:31:00
+ * @LastEditTime: 2025-06-17 21:28:29
+ * @LastEditors: 安知鱼
+ */
 import type { RouteRecordName } from "vue-router";
 
 export type cacheType = {
@@ -41,7 +48,7 @@ export type userType = {
   username?: string;
   nickname?: string;
   roles?: Array<string>;
-  permissions?: Array<string>;
+  // permissions?: Array<string>;
   isRemembered?: boolean;
   loginDay?: number;
 };

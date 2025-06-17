@@ -13,7 +13,9 @@ import {
   type CheckEmailExistsResult,
   getLogin,
   refreshTokenApi,
-  checkEmailExistsApi
+  checkEmailExistsApi,
+  registerUserApi,
+  type RegisterUserResult
 } from "@/api/user";
 import { useMultiTagsStoreHook } from "./multiTags";
 import { type DataInfo, setToken, removeToken, userKey } from "@/utils/auth";
@@ -30,8 +32,8 @@ export const useUserStore = defineStore({
     // 页面级别权限
     roles: storageLocal().getItem<DataInfo<number>>(userKey)?.roles ?? [],
     // 按钮级别权限
-    permissions:
-      storageLocal().getItem<DataInfo<number>>(userKey)?.permissions ?? [],
+    // permissions:
+    //   storageLocal().getItem<DataInfo<number>>(userKey)?.permissions ?? [],
     // 是否勾选了登录页的免登录
     isRemembered: false,
     // 登录页的免登录存储几天，默认7天
@@ -117,9 +119,9 @@ export const useUserStore = defineStore({
       });
     },
     // 用户注册
-    async registeredUser(email: string) {
-      return new Promise<CheckEmailExistsResult>((resolve, reject) => {
-        checkEmailExistsApi(email)
+    async registeredUser(data) {
+      return new Promise<RegisterUserResult>((resolve, reject) => {
+        registerUserApi(data)
           .then(data => {
             resolve(data);
           })

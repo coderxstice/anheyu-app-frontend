@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-15 11:31:00
+ * @LastEditTime: 2025-06-17 21:29:14
+ * @LastEditors: 安知鱼
+ */
 import type { Directive } from "vue";
 import type { CopyEl, OptimizeOptions, RippleOptions } from "@/directives";
 
@@ -14,7 +21,7 @@ declare module "vue" {
     /** 防抖、节流指令 */
     vOptimize: Directive<HTMLElement, OptimizeOptions>;
     /** 按钮权限指令（根据登录接口返回的`permissions`字段进行判断）*/
-    vPerms: Directive<HTMLElement, string | Array<string>>;
+    // vPerms: Directive<HTMLElement, string | Array<string>>;
     /**
      * `v-ripple`指令，用法如下：
      * 1. `v-ripple`代表启用基本的`ripple`功能

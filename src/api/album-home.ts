@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-15 14:44:11
+ * @LastEditTime: 2025-06-17 20:03:06
+ * @LastEditors: 安知鱼
+ */
 // src/api/wallpaper.ts
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
@@ -48,31 +55,38 @@ const getDynamicApiUrl = (endpointPath: string): string => {
 
 // 获取相册图片列表
 export const getWallpapertList = (params: any) => {
-  return http.request<Result>("get", baseUrlApi("wallpapers"), {
+  return http.request<Result>("get", baseUrlApi("albums/get"), {
     params
   });
 };
 
 // 删除相册图片
 export const deleteWallpaper = (data: { id: string }) => {
-  return http.request<addResult>("delete", baseUrlApi(`wallpapers/${data.id}`));
+  return http.request<addResult>(
+    "delete",
+    baseUrlApi(`albums/delete/${data.id}`)
+  );
 };
 
 // 更新相册图片信息
 export const updateWallpaper = (data: any) => {
-  return http.request<addResult>("put", baseUrlApi(`wallpapers/${data.id}`), {
-    data
-  });
+  return http.request<addResult>(
+    "put",
+    baseUrlApi(`albums/update/${data.id}`),
+    {
+      data
+    }
+  );
 };
 
 // 添加相册图片
 export const addWallpapert = (data: any) => {
-  return http.request<addResult>("post", baseUrlApi("wallpapers"), { data });
+  return http.request<addResult>("post", baseUrlApi("albums/add"), { data });
 };
 
 // 获取公共相册图片列表
 export const publicWallpapert = (params: any) => {
-  const requestUrl = getDynamicApiUrl("public/wallpapers"); // 使用抽离的逻辑
+  const requestUrl = getDynamicApiUrl("public/albums"); // 使用抽离的逻辑
 
   // 执行请求
   return http.request<Result>("get", requestUrl, {

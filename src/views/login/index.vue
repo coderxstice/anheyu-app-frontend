@@ -145,6 +145,8 @@ const apiLogin = async () => {
           password: form.password
         })
         .then(res => {
+          console.log(res);
+
           if (res.code === 200) {
             return initRouter().then(() => {
               router.push(getTopMenu(true).path).then(() => {
@@ -154,6 +156,12 @@ const apiLogin = async () => {
           } else {
             message("登录失败 - " + res.message, { type: "error" });
           }
+        })
+        .catch(err => {
+          console.error("登录错误：", err);
+          message(err.response.data.message || "未知错误", {
+            type: "error"
+          });
         });
     }
   });
@@ -165,19 +173,19 @@ const apiRegister = async () => {
   await formEl.validate(valid => {
     if (valid) {
       useUserStoreHook()
-        .loginByEmail({
+        .registeredUser({
           email: form.email,
-          password: form.password
+          password: form.password,
+          repeat_password: form.confirmPassword
         })
         .then(res => {
+          console.log("注册结果：", res);
+
           if (res.code === 200) {
-            return initRouter().then(() => {
-              router.push(getTopMenu(true).path).then(() => {
-                message("登录成功", { type: "success" });
-              });
-            });
+            switchStep("login-password", "prev");
+            message("注册成功，请登录", { type: "success" });
           } else {
-            message("登录失败 - " + res.message, { type: "error" });
+            message("注册失败 - " + res.message, { type: "error" });
           }
         });
     }
@@ -269,6 +277,7 @@ onBeforeUnmount(() => {
                       v-model="form.email"
                       placeholder="电子邮箱"
                       :prefix-icon="iconMap.mail"
+                      autocomplete="username"
                       @keyup.enter="handleNextStep"
                     />
                   </el-form-item>
@@ -308,6 +317,7 @@ onBeforeUnmount(() => {
                       show-password
                       placeholder="密码"
                       :prefix-icon="iconMap.lock"
+                      autocomplete="current-password"
                       @keyup.enter="handleLogin"
                     />
                   </el-form-item>
@@ -377,6 +387,7 @@ onBeforeUnmount(() => {
                       v-model="form.email"
                       placeholder="电子邮箱"
                       :prefix-icon="iconMap.mail"
+                      autocomplete="email"
                     />
                   </el-form-item>
                   <el-form-item prop="password">
@@ -386,6 +397,7 @@ onBeforeUnmount(() => {
                       show-password
                       placeholder="密码"
                       :prefix-icon="iconMap.lock"
+                      autocomplete="new-password"
                     />
                   </el-form-item>
                   <el-form-item prop="confirmPassword">
@@ -395,6 +407,7 @@ onBeforeUnmount(() => {
                       show-password
                       placeholder="重复密码"
                       :prefix-icon="iconMap.lock"
+                      autocomplete="new-password"
                       @keyup.enter="handleRegister"
                     />
                   </el-form-item>

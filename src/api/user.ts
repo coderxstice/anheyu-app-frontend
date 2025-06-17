@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-11 11:59:32
- * @LastEditTime: 2025-06-16 00:07:23
+ * @LastEditTime: 2025-06-17 21:28:01
  * @LastEditors: 安知鱼
  */
 // src/api/user.ts
@@ -21,7 +21,7 @@ export type UserResult = {
     /** 当前登录用户的角色 */
     roles: Array<string>;
     /** 按钮级别权限 */
-    permissions: Array<string>;
+    // permissions: Array<string>;
     /** `token` */
     accessToken: string;
     /** 用于调用刷新`accessToken`的接口时所需的`token` */
@@ -67,6 +67,12 @@ export type SiteConfigResult = {
   data: SiteConfig;
 };
 
+export type RegisterUserResult = {
+  code: number;
+  data: object;
+  message?: string;
+};
+
 export type CheckEmailExistsResult = {
   code: number;
   data: {
@@ -106,4 +112,15 @@ export const checkEmailExistsApi = (email: string) => {
       params: { email }
     }
   );
+};
+
+/** 注册用户 */
+export const registerUserApi = (data: {
+  email: string;
+  password: string;
+  repeat_password: string;
+}) => {
+  return http.request<RegisterUserResult>("post", baseUrlApi("user/register"), {
+    data
+  });
 };
