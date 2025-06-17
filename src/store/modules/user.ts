@@ -115,6 +115,18 @@ export const useUserStore = defineStore({
             reject(error);
           });
       });
+    },
+    // 用户注册
+    async registeredUser(email: string) {
+      return new Promise<CheckEmailExistsResult>((resolve, reject) => {
+        checkEmailExistsApi(email)
+          .then(data => {
+            resolve(data);
+          })
+          .catch(error => {
+            reject(error);
+          });
+      });
     }
   }
 });

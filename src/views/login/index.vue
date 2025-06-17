@@ -128,7 +128,6 @@ const checkEmailExists = async (email: string): Promise<boolean> => {
       return false;
     }
   } catch (error: any) {
-    // 捕获网络错误或其他异常
     message("检查邮箱时发生错误 - " + error.message, { type: "error" });
     return false;
   }
@@ -161,8 +160,28 @@ const apiLogin = async () => {
 };
 
 const apiRegister = async () => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  message("注册成功，已自动登录", { type: "success" });
+  const formEl = formRef.value;
+  if (!formEl) return;
+  await formEl.validate(valid => {
+    if (valid) {
+      useUserStoreHook()
+        .loginByEmail({
+          email: form.email,
+          password: form.password
+        })
+        .then(res => {
+          if (res.code === 200) {
+            return initRouter().then(() => {
+              router.push(getTopMenu(true).path).then(() => {
+                message("登录成功", { type: "success" });
+              });
+            });
+          } else {
+            message("登录失败 - " + res.message, { type: "error" });
+          }
+        });
+    }
+  });
 };
 
 // 下一步逻辑
@@ -176,7 +195,6 @@ const handleNextStep = async () => {
   );
 };
 
-// handleLogin 现在会调用新的 apiLogin
 const handleLogin = async () => {
   await handleSubmit(() => formRef.value!.validate(), apiLogin);
 };
