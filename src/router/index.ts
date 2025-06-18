@@ -101,7 +101,7 @@ export function resetRouter() {
 }
 
 /** 路由白名单 */
-const whiteList = ["/login", "/album"];
+const whiteList = ["/login", "/album", "/login/reset"];
 
 const { VITE_HIDE_HOME } = import.meta.env;
 
@@ -213,7 +213,7 @@ router.beforeEach((to: ToRouteType, _from, next) => {
   } else {
     // 未登录用户逻辑
     if (to.path !== "/login") {
-      // 如果目标是白名单页面（包括 /album），未登录时直接放行
+      // 如果目标是白名单页面
       if (whiteList.indexOf(to.path) !== -1) {
         next();
       } else {

@@ -8,27 +8,30 @@ import {
   computed
 } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
-
 import { useLayout } from "@/layout/hooks/useLayout";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 import { initRouter, getTopMenu } from "@/router/utils";
-import MailFill from "@iconify-icons/ri/mail-fill";
-import LockFill from "@iconify-icons/ri/lock-password-fill";
-import ArrowLeftSLine from "@iconify-icons/ri/arrow-left-s-line";
 import dayIcon from "@/assets/svg/day.svg?component";
 import darkIcon from "@/assets/svg/dark.svg?component";
-import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { message } from "@/utils/message";
 import { useUserStoreHook } from "@/store/modules/user";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+
+// 1. 导入所有子组件
+import CheckEmailForm from "./components/CheckEmailForm.vue";
+import LoginForm from "./components/LoginForm.vue";
+import RegisterPrompt from "./components/RegisterPrompt.vue";
+import RegisterForm from "./components/RegisterForm.vue";
+import ForgotPasswordForm from "./components/ForgotPasswordForm.vue";
+import ResetPasswordForm from "./components/ResetPasswordForm.vue";
 
 defineOptions({ name: "Login" });
 
+// --- 核心状态和设置 ---
 const siteConfigStore = useSiteConfigStore();
-
 const router = useRouter();
-
+const route = useRoute();
 const { initStorage } = useLayout();
 initStorage();
 const { dataTheme, overallStyle, dataThemeChange } = useDataThemeChange();
@@ -39,38 +42,39 @@ const siteIcon = computed(
     siteConfigStore.getSiteConfig?.LOGO_HORIZONTAL_DAY ||
     "/static/img/logo-horizontal-day.png"
 );
-const siteDark = computed(
-  () =>
-    siteConfigStore.getSiteConfig?.LOGO_HORIZONTAL_NIGHT ||
-    "/static/img/logo-horizontal-night.png"
-);
 
 type Step =
   | "check-email"
   | "login-password"
   | "register-prompt"
-  | "register-form";
+  | "register-form"
+  | "forgot-password"
+  | "reset-password";
 
 const step = ref<Step>("check-email");
 const loading = ref(false);
 const transitionName = ref("slide-next");
 
+// --- 为每个子组件创建 ref ---
+const checkEmailFormRef = ref();
+const loginFormRef = ref();
+const registerFormRef = ref();
+const forgotPasswordFormRef = ref();
+const resetPasswordFormRef = ref();
+
+// --- 统一的表单状态和验证规则 ---
 const formRef = ref<FormInstance>();
-const formContentRef = ref<HTMLDivElement>();
 const form = reactive({
   email: "",
   password: "",
-  confirmPassword: ""
+  confirmPassword: "",
+  resetToken: { id: "", secret: "" }
 });
 
-const rules: FormRules = {
+const rules = reactive<FormRules>({
   email: [
     { required: true, message: "请输入电子邮箱", trigger: "blur" },
-    {
-      type: "email",
-      message: "请输入有效的电子邮箱地址",
-      trigger: ["blur", "change"]
-    }
+    { type: "email", message: "请输入有效的电子邮箱地址", trigger: "blur" }
   ],
   password: [{ required: true, message: "请输入密码", trigger: "blur" }],
   confirmPassword: [
@@ -84,27 +88,44 @@ const rules: FormRules = {
       trigger: "blur"
     }
   ]
+});
+
+// --- 流程控制 ---
+const handleFocus = () => {
+  // 通过调用子组件暴露的 focus 方法来实现聚焦
+  switch (step.value) {
+    case "check-email":
+      checkEmailFormRef.value?.focus();
+      break;
+    case "login-password":
+      loginFormRef.value?.focus();
+      break;
+    case "register-form":
+      registerFormRef.value?.focus(form.email);
+      break;
+    case "forgot-password":
+      forgotPasswordFormRef.value?.focus();
+      break;
+    case "reset-password":
+      resetPasswordFormRef.value?.focus();
+      break;
+  }
 };
 
-const iconMap = {
-  mail: useRenderIcon(MailFill),
-  lock: useRenderIcon(LockFill),
-  back: useRenderIcon(ArrowLeftSLine)
-};
-
-// 统一切换页面并清空密码相关字段
 const switchStep = (targetStep: Step, direction: "next" | "prev" = "next") => {
   transitionName.value = direction === "next" ? "slide-next" : "slide-prev";
   step.value = targetStep;
-  form.password = "";
-  form.confirmPassword = "";
+  if (targetStep !== "check-email") {
+    form.password = "";
+    form.confirmPassword = "";
+  }
   nextTick(() => formRef.value?.clearValidate());
 };
 
-// 表单校验 + 加载中统一处理
+// --- 表单提交总处理器 ---
 const handleSubmit = async (
-  validateFn: () => Promise<boolean>,
-  submitFn: () => Promise<void>
+  validateFn: () => Promise<boolean | undefined>,
+  submitFn: (...args: any[]) => Promise<void>
 ) => {
   const valid = await validateFn();
   if (!valid) return;
@@ -118,127 +139,122 @@ const handleSubmit = async (
   }
 };
 
-const checkEmailExists = async (email: string): Promise<boolean> => {
-  try {
+// --- 所有 API 调用逻辑 ---
+const apiHandlers = {
+  checkEmailExists: async (email: string) => {
     const res = await useUserStoreHook().checkEmailRegistered(email);
+    return res.code === 200 && res.data.exists;
+  },
+  login: async () => {
+    const res = await useUserStoreHook().loginByEmail({
+      email: form.email,
+      password: form.password
+    });
     if (res.code === 200) {
-      return res.data.exists;
+      await initRouter();
+      await router.push(getTopMenu(true).path);
+      message("登录成功", { type: "success" });
     } else {
-      message("检查邮箱失败 - " + res.message, { type: "error" });
-      return false;
+      message(res.message || "登录失败", { type: "error" });
     }
-  } catch (error: any) {
-    message("检查邮箱时发生错误 - " + error.message, { type: "error" });
-    return false;
+  },
+  register: async () => {
+    const res = await useUserStoreHook().registeredUser({
+      email: form.email,
+      password: form.password,
+      repeat_password: form.confirmPassword
+    });
+    if (res.code === 200) {
+      switchStep("login-password", "prev");
+      message("注册成功，请登录", { type: "success" });
+    } else {
+      message(res.message || "注册失败", { type: "error" });
+    }
+  },
+  sendResetEmail: async (payload: { captcha: string; captchaCode: string }) => {
+    if (payload.captcha.toLowerCase() !== payload.captchaCode.toLowerCase()) {
+      message("验证码不正确", { type: "error" });
+      forgotPasswordFormRef.value?.refreshCaptcha();
+      return;
+    }
+    const res = await useUserStoreHook().sendPasswordResetEmail({
+      email: form.email
+    });
+    if (res.code === 200) {
+      message(res.message, { type: "success" });
+      switchStep("check-email", "prev");
+    } else {
+      message(res.message || "发送失败", { type: "error" });
+    }
+  },
+  resetPassword: async () => {
+    const res = await useUserStoreHook().resetPassword({
+      ...form.resetToken,
+      password: form.password,
+      repeat_password: form.confirmPassword
+    });
+    if (res.code === 200) {
+      message("密码重设成功，请使用新密码登录", { type: "success" });
+      await router.replace("/login");
+      switchStep("check-email", "prev");
+    } else {
+      message(res.message || "重设失败", { type: "error" });
+    }
   }
 };
 
-// 修改 apiLogin 函数，整合你提供的登录逻辑
-const apiLogin = async () => {
-  const formEl = formRef.value;
-  if (!formEl) return;
-  await formEl.validate(valid => {
-    if (valid) {
-      useUserStoreHook()
-        .loginByEmail({
-          email: form.email,
-          password: form.password
-        })
-        .then(res => {
-          console.log(res);
-
-          if (res.code === 200) {
-            return initRouter().then(() => {
-              router.push(getTopMenu(true).path).then(() => {
-                message("登录成功", { type: "success" });
-              });
-            });
-          } else {
-            message("登录失败 - " + res.message, { type: "error" });
-          }
-        })
-        .catch(err => {
-          console.error("登录错误：", err);
-          message(err.response.data.message || "未知错误", {
-            type: "error"
-          });
-        });
-    }
-  });
+// --- 事件处理器 ---
+const eventHandlers = {
+  onNextStep: () =>
+    handleSubmit(
+      () => formRef.value?.validateField("email"),
+      async () => {
+        const exists = await apiHandlers.checkEmailExists(form.email);
+        switchStep(exists ? "login-password" : "register-prompt", "next");
+      }
+    ),
+  onLogin: () =>
+    handleSubmit(() => formRef.value!.validate(), apiHandlers.login),
+  onRegister: () =>
+    handleSubmit(() => formRef.value!.validate(), apiHandlers.register),
+  onForgotPassword: payload =>
+    handleSubmit(
+      () => formRef.value!.validateField("email"),
+      () => apiHandlers.sendResetEmail(payload)
+    ),
+  onResetPassword: () =>
+    handleSubmit(
+      () => formRef.value!.validateField(["password", "confirmPassword"]),
+      apiHandlers.resetPassword
+    )
 };
 
-const apiRegister = async () => {
-  const formEl = formRef.value;
-  if (!formEl) return;
-  await formEl.validate(valid => {
-    if (valid) {
-      useUserStoreHook()
-        .registeredUser({
-          email: form.email,
-          password: form.password,
-          repeat_password: form.confirmPassword
-        })
-        .then(res => {
-          console.log("注册结果：", res);
-
-          if (res.code === 200) {
-            switchStep("login-password", "prev");
-            message("注册成功，请登录", { type: "success" });
-          } else {
-            message("注册失败 - " + res.message, { type: "error" });
-          }
-        });
-    }
-  });
-};
-
-// 下一步逻辑
-const handleNextStep = async () => {
-  await handleSubmit(
-    () => formRef.value?.validateField("email"),
-    async () => {
-      const exists = await checkEmailExists(form.email);
-      switchStep(exists ? "login-password" : "register-prompt", "next");
-    }
-  );
-};
-
-const handleLogin = async () => {
-  await handleSubmit(() => formRef.value!.validate(), apiLogin);
-};
-
-const handleRegister = async () => {
-  await handleSubmit(() => formRef.value!.validate(), apiRegister);
-};
-
-// --- 键盘事件逻辑 ---
-/** 使用公共函数，避免`removeEventListener`失效 */
+// --- 键盘与生命周期 ---
 const onkeypress = ({ code }: KeyboardEvent) => {
-  if (["Enter", "NumpadEnter"].includes(code)) {
-    switch (step.value) {
-      case "check-email":
-        handleNextStep();
-        break;
-      case "login-password":
-        handleLogin();
-        break;
-      case "register-form":
-        handleRegister();
-        break;
-      // "register-prompt" 页面不需要回车键触发操作
-      default:
-        break;
-    }
-  }
+  if (!["Enter", "NumpadEnter"].includes(code)) return;
+  const handlerMap = {
+    "check-email": eventHandlers.onNextStep,
+    "login-password": eventHandlers.onLogin,
+    "register-form": eventHandlers.onRegister,
+    "forgot-password": () => forgotPasswordFormRef.value?.triggerSubmit(),
+    "reset-password": eventHandlers.onResetPassword
+  };
+  handlerMap[step.value]?.();
 };
 
 onMounted(() => {
+  if (route.path === "/login/reset" && route.query.id && route.query.secret) {
+    form.resetToken.id = route.query.id as string;
+    form.resetToken.secret = route.query.secret as string;
+    step.value = "reset-password";
+  }
   window.document.addEventListener("keypress", onkeypress);
+  handleFocus();
 });
 
-onBeforeUnmount(() => {
-  window.document.removeEventListener("keypress", onkeypress);
-});
+onBeforeUnmount(() =>
+  window.document.removeEventListener("keypress", onkeypress)
+);
 </script>
 
 <template>
@@ -255,182 +271,74 @@ onBeforeUnmount(() => {
           @change="dataThemeChange"
         />
       </div>
-      <div class="flex justify-center w-40 h-10 mx-auto">
+      <div class="flex justify-center h-10 mx-auto">
         <img :src="siteIcon" alt="网站logo" />
       </div>
 
       <el-form ref="formRef" :model="form" :rules="rules" size="large">
-        <div
-          class="relative overflow-hidden transition-[height] duration-300 ease-in-out"
-        >
-          <transition :name="transitionName" mode="out-in">
-            <div :key="step" ref="formContentRef">
-              <div v-if="step === 'check-email'">
-                <h2
-                  class="text-xl font-semibold text-center text-[--anzhiyu-fontcolor]"
-                >
-                  登录你的账号
-                </h2>
-                <div class="mt-6">
-                  <el-form-item prop="email">
-                    <el-input
-                      v-model="form.email"
-                      placeholder="电子邮箱"
-                      :prefix-icon="iconMap.mail"
-                      autocomplete="username"
-                      @keyup.enter="handleNextStep"
-                    />
-                  </el-form-item>
-                  <el-form-item>
-                    <el-button
-                      class="w-full"
-                      type="primary"
-                      :loading="loading"
-                      @click="handleNextStep"
-                      >下一步</el-button
-                    >
-                  </el-form-item>
-                  <div class="mt-6 text-sm text-center">
-                    <span class="text-gray-600">还没有账号？</span>
-                    <a
-                      href="#"
-                      class="font-medium text-blue-600 hover:text-blue-500"
-                      @click.prevent="switchStep('register-form', 'next')"
-                      >立即注册</a
-                    >
-                  </div>
-                </div>
-              </div>
+        <div class="relative overflow-hidden">
+          <transition
+            :name="transitionName"
+            mode="out-in"
+            @after-enter="handleFocus"
+          >
+            <div :key="step">
+              <CheckEmailForm
+                v-if="step === 'check-email'"
+                ref="checkEmailFormRef"
+                v-model:email="form.email"
+                :loading="loading"
+                @submit="eventHandlers.onNextStep"
+                @go-to-register="switchStep('register-form', 'next')"
+              />
 
-              <div v-else-if="step === 'login-password'">
-                <h2 class="text-xl font-semibold text-center text-gray-800">
-                  请输入密码
-                </h2>
-                <p class="mt-2 text-sm text-center text-gray-500">
-                  请输入账号 {{ form.email }} 的密码
-                </p>
-                <div class="mt-6">
-                  <el-form-item prop="password">
-                    <el-input
-                      v-model="form.password"
-                      type="password"
-                      show-password
-                      placeholder="密码"
-                      :prefix-icon="iconMap.lock"
-                      autocomplete="current-password"
-                      @keyup.enter="handleLogin"
-                    />
-                  </el-form-item>
-                  <div class="text-sm text-right">
-                    <a href="#" class="text-blue-600 hover:text-blue-500"
-                      >忘记密码？</a
-                    >
-                  </div>
-                  <el-form-item class="mt-4">
-                    <el-button
-                      class="w-full"
-                      type="primary"
-                      :loading="loading"
-                      @click="handleLogin"
-                      >登录</el-button
-                    >
-                  </el-form-item>
-                  <div class="mt-4">
-                    <a
-                      href="#"
-                      class="flex items-center justify-center text-sm text-blue-600 hover:text-blue-500"
-                      @click.prevent="switchStep('check-email', 'prev')"
-                    >
-                      <component :is="iconMap.back" class="mr-1" /> 上一步
-                    </a>
-                  </div>
-                </div>
-              </div>
+              <LoginForm
+                v-else-if="step === 'login-password'"
+                ref="loginFormRef"
+                v-model:password="form.password"
+                :loading="loading"
+                :email="form.email"
+                @submit="eventHandlers.onLogin"
+                @go-back="switchStep('check-email', 'prev')"
+                @forgot-password="switchStep('forgot-password', 'next')"
+              />
 
-              <div v-else-if="step === 'register-prompt'">
-                <h2
-                  class="text-xl font-semibold text-center text-[--anzhiyu-fontcolor]"
-                >
-                  登录你的账号
-                </h2>
-                <p class="mt-4 text-center text-[--anzhiyu-fontcolor]">
-                  你输入的账户
-                  <span class="font-medium text-[--anzhiyu-fontcolor]">{{
-                    form.email
-                  }}</span>
-                  不存在，是否立即注册？
-                </p>
-                <div class="mt-6 space-y-4">
-                  <el-button
-                    class="w-full"
-                    type="primary"
-                    @click="switchStep('register-form', 'next')"
-                    >注册账号</el-button
-                  >
-                  <a
-                    href="#"
-                    class="flex items-center justify-center text-sm text-blue-600 hover:text-blue-500"
-                    @click.prevent="switchStep('check-email', 'prev')"
-                  >
-                    <component :is="iconMap.back" class="mr-1" /> 上一步
-                  </a>
-                </div>
-              </div>
+              <RegisterPrompt
+                v-else-if="step === 'register-prompt'"
+                :email="form.email"
+                @go-to-register="switchStep('register-form', 'next')"
+                @go-back="switchStep('check-email', 'prev')"
+              />
 
-              <div v-else-if="step === 'register-form'">
-                <h2 class="text-xl font-semibold text-center text-gray-800">
-                  创建新账号
-                </h2>
-                <div class="mt-6">
-                  <el-form-item prop="email">
-                    <el-input
-                      v-model="form.email"
-                      placeholder="电子邮箱"
-                      :prefix-icon="iconMap.mail"
-                      autocomplete="email"
-                    />
-                  </el-form-item>
-                  <el-form-item prop="password">
-                    <el-input
-                      v-model="form.password"
-                      type="password"
-                      show-password
-                      placeholder="密码"
-                      :prefix-icon="iconMap.lock"
-                      autocomplete="new-password"
-                    />
-                  </el-form-item>
-                  <el-form-item prop="confirmPassword">
-                    <el-input
-                      v-model="form.confirmPassword"
-                      type="password"
-                      show-password
-                      placeholder="重复密码"
-                      :prefix-icon="iconMap.lock"
-                      autocomplete="new-password"
-                      @keyup.enter="handleRegister"
-                    />
-                  </el-form-item>
-                  <el-form-item>
-                    <el-button
-                      class="w-full"
-                      type="primary"
-                      :loading="loading"
-                      @click="handleRegister"
-                      >注册</el-button
-                    >
-                  </el-form-item>
-                  <div class="text-sm text-center">
-                    <span class="text-[--anzhiyu-secondtext]">已有账号？</span>
-                    <a
-                      href="#"
-                      class="font-medium text-blue-600 hover:text-blue-500"
-                      @click.prevent="switchStep('check-email', 'prev')"
-                      >立即登录</a
-                    >
-                  </div>
-                </div>
-              </div>
+              <RegisterForm
+                v-else-if="step === 'register-form'"
+                ref="registerFormRef"
+                v-model:email="form.email"
+                v-model:password="form.password"
+                v-model:confirmPassword="form.confirmPassword"
+                :loading="loading"
+                @submit="eventHandlers.onRegister"
+                @go-to-login="switchStep('check-email', 'prev')"
+              />
+
+              <ForgotPasswordForm
+                v-else-if="step === 'forgot-password'"
+                ref="forgotPasswordFormRef"
+                v-model:email="form.email"
+                :loading="loading"
+                @submit="eventHandlers.onForgotPassword"
+                @back="switchStep('check-email', 'prev')"
+              />
+
+              <ResetPasswordForm
+                v-else-if="step === 'reset-password'"
+                ref="resetPasswordFormRef"
+                v-model:password="form.password"
+                v-model:confirmPassword="form.confirmPassword"
+                :loading="loading"
+                @submit="eventHandlers.onResetPassword"
+                @go-to-login="switchStep('check-email', 'prev')"
+              />
             </div>
           </transition>
         </div>
@@ -440,26 +348,33 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+/* 动画样式保持不变 */
+</style>
+<style scoped>
 .slide-next-enter-active,
 .slide-next-leave-active,
 .slide-prev-enter-active,
 .slide-prev-leave-active {
   transition: all 0.3s ease-in-out;
 }
+
 .slide-next-enter-from {
   opacity: 0;
-  transform: translateX(0px);
+  transform: translateX(30px);
 }
+
 .slide-next-leave-to {
   opacity: 0;
-  transform: translateX(30px);
+  transform: translateX(-30px);
 }
+
 .slide-prev-enter-from {
   opacity: 0;
-  transform: translateX(30px);
+  transform: translateX(-30px);
 }
+
 .slide-prev-leave-to {
   opacity: 0;
-  transform: translateX(0px);
+  transform: translateX(30px);
 }
 </style>

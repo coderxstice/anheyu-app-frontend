@@ -129,6 +129,22 @@ export const useUserStore = defineStore({
             reject(error);
           });
       });
+    },
+    // 发送密码重置邮件
+    sendPasswordResetEmail(data: { email: string }) {
+      return new Promise<any>(resolve => {
+        console.log("模拟发送重置邮件到：", data.email);
+        // 模拟后端成功响应
+        resolve({ code: 200, message: "重置邮件已发送，请检查收件箱" });
+      });
+    },
+    /** 重设密码 */
+    resetPassword(data: object) {
+      return new Promise<any>(resolve => {
+        console.log("模拟使用以下信息重设密码：", data);
+        // 模拟后端成功响应
+        resolve({ code: 200, message: "密码重设成功" });
+      });
     }
   }
 });

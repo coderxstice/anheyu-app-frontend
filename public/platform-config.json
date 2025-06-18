@@ -10,7 +10,7 @@
   "OverallStyle": "light",
   "Grey": false,
   "Weak": false,
-  "HideTabs": false,
+  "HideTabs": true,
   "HideFooter": false,
   "Stretch": false,
   "SidebarStatus": true,
