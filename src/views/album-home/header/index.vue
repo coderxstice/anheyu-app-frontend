@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed } from "vue"; // 导入 computed
-import { useSiteConfigStore } from "@/store/modules/siteConfig"; // 导入站点配置 Store
+import { computed } from "vue";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import { useRouter } from "vue-router";
 
 defineOptions({
   name: "HeaderComponent" // 给组件一个有意义的名字
 });
-
+const router = useRouter();
 const siteConfigStore = useSiteConfigStore();
 
 // 计算属性，从 Pinia Store 获取站点配置
@@ -19,25 +20,32 @@ const aboutLink = computed(() => siteConfig.value?.ABOUT_LINK || "#");
 
 // 动态获取 ICP 备案号
 const icpNumber = computed(() => siteConfig.value?.ICP_NUMBER || "");
+
+// 前往登录页
+const goLogin = () => {
+  router.push({ name: "Login" });
+};
 </script>
 
 <template>
   <header id="header">
-    <a style="cursor: pointer">
-      <img
-        class="site-logo"
-        :src="
-          siteConfig?.USER_AVATAR ||
-          'https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg'
-        "
-        alt="网站Logo"
-      />
-    </a>
-    <h1>
-      <a style="cursor: pointer"
-        ><strong>{{ siteName }}</strong></a
-      >
-    </h1>
+    <div class="flex items-center justify-center" @click="goLogin">
+      <a style="cursor: pointer">
+        <img
+          class="site-logo"
+          :src="
+            siteConfig?.USER_AVATAR ||
+            'https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg'
+          "
+          alt="网站Logo"
+        />
+      </a>
+      <h1>
+        <a style="cursor: pointer">
+          <strong>{{ siteName }}</strong>
+        </a>
+      </h1>
+    </div>
     <nav>
       <ul class="nav_links">
         <li class="nav-item">

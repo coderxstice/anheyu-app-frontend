@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-18 14:11:34
- * @LastEditTime: 2025-06-18 14:11:40
+ * @LastEditTime: 2025-06-19 00:02:19
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -53,8 +53,8 @@ defineExpose({ focus: () => passwordInputRef.value?.focus() });
           href="#"
           class="text-blue-600 hover:text-blue-500"
           @click.prevent="emit('forgotPassword')"
-          >忘记密码？</a
-        >
+          >忘记密码？
+        </a>
       </div>
       <el-form-item class="mt-4">
         <el-button
