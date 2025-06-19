@@ -1,9 +1,15 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-15 11:31:00
+ * @LastEditTime: 2025-06-19 11:02:48
+ * @LastEditors: 安知鱼
+ */
 const { VITE_HIDE_HOME } = import.meta.env;
 const Layout = () => import("@/layout/index.vue");
 
 export default {
   path: "/",
-  name: "Home",
   component: Layout,
   redirect: "/welcome",
   meta: {
@@ -15,10 +21,11 @@ export default {
     {
       path: "/welcome",
       name: "Welcome",
-      component: () => import("@/views/welcome/index.vue"),
+      component: () => import("@/views/system/welcome/index.vue"),
       meta: {
         title: "首页",
-        showLink: VITE_HIDE_HOME === "true" ? false : true
+        showLink: VITE_HIDE_HOME === "true" ? false : true,
+        roles: ["管理员"]
       }
     }
   ]

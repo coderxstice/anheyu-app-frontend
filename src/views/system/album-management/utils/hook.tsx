@@ -102,7 +102,7 @@ export function useDept() {
     },
     {
       label: "操作",
-      fixed: "right",
+      // fixed: "right",
       width: 210,
       slot: "operation"
     }

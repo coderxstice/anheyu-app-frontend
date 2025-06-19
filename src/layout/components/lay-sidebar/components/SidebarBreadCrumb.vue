@@ -104,7 +104,7 @@ watch(
 </script>
 
 <template>
-  <el-breadcrumb class="!leading-[50px] select-none" separator="/">
+  <el-breadcrumb class="!leading-[50px] select-none" separator="">
     <transition-group name="breadcrumb">
       <el-breadcrumb-item
         v-for="item in levelList"

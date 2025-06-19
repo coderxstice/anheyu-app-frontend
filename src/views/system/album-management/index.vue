@@ -11,7 +11,7 @@ import AddFill from "@iconify-icons/ri/add-circle-line";
 import Search from "@iconify-icons/ri/search-line";
 
 defineOptions({
-  name: "Welcome"
+  name: "AlbumManagement"
 });
 
 const formRef = ref();
