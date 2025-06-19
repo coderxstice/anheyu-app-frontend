@@ -1,3 +1,10 @@
+<!--
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-15 11:31:00
+ * @LastEditTime: 2025-06-19 12:51:21
+ * @LastEditors: 安知鱼
+-->
 <script setup lang="ts">
 import { getTopMenu } from "@/router/utils";
 import { computed } from "vue";
@@ -51,6 +58,7 @@ const appLogo = computed(
   width: 100%;
   height: 48px;
   overflow: hidden;
+  border-right: var(--style-border);
 
   .sidebar-logo-link {
     display: flex;

@@ -1,3 +1,10 @@
+<!--
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-15 11:31:00
+ * @LastEditTime: 2025-06-19 12:45:54
+ * @LastEditors: 安知鱼
+-->
 <script setup lang="ts">
 import { computed } from "vue";
 import { useGlobal } from "@pureadmin/utils";
@@ -64,6 +71,6 @@ const toggleClick = () => {
   width: 100%;
   height: 40px;
   line-height: 40px;
-  box-shadow: 0 0 6px -3px var(--el-color-primary);
+  border-top: var(--style-border);
 }
 </style>

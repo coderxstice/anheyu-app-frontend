@@ -93,7 +93,6 @@
     overflow: visible;
     font-size: 0;
     background: var(--anzhiyu-theme-menu-bg) !important;
-    border-right: 1px solid var(--anzhiyu-border-color);
 
     /* 展开动画 */
     transition: width var(--anzhiyu-transition-duration);
@@ -109,7 +108,8 @@
     &.has-logo {
       .el-scrollbar.pc {
         /* logo: 48px、leftCollapse: 40px、leftCollapse-shadow: 4px */
-        height: calc(100% - 92px);
+        height: calc(100% - 88px);
+        border-right: var(--style-border);
       }
 
       /* logo: 48px */
