@@ -79,9 +79,9 @@ class AnHttp {
 
         /** 请求白名单，放置一些不需要`token`的接口（通过设置请求白名单，防止`token`过期后再请求造成的死循环问题） */
         const whiteList = [
-          "user/refresh-token",
-          "user/login",
-          "user/check-email",
+          "auth/refresh-token",
+          "auth/login",
+          "auth/check-email",
           "public/wallpapers"
         ];
 
@@ -170,17 +170,22 @@ class AnHttp {
         }
 
         /** Token 刷新接口白名单，防止刷新Token接口自身因 401 导致死循环 */
-        const refreshTokenWhiteList = ["user/refresh-token", "user/login"];
+        const refreshTokenWhiteList = ["auth/refresh-token", "auth/login"];
         if (
           config.url &&
           refreshTokenWhiteList.some(url => config.url!.endsWith(url))
         ) {
+          console.log(
+            "刷新 Token 接口自身返回 401 错误，直接拒绝请求",
+            response
+          );
+
           // 如果是刷新 Token 或登录接口自身返回 401，直接拒绝，不再尝试刷新
           removeToken(); // 清除可能存在的无效 Token
           useUserStoreHook().logOut(); // 强制登出
           // 可以选择在这里跳转到登录页，或让业务层自己处理
           // router.push('/login');
-          return Promise.reject(error);
+          return Promise.reject(response.data || error);
         }
 
         // 如果收到 401 错误，且不是正在刷新 Token

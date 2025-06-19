@@ -1,8 +1,8 @@
 // src/store/modules/siteConfig.ts
 import { defineStore } from "pinia";
-import { getSiteConfigApi } from "@/api/user";
+import { getSiteConfigApi } from "@/api/site"; // 导入获取站点配置的 API
 import { getConfig } from "@/config"; // 导入 getConfig 用于获取前端默认配置
-import type { SiteConfig } from "@/api/user"; // 导入原始的 SiteConfig 类型
+import type { SiteConfig } from "@/api/site"; // 导入原始的 SiteConfig 类型
 
 // 定义 localStorage 存储的键名
 const LOCAL_STORAGE_KEY = "site_config_cache";
@@ -180,7 +180,7 @@ export const useSiteConfigStore = defineStore("pure-site-config", {
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToCache));
           console.log("站点配置已缓存到 localStorage。");
         } else {
-          console.error("获取站点配置失败:", res.msg);
+          console.error("获取站点配置失败:", res.message);
           // 如果后端请求失败，store 将保持 initialConfigFromFrontend 或 localStorage 缓存的值
           this.siteConfig = mergedConfig;
           this.isLoaded = false;

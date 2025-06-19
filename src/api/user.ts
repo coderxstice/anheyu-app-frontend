@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-11 11:59:32
- * @LastEditTime: 2025-06-17 21:28:01
+ * @LastEditTime: 2025-06-19 01:39:23
  * @LastEditors: 安知鱼
  */
 // src/api/user.ts
@@ -44,32 +44,11 @@ export type RefreshTokenResult = {
   };
 };
 
-export type SiteConfig = {
-  APP_NAME: string;
-  APP_VERSION: string;
-  ICP_NUMBER: string;
-  USER_AVATAR: string;
-  ABOUT_LINK: string;
-  API_URL: string;
-  LOGO_URL: string;
-  ICON_URL: string;
-  LOGO_HORIZONTAL_DAY: string;
-  LOGO_HORIZONTAL_NIGHT: string;
-  LOGO_URL_192x192: string;
-  LOGO_URL_512x512: string;
-  DEFAULT_THUMB_PARAM: string;
-  DEFAULT_BIG_PARAM: string;
-};
-
-export type SiteConfigResult = {
-  code: number; // 后端返回的code，这里约定为0表示成功
-  msg: string;
-  data: SiteConfig;
-};
-
 export type RegisterUserResult = {
   code: number;
-  data: object;
+  data: {
+    activation_required: boolean;
+  };
   message?: string;
 };
 
@@ -83,23 +62,15 @@ export type CheckEmailExistsResult = {
 
 /** 登录 */
 export const getLogin = (data?: object) => {
-  return http.request<UserResult>("post", baseUrlApi("user/login"), { data });
+  return http.request<UserResult>("post", baseUrlApi("auth/login"), { data });
 };
 
 /** 刷新`token` */
 export const refreshTokenApi = (data?: object) => {
   return http.request<RefreshTokenResult>(
     "post",
-    baseUrlApi("user/refresh-token"),
+    baseUrlApi("auth/refresh-token"),
     { data }
-  );
-};
-
-/** 获取站点配置 */
-export const getSiteConfigApi = () => {
-  return http.request<SiteConfigResult>(
-    "get",
-    baseUrlApi("public/site-config")
   );
 };
 
@@ -107,7 +78,7 @@ export const getSiteConfigApi = () => {
 export const checkEmailExistsApi = (email: string) => {
   return http.request<CheckEmailExistsResult>(
     "get",
-    baseUrlApi("user/check-email"),
+    baseUrlApi("auth/check-email"),
     {
       params: { email }
     }
@@ -120,7 +91,7 @@ export const registerUserApi = (data: {
   password: string;
   repeat_password: string;
 }) => {
-  return http.request<RegisterUserResult>("post", baseUrlApi("user/register"), {
+  return http.request<RegisterUserResult>("post", baseUrlApi("auth/register"), {
     data
   });
 };

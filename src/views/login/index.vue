@@ -25,6 +25,7 @@ import RegisterPrompt from "./components/RegisterPrompt.vue";
 import RegisterForm from "./components/RegisterForm.vue";
 import ForgotPasswordForm from "./components/ForgotPasswordForm.vue";
 import ResetPasswordForm from "./components/ResetPasswordForm.vue";
+import ActivatePrompt from "./components/ActivatePrompt.vue";
 
 defineOptions({ name: "Login" });
 
@@ -49,7 +50,8 @@ type Step =
   | "register-prompt"
   | "register-form"
   | "forgot-password"
-  | "reset-password";
+  | "reset-password"
+  | "activate-prompt";
 
 const step = ref<Step>("check-email");
 const loading = ref(false);
@@ -165,8 +167,16 @@ const apiHandlers = {
       repeat_password: form.confirmPassword
     });
     if (res.code === 200) {
-      switchStep("login-password", "prev");
-      message("注册成功，请登录", { type: "success" });
+      // 检查后端返回是否需要激活
+      if (res.data?.activation_required) {
+        // 如果需要激活，切换到提示页面
+        switchStep("activate-prompt", "next");
+        message("注册成功，请查收激活邮件", { type: "success" });
+      } else {
+        // 如果不需要激活，按原流程走
+        switchStep("login-password", "prev");
+        message("注册成功，请登录", { type: "success" });
+      }
     } else {
       message(res.message || "注册失败", { type: "error" });
     }
@@ -318,6 +328,12 @@ onBeforeUnmount(() =>
                 v-model:confirmPassword="form.confirmPassword"
                 :loading="loading"
                 @submit="eventHandlers.onRegister"
+                @go-to-login="switchStep('check-email', 'prev')"
+              />
+
+              <ActivatePrompt
+                v-else-if="step === 'activate-prompt'"
+                :email="form.email"
                 @go-to-login="switchStep('check-email', 'prev')"
               />
 
