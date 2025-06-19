@@ -92,7 +92,7 @@ const {
   width: 100%;
   height: 48px;
   overflow: hidden;
-  border-bottom: var(--style-border);
+  /* border-bottom: var(--style-border); */
 
   .hamburger-container {
     float: left;
