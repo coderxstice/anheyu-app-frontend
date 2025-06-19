@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-18 14:09:35
- * @LastEditTime: 2025-06-18 14:09:40
+ * @LastEditTime: 2025-06-20 00:21:01
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -26,7 +26,11 @@ const iconMap = { back: useRenderIcon(ArrowLeftSLine) };
       不存在，是否立即注册？
     </p>
     <div class="mt-6 space-y-4">
-      <el-button class="w-full" type="primary" @click="$emit('goToRegister')"
+      <el-button
+        v-ripple
+        class="w-full"
+        type="primary"
+        @click="$emit('goToRegister')"
         >注册账号</el-button
       >
       <a

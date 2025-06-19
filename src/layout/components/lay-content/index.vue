@@ -50,13 +50,13 @@ const getMainWidth = computed(() => {
 
 const getSectionStyle = computed(() => {
   return [
-    hideTabs.value && layout ? "padding-top: 48px;" : "",
+    hideTabs.value && layout ? "padding-top: 0px;" : "",
     !hideTabs.value && layout
       ? showModel.value == "chrome"
         ? "padding-top: 85px;"
         : "padding-top: 81px;"
       : "",
-    hideTabs.value && !layout.value ? "padding-top: 48px;" : "",
+    hideTabs.value && !layout.value ? "padding-top: 0px;" : "",
     !hideTabs.value && !layout.value
       ? showModel.value == "chrome"
         ? "padding-top: 85px;"
@@ -122,7 +122,7 @@ const transitionMain = defineComponent({
                 'max-width': getMainWidth,
                 margin: '0 auto',
                 transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-                'border-radius': '30px 0 0 0',
+                'border-radius': '30px',
                 border: 'var(--style-border)',
                 background: '#f0f2f5'
               }"
@@ -199,7 +199,7 @@ const transitionMain = defineComponent({
 .app-main {
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: calc(100vh - 87px);
   overflow-x: hidden;
   background: var(--anzhiyu-theme-menu-bg) !important;
 }

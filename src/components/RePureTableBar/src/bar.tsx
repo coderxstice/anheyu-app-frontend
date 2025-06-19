@@ -263,7 +263,9 @@ export default defineComponent({
             {slots?.title ? (
               slots.title()
             ) : (
-              <p class="font-bold truncate">{props.title}</p>
+              <p class="font-bold truncate text-[var(--anzhiyu-fontcolor)]">
+                {props.title}
+              </p>
             )}
             <div class="flex items-center justify-around">
               {slots?.buttons ? (
@@ -318,7 +320,12 @@ export default defineComponent({
                     indeterminate={isIndeterminate.value}
                     onChange={value => handleCheckAllChange(value)}
                   />
-                  <el-button type="primary" link onClick={() => onReset()}>
+                  <el-button
+                    type="primary"
+                    link
+                    onClick={() => onReset()}
+                    v-ripple
+                  >
                     重置
                   </el-button>
                 </div>

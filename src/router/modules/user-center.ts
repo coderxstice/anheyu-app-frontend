@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-06-19 17:32:29
+ * @LastEditTime: 2025-06-19 23:11:01
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
@@ -12,9 +12,8 @@ export default {
   redirect: "/user-center/index",
   component: Layout,
   meta: {
-    icon: "ep:home-filled",
-    title: "用户中心",
-    rank: 0
+    icon: "ep:user",
+    title: "用户中心"
   },
   children: [
     {
@@ -23,7 +22,7 @@ export default {
       component: () => import("@/views/system/user-center/index.vue"),
       meta: {
         title: "用户中心",
-        icon: "ep:picture-filled",
+        icon: "ep:user",
         roles: ["1"],
         showLink: false
       }

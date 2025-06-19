@@ -56,7 +56,7 @@ const {
       <!-- <LayNotice id="header-notice" /> -->
       <!-- 退出登录 -->
       <el-dropdown trigger="click" popper-class="anzhiyu-dropdown-menu">
-        <span class="el-dropdown-link navbar-bg-hover select-none">
+        <span v-ripple class="el-dropdown-link navbar-bg-hover select-none">
           <img :src="userAvatar" :style="avatarsStyle" />
           <p v-if="username" class="dark:text-white">{{ username }}</p>
         </span>
@@ -108,7 +108,6 @@ const {
     min-width: 280px;
     height: 48px;
     color: #000000d9;
-    margin-right: 8px;
 
     .el-dropdown-link {
       display: flex;

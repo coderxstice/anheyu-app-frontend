@@ -170,7 +170,7 @@ const LayHeader = defineComponent({
         pureSetting.getHiddenSideBar ? 'main-hidden' : ''
       ]"
     >
-      <div v-if="set.fixedHeader">
+      <div v-if="set.fixedHeader" style="margin-right: 20px">
         <LayHeader />
         <!-- 主体内容 -->
         <LayContent :fixed-header="set.fixedHeader" />

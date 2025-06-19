@@ -148,6 +148,7 @@ onMounted(refreshCaptcha);
 
       <el-form-item class="mt-4">
         <el-button
+          v-ripple
           class="w-full"
           type="primary"
           :loading="loading"

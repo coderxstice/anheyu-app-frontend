@@ -43,7 +43,7 @@ function onFullscreen() {
       ref="formRef"
       :inline="true"
       :model="form"
-      class="search-form bg-bg_color w-full pl-8 pt-[12px] overflow-auto"
+      class="search-form bg-bg_color w-full pl-8 pt-[12px] overflow-auto rounded-3xl"
     >
       <el-form-item label="上传时间：" prop="createdAt">
         <el-date-picker
@@ -58,6 +58,7 @@ function onFullscreen() {
       </el-form-item>
       <el-form-item>
         <el-button
+          v-ripple
           type="primary"
           :icon="useRenderIcon(Search)"
           :loading="loading"
@@ -65,7 +66,11 @@ function onFullscreen() {
         >
           搜索
         </el-button>
-        <el-button :icon="useRenderIcon(Refresh)" @click="resetForm(formRef)">
+        <el-button
+          v-ripple
+          :icon="useRenderIcon(Refresh)"
+          @click="resetForm(formRef)"
+        >
           重置
         </el-button>
       </el-form-item>
@@ -75,11 +80,13 @@ function onFullscreen() {
       title="相册图片管理"
       :columns="columns"
       :tableRef="tableRef?.getTableRef()"
+      class="rounded-3xl"
       @refresh="onSearch"
       @fullscreen="onFullscreen"
     >
       <template #buttons>
         <el-button
+          v-ripple
           type="primary"
           :icon="useRenderIcon(AddFill)"
           @click="openDialog()"
@@ -112,6 +119,7 @@ function onFullscreen() {
         >
           <template #operation="{ row }">
             <el-button
+              v-ripple
               class="reset-margin"
               link
               type="primary"
@@ -127,6 +135,7 @@ function onFullscreen() {
             >
               <template #reference>
                 <el-button
+                  v-ripple
                   class="reset-margin"
                   link
                   type="primary"

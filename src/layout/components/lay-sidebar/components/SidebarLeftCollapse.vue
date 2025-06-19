@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-06-19 15:16:30
+ * @LastEditTime: 2025-06-20 00:09:13
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -71,7 +71,5 @@ const toggleClick = () => {
   width: 100%;
   height: 40px;
   line-height: 40px;
-  border-top: var(--style-border);
-  border-right: var(--style-border);
 }
 </style>

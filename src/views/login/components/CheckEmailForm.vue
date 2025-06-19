@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-18 14:09:22
- * @LastEditTime: 2025-06-18 14:09:27
+ * @LastEditTime: 2025-06-20 00:34:45
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -38,12 +38,13 @@ defineExpose({ focus: () => emailInputRef.value?.focus() });
       </el-form-item>
       <el-form-item>
         <el-button
-          class="w-full"
+          v-ripple
+          class="w-full overflow-hidden"
           type="primary"
           :loading="loading"
           @click="emit('submit')"
-          >下一步</el-button
-        >
+          >下一步
+        </el-button>
       </el-form-item>
       <div class="mt-6 text-sm text-center">
         <span class="text-gray-600">还没有账号？</span>

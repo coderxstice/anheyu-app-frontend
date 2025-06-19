@@ -1,3 +1,10 @@
+<!--
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-15 11:31:00
+ * @LastEditTime: 2025-06-20 00:20:27
+ * @LastEditors: 安知鱼
+-->
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import noExist from "@/assets/status/404.svg?component";
@@ -48,6 +55,7 @@ const router = useRouter();
         抱歉，你访问的页面不存在
       </p>
       <el-button
+        v-ripple
         v-motion
         type="primary"
         :initial="{

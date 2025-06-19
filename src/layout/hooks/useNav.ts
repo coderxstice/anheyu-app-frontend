@@ -38,7 +38,7 @@ export function useNav() {
   });
 
   const goUserCenter = () => {
-    router.push({ name: "UserCenter" });
+    router.push({ path: "/user-center/index" });
   };
 
   /** 头像（如果头像为空则使用 src/assets/user.jpg ） */

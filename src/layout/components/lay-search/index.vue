@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-06-19 18:11:39
+ * @LastEditTime: 2025-06-20 00:22:46
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -18,6 +18,7 @@ function handleSearch() {
 <template>
   <div>
     <div
+      v-ripple
       class="search-container w-[40px] h-[40px] flex-c cursor-pointer navbar-bg-hover rounded-lg"
       @click="handleSearch"
     >

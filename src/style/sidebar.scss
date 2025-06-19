@@ -45,14 +45,20 @@
   }
 
   .main-container {
-    position: relative;
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 998;
     height: 100vh;
     min-height: 100%;
     margin-left: $sideBarWidth;
-    background: #f0f2f5;
+    background: var(--anzhiyu-theme-menu-bg);
+    width: calc(100% - #{$sideBarWidth});
 
     /* main-content 属性动画 */
-    transition: margin-left var(--anzhiyu-transition-duration);
+    transition:
+      margin-left var(--anzhiyu-transition-duration),
+      width var(--anzhiyu-transition-duration);
 
     .el-scrollbar__wrap {
       height: 100%;
@@ -61,11 +67,11 @@
   }
 
   .fixed-header {
-    position: fixed;
-    top: 0;
-    right: 0;
-    z-index: 998;
-    width: calc(100% - #{$sideBarWidth});
+    // position: fixed;
+    // top: 0;
+    // right: 0;
+    // z-index: 998;
+    width: 100%;
 
     /* fixed-header 属性左上角动画 */
     transition: width var(--anzhiyu-transition-duration);
@@ -74,7 +80,8 @@
   .main-hidden {
     margin-left: 0 !important;
 
-    .fixed-header {
+    .fixed-header,
+    .main-container {
       width: 100% !important;
 
       + .app-main {
@@ -549,7 +556,8 @@
 
   /* 手机端 */
   .mobile {
-    .fixed-header {
+    .fixed-header,
+    .main-container {
       width: 100% !important;
       transition: width var(--anzhiyu-transition-duration);
     }
@@ -589,7 +597,7 @@ body[layout="vertical"] {
 
   .hideSidebar {
     .fixed-header {
-      width: calc(100% - 54px);
+      width: 100%;
       transition: width var(--anzhiyu-transition-duration);
     }
 
@@ -604,6 +612,8 @@ body[layout="vertical"] {
 
     .main-container {
       margin-left: 54px;
+      width: calc(100% - 54px);
+      transition: width var(--anzhiyu-transition-duration);
     }
 
     /* 菜单折叠 */

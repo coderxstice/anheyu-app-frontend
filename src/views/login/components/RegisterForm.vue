@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-18 14:09:50
- * @LastEditTime: 2025-06-18 14:09:55
+ * @LastEditTime: 2025-06-20 00:20:58
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -81,6 +81,7 @@ defineExpose({ focus });
       </el-form-item>
       <el-form-item>
         <el-button
+          v-ripple
           class="w-full"
           type="primary"
           :loading="loading"

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-18 14:11:34
- * @LastEditTime: 2025-06-19 00:02:19
+ * @LastEditTime: 2025-06-20 00:20:54
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -58,6 +58,7 @@ defineExpose({ focus: () => passwordInputRef.value?.focus() });
       </div>
       <el-form-item class="mt-4">
         <el-button
+          v-ripple
           class="w-full"
           type="primary"
           :loading="loading"
