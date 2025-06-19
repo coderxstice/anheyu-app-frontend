@@ -24,7 +24,7 @@ export default {
       meta: {
         title: "相册管理",
         icon: "ep:picture-filled",
-        roles: ["管理员"]
+        roles: ["1"]
       }
     }
   ]
