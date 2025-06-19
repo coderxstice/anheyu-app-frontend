@@ -10,30 +10,28 @@ import type {
   AnHttpRequestConfig
 } from "./types.d";
 import { stringify } from "qs";
-// import NProgress from "../progress"; // 假设这里不需要动
-import { getToken, formatToken, removeToken } from "@/utils/auth"; // 增加 removeToken
+import { getToken, formatToken, removeToken } from "@/utils/auth";
 import { useUserStoreHook } from "@/store/modules/user";
 
 // 相关配置请参考：www.axios-js.com/zh-cn/docs/#axios-request-config-1
 const defaultConfig: AxiosRequestConfig = {
-  // 请求超时时间
   timeout: 10000,
   headers: {
     Accept: "application/json, text/plain, */*",
     "Content-Type": "application/json",
     "X-Requested-With": "XMLHttpRequest"
   },
-  // 数组格式参数序列化（https://github.com/axios/axios/issues/5142）
   paramsSerializer: {
     serialize: stringify as unknown as CustomParamsSerializer
   }
 };
 
 class AnHttp {
-  constructor() {
-    this.httpInterceptorsRequest();
-    this.httpInterceptorsResponse();
-  }
+  /** 初始化配置对象 */
+  private static initConfig: AnHttpRequestConfig = {};
+
+  /** 保存当前`Axios`实例对象 */
+  private static axiosInstance: AxiosInstance = Axios.create(defaultConfig);
 
   /** `token`过期后，暂存待执行的请求 */
   private static requests: ((token: string) => void)[] = [];
@@ -41,30 +39,87 @@ class AnHttp {
   /** 防止重复刷新`token` */
   private static isRefreshing = false;
 
-  /** 初始化配置对象 */
-  private static initConfig: AnHttpRequestConfig = {};
-
-  /** 保存当前`Axios`实例对象 */
-  private static axiosInstance: AxiosInstance = Axios.create(defaultConfig);
+  constructor() {
+    this.httpInterceptorsRequest();
+    this.httpInterceptorsResponse();
+  }
 
   /**
-   * 重连原始请求
-   * 当 Token 正在刷新时，将后续请求放入队列，待刷新完成后重新发起
+   * 暂停当前请求，并将其放入待执行队列 (用于请求拦截器)
+   * @param config 当前请求的配置
+   * @returns 返回一个 Promise，该 Promise 会在 Token 刷新后被解析为更新后的 config
+   */
+  private static queueRequest(
+    config: AnHttpRequestConfig
+  ): Promise<AnHttpRequestConfig> {
+    return new Promise(resolve => {
+      AnHttp.requests.push((token: string) => {
+        config.headers!["Authorization"] = formatToken(token);
+        // 核心：用更新后的 config 来 resolve Promise
+        resolve(config);
+      });
+    });
+  }
+
+  /**
+   * 重连原始请求 (用于响应拦截器)
+   * @param config 原始请求的配置
+   * @returns 返回一个 Promise，该 Promise 会在 Token 刷新后，重新发起请求并返回新的 Response Promise
    */
   private static retryOriginalRequest(config: AnHttpRequestConfig) {
     return new Promise(resolve => {
       AnHttp.requests.push((token: string) => {
-        config.headers!["Authorization"] = formatToken(token); // 确保 headers 存在
-        resolve(AnHttp.axiosInstance(config)); // 返回重新发起请求的 Promise
+        config.headers!["Authorization"] = formatToken(token);
+        // 核心：用重新发起请求的 Promise 来 resolve
+        resolve(AnHttp.axiosInstance(config));
       });
     });
+  }
+
+  /**
+   * 统一处理 Token 刷新逻辑
+   * @returns 返回一个包含新 accessToken 的 Promise
+   */
+  private static async handleRefreshToken(): Promise<string> {
+    try {
+      const tokenData = getToken();
+
+      if (!tokenData || !tokenData.refreshToken) {
+        // 如果本地没有有效的 refreshToken，直接抛出错误，终止刷新流程
+        throw new Error("No refresh token available.");
+      }
+
+      // 调用 store 中的方法，该方法负责调用刷新接口并持久化新 Token
+      const res = await useUserStoreHook().handRefreshToken({
+        refreshToken: tokenData.refreshToken
+      });
+
+      const newAccessToken = res.data?.accessToken;
+      if (!newAccessToken) {
+        // 如果刷新成功，但响应中没有 accessToken，也视为失败
+        throw new Error("Refresh response did not contain an accessToken.");
+      }
+
+      // 成功获取新 Token 后，执行所有在队列中等待的请求
+      AnHttp.requests.forEach(cb => cb(newAccessToken));
+      // 清空队列
+      AnHttp.requests = [];
+
+      return newAccessToken;
+    } catch (error) {
+      // 如果刷新过程中的任何一步失败，则清空本地 Token 并强制登出
+      removeToken();
+      useUserStoreHook().logOut();
+      // 将错误继续抛出，以便上层调用可以捕获
+      return Promise.reject(error);
+    }
   }
 
   /** 请求拦截 */
   private httpInterceptorsRequest(): void {
     AnHttp.axiosInstance.interceptors.request.use(
       async (config: AnHttpRequestConfig): Promise<any> => {
-        // 开启进度条动画
+        // 开启进度条动画 (如果需要)
         // NProgress.start();
 
         // 优先判断post/get等方法是否传入回调，否则执行初始化设置等回调
@@ -82,10 +137,10 @@ class AnHttp {
           "auth/refresh-token",
           "auth/login",
           "auth/check-email",
-          "public/wallpapers"
+          "public/wallpapers" // 示例公开接口
         ];
 
-        // 如果是白名单内的请求，直接放行
+        // 如果是白名单内的请求，直接放行，不附加 Token
         if (whiteList.some(url => config.url?.endsWith(url))) {
           return config;
         }
@@ -93,44 +148,32 @@ class AnHttp {
         const data = getToken();
         if (data) {
           const now = new Date().getTime();
-          const expired = parseInt(data.expires) - now <= 0;
+          // 后端已返回数字类型的时间戳，无需 parseInt
+          const expired = data.expires - now <= 0;
 
-          // 本地判断 Access Token 已过期
           if (expired) {
             if (!AnHttp.isRefreshing) {
               AnHttp.isRefreshing = true;
-              // Token 过期，尝试使用 Refresh Token 刷新
-              return useUserStoreHook()
-                .handRefreshToken({ refreshToken: data.refreshToken })
-                .then(res => {
-                  const token = res.data.accessToken;
-                  config.headers!["Authorization"] = formatToken(token); // 设置新 Token
-                  AnHttp.requests.forEach(cb => cb(token)); // 执行队列中的请求
-                  AnHttp.requests = []; // 清空队列
-                  return config; // 返回带有新 Token 的当前请求配置
-                })
-                .catch(err => {
-                  // Refresh Token 刷新失败，强制登出
-                  removeToken(); // 清除所有 Token
-                  useUserStoreHook().logOut();
-                  return Promise.reject(err);
-                })
-                .finally(() => {
-                  AnHttp.isRefreshing = false; // 无论成功失败，重置刷新状态
-                });
+              try {
+                // Token 已过期，调用统一的刷新逻辑
+                const newAccessToken = await AnHttp.handleRefreshToken();
+                config.headers!["Authorization"] = formatToken(newAccessToken);
+                return config;
+              } catch (error) {
+                return Promise.reject(error);
+              } finally {
+                AnHttp.isRefreshing = false;
+              }
             } else {
-              // 正在刷新中，将当前请求加入队列
-              return AnHttp.retryOriginalRequest(config);
+              // 正在刷新 Token，将当前请求加入队列
+              return AnHttp.queueRequest(config);
             }
           } else {
-            // Token 未过期，直接设置 Access Token
+            // Token 未过期，正常附加 Token
             config.headers!["Authorization"] = formatToken(data.accessToken);
-            return config;
           }
-        } else {
-          // 没有 Token，对于需要认证的接口，最终会由响应拦截器处理 401 错误
-          return config;
         }
+        return config;
       },
       error => {
         return Promise.reject(error);
@@ -143,11 +186,10 @@ class AnHttp {
     const instance = AnHttp.axiosInstance;
     instance.interceptors.response.use(
       (response: AnHttpResponse) => {
-        const $config = response.config;
         // 关闭进度条动画
         // NProgress.done();
 
-        // 优先判断post/get等方法是否传入回调，否则执行初始化设置等回调
+        const $config = response.config;
         if (typeof $config.beforeResponseCallback === "function") {
           $config.beforeResponseCallback(response);
           return response.data;
@@ -159,79 +201,48 @@ class AnHttp {
         return response.data;
       },
       async (error: AnHttpError) => {
-        // 异步处理错误
-        const { config, response } = error;
         // 关闭进度条动画
         // NProgress.done();
+        const { config, response } = error;
 
-        // 检查是否是取消请求，或者 config 不存在（某些错误可能没有config）
+        // 如果是请求取消或配置不存在，则直接返回错误
         if (Axios.isCancel(error) || !config) {
           return Promise.reject(error.response || error);
         }
 
-        /** Token 刷新接口白名单，防止刷新Token接口自身因 401 导致死循环 */
+        // 刷新 Token 或登录接口本身出错（如返回401），直接拒绝，防止死循环
         const refreshTokenWhiteList = ["auth/refresh-token", "auth/login"];
         if (
           config.url &&
-          refreshTokenWhiteList.some(url => config.url!.endsWith(url))
+          refreshTokenWhiteList.some(url => config.url!.endsWith(url)) &&
+          response?.status === 401
         ) {
-          console.log(
-            "刷新 Token 接口自身返回 401 错误，直接拒绝请求",
-            response
-          );
-
-          // 如果是刷新 Token 或登录接口自身返回 401，直接拒绝，不再尝试刷新
-          removeToken(); // 清除可能存在的无效 Token
-          useUserStoreHook().logOut(); // 强制登出
-          // 可以选择在这里跳转到登录页，或让业务层自己处理
-          // router.push('/login');
+          removeToken();
+          useUserStoreHook().logOut();
           return Promise.reject(response.data || error);
         }
 
-        // 如果收到 401 错误，且不是正在刷新 Token
-        if (response && response.status === 401 && !AnHttp.isRefreshing) {
-          AnHttp.isRefreshing = true; // 标记正在刷新 Token
-
+        // 如果收到 401 错误，且当前没有正在刷新 Token
+        if (response?.status === 401 && !AnHttp.isRefreshing) {
+          AnHttp.isRefreshing = true;
           try {
-            const tokenData = getToken(); // 获取当前存储的 Token 信息
-            if (!tokenData || !tokenData.refreshToken) {
-              // 没有 refreshToken，或者 refreshToken 也无效，直接登出
-              removeToken();
-              useUserStoreHook().logOut();
-              // 可以选择跳转到登录页，或让业务层自己处理
-              // router.push('/login');
-              return Promise.reject(error); // 拒绝当前请求
-            }
-
-            // 尝试刷新 Token
-            const res = await useUserStoreHook().handRefreshToken({
-              refreshToken: tokenData.refreshToken
-            });
-            const newToken = res.data.accessToken;
-
-            // 刷新成功，执行待定请求，并用新 Token 重新发起原始请求
-            AnHttp.requests.forEach(cb => cb(newToken));
-            AnHttp.requests = []; // 清空队列
-
-            config.headers!["Authorization"] = formatToken(newToken); // 设置新 Token
-            return AnHttp.axiosInstance(config); // 使用新 Token 重新发起原始请求
+            const newAccessToken = await AnHttp.handleRefreshToken();
+            // 使用新的 Token 重新发起原始请求
+            config.headers!["Authorization"] = formatToken(newAccessToken);
+            return AnHttp.axiosInstance(config);
           } catch (refreshError) {
-            // 刷新 Token 失败（例如 refreshToken 也过期或无效）
-            console.error("刷新 Token 失败:", refreshError);
-            removeToken(); // 清除所有 Token
-            useUserStoreHook().logOut(); // 登出用户
-            // 可以选择跳转到登录页
-            // router.push('/login');
-            return Promise.reject(refreshError); // 拒绝当前请求并抛出刷新失败的错误
+            return Promise.reject(refreshError);
           } finally {
-            AnHttp.isRefreshing = false; // 无论成功失败，重置刷新状态
+            AnHttp.isRefreshing = false;
           }
-        } else if (response && response.status === 401 && AnHttp.isRefreshing) {
-          // 如果是 401 错误，但正在刷新 Token，则将当前请求加入待定队列
+        }
+
+        // 如果是 401 错误，但正在刷新 Token，则将当前请求加入待定队列
+        if (response?.status === 401 && AnHttp.isRefreshing) {
           return AnHttp.retryOriginalRequest(config);
         }
 
-        // 所有的响应异常 区分来源为取消请求/非取消请求，其他错误直接抛出
+        // 其他错误直接抛出
         return Promise.reject(error);
       }
     );
@@ -251,12 +262,10 @@ class AnHttp {
       ...axiosConfig
     } as AnHttpRequestConfig;
 
-    // 单独处理自定义请求/响应回调
     return new Promise((resolve, reject) => {
       AnHttp.axiosInstance
         .request(config)
         .then((response: any) => {
-          // 将 undefined 改为 any 或更具体的类型
           resolve(response);
         })
         .catch(error => {

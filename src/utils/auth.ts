@@ -17,8 +17,6 @@ export interface DataInfo<T> {
   nickname?: string;
   /** 当前登录用户的角色 */
   roles?: Array<string>;
-  /** 当前登录用户的按钮级别权限 */
-  // permissions?: Array<string>;
 }
 
 export const userKey = "yuyu-user-info";
@@ -31,87 +29,123 @@ export const TokenKey = "authorized-token";
  * */
 export const multipleTabsKey = "multiple-tabs";
 
-/** 获取`token` */
-export function getToken(): DataInfo<number> {
-  // 此处与`TokenKey`相同，此写法解决初始化时`Cookies`中不存在`TokenKey`报错
-  return Cookies.get(TokenKey)
-    ? JSON.parse(Cookies.get(TokenKey))
-    : storageLocal().getItem(userKey);
+/**
+ * 获取`token`。
+ * 综合 Cookie 和 localStorage 的信息，确保健壮性。
+ * Cookie 主要存放有时效性的 accessToken，localStorage 存放长期的 refreshToken 和用户信息。
+ */
+export function getToken(): DataInfo<number> | null {
+  const cookieDataString = Cookies.get(TokenKey);
+  const localData = storageLocal().getItem<DataInfo<number>>(userKey);
+
+  let tokenInfo: Partial<DataInfo<number>> = {};
+
+  // 1. 优先从 Cookie 中解析数据
+  if (cookieDataString) {
+    try {
+      tokenInfo = JSON.parse(cookieDataString);
+    } catch (e) {
+      console.error("解析 Cookie Token 出错, 已自动清除", e);
+      Cookies.remove(TokenKey);
+    }
+  }
+
+  // 2. 使用 localStorage 的信息来补充或覆盖，localStorage 的 refreshToken 更可靠
+  if (localData) {
+    tokenInfo.refreshToken = localData.refreshToken || tokenInfo.refreshToken;
+    // 如果 Cookie 不存在或解析失败，从 localStorage 回退 expires
+    if (!tokenInfo.expires) {
+      tokenInfo.expires = localData.expires;
+    }
+    // 用户信息以 localStorage 为准
+    tokenInfo.avatar = localData.avatar;
+    tokenInfo.username = localData.username;
+    tokenInfo.nickname = localData.nickname;
+    tokenInfo.roles = localData.roles;
+  }
+
+  // 3. 如果连 accessToken 和 refreshToken 都没有，则视为无有效 token
+  if (!tokenInfo.accessToken && !tokenInfo.refreshToken) {
+    return null;
+  }
+
+  // 4. 确保返回的对象结构完整，符合 DataInfo 类型，为缺失的字段提供默认值
+  return {
+    accessToken: tokenInfo.accessToken || "",
+    refreshToken: tokenInfo.refreshToken || "",
+    expires: tokenInfo.expires || 0,
+    avatar: tokenInfo.avatar || "",
+    username: tokenInfo.username || "",
+    nickname: tokenInfo.nickname || "",
+    roles: tokenInfo.roles || []
+  };
 }
 
 /**
  * @description 设置`token`以及一些必要信息并采用无感刷新`token`方案
- * 无感刷新：后端返回`accessToken`（访问接口使用的`token`）、`refreshToken`（用于调用刷新`accessToken`的接口时所需的`token`，`refreshToken`的过期时间（比如30天）应大于`accessToken`的过期时间（比如2小时））、`expires`（`accessToken`的过期时间）
- * 将`accessToken`、`expires`、`refreshToken`这三条信息放在key值为authorized-token的cookie里（过期自动销毁）
- * 将`avatar`、`username`、`nickname`、`roles`、`permissions`、`refreshToken`、`expires`这七条信息放在key值为`user-info`的localStorage里（利用`multipleTabsKey`当浏览器完全关闭后自动销毁）
+ * @param data 传入的数据。登录时是完整的，刷新时可能只有 accessToken 和 expires。
  */
-export function setToken(data: DataInfo<Date>) {
-  let expires = 0;
-  const { accessToken, refreshToken } = data;
+export function setToken(data: Partial<DataInfo<number>>) {
   const { isRemembered, loginDay } = useUserStoreHook();
-  expires = new Date(data.expires).getTime(); // 如果后端直接设置时间戳，将此处代码改为expires = data.expires，然后把上面的DataInfo<Date>改成DataInfo<number>即可
-  const cookieString = JSON.stringify({ accessToken, expires, refreshToken });
 
-  expires > 0
-    ? Cookies.set(TokenKey, cookieString, {
-        expires: (expires - Date.now()) / 86400000
-      })
-    : Cookies.set(TokenKey, cookieString);
+  // --- START OF FIX ---
+  // 1. 保留现有的 refreshToken
+  // 如果传入的 data 中没有 refreshToken（比如刷新 accessToken 的场景），
+  // 则从现有的存储中读取旧的 refreshToken，防止其被覆盖丢失。
+  const preservedRefreshToken =
+    data.refreshToken || getToken()?.refreshToken || "";
 
+  // 2. 准备要存入 Cookie 的数据
+  const accessToken = data.accessToken ?? "";
+  const expires = data.expires ?? 0;
+  const cookieString = JSON.stringify({
+    accessToken,
+    expires,
+    refreshToken: preservedRefreshToken
+  });
+  // --- END OF FIX ---
+
+  // 设置 Cookie 的过期时间与 accessToken 的过期时间同步
+  if (expires > 0) {
+    const expireDays = (expires - Date.now()) / (1000 * 60 * 60 * 24);
+    Cookies.set(TokenKey, cookieString, {
+      // 设置一个最小过期天数，防止计算出负数或0导致cookie立即失效
+      expires: expireDays > 0 ? expireDays : 0
+    });
+  } else {
+    Cookies.set(TokenKey, cookieString);
+  }
+
+  // 设置用于判断多标签页登录状态的 Cookie
   Cookies.set(
     multipleTabsKey,
     "true",
-    isRemembered
-      ? {
-          expires: loginDay
-        }
-      : {}
+    isRemembered ? { expires: loginDay } : {}
   );
 
-  function setUserKey({ avatar, username, nickname, roles }) {
-    useUserStoreHook().SET_AVATAR(avatar);
-    useUserStoreHook().SET_USERNAME(username);
-    useUserStoreHook().SET_NICKNAME(nickname);
-    useUserStoreHook().SET_ROLES(roles);
-    // useUserStoreHook().SET_PERMS(permissions);
-    storageLocal().setItem(userKey, {
-      refreshToken,
-      expires,
-      avatar,
-      username,
-      nickname,
-      roles
-      // permissions
-    });
-  }
+  // --- START OF FIX 2 ---
+  // 将更持久的信息（如 refreshToken 和用户信息）存入 localStorage
+  // 登录时，data 中包含用户信息，需要存入；
+  // 刷新时，data 中不包含用户信息，需要从旧存储中获取以防丢失。
+  const oldLocalData = storageLocal().getItem<DataInfo<number>>(userKey);
+  const userInfo = {
+    refreshToken: preservedRefreshToken,
+    expires, // 也存一份，用于 Cookie 失效后回退
+    avatar: data.avatar ?? oldLocalData?.avatar ?? "",
+    username: data.username ?? oldLocalData?.username ?? "",
+    nickname: data.nickname ?? oldLocalData?.nickname ?? "",
+    roles: data.roles ?? oldLocalData?.roles ?? []
+  };
+  storageLocal().setItem(userKey, userInfo);
+  // --- END OF FIX 2 ---
 
+  // 更新 Pinia Store
+  // 只有在登录（提供了完整的data）时才需要全面更新用户信息
   if (data.username && data.roles) {
-    const { username, roles } = data;
-    setUserKey({
-      avatar: data?.avatar ?? "",
-      username,
-      nickname: data?.nickname ?? "",
-      roles
-      // permissions: data?.permissions ?? []
-    });
-  } else {
-    const avatar =
-      storageLocal().getItem<DataInfo<number>>(userKey)?.avatar ?? "";
-    const username =
-      storageLocal().getItem<DataInfo<number>>(userKey)?.username ?? "";
-    const nickname =
-      storageLocal().getItem<DataInfo<number>>(userKey)?.nickname ?? "";
-    const roles =
-      storageLocal().getItem<DataInfo<number>>(userKey)?.roles ?? [];
-    // const permissions =
-    //   storageLocal().getItem<DataInfo<number>>(userKey)?.permissions ?? [];
-    setUserKey({
-      avatar,
-      username,
-      nickname,
-      roles
-      // permissions
-    });
+    useUserStoreHook().SET_AVATAR(userInfo.avatar);
+    useUserStoreHook().SET_USERNAME(userInfo.username);
+    useUserStoreHook().SET_NICKNAME(userInfo.nickname);
+    useUserStoreHook().SET_ROLES(userInfo.roles);
   }
 }
 
@@ -126,16 +160,3 @@ export function removeToken() {
 export const formatToken = (token: string): string => {
   return "Bearer " + token;
 };
-
-/** 是否有按钮级别的权限（根据登录接口返回的`permissions`字段进行判断）*/
-// export const hasPerms = (value: string | Array<string>): boolean => {
-//   if (!value) return false;
-//   const allPerms = "*:*:*";
-//   const { permissions } = useUserStoreHook();
-//   if (!permissions) return false;
-//   if (permissions.length === 1 && permissions[0] === allPerms) return true;
-//   const isAuths = isString(value)
-//     ? permissions.includes(value)
-//     : isIncludeAllChildren(value, permissions);
-//   return isAuths ? true : false;
-// };

@@ -37,6 +37,10 @@ export function useNav() {
     };
   });
 
+  const goUserCenter = () => {
+    router.push({ name: "UserCenter" });
+  };
+
   /** 头像（如果头像为空则使用 src/assets/user.jpg ） */
   const userAvatar = computed(() => {
     return isAllEmpty(useUserStoreHook()?.avatar)
@@ -141,6 +145,7 @@ export function useNav() {
     backTopMenu,
     onPanel,
     getDivStyle,
+    goUserCenter,
     changeTitle,
     toggleSideBar,
     menuSelect,

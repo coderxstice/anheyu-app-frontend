@@ -1,3 +1,10 @@
+<!--
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-15 11:31:00
+ * @LastEditTime: 2025-06-19 18:17:01
+ * @LastEditors: 安知鱼
+-->
 <script setup lang="ts">
 import { computed } from "vue";
 import { useGlobal } from "@pureadmin/utils";
@@ -64,7 +71,7 @@ const toggleClick = () => {
   cursor: pointer;
   background: var(--el-bg-color);
   border: 1px solid var(--anzhiyu-border-color);
-  border-radius: 4px;
+  border-radius: 8px;
   transform: translate(12px, -50%);
 }
 </style>

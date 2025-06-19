@@ -14,7 +14,7 @@ const {
   layout,
   device,
   logout,
-  onPanel,
+  goUserCenter,
   pureApp,
   username,
   userAvatar,
@@ -24,7 +24,7 @@ const {
 </script>
 
 <template>
-  <div class="navbar bg-[#fff] shadow-sm shadow-[rgba(0,21,41,0.08)]">
+  <div class="navbar bg-[#fff]">
     <LaySidebarTopCollapse
       v-if="device === 'mobile'"
       class="hamburger-container"
@@ -40,6 +40,14 @@ const {
     <LayNavMix v-if="layout === 'mix'" />
 
     <div v-if="layout === 'vertical'" class="vertical-header-right">
+      <!-- 暗色模式/浅色模式 -->
+      <!-- <el-switch
+        v-model="dataTheme"
+        inline-prompt
+        :active-icon="dayIcon"
+        :inactive-icon="darkIcon"
+        @change="dataThemeChange"
+      /> -->
       <!-- 菜单搜索 -->
       <LaySearch id="header-search" />
       <!-- 全屏 -->
@@ -47,13 +55,17 @@ const {
       <!-- 消息通知 -->
       <!-- <LayNotice id="header-notice" /> -->
       <!-- 退出登录 -->
-      <el-dropdown trigger="click">
+      <el-dropdown trigger="click" popper-class="anzhiyu-dropdown-menu">
         <span class="el-dropdown-link navbar-bg-hover select-none">
           <img :src="userAvatar" :style="avatarsStyle" />
           <p v-if="username" class="dark:text-white">{{ username }}</p>
         </span>
         <template #dropdown>
           <el-dropdown-menu class="logout">
+            <el-dropdown-item @click="goUserCenter">
+              <IconifyIconOffline :icon="Setting" style="margin: 5px" />
+              个人中心
+            </el-dropdown-item>
             <el-dropdown-item @click="logout">
               <IconifyIconOffline
                 :icon="LogoutCircleRLine"
@@ -80,6 +92,7 @@ const {
   width: 100%;
   height: 48px;
   overflow: hidden;
+  border-bottom: var(--style-border);
 
   .hamburger-container {
     float: left;
@@ -95,12 +108,14 @@ const {
     min-width: 280px;
     height: 48px;
     color: #000000d9;
+    margin-right: 8px;
 
     .el-dropdown-link {
       display: flex;
       align-items: center;
       justify-content: space-around;
-      height: 48px;
+      height: 40px;
+      border-radius: 8px;
       padding: 10px;
       color: #000000d9;
       cursor: pointer;
