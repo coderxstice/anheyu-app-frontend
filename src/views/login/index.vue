@@ -148,17 +148,13 @@ const apiHandlers = {
     return res.code === 200 && res.data.exists;
   },
   login: async () => {
-    const res = await useUserStoreHook().loginByEmail({
+    await useUserStoreHook().loginByEmail({
       email: form.email,
       password: form.password
     });
-    if (res.code === 200) {
-      await initRouter();
-      await router.push(getTopMenu(true).path);
-      message("登录成功", { type: "success" });
-    } else {
-      message(res.message || "登录失败", { type: "error" });
-    }
+    await initRouter();
+    await router.push(getTopMenu(true).path);
+    message("登录成功", { type: "success" });
   },
   register: async () => {
     const res = await useUserStoreHook().registeredUser({

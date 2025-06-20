@@ -1,47 +1,88 @@
-/*
- * @Description:
- * @Author: 安知鱼
- * @Date: 2025-06-11 11:59:32
- * @LastEditTime: 2025-06-19 01:39:23
- * @LastEditors: 安知鱼
- */
-// src/api/user.ts
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
 
-export type UserResult = {
-  code: number;
-  data: {
-    /** 头像 */
-    avatar: string;
-    /** 用户名 */
-    username: string;
-    /** 昵称 */
-    nickname: string;
-    /** 当前登录用户的角色 */
-    roles: Array<string>;
-    /** 按钮级别权限 */
-    // permissions: Array<string>;
-    /** `token` */
-    accessToken: string;
-    /** 用于调用刷新`accessToken`的接口时所需的`token` */
-    refreshToken: string;
-    /** `accessToken`的过期时间（格式'xxxx/xx/xx xx:xx:xx'） */
-    expires: Date;
-  };
-  message: string;
+/**
+ * @description 用户组的设置信息
+ */
+export type UserSettings = {
+  source_batch: number;
+  policy_ordering: number[];
+  redirected_source: boolean;
 };
 
+/**
+ * @description 用户的角色组信息
+ */
+export type UserGroup = {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  name: string;
+  description: string;
+  permissions: number[];
+  maxStorage: number;
+  settings: UserSettings;
+};
+
+/**
+ * @description 完整的用户信息
+ */
+export type UserInfo = {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+  username: string;
+  nickname: string;
+  avatar: string;
+  email: string;
+  lastLoginAt: string;
+  userGroupID: number;
+  userGroup: UserGroup;
+  status: number;
+};
+
+/**
+_@description 登录成功后，data字段的完整类型_
+ */
+export type LoginResultData = {
+  /** 用于API认证的访问令牌 */
+  accessToken: string;
+  /** accessToken 的过期时间戳 (毫秒) */
+  expires: number;
+  /** 用于刷新 accessToken 的令牌 */
+  refreshToken: string;
+  /** 当前用户的角色（用户组id） */
+  roles: string[];
+  /** 包含所有详细信息的用户对象 */
+  userInfo: UserInfo;
+};
+
+/**
+ * @description 登录接口的完整响应类型
+ */
+export type UserResult = {
+  code: number;
+  message: string;
+  data: LoginResultData;
+};
+
+/**
+ * @description 刷新Token接口的data字段类型
+ */
+export type RefreshTokenData = {
+  /** 新的 accessToken */
+  accessToken: string;
+  /** 新的过期时间戳 (毫秒) */
+  expires: number;
+};
+
+/**
+ * @description 刷新Token接口的完整响应类型
+ */
 export type RefreshTokenResult = {
   code: number;
-  data: {
-    /** `token` */
-    accessToken: string;
-    /** 用于调用刷新`accessToken`的接口时所需的`token` */
-    refreshToken: string;
-    /** `accessToken`的过期时间（格式'xxxx/xx/xx xx:xx:xx'） */
-    expires: Date;
-  };
+  data: RefreshTokenData;
 };
 
 export type RegisterUserResult = {
@@ -58,6 +99,15 @@ export type CheckEmailExistsResult = {
     exists: boolean;
   };
   message?: string;
+};
+
+/**
+ * @description 用户注册时需要提交的数据类型
+ */
+export type RegisterData = {
+  email: string;
+  password: string;
+  repeat_password: string;
 };
 
 /** 登录 */
@@ -86,11 +136,7 @@ export const checkEmailExistsApi = (email: string) => {
 };
 
 /** 注册用户 */
-export const registerUserApi = (data: {
-  email: string;
-  password: string;
-  repeat_password: string;
-}) => {
+export const registerUserApi = (data: RegisterData) => {
   return http.request<RegisterUserResult>("post", baseUrlApi("auth/register"), {
     data
   });

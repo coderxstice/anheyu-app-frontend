@@ -16,13 +16,13 @@ interface CombinedSiteSettings extends Partial<SiteConfig> {
   hiddenSideBar?: boolean;
 }
 
-export const useSiteConfigStore = defineStore("pure-site-config", {
+export const useSiteConfigStore = defineStore("yuyu-site-config", {
   // 定义 store 的状态
   state: (): {
     siteConfig: CombinedSiteSettings | null;
     isLoaded: boolean;
   } => ({
-    siteConfig: null, // 将存储合并后的所有站点配置
+    siteConfig: null,
     isLoaded: false
   }),
 

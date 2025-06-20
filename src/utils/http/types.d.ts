@@ -1,8 +1,16 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-15 11:31:00
+ * @LastEditTime: 2025-06-20 17:47:32
+ * @LastEditors: 安知鱼
+ */
 import type {
   Method,
   AxiosError,
   AxiosResponse,
-  AxiosRequestConfig
+  AxiosRequestConfig,
+  InternalAxiosRequestConfig
 } from "axios";
 
 export type resultType = {
@@ -22,7 +30,8 @@ export interface AnHttpResponse extends AxiosResponse {
   config: AnHttpRequestConfig;
 }
 
-export interface AnHttpRequestConfig extends AxiosRequestConfig {
+export interface AnHttpRequestConfig extends InternalAxiosRequestConfig {
+  // 自定义的属性保持不变
   beforeRequestCallback?: (request: AnHttpRequestConfig) => void;
   beforeResponseCallback?: (response: AnHttpResponse) => void;
 }

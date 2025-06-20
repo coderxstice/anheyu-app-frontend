@@ -1,152 +1,150 @@
+import { ref } from "vue";
 import { defineStore } from "pinia";
+import { store, router, resetRouter, routerArrays } from "../utils";
 import {
-  type userType,
-  store,
-  router,
-  resetRouter,
-  routerArrays,
-  storageLocal
-} from "../utils";
-import {
-  type UserResult,
+  type UserInfo,
+  type LoginResultData,
   type RefreshTokenResult,
   type CheckEmailExistsResult,
+  type RegisterUserResult,
+  type RegisterData,
   getLogin,
   refreshTokenApi,
   checkEmailExistsApi,
-  registerUserApi,
-  type RegisterUserResult
+  registerUserApi
 } from "@/api/user";
 import { useMultiTagsStoreHook } from "./multiTags";
-import { type DataInfo, setToken, removeToken, userKey } from "@/utils/auth";
+import { getToken, setToken, removeToken } from "@/utils/auth";
 
-export const useUserStore = defineStore({
-  id: "pure-user",
-  state: (): userType => ({
-    // 头像
-    avatar: storageLocal().getItem<DataInfo<number>>(userKey)?.avatar ?? "",
-    // 用户名
-    username: storageLocal().getItem<DataInfo<number>>(userKey)?.username ?? "",
-    // 昵称
-    nickname: storageLocal().getItem<DataInfo<number>>(userKey)?.nickname ?? "",
-    // 页面级别权限
-    roles: storageLocal().getItem<DataInfo<number>>(userKey)?.roles ?? [],
-    // 按钮级别权限
-    // permissions:
-    //   storageLocal().getItem<DataInfo<number>>(userKey)?.permissions ?? [],
-    // 是否勾选了登录页的免登录
-    isRemembered: false,
-    // 登录页的免登录存储几天，默认7天
-    loginDay: 7
-  }),
-  actions: {
-    /** 存储头像 */
-    SET_AVATAR(avatar: string) {
-      this.avatar = avatar;
-    },
-    /** 存储用户名 */
-    SET_USERNAME(username: string) {
-      this.username = username;
-    },
-    /** 存储昵称 */
-    SET_NICKNAME(nickname: string) {
-      this.nickname = nickname;
-    },
-    /** 存储角色 */
-    SET_ROLES(roles: Array<string>) {
-      this.roles = roles;
-    },
-    /** 存储按钮级别权限 */
-    SET_PERMS(permissions: Array<string>) {
-      this.permissions = permissions;
-    },
-    /** 存储是否勾选了登录页的免登录 */
-    SET_ISREMEMBERED(bool: boolean) {
-      this.isRemembered = bool;
-    },
-    /** 设置登录页的免登录存储几天 */
-    SET_LOGINDAY(value: number) {
-      this.loginDay = Number(value);
-    },
-    /** 登入 */
-    async loginByEmail(data) {
-      return new Promise<UserResult>((resolve, reject) => {
-        getLogin(data)
-          .then(data => {
-            if (data?.code === 200) setToken(data.data);
-            resolve(data);
-          })
-          .catch(error => {
-            reject(error);
-          });
-      });
-    },
-    /** 前端登出（不调用接口） */
-    logOut() {
-      this.username = "";
-      this.roles = [];
-      this.permissions = [];
-      removeToken();
-      useMultiTagsStoreHook().handleTags("equal", [...routerArrays]);
-      resetRouter();
-      router.push("/login");
-    },
-    /** 刷新`token` */
-    async handRefreshToken(data) {
-      return new Promise<RefreshTokenResult>((resolve, reject) => {
-        refreshTokenApi(data)
-          .then(data => {
-            if (data) {
-              setToken(data.data);
-              resolve(data);
-            }
-          })
-          .catch(error => {
-            reject(error);
-          });
-      });
-    },
-    // 邮箱校验用户是否注册
-    async checkEmailRegistered(email: string) {
-      return new Promise<CheckEmailExistsResult>((resolve, reject) => {
-        checkEmailExistsApi(email)
-          .then(data => {
-            resolve(data);
-          })
-          .catch(error => {
-            reject(error);
-          });
-      });
-    },
-    // 用户注册
-    async registeredUser(data) {
-      return new Promise<RegisterUserResult>((resolve, reject) => {
-        registerUserApi(data)
-          .then(data => {
-            resolve(data);
-          })
-          .catch(error => {
-            reject(error);
-          });
-      });
-    },
-    // 发送密码重置邮件
-    sendPasswordResetEmail(data: { email: string }) {
-      return new Promise<any>(resolve => {
-        console.log("模拟发送重置邮件到：", data.email);
-        // 模拟后端成功响应
-        resolve({ code: 200, message: "重置邮件已发送，请检查收件箱" });
-      });
-    },
-    /** 重设密码 */
-    resetPassword(data: object) {
-      return new Promise<any>(resolve => {
-        console.log("模拟使用以下信息重设密码：", data);
-        // 模拟后端成功响应
-        resolve({ code: 200, message: "密码重设成功" });
-      });
-    }
+export const useUserStore = defineStore("yuyu-user", () => {
+  const initialTokenData = getToken();
+  const userInfo = initialTokenData?.userInfo;
+
+  const avatar = ref<string>(userInfo?.avatar ?? "");
+  const username = ref<string>(userInfo?.username ?? "");
+  const nickname = ref<string>(userInfo?.nickname ?? "");
+  const roles = ref<string[]>(
+    initialTokenData?.roles?.length ? initialTokenData.roles : []
+  );
+  const isRemembered = ref<boolean>(false);
+  const loginDay = ref<number>(7);
+
+  /**
+   * @description 统一更新用户信息
+   */
+  function SET_USER_INFO(info: UserInfo) {
+    avatar.value = info.avatar;
+    username.value = info.username;
+    nickname.value = info.nickname;
+    roles.value = info.userGroup ? [info.userGroup.name] : [];
   }
+
+  /**
+   * @description 存储是否勾选了登录页的免登录
+   */
+  function SET_ISREMEMBERED(bool: boolean) {
+    isRemembered.value = bool;
+  }
+
+  /**
+   * @description 设置登录页的免登录存储几天
+   */
+  function SET_LOGINDAY(value: number) {
+    loginDay.value = Number(value);
+  }
+
+  /**
+   * @description 登入
+   */
+  async function loginByEmail(data: object): Promise<LoginResultData> {
+    const response = await getLogin(data);
+    if (response?.code === 200) {
+      setToken(response.data);
+      SET_USER_INFO(response.data.userInfo);
+    }
+    return response.data;
+  }
+
+  /**
+   * @description 前端登出（不调用接口）
+   */
+  function logOut() {
+    username.value = "";
+    nickname.value = "";
+    avatar.value = "";
+    roles.value = [];
+    removeToken();
+    useMultiTagsStoreHook().handleTags("equal", [...routerArrays]);
+    resetRouter();
+    router.push("/login");
+  }
+
+  /**
+   * @description 刷新`token`
+   */
+  async function handRefreshToken(data: object): Promise<RefreshTokenResult> {
+    const response = await refreshTokenApi(data);
+    if (response) {
+      setToken(response.data);
+    }
+    return response;
+  }
+
+  /**
+   * @description 邮箱校验用户是否注册
+   */
+  async function checkEmailRegistered(
+    email: string
+  ): Promise<CheckEmailExistsResult> {
+    return checkEmailExistsApi(email);
+  }
+
+  /**
+   * @description 用户注册
+   */
+  async function registeredUser(
+    data: RegisterData
+  ): Promise<RegisterUserResult> {
+    return registerUserApi(data);
+  }
+
+  /**
+   * @description 模拟发送密码重置邮件
+   */
+  async function sendPasswordResetEmail(data: { email: string }) {
+    return new Promise<any>(resolve => {
+      console.log("模拟发送重置邮件到：", data.email);
+      // 模拟后端成功响应
+      resolve({ code: 200, message: "重置邮件已发送，请检查收件箱" });
+    });
+  }
+  /** 重设密码 */
+  async function resetPassword(data: object) {
+    return new Promise<any>(resolve => {
+      console.log("模拟使用以下信息重设密码：", data);
+      // 模拟后端成功响应
+      resolve({ code: 200, message: "密码重设成功" });
+    });
+  }
+
+  return {
+    avatar,
+    username,
+    nickname,
+    roles,
+    isRemembered,
+    loginDay,
+    SET_USER_INFO,
+    SET_ISREMEMBERED,
+    SET_LOGINDAY,
+    loginByEmail,
+    logOut,
+    handRefreshToken,
+    checkEmailRegistered,
+    registeredUser,
+    sendPasswordResetEmail,
+    resetPassword
+  };
 });
 
 export function useUserStoreHook() {
