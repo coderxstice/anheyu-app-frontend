@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:30:32
- * @LastEditTime: 2025-06-21 18:55:13
+ * @LastEditTime: 2025-06-21 23:43:17
  * @LastEditors: 安知鱼
  */
 // src/api/sys-settings.ts
@@ -36,9 +36,7 @@ export const getSettingsApi = (keys: string[]) => {
  * @param settings - 需要更新的配置项 (键值对)
  */
 export const updateSettingsApi = (settings: SettingsMap) => {
-  return http.request<SettingsResult>(
-    "post",
-    baseUrlApi("admin/settings/update"),
-    { data: settings }
-  );
+  return http.request<SettingsResult>("post", baseUrlApi("settings/update"), {
+    data: settings
+  });
 };

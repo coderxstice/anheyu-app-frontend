@@ -24,6 +24,7 @@ export type SiteConfig = {
   LOGO_URL_512x512: string;
   DEFAULT_THUMB_PARAM: string;
   DEFAULT_BIG_PARAM: string;
+  KeySiteAnnouncement: string;
 };
 
 export type SiteConfigResult = {

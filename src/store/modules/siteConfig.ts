@@ -1,42 +1,55 @@
 // src/store/modules/siteConfig.ts
+
 import { defineStore } from "pinia";
-import { getSiteConfigApi } from "@/api/site"; // 导入获取站点配置的 API
-import { getConfig } from "@/config"; // 导入 getConfig 用于获取前端默认配置
-import type { SiteConfig } from "@/api/site"; // 导入原始的 SiteConfig 类型
+import { getConfig } from "@/config";
+import { getSiteConfigApi, type SiteConfig } from "@/api/site";
+import {
+  getSettingsApi,
+  updateSettingsApi,
+  type SettingsMap
+} from "@/api/sys-settings";
+import { message } from "@/utils/message";
 
-// 定义 localStorage 存储的键名
-const LOCAL_STORAGE_KEY = "site_config_cache";
-// 定义缓存的有效期（例如：24小时，单位毫秒）
-const CACHE_EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 24小时
+// 引入公告相关的函数
+import { checkAndShowAnnouncementByConfig } from "@/components/Announcement";
 
-// 将 SiteConfig 的所有属性设为可选，因为它们会通过合并逐步填充
+// 定义了 localStorage 存储的键名
+export const LOCAL_STORAGE_KEY = "site_config_cache";
+// 定义了缓存的有效期（24小时）
+const CACHE_EXPIRATION_TIME = 24 * 60 * 60 * 1000;
+
+// 将 SiteConfig 的所有属性设为可选，并允许包含来自 sys-settings 的任意键值对
+// 这样它就能容纳所有类型的配置了
 interface CombinedSiteSettings extends Partial<SiteConfig> {
   title?: string;
   fixedHeader?: boolean;
   hiddenSideBar?: boolean;
+  SiteAnnouncement?: string; // 添加公告内容的键名
+  [key: string]: any;
 }
 
 export const useSiteConfigStore = defineStore("yuyu-site-config", {
-  // 定义 store 的状态
+  // 定义了 store 的统一状态
   state: (): {
-    siteConfig: CombinedSiteSettings | null;
-    isLoaded: boolean;
+    siteConfig: CombinedSiteSettings;
+    isLoaded: boolean; // 标记公共配置是否已加载
+    loading: boolean; // 用于在请求系统设置时显示加载状态
   } => ({
-    siteConfig: null,
-    isLoaded: false
+    siteConfig: {},
+    isLoaded: false,
+    loading: false
   }),
 
-  // 定义 store 的 getters
+  // 定义了 store 的 getters
   getters: {
     // 获取完整的站点配置对象
-    getSiteConfig(state): CombinedSiteSettings | null {
+    getSiteConfig(state): CombinedSiteSettings {
       return state.siteConfig;
     },
     // 获取相册图片后端 API 地址
     getWallpaperBackendApiUrl(state): string | null {
       if (state.siteConfig?.API_URL) {
         let apiUrl = state.siteConfig.API_URL;
-        // 确保以斜杠结尾
         if (!apiUrl.endsWith("/")) {
           apiUrl += "/";
         }
@@ -44,157 +57,160 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
       }
       return null;
     },
-    // 从 useSettingStore 继承的 getter: 获取页面标题
     getTitle(state): string {
-      // 优先使用 siteConfig.title (来自后端 APP_NAME 或设置修改)，否则回退到前端 getConfig().Title
-      return state.siteConfig?.title || getConfig().Title || "鱼鱼相册";
+      return (
+        state.siteConfig?.title ||
+        state.siteConfig?.app_name || // 来自系统设置
+        state.siteConfig?.APP_NAME || // 来自公共配置
+        getConfig().Title ||
+        "鱼鱼相册"
+      );
     },
-    // 从 useSettingStore 继承的 getter: 获取固定头部设置
     getFixedHeader(state): boolean {
-      // 优先使用 siteConfig.fixedHeader (来自后端或设置修改)，否则回退到前端 getConfig().FixedHeader
       return typeof state.siteConfig?.fixedHeader === "boolean"
         ? state.siteConfig.fixedHeader
         : getConfig().FixedHeader;
     },
-    // 从 useSettingStore 继承的 getter: 获取隐藏侧边栏设置
     getHiddenSideBar(state): boolean {
       return typeof state.siteConfig?.hiddenSideBar === "boolean"
         ? state.siteConfig.hiddenSideBar
         : getConfig().HiddenSideBar;
     },
-    // 从 useSettingStore 继承的 getter: 获取logo
     getLogo(state): string {
-      return state.siteConfig?.LOGO_URL || "/logo.svg";
+      return state.siteConfig?.LOGO_URL_192x192 || "/logo.svg";
     }
   },
 
-  // 定义 store 的 actions
   actions: {
-    // 从 useSettingStore 继承的 action: 更改单个设置
-    CHANGE_SETTING({
-      key,
-      value
-    }: {
-      key: keyof CombinedSiteSettings;
-      value: any;
-    }) {
-      if (this.siteConfig) {
-        // 特殊处理 title，它对应后端的 APP_NAME
-        if (key === "title") {
-          this.siteConfig.APP_NAME = value; // 更新 APP_NAME 确保与后端对应
-          this.siteConfig.title = value; // 更新本地 title 属性
-        } else if (Reflect.has(this.siteConfig, key)) {
-          (this.siteConfig as any)[key] = value;
-        }
+    /**
+     * @description 一个内部方法，用于更新状态并同步到 localStorage，避免代码重复
+     * @param newSettings - 需要合并到 state 的新配置
+     */
+    _updateStateAndCache(newSettings: Partial<CombinedSiteSettings>) {
+      // 将新旧配置合并
+      this.siteConfig = { ...this.siteConfig, ...newSettings };
+
+      // 在这里特殊处理了标题，确保其同步
+      if (newSettings.app_name) {
+        this.siteConfig.title = newSettings.app_name;
+      } else if (newSettings.APP_NAME) {
+        this.siteConfig.title = newSettings.APP_NAME;
       }
-    },
-    // 从 useSettingStore 继承的 action: 封装 CHANGE_SETTING
-    changeSetting(data: { key: keyof CombinedSiteSettings; value: any }) {
-      this.CHANGE_SETTING(data);
-    },
 
-    // 异步获取并合并站点配置
-    async fetchSiteConfig() {
-      // 1. 获取前端默认配置作为初始值 (最低优先级)
-      const initialConfigFromFrontend = getConfig();
-      let mergedConfig: CombinedSiteSettings = {
-        // 将 getConfig() 中的相关属性作为初始值
-        title: initialConfigFromFrontend.Title,
-        fixedHeader: initialConfigFromFrontend.FixedHeader,
-        hiddenSideBar: initialConfigFromFrontend.HiddenSideBar
-        // 其他 SiteConfig 属性现在已是可选，无需在此处初始化所有
+      // 确保 API_URL 总是以斜杠结尾
+      if (this.siteConfig.API_URL && !this.siteConfig.API_URL.endsWith("/")) {
+        this.siteConfig.API_URL += "/";
+      }
+
+      console.log("合并后的站点配置:", this.siteConfig);
+
+      // 传递 SiteAnnouncement 给公告函数
+      if (this.siteConfig.SITE_ANNOUNCEMENT !== undefined) {
+        checkAndShowAnnouncementByConfig(this.siteConfig.SITE_ANNOUNCEMENT);
+      }
+
+      // 将合并后的最新配置存入缓存
+      const dataToCache = {
+        config: this.siteConfig,
+        timestamp: Date.now()
       };
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToCache));
+      console.log("站点配置已更新并缓存到 localStorage:", this.siteConfig);
+    },
 
-      // 2. 尝试从 localStorage 读取缓存 (中等优先级)
+    // 异步获取并合并站点公共配置（用于应用初始化）
+    async fetchSiteConfig() {
+      if (this.isLoaded) return; // 如果已加载，选择直接返回
+
+      // 1. 先从前端获取默认配置
+      const initialConfig = {
+        title: getConfig().Title,
+        fixedHeader: getConfig().FixedHeader,
+        hiddenSideBar: getConfig().HiddenSideBar
+      };
+      this.siteConfig = { ...initialConfig, ...this.siteConfig };
+
+      // 2. 尝试从 localStorage 读取缓存
       const cachedData = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (cachedData) {
         try {
-          const { config: cachedSiteConfig, timestamp } =
-            JSON.parse(cachedData);
-          const now = Date.now();
-
-          // 检查缓存是否过期
-          if (now - timestamp < CACHE_EXPIRATION_TIME) {
-            // 合并缓存数据到当前配置，缓存优先级高于前端默认配置
-            Object.assign(mergedConfig, cachedSiteConfig);
-            // 确保 title 属性在合并后存在，如果缓存中 APP_NAME 存在
-            if (cachedSiteConfig.APP_NAME) {
-              mergedConfig.title = cachedSiteConfig.APP_NAME;
-            }
-            this.siteConfig = mergedConfig;
-
-            // 确保 API_URL 以斜杠结尾
-            if (
-              this.siteConfig.API_URL &&
-              !this.siteConfig.API_URL.endsWith("/")
-            ) {
-              this.siteConfig.API_URL += "/";
-            }
+          const { config: cachedConfig, timestamp } = JSON.parse(cachedData);
+          if (Date.now() - timestamp < CACHE_EXPIRATION_TIME) {
+            this._updateStateAndCache(cachedConfig);
             this.isLoaded = true;
-            console.log(
-              "站点配置已从 localStorage 缓存中加载并合并:",
-              this.siteConfig
-            );
-            return; // 成功从缓存加载，直接返回
+            console.log("站点配置已从 localStorage 缓存中加载。");
+            return;
           } else {
-            console.log("站点配置缓存已过期，将重新请求。");
-            localStorage.removeItem(LOCAL_STORAGE_KEY); // 清除过期缓存
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
           }
-        } catch (e) {
-          console.error("解析 localStorage 中的站点配置失败:", e);
-          localStorage.removeItem(LOCAL_STORAGE_KEY); // 清除损坏的缓存
+        } catch (error) {
+          console.log("无效的缓存数据，清除缓存:", error);
+
+          localStorage.removeItem(LOCAL_STORAGE_KEY);
         }
       }
 
-      // 3. 如果缓存无效或不存在，则发起网络请求 (最高优先级)
+      // 3. 如果缓存无效，再发起网络请求获取公共配置
       try {
         const res = await getSiteConfigApi();
-        console.log(res);
-
         if (res.code === 200 && res.data) {
-          const backendSiteConfig: SiteConfig = res.data; // 后端返回的原始 SiteConfig
-
-          // 合并后端数据到当前配置，后端数据优先级最高，会覆盖之前的值
-          Object.assign(mergedConfig, backendSiteConfig);
-          // 特殊处理 title：后端返回的 APP_NAME 应该作为 title
-          if (backendSiteConfig.APP_NAME) {
-            mergedConfig.title = backendSiteConfig.APP_NAME;
-          }
-          // 如果后端也提供了 fixedHeader 或 hiddenSideBar，它们会直接覆盖 mergedConfig 里的值
-
-          this.siteConfig = mergedConfig;
-          // 处理 API_URL，确保以斜杠结尾
-          if (
-            this.siteConfig.API_URL &&
-            !this.siteConfig.API_URL.endsWith("/")
-          ) {
-            this.siteConfig.API_URL += "/";
-          }
+          this._updateStateAndCache(res.data);
           this.isLoaded = true;
-          console.log(
-            "站点配置已通过网络获取、合并并存储到 Pinia:",
-            this.siteConfig
-          );
-
-          // 4. 将最新获取的（已合并的）数据存储到 localStorage
-          const dataToCache = {
-            config: this.siteConfig, // 缓存完整合并后的配置
-            timestamp: Date.now() // 记录存储时间
-          };
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToCache));
-          console.log("站点配置已缓存到 localStorage。");
-        } else {
-          console.error("获取站点配置失败:", res.message);
-          // 如果后端请求失败，store 将保持 initialConfigFromFrontend 或 localStorage 缓存的值
-          this.siteConfig = mergedConfig;
-          this.isLoaded = false;
         }
       } catch (error) {
-        console.error("请求站点配置出错:", error);
-        // 如果请求抛出异常，store 也将保持 initialConfigFromFrontend 或 localStorage 缓存的值
-        this.siteConfig = mergedConfig;
-        this.isLoaded = false;
+        console.error("请求站点公共配置出错:", error);
       }
+    },
+
+    /**
+     * @description 专门用于从后台管理页面获取详细的系统设置
+     * @param keys - 需要获取的设置项的键名数组
+     */
+    async fetchSystemSettings(keys: string[]) {
+      this.loading = true;
+      try {
+        const res = await getSettingsApi(keys);
+        if (res.code === 200 && res.data) {
+          this._updateStateAndCache(res.data);
+        } else {
+          return Promise.reject(new Error(res.message));
+        }
+      } catch (error) {
+        return Promise.reject(error);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    /**
+     * @description 用于保存系统设置到后端，并同步更新状态和缓存
+     * @param settingsToUpdate - 包含待更新键值对的对象
+     */
+    async saveSystemSettings(settingsToUpdate: SettingsMap) {
+      this.loading = true;
+      try {
+        const res = await updateSettingsApi(settingsToUpdate);
+        if (res.code === 200) {
+          // 在后端更新成功后，立即更新本地状态和缓存
+          this._updateStateAndCache(settingsToUpdate);
+          message("设置已保存成功", { type: "success" });
+          return Promise.resolve();
+        } else {
+          return Promise.reject(new Error(res.message));
+        }
+      } catch (error) {
+        return Promise.reject(error);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // 保留了这个 action，用于在客户端修改如 fixedHeader 等不需持久化到后端的设置
+    changeSetting(data: { key: keyof CombinedSiteSettings; value: any }) {
+      const { key, value } = data;
+      const changes: Partial<CombinedSiteSettings> = {};
+      changes[key] = value;
+      this._updateStateAndCache(changes);
     }
   }
 });

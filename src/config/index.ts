@@ -71,7 +71,7 @@ export const initializeConfigs = async (app: App): Promise<void> => {
       if (siteConfig.APP_NAME) {
         document.title = siteConfig.APP_NAME;
       } else {
-        document.title = "鱼鱼相册"; // 默认标题
+        document.title = "鱼鱼相册";
       }
 
       // 更新 Favicon

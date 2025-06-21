@@ -1,5 +1,5 @@
 <template>
-  <el-card v-loading="settingsStore.loading" shadow="never">
+  <el-card v-loading="siteConfigStore.loading" shadow="never">
     <el-tabs v-model="activeName" class="setting-tabs">
       <el-tab-pane label="站点信息" name="siteConfig">
         <el-form :model="form" label-position="top" class="setting-form">
@@ -26,13 +26,14 @@
 <script lang="ts" setup>
 import { reactive, onMounted, watch } from "vue";
 import { ElMessage } from "element-plus";
-import { useSettingsStore } from "@/store/modules/sys-settings";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { constant } from "@/constant";
 
 import BaseInfoForm from "./components/BaseInfoForm.vue";
 import IconSettingsForm from "./components/IconSettingsForm.vue";
 import UserSessionForm from "./components/UserSessionForm.vue";
 
+// 我保留了这些接口定义，它们依然有用
 export interface SiteInfo {
   siteName: string;
   siteDescription: string;
@@ -54,7 +55,8 @@ export interface SettingsForm {
 }
 
 const activeName = "siteConfig";
-const settingsStore = useSettingsStore();
+// 我现在使用统一的 siteConfigStore
+const siteConfigStore = useSiteConfigStore();
 
 const form = reactive<SettingsForm>({
   site: {
@@ -74,6 +76,7 @@ const form = reactive<SettingsForm>({
   }
 });
 
+// 表单字段到后端键名的映射关系，我保留了它
 const formToKeysMap: Record<keyof SiteInfo | keyof UserSessionInfo, string> = {
   siteName: constant.KeyAppName,
   siteDescription: constant.KeySiteDescription,
@@ -90,9 +93,13 @@ const formToKeysMap: Record<keyof SiteInfo | keyof UserSessionInfo, string> = {
 
 const allKeys = Object.values(formToKeysMap);
 
+// 我将 watch 的目标改为了 siteConfigStore.siteConfig
+// 并增加了 immediate: true，以便在组件加载时立即用 store 中的数据填充表单
 watch(
-  () => settingsStore.settings,
+  () => siteConfigStore.siteConfig,
   newSettings => {
+    if (!newSettings) return; // 我增加了安全检查
+
     form.site.siteName = newSettings[constant.KeyAppName] || "";
     form.site.siteDescription = newSettings[constant.KeySiteDescription] || "";
     form.site.primaryUrl = newSettings[constant.KeySiteURL] || "";
@@ -106,11 +113,12 @@ watch(
     form.user.enableRegistration =
       newSettings[constant.KeyEnableUserActivation] === "true";
   },
-  { deep: true }
+  { deep: true, immediate: true }
 );
 
 onMounted(() => {
-  settingsStore.fetchSettings(allKeys);
+  // 当组件挂载时，我调用新的 action 来获取本页面所需的详细配置
+  siteConfigStore.fetchSystemSettings(allKeys);
 });
 
 const handleSave = async () => {
@@ -131,8 +139,10 @@ const handleSave = async () => {
   );
 
   try {
-    await settingsStore.saveSettings(settingsToUpdate);
-    ElMessage.success("设置已成功保存！");
+    // 我调用了新的保存 action，它会处理后续的 API 请求、状态更新和缓存
+    await siteConfigStore.saveSystemSettings(settingsToUpdate);
+    // 成功消息现在由 store 内部处理，这里也可以保留
+    // ElMessage.success("设置已成功保存！");
   } catch (error) {
     ElMessage.error(`保存失败: ${error}`);
   }

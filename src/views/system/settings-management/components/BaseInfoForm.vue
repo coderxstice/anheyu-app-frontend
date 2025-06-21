@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:04:30
- * @LastEditTime: 2025-06-21 18:39:57
+ * @LastEditTime: 2025-06-22 00:32:46
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -53,7 +53,9 @@
       :rows="3"
       placeholder="请输入站点公告"
     />
-    <div class="form-item-help">用于在用户登录或注册页脚展示，留空不展示。</div>
+    <div class="form-item-help">
+      展示给全体用户（包括匿名用户）的公告，留空不展示。当此项内容更改时，所有用户会重新看到公告。
+    </div>
   </el-form-item>
 </template>
 
