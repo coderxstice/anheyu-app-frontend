@@ -15,6 +15,7 @@ import {
 } from "@/api/user";
 import { useMultiTagsStoreHook } from "./multiTags";
 import { getToken, setToken, removeToken } from "@/utils/auth";
+import { message } from "@/utils/message";
 
 export const useUserStore = defineStore("yuyu-user", () => {
   const initialTokenData = getToken();
@@ -61,8 +62,11 @@ export const useUserStore = defineStore("yuyu-user", () => {
     if (response?.code === 200) {
       setToken(response.data);
       SET_USER_INFO(response.data.userInfo);
+      return response.data;
+    } else {
+      message(response?.message || "登录失败，请重试");
+      return Promise.reject(response.data);
     }
-    return response.data;
   }
 
   /**

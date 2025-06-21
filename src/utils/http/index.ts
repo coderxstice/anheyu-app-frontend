@@ -195,7 +195,7 @@ class AnHttp {
         if (isAuthRequest && response?.status === 401) {
           removeToken();
           useUserStoreHook().logOut();
-          return Promise.reject(error);
+          return Promise.reject(response.data);
         }
 
         // 当接收到401错误时，触发Token刷新流程
