@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-19 01:17:38
- * @LastEditTime: 2025-06-19 01:18:54
+ * @LastEditTime: 2025-06-21 23:29:42
  * @LastEditors: 安知鱼
  */
 
@@ -16,10 +16,10 @@ export type SiteConfig = {
   USER_AVATAR: string;
   ABOUT_LINK: string;
   API_URL: string;
-  LOGO_URL: string;
   ICON_URL: string;
   LOGO_HORIZONTAL_DAY: string;
   LOGO_HORIZONTAL_NIGHT: string;
+  LOGO_URL: string;
   LOGO_URL_192x192: string;
   LOGO_URL_512x512: string;
   DEFAULT_THUMB_PARAM: string;

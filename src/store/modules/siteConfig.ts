@@ -61,6 +61,10 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
       return typeof state.siteConfig?.hiddenSideBar === "boolean"
         ? state.siteConfig.hiddenSideBar
         : getConfig().HiddenSideBar;
+    },
+    // 从 useSettingStore 继承的 getter: 获取logo
+    getLogo(state): string {
+      return state.siteConfig?.LOGO_URL || "/logo.svg";
     }
   },
 

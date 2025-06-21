@@ -96,16 +96,11 @@ export const publicWallpapert = (params: any) => {
 
 // 更新相册图片统计信息 (浏览量、下载量等)
 export const updateWallpaperStat = (params: { id: string; type: string }) => {
-  const requestUrl = getDynamicApiUrl(`public/stat/${params.id}`); // 使用抽离的逻辑
+  const requestUrl = getDynamicApiUrl(`public/stat/${params.id}`);
 
-  return http.request<Result>(
-    "put",
-    requestUrl, // 使用动态生成的 requestUrl
-    null,
-    {
-      params: {
-        type: params.type
-      }
+  return http.request<Result>("put", requestUrl, {
+    params: {
+      type: params.type
     }
-  );
+  });
 };

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:06:37
- * @LastEditTime: 2025-06-21 18:40:06
+ * @LastEditTime: 2025-06-21 22:18:33
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -21,31 +21,79 @@
         </el-input>
       </div>
     </div>
-    <div class="form-item-help">
+    <div class="form-item-help w-full">
       LOGO 图像的地址，用于在左上角展示；请分别提供黑暗模式和日间模式下不同的
       LOGO。
+    </div>
+
+    <div class="flex">
+      <el-image
+        v-if="formData.logoNight"
+        :src="formData.logoNight"
+        fit="contain"
+        class="bg-[var(--anzhiyu-card-bg-grey)] max-w-44 max-h-12 rounded-lg p-2 mt-2"
+      />
+      <el-image
+        v-if="formData.logoDay"
+        :src="formData.logoDay"
+        fit="contain"
+        class="ml-4 bg-black max-w-44 max-h-12 rounded-lg p-2 w-full mt-2"
+      />
     </div>
   </el-form-item>
 
   <el-form-item label="小图标 (Favicon)">
-    <el-input v-model="formData.favicon" placeholder="请输入 .ico 图标地址" />
-    <div class="form-item-help">扩展名为 ico 的小图标地址。</div>
+    <div class="w-full">
+      <el-input v-model="formData.favicon" placeholder="请输入 .ico 图标地址" />
+      <div class="form-item-help">扩展名为 ico 的小图标地址。</div>
+    </div>
+
+    <div class="flex">
+      <el-image
+        v-if="formData.favicon"
+        :src="formData.favicon"
+        fit="contain"
+        class="bg-[var(--anzhiyu-card-bg-grey)] max-w-44 max-h-12 rounded-lg p-2 mt-2"
+      />
+    </div>
   </el-form-item>
 
   <el-form-item label="中图标 (PWA)">
-    <el-input
-      v-model="formData.iconMedium"
-      placeholder="请输入 192x192 的 PNG 图标地址"
-    />
-    <div class="form-item-help">192x192 的中等图标地址，png 格式。</div>
+    <div class="w-full">
+      <el-input
+        v-model="formData.iconMedium"
+        placeholder="请输入 192x192 的 PNG 图标地址"
+      />
+      <div class="form-item-help">192x192 的中等图标地址，png 格式。</div>
+    </div>
+
+    <div class="flex">
+      <el-image
+        v-if="formData.iconMedium"
+        :src="formData.iconMedium"
+        fit="contain"
+        class="bg-[var(--anzhiyu-card-bg-grey)] max-w-[192px] max-h-[192px] rounded-lg p-2 mt-2"
+      />
+    </div>
   </el-form-item>
 
   <el-form-item label="大图标 (PWA)">
-    <el-input
-      v-model="formData.iconLarge"
-      placeholder="请输入 512x512 的 PNG 图标地址"
-    />
-    <div class="form-item-help">512x512 的大图标地址，png 格式。</div>
+    <div class="w-full">
+      <el-input
+        v-model="formData.iconLarge"
+        placeholder="请输入 512x512 的 PNG 图标地址"
+      />
+      <div class="form-item-help">512x512 的大图标地址，png 格式。</div>
+    </div>
+
+    <div class="flex">
+      <el-image
+        v-if="formData.iconLarge"
+        :src="formData.iconLarge"
+        fit="contain"
+        class="bg-[var(--anzhiyu-card-bg-grey)] max-w-[512px] max-h-[512px] rounded-lg p-2 mt-2"
+      />
+    </div>
   </el-form-item>
 </template>
 
@@ -84,6 +132,9 @@ const formData = computed({
     margin: 0;
     color: #606266;
   }
+}
+.el-image {
+  border: var(--style-border);
 }
 
 .logo-inputs {

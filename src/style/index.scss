@@ -82,6 +82,7 @@
   --anzhiyu-shadow-lightblack: 0 5px 12px -5px rgba(102, 68, 68, 0);
   --anzhiyu-shadow-light2black: 0 5px 12px -5px rgba(102, 68, 68, 0);
   --anzhiyu-card-border: #e3e8f7;
+  --anzhiyu-card-bg-grey: #f0f2f5;
   --anzhiyu-shadow-border: 0 8px 16px -4px #2c2d300c;
   --style-border: 1px solid var(--anzhiyu-card-border);
   --style-border-always: 1px solid var(--anzhiyu-card-border);
@@ -89,6 +90,10 @@
   --style-border-hover-always: 1px solid var(--anzhiyu-main);
   --style-border-dashed: 1px dashed var(--anzhiyu-theme-op);
   --style-border-forever: 2px solid var(--anzhiyu-main);
+
+  --style-border-width: 1px;
+  --style-border-style: solid;
+  --style-border-color: #e2e8f0;
 }
 
 /* 灰色模式 */
