@@ -100,6 +100,7 @@ export function useDataThemeChange() {
 
     if (dataTheme.value) {
       document.documentElement.classList.add("dark");
+      setEpThemeColor("#dfa621"); // 默认深色主题色
     } else {
       if ($storage.layout.themeColor === "light") {
         setLayoutThemeColor("light", false);
