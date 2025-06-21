@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-15 11:31:00
+ * @LastEditTime: 2025-06-21 15:19:18
+ * @LastEditors: 安知鱼
+ */
 import { Plugin as importToCDN } from "vite-plugin-cdn-import";
 
 /**
@@ -6,45 +13,53 @@ import { Plugin as importToCDN } from "vite-plugin-cdn-import";
  * 注意：上面提到的仅限外网使用也不是完全肯定的，如果你们公司内网部署的有相关js、css文件，也可以将下面配置对应改一下，整一套内网版cdn
  */
 export const cdn = importToCDN({
-  //（prodUrl解释： name: 对应下面modules的name，version: 自动读取本地package.json中dependencies依赖中对应包的版本号，path: 对应下面modules的path，当然也可写完整路径，会替换prodUrl）
-  prodUrl: "https://cdn.bootcdn.net/ajax/libs/{name}/{version}/{path}",
+  // 全局 prodUrl：如果你希望为大多数模块使用一个统一的 CDN 模板，可以在这里设置。
+  // 如果某个 module 内部有 path/css 但没有定义 prodUrl，会使用这个全局模板来拼接。
+  // 如果所有模块的链接都是完全自定义的完整链接，这个字段可以省略或设置为默认值。
+  // 推荐保持默认值或者你最常用的 CDN 模板，作为未明确指定 prodUrl 的模块的兜底。
+  prodUrl: "https://cdn.cbd.int/{name}@{version}/{path}",
   modules: [
     {
       name: "vue",
       var: "Vue",
-      path: "vue.global.prod.min.js"
+      path: "dist/vue.global.prod.js",
+      prodUrl: "https://cdn.cbd.int/{name}@{version}/{path}"
     },
     {
       name: "vue-router",
       var: "VueRouter",
-      path: "vue-router.global.min.js"
+      path: "dist/vue-router.global.prod.js",
+      prodUrl: "https://cdn.cbd.int/{name}@{version}/{path}"
     },
-    // 项目中没有直接安装vue-demi，但是pinia用到了，所以需要在引入pinia前引入vue-demi（https://github.com/vuejs/pinia/blob/v2/packages/pinia/package.json#L77）
     {
       name: "vue-demi",
       var: "VueDemi",
-      path: "index.iife.min.js"
+      path: "lib/index.iife.js",
+      prodUrl: "https://cdn.cbd.int/{name}@{version}/{path}"
     },
     {
       name: "pinia",
       var: "Pinia",
-      path: "pinia.iife.min.js"
+      path: "dist/pinia.iife.prod.js",
+      prodUrl: "https://cdn.cbd.int/{name}@{version}/{path}"
     },
     {
       name: "element-plus",
       var: "ElementPlus",
-      path: "index.full.min.js",
-      css: "index.min.css"
+      path: "https://cdn.cbd.int/{name}@{version}/dist/index.full.min.js",
+      css: "https://cdn.cbd.int/{name}@{version}/dist/index.css"
     },
     {
       name: "axios",
       var: "axios",
-      path: "axios.min.js"
+      path: "dist/axios.min.js",
+      prodUrl: "https://cdn.cbd.int/{name}@{version}/{path}"
     },
     {
       name: "dayjs",
       var: "dayjs",
-      path: "dayjs.min.js"
+      path: "dayjs.min.js",
+      prodUrl: "https://cdn.cbd.int/{name}@{version}/{path}"
     }
   ]
 });
