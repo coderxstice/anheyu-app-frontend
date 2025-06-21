@@ -17,15 +17,10 @@ watch(needRefresh, newValue => {
       cancelButtonText: "稍后提醒",
       type: "info",
       center: true
-    })
-      .then(() => {
-        // 用户点击“立即刷新”
-        updateServiceWorker();
-      })
-      .catch(() => {
-        // 用户点击“稍后提醒”或关闭了对话框，本次不做任何事。
-        // 下次用户重新加载页面时，如果还有新版本，提示会再次出现。
-      });
+    }).then(() => {
+      // 用户点击“立即刷新”
+      updateServiceWorker();
+    });
   }
 });
 

@@ -247,3 +247,18 @@ button.el-button {
 .el-message-box {
   border-radius: 16px !important;
 }
+
+div.el-input__wrapper {
+  border-radius: 12px;
+}
+
+div.el-input-group__append,
+div.el-input-group__prepend {
+  border-bottom-left-radius: 12px;
+  border-top-left-radius: 12px;
+}
+
+div.el-textarea__inner {
+  border-radius: 12px;
+}
+

@@ -31,8 +31,6 @@ export function getToken(): LoginResultData | null {
     return null;
   }
 
-  console.log("getToken");
-
   // 4. 组合成完整的 LoginResultData 对象
   //    userInfo 只可能在 localData 中找到
   return {
