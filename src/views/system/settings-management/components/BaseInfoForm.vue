@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:04:30
- * @LastEditTime: 2025-06-22 00:32:46
+ * @LastEditTime: 2025-06-22 22:21:30
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -27,12 +27,27 @@
     <template #label>
       <span>站点 URL</span>
       <div class="form-item-help" style="margin-top: 0">
-        主要站点 URL 用于与外部服务通信和接受回调，请使用能被公网访问的 URL。
+        主要站点 URL 用于与外部服务通信和接受回调，请使用能被公网访问的
+        URL，一般填写网站部署的域名即可。
       </div>
     </template>
     <el-input
       v-model="formData.primaryUrl"
       placeholder="例如：https://album.anheyu.com"
+    />
+  </el-form-item>
+
+  <el-form-item>
+    <template #label>
+      <span>相册请求后端 URL</span>
+      <div class="form-item-help" style="margin-top: 0">
+        相册页面后端 URL
+        用于请求相册数据，如果有比较好的又不想自己传相册的，可以直接使用他人部署的鱼鱼来直接使用。注意需要以/结尾。
+      </div>
+    </template>
+    <el-input
+      v-model="formData.albumApiURL"
+      placeholder="例如：https://album.anheyu.com/"
     />
   </el-form-item>
 

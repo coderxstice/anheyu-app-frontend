@@ -38,6 +38,7 @@ export interface SiteInfo {
   siteName: string;
   siteDescription: string;
   primaryUrl: string;
+  albumApiURL: string;
   footerCode: string;
   announcement: string;
   logoDay: string;
@@ -63,6 +64,7 @@ const form = reactive<SettingsForm>({
     siteName: "",
     siteDescription: "",
     primaryUrl: "",
+    albumApiURL: "",
     footerCode: "",
     announcement: "",
     logoDay: "",
@@ -76,11 +78,12 @@ const form = reactive<SettingsForm>({
   }
 });
 
-// 表单字段到后端键名的映射关系，保留了它
+// 表单字段到后端键名的映射关系
 const formToKeysMap: Record<keyof SiteInfo | keyof UserSessionInfo, string> = {
   siteName: constant.KeyAppName,
   siteDescription: constant.KeySiteDescription,
   primaryUrl: constant.KeySiteURL,
+  albumApiURL: constant.KeyApiURL,
   footerCode: constant.KeyFooterCode,
   announcement: constant.KeySiteAnnouncement,
   logoDay: constant.KeyLogoHorizontalDay,
@@ -103,6 +106,7 @@ watch(
     form.site.siteName = newSettings[constant.KeyAppName] || "";
     form.site.siteDescription = newSettings[constant.KeySiteDescription] || "";
     form.site.primaryUrl = newSettings[constant.KeySiteURL] || "";
+    form.site.albumApiURL = newSettings[constant.KeyApiURL] || "";
     form.site.footerCode = newSettings[constant.KeyFooterCode] || "";
     form.site.announcement = newSettings[constant.KeySiteAnnouncement] || "";
     form.site.logoDay = newSettings[constant.KeyLogoHorizontalDay] || "";

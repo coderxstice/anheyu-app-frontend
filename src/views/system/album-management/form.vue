@@ -55,7 +55,7 @@ defineExpose({ getRef });
         </el-form-item>
       </re-col>
       <re-col :value="12" :xs="24" :sm="24">
-        <el-form-item label="大图链接（可选）">
+        <el-form-item label="大图链接">
           <el-input
             v-model="newFormInline.bigImageUrl"
             clearable
@@ -67,7 +67,7 @@ defineExpose({ getRef });
       </re-col>
 
       <re-col :value="12" :xs="24" :sm="24">
-        <el-form-item label="下载地址（可选）" prop="downloadUrl">
+        <el-form-item label="下载地址" prop="downloadUrl">
           <el-input
             v-model="newFormInline.downloadUrl"
             clearable
@@ -77,7 +77,7 @@ defineExpose({ getRef });
       </re-col>
 
       <re-col :value="12" :xs="24" :sm="24">
-        <el-form-item label="缩略图参数(可选)" prop="thumbParam">
+        <el-form-item label="缩略图参数" prop="thumbParam">
           <el-input
             v-model="newFormInline.thumbParam"
             clearable
@@ -87,7 +87,7 @@ defineExpose({ getRef });
       </re-col>
 
       <re-col :value="12" :xs="24" :sm="24">
-        <el-form-item label="大图参数(可选)" prop="bigParam">
+        <el-form-item label="大图参数" prop="bigParam">
           <el-input
             v-model="newFormInline.bigParam"
             clearable

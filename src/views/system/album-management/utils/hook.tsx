@@ -162,7 +162,7 @@ export function useDept() {
           downloadCount: row?.downloadCount ?? 0
         }
       },
-      width: "50%",
+      width: "80vw",
       draggable: true,
       fullscreen: deviceDetection(),
       fullscreenIcon: true,
