@@ -197,7 +197,7 @@ function handleClose(
               })
             "
           >
-            {{ btn?.label }}
+            <template #default>{{ btn?.label }}</template>
           </el-button>
         </template>
       </span>

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-04-09 12:31:32
- * @LastEditTime: 2025-06-11 13:10:21
+ * @LastEditTime: 2025-06-22 23:25:04
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -40,6 +40,8 @@ const fetchWallpapers = async () => {
     };
 
     const res = await publicWallpapert(params);
+
+    console.log(res);
 
     if (res.code === 200) {
       wallpapers.value = res.data.list;

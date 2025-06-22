@@ -88,6 +88,7 @@ export const addWallpapert = (data: any) => {
 export const publicWallpapert = (params: any) => {
   const requestUrl = getDynamicApiUrl("public/albums"); // 使用抽离的逻辑
 
+  console.log(`请求公共相册图片列表: ${requestUrl}`, params);
   // 执行请求
   return http.request<Result>("get", requestUrl, {
     params
