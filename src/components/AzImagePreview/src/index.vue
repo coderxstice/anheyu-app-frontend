@@ -5,46 +5,25 @@
         <div
           style="display: inline-block; height: 100%; vertical-align: middle"
         />
-        <div
-          class="poptrox-popup"
-          :style="{
-            width: containerEnter
-              ? containerWidth
-              : isSwitch
-                ? containerWidth
-                : '150px',
-            height: containerEnter
-              ? containerHeight
-              : isSwitch
-                ? containerHeight
-                : '150px',
-            opacity: visible ? 1 : 0
-          }"
-        >
+        <div ref="popupRef" class="poptrox-popup" :style="{ opacity: 0 }">
           <div v-if="loading" class="loader" />
-          <Transition name="pic-fade">
-            <div v-if="containerVisible" :key="imageKey" class="pic">
-              <img
-                ref="imgRef"
-                class="az-preview-image"
-                :class="{ 'az-image-enter': showTransition }"
-                :src="
-                  previewSrcList[previewIndex]?.bigParam
-                    ? previewSrcList[previewIndex]?.imageUrl +
-                      `?${previewSrcList[previewIndex]?.bigParam}`
-                    : previewSrcList[previewIndex]?.imageUrl
-                "
-                @click.stop
-                @load="imgLoad()"
-              />
-            </div>
-          </Transition>
 
-          <div
-            v-if="!loading"
-            class="caption"
-            :class="{ 'az-image-enter': showTransition }"
-          >
+          <div v-if="containerVisible" :key="imageKey" class="pic">
+            <img
+              ref="imgRef"
+              class="az-preview-image"
+              :src="
+                previewSrcList[previewIndex]?.bigParam
+                  ? previewSrcList[previewIndex]?.imageUrl +
+                    `?${previewSrcList[previewIndex]?.bigParam}`
+                  : previewSrcList[previewIndex]?.imageUrl
+              "
+              @click.stop
+              @load="imgLoad()"
+            />
+          </div>
+
+          <div v-if="!loading" class="caption">
             <div class="tag-info tag-info-bottom">
               <span
                 class="tag-device"
@@ -86,21 +65,12 @@
           <span
             v-show="showControls"
             class="az-preview-close closer"
-            :class="{ 'delayed-hidden': !showControls }"
             @click="close"
           />
 
           <template v-if="previewSrcList.length > 1 && showControls">
-            <div
-              class="az-nav nav-previous"
-              :class="{ 'delayed-hidden': !showControls }"
-              @click.stop="prev"
-            />
-            <div
-              class="az-nav nav-next"
-              :class="{ 'delayed-hidden': !showControls }"
-              @click.stop="next"
-            />
+            <div class="az-nav nav-previous" @click.stop="prev" />
+            <div class="az-nav nav-next" @click.stop="next" />
           </template>
         </div>
       </div>
@@ -112,6 +82,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick, computed } from "vue";
+import gsap from "gsap";
 import Download from "@/assets/svg/download.svg?component";
 import Downloads from "@/assets/svg/downloads.svg?component";
 import Size from "@/assets/svg/size.svg?component";
@@ -124,23 +95,22 @@ import DownloadProgressBar from "./downloadProgressBar.vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
 const progressRef = ref();
+const popupRef = ref<HTMLElement | null>(null);
+const imgRef = ref<HTMLImageElement | null>(null);
 
 const visible = ref(false);
 const previewSrcList = ref<any[]>([]);
 const previewIndex = ref(0);
-const imageKey = ref(0);
-const containerVisible = ref(false); // 初始值改为 false
-const containerWidth = ref("150px");
-const containerHeight = ref("150px");
-const containerEnter = ref(false);
+const imageKey = ref("");
+const containerVisible = ref(false);
 const loading = ref(true);
-const showTransition = ref(false);
 const currentIndex = ref(0);
 const downloadCount = ref(0);
-
 const showControls = ref(false);
-
+const isSwitch = ref(false);
 let currentImgSize = { width: 0, height: 0 };
+let finalWidth = ref("150px");
+let finalHeight = ref("150px");
 
 const siteConfigStore = useSiteConfigStore();
 
@@ -148,6 +118,7 @@ const siteName = computed(
   () => siteConfigStore.getSiteConfig?.APP_NAME || "鱼鱼相册"
 );
 
+// formatFileSize, downImage, getImageSize 保持不变
 const formatFileSize = (size: number) => {
   if (size >= 1024 * 1024) {
     return (size / 1024 / 1024).toFixed(2) + " MB";
@@ -157,7 +128,6 @@ const formatFileSize = (size: number) => {
     return size + " B";
   }
 };
-
 const downImage = (imageInfo: any) => {
   updateWallpaperStat({
     id: imageInfo.id,
@@ -170,42 +140,45 @@ const downImage = (imageInfo: any) => {
     progressRef.value.downloadImageWithProgress(finalDownloadUrl, fileName);
   });
 };
-
 const getImageSize = (url: string) => {
   return new Promise<{ width: number; height: number }>((resolve, reject) => {
     const img = new Image();
-    img.onload = () => {
+    img.onload = () =>
       resolve({ width: img.naturalWidth, height: img.naturalHeight });
-    };
     img.onerror = reject;
     img.src = url;
   });
 };
 
-const updateContainerSize = () => {
-  const isMobile = window.innerWidth < 600;
-  if (isMobile) {
-    containerWidth.value = `100vw`;
-    containerHeight.value = `auto`;
-    return;
-  }
-  const viewportWidth = window.innerWidth * 0.9;
-  const viewportHeight = window.innerHeight * 0.9;
-  const widthRatio = viewportWidth / currentImgSize.width;
-  const heightRatio = viewportHeight / currentImgSize.height;
-  const ratio = Math.min(widthRatio, heightRatio, 1);
-  const targetWidth = Math.floor(currentImgSize.width * ratio);
-  const targetHeight = Math.floor(currentImgSize.height * ratio);
-  containerWidth.value = `${targetWidth}px`;
-  containerHeight.value = `${targetHeight}px`;
-};
-
+// handleResize, handleKeydown, onMounted, onUnmounted 保持不变
 const handleResize = () => {
-  if (visible.value && currentImgSize.width && currentImgSize.height) {
-    updateContainerSize();
+  if (visible.value && popupRef.value && !loading.value) {
+    const isMobile = window.innerWidth < 600;
+    let targetWidth: string, targetHeight: string;
+    if (isMobile) {
+      targetWidth = "100vw";
+      targetHeight = "auto";
+    } else {
+      const viewportWidth = window.innerWidth * 0.9;
+      const viewportHeight = window.innerHeight * 0.9;
+      const ratio = Math.min(
+        viewportWidth / currentImgSize.width,
+        viewportHeight / currentImgSize.height,
+        1
+      );
+      targetWidth = `${Math.floor(currentImgSize.width * ratio)}px`;
+      targetHeight = `${Math.floor(currentImgSize.height * ratio)}px`;
+    }
+    gsap.to(popupRef.value, {
+      width: targetWidth,
+      height: targetHeight,
+      duration: 0.3,
+      ease: "power2.out"
+    });
+    finalWidth.value = targetWidth;
+    finalHeight.value = targetHeight;
   }
 };
-
 const handleKeydown = (e: KeyboardEvent) => {
   if (!visible.value || !showControls.value) return;
   switch (e.key) {
@@ -220,105 +193,193 @@ const handleKeydown = (e: KeyboardEvent) => {
       break;
   }
 };
-
 onMounted(() => {
   window.addEventListener("resize", handleResize);
   window.addEventListener("keydown", handleKeydown);
 });
-
 onUnmounted(() => {
   window.removeEventListener("resize", handleResize);
   window.removeEventListener("keydown", handleKeydown);
 });
 
-const isSwitch = ref(false);
-
 const open = async (list: Array<any>, index = 0, next = false) => {
-  imageKey.value++;
+  // 这使得动画可以被随时打断
+  if (popupRef.value) {
+    gsap.killTweensOf(popupRef.value);
+  }
+  gsap.killTweensOf([".az-preview-image", ".caption"]);
+
+  imageKey.value = `${index}-${Date.now()}`;
   visible.value = true;
-  containerEnter.value = false;
-  containerVisible.value = false;
   loading.value = true;
-  showTransition.value = false;
+  containerVisible.value = false;
 
-  previewSrcList.value = list;
-  previewIndex.value = index;
-  downloadCount.value = list[index].downloadCount;
-
-  if (next) {
-    isSwitch.value = true;
-  } else {
-    isSwitch.value = false;
+  // [优化1] 只有在“全新打开”时才隐藏按钮，翻页切换时保持显示
+  if (!next) {
     showControls.value = false;
   }
 
+  previewSrcList.value = list;
+  previewIndex.value = index;
+  currentIndex.value = index;
+  downloadCount.value = list[index].downloadCount;
+
+  isSwitch.value = next;
+
+  await nextTick();
+
+  // 阶段一：显示初始加载框
+  if (popupRef.value) {
+    // 如果是图片切换，则不播放初始的“从无到有”的动画，因为弹窗已经是打开状态
+    if (next) {
+      // 对于切换，我们直接让 containerVisible 为 true，以便立即加载下一张图片
+      containerVisible.value = true;
+    } else {
+      // 对于全新打开，播放初始加载框动画
+      gsap.fromTo(
+        popupRef.value,
+        {
+          width: "150px",
+          height: "150px",
+          scale: 0.7,
+          opacity: 0,
+          x: "-50%",
+          y: "-50%"
+        },
+        {
+          scale: 1,
+          opacity: 1,
+          duration: 0.3,
+          ease: "power2.out",
+          onComplete: () => {
+            containerVisible.value = true; // 加载框出现后，才开始加载图片
+          }
+        }
+      );
+    }
+  }
+
+  // 后台获取图片最终尺寸
   const imgUrl = list[index].bigParam
     ? list[index].imageUrl + `?${list[index].bigParam}`
     : list[index].imageUrl;
-  currentIndex.value = index;
 
   try {
-    const size = await getImageSize(imgUrl);
-    currentImgSize = size;
+    currentImgSize = await getImageSize(imgUrl);
   } catch (error) {
     console.error("Image size calculation failed:", error);
     close();
-    return;
   }
-
-  await nextTick();
-  updateContainerSize();
-
-  await nextTick();
-  requestAnimationFrame(() => {
-    containerVisible.value = true;
-  });
 };
 
 function imgLoad() {
-  containerEnter.value = true;
-  updateWallpaperStat({
-    id: previewSrcList.value[previewIndex.value].id,
-    type: "view"
-  }).then(() => {
-    loading.value = false;
-    showTransition.value = true;
+  // 阶段二：图片加载完成，执行“放大 -> 切换内容 -> 淡入内容”的动画序列
+  const isMobile = window.innerWidth < 600;
+  if (isMobile) {
+    finalWidth.value = "100vw";
+    finalHeight.value = "auto";
+  } else {
+    const viewportWidth = window.innerWidth * 0.9;
+    const viewportHeight = window.innerHeight * 0.9;
+    const ratio = Math.min(
+      viewportWidth / currentImgSize.width,
+      viewportHeight / currentImgSize.height,
+      1
+    );
+    finalWidth.value = `${Math.floor(currentImgSize.width * ratio)}px`;
+    finalHeight.value = `${Math.floor(currentImgSize.height * ratio)}px`;
+  }
 
-    showControls.value = true;
+  const tl = gsap.timeline({
+    onComplete: () => {
+      // [优化] 当所有核心动画完成后，再执行“显示操作按钮”的动画
+      showControls.value = true;
+    }
+  });
+
+  // 动画1：放大弹窗
+  if (popupRef.value) {
+    tl.to(popupRef.value, {
+      width: finalWidth.value,
+      height: finalHeight.value,
+      duration: 0.5,
+      ease: "power3.inOut"
+    });
+  }
+
+  // 动画2：在放大动画完成后，切换内容
+  tl.add(() => {
+    loading.value = false;
+    gsap.set([".az-preview-image", ".caption"], { opacity: 0 });
+  });
+
+  // 动画3：平滑淡入图片和文字
+  tl.to([".az-preview-image", ".caption"], {
+    opacity: 1,
+    duration: 0.4,
+    stagger: 0.1
   });
 }
-
 const close = () => {
-  visible.value = false;
-  containerVisible.value = false;
-  containerEnter.value = false;
-  showTransition.value = false;
-  showControls.value = false;
+  if (popupRef.value) {
+    // 动画1：让操作按钮平滑淡出
+    gsap.to(
+      ".poptrox-popup .closer, .poptrox-popup .nav-previous, .poptrox-popup .nav-next",
+      {
+        opacity: 0,
+        duration: 0.15,
+        ease: "power2.in"
+      }
+    );
+
+    // 动画2：让主弹窗缩小并淡出
+    gsap.to(popupRef.value, {
+      opacity: 0,
+      scale: 0.7,
+      duration: 0.15,
+      ease: "power2.in",
+      x: "-50%",
+      y: "-50%",
+      onComplete: () => {
+        // 动画结束后，更新状态并重置所有相关样式
+        visible.value = false;
+        containerVisible.value = false;
+        showControls.value = false;
+
+        gsap.set(
+          ".poptrox-popup .closer, .poptrox-popup .nav-previous, .poptrox-popup .nav-next",
+          { clearProps: "opacity" }
+        );
+
+        gsap.set(popupRef.value, { clearProps: "all" });
+      }
+    });
+  } else {
+    visible.value = false;
+  }
 };
 
 const next = () => {
-  previewIndex.value = (previewIndex.value + 1) % previewSrcList.value.length;
-  currentIndex.value = previewIndex.value;
-  reopenCurrentImage();
+  open(
+    previewSrcList.value,
+    (previewIndex.value + 1) % previewSrcList.value.length,
+    true
+  );
 };
 
 const prev = () => {
-  previewIndex.value =
+  open(
+    previewSrcList.value,
     (previewIndex.value - 1 + previewSrcList.value.length) %
-    previewSrcList.value.length;
-  currentIndex.value = previewIndex.value;
-  reopenCurrentImage();
-};
-
-const reopenCurrentImage = () => {
-  open(previewSrcList.value, previewIndex.value, true);
+      previewSrcList.value.length,
+    true
+  );
 };
 
 defineExpose({ open, downImage });
 </script>
 
 <style scoped lang="scss">
-/* Style ares are unchanged */
 $popup-bg: rgb(31 34 36 / 92.5%);
 $gradient-color: rgb(31 34 36 / 35%);
 $caption-gradient: linear-gradient(
@@ -332,13 +393,11 @@ $transition: opacity 0.2s ease-in-out;
   0% {
     transform: rotate(0deg);
   }
-
   100% {
     transform: rotate(359deg);
   }
 }
 
-/* 添加淡入淡出动画 */
 .az-fade-enter-active,
 .az-fade-leave-active {
   transition: opacity 0.6s ease;
@@ -352,8 +411,7 @@ $transition: opacity 0.2s ease-in-out;
 .pic-fade-enter-active {
   transition:
     opacity 0.5s ease 0.2s,
-    transform 0.4s cubic-bezier(0.33, 0, 0.2, 1) 0.2s; // 更平缓的贝塞尔曲线
-
+    transform 0.4s cubic-bezier(0.33, 0, 0.2, 1) 0.2s;
   img {
     transition:
       clip-path 0.4s cubic-bezier(0.33, 0, 0.2, 1),
@@ -363,19 +421,16 @@ $transition: opacity 0.2s ease-in-out;
 
 .pic-fade-enter-from {
   opacity: 0;
-  transform: translateY(2px) scale(0.995); // 减少位移和缩放幅度
-
+  transform: translateY(2px) scale(0.995);
   img {
-    clip-path: inset(0% 20% 0% 20%); // 改为中间展开式裁剪
-    filter: brightness(1.02) contrast(0.98); // 减少滤镜强度
+    clip-path: inset(0% 20% 0% 20%);
+    filter: brightness(1.02) contrast(0.98);
   }
 }
 
-/* 添加动画性能优化 */
 .pic {
   will-change: transform, opacity;
   backface-visibility: hidden;
-
   img {
     transform: translateZ(0);
   }
@@ -402,21 +457,17 @@ $transition: opacity 0.2s ease-in-out;
       flex-direction: column;
       align-items: flex-start;
     }
-
     .poptrox-popup {
       margin-bottom: 120px;
       border-radius: 0 !important;
     }
-
     .poptrox-popup::before {
       display: none;
     }
-
     .poptrox-popup .caption {
       position: fixed;
       bottom: 0;
     }
-
     .poptrox-popup .closer,
     .poptrox-popup .nav-previous,
     .poptrox-popup .nav-next {
@@ -427,41 +478,30 @@ $transition: opacity 0.2s ease-in-out;
   .az-preview-image {
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
-    transform: translateZ(0); // 强制开启 GPU 合成
+    transform: translateZ(0);
     will-change: transform, opacity;
     backface-visibility: hidden;
   }
 
   .poptrox-popup {
-    position: relative;
     position: absolute;
     top: 50%;
     left: 50%;
     z-index: 1;
     display: inline-block;
-    width: 150px;
-    min-width: 150px;
-    height: 150px;
-    min-height: 150px;
     overflow: hidden;
     vertical-align: middle;
     cursor: default;
-    cursor: pointer;
     background: $popup-bg;
     border-radius: 12px;
     box-shadow: 0 1em 3em 0.5em rgb(0 0 0 / 25%);
     opacity: 0;
-    transition:
-      width 0.5s ease,
-      height 0.5s ease;
-    transform: translate(-50%, -50%);
-    will-change: transform, opacity;
+    will-change: transform, opacity, width, height;
 
     @media screen and (width <= 980px) {
       .closer {
         background-size: 3em;
       }
-
       .nav-previous,
       .nav-next {
         background-size: 4em;
@@ -507,14 +547,12 @@ $transition: opacity 0.2s ease-in-out;
       opacity: 0.8;
       transition: all 0.3s ease-in-out;
     }
-
     span.tag-list a:hover {
       opacity: 1;
     }
 
     .tag-info-bottom {
       display: flex;
-
       span {
         display: flex;
         gap: 4px;
@@ -534,9 +572,9 @@ $transition: opacity 0.2s ease-in-out;
       background-position: center;
       opacity: 0;
       transition: $transition;
+      cursor: pointer;
     }
 
-    /* 新增类：延迟显示时隐藏和禁用点击 */
     .delayed-hidden {
       opacity: 0 !important;
       pointer-events: none !important;
@@ -568,7 +606,6 @@ $transition: opacity 0.2s ease-in-out;
       left: 0;
       transform: scaleX(-1);
     }
-
     .nav-next {
       right: 0;
     }
@@ -598,7 +635,6 @@ $transition: opacity 0.2s ease-in-out;
         margin: 0;
         font-weight: bold;
       }
-
       p {
         font-size: 15px;
         color: #fff;
@@ -624,27 +660,21 @@ $transition: opacity 0.2s ease-in-out;
       animation: spinner 1s infinite linear !important;
     }
 
-    &:hover {
-      .closer,
-      .nav-previous,
-      .nav-next {
-        opacity: 0.5;
-
-        &:hover {
-          opacity: 1;
-        }
+    &:hover .closer,
+    &:hover .nav-previous,
+    &:hover .nav-next {
+      opacity: 0.5;
+      &:hover {
+        opacity: 1;
       }
     }
 
-    .tag-categorys {
-      .link {
-        margin: 0;
-        background: rgb(0 0 0 / 80%);
-        cursor: pointer;
-
-        &:hover {
-          background: #0d00ff;
-        }
+    .tag-categorys .link {
+      margin: 0;
+      background: rgb(0 0 0 / 80%);
+      cursor: pointer;
+      &:hover {
+        background: #0d00ff;
       }
     }
   }
@@ -659,7 +689,6 @@ $transition: opacity 0.2s ease-in-out;
 
   .tag-categorys {
     display: flex;
-
     .link {
       z-index: 1;
       display: flex;
@@ -676,7 +705,6 @@ $transition: opacity 0.2s ease-in-out;
       backdrop-filter: saturate(180%) blur(20px);
       border-radius: 8px;
       transition: 0.3s;
-
       &:hover {
         color: #fff;
         background: #0d00ff;
