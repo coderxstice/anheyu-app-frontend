@@ -14,6 +14,8 @@ html.dark {
   /* switch关闭状态下的color 需要时可取用 */
   --anzhiyu-switch-off-color: #ffffff3f;
 
+  --anzhiyu-theme-menu-bg: #141414;
+
   --anzhiyu-theme: #dfa621;
   --anzhiyu-theme-op: #dfa62123;
   --anzhiyu-theme-op-deep: #dfa621dd;
@@ -47,7 +49,7 @@ html.dark {
   --anzhiyu-shadow-lightblack: 0 5px 12px -5px rgba(102, 68, 68, 0);
   --anzhiyu-shadow-light2black: 0 5px 12px -5px rgba(102, 68, 68, 0);
   --anzhiyu-card-border: #3d3d3f;
-  --anzhiyu-card-bg-grey: #f0f2f5;
+  --anzhiyu-card-bg-grey: #27282a;
   --anzhiyu-shadow-border: 0 8px 16px -4px #00000050;
   --style-border: 1px solid var(--anzhiyu-card-border);
   --style-border-always: 1px solid var(--anzhiyu-card-border);

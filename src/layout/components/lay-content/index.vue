@@ -124,7 +124,7 @@ const transitionMain = defineComponent({
                 transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
                 'border-radius': '30px',
                 border: 'var(--style-border)',
-                background: '#f0f2f5'
+                background: 'var(--anzhiyu-card-bg-grey)'
               }"
               :view-style="{
                 display: 'flex',
@@ -201,7 +201,7 @@ const transitionMain = defineComponent({
   width: 100%;
   height: calc(100vh - 87px);
   overflow-x: hidden;
-  background: var(--anzhiyu-theme-menu-bg) !important;
+  background: var(--el-bg-color) !important;
 }
 
 .app-main-nofixed-header {
