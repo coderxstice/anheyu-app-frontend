@@ -24,7 +24,7 @@ const {
 </script>
 
 <template>
-  <div class="navbar bg-[#fff]">
+  <div class="navbar">
     <LaySidebarTopCollapse
       v-if="device === 'mobile'"
       class="hamburger-container"

@@ -528,9 +528,11 @@ onMounted(() => {
 
   // 触发隐藏标签页
   emitter.on("tagViewsChange", (key: any) => {
-    if (unref(showTags as any) === key) return;
-    (showTags as any).value = key;
+    // if (unref(showTags as any) === key) return;
+    // (showTags as any).value = key;
   });
+
+  console.log(showTags.value, "showTags");
 
   // 改变标签风格
   emitter.on("tagViewsShowModel", key => {

@@ -122,7 +122,7 @@ const transitionMain = defineComponent({
                 'max-width': getMainWidth,
                 margin: '0 auto',
                 transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-                'border-radius': '30px',
+                'border-radius': '0 0 30px 30px',
                 border: 'var(--style-border)',
                 background: 'var(--anzhiyu-card-bg-grey)'
               }"
@@ -199,9 +199,8 @@ const transitionMain = defineComponent({
 .app-main {
   position: relative;
   width: 100%;
-  height: calc(100vh - 87px);
+  height: calc(100vh - 120px);
   overflow-x: hidden;
-  background: var(--el-bg-color) !important;
 }
 
 .app-main-nofixed-header {
