@@ -262,3 +262,12 @@ div.el-textarea__inner {
   border-radius: 12px;
 }
 
+@media screen and (max-width: 470px) {
+  .el-pagination .el-pagination__total {
+    width: 50%;
+    margin-bottom: 20px;
+  }
+  .el-pagination__sizes {
+    margin-bottom: 20px;
+  }
+}

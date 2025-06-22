@@ -166,7 +166,7 @@ const LayHeader = defineComponent({
         pureSetting.getHiddenSideBar ? 'main-hidden' : ''
       ]"
     >
-      <div v-if="set.fixedHeader" style="margin-right: 20px">
+      <div v-if="set.fixedHeader" class="rmain-content">
         <LayHeader />
         <!-- 主体内容 -->
         <LayContent :fixed-header="set.fixedHeader" />
@@ -218,5 +218,15 @@ const LayHeader = defineComponent({
 
 .re-screen {
   margin-top: 12px;
+}
+
+.rmain-content {
+  margin-right: 20px;
+}
+
+@media screen and (max-width: 760px) {
+  .rmain-content {
+    margin: 0 20px !important;
+  }
 }
 </style>

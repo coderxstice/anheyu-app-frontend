@@ -8,11 +8,11 @@
         </el-form>
       </el-tab-pane>
 
-      <el-tab-pane label="用户会话" name="userSession">
+      <!-- <el-tab-pane label="用户会话" name="userSession">
         <el-form :model="form" label-position="top" class="setting-form">
           <UserSessionForm v-model="form.user" />
         </el-form>
-      </el-tab-pane>
+      </el-tab-pane> -->
     </el-tabs>
 
     <div class="save-button-container">
@@ -31,9 +31,9 @@ import { constant } from "@/constant";
 
 import BaseInfoForm from "./components/BaseInfoForm.vue";
 import IconSettingsForm from "./components/IconSettingsForm.vue";
-import UserSessionForm from "./components/UserSessionForm.vue";
+// import UserSessionForm from "./components/UserSessionForm.vue";
 
-// 我保留了这些接口定义，它们依然有用
+// 保留了这些接口定义，它们依然有用
 export interface SiteInfo {
   siteName: string;
   siteDescription: string;
@@ -55,7 +55,7 @@ export interface SettingsForm {
 }
 
 const activeName = "siteConfig";
-// 我现在使用统一的 siteConfigStore
+// 现在使用统一的 siteConfigStore
 const siteConfigStore = useSiteConfigStore();
 
 const form = reactive<SettingsForm>({
@@ -76,7 +76,7 @@ const form = reactive<SettingsForm>({
   }
 });
 
-// 表单字段到后端键名的映射关系，我保留了它
+// 表单字段到后端键名的映射关系，保留了它
 const formToKeysMap: Record<keyof SiteInfo | keyof UserSessionInfo, string> = {
   siteName: constant.KeyAppName,
   siteDescription: constant.KeySiteDescription,
@@ -93,12 +93,12 @@ const formToKeysMap: Record<keyof SiteInfo | keyof UserSessionInfo, string> = {
 
 const allKeys = Object.values(formToKeysMap);
 
-// 我将 watch 的目标改为了 siteConfigStore.siteConfig
+// 将 watch 的目标改为了 siteConfigStore.siteConfig
 // 并增加了 immediate: true，以便在组件加载时立即用 store 中的数据填充表单
 watch(
   () => siteConfigStore.siteConfig,
   newSettings => {
-    if (!newSettings) return; // 我增加了安全检查
+    if (!newSettings) return;
 
     form.site.siteName = newSettings[constant.KeyAppName] || "";
     form.site.siteDescription = newSettings[constant.KeySiteDescription] || "";
@@ -117,7 +117,7 @@ watch(
 );
 
 onMounted(() => {
-  // 当组件挂载时，我调用新的 action 来获取本页面所需的详细配置
+  // 当组件挂载时，调用新的 action 来获取本页面所需的详细配置
   siteConfigStore.fetchSystemSettings(allKeys);
 });
 
@@ -139,7 +139,7 @@ const handleSave = async () => {
   );
 
   try {
-    // 我调用了新的保存 action，它会处理后续的 API 请求、状态更新和缓存
+    // 调用了新的保存 action，它会处理后续的 API 请求、状态更新和缓存
     await siteConfigStore.saveSystemSettings(settingsToUpdate);
     // 成功消息现在由 store 内部处理，这里也可以保留
     // ElMessage.success("设置已成功保存！");
