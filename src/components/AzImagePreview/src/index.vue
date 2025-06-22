@@ -23,7 +23,7 @@
         >
           <div v-if="loading" class="loader" />
           <Transition name="pic-fade">
-            <div v-show="imageReady" class="pic">
+            <div v-if="containerVisible" :key="imageKey" class="pic">
               <img
                 ref="imgRef"
                 class="az-preview-image"
@@ -84,9 +84,9 @@
           </div>
 
           <span
+            v-show="showControls"
             class="az-preview-close closer"
             :class="{ 'delayed-hidden': !showControls }"
-            v-show="showControls"
             @click="close"
           />
 
@@ -126,10 +126,10 @@ import { useSiteConfigStore } from "@/store/modules/siteConfig";
 const progressRef = ref();
 
 const visible = ref(false);
-const previewSrcList = ref([]);
+const previewSrcList = ref<any[]>([]);
 const previewIndex = ref(0);
-const imageReady = ref(false);
-const containerVisible = ref(true);
+const imageKey = ref(0);
+const containerVisible = ref(false); // 初始值改为 false
 const containerWidth = ref("150px");
 const containerHeight = ref("150px");
 const containerEnter = ref(false);
@@ -138,7 +138,6 @@ const showTransition = ref(false);
 const currentIndex = ref(0);
 const downloadCount = ref(0);
 
-// 新增：控制按钮显示和点击的变量
 const showControls = ref(false);
 
 let currentImgSize = { width: 0, height: 0 };
@@ -150,7 +149,6 @@ const siteName = computed(
 );
 
 const formatFileSize = (size: number) => {
-  // 添加 size 的类型标注
   if (size >= 1024 * 1024) {
     return (size / 1024 / 1024).toFixed(2) + " MB";
   } else if (size >= 1024) {
@@ -161,19 +159,14 @@ const formatFileSize = (size: number) => {
 };
 
 const downImage = (imageInfo: any) => {
-  // 添加 imageInfo 的类型标注
   updateWallpaperStat({
     id: imageInfo.id,
     type: "download"
   }).then(() => {
     downloadCount.value++;
-
     const finalDownloadUrl = imageInfo.downloadUrl;
-
     const extension = getFileExtension(finalDownloadUrl);
     const fileName = `${siteName.value}.${extension}`;
-
-    // 使用图片原始的 downloadUrl 和动态生成的文件名进行下载
     progressRef.value.downloadImageWithProgress(finalDownloadUrl, fileName);
   });
 };
@@ -191,23 +184,18 @@ const getImageSize = (url: string) => {
 
 const updateContainerSize = () => {
   const isMobile = window.innerWidth < 600;
-
   if (isMobile) {
     containerWidth.value = `100vw`;
     containerHeight.value = `auto`;
     return;
   }
-
   const viewportWidth = window.innerWidth * 0.9;
   const viewportHeight = window.innerHeight * 0.9;
-
   const widthRatio = viewportWidth / currentImgSize.width;
   const heightRatio = viewportHeight / currentImgSize.height;
   const ratio = Math.min(widthRatio, heightRatio, 1);
-
   const targetWidth = Math.floor(currentImgSize.width * ratio);
   const targetHeight = Math.floor(currentImgSize.height * ratio);
-
   containerWidth.value = `${targetWidth}px`;
   containerHeight.value = `${targetHeight}px`;
 };
@@ -219,9 +207,7 @@ const handleResize = () => {
 };
 
 const handleKeydown = (e: KeyboardEvent) => {
-  if (!visible.value) return;
-  // 仅当 showControls 为 true 时才响应键盘事件
-  if (!showControls.value) return;
+  if (!visible.value || !showControls.value) return;
   switch (e.key) {
     case "Escape":
       close();
@@ -248,11 +234,12 @@ onUnmounted(() => {
 const isSwitch = ref(false);
 
 const open = async (list: Array<any>, index = 0, next = false) => {
+  imageKey.value++;
   visible.value = true;
   containerEnter.value = false;
-  imageReady.value = false;
   containerVisible.value = false;
   loading.value = true;
+  showTransition.value = false;
 
   previewSrcList.value = list;
   previewIndex.value = index;
@@ -269,17 +256,20 @@ const open = async (list: Array<any>, index = 0, next = false) => {
     ? list[index].imageUrl + `?${list[index].bigParam}`
     : list[index].imageUrl;
   currentIndex.value = index;
-  // 预加载
-  const size = await getImageSize(imgUrl);
-  currentImgSize = size;
 
-  // 动画调整完毕以后显示按钮
-  showControls.value = true;
+  try {
+    const size = await getImageSize(imgUrl);
+    currentImgSize = size;
+  } catch (error) {
+    console.error("Image size calculation failed:", error);
+    close();
+    return;
+  }
 
   await nextTick();
   updateContainerSize();
-  await nextTick();
 
+  await nextTick();
   requestAnimationFrame(() => {
     containerVisible.value = true;
   });
@@ -287,14 +277,14 @@ const open = async (list: Array<any>, index = 0, next = false) => {
 
 function imgLoad() {
   containerEnter.value = true;
-
   updateWallpaperStat({
     id: previewSrcList.value[previewIndex.value].id,
     type: "view"
   }).then(() => {
     loading.value = false;
-    imageReady.value = true;
     showTransition.value = true;
+
+    showControls.value = true;
   });
 }
 
@@ -302,7 +292,6 @@ const close = () => {
   visible.value = false;
   containerVisible.value = false;
   containerEnter.value = false;
-  imageReady.value = false;
   showTransition.value = false;
   showControls.value = false;
 };
@@ -329,6 +318,7 @@ defineExpose({ open, downImage });
 </script>
 
 <style scoped lang="scss">
+/* Style ares are unchanged */
 $popup-bg: rgb(31 34 36 / 92.5%);
 $gradient-color: rgb(31 34 36 / 35%);
 $caption-gradient: linear-gradient(
@@ -505,6 +495,7 @@ $transition: opacity 0.2s ease-in-out;
         );
       opacity: 0;
       transition: $transition;
+      cursor: auto;
     }
 
     &:hover::before {
@@ -597,6 +588,7 @@ $transition: opacity 0.2s ease-in-out;
       background-image: $caption-gradient;
       opacity: 0.8;
       transition: $transition;
+      cursor: auto;
 
       h2,
       h3,
@@ -648,6 +640,7 @@ $transition: opacity 0.2s ease-in-out;
       .link {
         margin: 0;
         background: rgb(0 0 0 / 80%);
+        cursor: pointer;
 
         &:hover {
           background: #0d00ff;

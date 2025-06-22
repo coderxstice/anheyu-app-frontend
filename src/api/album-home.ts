@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 14:44:11
- * @LastEditTime: 2025-06-17 20:03:06
+ * @LastEditTime: 2025-06-22 23:46:22
  * @LastEditors: 安知鱼
  */
 // src/api/wallpaper.ts
@@ -41,9 +41,6 @@ const getDynamicApiUrl = (endpointPath: string): string => {
     siteConfigStore.getWallpaperBackendApiUrl + "api/";
 
   if (backendConfiguredApiUrl) {
-    console.log(
-      `使用后端配置的API地址: ${backendConfiguredApiUrl}${endpointPath}`
-    );
     return `${backendConfiguredApiUrl}${endpointPath}`;
   } else {
     console.warn(
