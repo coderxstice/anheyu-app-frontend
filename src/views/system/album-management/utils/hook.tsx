@@ -13,7 +13,7 @@ import type { FormItemProps } from "./types";
 import { deviceDetection } from "@pureadmin/utils";
 import type { PaginationProps, LoadingConfig } from "@pureadmin/table";
 
-export function useDept() {
+export function useAlbum() {
   const form = reactive({
     createdAt: null
   });
