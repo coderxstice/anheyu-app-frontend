@@ -214,7 +214,7 @@ const open = async (list: Array<any>, index = 0, next = false) => {
   loading.value = true;
   containerVisible.value = false;
 
-  // [优化1] 只有在“全新打开”时才隐藏按钮，翻页切换时保持显示
+  // 只有在“全新打开”时才隐藏按钮，翻页切换时保持显示
   if (!next) {
     showControls.value = false;
   }
@@ -225,6 +225,17 @@ const open = async (list: Array<any>, index = 0, next = false) => {
   downloadCount.value = list[index].downloadCount;
 
   isSwitch.value = next;
+
+  updateWallpaperStat({
+    id: list[index].id,
+    type: "view"
+  })
+    .then(() => {
+      list[index].viewCount++;
+    })
+    .catch(err => {
+      console.error("Failed to update view count:", err);
+    });
 
   await nextTick();
 
