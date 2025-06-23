@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import { useAlbumStore } from "@/store/modules/album";
 import { useRouter } from "vue-router";
+import { storeToRefs } from "pinia";
 
 defineOptions({
-  name: "HeaderComponent" // 给组件一个有意义的名字
+  name: "HeaderComponent"
 });
 const router = useRouter();
 const siteConfigStore = useSiteConfigStore();
+
+const albumStore = useAlbumStore();
+const { sortOrder } = storeToRefs(albumStore);
 
 // 计算属性，从 Pinia Store 获取站点配置
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);
@@ -24,6 +29,10 @@ const icpNumber = computed(() => siteConfig.value?.ICP_NUMBER || "");
 // 前往登录页
 const goLogin = () => {
   router.push({ name: "Login" });
+};
+
+const handleSortChange = (newOrder: string) => {
+  albumStore.setSortOrder(newOrder);
 };
 </script>
 
@@ -48,6 +57,34 @@ const goLogin = () => {
     </div>
     <nav>
       <ul class="nav_links">
+        <li class="nav-item">
+          <a style="cursor: pointer">排序</a>
+          <div class="nav-item-child">
+            <ul>
+              <li class="category-parent category-level-0 mb-1">
+                <a
+                  :class="{ active: sortOrder === 'display_order_asc' }"
+                  @click="handleSortChange('display_order_asc')"
+                  >默认排序
+                </a>
+              </li>
+              <li class="category-parent category-level-0">
+                <a
+                  :class="{ active: sortOrder === 'created_at_desc' }"
+                  @click="handleSortChange('created_at_desc')"
+                  >最新发布
+                </a>
+              </li>
+              <li class="category-parent category-level-0">
+                <a
+                  :class="{ active: sortOrder === 'view_count_desc' }"
+                  @click="handleSortChange('view_count_desc')"
+                  >热度排序</a
+                >
+              </li>
+            </ul>
+          </div>
+        </li>
         <li class="nav-item">
           <a style="cursor: pointer" :href="aboutLink" target="_blank">关于</a>
         </li>
@@ -194,7 +231,7 @@ const goLogin = () => {
 
           .category-parent {
             font-size: 14px;
-            border-radius: 6px;
+            border-radius: 8px;
             transition: 0.3s;
 
             &:hover {

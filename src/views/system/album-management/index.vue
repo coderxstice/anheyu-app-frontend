@@ -66,6 +66,7 @@ function onFullscreen() {
           <el-option label="按排序号" value="display_order_asc" />
           <el-option label="最新创建" value="created_at_desc" />
           <el-option label="最早创建" value="created_at_asc" />
+          <el-option label="热度排序" value="view_count_desc" />
         </el-select>
       </el-form-item>
       <el-form-item>

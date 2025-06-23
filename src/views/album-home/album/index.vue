@@ -2,16 +2,18 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-04-09 12:31:32
- * @LastEditTime: 2025-06-22 23:25:04
+ * @LastEditTime: 2025-06-24 00:40:26
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import AzImage from "@/components/AzImage";
 import AzImagePreview from "@/components/AzImagePreview";
+import { useAlbumStore } from "@/store/modules/album";
 import Download from "@/assets/svg/downloads.svg";
 import { publicWallpapert } from "@/api/album-home";
 import { message } from "@/utils/message";
+import { storeToRefs } from "pinia";
 
 defineOptions({
   name: "album"
@@ -19,6 +21,9 @@ defineOptions({
 
 const loadedImages = ref<boolean[]>([]);
 const previewRef = ref<InstanceType<typeof AzImagePreview>>();
+
+const albumStore = useAlbumStore(); // 3. 获取 store 实例
+const { sortOrder } = storeToRefs(albumStore);
 
 const handleImageLoad = () => {
   loadedImages.value.splice(0, 24, ...Array(24).fill(true));
@@ -36,7 +41,8 @@ const fetchWallpapers = async () => {
   try {
     const params = {
       page: currentPage.value,
-      pageSize: pageSize.value
+      pageSize: pageSize.value,
+      sort: sortOrder.value
     };
 
     const res = await publicWallpapert(params);
@@ -53,6 +59,13 @@ const fetchWallpapers = async () => {
     });
   }
 };
+
+watch(sortOrder, newSortValue => {
+  if (newSortValue) {
+    currentPage.value = 1;
+    fetchWallpapers();
+  }
+});
 
 const handlePreview = index => {
   previewRef.value?.open(wallpapers.value, index);
