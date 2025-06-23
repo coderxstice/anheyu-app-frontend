@@ -15,7 +15,8 @@ import type { PaginationProps, LoadingConfig } from "@pureadmin/table";
 
 export function useAlbum() {
   const form = reactive({
-    createdAt: null
+    createdAt: null,
+    sort: "display_order_asc"
   });
 
   const formRef = ref();
@@ -117,6 +118,11 @@ export function useAlbum() {
       hide: true
     },
     {
+      label: "排序",
+      prop: "displayOrder",
+      minWidth: 70
+    },
+    {
       label: "创建时间",
       minWidth: 180,
       prop: "createdAt",
@@ -135,6 +141,7 @@ export function useAlbum() {
     if (!formEl) return;
     formEl.resetFields();
     form.createdAt = null;
+    form.sort = "display_order_asc";
     onSearch();
   }
 
@@ -146,7 +153,8 @@ export function useAlbum() {
     const { data } = await getWallpapertList({
       page: currentPage,
       pageSize: pageSize,
-      createdAt: form.createdAt
+      createdAt: form.createdAt,
+      sort: form.sort
     });
 
     dataList.value = data.list;
@@ -186,7 +194,8 @@ export function useAlbum() {
           downloadCount: row?.downloadCount ?? 0,
           aspectRatio: row?.aspectRatio ?? "",
           widthAndHeight: row?.widthAndHeight ?? "",
-          fileSize: row?.fileSize ?? 0
+          fileSize: row?.fileSize ?? 0,
+          displayOrder: row?.displayOrder ?? 0
         }
       },
       width: "80vw",
@@ -221,8 +230,7 @@ export function useAlbum() {
             }
 
             const img = new Image();
-            img.crossOrigin = "Anonymous"; // 跨域图片需要
-            // const hashCache: Record<string, string> = {}; // 缓存哈希值 - 考虑在更高层级管理缓存
+            img.crossOrigin = "Anonymous";
 
             img.onload = async function () {
               const width = img.width;
@@ -257,7 +265,7 @@ export function useAlbum() {
                   height,
                   fileSize,
                   format,
-                  fileHash // 返回哈希值
+                  fileHash
                 });
               } catch (error) {
                 console.warn(

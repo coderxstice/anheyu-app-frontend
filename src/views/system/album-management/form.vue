@@ -18,7 +18,8 @@ const props = withDefaults(defineProps<FormProps>(), {
     downloadCount: 1,
     aspectRatio: "",
     widthAndHeight: "",
-    fileSize: 0
+    fileSize: 0,
+    displayOrder: 0
   })
 });
 
@@ -197,6 +198,18 @@ defineExpose({ getRef });
               }
             })()
           }}
+        </el-form-item>
+      </re-col>
+
+      <re-col :value="12" :xs="24" :sm="24">
+        <el-form-item label="排序号">
+          <el-input-number
+            v-model="newFormInline.displayOrder"
+            class="w-full!"
+            :min="0"
+            controls-position="right"
+            placeholder="数字越小，排序越靠前"
+          />
         </el-form-item>
       </re-col>
     </el-row>

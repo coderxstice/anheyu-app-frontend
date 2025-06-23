@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-04-11 15:38:10
- * @LastEditTime: 2025-06-23 13:42:09
+ * @LastEditTime: 2025-06-24 00:19:06
  * @LastEditors: 安知鱼
  */
 interface FormItemProps {
@@ -19,6 +19,7 @@ interface FormItemProps {
   aspectRatio: string;
   widthAndHeight: string;
   fileSize: number;
+  displayOrder: number;
 }
 interface FormProps {
   formInline: FormItemProps;

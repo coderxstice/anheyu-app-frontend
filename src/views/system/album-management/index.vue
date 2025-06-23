@@ -56,6 +56,18 @@ function onFullscreen() {
           value-format="YYYY/MM/DD hh:mm:ss"
         />
       </el-form-item>
+      <el-form-item label="排序方式：" prop="sort">
+        <el-select
+          v-model="form.sort"
+          placeholder="请选择排序方式"
+          clearable
+          class="!w-[180px]"
+        >
+          <el-option label="按排序号" value="display_order_asc" />
+          <el-option label="最新创建" value="created_at_desc" />
+          <el-option label="最早创建" value="created_at_asc" />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button
           v-ripple
