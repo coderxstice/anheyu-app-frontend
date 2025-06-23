@@ -37,7 +37,8 @@ body {
   text-rendering: optimizelegibility;
 }
 
-body:has(#wrapper) {
+body:has(#wrapper),
+html:has(#wrapper) {
   background-color: #242629;
 }
 @media screen and (max-width: 1680px) {
