@@ -61,7 +61,8 @@ export function useDept() {
     {
       label: "查看次数",
       prop: "viewCount",
-      minWidth: 70
+      minWidth: 70,
+      hide: true
     },
     {
       label: "图片大小",
@@ -76,7 +77,8 @@ export function useDept() {
         } else {
           return size + " B";
         }
-      }
+      },
+      hide: true
     },
     {
       label: "长宽比",
@@ -86,12 +88,14 @@ export function useDept() {
     {
       label: "下载次数",
       prop: "downloadCount",
-      minWidth: 70
+      minWidth: 70,
+      hide: true
     },
     {
       label: "宽*高",
       prop: "widthAndHeight",
-      minWidth: 90
+      minWidth: 90,
+      hide: true
     },
     {
       label: "创建时间",
@@ -111,7 +115,7 @@ export function useDept() {
   function resetForm(formEl) {
     if (!formEl) return;
     formEl.resetFields();
-    form.createdAt = null; // 清空时间筛选
+    form.createdAt = null;
     onSearch();
   }
 
@@ -159,7 +163,8 @@ export function useDept() {
             return [];
           })(),
           viewCount: row?.viewCount ?? 1,
-          downloadCount: row?.downloadCount ?? 0
+          downloadCount: row?.downloadCount ?? 0,
+          aspectRatio: row?.aspectRatio ?? ""
         }
       },
       width: "80vw",
@@ -185,7 +190,6 @@ export function useDept() {
           height: number;
           fileSize: number;
           format: string;
-          aspectRatio: string;
           fileHash: string; // 新增哈希值返回
         }> {
           return new Promise(async (resolve, reject) => {
@@ -201,7 +205,6 @@ export function useDept() {
             img.onload = async function () {
               const width = img.width;
               const height = img.height;
-              const aspectRatio = reduceRatio(width, height);
 
               // 获取文件大小和格式
               let fileSize = 0;
@@ -232,7 +235,6 @@ export function useDept() {
                   height,
                   fileSize,
                   format,
-                  aspectRatio,
                   fileHash // 返回哈希值
                 });
               } catch (error) {
@@ -258,17 +260,6 @@ export function useDept() {
 
             img.src = url;
           });
-        }
-
-        // 比例化简函数
-        function reduceRatio(width: number, height: number): string {
-          if (width === 0 || height === 0) {
-            return "0:0";
-          }
-          const gcd = (a: number, b: number): number =>
-            b === 0 ? a : gcd(b, a % b);
-          const factor = gcd(width, height);
-          return `${width / factor}:${height / factor}`;
         }
 
         // 计算文件哈希值（使用 SHA-256 作为示例）

@@ -15,6 +15,7 @@ interface FormItemProps {
   tags: Array<string>;
   viewCount: number;
   downloadCount: number;
+  aspectRatio: string;
 }
 interface FormProps {
   formInline: FormItemProps;

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-04-11 15:37:10
- * @LastEditTime: 2025-06-19 09:57:14
+ * @LastEditTime: 2025-06-23 09:33:40
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -21,12 +21,15 @@ const props = withDefaults(defineProps<FormProps>(), {
     bigParam: "",
     tags: [],
     viewCount: 0,
-    downloadCount: 1
+    downloadCount: 1,
+    aspectRatio: ""
   })
 });
 
 const ruleFormRef = ref();
 const newFormInline = ref(props.formInline);
+
+console.log("newFormInline", newFormInline.value);
 
 function getRef() {
   return ruleFormRef.value;
@@ -135,6 +138,10 @@ defineExpose({ getRef });
             </template>
           </el-input-tag>
         </el-form-item>
+      </re-col>
+
+      <re-col :value="12" :xs="24" :sm="24">
+        长宽比: {{ newFormInline.aspectRatio }}
       </re-col>
     </el-row>
   </el-form>
