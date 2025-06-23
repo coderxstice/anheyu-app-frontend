@@ -2,13 +2,12 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-22 00:40:29
- * @LastEditTime: 2025-06-22 00:50:07
+ * @LastEditTime: 2025-06-23 12:56:16
  * @LastEditors: 安知鱼
  */
 // src/components/Announcement/index.ts
 import { addDialog } from "@/components/ReDialog/index";
 import { h } from "vue";
-import { ElButton } from "element-plus";
 
 // 用于存储公告内容在 localStorage 的键名，与 Pinia store 中的 SiteAnnouncement 对应
 const ANNOUNCEMENT_READ_KEY = "app_announcement_read_content";
@@ -30,30 +29,30 @@ export const checkAndShowAnnouncementByConfig = (
 
   // 如果最新的公告内容与已读内容不一致，或者没有已读内容，则显示公告
   if (announcementContent !== storedReadContent) {
+    // 判断是否为移动端
+    const isMobile = window.innerWidth < 768;
+
     addDialog({
       title: "系统公告",
-      width: "40%",
+      // 在移动端设备上应用不同的宽度
+      width: isMobile ? "80%" : "40%",
       fullscreenIcon: true,
       closeOnClickModal: false,
       closeOnPressEscape: false,
       contentRenderer: () => h("div", { innerHTML: announcementContent }),
-      footerRenderer: ({ options }) =>
-        h("div", { style: "text-align: center;" }, [
-          h(
-            ElButton,
-            {
-              type: "primary",
-              onClick: () => {
-                localStorage.setItem(
-                  ANNOUNCEMENT_READ_KEY,
-                  announcementContent
-                );
-                options.visible = false;
-              }
-            },
-            "我已知晓"
-          )
-        ])
+      // 不使用 footerRenderer，改用 footerButtons 自定义底部按钮
+      footerButtons: [
+        {
+          label: "我已知晓",
+          type: "primary",
+          btnClick: ({ dialog }) => {
+            // 将当前公告内容存入 localStorage
+            localStorage.setItem(ANNOUNCEMENT_READ_KEY, announcementContent);
+            // 通过框架提供的方式关闭弹窗
+            dialog.options.visible = false;
+          }
+        }
+      ]
     });
   }
 };
