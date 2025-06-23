@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:04:30
- * @LastEditTime: 2025-06-22 22:21:30
+ * @LastEditTime: 2025-06-23 13:12:37
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -34,20 +34,6 @@
     <el-input
       v-model="formData.primaryUrl"
       placeholder="例如：https://album.anheyu.com"
-    />
-  </el-form-item>
-
-  <el-form-item>
-    <template #label>
-      <span>相册请求后端 URL</span>
-      <div class="form-item-help" style="margin-top: 0">
-        相册页面后端 URL
-        用于请求相册数据，如果有比较好的又不想自己传相册的，可以直接使用他人部署的鱼鱼来直接使用。注意需要以/结尾。
-      </div>
-    </template>
-    <el-input
-      v-model="formData.albumApiURL"
-      placeholder="例如：https://album.anheyu.com/"
     />
   </el-form-item>
 

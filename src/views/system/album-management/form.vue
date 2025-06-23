@@ -1,10 +1,3 @@
-<!--
- * @Description:
- * @Author: 安知鱼
- * @Date: 2025-04-11 15:37:10
- * @LastEditTime: 2025-06-23 09:33:40
- * @LastEditors: 安知鱼
--->
 <script setup lang="ts">
 import { ref } from "vue";
 import ReCol from "@/components/ReCol";
@@ -22,7 +15,9 @@ const props = withDefaults(defineProps<FormProps>(), {
     tags: [],
     viewCount: 0,
     downloadCount: 1,
-    aspectRatio: ""
+    aspectRatio: "",
+    widthAndHeight: "",
+    fileSize: 0
   })
 });
 
@@ -141,7 +136,42 @@ defineExpose({ getRef });
       </re-col>
 
       <re-col :value="12" :xs="24" :sm="24">
-        长宽比: {{ newFormInline.aspectRatio }}
+        <el-form-item label="长宽比">
+          {{ newFormInline.aspectRatio }}
+        </el-form-item>
+      </re-col>
+
+      <re-col :value="12" :xs="24" :sm="24">
+        <el-form-item label="下载次数">
+          {{ newFormInline.downloadCount }}
+        </el-form-item>
+      </re-col>
+      <re-col :value="12" :xs="24" :sm="24">
+        <el-form-item label="查看次数">
+          {{ newFormInline.viewCount }}
+        </el-form-item>
+      </re-col>
+      <re-col :value="12" :xs="24" :sm="24">
+        <el-form-item label="宽*高">
+          {{ newFormInline.widthAndHeight }}
+        </el-form-item>
+      </re-col>
+      <re-col :value="12" :xs="24" :sm="24">
+        <el-form-item label="图片大小">
+          {{
+            (() => {
+              if (newFormInline.fileSize >= 1024 * 1024) {
+                return (
+                  (newFormInline.fileSize / 1024 / 1024).toFixed(2) + " MB"
+                );
+              } else if (newFormInline.fileSize >= 1024) {
+                return (newFormInline.fileSize / 1024).toFixed(2) + " KB";
+              } else {
+                return newFormInline.fileSize + " B";
+              }
+            })()
+          }}
+        </el-form-item>
       </re-col>
     </el-row>
   </el-form>

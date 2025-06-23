@@ -8,11 +8,11 @@
         </el-form>
       </el-tab-pane>
 
-      <!-- <el-tab-pane label="用户会话" name="userSession">
+      <el-tab-pane label="页面配置" name="pageSetting">
         <el-form :model="form" label-position="top" class="setting-form">
-          <UserSessionForm v-model="form.user" />
+          <PageSittingForm v-model="form.page" />
         </el-form>
-      </el-tab-pane> -->
+      </el-tab-pane>
     </el-tabs>
 
     <div class="save-button-container">
@@ -31,14 +31,12 @@ import { constant } from "@/constant";
 
 import BaseInfoForm from "./components/BaseInfoForm.vue";
 import IconSettingsForm from "./components/IconSettingsForm.vue";
-// import UserSessionForm from "./components/UserSessionForm.vue";
+import PageSittingForm from "./components/PageSittingForm.vue";
 
-// 保留了这些接口定义，它们依然有用
 export interface SiteInfo {
   siteName: string;
   siteDescription: string;
   primaryUrl: string;
-  albumApiURL: string;
   footerCode: string;
   announcement: string;
   logoDay: string;
@@ -47,12 +45,14 @@ export interface SiteInfo {
   iconMedium: string;
   iconLarge: string;
 }
-export interface UserSessionInfo {
-  enableRegistration: boolean;
+export interface PageSittingInfo {
+  albumApiURL: string;
+  defaultThumbParam?: string;
+  defaultBigParam?: string;
 }
 export interface SettingsForm {
   site: SiteInfo;
-  user: UserSessionInfo;
+  page: PageSittingInfo;
 }
 
 const activeName = "siteConfig";
@@ -64,7 +64,6 @@ const form = reactive<SettingsForm>({
     siteName: "",
     siteDescription: "",
     primaryUrl: "",
-    albumApiURL: "",
     footerCode: "",
     announcement: "",
     logoDay: "",
@@ -73,25 +72,28 @@ const form = reactive<SettingsForm>({
     iconMedium: "",
     iconLarge: ""
   },
-  user: {
-    enableRegistration: false
+  page: {
+    albumApiURL: "",
+    defaultThumbParam: "",
+    defaultBigParam: ""
   }
 });
 
 // 表单字段到后端键名的映射关系
-const formToKeysMap: Record<keyof SiteInfo | keyof UserSessionInfo, string> = {
+const formToKeysMap: Record<keyof SiteInfo | keyof PageSittingInfo, string> = {
   siteName: constant.KeyAppName,
   siteDescription: constant.KeySiteDescription,
   primaryUrl: constant.KeySiteURL,
   albumApiURL: constant.KeyApiURL,
+  defaultThumbParam: constant.KeyDefaultThumbParam,
+  defaultBigParam: constant.KeyDefaultBigParam,
   footerCode: constant.KeyFooterCode,
   announcement: constant.KeySiteAnnouncement,
   logoDay: constant.KeyLogoHorizontalDay,
   logoNight: constant.KeyLogoHorizontalNight,
   favicon: constant.KeyIconURL,
   iconMedium: constant.KeyLogoURL192,
-  iconLarge: constant.KeyLogoURL512,
-  enableRegistration: constant.KeyEnableUserActivation
+  iconLarge: constant.KeyLogoURL512
 };
 
 const allKeys = Object.values(formToKeysMap);
@@ -106,7 +108,6 @@ watch(
     form.site.siteName = newSettings[constant.KeyAppName] || "";
     form.site.siteDescription = newSettings[constant.KeySiteDescription] || "";
     form.site.primaryUrl = newSettings[constant.KeySiteURL] || "";
-    form.site.albumApiURL = newSettings[constant.KeyApiURL] || "";
     form.site.footerCode = newSettings[constant.KeyFooterCode] || "";
     form.site.announcement = newSettings[constant.KeySiteAnnouncement] || "";
     form.site.logoDay = newSettings[constant.KeyLogoHorizontalDay] || "";
@@ -114,8 +115,11 @@ watch(
     form.site.favicon = newSettings[constant.KeyIconURL] || "";
     form.site.iconMedium = newSettings[constant.KeyLogoURL192] || "";
     form.site.iconLarge = newSettings[constant.KeyLogoURL512] || "";
-    form.user.enableRegistration =
-      newSettings[constant.KeyEnableUserActivation] === "true";
+
+    form.page.albumApiURL = newSettings[constant.KeyApiURL] || "";
+    form.page.defaultThumbParam =
+      newSettings[constant.KeyDefaultThumbParam] || "";
+    form.page.defaultBigParam = newSettings[constant.KeyDefaultBigParam] || "";
   },
   { deep: true, immediate: true }
 );
@@ -127,7 +131,7 @@ onMounted(() => {
 
 const handleSave = async () => {
   const settingsToUpdate: Record<string, string> = {};
-  const combinedForm = { ...form.site, ...form.user };
+  const combinedForm = { ...form.site, ...form.page };
 
   (Object.keys(formToKeysMap) as Array<keyof typeof combinedForm>).forEach(
     formKey => {

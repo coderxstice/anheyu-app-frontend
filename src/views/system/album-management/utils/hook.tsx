@@ -31,32 +31,50 @@ export function useDept() {
     {
       label: "图片URL",
       prop: "imageUrl",
-      minWidth: 70
+      minWidth: 120,
+      cellRenderer: ({ row }) => {
+        const thumbnailUrl =
+          row.imageUrl + "?" + (row.thumbParam ? row.thumbParam : "");
+
+        console.log("缩略图URL:", row.imageUrl, row.thumbParam);
+
+        return h("img", {
+          src: thumbnailUrl,
+          alt: "缩略图",
+          style: {
+            width: "100px",
+            height: "auto",
+            objectFit: "contain"
+          }
+        });
+      }
     },
     {
       label: "大图",
       prop: "bigImageUrl",
-      minWidth: 70
+      minWidth: 70,
+      hide: true
     },
     {
       label: "下载地址",
       prop: "downloadUrl",
-      minWidth: 70
+      minWidth: 120,
+      hide: true
     },
     {
       label: "大图参数",
       prop: "bigParam",
-      minWidth: 70
+      minWidth: 120
     },
     {
       label: "缩略参数",
       prop: "thumbParam",
-      minWidth: 70
+      minWidth: 120
     },
     {
       label: "标签",
       prop: "tags",
-      minWidth: 70
+      minWidth: 120
     },
     {
       label: "查看次数",
@@ -83,7 +101,8 @@ export function useDept() {
     {
       label: "长宽比",
       prop: "aspectRatio",
-      minWidth: 70
+      minWidth: 70,
+      hide: true
     },
     {
       label: "下载次数",
@@ -99,7 +118,7 @@ export function useDept() {
     },
     {
       label: "创建时间",
-      minWidth: 150,
+      minWidth: 180,
       prop: "createdAt",
       formatter: ({ createdAt }) =>
         dayjs(createdAt).format("YYYY-MM-DD HH:mm:ss")
@@ -164,7 +183,9 @@ export function useDept() {
           })(),
           viewCount: row?.viewCount ?? 1,
           downloadCount: row?.downloadCount ?? 0,
-          aspectRatio: row?.aspectRatio ?? ""
+          aspectRatio: row?.aspectRatio ?? "",
+          widthAndHeight: row?.widthAndHeight ?? "",
+          fileSize: row?.fileSize ?? 0
         }
       },
       width: "80vw",
