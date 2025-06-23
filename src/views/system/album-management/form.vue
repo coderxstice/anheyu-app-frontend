@@ -7,6 +7,7 @@ import { FormProps } from "./utils/types";
 const props = withDefaults(defineProps<FormProps>(), {
   formInline: () => ({
     id: null,
+    title: "新增",
     imageUrl: "",
     bigImageUrl: "",
     downloadUrl: "",
@@ -135,28 +136,53 @@ defineExpose({ getRef });
         </el-form-item>
       </re-col>
 
-      <re-col :value="12" :xs="24" :sm="24">
+      <re-col
+        v-if="newFormInline.title !== '新增'"
+        :value="12"
+        :xs="24"
+        :sm="24"
+      >
         <el-form-item label="长宽比">
           {{ newFormInline.aspectRatio }}
         </el-form-item>
       </re-col>
 
-      <re-col :value="12" :xs="24" :sm="24">
+      <re-col
+        v-if="newFormInline.title !== '新增'"
+        :value="12"
+        :xs="24"
+        :sm="24"
+      >
         <el-form-item label="下载次数">
           {{ newFormInline.downloadCount }}
         </el-form-item>
       </re-col>
-      <re-col :value="12" :xs="24" :sm="24">
+      <re-col
+        v-if="newFormInline.title !== '新增'"
+        :value="12"
+        :xs="24"
+        :sm="24"
+      >
         <el-form-item label="查看次数">
           {{ newFormInline.viewCount }}
         </el-form-item>
       </re-col>
-      <re-col :value="12" :xs="24" :sm="24">
+      <re-col
+        v-if="newFormInline.title !== '新增'"
+        :value="12"
+        :xs="24"
+        :sm="24"
+      >
         <el-form-item label="宽*高">
           {{ newFormInline.widthAndHeight }}
         </el-form-item>
       </re-col>
-      <re-col :value="12" :xs="24" :sm="24">
+      <re-col
+        v-if="newFormInline.title !== '新增'"
+        :value="12"
+        :xs="24"
+        :sm="24"
+      >
         <el-form-item label="图片大小">
           {{
             (() => {

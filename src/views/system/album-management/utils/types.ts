@@ -2,11 +2,12 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-04-11 15:38:10
- * @LastEditTime: 2025-06-23 13:25:13
+ * @LastEditTime: 2025-06-23 13:42:09
  * @LastEditors: 安知鱼
  */
 interface FormItemProps {
   id: number;
+  title: string;
   imageUrl: string;
   bigImageUrl: string;
   downloadUrl: string;

@@ -165,6 +165,7 @@ export function useDept() {
       props: {
         formInline: {
           id: row?.id ?? 0,
+          title: title,
           imageUrl: row?.imageUrl ?? "",
           bigImageUrl: row?.bigImageUrl ?? "",
           downloadUrl: row?.downloadUrl ?? "",
