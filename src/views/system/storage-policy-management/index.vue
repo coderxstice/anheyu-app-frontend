@@ -277,8 +277,8 @@ const storageTypes = [
   transition: all 0.2s ease-in-out;
   &:hover {
     border-color: var(--el-color-primary);
-    background-color: var(--el-color-primary-light-9);
-    color: var(--el-color-primary);
+    background-color: var(--anzhiyu-theme);
+    color: var(--anzhiyu-white);
   }
 }
 </style>
