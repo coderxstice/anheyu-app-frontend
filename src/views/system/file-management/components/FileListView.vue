@@ -1,100 +1,238 @@
-<!--
- * @Description:
- * @Author: 安知鱼
- * @Date: 2025-06-24 14:14:33
- * @LastEditTime: 2025-06-24 14:20:11
- * @LastEditors: 安知鱼
--->
-<template>
-  <el-table
-    ref="tableRef"
-    v-loading="loading"
-    :data="files"
-    style="width: 100%"
-    @row-click="handleRowClick"
-    @selection-change="handleSelectionChange"
-  >
-    <el-table-column type="selection" width="55" />
-    <el-table-column label="名称" min-width="300">
-      <template #default="{ row }">
-        <div class="file-name-cell">
-          <component :is="getFileIcon(row)" />
-          <span class="file-name-text">{{ row.name }}</span>
-        </div>
-      </template>
-    </el-table-column>
-    <el-table-column prop="size" label="大小" width="180">
-      <template #default="{ row }">
-        {{ row.type === "folder" ? "-" : formatSize(row.size) }}
-      </template>
-    </el-table-column>
-    <el-table-column prop="modified" label="修改日期" width="180">
-      <template #default="{ row }">
-        {{ formatTime(row.modified) }}
-      </template>
-    </el-table-column>
-  </el-table>
-</template>
-
 <script setup lang="ts">
-import { computed, watch, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
+import { storeToRefs } from "pinia";
 import { useFileStore } from "@/store/modules/fileStore";
-import type { FileItem } from "@/store/types";
-import { formatSize, formatTime, getFileIcon } from "../utils/utils";
-import type { ElTable } from "element-plus";
+import { formatSize } from "@/utils/format";
+import { useFileIcons } from "../hooks/useFileIcons";
+import gsap from "gsap";
 
+// --- 初始化 ---
 const fileStore = useFileStore();
-const files = computed(() => fileStore.files);
-const loading = computed(() => fileStore.loading);
-const tableRef = ref<InstanceType<typeof ElTable>>();
+const { getFileIcon } = useFileIcons();
+const { files, loading, selectedFiles } = storeToRefs(fileStore);
 
-const handleRowClick = (row: FileItem) => {
-  if (row.type === "folder") {
-    const newPath = `${fileStore.path === "/" ? "" : fileStore.path}/${row.name}`;
-    fileStore.loadFiles(newPath);
-  }
-};
+const hoveredFileId = ref<string | null>(null);
 
-const handleSelectionChange = (selection: FileItem[]) => {
-  // 避免与 store 的 set 无限循环
-  const newSelection = new Set(selection.map(f => f.id));
-  if (
-    JSON.stringify(Array.from(newSelection)) !==
-    JSON.stringify(Array.from(fileStore.selectedFiles))
-  ) {
-    fileStore.selectedFiles = newSelection;
-  }
-};
-
-// 监听Pinia中selection的变化，同步到el-table
-watch(
-  () => fileStore.selectedFiles,
-  newSelection => {
-    tableRef.value?.clearSelection();
-    if (newSelection.size > 0) {
-      files.value.forEach(file => {
-        if (newSelection.has(file.id)) {
-          tableRef.value?.toggleRowSelection(file, true);
-        }
-      });
+// --- GSAP 动画钩子 ---
+const onIconEnter = (el, done) => {
+  gsap.fromTo(
+    el,
+    { opacity: 0 },
+    {
+      opacity: 1,
+      duration: 0.125,
+      ease: "cubic-bezier(0.4, 0, 0.2, 1)",
+      onComplete: done
     }
-  },
-  { deep: true }
-);
+  );
+};
+
+const onIconLeave = (el, done) => {
+  gsap.to(el, {
+    opacity: 0,
+    duration: 0.105,
+    ease: "cubic-bezier(0.4, 0, 0.2, 1)",
+    onComplete: done
+  });
+};
+
+// --- 事件处理函数 ---
+const handleItemClick = (item, event: MouseEvent) => {
+  if (event.shiftKey) {
+    fileStore.selectRange(item.id);
+  } else if (event.metaKey || event.ctrlKey) {
+    fileStore.toggleSelection(item.id);
+  } else {
+    fileStore.selectSingle(item.id);
+  }
+};
+
+const handlePathChange = (newPath: string) => {
+  if (loading.value) return;
+  fileStore.loadFiles(newPath);
+};
+
+const handleKeyDown = (event: KeyboardEvent) => {
+  const target = event.target as HTMLElement;
+  if (["INPUT", "TEXTAREA"].includes(target.tagName)) return;
+
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "a") {
+    event.preventDefault();
+    fileStore.selectAll();
+  }
+};
+
+// --- 生命周期 ---
+onMounted(() => {
+  handlePathChange("/");
+  window.addEventListener("keydown", handleKeyDown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleKeyDown);
+});
 </script>
 
-<style scoped>
-.file-name-cell {
+<template>
+  <div class="file-list-container">
+    <div class="file-list-header">
+      <div class="column-name">名称</div>
+      <div class="column-size">文件大小</div>
+      <div class="column-modified">更改时间</div>
+    </div>
+
+    <div v-if="loading" class="state-view">
+      <span>正在努力加载中...</span>
+    </div>
+
+    <ul v-else class="file-list-body">
+      <li v-if="!files.length" class="state-view">
+        <span>这里什么都没有</span>
+      </li>
+      <li
+        v-for="item in files"
+        :key="item.id"
+        class="file-item"
+        :class="{ selected: selectedFiles.has(item.id) }"
+        @click="handleItemClick(item, $event)"
+        @dblclick="
+          item.type === 'dir' &&
+          handlePathChange(
+            item.path === '/' ? `/${item.name}` : `${item.path}/${item.name}`
+          )
+        "
+        @mouseenter="hoveredFileId = item.id"
+        @mouseleave="hoveredFileId = null"
+      >
+        <div class="column-name">
+          <Transition
+            name="icon-swap"
+            mode="out-in"
+            @enter="onIconEnter"
+            @leave="onIconLeave"
+          >
+            <IconifyIconOnline
+              v-if="selectedFiles.has(item.id)"
+              :key="item.id + '-selected'"
+              icon="material-symbols:check-circle-rounded"
+              class="file-icon selected-icon"
+              @click.stop="fileStore.toggleSelection(item.id)"
+            />
+
+            <IconifyIconOnline
+              v-else-if="selectedFiles.size > 0 && hoveredFileId === item.id"
+              :key="item.id + '-hover'"
+              icon="charm:circle"
+              class="file-icon hover-icon"
+              @click.stop="fileStore.toggleSelection(item.id)"
+              @dblclick.stop
+            />
+
+            <component
+              :is="getFileIcon(item)"
+              v-else
+              :key="item.id + '-default'"
+              class="file-icon"
+            />
+          </Transition>
+
+          <span>{{ item.name }}</span>
+        </div>
+        <div class="column-size">{{ formatSize(item.size) }}</div>
+        <div class="column-modified">{{ item.modified }}</div>
+      </li>
+    </ul>
+  </div>
+</template>
+
+<style scoped lang="scss">
+.file-list-container {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+.file-list-body {
+  padding: 6px 8px;
+}
+
+.file-list-header,
+.file-item {
   display: flex;
   align-items: center;
+  padding: 12px 8px;
+  font-size: 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.file-item {
   cursor: pointer;
+  border-radius: 6px;
+  user-select: none;
 }
-.file-name-cell .el-icon {
-  margin-right: 8px;
+
+.file-list-header {
+  color: #64748b;
+  font-weight: 500;
 }
-.file-name-text {
+
+.file-item:last-child {
+  border-bottom: none;
+}
+.file-item:hover {
+  background-color: #f8fafc;
+}
+.file-item.selected {
+  color: #fff;
+  background-color: var(--anzhiyu-theme, #007bff) !important;
+  .column-size,
+  .column-modified {
+    color: #fff;
+  }
+}
+.column-name {
+  flex: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  padding-left: 12px;
+}
+.file-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+/* 使图标本身也可点击 */
+.selected-icon,
+.hover-icon {
+  cursor: pointer;
+}
+
+.selected-icon {
+  color: gold;
+}
+.hover-icon {
+  color: #a0a0a0;
+}
+
+.column-size {
+  flex: 1.5;
+  text-align: left;
+  color: #64748b;
+}
+.column-modified {
+  flex: 2.5;
+  color: #64748b;
+}
+
+.state-view {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  color: #909399;
+  font-size: 14px;
 }
 </style>

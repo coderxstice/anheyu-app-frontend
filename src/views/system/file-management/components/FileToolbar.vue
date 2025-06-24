@@ -26,30 +26,9 @@
         </template>
       </el-dropdown>
 
-      <el-tooltip content="更多操作" placement="bottom">
-        <div>
-          <el-button circle :icon="MoreFilled" />
-        </div>
-      </el-tooltip>
-
-      <el-button-group class="view-switcher">
-        <div>
-          <el-button
-            :type="viewMode === 'grid' ? 'primary' : 'default'"
-            :icon="Grid"
-            @click="setView('grid')"
-          />
-          <el-button
-            :type="viewMode === 'list' ? 'primary' : 'default'"
-            :icon="Tickets"
-            @click="setView('list')"
-          />
-        </div>
-      </el-button-group>
-
       <el-popover
         placement="bottom-end"
-        title="列设置"
+        title="布局设置"
         :width="250"
         trigger="click"
       >
@@ -62,9 +41,26 @@
             </el-tooltip>
           </div>
         </template>
+        <el-button-group class="view-switcher">
+          <div>
+            <el-button
+              :type="viewMode === 'grid' ? 'primary' : 'default'"
+              :icon="Grid"
+              @click="setView('grid')"
+            />
+            <el-button
+              :type="viewMode === 'list' ? 'primary' : 'default'"
+              :icon="Tickets"
+              @click="setView('list')"
+            />
+          </div>
+        </el-button-group>
         <div>
-          <span>分页大小</span>
-          <el-slider v-model="pageSize" :min="50" :max="2000" show-input />
+          <h1 class="text-base mt-2">分页大小</h1>
+          <el-slider v-model="pageSize" :min="50" :max="2000" size="small" />
+          <div class="text-xs text-gray-500">
+            当前分页大小: {{ pageSize }} 条
+          </div>
         </div>
       </el-popover>
 
@@ -78,11 +74,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref } from "vue";
+import { storeToRefs } from "pinia"; // <<< [!优化] 引入 storeToRefs
 import { useFileStore } from "@/store/modules/fileStore";
 import {
   Refresh,
-  MoreFilled,
   Grid,
   Tickets,
   Operation,
@@ -91,9 +87,13 @@ import {
 } from "@element-plus/icons-vue";
 
 const fileStore = useFileStore();
-const viewMode = computed(() => fileStore.viewMode);
+// --- [!优化] 使用 storeToRefs 获取响应式状态 ---
+// 这样可以确保 viewMode 始终与 store 保持同步，且代码风格更统一
+const { viewMode } = storeToRefs(fileStore);
+
 const pageSize = ref(50);
 
+// setViewMode action 现在可以直接从 store 实例调用
 const setView = (mode: "list" | "grid") => {
   fileStore.setViewMode(mode);
 };
@@ -118,7 +118,8 @@ const refresh = () => {
   align-items: center;
   gap: 12px;
 }
-.view-switcher {
-  margin: 0 8px;
+:deep(.el-slider__button) {
+  width: 16px !important;
+  height: 16px !important;
 }
 </style>

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-11 11:59:32
- * @LastEditTime: 2025-06-21 15:37:12
+ * @LastEditTime: 2025-06-24 23:28:19
  * @LastEditors: 安知鱼
  */
 import { cdn } from "./cdn";
@@ -82,7 +82,7 @@ export function getPluginsList(
       }
     }),
 
-    // 自定义插件 - 异步加载 CSS (保持不变)
+    // 自定义插件 - 异步加载 CSS
     {
       name: "load-stylesheet-async",
       transformIndexHtml(html) {
@@ -93,7 +93,7 @@ export function getPluginsList(
       }
     },
 
-    // 自定义插件 - 生成版本信息文件 (已修正)
+    // 自定义插件 - 生成版本信息文件
     {
       name: "generate-version",
       async writeBundle(outputOptions) {
