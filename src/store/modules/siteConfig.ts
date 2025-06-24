@@ -11,7 +11,7 @@ import {
 import { message } from "@/utils/message";
 
 // 引入公告相关的函数
-import { checkAndShowAnnouncementByConfig } from "@/components/Announcement";
+import { checkAndShowAnnouncementByConfig } from "@/components/AnNouncement";
 
 // 定义了 localStorage 存储的键名
 export const LOCAL_STORAGE_KEY = "site_config_cache";

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-06-24 22:39:13
+ * @LastEditTime: 2025-06-25 00:08:57
  * @LastEditors: 安知鱼
  */
 // 文件项类型定义
@@ -16,6 +16,7 @@ export interface FileItem {
   size?: number; // 单位：KB
   ext?: string;
   modified: string;
+  uploaded: string;
   type: "file" | "dir";
 }
 

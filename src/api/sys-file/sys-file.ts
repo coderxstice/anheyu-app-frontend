@@ -24,6 +24,10 @@ let fileIdCounter = 0;
  */
 const createFile = (options: Partial<FileItem>): FileItem => {
   const isDir = options.type === "dir";
+  const modifiedDate = new Date(
+    new Date(2024, 0, 1).getTime() +
+      Math.random() * (new Date().getTime() - new Date(2024, 0, 1).getTime())
+  );
   const defaults: Partial<FileItem> = {
     id: `${options.type}-${++fileIdCounter}`,
     path: "/",
@@ -32,7 +36,10 @@ const createFile = (options: Partial<FileItem>): FileItem => {
     // 如果是文件夹，扩展名为空
     ext: isDir ? "" : options.name?.split(".").pop()?.toLowerCase() || "",
     // 生成2024年至今的随机修改日期
-    modified: randomDate(new Date(2024, 0, 1), new Date())
+    modified: randomDate(new Date(2024, 0, 1), new Date()),
+    uploaded: new Date(
+      modifiedDate.getTime() - Math.random() * 1000 * 60 * 60 * 24
+    ).toISOString()
   };
   // 合并默认属性和传入的特定属性
   return { ...defaults, ...options } as FileItem;

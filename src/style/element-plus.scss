@@ -220,6 +220,17 @@ button.el-button {
   color: var(--anzhiyu-white) !important;
 }
 
+.sort-dropdown-item.el-dropdown-menu__item:not(.is-disabled):focus,
+.sort-dropdown-item.el-dropdown-menu__item:not(.is-disabled):hover {
+  background-color: var(--el-color-primary-light-9, #ecf5ff) !important;
+  color: var(--el-color-primary, #409eff) !important;
+}
+
+.el-dropdown-menu__item.active {
+  background-color: var(--anzhiyu-theme) !important;
+  color: var(--anzhiyu-white) !important;
+}
+
 .anzhiyu-dropdown-menu {
   transform-origin: right top;
 }

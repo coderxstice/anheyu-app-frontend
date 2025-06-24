@@ -3,6 +3,17 @@ import type { FileItem, UploadItem } from "@/api/sys-file/type";
 import { fetchFilesByPath, uploadFile } from "@/api/sys-file/sys-file";
 import { ElMessage } from "element-plus";
 
+// 为排序规则定义一个类型，增强代码健壮性
+export type SortKey =
+  | "name_asc"
+  | "name_desc"
+  | "size_asc"
+  | "size_desc"
+  | "modified_asc"
+  | "modified_desc"
+  | "uploaded_asc"
+  | "uploaded_desc";
+
 // 定义 Store 的状态接口
 interface FileState {
   path: string;
@@ -13,6 +24,7 @@ interface FileState {
   loading: boolean;
   uploadQueue: UploadItem[];
   showUploadProgress: boolean;
+  sortKey: SortKey;
 }
 
 // 用于上传队列中项目的唯一 ID
@@ -28,7 +40,8 @@ export const useFileStore = defineStore("file", {
     viewMode: "list",
     loading: false,
     uploadQueue: [],
-    showUploadProgress: false
+    showUploadProgress: false,
+    sortKey: "uploaded_desc"
   }),
 
   // getters: 派生状态（计算属性）
@@ -49,11 +62,48 @@ export const useFileStore = defineStore("file", {
     isAllSelected: state => {
       if (state.files.length === 0) return false;
       return state.selectedFiles.size === state.files.length;
+    },
+    sortedFiles: (state): FileItem[] => {
+      // 创建一个可变副本进行排序，以防意外修改原始 state
+      const filesToSort = [...state.files];
+      const [key, order] = state.sortKey.split("_");
+
+      filesToSort.sort((a, b) => {
+        // 始终将文件夹排在文件前面
+        if (a.type === "dir" && b.type !== "dir") return -1;
+        if (a.type !== "dir" && b.type === "dir") return 1;
+
+        let comparison = 0;
+        switch (key) {
+          case "name":
+            // 使用 localeCompare 进行带语言环境的字符串比较
+            comparison = a.name.localeCompare(b.name, "zh-Hans-CN");
+            break;
+          case "size":
+            comparison = (a.size ?? 0) - (b.size ?? 0);
+            break;
+          case "modified":
+            comparison =
+              new Date(a.modified).getTime() - new Date(b.modified).getTime();
+            break;
+          case "uploaded":
+            comparison =
+              new Date(a.uploaded).getTime() - new Date(b.uploaded).getTime();
+            break;
+        }
+        // 根据升序或降序返回结果
+        return order === "asc" ? comparison : -comparison;
+      });
+
+      return filesToSort;
     }
   },
 
   // actions: 定义修改状态的方法
   actions: {
+    setSort(key: SortKey) {
+      this.sortKey = key;
+    },
     // 从 API 加载文件列表
     async loadFiles(newPath: string) {
       this.loading = true;

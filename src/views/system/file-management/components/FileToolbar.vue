@@ -2,71 +2,154 @@
   <div class="file-toolbar rounded-2xl overflow-hidden bg-white">
     <div class="right-actions">
       <el-tooltip content="刷新" placement="bottom">
+        <el-button circle :icon="Refresh" @click="refresh" />
+      </el-tooltip>
+
+      <el-tooltip content="选择操作" placement="bottom">
         <div>
-          <el-button circle :icon="Refresh" @click="refresh" />
+          <el-dropdown trigger="click" placement="bottom-end">
+            <el-button circle :icon="FullScreen" />
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="fileStore.selectAll"
+                  >全选</el-dropdown-item
+                >
+                <el-dropdown-item
+                  :disabled="fileStore.selectedFiles.size === 0"
+                  @click="fileStore.clearSelection"
+                  >取消选择</el-dropdown-item
+                >
+                <el-dropdown-item @click="fileStore.invertSelection"
+                  >反选</el-dropdown-item
+                >
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
       </el-tooltip>
 
-      <el-dropdown trigger="click" placement="bottom-end">
-        <el-button circle :icon="FullScreen" />
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item @click="fileStore.selectAll"
-              >全选</el-dropdown-item
-            >
-            <el-dropdown-item
-              :disabled="fileStore.selectedFiles.size === 0"
-              @click="fileStore.clearSelection"
-              >取消选择</el-dropdown-item
-            >
-            <el-dropdown-item @click="fileStore.invertSelection"
-              >反选</el-dropdown-item
-            >
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-
-      <el-popover
-        placement="bottom-end"
-        title="布局设置"
-        :width="250"
-        trigger="click"
-      >
-        <template #reference>
-          <div>
-            <el-tooltip content="视图设置" placement="bottom">
-              <div>
-                <el-button circle :icon="Operation" />
-              </div>
-            </el-tooltip>
-          </div>
-        </template>
-        <el-button-group class="view-switcher">
-          <div>
-            <el-button
-              :type="viewMode === 'grid' ? 'primary' : 'default'"
-              :icon="Grid"
-              @click="setView('grid')"
-            />
-            <el-button
-              :type="viewMode === 'list' ? 'primary' : 'default'"
-              :icon="Tickets"
-              @click="setView('list')"
-            />
-          </div>
-        </el-button-group>
+      <el-tooltip content="视图设置" placement="bottom">
         <div>
-          <h1 class="text-base mt-2">分页大小</h1>
-          <el-slider v-model="pageSize" :min="50" :max="2000" size="small" />
-          <div class="text-xs text-gray-500">
-            当前分页大小: {{ pageSize }} 条
-          </div>
+          <el-popover
+            placement="bottom-end"
+            title="布局设置"
+            :width="250"
+            trigger="click"
+          >
+            <template #reference>
+              <el-button circle :icon="Operation" />
+            </template>
+            <el-button-group class="view-switcher">
+              <div>
+                <el-button
+                  :type="viewMode === 'grid' ? 'primary' : 'default'"
+                  :icon="Grid"
+                  @click="setView('grid')"
+                />
+                <el-button
+                  :type="viewMode === 'list' ? 'primary' : 'default'"
+                  :icon="Tickets"
+                  @click="setView('list')"
+                />
+              </div>
+            </el-button-group>
+            <div>
+              <h1 class="text-base mt-2">分页大小</h1>
+              <el-slider
+                v-model="pageSize"
+                :min="50"
+                :max="2000"
+                size="small"
+              />
+              <div class="text-xs text-gray-500">
+                当前分页大小: {{ pageSize }} 条
+              </div>
+            </div>
+          </el-popover>
         </div>
-      </el-popover>
+      </el-tooltip>
 
       <el-tooltip content="排序" placement="bottom">
         <div>
-          <el-button circle :icon="Sort" />
+          <el-dropdown
+            trigger="click"
+            placement="bottom-end"
+            class="sort-dropdown"
+            @command="handleSortChange"
+          >
+            <el-button circle :icon="Sort" />
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item
+                  command="name_asc"
+                  :class="{
+                    active: sortKey === 'name_asc',
+                    'sort-dropdown-item': true
+                  }"
+                  >A-Z</el-dropdown-item
+                >
+                <el-dropdown-item
+                  command="name_desc"
+                  :class="{
+                    active: sortKey === 'name_desc',
+                    'sort-dropdown-item': true
+                  }"
+                  >Z-A</el-dropdown-item
+                >
+                <el-dropdown-item
+                  divided
+                  command="size_asc"
+                  :class="{
+                    active: sortKey === 'size_asc',
+                    'sort-dropdown-item': true
+                  }"
+                  >最小</el-dropdown-item
+                >
+                <el-dropdown-item
+                  command="size_desc"
+                  :class="{
+                    active: sortKey === 'size_desc',
+                    'sort-dropdown-item': true
+                  }"
+                  >最大</el-dropdown-item
+                >
+                <el-dropdown-item
+                  divided
+                  command="modified_asc"
+                  :class="{
+                    active: sortKey === 'modified_asc',
+                    'sort-dropdown-item': true
+                  }"
+                  >最早修改</el-dropdown-item
+                >
+                <el-dropdown-item
+                  command="modified_desc"
+                  :class="{
+                    active: sortKey === 'modified_desc',
+                    'sort-dropdown-item': true
+                  }"
+                  >最新修改</el-dropdown-item
+                >
+                <el-dropdown-item
+                  divided
+                  command="uploaded_asc"
+                  :class="{
+                    active: sortKey === 'uploaded_asc',
+                    'sort-dropdown-item': true
+                  }"
+                  >最早上传</el-dropdown-item
+                >
+                <el-dropdown-item
+                  command="uploaded_desc"
+                  :class="{
+                    active: sortKey === 'uploaded_desc',
+                    'sort-dropdown-item': true
+                  }"
+                  >最新上传</el-dropdown-item
+                >
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
       </el-tooltip>
     </div>
@@ -75,8 +158,9 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { storeToRefs } from "pinia"; // <<< [!优化] 引入 storeToRefs
+import { storeToRefs } from "pinia";
 import { useFileStore } from "@/store/modules/fileStore";
+import type { SortKey } from "@/store/modules/fileStore";
 import {
   Refresh,
   Grid,
@@ -87,13 +171,9 @@ import {
 } from "@element-plus/icons-vue";
 
 const fileStore = useFileStore();
-// --- [!优化] 使用 storeToRefs 获取响应式状态 ---
-// 这样可以确保 viewMode 始终与 store 保持同步，且代码风格更统一
-const { viewMode } = storeToRefs(fileStore);
-
+const { viewMode, sortKey } = storeToRefs(fileStore);
 const pageSize = ref(50);
 
-// setViewMode action 现在可以直接从 store 实例调用
 const setView = (mode: "list" | "grid") => {
   fileStore.setViewMode(mode);
 };
@@ -101,18 +181,21 @@ const setView = (mode: "list" | "grid") => {
 const refresh = () => {
   fileStore.loadFiles(fileStore.path);
 };
+
+const handleSortChange = (key: SortKey) => {
+  fileStore.setSort(key);
+};
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .file-toolbar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   padding: 8px 24px;
   background-color: #fff;
   border: var(--style-border);
 }
-.left-actions,
 .right-actions {
   display: flex;
   align-items: center;
@@ -121,5 +204,9 @@ const refresh = () => {
 :deep(.el-slider__button) {
   width: 16px !important;
   height: 16px !important;
+}
+:deep(.el-dropdown-menu__item.active) {
+  color: var(--el-color-primary, #409eff);
+  background-color: var(--el-color-primary-light-9, #ecf5ff);
 }
 </style>
