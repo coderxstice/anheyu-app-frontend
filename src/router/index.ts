@@ -141,6 +141,28 @@ router.beforeEach((to: ToRouteType, _from, next) => {
       return; // 结束当前导航守卫
     }
 
+    // 新增：已登录状态下访问登录页，直接重定向到第一个菜单页
+    if (to.path === "/login") {
+      // 检查权限菜单是否已加载
+      if (usePermissionStoreHook().wholeMenus.length === 0) {
+        // 如果未加载（例如刷新或直接访问/login），则先初始化路由
+        initRouter()
+          .then(() => {
+            // 初始化成功后，获取第一个菜单并重定向
+            next({ path: getTopMenu(true).path, replace: true });
+          })
+          .catch(() => {
+            // 初始化失败（如token失效），则移除token并允许访问登录页
+            removeToken();
+            next();
+          });
+      } else {
+        // 如果权限菜单已加载，直接获取第一个菜单并重定向
+        next({ path: getTopMenu(true).path, replace: true });
+      }
+      return; // 结束当前导航守卫
+    }
+
     // 3.3 **重要：已登录用户访问白名单页面（如 /album）直接放行**
     if (whiteList.includes(to.fullPath)) {
       next();
