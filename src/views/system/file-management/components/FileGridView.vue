@@ -3,7 +3,7 @@
     <div
       v-for="file in files"
       :key="file.id"
-      class="grid-item"
+      class="grid-item deselect-safe-zone"
       :class="{ selected: selectedFiles.has(file.id) }"
       @click="handleItemClick(file, $event)"
       @dblclick="handleItemDblClick(file)"
@@ -25,6 +25,7 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, onUnmounted } from "vue"; // 引入生命周期钩子
 import { storeToRefs } from "pinia";
 import { useFileStore } from "@/store/modules/fileStore";
 import { useFileIcons } from "../hooks/useFileIcons";
@@ -36,11 +37,7 @@ const fileStore = useFileStore();
 const { getFileIcon } = useFileIcons();
 const { sortedFiles: files, loading, selectedFiles } = storeToRefs(fileStore);
 
-// --- [!新增] 动画处理函数 ---
-/**
- * 当鼠标按下时，缩小项目
- * @param event 鼠标事件
- */
+// --- 动画处理函数 ---
 const handleMouseDown = (event: MouseEvent) => {
   gsap.to(event.currentTarget as HTMLElement, {
     scale: 0.95,
@@ -48,25 +45,14 @@ const handleMouseDown = (event: MouseEvent) => {
     ease: "power2.out"
   });
 };
-
-/**
- * 当鼠标抬起或离开时，恢复项目大小，并带有回弹效果
- * @param event 鼠标事件
- */
 const handleMouseUp = (event: MouseEvent) => {
   gsap.to(event.currentTarget as HTMLElement, {
     scale: 1,
-    duration: 0.4, // 恢复动画可以稍长一点，以突出弹性效果
-    ease: "elastic.out(1, 0.5)" // GSAP 经典的弹性缓动
+    duration: 0.4,
+    ease: "elastic.out(1, 0.5)"
   });
 };
-
-/**
- * 当鼠标移出时，同样恢复项目大小，防止项目卡在缩小状态
- * @param event 鼠标事件
- */
 const handleMouseLeave = (event: MouseEvent) => {
-  // 为了防止和 mouseup 冲突，可以检查鼠标是否仍处于按下状态，但通常直接恢复更稳妥
   gsap.to(event.currentTarget as HTMLElement, {
     scale: 1,
     duration: 0.4,
@@ -74,12 +60,7 @@ const handleMouseLeave = (event: MouseEvent) => {
   });
 };
 
-// --- [!修改] 文件选择逻辑 (移除动画部分) ---
-/**
- * 处理单击事件，现在只负责选择逻辑
- * @param file 被点击的文件项
- * @param event 鼠标事件对象
- */
+// --- 文件选择逻辑 ---
 const handleItemClick = (file: FileItem, event: MouseEvent) => {
   if (event.shiftKey) {
     fileStore.selectRange(file.id);
@@ -90,9 +71,7 @@ const handleItemClick = (file: FileItem, event: MouseEvent) => {
   }
 };
 
-/**
- * 处理双击事件 (保持不变)
- */
+// --- 双击事件 ---
 const handleItemDblClick = (file: FileItem) => {
   if (file.type === "dir") {
     const newPath =
@@ -100,6 +79,32 @@ const handleItemDblClick = (file: FileItem) => {
     fileStore.loadFiles(newPath);
   }
 };
+
+// --- [!新增] 全选快捷键逻辑 ---
+const handleKeyDown = (event: KeyboardEvent) => {
+  // 检查焦点是否在输入框等元素上，如果是则不执行快捷键
+  const target = event.target as HTMLElement;
+  if (["INPUT", "TEXTAREA"].includes(target.tagName)) {
+    return;
+  }
+
+  // 判断是否按下了 Cmd/Ctrl + A
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "a") {
+    event.preventDefault(); // 阻止浏览器默认的全选文本行为
+    fileStore.selectAll();
+  }
+};
+
+// --- [!新增] 生命周期钩子 ---
+onMounted(() => {
+  // 组件挂载时，添加全局键盘事件监听
+  window.addEventListener("keydown", handleKeyDown);
+});
+
+onUnmounted(() => {
+  // 组件卸载时，移除监听，防止内存泄漏
+  window.removeEventListener("keydown", handleKeyDown);
+});
 </script>
 
 <style scoped>
@@ -118,7 +123,6 @@ const handleItemDblClick = (file: FileItem) => {
   border-radius: 8px;
   cursor: pointer;
   border: 1px solid transparent;
-  /* 移除 transform 的 CSS transition，完全交由 GSAP 控制 */
   transition:
     background-color 0.2s ease,
     border-color 0.2s ease;
@@ -147,6 +151,7 @@ const handleItemDblClick = (file: FileItem) => {
 }
 .item-name {
   width: 100%;
+  min-width: 0;
   font-size: 14px;
   word-break: break-all;
   display: -webkit-box;

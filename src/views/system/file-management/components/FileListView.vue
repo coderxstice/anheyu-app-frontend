@@ -92,7 +92,7 @@ onUnmounted(() => {
       <li
         v-for="item in files"
         :key="item.id"
-        class="file-item"
+        class="file-item deselect-safe-zone"
         :class="{ selected: selectedFiles.has(item.id) }"
         @click="handleItemClick(item, $event)"
         @dblclick="

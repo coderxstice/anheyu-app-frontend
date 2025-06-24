@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, computed, ref } from "vue";
+import { onMounted, computed, ref, onUnmounted } from "vue";
 import { useFileStore } from "@/store/modules/fileStore";
 import FileHeard from "./components/FileHeard.vue";
 import FileBreadcrumb from "./components/FileBreadcrumb.vue";
@@ -87,6 +87,24 @@ const onDrop = (e: DragEvent) => {
     fileStore.addFilesToUpload(Array.from(e.dataTransfer.files));
   }
 };
+
+// --- 点击外部/空白区域取消选择 ---
+const handleDocumentMouseDown = (event: MouseEvent) => {
+  // .closest() 方法会从事件目标开始，向上遍历 DOM 树，查找匹配选择器的最近的祖先元素
+  // 如果点击的目标或其任何父级元素都不在“安全区”内，则清空选择
+  if (!(event.target as HTMLElement).closest(".deselect-safe-zone")) {
+    fileStore.clearSelection();
+  }
+};
+
+onMounted(() => {
+  fileStore.loadFiles("/");
+  document.addEventListener("mousedown", handleDocumentMouseDown);
+});
+
+onUnmounted(() => {
+  document.removeEventListener("mousedown", handleDocumentMouseDown);
+});
 </script>
 
 <style>
