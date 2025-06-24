@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, watch, h } from "vue";
+import { ref, computed, watch } from "vue";
 import type { StoragePolicy } from "@/api/sys-policy";
-import { addDialog } from "@/components/ReDialog";
-import MagicVariablesTable from "./MagicVariablesTable.vue";
+import { formRules } from "./utils/rule";
 
-// ... (props, emits, formData, aera 等逻辑保持不变)
+// --- props, emits, and form data logic ---
 const props = defineProps<{ modelValue: Partial<StoragePolicy> }>();
 const emit = defineEmits(["update:modelValue"]);
 const formData = computed({
@@ -12,6 +11,8 @@ const formData = computed({
   set: value => emit("update:modelValue", value)
 });
 const ruleFormRef = ref();
+
+// --- Unit conversion and form logic ---
 const units = [
   { label: "B", value: 1 },
   { label: "KB", value: 1024 },
@@ -22,6 +23,7 @@ const maxsizeValue = ref(0);
 const maxsizeUnit = ref(1024 * 1024);
 const chunkSizeValue = ref(0);
 const chunkSizeUnit = ref(1024 * 1024);
+
 function bytesToHuman(bytes: number): [number, number] {
   if (bytes === 0) return [0, 1024 * 1024];
   for (let i = units.length - 1; i >= 0; i--) {
@@ -33,9 +35,11 @@ function bytesToHuman(bytes: number): [number, number] {
   const mbValue = 1024 * 1024;
   return [parseFloat((bytes / mbValue).toFixed(2)), mbValue];
 }
+
 watch([maxsizeValue, maxsizeUnit], ([newSize, newUnit]) => {
   formData.value.max_size = Math.round(newSize * newUnit);
 });
+
 watch(
   () => props.modelValue.max_size,
   newMaxSize => {
@@ -43,10 +47,12 @@ watch(
   },
   { immediate: true }
 );
+
 watch([chunkSizeValue, chunkSizeUnit], ([newSize, newUnit]) => {
   if (!formData.value.settings) formData.value.settings = {};
   formData.value.settings.chunk_size = Math.round(newSize * newUnit);
 });
+
 watch(
   () => props.modelValue.settings?.chunk_size,
   newChunkSize => {
@@ -57,27 +63,23 @@ watch(
   },
   { immediate: true }
 );
-const showOneDriveFields = computed(() => formData.value.type === "onedrive");
 
-// ▼▼▼ 1. 修改函数，让它能接收上下文参数 ▼▼▼
-function showMagicVariablesDialog(context: "path" | "filename") {
-  addDialog({
-    title: "魔法变量说明",
-    width: "750px",
-    hideFooter: true,
-    // ▼▼▼ 2. 将 context 作为 prop 传递给子组件 ▼▼▼
-    contentRenderer: () => h(MagicVariablesTable, { context })
-  });
-}
+const showOneDriveFields = computed(() => formData.value.type === "onedrive");
 
 function getRef() {
   return ruleFormRef.value;
 }
+
 defineExpose({ getRef });
 </script>
 
 <template>
-  <el-form ref="ruleFormRef" :model="formData" label-width="150px">
+  <el-form
+    ref="ruleFormRef"
+    :model="formData"
+    :rules="formRules"
+    label-width="150px"
+  >
     <h1>基本信息</h1>
     <el-form-item label="策略名称" prop="name">
       <el-input v-model="formData.name" placeholder="请输入策略名称" />
@@ -96,34 +98,21 @@ defineExpose({ getRef });
       <h2 class="divider-title">存储与上传</h2>
     </el-divider>
 
-    <el-form-item label="Blob 存储目录">
+    <el-form-item label="Blob 挂载目录" prop="mount_dir">
+      <el-input v-model="formData.mount_dir" placeholder="例如: /" />
+      <div class="form-item-help">存储对应的挂载路径，需要确保唯一。</div>
+    </el-form-item>
+
+    <el-form-item label="Blob 存储目录" prop="dir_name_rule">
       <el-input
         v-model="formData.dir_name_rule"
-        placeholder="例如: data/uploads/{uid}/{path}"
+        placeholder="例如: /www/wwwroot/anheyu.com/storage"
       />
-      <div class="form-item-help">
-        文件 Blob 的存放目录，可以使用
-        <el-link type="primary" @click="showMagicVariablesDialog('path')"
-          >魔法变量</el-link
-        >。
-      </div>
+      <div class="form-item-help">文件 Blob 的存放目录</div>
     </el-form-item>
 
-    <el-form-item label="Blob 名称">
-      <el-input
-        v-model="formData.file_name_rule"
-        placeholder="例如: {uuid}_{originname}"
-      />
-      <div class="form-item-help">
-        文件 Blob 的名称，可以使用
-        <el-link type="primary" @click="showMagicVariablesDialog('filename')"
-          >魔法变量</el-link
-        >，需确保绝对唯一。
-      </div>
-    </el-form-item>
-
-    <el-form-item label="文件大小限制">
-      <el-input v-model.number="maxsizeValue" type="number" :min="0">
+    <el-form-item label="文件大小限制" prop="max_size">
+      <el-input v-model.number="maxsizeValue" :min="0" style="width: 180px">
         <template #append>
           <el-select v-model="maxsizeUnit" style="width: 80px">
             <el-option
@@ -139,8 +128,8 @@ defineExpose({ getRef });
         单个文件的最大大小，输入为 0 时表示不限制单文件大小。
       </div>
     </el-form-item>
-    <el-form-item label="上传分片大小">
-      <el-input v-model.number="chunkSizeValue" type="number" :min="0">
+    <el-form-item label="上传分片大小" prop="settings.chunk_size">
+      <el-input v-model.number="chunkSizeValue" :min="0" style="width: 180px">
         <template #append>
           <el-select v-model="chunkSizeUnit" style="width: 80px">
             <el-option
@@ -166,5 +155,16 @@ defineExpose({ getRef });
 }
 .el-link__inner {
   font-size: 12px !important;
+}
+.form-item-help {
+  color: #999;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+.divider-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
 }
 </style>

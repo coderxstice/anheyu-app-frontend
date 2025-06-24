@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 14:37:32
- * @LastEditTime: 2025-06-23 17:26:41
+ * @LastEditTime: 2025-06-24 10:03:33
  * @LastEditors: 安知鱼
  */
 import { reactive } from "vue";
@@ -14,7 +14,11 @@ export const formRules = reactive<FormRules>({
   dir_name_rule: [
     { required: true, message: "目录命名规则为必填项", trigger: "blur" }
   ],
-  file_name_rule: [
-    { required: true, message: "文件命名规则为必填项", trigger: "blur" }
+  mount_dir: [{ required: true, message: "挂载路径为必填项", trigger: "blur" }],
+  max_size: [
+    { required: true, message: "文件大小限制为必填项", trigger: "change" }
+  ],
+  "settings.chunk_size": [
+    { required: true, message: "上传分片大小为必填项", trigger: "change" }
   ]
 });

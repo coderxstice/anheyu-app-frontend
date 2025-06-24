@@ -22,7 +22,7 @@ export interface StoragePolicy {
   secret_key?: string;
   max_size: number;
   dir_name_rule?: string;
-  file_name_rule?: string;
+  mount_dir?: string;
   settings?: any;
 }
 
