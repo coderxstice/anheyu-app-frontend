@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useRouter } from "vue-router"; // 1. 导入 useRouter
-import { gsap } from "gsap";
+import { useRouter } from "vue-router";
 import { usePolicy } from "./utils/hook";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { IconifyIconOffline } from "@/components/ReIcon";

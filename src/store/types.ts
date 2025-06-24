@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-06-17 21:28:29
+ * @LastEditTime: 2025-06-24 14:17:17
  * @LastEditors: 安知鱼
  */
 import type { RouteRecordName } from "vue-router";
@@ -52,3 +52,22 @@ export type userType = {
   isRemembered?: boolean;
   loginDay?: number;
 };
+
+export interface FileItem {
+  id: string;
+  name: string;
+  type: "folder" | "file";
+  size: number;
+  modified: number;
+  path: string;
+  extension?: string;
+}
+
+export interface UploadItem {
+  id: number;
+  name: string;
+  size: number;
+  status: "uploading" | "success" | "error";
+  progress: number;
+  file: File;
+}
