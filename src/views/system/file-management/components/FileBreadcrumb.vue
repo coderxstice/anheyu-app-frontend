@@ -147,12 +147,12 @@ import InfoFilled from "@iconify-icons/ep/info-filled";
 import Delete from "@iconify-icons/ep/delete";
 
 const fileStore = useFileStore();
-// ... (剩余的 script 内容完全保持不变) ...
 const pathSegments = computed(() => fileStore.pathSegments);
 const isEditing = ref(false);
 const pathInput = ref("");
 const pathInputRef = ref<HTMLInputElement | null>(null);
 const isDropdownVisible = ref(false);
+
 const switchToEditMode = () => {
   if (isDropdownVisible.value) return;
   isEditing.value = true;
@@ -161,16 +161,34 @@ const switchToEditMode = () => {
     pathInputRef.value?.focus();
   });
 };
+
 const goToPath = (path: string) => {
   fileStore.loadFiles(path);
 };
+
 const handleSubmit = () => {
-  const finalPath = pathInput.value.startsWith("/")
-    ? pathInput.value
-    : `/${pathInput.value}`;
+  // 1. 格式化用户输入的路径
+  let finalPath = pathInput.value.trim();
+  if (!finalPath.startsWith("/")) {
+    finalPath = `/${finalPath}`;
+  }
+  // 移除末尾的'/' (根目录除外)，以便于精确比较
+  if (finalPath.length > 1 && finalPath.endsWith("/")) {
+    finalPath = finalPath.slice(0, -1);
+  }
+
+  // 2. 比较新旧路径是否相同
+  if (finalPath === fileStore.path) {
+    // 路径未改变，仅退出编辑模式，不重新加载数据
+    isEditing.value = false;
+    return;
+  }
+
+  // 3. 路径已改变，加载新数据
   goToPath(finalPath);
   isEditing.value = false;
 };
+
 type CommandAction =
   | "enter"
   | "download"
@@ -183,10 +201,12 @@ type CommandAction =
   | "more"
   | "info"
   | "delete";
+
 interface CommandPayload {
   action: CommandAction;
   segment: { name: string; path: string };
 }
+
 const handleCommand = (command: CommandPayload) => {
   const { action, segment } = command;
   ElMessage.info(`你点击了 [${segment.name}] 的 [${action}] 操作`);
@@ -287,7 +307,6 @@ const handleCommand = (command: CommandPayload) => {
 }
 .el-dropdown-link .el-icon--right {
   margin-left: 5px;
-  // 为在线图标设置一个合适的尺寸
   font-size: 12px;
   display: inline-flex;
   align-items: center;
