@@ -61,6 +61,7 @@ import Download from "@iconify-icons/ep/download";
 import Share from "@iconify-icons/ep/share";
 import CopyDocument from "@iconify-icons/ep/copy-document";
 import Rank from "@iconify-icons/ep/rank";
+import Info from "@iconify-icons/ep/info-filled";
 
 export interface MenuItem {
   label?: string;
@@ -131,6 +132,7 @@ const itemMenu: MenuItem[] = [
   { label: "下载", action: "download", icon: Download, color: "#1677FF" },
   { label: "分享", action: "share", icon: Share, color: "#A15FDE" },
   { label: "复制", action: "copy", icon: CopyDocument, color: "#f6c75c" },
+  { label: "详细信息", action: "info", icon: Info, color: "#b9b7b2" },
   { divider: true },
   {
     label: "删除",

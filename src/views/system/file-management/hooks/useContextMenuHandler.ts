@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-25 14:18:45
- * @LastEditTime: 2025-06-25 14:18:51
+ * @LastEditTime: 2025-06-25 14:55:41
  * @LastEditors: 安知鱼
  */
 import { ref } from "vue";
@@ -70,6 +70,9 @@ export function useContextMenuHandler() {
         handleCreateFile("md");
         break;
       case "create-txt":
+        handleCreateFile("txt");
+        break;
+      case "info":
         handleCreateFile("txt");
         break;
       case "refresh":
