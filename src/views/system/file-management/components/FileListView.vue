@@ -5,23 +5,18 @@ import { useFileStore } from "@/store/modules/fileStore";
 import { formatSize } from "@/utils/format";
 import { useFileIcons } from "../hooks/useFileIcons";
 import gsap from "gsap";
-import type { FileItem } from "@/api/sys-file/type";
+import { FileItem, FileType } from "@/api/sys-file/type"; // 确保 FileType 已正确导入
 
 // --- 初始化 ---
 const fileStore = useFileStore();
-const { getFileIcon } = useFileIcons();
-// 解构出 store 中的 files, loading, selectedFiles 和当前的 path
-const {
-  files,
-  loading,
-  selectedFiles,
-  path: currentStorePath
-} = storeToRefs(fileStore);
+const { getFileIcon } = useFileIcons(); // useFileIcons 钩子需要被修改
+const { files, loading, selectedFiles } = storeToRefs(fileStore);
 
 const hoveredFileId = ref<string | null>(null);
 
 // --- GSAP 动画钩子 ---
-const onIconEnter = (el, done) => {
+const onIconEnter = (el: HTMLElement, done: () => void) => {
+  // 添加类型注解
   gsap.fromTo(
     el,
     { opacity: 0 },
@@ -34,7 +29,8 @@ const onIconEnter = (el, done) => {
   );
 };
 
-const onIconLeave = (el, done) => {
+const onIconLeave = (el: HTMLElement, done: () => void) => {
+  // 添加类型注解
   gsap.to(el, {
     opacity: 0,
     duration: 0.105,
@@ -87,8 +83,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
 // --- 生命周期 ---
 onMounted(() => {
-  // 首次加载文件列表，从根路径开始
-  handlePathChange("/");
+  handlePathChange("anzhiyu://my/"); // 首次加载文件列表，使用后端定义的根路径 URI
   window.addEventListener("keydown", handleKeyDown);
 });
 
@@ -121,17 +116,12 @@ onUnmounted(() => {
         :class="{ selected: selectedFiles.has(item.id) }"
         @click="handleItemClick(item, $event)"
         @dblclick="
-          item.type === 'dir' &&
+          item.type === FileType.Dir && // 这里已正确使用 FileType.Dir
           (_ => {
             console.log('双击了目录项:', item);
             return true;
           })() &&
-          // 根据当前路径和文件夹名称拼接新路径
-          handlePathChange(
-            currentStorePath === '/'
-              ? `/${item.name}`
-              : `${currentStorePath}/${item.name}`
-          )
+          handlePathChange(item.path) // 直接使用 item.path 进行导航
         "
         @mouseenter="hoveredFileId = item.id"
         @mouseleave="hoveredFileId = null"
@@ -173,7 +163,7 @@ onUnmounted(() => {
           <span>{{ item.name }}</span>
         </div>
         <div class="column-size">{{ formatSize(item.size) }}</div>
-        <div class="column-modified">{{ item.modified }}</div>
+        <div class="column-modified">{{ item.updated_at }}</div>
       </li>
     </ul>
   </div>

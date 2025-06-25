@@ -31,18 +31,12 @@ import { storeToRefs } from "pinia";
 import { useFileStore } from "@/store/modules/fileStore";
 import { useFileIcons } from "../hooks/useFileIcons";
 import gsap from "gsap";
-import type { FileItem } from "@/api/sys-file/type";
+import { FileItem, FileType } from "@/api/sys-file/type"; // 确保 FileType 已正确导入
 
 // --- 初始化 Store 和 Hooks ---
 const fileStore = useFileStore();
-const { getFileIcon } = useFileIcons();
-// 解构出 store 中的 sortedFiles, loading, selectedFiles 和当前的 path
-const {
-  sortedFiles: files,
-  loading,
-  selectedFiles,
-  path: currentStorePath
-} = storeToRefs(fileStore);
+const { getFileIcon } = useFileIcons(); // useFileIcons 钩子需要被修改
+const { sortedFiles: files, loading, selectedFiles } = storeToRefs(fileStore);
 
 // --- 动画处理函数 ---
 const handleMouseDown = (event: MouseEvent) => {
@@ -80,15 +74,11 @@ const handleItemClick = (file: FileItem, event: MouseEvent) => {
 
 // --- 双击事件 ---
 const handleItemDblClick = (file: FileItem) => {
-  if (file.type === "dir") {
+  // 检查 file.type 是否为目录类型 (使用 FileType.Dir 枚举)
+  if (file.type === FileType.Dir) {
     console.log("双击了目录项:", file);
-    // 根据当前路径和文件夹名称拼接新路径
-    const newPath =
-      currentStorePath.value === "/"
-        ? `/${file.name}`
-        : `${currentStorePath.value}/${file.name}`;
-    console.log("双击目录，将导航到路径:", newPath);
-    fileStore.loadFiles(newPath);
+    // 直接使用 file.path 进行导航
+    fileStore.loadFiles(file.path);
   }
 };
 
