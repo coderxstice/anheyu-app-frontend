@@ -11,7 +11,8 @@ import type { SortKey } from "@/store/modules/fileStore";
  * @param pageSize The number of items per page
  * @returns Promise<FileListResponse>
  */
-export const fetchFilesByPathApi = (
+export const fetchFilesByPathApi = async (
+  // 将函数改为 async
   path: string,
   sortKey: SortKey,
   page: number,
@@ -19,22 +20,40 @@ export const fetchFilesByPathApi = (
 ): Promise<FileListResponse> => {
   const [order, direction] = sortKey.split("_");
 
-  // 构造 URI 字符串，不再包含其他查询参数
-  // 注意：根目录的路径是 /，其他路径是 /folder，所以要处理一下
   const finalPath = path === "/" ? "" : path;
   const uri = `anzhiyu://my${finalPath}`; // URI 中只包含路径信息
 
-  // 发起真实的 API 请求
-  // 将 uri 和其他查询参数作为独立的 params 对象传递
-  return http.request<FileListResponse>("get", baseUrlApi("file"), {
-    params: {
-      uri: uri, // 文件路径 URI
-      order: order,
-      direction: direction,
-      page: String(page),
-      page_size: String(pageSize) // 注意这里也应该是 page_size，与后端约定一致
-    }
+  console.log("fetchFilesByPathApi 请求参数:", {
+    // 新增日志：请求参数
+    uri: uri,
+    order: order,
+    direction: direction,
+    page: String(page),
+    page_size: String(pageSize)
   });
+
+  try {
+    const response = await http.request<FileListResponse>(
+      "get",
+      baseUrlApi("file"),
+      {
+        params: {
+          uri: uri,
+          order: order,
+          direction: direction,
+          page: String(page),
+          page_size: String(pageSize)
+        }
+      }
+    );
+
+    console.log("fetchFilesByPathApi 后端返回数据:", response); // *** 关键新增日志：打印后端返回的完整数据 ***
+
+    return response;
+  } catch (error) {
+    console.error("fetchFilesByPathApi 请求失败:", error); // 新增日志：请求失败
+    throw error; // 重新抛出错误，让调用者可以捕获
+  }
 };
 
 /**
@@ -93,28 +112,56 @@ export const deleteUploadSessionApi = (
   });
 };
 
-// --- 以下为占位符 API，待后端提供接口后可替换 ---
-
 /**
- * 模拟创建文件的 API
- * @param path 所在路径
- * @param name 文件名
+ * 创建文件或文件夹的通用 API
+ * @param type 'file' 或 'folder'
+ * @param path 所在路径，例如 "/" 或 "/Documents"
+ * @param name 文件名或文件夹名
+ * @param errOnConflict 如果为 true，当目标已存在时返回错误。默认为 false。
  */
-export const createFileApi = (path: string, name: string): Promise<any> => {
-  console.log(`调用创建文件 API: 在路径 '${path}' 创建 '${name}'`);
-  const uri = `anzhiyu://my${path === "/" ? "" : path}/${name}`;
-  // 假设的创建文件接口
-  return http.request("post", baseUrlApi("file/touch"), { data: { uri } });
+export const createItemApi = (
+  type: "file" | "folder",
+  path: string,
+  name: string,
+  errOnConflict: boolean = false
+): Promise<any> => {
+  console.log(`调用创建 ${type} API: 在路径 '${path}' 创建 '${name}'`);
+  const finalPath = path === "/" ? "" : path;
+  const uri = `anzhiyu://my${finalPath}/${name}`;
+
+  return http.request("post", baseUrlApi("file/create"), {
+    data: {
+      type: type,
+      uri: uri,
+      err_on_conflict: errOnConflict
+    }
+  });
 };
 
 /**
- * 模拟创建文件夹的 API
+ * 创建空文件的 API
+ * @param path 所在路径
+ * @param name 文件名
+ * @param errOnConflict 如果为 true，当目标已存在时返回错误。默认为 false。
+ */
+export const createFileApi = (
+  path: string,
+  name: string,
+  errOnConflict: boolean = false
+): Promise<any> => {
+  return createItemApi("file", path, name, errOnConflict);
+};
+
+/**
+ * 创建文件夹的 API
  * @param path 所在路径
  * @param name 文件夹名
+ * @param errOnConflict 如果为 true，当目标已存在时返回错误。默认为 false。
  */
-export const createFolderApi = (path: string, name: string): Promise<any> => {
-  console.log(`调用创建文件夹 API: 在路径 '${path}' 创建 '${name}'`);
-  const uri = `anzhiyu://my${path === "/" ? "" : path}/${name}`;
-  // 假设的创建文件夹接口
-  return http.request("post", baseUrlApi("file/folder"), { data: { uri } });
+export const createFolderApi = (
+  path: string,
+  name: string,
+  errOnConflict: boolean = false
+): Promise<any> => {
+  return createItemApi("folder", path, name, errOnConflict);
 };

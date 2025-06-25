@@ -1,12 +1,13 @@
 /*
- * @Description:
+ * @Description: 文件操作的组合式函数
  * @Author: 安知鱼
  * @Date: 2025-06-25 09:49:46
- * @LastEditTime: 2025-06-25 09:49:51
+ * @LastEditTime: 2025-06-25 19:01:36
  * @LastEditors: 安知鱼
  */
 import { useFileStore } from "@/store/modules/fileStore";
 import { ElMessage, ElMessageBox } from "element-plus";
+import { nextTick } from "vue"; // 引入 nextTick
 
 // 这是一个组合式函数，返回一组可复用的文件操作方法
 export function useFileActions() {
@@ -49,49 +50,130 @@ export function useFileActions() {
    * @param ext 文件扩展名，如 'md' 或 'txt'
    */
   const handleCreateFile = (ext: "md" | "txt") => {
+    const defaultFileName = `新文件.${ext}`;
     ElMessageBox.prompt("请输入文件名", "创建文件", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
-      inputValue: `新文件.${ext}`,
+      inputValue: defaultFileName,
       inputPattern: /^[^\s\/\\:*?"<>|]+$/,
       inputErrorMessage: "文件名不能包含特殊字符"
     })
       .then(({ value }) => {
-        // 在这里可以调用 store action 来实际创建文件
         fileStore.createFile(value);
-        ElMessage.success(`文件 ${value} 创建成功`);
       })
       .catch(() => {
         ElMessage.info("已取消创建");
       });
+
+    // 使用 nextTick 在 DOM 更新后尝试聚焦并选中文件名部分
+    nextTick(() => {
+      const inputElement = document.querySelector(
+        ".el-message-box__input input"
+      ) as HTMLInputElement;
+      if (inputElement) {
+        const dotIndex = defaultFileName.lastIndexOf(".");
+        if (dotIndex > 0) {
+          // 如果有扩展名，则只选中文件名部分
+          inputElement.setSelectionRange(0, dotIndex);
+        } else {
+          // 如果没有扩展名，则全选
+          inputElement.select();
+        }
+        inputElement.focus(); // 确保输入框获得焦点
+      }
+    });
   };
 
   /**
    * 创建新文件夹
    */
   const handleCreateFolder = () => {
+    const defaultFolderName = `新建文件夹`;
     ElMessageBox.prompt("请输入文件夹名称", "创建文件夹", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
-      inputValue: `新建文件夹`,
+      inputValue: defaultFolderName,
       inputPattern: /^[^\s\/\\:*?"<>|]+$/,
       inputErrorMessage: "文件夹名不能包含特殊字符"
     })
       .then(({ value }) => {
         fileStore.createFolder(value);
-        ElMessage.success(`文件夹 ${value} 创建成功`);
       })
       .catch(() => {
         ElMessage.info("已取消创建");
       });
+
+    // 使用 nextTick 在 DOM 更新后尝试聚焦并全选输入框内容
+    nextTick(() => {
+      const inputElement = document.querySelector(
+        ".el-message-box__input input"
+      ) as HTMLInputElement;
+      if (inputElement) {
+        inputElement.select(); // 文件夹名直接全选
+        inputElement.focus(); // 确保输入框获得焦点
+      }
+    });
   };
 
-  // ... 未来可以添加更多操作，如重命名、删除等
-  const handleRename = file => {
+  const handleRename = (file: { name: string; [key: string]: any }) => {
     console.log("重命名文件:", file);
+    ElMessageBox.prompt("请输入新名称", `重命名 ${file.name}`, {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      inputValue: file.name,
+      inputPattern: /^[^\s\/\\:*?"<>|]+$/,
+      inputErrorMessage: "名称不能包含特殊字符"
+    })
+      .then(({ value }) => {
+        console.log(`将 ${file.name} 重命名为 ${value}`);
+        ElMessage.success(`已请求重命名为 ${value}`);
+        // 成功后重新加载文件列表（如果需要的话）
+        // fileStore.loadFiles(fileStore.path);
+      })
+      .catch(() => {
+        ElMessage.info("已取消重命名");
+      });
+
+    nextTick(() => {
+      const inputElement = document.querySelector(
+        ".el-message-box__input input"
+      ) as HTMLInputElement;
+      if (inputElement) {
+        const fileName = file.name;
+        const dotIndex = fileName.lastIndexOf(".");
+        if (dotIndex > 0) {
+          // 如果有扩展名，则只选中文件名部分
+          inputElement.setSelectionRange(0, dotIndex);
+        } else {
+          // 如果没有扩展名，则全选
+          inputElement.select();
+        }
+        inputElement.focus(); // 确保输入框获得焦点
+      }
+    });
   };
-  const handleDelete = files => {
+
+  const handleDelete = (files: { name: string; [key: string]: any }[]) => {
     console.log("删除文件:", files);
+    const names = files.map(f => f.name).join("、");
+    ElMessageBox.confirm(
+      `确定要删除选中的 ${files.length} 个文件/文件夹吗：${names}？`,
+      "删除确认",
+      {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }
+    )
+      .then(() => {
+        console.log("执行删除操作");
+        ElMessage.success("删除请求已发送");
+        // 成功后重新加载文件列表（如果需要的话）
+        // fileStore.loadFiles(fileStore.path);
+      })
+      .catch(() => {
+        ElMessage.info("已取消删除");
+      });
   };
 
   return {

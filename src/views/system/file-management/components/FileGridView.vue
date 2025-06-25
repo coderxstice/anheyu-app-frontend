@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "vue"; // 引入生命周期钩子
+import { onMounted, onUnmounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useFileStore } from "@/store/modules/fileStore";
 import { useFileIcons } from "../hooks/useFileIcons";
@@ -36,7 +36,13 @@ import type { FileItem } from "@/api/sys-file/type";
 // --- 初始化 Store 和 Hooks ---
 const fileStore = useFileStore();
 const { getFileIcon } = useFileIcons();
-const { sortedFiles: files, loading, selectedFiles } = storeToRefs(fileStore);
+// 解构出 store 中的 sortedFiles, loading, selectedFiles 和当前的 path
+const {
+  sortedFiles: files,
+  loading,
+  selectedFiles,
+  path: currentStorePath
+} = storeToRefs(fileStore);
 
 // --- 动画处理函数 ---
 const handleMouseDown = (event: MouseEvent) => {
@@ -75,35 +81,36 @@ const handleItemClick = (file: FileItem, event: MouseEvent) => {
 // --- 双击事件 ---
 const handleItemDblClick = (file: FileItem) => {
   if (file.type === "dir") {
+    console.log("双击了目录项:", file);
+    // 根据当前路径和文件夹名称拼接新路径
     const newPath =
-      file.path === "/" ? `/${file.name}` : `${file.path}/${file.name}`;
+      currentStorePath.value === "/"
+        ? `/${file.name}`
+        : `${currentStorePath.value}/${file.name}`;
+    console.log("双击目录，将导航到路径:", newPath);
     fileStore.loadFiles(newPath);
   }
 };
 
-// --- [!新增] 全选快捷键逻辑 ---
+// --- 全选快捷键逻辑 ---
 const handleKeyDown = (event: KeyboardEvent) => {
-  // 检查焦点是否在输入框等元素上，如果是则不执行快捷键
   const target = event.target as HTMLElement;
   if (["INPUT", "TEXTAREA"].includes(target.tagName)) {
     return;
   }
 
-  // 判断是否按下了 Cmd/Ctrl + A
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "a") {
-    event.preventDefault(); // 阻止浏览器默认的全选文本行为
+    event.preventDefault();
     fileStore.selectAll();
   }
 };
 
-// --- [!新增] 生命周期钩子 ---
+// --- 生命周期钩子 ---
 onMounted(() => {
-  // 组件挂载时，添加全局键盘事件监听
   window.addEventListener("keydown", handleKeyDown);
 });
 
 onUnmounted(() => {
-  // 组件卸载时，移除监听，防止内存泄漏
   window.removeEventListener("keydown", handleKeyDown);
 });
 </script>

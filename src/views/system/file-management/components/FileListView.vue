@@ -5,11 +5,18 @@ import { useFileStore } from "@/store/modules/fileStore";
 import { formatSize } from "@/utils/format";
 import { useFileIcons } from "../hooks/useFileIcons";
 import gsap from "gsap";
+import type { FileItem } from "@/api/sys-file/type";
 
 // --- 初始化 ---
 const fileStore = useFileStore();
 const { getFileIcon } = useFileIcons();
-const { files, loading, selectedFiles } = storeToRefs(fileStore);
+// 解构出 store 中的 files, loading, selectedFiles 和当前的 path
+const {
+  files,
+  loading,
+  selectedFiles,
+  path: currentStorePath
+} = storeToRefs(fileStore);
 
 const hoveredFileId = ref<string | null>(null);
 
@@ -52,7 +59,7 @@ const handleMouseUp = (event: MouseEvent) => {
 };
 
 // --- 事件处理函数 ---
-const handleItemClick = (item, event: MouseEvent) => {
+const handleItemClick = (item: FileItem, event: MouseEvent) => {
   if (event.shiftKey) {
     fileStore.selectRange(item.id);
   } else if (event.metaKey || event.ctrlKey) {
@@ -64,6 +71,7 @@ const handleItemClick = (item, event: MouseEvent) => {
 
 const handlePathChange = (newPath: string) => {
   if (loading.value) return;
+  console.log("调用 fileStore.loadFiles，传入路径:", newPath);
   fileStore.loadFiles(newPath);
 };
 
@@ -79,6 +87,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
 // --- 生命周期 ---
 onMounted(() => {
+  // 首次加载文件列表，从根路径开始
   handlePathChange("/");
   window.addEventListener("keydown", handleKeyDown);
 });
@@ -113,8 +122,15 @@ onUnmounted(() => {
         @click="handleItemClick(item, $event)"
         @dblclick="
           item.type === 'dir' &&
+          (_ => {
+            console.log('双击了目录项:', item);
+            return true;
+          })() &&
+          // 根据当前路径和文件夹名称拼接新路径
           handlePathChange(
-            item.path === '/' ? `/${item.name}` : `${item.path}/${item.name}`
+            currentStorePath === '/'
+              ? `/${item.name}`
+              : `${currentStorePath}/${item.name}`
           )
         "
         @mouseenter="hoveredFileId = item.id"

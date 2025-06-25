@@ -7,8 +7,8 @@ import {
   createUploadSessionApi,
   uploadChunkApi,
   deleteUploadSessionApi,
-  createFileApi,
-  createFolderApi
+  // 引入修改后的 createItemApi 来创建文件和文件夹
+  createItemApi
 } from "@/api/sys-file/sys-file";
 
 // 引入更新后的类型定义
@@ -142,14 +142,21 @@ export const useFileStore = defineStore("file", {
     },
 
     // 从 API 加载文件列表
-    async loadFiles(newPath: string, page = 1) {
+    async loadFiles(newPath: string | undefined, page = 1) {
+      // 允许 newPath 为 undefined
+      console.log("loadFiles: 原始 newPath =", newPath); // 新增日志
       this.loading = true;
-      this.path = newPath;
+      // 校验并处理 newPath，确保它始终是有效的字符串路径
+      const finalPath =
+        typeof newPath === "string" && newPath.length > 0 ? newPath : "/";
+      this.path = finalPath; // 更新 store 中的路径
+      console.log("loadFiles: 处理后的 finalPath =", finalPath); // 新增日志
+
       this.clearSelection();
 
       try {
         const response = await fetchFilesByPathApi(
-          newPath,
+          finalPath, // 使用处理后的路径
           this.sortKey,
           page,
           this.pageSize
@@ -225,26 +232,35 @@ export const useFileStore = defineStore("file", {
       this.selectedFiles = newSelectedFiles;
     },
 
-    // --- 文件操作 Actions ---
+    // --- 创建文件和文件夹的 Actions ---
     async createFile(name: string) {
       try {
-        await createFileApi(this.path, name);
-        ElMessage.success(`文件 ${name} 创建成功`);
-        this.loadFiles(this.path);
+        // 调用通用的 createItemApi 创建文件
+        const response = await createItemApi("file", this.path, name);
+        if (response.code === 200) {
+          ElMessage.success(`文件 ${name} 创建成功`);
+          this.loadFiles(this.path); // 重新加载文件列表以显示新创建的文件
+        } else {
+          ElMessage.error(response.message || `文件 ${name} 创建失败`);
+        }
       } catch (error) {
         console.error(`创建文件失败:`, error);
-
-        ElMessage.error(`文件创建失败`);
+        ElMessage.error(`文件 ${name} 创建失败，请检查网络连接或权限。`);
       }
     },
     async createFolder(name: string) {
       try {
-        await createFolderApi(this.path, name);
-        ElMessage.success(`文件夹 ${name} 创建成功`);
-        this.loadFiles(this.path);
+        // 调用通用的 createItemApi 创建文件夹
+        const response = await createItemApi("folder", this.path, name);
+        if (response.code === 200) {
+          ElMessage.success(`文件夹 ${name} 创建成功`);
+          this.loadFiles(this.path); // 重新加载文件列表以显示新创建的文件夹
+        } else {
+          ElMessage.error(response.message || `文件夹 ${name} 创建失败`);
+        }
       } catch (error) {
         console.error(`创建文件夹失败:`, error);
-        ElMessage.error(`文件夹创建失败`);
+        ElMessage.error(`文件夹 ${name} 创建失败，请检查网络连接或权限。`);
       }
     },
 
