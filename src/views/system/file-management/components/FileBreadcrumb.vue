@@ -11,15 +11,8 @@
           v-for="(segment, index) in pathSegments"
           :key="segment.path"
         >
-          <span
-            v-if="index === 0"
-            class="is-link"
-            @click.stop="goToPath(segment.path)"
-          >
-            {{ segment.name }}
-          </span>
           <el-dropdown
-            v-else
+            v-if="index === pathSegments.length - 1 && index !== 0"
             trigger="click"
             placement="bottom-start"
             @command="handleCommand"
@@ -106,6 +99,10 @@
               </el-dropdown-menu>
             </template>
           </el-dropdown>
+
+          <span v-else class="is-link" @click.stop="goToPath(segment.path)">
+            {{ segment.name }}
+          </span>
         </el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -167,24 +164,19 @@ const goToPath = (path: string) => {
 };
 
 const handleSubmit = () => {
-  // 1. 格式化用户输入的路径
   let finalPath = pathInput.value.trim();
   if (!finalPath.startsWith("/")) {
     finalPath = `/${finalPath}`;
   }
-  // 移除末尾的'/' (根目录除外)，以便于精确比较
   if (finalPath.length > 1 && finalPath.endsWith("/")) {
     finalPath = finalPath.slice(0, -1);
   }
 
-  // 2. 比较新旧路径是否相同
   if (finalPath === fileStore.path) {
-    // 路径未改变，仅退出编辑模式，不重新加载数据
     isEditing.value = false;
     return;
   }
 
-  // 3. 路径已改变，加载新数据
   goToPath(finalPath);
   isEditing.value = false;
 };
@@ -265,7 +257,7 @@ const handleCommand = (command: CommandPayload) => {
   cursor: pointer;
   margin-right: 12px;
   font-size: 16px;
-  color: #606266;
+  color: var(--anzhiyu-fontcolor);
 }
 .home-icon:hover {
   color: var(--el-color-primary);
@@ -273,17 +265,23 @@ const handleCommand = (command: CommandPayload) => {
 .is-link {
   font-weight: normal;
   cursor: pointer;
-  height: 35px;
-  line-height: 2;
-  padding: 4px;
-  display: flex;
+  display: inline-block;
+  padding: 8px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
 }
 .is-link:hover {
   color: var(--el-color-primary);
+  background-color: #f5f7fa;
 }
+/* 我们让所有非下拉菜单的链接都保持一致的样式 */
+.el-breadcrumb__item:not(:last-child) .is-link {
+  color: var(--anzhiyu-fontcolor);
+  font-weight: normal;
+}
+
 .el-breadcrumb__item:first-child .is-link {
-  color: #303133;
-  font-weight: 600;
+  color: var(--anzhiyu-fontcolor);
 }
 .el-dropdown-link {
   cursor: pointer;
@@ -291,20 +289,11 @@ const handleCommand = (command: CommandPayload) => {
   font-weight: 600;
   display: flex;
   align-items: center;
-  padding: 4px 8px;
+  padding: 8px 8px;
   border-radius: 4px;
   transition: background-color 0.2s;
-  height: 35px;
-  line-height: 2;
-  padding: 4px;
-  display: flex;
 }
-.el-breadcrumb__item:hover :deep(.el-breadcrumb__inner) {
-  background-color: #f5f7fa;
-  color: var(--el-color-primary);
-  border-radius: 6px;
-  overflow: hidden;
-}
+
 .el-dropdown-link .el-icon--right {
   margin-left: 5px;
   font-size: 12px;
@@ -339,8 +328,5 @@ const handleCommand = (command: CommandPayload) => {
       box-shadow: none !important;
     }
   }
-}
-:deep(.el-breadcrumb__item) {
-  height: 35px;
 }
 </style>

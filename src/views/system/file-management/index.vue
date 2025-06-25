@@ -5,6 +5,7 @@
     @dragover.prevent="onDragOver"
     @dragleave.prevent="onDragLeave"
     @drop.prevent="onDrop"
+    @contextmenu.prevent="handleContextMenuTrigger"
   >
     <FileHeard class="mb-2" />
     <div class="flex w-full">
@@ -26,6 +27,12 @@
       </div>
     </div>
 
+    <ContextMenu
+      :trigger-event="contextMenuTriggerEvent"
+      @select="onMenuSelect"
+      @closed="handleContextMenuClosed"
+    />
+
     <UploadProgress />
   </div>
 </template>
@@ -33,6 +40,7 @@
 <script lang="ts" setup>
 import { onMounted, computed, ref, onUnmounted } from "vue";
 import { useFileStore } from "@/store/modules/fileStore";
+import ContextMenu from "./components/ContextMenu.vue";
 import FileHeard from "./components/FileHeard.vue";
 import FileBreadcrumb from "./components/FileBreadcrumb.vue";
 import FileToolbar from "./components/FileToolbar.vue";
@@ -40,6 +48,8 @@ import FileListView from "./components/FileListView.vue";
 import FileGridView from "./components/FileGridView.vue";
 import UploadProgress from "./components/UploadProgress.vue";
 import { UploadFilled } from "@element-plus/icons-vue";
+
+import { useFileActions } from "./hooks/useFileActions";
 
 const fileStore = useFileStore();
 
@@ -50,9 +60,25 @@ const viewComponents = {
 };
 const activeViewComponent = computed(() => viewComponents[fileStore.viewMode]);
 
+const {
+  handleUploadFile,
+  handleUploadDir,
+  handleCreateFile,
+  handleCreateFolder
+} = useFileActions();
+
+// --- 右键菜单触发事件状态 ---
+const contextMenuTriggerEvent = ref<MouseEvent | null>(null);
+
 // 初始加载文件
 onMounted(() => {
   fileStore.loadFiles("/");
+  // 保持这个监听器，它用于清空文件选择，与右键菜单的逻辑独立
+  document.addEventListener("mousedown", handleDocumentMouseDown);
+});
+
+onUnmounted(() => {
+  document.removeEventListener("mousedown", handleDocumentMouseDown);
 });
 
 // --- 拖拽上传逻辑 ---
@@ -90,24 +116,63 @@ const onDrop = (e: DragEvent) => {
 
 // --- 点击外部/空白区域取消选择 ---
 const handleDocumentMouseDown = (event: MouseEvent) => {
-  // .closest() 方法会从事件目标开始，向上遍历 DOM 树，查找匹配选择器的最近的祖先元素
-  // 如果点击的目标或其任何父级元素都不在“安全区”内，则清空选择
   if (!(event.target as HTMLElement).closest(".deselect-safe-zone")) {
     fileStore.clearSelection();
   }
 };
 
-onMounted(() => {
-  fileStore.loadFiles("/");
-  document.addEventListener("mousedown", handleDocumentMouseDown);
-});
+// --- 右键菜单相关处理函数 ---
+const handleContextMenuTrigger = (event: MouseEvent) => {
+  console.log("【父组件】捕获右键事件，传递给 ContextMenu。");
+  // 将事件对象存储起来，传递给 ContextMenu 组件
+  contextMenuTriggerEvent.value = event;
+};
 
-onUnmounted(() => {
-  document.removeEventListener("mousedown", handleDocumentMouseDown);
-});
+const handleContextMenuClosed = () => {
+  // 当 ContextMenu 通知它已关闭时，清空触发事件，准备下一次打开
+  console.log("【父组件】ContextMenu 通知已关闭，清空触发事件。");
+  contextMenuTriggerEvent.value = null;
+};
+
+// 右键菜单项被选中时的处理，现在 ContextMenu 会把 context 传回来
+const onMenuSelect = (action: string, context?: any) => {
+  console.log("Menu action:", action, "Context:", context);
+  switch (action) {
+    case "upload-file":
+      handleUploadFile();
+      break;
+    case "upload-dir":
+      handleUploadDir();
+      break;
+    case "create-folder":
+      handleCreateFolder();
+      break;
+    case "create-md":
+      handleCreateFile("md");
+      break;
+    case "create-txt":
+      handleCreateFile("txt");
+      break;
+    case "refresh":
+      fileStore.loadFiles(fileStore.path);
+      break;
+    // 对于需要选中文件上下文的操作，可以从 context 中获取 selectedIds
+    case "rename":
+    case "delete":
+      if (context?.selectedIds && context.selectedIds.length > 0) {
+        console.log(`执行操作 ${action}，选中文件 ID:`, context.selectedIds);
+        // 调用相应的处理函数，例如：
+        // fileStore.deleteFiles(context.selectedIds);
+      } else {
+        console.warn(`执行操作 ${action}，但没有选中文件。`);
+      }
+      break;
+  }
+};
 </script>
 
 <style>
+/* 样式保持不变 */
 .file-management-container {
   height: 100%;
   display: flex;

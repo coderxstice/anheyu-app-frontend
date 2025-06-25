@@ -1,6 +1,11 @@
 import { defineStore } from "pinia";
 import type { FileItem, UploadItem } from "@/api/sys-file/type";
-import { fetchFilesByPath, uploadFile } from "@/api/sys-file/sys-file";
+import {
+  fetchFilesByPath,
+  uploadFile,
+  createFileApi,
+  createFolderApi
+} from "@/api/sys-file/sys-file";
 import { ElMessage } from "element-plus";
 
 // 为排序规则定义一个类型，增强代码健壮性
@@ -249,6 +254,19 @@ export const useFileStore = defineStore("file", {
       if (this.uploadQueue.length === 0) {
         this.showUploadProgress = false;
       }
+    },
+
+    // 创建文件（模拟）
+    async createFile(name: string) {
+      // 模拟API调用
+      const newFile = await createFileApi(this.path, name);
+      this.files.push(newFile);
+    },
+
+    // 创建文件夹（模拟）
+    async createFolder(name: string) {
+      const newFolder = await createFolderApi(this.path, name);
+      this.files.push(newFolder);
     }
   }
 });

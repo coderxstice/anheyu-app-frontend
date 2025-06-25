@@ -156,3 +156,45 @@ export const uploadFile = (file: File, path: string): Promise<FileItem> => {
     }, uploadDuration);
   });
 };
+
+export const createFileApi = (
+  path: string,
+  name: string
+): Promise<FileItem> => {
+  console.log(`模拟 API 请求: 创建文件 '${name}' 在路径 '${path}'...`);
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const newFile = createFile({
+        name,
+        path,
+        type: "file"
+      });
+      if (!allFiles[path]) {
+        allFiles[path] = [];
+      }
+      allFiles[path].push(newFile);
+      resolve(newFile);
+    }, 300); // 模拟创建文件的延迟
+  });
+};
+
+export const createFolderApi = (
+  path: string,
+  name: string
+): Promise<FileItem> => {
+  console.log(`模拟 API 请求: 创建文件夹 '${name}' 在路径 '${path}'...`);
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const newDir = createFile({
+        name,
+        path,
+        type: "dir"
+      });
+      if (!allFiles[path]) {
+        allFiles[path] = [];
+      }
+      allFiles[path].push(newDir);
+      resolve(newDir);
+    }, 300); // 模拟创建目录的延迟
+  });
+};

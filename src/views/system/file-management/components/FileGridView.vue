@@ -4,6 +4,7 @@
       v-for="file in files"
       :key="file.id"
       class="grid-item deselect-safe-zone"
+      :data-id="file.id"
       :class="{ selected: selectedFiles.has(file.id) }"
       @click="handleItemClick(file, $event)"
       @dblclick="handleItemDblClick(file)"
