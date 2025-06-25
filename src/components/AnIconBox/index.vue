@@ -3,7 +3,7 @@
   @description 提供可自定义的图标容器，支持不同颜色、尺寸和形状
 -->
 <template>
-  <div class="gi-icon-box" :class="getClass" :style="getStyle">
+  <div class="an-icon-box" :class="getClass" :style="getStyle">
     <slot />
   </div>
 </template>
@@ -52,8 +52,8 @@ interface Props {
 const getClass = computed(() => {
   const classes = [
     STATUS_COLORS.includes(props.color as (typeof STATUS_COLORS)[number]) &&
-      `gi-icon-box--${props.color}`,
-    props.shape && `gi-icon-box__shape--${props.shape}`
+      `an-icon-box--${props.color}`,
+    props.shape && `an-icon-box__shape--${props.shape}`
   ].filter(Boolean);
 
   return classes.join(" ");
@@ -79,7 +79,7 @@ const getStyle = computed((): CSSProperties => {
 </script>
 
 <style lang="scss" scoped>
-.gi-icon-box {
+.an-icon-box {
   display: flex;
   justify-content: center;
   align-items: center;
