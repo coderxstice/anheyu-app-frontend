@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-25 14:18:45
- * @LastEditTime: 2025-06-25 14:55:41
+ * @LastEditTime: 2025-06-25 15:35:10
  * @LastEditors: 安知鱼
  */
 import { ref } from "vue";
@@ -73,7 +73,13 @@ export function useContextMenuHandler() {
         handleCreateFile("txt");
         break;
       case "info":
-        handleCreateFile("txt");
+        if (context?.selectedIds && context.selectedIds.length > 0) {
+          console.log(`执行操作 ${action}，选中文件 ID:`, context.selectedIds);
+          // 在这里调用 store action, e.g., fileStore.deleteFiles(context.selectedIds);
+        } else {
+          console.warn(`执行操作 ${action}，但没有选中文件。`);
+        }
+        break;
         break;
       case "refresh":
         fileStore.loadFiles(fileStore.path);

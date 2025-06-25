@@ -178,7 +178,8 @@ onUnmounted(() => {
   align-items: center;
   padding: 12px 8px;
   font-size: 14px;
-  border-bottom: 1px solid #f1f5f9;
+  /* border-bottom: 1px solid #f1f5f9; */
+  margin: 1px 0;
 }
 
 .file-item {
