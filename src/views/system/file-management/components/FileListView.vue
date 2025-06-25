@@ -36,6 +36,21 @@ const onIconLeave = (el, done) => {
   });
 };
 
+const handleMouseDown = (event: MouseEvent) => {
+  gsap.to(event.currentTarget as HTMLElement, {
+    scale: 0.995,
+    duration: 0.15,
+    ease: "power2.out"
+  });
+};
+const handleMouseUp = (event: MouseEvent) => {
+  gsap.to(event.currentTarget as HTMLElement, {
+    scale: 1,
+    duration: 0.4,
+    ease: "elastic.out(1, 0.5)"
+  });
+};
+
 // --- 事件处理函数 ---
 const handleItemClick = (item, event: MouseEvent) => {
   if (event.shiftKey) {
@@ -104,6 +119,8 @@ onUnmounted(() => {
         "
         @mouseenter="hoveredFileId = item.id"
         @mouseleave="hoveredFileId = null"
+        @mousedown="handleMouseDown"
+        @mouseup="handleMouseUp"
       >
         <div class="column-name">
           <Transition
