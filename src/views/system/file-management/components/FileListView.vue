@@ -83,7 +83,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
 // --- 生命周期 ---
 onMounted(() => {
-  handlePathChange("anzhiyu://my/"); // 首次加载文件列表，使用后端定义的根路径 URI
+  handlePathChange("/");
   window.addEventListener("keydown", handleKeyDown);
 });
 

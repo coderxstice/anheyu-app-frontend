@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
 import { ElMessage } from "element-plus";
 
-// 引入真实的 API 调用函数，现在它们只接收处理好的参数
 import {
   fetchFilesByPathApi,
   createUploadSessionApi,
@@ -26,14 +25,14 @@ export type SortKey =
   | "name_desc"
   | "size_asc"
   | "size_desc"
-  | "updated_at_asc" // 对应后端 updated_at
+  | "updated_at"
   | "updated_at_desc"
-  | "created_at_asc" // 对应后端 created_at
+  | "created_at"
   | "created_at_desc";
 
 // 定义 Store 的状态接口
 interface FileState {
-  path: string; // 存储当前目录的完整 URI，例如 "anzhiyu://my/"
+  path: string; // 存储当前目录的逻辑路径，例如 "/" 或 "/Documents"
   files: FileItem[];
   selectedFiles: Set<string>;
   lastSelectedId: string | null;
@@ -41,7 +40,7 @@ interface FileState {
   sortKey: SortKey;
   loading: boolean;
   pagination: PaginationInfo | null;
-  parentInfo: ParentInfo | null;
+  parentInfo: ParentInfo | null; // parentInfo 的 path 字段在 FileItem 类型中是完整的 URI
   currentProps: FileProps | null;
   uploadQueue: UploadItem[];
   showUploadProgress: boolean;
@@ -51,10 +50,27 @@ interface FileState {
 // 用于上传队列中项目的唯一 ID (仅前端渲染使用)
 let uploadId = 0;
 
+/**
+ * 辅助函数：从完整的后端 URI (e.g., "anzhiyu://my/Documents") 中提取逻辑路径 (e.g., "/Documents")
+ */
+const extractLogicalPathFromUri = (uri: string): string => {
+  // 假设所有后端返回的 path 都是以 'anzhiyu://my' 开头的完整 URI
+  if (uri.startsWith("anzhiyu://my")) {
+    let path = uri.substring("anzhiyu://my".length);
+    // 如果是 'anzhiyu://my' 后面没有斜杠或只有斜杠，都视为根目录 '/'
+    return path === "" || path === "/" ? "/" : path;
+  }
+  // 如果不是期望的格式，原样返回（可能需要进一步的错误处理或默认值）
+  console.warn(
+    `Attempted to extract logical path from unexpected URI format: ${uri}`
+  );
+  return uri;
+};
+
 export const useFileStore = defineStore("file", {
   // state: 定义所有初始状态
   state: (): FileState => ({
-    path: "anzhiyu://my/", // *** 初始根路径改为后端期望的完整 URI 格式 ***
+    path: "/", //  初始根路径现在是逻辑路径 "/"
     files: [],
     selectedFiles: new Set(),
     lastSelectedId: null,
@@ -62,7 +78,7 @@ export const useFileStore = defineStore("file", {
     sortKey: "updated_at_desc", // 默认排序键更新为后端提供的 updated_at
     loading: false,
     pagination: null,
-    parentInfo: null,
+    parentInfo: null, // parentInfo 的 path 是完整 URI，需要通过 extractLogicalPathFromUri 处理
     currentProps: null,
     uploadQueue: [],
     showUploadProgress: false,
@@ -71,26 +87,20 @@ export const useFileStore = defineStore("file", {
 
   // getters: 派生状态（计算属性）
   getters: {
-    // 根据当前路径（URI）生成面包屑导航片段
+    // 根据当前逻辑路径生成面包屑导航片段
     pathSegments: state => {
-      // 从 "anzhiyu://my/" 提取出 "/my/" 部分用于显示，或者自定义显示
-      // 移除协议和 "my/"，并处理根路径的斜杠，使其显示为 "/"
-      let displayPath = state.path.replace(/^anzhiyu:\/\/my\/?/, "");
-      if (displayPath === "") {
-        displayPath = "/";
-      }
+      // 这里的 state.path 已经是逻辑路径 (例如 "/", "/Documents")
+      // 面包屑的根显示为 "我的文件"，其 path 也是逻辑根路径 "/"
+      if (state.path === "/") return [{ name: "我的文件", path: "/" }];
 
-      // 基础路径，例如 "我的文件" 对应 "anzhiyu://my/"
-      const result = [{ name: "我的文件", path: "anzhiyu://my/" }];
+      const segments = state.path.split("/").filter(Boolean); // 过滤掉空字符串，防止连续斜杠
+      const result = [{ name: "我的文件", path: "/" }]; // 根面包屑始终是逻辑根路径 "/"
 
-      // 如果不是根目录，则分割路径并构建面包屑
-      if (displayPath !== "/") {
-        const segments = displayPath.split("/").filter(Boolean); // 过滤掉空字符串，防止连续斜杠
-        let currentUri = "anzhiyu://my";
-        for (const segment of segments) {
-          currentUri += `/${segment}`;
-          result.push({ name: segment, path: currentUri });
-        }
+      let currentLogicalPath = "";
+      for (const segment of segments) {
+        currentLogicalPath += `/${segment}`;
+        // 面包屑项的 path 也是逻辑路径
+        result.push({ name: segment, path: currentLogicalPath });
       }
       return result;
     },
@@ -104,14 +114,13 @@ export const useFileStore = defineStore("file", {
     // 经过排序的文件列表
     sortedFiles: (state): FileItem[] => {
       const filesToSort = [...state.files];
-      // 修正 SortKey 的解析逻辑
       const sortParts = state.sortKey.split("_");
-      let key = sortParts[0];
-      let order = sortParts[sortParts.length - 1]; // 假设 asc/desc 总是最后一个部分
+      let orderKey = sortParts[0];
+      let direction = sortParts[sortParts.length - 1];
 
       // 特殊处理 'updated_at' 和 'created_at' 这种多部分 key
       if (sortParts.length > 2) {
-        key = sortParts.slice(0, -1).join("_"); // 重新组合 key，例如 "updated_at"
+        orderKey = sortParts.slice(0, -1).join("_"); // 重新组合 key，例如 "updated_at"
       }
 
       filesToSort.sort((a, b) => {
@@ -120,25 +129,25 @@ export const useFileStore = defineStore("file", {
         if (a.type !== FileType.Dir && b.type === FileType.Dir) return 1;
 
         let comparison = 0;
-        switch (key) {
+        switch (orderKey) {
           case "name":
             comparison = a.name.localeCompare(b.name, "zh-Hans-CN");
             break;
           case "size":
             comparison = (a.size ?? 0) - (b.size ?? 0);
             break;
-          case "updated_at": // 对应后端 updated_at
+          case "updated_at":
             comparison =
               new Date(a.updated_at).getTime() -
               new Date(b.updated_at).getTime();
             break;
-          case "created_at": // 对应后端 created_at
+          case "created_at":
             comparison =
               new Date(a.created_at).getTime() -
               new Date(b.created_at).getTime();
             break;
         }
-        return order === "asc" ? comparison : -comparison;
+        return direction === "asc" ? comparison : -comparison;
       });
 
       return filesToSort;
@@ -164,33 +173,30 @@ export const useFileStore = defineStore("file", {
     },
 
     // 从 API 加载文件列表
-    async loadFiles(newPath: string | undefined, page = 1) {
+    async loadFiles(logicalPath: string | undefined, page = 1) {
+      // 接收逻辑路径
       this.loading = true;
-      // 校验并处理 newPath，确保它始终是后端期望的完整 URI 格式
-      // 如果 newPath 是 undefined 或空字符串，则默认为根 URI "anzhiyu://my/"
-      const finalPath =
-        typeof newPath === "string" && newPath.length > 0
-          ? newPath
-          : "anzhiyu://my/";
-      this.path = finalPath; // 更新 store 中的路径
+      // 校验并处理 logicalPath，默认为根逻辑路径 "/"
+      const finalLogicalPath =
+        typeof logicalPath === "string" && logicalPath.length > 0
+          ? logicalPath
+          : "/";
+      this.path = finalLogicalPath; // 更新 store 中的路径为逻辑路径
 
       this.clearSelection();
 
       try {
-        // 修正 SortKey 的解析，并传递给 API
         const sortParts = this.sortKey.split("_");
         let order = sortParts[0];
         let direction = sortParts[sortParts.length - 1];
-
-        // 特殊处理 'updated_at' 和 'created_at' 这种多部分 key
         if (sortParts.length > 2) {
-          order = sortParts.slice(0, -1).join("_"); // 重新组合 order，例如 "updated_at"
+          order = sortParts.slice(0, sortParts.length - 1).join("_");
         }
 
         const response = await fetchFilesByPathApi(
-          finalPath, // 传入完整的 URI
-          order, // 传入解析后的 order
-          direction, // 传入解析后的 direction
+          finalLogicalPath, // 传入逻辑路径给 API
+          order,
+          direction,
           page,
           this.pageSize
         );
@@ -201,7 +207,11 @@ export const useFileStore = defineStore("file", {
           // 无论是第几页，都直接替换当前的文件列表
           this.files = files;
           this.pagination = pagination;
-          this.parentInfo = parent; // parent 也会有完整的 path 字段
+          // parent.path 是后端返回的完整 URI，需要转换为逻辑路径存储
+          this.parentInfo = {
+            ...parent,
+            path: extractLogicalPathFromUri(parent.path) // 转换 parent path 为逻辑路径
+          };
           this.currentProps = props;
         } else {
           ElMessage.error(response.message || "文件列表加载失败");
@@ -268,14 +278,17 @@ export const useFileStore = defineStore("file", {
     // --- 创建文件和文件夹的 Actions ---
     async createFile(name: string) {
       try {
-        // 构建要创建的文件完整 URI
-        const fullFileUri =
-          this.path.endsWith("/") && this.path !== "anzhiyu://my/"
+        // 构建要创建的文件完整逻辑路径
+        const fullFileLogicalPath =
+          this.path.endsWith("/") && this.path !== "/"
             ? `${this.path.slice(0, -1)}/${name}` // 非根目录且带斜杠，移除斜杠
             : `${this.path}${name}`; // 根目录直接拼接
 
-        // 调用通用的 createItemApi，传入 FileType.File (0) 和完整 URI
-        const response = await createItemApi(FileType.File, fullFileUri);
+        // 调用 createItemApi，传入 FileType.File (0) 和完整逻辑路径
+        const response = await createItemApi(
+          FileType.File,
+          fullFileLogicalPath
+        );
         if (response.code === 200) {
           ElMessage.success(`文件 ${name} 创建成功`);
           this.loadFiles(this.path); // 重新加载当前目录的文件列表
@@ -289,14 +302,17 @@ export const useFileStore = defineStore("file", {
     },
     async createFolder(name: string) {
       try {
-        // 构建要创建的文件夹完整 URI
-        const fullFolderUri =
-          this.path.endsWith("/") && this.path !== "anzhiyu://my/"
+        // 构建要创建的文件夹完整逻辑路径
+        const fullFolderLogicalPath =
+          this.path.endsWith("/") && this.path !== "/"
             ? `${this.path.slice(0, -1)}/${name}` // 非根目录且带斜杠，移除斜杠
             : `${this.path}${name}`; // 根目录直接拼接
 
-        // 调用通用的 createItemApi，传入 FileType.Dir (1) 和完整 URI
-        const response = await createItemApi(FileType.Dir, fullFolderUri);
+        // 调用 createItemApi，传入 FileType.Dir (1) 和完整逻辑路径
+        const response = await createItemApi(
+          FileType.Dir,
+          fullFolderLogicalPath
+        );
         if (response.code === 200) {
           ElMessage.success(`文件夹 ${name} 创建成功`);
           this.loadFiles(this.path); // 重新加载当前目录的文件列表
@@ -331,14 +347,14 @@ export const useFileStore = defineStore("file", {
         .map(async item => {
           try {
             item.status = "uploading";
-            // 拼接上传的完整 URI，使用当前路径作为前缀
-            const uploadUri =
-              this.path.endsWith("/") && this.path !== "anzhiyu://my/"
+            // 拼接上传的完整逻辑路径
+            const uploadLogicalPath =
+              this.path.endsWith("/") && this.path !== "/"
                 ? `${this.path.slice(0, -1)}/${item.name}` // 非根目录且带斜杠，移除斜杠
                 : `${this.path}${item.name}`; // 根目录直接拼接
 
             const sessionRes = await createUploadSessionApi(
-              uploadUri, // 使用完整的 URI
+              uploadLogicalPath, // 传入逻辑路径
               item.size,
               "J7uV"
             );
@@ -371,8 +387,8 @@ export const useFileStore = defineStore("file", {
             if (item.sessionId) {
               await deleteUploadSessionApi(
                 item.sessionId,
-                // 删除时也使用完整 URI
-                this.path.endsWith("/") && this.path !== "anzhiyu://my/"
+                // 删除时也使用逻辑路径
+                this.path.endsWith("/") && this.path !== "/"
                   ? `${this.path.slice(0, -1)}/${item.name}`
                   : `${this.path}${item.name}`
               );
