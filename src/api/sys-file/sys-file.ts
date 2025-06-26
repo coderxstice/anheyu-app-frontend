@@ -89,17 +89,17 @@ export const fetchFilesByPathApi = async (
  * @returns Promise<CreateUploadSessionResponse>
  */
 export const createUploadSessionApi = (
-  fullPath: string, // 现在接收逻辑路径
+  fullPath: string,
   size: number,
   policyId: string
 ): Promise<CreateUploadSessionResponse> => {
-  const fullUri = buildFullUri(fullPath); // 在 API 层拼接完整 URI
+  const fullUri = buildFullUri(fullPath);
 
   return http.request<CreateUploadSessionResponse>(
     "put",
     baseUrlApi("file/upload"),
     {
-      data: { uri: fullUri, size, policy_id: policyId } // 传递拼接好的完整 URI
+      data: { uri: fullUri, size, policy_id: policyId }
     }
   );
 };
