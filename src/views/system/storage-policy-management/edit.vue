@@ -1,3 +1,10 @@
+<!--
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-23 18:36:45
+ * @LastEditTime: 2025-06-26 15:05:10
+ * @LastEditors: 安知鱼
+-->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -16,7 +23,7 @@ defineOptions({
 const route = useRoute();
 const router = useRouter();
 const formRef = ref();
-const policyId = Number(route.params.id);
+const policyId: string = String(route.params.id);
 const formData = ref<Partial<StoragePolicy>>({});
 const isLoading = ref(true);
 

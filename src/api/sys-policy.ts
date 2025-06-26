@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-24 19:24:57
+ * @LastEditTime: 2025-06-26 15:29:57
+ * @LastEditors: 安知鱼
+ */
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
 
@@ -21,8 +28,8 @@ export interface StoragePolicy {
   access_key?: string;
   secret_key?: string;
   max_size: number;
-  dir_name_rule?: string;
-  mount_dir?: string;
+  base_path?: string;
+  virtual_path?: string;
   settings?: any;
 }
 
@@ -78,7 +85,7 @@ export const deletePolicy = (id: number) => {
 };
 
 // 根据 ID 获取单个存储策略
-export const getPolicyById = (id: number) => {
+export const getPolicyById = (id: string) => {
   return http.request<Result<StoragePolicy>>(
     "get",
     baseUrlApi(`policies/${id}`)

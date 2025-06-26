@@ -98,14 +98,16 @@ defineExpose({ getRef });
       <h2 class="divider-title">存储与上传</h2>
     </el-divider>
 
-    <el-form-item label="Blob 挂载目录" prop="mount_dir">
-      <el-input v-model="formData.mount_dir" placeholder="例如: /" />
-      <div class="form-item-help">存储对应的挂载路径，需要确保唯一。</div>
+    <el-form-item label="Blob 挂载目录" prop="virtual_path">
+      <el-input v-model="formData.virtual_path" placeholder="例如: /" />
+      <div class="form-item-help">
+        存储到本系统内对应的挂载路径，需要确保唯一。
+      </div>
     </el-form-item>
 
-    <el-form-item label="Blob 存储目录" prop="dir_name_rule">
+    <el-form-item label="Blob 存储目录" prop="base_path">
       <el-input
-        v-model="formData.dir_name_rule"
+        v-model="formData.base_path"
         placeholder="例如: /www/wwwroot/anheyu.com/storage"
       />
       <div class="form-item-help">文件 Blob 的存放目录</div>

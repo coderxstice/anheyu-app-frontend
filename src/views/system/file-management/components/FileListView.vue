@@ -97,7 +97,7 @@ onUnmounted(() => {
     <div class="file-list-header">
       <div class="column-name">名称</div>
       <div class="column-size">文件大小</div>
-      <div class="column-modified">更改时间</div>
+      <div class="column-modified">创建时间</div>
     </div>
 
     <div v-if="loading" class="state-view">
@@ -163,7 +163,7 @@ onUnmounted(() => {
           <span>{{ item.name }}</span>
         </div>
         <div class="column-size">{{ formatSize(item.size) }}</div>
-        <div class="column-modified">{{ item.updated_at }}</div>
+        <div class="column-modified">{{ item.created_at }}</div>
       </li>
     </ul>
   </div>

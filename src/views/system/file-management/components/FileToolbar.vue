@@ -117,7 +117,7 @@
                   divided
                   command="updated_at"
                   :class="{
-                    active: sortKey === 'updated_at',
+                    active: sortKey === 'updated_at_asc',
                     'sort-dropdown-item': true
                   }"
                   >最早修改</el-dropdown-item
@@ -134,7 +134,7 @@
                   divided
                   command="created_at"
                   :class="{
-                    active: sortKey === 'created_at',
+                    active: sortKey === 'created_at_asc',
                     'sort-dropdown-item': true
                   }"
                   >最早上传</el-dropdown-item

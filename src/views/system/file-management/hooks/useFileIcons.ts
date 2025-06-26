@@ -2,7 +2,7 @@
  * @Description: 文件图标相关的 Hook
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:30:17
- * @LastEditTime: 2025-06-25 23:37:45
+ * @LastEditTime: 2025-06-26 16:29:11
  * @LastEditors: 安知鱼
  */
 import type { Component } from "vue";
@@ -96,6 +96,7 @@ const iconMap: Record<string, Component> = {
 export function useFileIcons() {
   const getFileIcon = (item: FileItem): Component => {
     // 1. 判断是否是文件夹 (type: 1)
+    console.log("useFileIcons", item);
     if (item.type === FileType.Dir) {
       return FileDir;
     }

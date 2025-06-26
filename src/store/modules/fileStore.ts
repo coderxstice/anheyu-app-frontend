@@ -16,6 +16,7 @@ import {
   type PaginationInfo,
   type ParentInfo,
   type FileProps,
+  type StoragePolicy,
   FileType // 引入 FileType 枚举 (0: File, 1: Dir)
 } from "@/api/sys-file/type";
 
@@ -25,9 +26,9 @@ export type SortKey =
   | "name_desc"
   | "size_asc"
   | "size_desc"
-  | "updated_at"
+  | "updated_at_asc"
   | "updated_at_desc"
-  | "created_at"
+  | "created_at_asc"
   | "created_at_desc";
 
 // 定义 Store 的状态接口
@@ -40,8 +41,9 @@ interface FileState {
   sortKey: SortKey;
   loading: boolean;
   pagination: PaginationInfo | null;
-  parentInfo: ParentInfo | null; // parentInfo 的 path 字段在 FileItem 类型中是完整的 URI
+  parentInfo: ParentInfo | null;
   currentProps: FileProps | null;
+  storagePolicy: StoragePolicy | null; // 新增：存储当前目录的存储策略
   uploadQueue: UploadItem[];
   showUploadProgress: boolean;
   pageSize: number;
@@ -54,32 +56,32 @@ let uploadId = 0;
  * 辅助函数：从完整的后端 URI (e.g., "anzhiyu://my/Documents") 中提取逻辑路径 (e.g., "/Documents")
  */
 const extractLogicalPathFromUri = (uri: string): string => {
-  // 假设所有后端返回的 path 都是以 'anzhiyu://my' 开头的完整 URI
   if (uri.startsWith("anzhiyu://my")) {
+    // 截取 'anzhiyu://my' 之后的部分
     let path = uri.substring("anzhiyu://my".length);
-    // 如果是 'anzhiyu://my' 后面没有斜杠或只有斜杠，都视为根目录 '/'
-    return path === "" || path === "/" ? "/" : path;
+    // 如果路径是空的（对应 anzhiyu://my）或只有一个斜杠，都视为根目录 "/"
+    // 否则，如果不是以 / 开头，则补上
+    if (path === "" || path === "/") return "/";
+    return path.startsWith("/") ? path : `/${path}`;
   }
-  // 如果不是期望的格式，原样返回（可能需要进一步的错误处理或默认值）
-  console.warn(
-    `Attempted to extract logical path from unexpected URI format: ${uri}`
-  );
+  console.warn(`尝试从意外的 URI 格式中提取逻辑路径: ${uri}`);
   return uri;
 };
 
 export const useFileStore = defineStore("file", {
   // state: 定义所有初始状态
   state: (): FileState => ({
-    path: "/", //  初始根路径现在是逻辑路径 "/"
+    path: "/", // 初始根路径现在是逻辑路径 "/"
     files: [],
     selectedFiles: new Set(),
     lastSelectedId: null,
     viewMode: "list",
-    sortKey: "updated_at_desc", // 默认排序键更新为后端提供的 updated_at
+    sortKey: "updated_at_desc", // 默认排序
     loading: false,
     pagination: null,
-    parentInfo: null, // parentInfo 的 path 是完整 URI，需要通过 extractLogicalPathFromUri 处理
+    parentInfo: null,
     currentProps: null,
+    storagePolicy: null, // 初始化存储策略为 null
     uploadQueue: [],
     showUploadProgress: false,
     pageSize: 50
@@ -87,44 +89,36 @@ export const useFileStore = defineStore("file", {
 
   // getters: 派生状态（计算属性）
   getters: {
-    // 根据当前逻辑路径生成面包屑导航片段
     pathSegments: state => {
-      // 这里的 state.path 已经是逻辑路径 (例如 "/", "/Documents")
-      // 面包屑的根显示为 "我的文件"，其 path 也是逻辑根路径 "/"
       if (state.path === "/") return [{ name: "我的文件", path: "/" }];
 
-      const segments = state.path.split("/").filter(Boolean); // 过滤掉空字符串，防止连续斜杠
-      const result = [{ name: "我的文件", path: "/" }]; // 根面包屑始终是逻辑根路径 "/"
+      const segments = state.path.split("/").filter(Boolean);
+      const result = [{ name: "我的文件", path: "/" }];
 
       let currentLogicalPath = "";
       for (const segment of segments) {
         currentLogicalPath += `/${segment}`;
-        // 面包屑项的 path 也是逻辑路径
         result.push({ name: segment, path: currentLogicalPath });
       }
       return result;
     },
 
-    // 判断当前文件是否已全选
     isAllSelected: state => {
       if (state.files.length === 0) return false;
       return state.selectedFiles.size === state.files.length;
     },
 
-    // 经过排序的文件列表
     sortedFiles: (state): FileItem[] => {
       const filesToSort = [...state.files];
       const sortParts = state.sortKey.split("_");
       let orderKey = sortParts[0];
       let direction = sortParts[sortParts.length - 1];
 
-      // 特殊处理 'updated_at' 和 'created_at' 这种多部分 key
       if (sortParts.length > 2) {
-        orderKey = sortParts.slice(0, -1).join("_"); // 重新组合 key，例如 "updated_at"
+        orderKey = sortParts.slice(0, -1).join("_");
       }
 
       filesToSort.sort((a, b) => {
-        // 根据后端返回的 type 字段进行目录优先排序 (使用 FileType 枚举)
         if (a.type === FileType.Dir && b.type !== FileType.Dir) return -1;
         if (a.type !== FileType.Dir && b.type === FileType.Dir) return 1;
 
@@ -158,31 +152,20 @@ export const useFileStore = defineStore("file", {
   actions: {
     setPageSize(size: number) {
       this.pageSize = size;
-      // 修改分页大小后，应重新从第一页加载
       this.loadFiles(this.path, 1);
     },
-    // 设置排序规则
     setSort(key: SortKey) {
       this.sortKey = key;
       this.loadFiles(this.path, 1);
     },
-
-    // 切换视图模式
     setViewMode(mode: "list" | "grid") {
       this.viewMode = mode;
     },
 
-    // 从 API 加载文件列表
     async loadFiles(logicalPath: string | undefined, page = 1) {
-      // 接收逻辑路径
       this.loading = true;
-      // 校验并处理 logicalPath，默认为根逻辑路径 "/"
-      const finalLogicalPath =
-        typeof logicalPath === "string" && logicalPath.length > 0
-          ? logicalPath
-          : "/";
-      this.path = finalLogicalPath; // 更新 store 中的路径为逻辑路径
-
+      const finalLogicalPath = logicalPath || "/";
+      this.path = finalLogicalPath;
       this.clearSelection();
 
       try {
@@ -190,11 +173,11 @@ export const useFileStore = defineStore("file", {
         let order = sortParts[0];
         let direction = sortParts[sortParts.length - 1];
         if (sortParts.length > 2) {
-          order = sortParts.slice(0, sortParts.length - 1).join("_");
+          order = sortParts.slice(0, -1).join("_");
         }
 
         const response = await fetchFilesByPathApi(
-          finalLogicalPath, // 传入逻辑路径给 API
+          finalLogicalPath,
           order,
           direction,
           page,
@@ -202,25 +185,28 @@ export const useFileStore = defineStore("file", {
         );
 
         if (response.code === 200) {
-          const { files, parent, pagination, props } = response.data;
-
-          // 无论是第几页，都直接替换当前的文件列表
+          const { files, parent, pagination, props, storage_policy } =
+            response.data;
           this.files = files;
           this.pagination = pagination;
-          // parent.path 是后端返回的完整 URI，需要转换为逻辑路径存储
-          this.parentInfo = {
-            ...parent,
-            path: extractLogicalPathFromUri(parent.path) // 转换 parent path 为逻辑路径
-          };
+          this.parentInfo = parent
+            ? {
+                ...parent,
+                path: extractLogicalPathFromUri(parent.path)
+              }
+            : null;
           this.currentProps = props;
+          this.storagePolicy = storage_policy; // **修复**: 保存从后端获取的存储策略
         } else {
           ElMessage.error(response.message || "文件列表加载失败");
           this.files = [];
+          this.storagePolicy = null; // 加载失败时清空
         }
       } catch (error) {
         console.error("文件加载失败:", error);
         ElMessage.error("文件加载失败，请检查网络连接。");
         this.files = [];
+        this.storagePolicy = null; // 加载失败时清空
       } finally {
         this.loading = false;
       }
@@ -257,8 +243,7 @@ export const useFileStore = defineStore("file", {
       }
     },
     selectAll() {
-      const allIds = this.files.map(f => f.id);
-      this.selectedFiles = new Set(allIds);
+      this.selectedFiles = new Set(this.files.map(f => f.id));
     },
     clearSelection() {
       this.selectedFiles = new Set();
@@ -275,23 +260,33 @@ export const useFileStore = defineStore("file", {
       this.selectedFiles = newSelectedFiles;
     },
 
+    /**
+     * 健壮的路径拼接辅助函数
+     * @param basePath 基础逻辑路径 (e.g., '/', '/Documents')
+     * @param name 文件或文件夹名 (e.g., 'file.txt')
+     * @returns 拼接后的完整逻辑路径 (e.g., '/file.txt', '/Documents/file.txt')
+     */
+    _joinPath(basePath: string, name: string): string {
+      if (basePath === "/") {
+        return `/${name}`;
+      }
+      // 移除 basePath 可能存在的尾部斜杠，然后拼接
+      return `${basePath.replace(/\/$/, "")}/${name}`;
+    },
+
     // --- 创建文件和文件夹的 Actions ---
     async createFile(name: string) {
       try {
-        // 构建要创建的文件完整逻辑路径
-        const fullFileLogicalPath =
-          this.path.endsWith("/") && this.path !== "/"
-            ? `${this.path.slice(0, -1)}/${name}` // 非根目录且带斜杠，移除斜杠
-            : `${this.path}${name}`; // 根目录直接拼接
+        // **优化**: 使用辅助函数进行路径拼接
+        const fullFileLogicalPath = this._joinPath(this.path, name);
 
-        // 调用 createItemApi，传入 FileType.File (0) 和完整逻辑路径
         const response = await createItemApi(
           FileType.File,
           fullFileLogicalPath
         );
         if (response.code === 200) {
           ElMessage.success(`文件 ${name} 创建成功`);
-          this.loadFiles(this.path); // 重新加载当前目录的文件列表
+          this.loadFiles(this.path);
         } else {
           ElMessage.error(response.message || `文件 ${name} 创建失败`);
         }
@@ -302,20 +297,16 @@ export const useFileStore = defineStore("file", {
     },
     async createFolder(name: string) {
       try {
-        // 构建要创建的文件夹完整逻辑路径
-        const fullFolderLogicalPath =
-          this.path.endsWith("/") && this.path !== "/"
-            ? `${this.path.slice(0, -1)}/${name}` // 非根目录且带斜杠，移除斜杠
-            : `${this.path}${name}`; // 根目录直接拼接
+        // **优化**: 使用辅助函数进行路径拼接
+        const fullFolderLogicalPath = this._joinPath(this.path, name);
 
-        // 调用 createItemApi，传入 FileType.Dir (1) 和完整逻辑路径
         const response = await createItemApi(
           FileType.Dir,
           fullFolderLogicalPath
         );
         if (response.code === 200) {
           ElMessage.success(`文件夹 ${name} 创建成功`);
-          this.loadFiles(this.path); // 重新加载当前目录的文件列表
+          this.loadFiles(this.path);
         } else {
           ElMessage.error(response.message || `文件夹 ${name} 创建失败`);
         }
@@ -347,16 +338,19 @@ export const useFileStore = defineStore("file", {
         .map(async item => {
           try {
             item.status = "uploading";
-            // 拼接上传的完整逻辑路径
-            const uploadLogicalPath =
-              this.path.endsWith("/") && this.path !== "/"
-                ? `${this.path.slice(0, -1)}/${item.name}` // 非根目录且带斜杠，移除斜杠
-                : `${this.path}${item.name}`; // 根目录直接拼接
+
+            // **修复**: 检查存储策略是否存在
+            if (!this.storagePolicy?.id) {
+              throw new Error("存储策略未加载，无法开始上传。");
+            }
+
+            // **优化**: 使用辅助函数拼接上传路径
+            const uploadLogicalPath = this._joinPath(this.path, item.name);
 
             const sessionRes = await createUploadSessionApi(
-              uploadLogicalPath, // 传入逻辑路径
+              uploadLogicalPath,
               item.size,
-              "J7uV"
+              this.storagePolicy.id // **修复**: 使用从 state 中获取的动态存储策略 ID
             );
             if (sessionRes.code !== 200) throw new Error(sessionRes.message);
 
@@ -381,23 +375,26 @@ export const useFileStore = defineStore("file", {
             }
             await Promise.all(chunkPromises);
             item.status = "success";
-          } catch (error) {
+          } catch (error: any) {
             item.status = "error";
+            item.errorMessage = error.message || `上传文件 ${item.name} 失败`;
             console.error(`上传文件 ${item.name} 失败:`, error);
             if (item.sessionId) {
-              await deleteUploadSessionApi(
-                item.sessionId,
-                // 删除时也使用逻辑路径
-                this.path.endsWith("/") && this.path !== "/"
-                  ? `${this.path.slice(0, -1)}/${item.name}`
-                  : `${this.path}${item.name}`
-              );
+              // 删除时也使用正确的逻辑路径
+              const logicalPath = this._joinPath(this.path, item.name);
+              await deleteUploadSessionApi(item.sessionId, logicalPath);
             }
           }
         });
 
       await Promise.all(uploadTasks);
-      this.loadFiles(this.path);
+      // 只有在全部上传任务（无论成功失败）处理完毕后，才刷新一次文件列表
+      const hasSuccessUploads = this.uploadQueue.some(
+        item => item.status === "success"
+      );
+      if (hasSuccessUploads) {
+        this.loadFiles(this.path);
+      }
     },
     removeFromQueue(id: number) {
       this.uploadQueue = this.uploadQueue.filter(item => item.id !== id);
@@ -407,7 +404,7 @@ export const useFileStore = defineStore("file", {
     },
     clearFinishedUploads() {
       this.uploadQueue = this.uploadQueue.filter(
-        item => item.status === "uploading"
+        item => item.status === "pending" || item.status === "uploading"
       );
       if (this.uploadQueue.length === 0) {
         this.showUploadProgress = false;
