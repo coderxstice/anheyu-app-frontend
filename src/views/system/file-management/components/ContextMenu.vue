@@ -82,8 +82,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "select", action: string, context?: any): void;
   (e: "closed"): void;
-  /** 请求父组件（或处理它的Hook）去执行单选操作 */
   (e: "request-select-single", fileId: string): void;
+  (e: "request-clear-selection"): void;
 }>();
 
 // --- 内部状态管理 ---
@@ -160,7 +160,7 @@ const openMenu = (event: MouseEvent) => {
     if (itemId && !props.selectedFileIds.has(itemId)) {
       // **关键修改点**: 发出事件请求父组件进行单选，而不是自己操作
       emit("request-select-single", itemId);
-      // 假设父组件会同步更新 selectedFileIds prop，我们在这里乐观更新
+      // 父组件会同步更新 selectedFileIds prop，我们在这里乐观更新
       finalSelectedIds = new Set([itemId]);
     }
     localItems.value = itemMenu;

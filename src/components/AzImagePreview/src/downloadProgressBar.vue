@@ -1,13 +1,15 @@
 <template>
-  <Transition name="slide-down">
-    <div v-if="visible" class="download-bar">
-      <div
-        class="progress-bar"
-        :style="{ width: progress + '%', background: mainColor }"
-      />
-      <span class="text">{{ text }}</span>
-    </div>
-  </Transition>
+  <div>
+    <Transition name="slide-down">
+      <div v-if="visible" class="download-bar">
+        <div
+          class="progress-bar"
+          :style="{ width: progress + '%', background: mainColor }"
+        />
+        <span class="text">{{ text }}</span>
+      </div>
+    </Transition>
+  </div>
 </template>
 
 <script setup lang="ts">

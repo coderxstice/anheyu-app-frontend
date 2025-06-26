@@ -4,7 +4,7 @@
     <div
       v-for="file in files"
       :key="file.id"
-      class="grid-item deselect-safe-zone"
+      class="grid-item"
       :data-id="file.id"
       :class="{ selected: selectedFileIds.has(file.id) }"
       @click="handleItemClick(file, $event)"

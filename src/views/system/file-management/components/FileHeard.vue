@@ -93,7 +93,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
-import SearchOverlay from "./SearchOverlay.vue"; // 假设这是正确的路径
+import SearchOverlay from "./SearchOverlay.vue";
 import gsap from "gsap";
 
 // 引入所有需要的图标

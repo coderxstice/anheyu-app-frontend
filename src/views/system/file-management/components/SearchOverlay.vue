@@ -1,28 +1,30 @@
 <template>
-  <Transition
-    name="search-overlay"
-    :css="false"
-    @enter="onEnter"
-    @leave="onLeave"
-  >
-    <div v-if="visible" class="search-overlay" @click="handleOverlayClick">
-      <div class="search-box">
-        <el-input
-          ref="searchInputRef"
-          v-model="query"
-          placeholder="搜索您的所有文件..."
-          clearable
-          size="large"
-        >
-          <template #prefix>
-            <el-icon><Search /></el-icon>
-          </template>
-        </el-input>
+  <div>
+    <Transition
+      name="search-overlay"
+      :css="false"
+      @enter="onEnter"
+      @leave="onLeave"
+    >
+      <div v-if="visible" class="search-overlay" @click="handleOverlayClick">
+        <div class="search-box">
+          <el-input
+            ref="searchInputRef"
+            v-model="query"
+            placeholder="搜索您的所有文件..."
+            clearable
+            size="large"
+          >
+            <template #prefix>
+              <el-icon><Search /></el-icon>
+            </template>
+          </el-input>
+        </div>
+        <div class="search-results" />
+        <el-icon class="close-icon" @click="close"><CloseBold /></el-icon>
       </div>
-      <div class="search-results" />
-      <el-icon class="close-icon" @click="close"><CloseBold /></el-icon>
-    </div>
-  </Transition>
+    </Transition>
+  </div>
 </template>
 
 <script setup lang="ts">

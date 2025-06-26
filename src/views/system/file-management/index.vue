@@ -1,6 +1,8 @@
 <template>
   <div
+    ref="fileManagerContainerRef"
     class="file-management-container"
+    @click="handleInternalClick"
     @dragenter="dragHandlers.onDragEnter"
     @dragover="dragHandlers.onDragOver"
     @dragleave="dragHandlers.onDragLeave"
@@ -9,7 +11,7 @@
   >
     <!-- 头部区域 -->
     <FileHeard
-      class="mb-2 deselect-safe-zone"
+      class="mb-2"
       :has-selection="hasSelection"
       :is-single-selection="isSingleSelection"
       :selection-count-label="selectionCountLabel"
@@ -24,7 +26,7 @@
       @share="onActionShare"
     />
     <!-- 面包屑和工具栏 -->
-    <div class="flex w-full deselect-safe-zone">
+    <div class="flex w-full">
       <FileBreadcrumb class="flex-1 mb-2" />
       <FileToolbar
         class="mb-2 ml-2"
@@ -82,16 +84,18 @@
       @select="onMenuSelect"
       @closed="handleContextMenuClosed"
     />
-    <!-- 关键修改：绑定所有新的上传事件 -->
+
     <UploadProgress
       :visible="isPanelVisible"
+      :is-collapsed="isPanelCollapsed"
       :queue="uploadQueue"
       @close="handlePanelClose"
-      @clear-finished="clearFinishedUploads"
+      @toggle-collapse="isPanelCollapsed = !isPanelCollapsed"
       @retry-item="retryItem"
       @remove-item="removeItem"
       @resolve-conflict="resolveConflict"
       @global-command="handleUploadGlobalCommand"
+      @add-files="handleUploadFile"
     />
   </div>
 </template>
@@ -99,6 +103,8 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
+import { ElMessageBox } from "element-plus";
+import { onClickOutside } from "@vueuse/core";
 
 // --- 核心状态管理 ---
 import { useFileStore, type SortKey } from "@/store/modules/fileStore";
@@ -147,18 +153,20 @@ const {
   invertSelection
 } = useFileSelection(sortedFiles);
 
-// 2.2 文件上传 Hook (解构出所有新方法)
+// 2.2 文件上传 Hook
 const {
   uploadQueue,
-  showUploadProgress,
   addUploadsToQueue,
   removeItem,
   retryItem,
   retryAllFailed,
   resolveConflict,
   setGlobalOverwriteAndRetry,
-  clearFinishedUploads
+  clearFinishedUploads,
+  setConcurrency,
+  concurrency
 } = useFileUploader(
+  sortedFiles,
   computed(() => storagePolicy.value),
   () => fileStore.loadFiles(path.value)
 );
@@ -190,7 +198,6 @@ const {
 // 3.4 上下文菜单 Hook
 const {
   contextMenuTriggerEvent,
-  handleContextMenuTrigger,
   onMenuSelect,
   handleContextMenuClosed,
   openBlankMenu
@@ -218,6 +225,75 @@ const isSingleSelection = computed(() => selectedFiles.value.size === 1);
 const selectionCountLabel = computed(
   () => `${selectedFiles.value.size} 个对象`
 );
+
+// --- 核心交互逻辑 ---
+
+const fileManagerContainerRef = ref(null);
+
+// **策略一: 处理组件外部的点击**
+onClickOutside(
+  fileManagerContainerRef,
+  () => {
+    if (hasSelection.value) {
+      clearSelection();
+    }
+  },
+  {
+    ignore: [
+      ".el-popper",
+      ".el-overlay",
+      ".upload-progress-panel",
+      ".context-menu-overlay",
+      ".context-menu"
+    ]
+  }
+);
+
+/**
+ * **策略二: 处理组件内部的点击**
+ */
+const handleInternalClick = (event: MouseEvent) => {
+  if (!hasSelection.value) return;
+
+  const target = event.target as HTMLElement;
+
+  // 关键逻辑: 如果点击的是任何明确的交互项，则不取消选择。
+  // 我们不再依赖特定 class，而是通过更通用的方式判断。
+
+  // 1. 如果点击的是文件项，则不取消选择
+  if (target.closest(".file-item, .grid-item")) {
+    return;
+  }
+
+  // 2. 如果点击的是 Element Plus 的按钮或输入框，则不取消选择
+  if (target.closest(".el-button, .el-input, .el-select, .el-dropdown")) {
+    return;
+  }
+
+  // 3. 如果点击的是我们自定义的、可点击的图标，也不取消选择
+  // (这是一个备用规则，以防有些图标不是el-button)
+  if (target.closest(".action-icon")) {
+    return;
+  }
+
+  // 如果代码能执行到这里，说明点击的是组件内部的“空白区域”。
+  clearSelection();
+};
+
+/**
+ * 处理右键点击
+ */
+const handleContextMenuTrigger = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  const clickedOnItem = target.closest(".file-item, .grid-item");
+
+  if (!clickedOnItem) {
+    if (hasSelection.value) {
+      clearSelection();
+    }
+  }
+  contextMenuTriggerEvent.value = event;
+};
 
 // 4.2 为 FileHeard 和右键菜单实现事件处理器
 const getSelectedFileItems = () =>
@@ -260,14 +336,23 @@ const handleLoadInitial = () => {
 
 // 4.5 为 UploadProgress 处理显示逻辑和事件
 const isPanelVisible = ref(false);
-watch(showUploadProgress, shouldShow => {
-  if (shouldShow) isPanelVisible.value = true;
-});
+const isPanelCollapsed = ref(false);
+
+watch(
+  () => uploadQueue.length,
+  (newLength, oldLength) => {
+    if (newLength > 0 && oldLength === 0) {
+      isPanelVisible.value = true;
+      isPanelCollapsed.value = false;
+    }
+  }
+);
+
 const handlePanelClose = () => {
   isPanelVisible.value = false;
 };
 
-// 关键修改：实现处理全局上传命令的函数
+// 实现处理全局上传命令的函数
 const handleUploadGlobalCommand = (command: string) => {
   switch (command) {
     case "overwrite-all":
@@ -279,6 +364,19 @@ const handleUploadGlobalCommand = (command: string) => {
     case "clear-finished":
       clearFinishedUploads();
       break;
+    case "set-concurrency":
+      ElMessageBox.prompt("请输入新的并发上传数 (1-10)", "设置并发数", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        inputValue: String(concurrency.value),
+        inputPattern: /^[1-9]$|^10$/,
+        inputErrorMessage: "请输入 1 到 10 之间的整数"
+      })
+        .then(({ value }) => {
+          setConcurrency(Number(value));
+        })
+        .catch(() => {});
+      break;
   }
 };
 
@@ -288,7 +386,6 @@ const activeViewComponent = computed(() => viewComponents[viewMode.value]);
 </script>
 
 <style>
-/* 样式保持不变 */
 .file-management-container {
   height: 100%;
   display: flex;

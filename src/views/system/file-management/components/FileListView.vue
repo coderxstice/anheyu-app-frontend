@@ -14,7 +14,7 @@
       <li
         v-for="item in files"
         :key="item.id"
-        class="file-item deselect-safe-zone"
+        class="file-item"
         :data-id="item.id"
         :class="{ selected: selectedFileIds.has(item.id) }"
         @click="handleItemClick(item, $event)"
