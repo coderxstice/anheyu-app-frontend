@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-06-26 16:24:23
+ * @LastEditTime: 2025-06-26 18:19:18
  * @LastEditors: 安知鱼
  */
 
@@ -15,8 +15,8 @@
  * 0 代表文件，1 代表文件夹
  */
 export enum FileType {
-  File = 0,
-  Dir = 1
+  File = 1,
+  Dir = 2
 }
 
 /**

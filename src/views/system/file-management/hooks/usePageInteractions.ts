@@ -2,15 +2,15 @@ import { ref } from "vue";
 
 /**
  * 管理页面级别的交互，如拖拽上传和搜索。
- * @param onFilesDropped - 当文件被拖拽到窗口并释放时触发的回调函数。
+ * @param onDrop - 当文件或目录被拖拽到窗口并释放时触发的回调函数。
  */
-export function usePageInteractions(onFilesDropped: (files: FileList) => void) {
+export function usePageInteractions(
+  // **修复**: 回调函数现在接收完整的 DataTransfer 对象
+  onDrop: (dataTransfer: DataTransfer) => void
+) {
   const isDragging = ref(false);
   const isSearchVisible = ref(false);
-
-  // **修复**: 将 origin 的类型修改为 { x: number, y: number } 以匹配 SearchOverlay 组件的 prop 定义
   const searchOrigin = ref({ x: 0, y: 0 });
-
   let dragCounter = 0;
 
   const dragHandlers = {
@@ -35,16 +35,13 @@ export function usePageInteractions(onFilesDropped: (files: FileList) => void) {
       event.preventDefault();
       isDragging.value = false;
       dragCounter = 0;
-      if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
-        onFilesDropped(event.dataTransfer.files);
+      // **修复**: 检查并传递完整的 event.dataTransfer 对象
+      if (event.dataTransfer) {
+        onDrop(event.dataTransfer);
       }
     }
   };
 
-  /**
-   * **修复**: 将函数签名修改为接收 MouseEvent，并从事件中直接获取坐标
-   * @param event - 从 FileHeard 组件的 @trigger-search 事件中发出的 MouseEvent
-   */
   const openSearchFromElement = (event: MouseEvent) => {
     searchOrigin.value = {
       x: event.clientX,

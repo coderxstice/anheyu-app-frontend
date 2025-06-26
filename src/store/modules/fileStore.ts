@@ -148,10 +148,9 @@ export const useFileStore = defineStore("file", {
     async loadFiles(pathToLoad: string | undefined, page = 1) {
       this.loading = true;
 
-      // **修复**: 无论传入什么路径，都先净化为标准的逻辑路径
       const logicalPath = extractLogicalPathFromUri(pathToLoad || "/");
 
-      this.path = logicalPath; // 将净化后的逻辑路径存入 state
+      this.path = logicalPath;
       this.clearSelection();
 
       try {
@@ -161,7 +160,6 @@ export const useFileStore = defineStore("file", {
         if (sortParts.length > 2) {
           order = sortParts.slice(0, -1).join("_");
         }
-        // **修复**: 将净化后的逻辑路径传递给 API
         const response = await fetchFilesByPathApi(
           logicalPath,
           order,
@@ -292,7 +290,13 @@ export const useFileStore = defineStore("file", {
         "id" | "status" | "progress" | "uploadedChunks" | "abortController"
       >[]
     ) {
-      if (uploads.length === 0) return;
+      // **优化**: 增加一个警告，以便在调用处逻辑错误时更容易调试
+      if (uploads.length === 0) {
+        console.warn(
+          "[Queue] addUploadsToQueue 方法被调用，但传入的上传列表为空。"
+        );
+        return;
+      }
       this.showUploadProgress = true;
 
       const newUploadItems: UploadItem[] = uploads.map(u => ({
@@ -304,9 +308,6 @@ export const useFileStore = defineStore("file", {
       }));
 
       this.uploadQueue.push(...newUploadItems);
-      console.log(
-        `[Queue] 已添加 ${newUploadItems.length} 个新项目到上传队列。`
-      );
       this.processUploadQueue();
     },
 

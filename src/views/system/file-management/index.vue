@@ -50,7 +50,7 @@ import { computed } from "vue";
 import { useFileStore } from "@/store/modules/fileStore";
 import { useContextMenuHandler } from "./hooks/useContextMenuHandler";
 import { usePageInteractions } from "./hooks/usePageInteractions";
-import { useDirectoryUpload } from "./hooks/useDirectoryUpload"; // 1. 引入新的 Hook
+import { useDirectoryUpload } from "./hooks/useDirectoryUpload";
 
 // 引入所有需要的子组件
 import FileHeard from "./components/FileHeard.vue";
@@ -65,8 +65,7 @@ import { UploadFilled } from "@element-plus/icons-vue";
 
 // --- 初始化 Store 和 Hooks ---
 const fileStore = useFileStore();
-const { handleFiles } = useDirectoryUpload(); // 2. 初始化上传 Hook
-
+const { handleDrop } = useDirectoryUpload();
 const {
   contextMenuTriggerEvent,
   handleContextMenuTrigger,
@@ -82,7 +81,7 @@ const {
   isSearchVisible,
   searchOrigin,
   openSearchFromElement
-} = usePageInteractions(handleFiles);
+} = usePageInteractions(handleDrop);
 
 // --- 视图状态 ---
 const viewComponents = {
