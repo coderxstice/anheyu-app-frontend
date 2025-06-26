@@ -91,7 +91,8 @@ export const fetchFilesByPathApi = async (
 export const createUploadSessionApi = (
   fullPath: string,
   size: number,
-  policyId: string
+  policyId: string,
+  overwrite: boolean = false // 是否覆盖同名文件
 ): Promise<CreateUploadSessionResponse> => {
   const fullUri = buildFullUri(fullPath);
 
@@ -99,7 +100,7 @@ export const createUploadSessionApi = (
     "put",
     baseUrlApi("file/upload"),
     {
-      data: { uri: fullUri, size, policy_id: policyId }
+      data: { uri: fullUri, size, policy_id: policyId, overwrite }
     }
   );
 };

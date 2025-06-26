@@ -82,12 +82,16 @@
       @select="onMenuSelect"
       @closed="handleContextMenuClosed"
     />
+    <!-- 关键修改：绑定所有新的上传事件 -->
     <UploadProgress
       :visible="isPanelVisible"
       :queue="uploadQueue"
       @close="handlePanelClose"
       @clear-finished="clearFinishedUploads"
-      @cancel-upload="cancelUpload"
+      @retry-item="retryItem"
+      @remove-item="removeItem"
+      @resolve-conflict="resolveConflict"
+      @global-command="handleUploadGlobalCommand"
     />
   </div>
 </template>
@@ -143,12 +147,16 @@ const {
   invertSelection
 } = useFileSelection(sortedFiles);
 
-// 2.2 文件上传 Hook
+// 2.2 文件上传 Hook (解构出所有新方法)
 const {
   uploadQueue,
   showUploadProgress,
   addUploadsToQueue,
-  cancelUpload,
+  removeItem,
+  retryItem,
+  retryAllFailed,
+  resolveConflict,
+  setGlobalOverwriteAndRetry,
   clearFinishedUploads
 } = useFileUploader(
   computed(() => storagePolicy.value),
@@ -157,7 +165,7 @@ const {
 
 // --- 3. 初始化与用户交互相关的 Hooks ---
 
-// 3.1 文件操作 Hook (新建、重命名、删除等)
+// 3.1 文件操作 Hook
 const {
   handleUploadFile,
   handleUploadDir,
@@ -170,7 +178,7 @@ const {
 // 3.2 拖拽上传 Hook
 const { handleDrop } = useDirectoryUpload(addUploadsToQueue, path);
 
-// 3.3 页面交互 Hook (处理拖拽覆盖层等)
+// 3.3 页面交互 Hook
 const {
   isDragging,
   dragHandlers,
@@ -242,17 +250,15 @@ const handleSetSortKey = (key: SortKey) => fileStore.setSort(key);
 
 // 4.4 为 FileList / FileGrid 实现事件处理器
 const handleNavigate = (newPath: string) => {
-  // 导航前清空选择
   clearSelection();
   fileStore.loadFiles(newPath);
 };
 const handleLoadInitial = () => {
-  if (sortedFiles.value.length === 0 && !loading.value) {
+  if (sortedFiles.value.length === 0 && !loading.value)
     fileStore.loadFiles("/");
-  }
 };
 
-// 4.5 为 UploadProgress 处理显示逻辑
+// 4.5 为 UploadProgress 处理显示逻辑和事件
 const isPanelVisible = ref(false);
 watch(showUploadProgress, shouldShow => {
   if (shouldShow) isPanelVisible.value = true;
@@ -261,11 +267,23 @@ const handlePanelClose = () => {
   isPanelVisible.value = false;
 };
 
-// --- 5. 视图状态 ---
-const viewComponents = {
-  list: FileListView,
-  grid: FileGridView
+// 关键修改：实现处理全局上传命令的函数
+const handleUploadGlobalCommand = (command: string) => {
+  switch (command) {
+    case "overwrite-all":
+      setGlobalOverwriteAndRetry(true);
+      break;
+    case "retry-all":
+      retryAllFailed();
+      break;
+    case "clear-finished":
+      clearFinishedUploads();
+      break;
+  }
 };
+
+// --- 5. 视图状态 ---
+const viewComponents = { list: FileListView, grid: FileGridView };
 const activeViewComponent = computed(() => viewComponents[viewMode.value]);
 </script>
 
@@ -275,12 +293,12 @@ const activeViewComponent = computed(() => viewComponents[viewMode.value]);
   height: 100%;
   display: flex;
   flex-direction: column;
-  position: relative; /* 为遮罩层提供定位上下文 */
+  position: relative;
 }
 .file-management-main {
   width: 100%;
-  flex: 1; /* 占据剩余空间 */
-  min-height: 0; /* 防止在 flex 布局中溢出 */
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   background-color: #fff;
@@ -289,9 +307,8 @@ const activeViewComponent = computed(() => viewComponents[viewMode.value]);
 .file-content-area {
   flex: 1;
   overflow: auto;
-  position: relative; /* 确保内容区可以作为定位参考 */
+  position: relative;
 }
-
 .drag-overlay {
   position: absolute;
   top: 0;
@@ -304,8 +321,8 @@ const activeViewComponent = computed(() => viewComponents[viewMode.value]);
   align-items: center;
   justify-content: center;
   color: white;
-  pointer-events: none; /* 关键：允许下方的 dragleave 事件触发 */
-  border-radius: inherit; /* 如果父容器有圆角，则继承 */
+  pointer-events: none;
+  border-radius: inherit;
 }
 .drag-content {
   text-align: center;

@@ -47,7 +47,14 @@ export interface UploadItem {
   id: number; // 前端生成的唯一ID
   name: string;
   size: number;
-  status: "pending" | "uploading" | "success" | "error" | "canceled";
+  status:
+    | "pending"
+    | "uploading"
+    | "success"
+    | "error"
+    | "conflict"
+    | "canceled";
+  overwrite?: boolean; // 用于单个文件覆盖
   progress: number;
   file: File; // 原始 File 对象
   relativePath: string; // 文件在所选目录中的相对路径
