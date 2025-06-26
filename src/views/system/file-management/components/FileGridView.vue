@@ -1,11 +1,12 @@
 <template>
   <div v-loading="loading" class="file-grid-view">
+    <!-- 使用从 props 传入的文件列表 -->
     <div
       v-for="file in files"
       :key="file.id"
       class="grid-item deselect-safe-zone"
       :data-id="file.id"
-      :class="{ selected: selectedFiles.has(file.id) }"
+      :class="{ selected: selectedFileIds.has(file.id) }"
       @click="handleItemClick(file, $event)"
       @dblclick="handleItemDblClick(file)"
       @mousedown="handleMouseDown"
@@ -27,18 +28,29 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
-import { storeToRefs } from "pinia";
-import { useFileStore } from "@/store/modules/fileStore";
 import { useFileIcons } from "../hooks/useFileIcons";
 import gsap from "gsap";
-import { FileItem, FileType } from "@/api/sys-file/type"; // 确保 FileType 已正确导入
+import { FileItem, FileType } from "@/api/sys-file/type";
 
-// --- 初始化 Store 和 Hooks ---
-const fileStore = useFileStore();
-const { getFileIcon } = useFileIcons(); // useFileIcons 钩子需要被修改
-const { sortedFiles: files, loading, selectedFiles } = storeToRefs(fileStore);
+// --- 1. 定义 Props 和 Emits ---
+const props = defineProps<{
+  files: FileItem[];
+  loading: boolean;
+  selectedFileIds: Set<string>;
+}>();
 
-// --- 动画处理函数 ---
+const emit = defineEmits<{
+  (e: "select-single", fileId: string): void;
+  (e: "select-range", fileId: string): void;
+  (e: "toggle-selection", fileId: string): void;
+  (e: "select-all"): void;
+  (e: "navigate-to", path: string): void;
+}>();
+
+// --- 2. 初始化独立的 Hooks ---
+const { getFileIcon } = useFileIcons();
+
+// --- 3. 动画处理 (保持不变) ---
 const handleMouseDown = (event: MouseEvent) => {
   gsap.to(event.currentTarget as HTMLElement, {
     scale: 0.95,
@@ -61,41 +73,34 @@ const handleMouseLeave = (event: MouseEvent) => {
   });
 };
 
-// --- 文件选择逻辑 ---
+// --- 4. 修改事件处理器，通过 emit 发出意图 ---
 const handleItemClick = (file: FileItem, event: MouseEvent) => {
   if (event.shiftKey) {
-    fileStore.selectRange(file.id);
+    emit("select-range", file.id);
   } else if (event.metaKey || event.ctrlKey) {
-    fileStore.toggleSelection(file.id);
+    emit("toggle-selection", file.id);
   } else {
-    fileStore.selectSingle(file.id);
+    emit("select-single", file.id);
   }
 };
 
-// --- 双击事件 ---
 const handleItemDblClick = (file: FileItem) => {
-  // 检查 file.type 是否为目录类型 (使用 FileType.Dir 枚举)
   if (file.type === FileType.Dir) {
-    console.log("双击了目录项:", file);
-    // 直接使用 file.path 进行导航
-    fileStore.loadFiles(file.path);
+    emit("navigate-to", file.path);
   }
 };
 
-// --- 全选快捷键逻辑 ---
 const handleKeyDown = (event: KeyboardEvent) => {
   const target = event.target as HTMLElement;
-  if (["INPUT", "TEXTAREA"].includes(target.tagName)) {
-    return;
-  }
+  if (["INPUT", "TEXTAREA"].includes(target.tagName)) return;
 
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "a") {
     event.preventDefault();
-    fileStore.selectAll();
+    emit("select-all");
   }
 };
 
-// --- 生命周期钩子 ---
+// --- 生命周期钩子 (保持不变) ---
 onMounted(() => {
   window.addEventListener("keydown", handleKeyDown);
 });
@@ -106,6 +111,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* 样式保持不变 */
 .file-grid-view {
   padding: 24px;
   display: grid;

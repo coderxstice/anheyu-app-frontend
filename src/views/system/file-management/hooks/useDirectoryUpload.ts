@@ -5,11 +5,11 @@
  * @LastEditTime: 2025-06-26 17:48:47
  * @LastEditors: 安知鱼
  */
-import { useFileStore } from "@/store/modules/fileStore";
 import type { UploadItem } from "@/api/sys-file/type";
 import { ElMessage } from "element-plus";
+import type { Ref } from "vue";
 
-// --- 目录遍历核心函数 ---
+// --- 目录遍历核心函数 (这部分逻辑很棒，保持不变) ---
 
 /**
  * 从 FileSystemFileEntry 获取 File 对象。
@@ -33,7 +33,6 @@ const traverseDirectory = (
   directoryEntry: FileSystemDirectoryEntry
 ): Promise<File[]> => {
   const reader = directoryEntry.createReader();
-  // readEntries() 每次可能只返回一部分条目，需要循环读取
   return new Promise((resolve, reject) => {
     const allEntries: FileSystemEntry[] = [];
 
@@ -50,22 +49,21 @@ const traverseDirectory = (
                 // 递归遍历子目录
                 return traverseDirectory(entry as FileSystemDirectoryEntry);
               }
-              return Promise.resolve(null); // 忽略其他类型
+              return Promise.resolve(null);
             });
 
-            // 等待所有 Promise 完成，然后扁平化数组并过滤掉空值
             const filesOrNulls = await Promise.all(filePromises);
-            const flattenedFiles = filesOrNulls
-              .flat(Infinity)
-              .filter(Boolean) as File[];
+            // 使用 flat(Infinity) 来深度扁平化数组，并过滤掉 null
+            const flattenedFiles = (
+              filesOrNulls.flat(Infinity) as (File | null)[]
+            ).filter((file): file is File => file !== null);
             resolve(flattenedFiles);
           } catch (e) {
             reject(e);
           }
         } else {
-          // 将当前批次的条目添加到总列表中，并继续读取下一批
           allEntries.push(...entries);
-          readEntries();
+          readEntries(); // 继续读取下一批
         }
       }, reject);
     };
@@ -75,13 +73,21 @@ const traverseDirectory = (
 };
 
 /**
- * 处理文件和目录上传的 Hook
+ * 处理文件和目录拖拽上传的 Hook
+ * @param addUploadsToQueue - 一个能将文件添加至上传队列的函数。
+ * @param currentPath - 一个包含当前文件浏览器路径的响应式引用 (Ref)。
  */
-export function useDirectoryUpload() {
-  const fileStore = useFileStore();
-
+export function useDirectoryUpload(
+  addUploadsToQueue: (
+    uploads: Omit<
+      UploadItem,
+      "id" | "status" | "progress" | "uploadedChunks" | "abortController"
+    >[]
+  ) => void,
+  currentPath: Ref<string>
+) {
   /**
-   * **修复**: 新的处理函数，接收 DataTransfer 对象，并能遍历目录。
+   * 处理拖拽事件的核心函数。
    * @param dataTransfer - 从拖拽事件中获取的 DataTransfer 对象。
    */
   const handleDrop = async (dataTransfer: DataTransfer) => {
@@ -89,10 +95,10 @@ export function useDirectoryUpload() {
       `[UploadHook] handleDrop 被调用，接收到 ${dataTransfer.items.length} 个拖拽项目。`
     );
 
-    const currentTargetPath = fileStore.path;
+    const currentTargetPath = currentPath.value; // 从传入的 Ref 获取当前路径
     console.log(`[UploadHook] 当前目标路径为: ${currentTargetPath}`);
 
-    const promises: Promise<(File | File[]) | null>[] = [];
+    const promises: Promise<File | File[] | null>[] = [];
 
     // 遍历所有拖拽项目
     for (const item of Array.from(dataTransfer.items)) {
@@ -109,14 +115,16 @@ export function useDirectoryUpload() {
     try {
       // 等待所有文件和目录的遍历完成
       const nestedFiles = await Promise.all(promises);
-      const allFiles = nestedFiles.flat(Infinity).filter(Boolean) as File[];
+      const allFiles = (nestedFiles.flat(Infinity) as (File | null)[]).filter(
+        (file): file is File => file !== null
+      );
 
       console.log(
         `[UploadHook] 目录遍历完成，共找到 ${allFiles.length} 个可上传的文件。`
       );
 
       if (allFiles.length === 0) {
-        ElMessage.info("您拖拽的目录中没有可上传的文件。");
+        ElMessage.info("您拖拽的项目中没有可上传的文件。");
         return;
       }
 
@@ -124,24 +132,36 @@ export function useDirectoryUpload() {
         UploadItem,
         "id" | "status" | "progress" | "uploadedChunks" | "abortController"
       >[] = allFiles.map(file => ({
-        // UI上显示相对路径，避免同名文件混淆
+        // 在 UI 上显示相对路径，这样用户可以区分同名但不同目录的文件
         name: file.webkitRelativePath || file.name,
         size: file.size,
         file: file,
+        // 上传时，后端需要这个相对路径来重建目录结构
         relativePath: file.webkitRelativePath || file.name,
-        targetPath: currentTargetPath
+        // 所有文件都上传到当前的目标路径下
+        targetPath: currentTargetPath,
+        // 标记为需要刷新，以便上传完成后更新文件列表
+        needsRefresh: true
       }));
 
       console.log(
         "[UploadHook] 准备将以下任务添加到队列:",
         JSON.parse(
-          JSON.stringify(newUploads.map(u => ({ name: u.name, size: u.size })))
+          JSON.stringify(
+            newUploads.map(u => ({
+              name: u.name,
+              size: u.size,
+              path: u.relativePath
+            }))
+          )
         )
       );
-      fileStore.addUploadsToQueue(newUploads);
+
+      // 调用从外部注入的函数来添加上传任务
+      addUploadsToQueue(newUploads);
     } catch (error) {
       console.error("[UploadHook] 遍历文件或目录时出错:", error);
-      ElMessage.error("读取目录内容时出错，请重试。");
+      ElMessage.error("读取拖拽内容时出错，请重试。");
     }
   };
 

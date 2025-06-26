@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-06-26 18:19:18
+ * @LastEditTime: 2025-06-26 18:36:16
  * @LastEditors: 安知鱼
  */
 
@@ -47,12 +47,15 @@ export interface UploadItem {
   id: number; // 前端生成的唯一ID
   name: string;
   size: number;
-  status: "pending" | "uploading" | "success" | "error"; // 增加 pending 状态
+  status: "pending" | "uploading" | "success" | "error" | "canceled";
   progress: number;
   file: File; // 原始 File 对象
   relativePath: string; // 文件在所选目录中的相对路径
   targetPath: string; // 上传任务启动时所在的目标目录路径
   abortController?: AbortController; // 用于取消上传的控制器
+
+  // 用于告知调用方是否需要在完成后刷新列表;
+  needsRefresh?: boolean;
 
   // 用于分块上传的状态管理
   sessionId?: string; // 上传会话ID

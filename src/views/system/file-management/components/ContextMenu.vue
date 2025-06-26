@@ -13,6 +13,7 @@
         ref="contextMenuRef"
         class="context-menu"
         :style="{ left: `${x}px`, top: `${y}px` }"
+        @contextmenu.prevent
       >
         <ul>
           <li
@@ -45,12 +46,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from "vue";
+import { ref, watch } from "vue";
 import gsap from "gsap";
-import { useFileStore } from "@/store/modules/fileStore";
 import AnIconBox from "@/components/AnIconBox/index.vue";
 
-// 图标
+// 图标（保持不变）
 import Upload from "@iconify-icons/ep/upload";
 import FolderAdd from "@iconify-icons/ep/folder-add";
 import DocumentAdd from "@iconify-icons/ep/document-add";
@@ -69,32 +69,32 @@ export interface MenuItem {
   action?: string;
   danger?: boolean;
   divider?: boolean;
-  color?: string; // 添加 color 属性
+  color?: string;
 }
 
-// 父组件只需要提供一个触发菜单的事件，不再需要管理 visible、x、y、items
 const props = defineProps<{
-  /** 接收触发菜单的鼠标事件，由父组件传入 */
+  /** 接收触发菜单的鼠标事件 */
   triggerEvent: MouseEvent | null;
+  /** 接收当前已选择的文件ID集合 */
+  selectedFileIds: Set<string>;
 }>();
 
 const emit = defineEmits<{
   (e: "select", action: string, context?: any): void;
-  /** 当菜单关闭时，父组件可能需要清除 triggerEvent */
   (e: "closed"): void;
+  /** 请求父组件（或处理它的Hook）去执行单选操作 */
+  (e: "request-select-single", fileId: string): void;
 }>();
 
 // --- 内部状态管理 ---
-const fileStore = useFileStore(); // 菜单需要访问文件选择状态
 const contextMenuRef = ref<HTMLElement | null>(null);
+const localVisible = ref(false);
+const x = ref(0);
+const y = ref(0);
+const localItems = ref<MenuItem[]>([]);
+const menuContext = ref<any>(null);
 
-const localVisible = ref(false); // 菜单自身的可见性状态
-const x = ref(0); // 菜单的 X 坐标
-const y = ref(0); // 菜单的 Y 坐标
-const localItems = ref<MenuItem[]>([]); // 菜单项
-const menuContext = ref<any>(null); // 菜单的上下文数据
-
-// --- 右键菜单定义 ---
+// --- 右键菜单定义 (保持不变) ---
 const blankMenu: MenuItem[] = [
   { label: "上传文件", action: "upload-file", icon: Upload, color: "#1677FF" },
   {
@@ -125,7 +125,6 @@ const blankMenu: MenuItem[] = [
   { divider: true },
   { label: "刷新", action: "refresh", icon: Refresh, color: "#4F6BF6" }
 ];
-
 const itemMenu: MenuItem[] = [
   { label: "重命名", action: "rename", icon: EditPen, color: "#4F6BF6" },
   { label: "移动到", action: "move", icon: Rank, color: "#62C558" },
@@ -145,70 +144,54 @@ const itemMenu: MenuItem[] = [
 
 // --- 菜单操作函数 ---
 const openMenu = (event: MouseEvent) => {
-  // 阻止默认的浏览器右键菜单
   event.preventDefault();
-
   x.value = event.clientX;
   y.value = event.clientY;
 
   const target = event.target as HTMLElement;
-  // 查找最近的文件项或网格项，用于判断点击上下文
   const itemElement = target.closest(
     ".deselect-safe-zone.file-item, .deselect-safe-zone.grid-item"
   );
 
   if (itemElement) {
     const itemId = (itemElement as HTMLElement).dataset.id;
-    if (itemId && !fileStore.selectedFiles.has(itemId)) {
-      // 如果点击的是文件项且未选中，则选中它
-      fileStore.selectSingle(itemId);
+    let finalSelectedIds = new Set(props.selectedFileIds);
+
+    if (itemId && !props.selectedFileIds.has(itemId)) {
+      // **关键修改点**: 发出事件请求父组件进行单选，而不是自己操作
+      emit("request-select-single", itemId);
+      // 假设父组件会同步更新 selectedFileIds prop，我们在这里乐观更新
+      finalSelectedIds = new Set([itemId]);
     }
     localItems.value = itemMenu;
-    menuContext.value = { selectedIds: [...fileStore.selectedFiles] };
-    console.log("【ContextMenu】点击文件项，设置文件菜单。", localItems.value);
+    menuContext.value = { selectedIds: [...finalSelectedIds] };
   } else {
-    // 否则点击的是空白区域
+    // 点击空白区域
     localItems.value = blankMenu;
-    menuContext.value = null;
-    console.log(
-      "【ContextMenu】点击空白区域，设置空白菜单。",
-      localItems.value
-    );
+    menuContext.value = null; // 空白区域没有上下文
   }
 
-  localVisible.value = true; // 显示菜单
-  console.log("【ContextMenu】菜单已打开。当前状态:", {
-    x: x.value,
-    y: y.value,
-    visible: localVisible.value,
-    items: localItems.value
-  });
+  localVisible.value = true;
 };
 
 const closeMenu = () => {
-  console.log("【ContextMenu】closeMenu 被调用，设置 visible 为 false。");
+  if (!localVisible.value) return;
   localVisible.value = false;
-  // 通知父组件菜单已关闭，父组件可以清空 triggerEvent
   emit("closed");
 };
 
 const onItemClick = (item: MenuItem) => {
   if (item.action) {
-    emit("select", item.action, menuContext.value); // 传递上下文信息
+    emit("select", item.action, menuContext.value);
   }
   closeMenu();
 };
 
-// --- GSAP 动画钩子 ---
+// --- 动画钩子 (保持不变) ---
 const onMenuEnter = (el: Element, done: () => void) => {
-  console.log("【ContextMenu】GSAP 动画：菜单进入");
   gsap.fromTo(
     el,
-    {
-      opacity: 0,
-      scale: 0.8,
-      transformOrigin: "top left"
-    },
+    { opacity: 0, scale: 0.8, transformOrigin: "top left" },
     {
       opacity: 1,
       scale: 1,
@@ -218,9 +201,7 @@ const onMenuEnter = (el: Element, done: () => void) => {
     }
   );
 };
-
 const onMenuLeave = (el: Element, done: () => void) => {
-  console.log("【ContextMenu】GSAP 动画：菜单离开");
   gsap.to(el, {
     opacity: 0,
     scale: 0.8,
@@ -230,31 +211,21 @@ const onMenuLeave = (el: Element, done: () => void) => {
   });
 };
 
-// --- 监听父组件传入的 triggerEvent ---
+// --- 监听 ---
 watch(
   () => props.triggerEvent,
   newEvent => {
     if (newEvent) {
-      console.log("【ContextMenu】接收到新的触发事件:", newEvent);
       openMenu(newEvent);
     } else if (!newEvent && localVisible.value) {
-      // 如果 triggerEvent 被清空，并且菜单当前是可见的，则关闭菜单
       closeMenu();
     }
   }
 );
-
-// --- 生命周期钩子 ---
-onMounted(() => {
-  console.log("【ContextMenu】组件已挂载。");
-});
-
-onUnmounted(() => {
-  console.log("【ContextMenu】组件已卸载。");
-});
 </script>
 
 <style scoped lang="scss">
+// 样式保持不变
 .context-menu-overlay {
   position: fixed;
   top: 0;

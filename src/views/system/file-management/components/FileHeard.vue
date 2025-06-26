@@ -1,5 +1,6 @@
 <template>
   <div class="file-heard-actions w-full flex items-center">
+    <!-- “新建”按钮的逻辑保持不变，因为它已经通过 emit 与父组件通信 -->
     <el-button
       v-ripple
       :icon="useRenderIcon(UploadIcon)"
@@ -18,45 +19,50 @@
         @enter="onToolbarEnter"
         @leave="onToolbarLeave"
       >
+        <!-- 使用从 props 传入的 hasSelection -->
         <div
           v-if="hasSelection"
           key="selection-toolbar"
           class="selection-toolbar"
         >
           <el-button-group class="action-group">
+            <!-- 通过 emit 发出清空选择的意图 -->
             <el-button
               :icon="Close"
               title="取消选择"
-              @click="fileStore.clearSelection()"
+              @click="emit('clear-selection')"
             />
+            <!-- 使用从 props 传入的 selectionCountLabel -->
             <el-button class="selection-count" disabled>{{
               selectionCountLabel
             }}</el-button>
           </el-button-group>
 
           <el-button-group class="ml-2 action-group">
-            <el-tooltip content="下载" placement="bottom"
-              ><el-button :icon="Download" @click="handleDownload"
-            /></el-tooltip>
-            <el-tooltip content="复制" placement="bottom"
-              ><el-button :icon="CopyDocument" @click="handleCopy"
-            /></el-tooltip>
-            <el-tooltip content="移动" placement="bottom"
-              ><el-button :icon="Folder" @click="handleMove"
-            /></el-tooltip>
+            <!-- 所有的操作都通过 emit 发出 -->
+            <el-tooltip content="下载" placement="bottom">
+              <el-button :icon="Download" @click="emit('download')" />
+            </el-tooltip>
+            <el-tooltip content="复制" placement="bottom">
+              <el-button :icon="CopyDocument" @click="emit('copy')" />
+            </el-tooltip>
+            <el-tooltip content="移动" placement="bottom">
+              <el-button :icon="Folder" @click="emit('move')" />
+            </el-tooltip>
 
+            <!-- 使用从 props 传入的 isSingleSelection -->
             <template v-if="isSingleSelection">
-              <el-tooltip content="重命名" placement="bottom"
-                ><el-button :icon="EditPen" @click="handleRename"
-              /></el-tooltip>
-              <el-tooltip content="分享" placement="bottom"
-                ><el-button :icon="Share" @click="handleShare"
-              /></el-tooltip>
+              <el-tooltip content="重命名" placement="bottom">
+                <el-button :icon="EditPen" @click="emit('rename')" />
+              </el-tooltip>
+              <el-tooltip content="分享" placement="bottom">
+                <el-button :icon="Share" @click="emit('share')" />
+              </el-tooltip>
             </template>
 
-            <el-tooltip content="删除" placement="bottom"
-              ><el-button type="danger" :icon="Delete" @click="handleDelete"
-            /></el-tooltip>
+            <el-tooltip content="删除" placement="bottom">
+              <el-button type="danger" :icon="Delete" @click="emit('delete')" />
+            </el-tooltip>
           </el-button-group>
         </div>
 
@@ -75,6 +81,7 @@
       </Transition>
     </div>
 
+    <!-- 搜索浮层逻辑保持不变 -->
     <SearchOverlay
       :visible="isSearchVisible"
       :origin="searchOrigin"
@@ -84,11 +91,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from "vue";
-import { useFileStore } from "@/store/modules/fileStore";
-import { storeToRefs } from "pinia";
+import { ref } from "vue";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
-import SearchOverlay from "./SearchOverlay.vue";
+import SearchOverlay from "./SearchOverlay.vue"; // 假设这是正确的路径
 import gsap from "gsap";
 
 // 引入所有需要的图标
@@ -101,62 +106,45 @@ import {
   Folder,
   Share,
   Delete,
-  EditPen // 新增“重命名”图标
+  EditPen
 } from "@element-plus/icons-vue";
 
-// --- 初始化 Store 和 Hooks ---
-const fileStore = useFileStore();
-const { selectedFiles } = storeToRefs(fileStore);
-
-// --- 状态驱动 ---
-const hasSelection = computed(() => selectedFiles.value.size > 0);
-const selectionCountLabel = computed(
-  () => `${selectedFiles.value.size} 个对象`
-);
-// [!新增] 判断是否为单选
-const isSingleSelection = computed(() => selectedFiles.value.size === 1);
-
-// --- “新建”和“搜索”按钮逻辑 ---
-const emit = defineEmits<{
-  (e: "open-new-menu", event: MouseEvent): void;
-  (e: "trigger-search", event: MouseEvent): void;
+// --- 1. 定义 Props 和 Emits ---
+const props = defineProps<{
+  hasSelection: boolean;
+  isSingleSelection: boolean;
+  selectionCountLabel: string;
 }>();
 
+const emit = defineEmits<{
+  // 已有的 emits
+  (e: "open-new-menu", event: MouseEvent): void;
+  (e: "trigger-search", event: MouseEvent): void;
+  // 新增的 emits，用于文件操作
+  (e: "clear-selection"): void;
+  (e: "download"): void;
+  (e: "copy"): void;
+  (e: "move"): void;
+  (e: "rename"): void;
+  (e: "share"): void;
+  (e: "delete"): void;
+}>();
+
+// --- “新建”和“搜索”按钮逻辑 (大部分保持不变) ---
 const handleNewButtonClick = (event: MouseEvent) => {
   emit("open-new-menu", event);
 };
 
-const isSearchVisible = ref(false);
+const isSearchVisible = ref(false); // Note: 这个状态可能也应该由父组件管理
 const searchOrigin = ref({ x: 0, y: 0 });
 
 const openSearchOverlay = (event: MouseEvent) => {
   emit("trigger-search", event);
 };
 
-// --- 选择工具栏按钮处理函数 ---
-const handleDownload = () => {
-  console.log("下载选中的文件:", selectedFiles.value);
-};
-const handleCopy = () => {
-  console.log("复制选中的文件:", selectedFiles.value);
-};
-const handleMove = () => {
-  console.log("移动选中的文件:", selectedFiles.value);
-};
-const handleShare = () => {
-  console.log("分享选中的文件:", selectedFiles.value);
-};
-const handleDelete = () => {
-  console.log("删除选中的文件:", selectedFiles.value);
-};
-// [!新增] 重命名处理函数
-const handleRename = () => {
-  // 因为是单选，所以可以安全地获取第一个元素
-  const fileId = selectedFiles.value.values().next().value;
-  console.log("重命名文件:", fileId);
-};
+// --- 选择工具栏按钮处理函数 (现在都通过 emit 实现，所以不再需要本地函数) ---
 
-// --- GSAP 动画钩子 ---
+// --- GSAP 动画钩子 (保持不变) ---
 const onToolbarEnter = (el: HTMLElement, done: () => void) => {
   gsap.fromTo(
     el,
@@ -176,10 +164,11 @@ const onToolbarLeave = (el: HTMLElement, done: () => void) => {
 </script>
 
 <style scoped lang="scss">
+/* 样式保持不变 */
 .file-heard-actions {
   display: flex;
-  height: 40px; /* 调整为与 Element Plus 按钮默认高度一致 */
-  align-items: center; /* 垂直居中 */
+  height: 40px;
+  align-items: center;
   .new-btn {
     border: var(--style-border);
   }
@@ -187,7 +176,6 @@ const onToolbarLeave = (el: HTMLElement, done: () => void) => {
 .actions-container {
   flex-grow: 1;
   position: relative;
-  /* 确保容器和按钮一样高 */
   height: 100%;
 }
 

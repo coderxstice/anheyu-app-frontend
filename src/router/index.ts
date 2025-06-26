@@ -141,7 +141,7 @@ router.beforeEach((to: ToRouteType, _from, next) => {
       return; // 结束当前导航守卫
     }
 
-    // 新增：已登录状态下访问登录页，直接重定向到第一个菜单页
+    // 已登录状态下访问登录页，直接重定向到第一个菜单页
     if (to.path === "/login") {
       // 检查权限菜单是否已加载
       if (usePermissionStoreHook().wholeMenus.length === 0) {

@@ -1,34 +1,61 @@
 <template>
-  <div v-if="show" class="upload-progress-panel">
+  <!-- 使用 v-model:visible 模式，或直接用 :visible 和 @update:visible -->
+  <div v-if="visible" class="upload-progress-panel">
     <div class="panel-header">
       <span>上传队列 ({{ queue.length }})</span>
       <div class="header-actions">
-        <el-icon @click="clearFinished"><Delete /></el-icon>
-        <el-icon @click="show = false"><Close /></el-icon>
+        <!-- 发出事件 -->
+        <el-tooltip content="清除已完成" placement="bottom">
+          <el-icon @click="emit('clear-finished')"><Delete /></el-icon>
+        </el-tooltip>
+        <el-tooltip content="关闭" placement="bottom">
+          <el-icon @click="emit('update:visible', false)"><Close /></el-icon>
+        </el-tooltip>
       </div>
     </div>
     <div class="panel-body">
       <div v-if="queue.length === 0" class="empty-queue">没有上传任务</div>
+      <!-- 使用从 props 传入的 queue -->
       <div v-for="item in queue" :key="item.id" class="upload-item">
         <div class="item-icon">
+          <!-- 可以根据文件类型显示不同图标 -->
           <el-icon><Document /></el-icon>
         </div>
         <div class="item-info">
-          <div class="item-name">{{ item.name }}</div>
+          <div class="item-name" :title="item.name">{{ item.name }}</div>
+          <!-- 修复 progress status 的类型问题 -->
           <el-progress
             :percentage="item.progress"
-            :status="item?.status as any"
+            :status="getProgressStatus(item.status)"
           />
+          <div v-if="item.status === 'error'" class="error-message">
+            {{ item.errorMessage }}
+          </div>
         </div>
         <div class="item-status">
+          <el-tooltip content="取消上传" placement="bottom">
+            <el-icon
+              v-if="item.status === 'uploading' || item.status === 'pending'"
+              class="cancel-icon"
+              @click="emit('cancel-upload', item.id)"
+            >
+              <CircleClose />
+            </el-icon>
+          </el-tooltip>
           <el-icon
             v-if="item.status === 'success'"
             color="var(--el-color-success)"
             ><CircleCheckFilled
           /></el-icon>
-          <el-icon v-if="item.status === 'error'" color="var(--el-color-error)"
-            ><CircleCloseFilled
-          /></el-icon>
+          <el-tooltip
+            v-if="item.status === 'error'"
+            :content="item.errorMessage"
+            placement="top"
+          >
+            <el-icon color="var(--el-color-error)"
+              ><CircleCloseFilled
+            /></el-icon>
+          </el-tooltip>
         </div>
       </div>
     </div>
@@ -36,31 +63,49 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import { useFileStore } from "@/store/modules/fileStore";
+import type { UploadItem } from "@/api/sys-file/type";
 import {
   Close,
   Delete,
   Document,
   CircleCheckFilled,
-  CircleCloseFilled
+  CircleCloseFilled,
+  CircleClose // 新增取消图标
 } from "@element-plus/icons-vue";
+import type { ProgressProps } from "element-plus";
 
-const fileStore = useFileStore();
+// --- 1. 定义 Props 和 Emits ---
+defineProps<{
+  visible: boolean;
+  queue: UploadItem[];
+}>();
 
-const show = computed({
-  get: () => fileStore.showUploadProgress,
-  set: val => (fileStore.showUploadProgress = val)
-});
+const emit = defineEmits<{
+  (e: "update:visible", value: boolean): void;
+  (e: "clear-finished"): void;
+  (e: "cancel-upload", itemId: number): void;
+}>();
 
-const queue = computed(() => fileStore.uploadQueue);
-
-const clearFinished = () => {
-  fileStore.clearFinishedUploads();
+// --- 2. 辅助函数 ---
+// 将我们的上传状态映射到 Element Plus 的 Progress 组件状态
+const getProgressStatus = (
+  status: UploadItem["status"]
+): ProgressProps["status"] => {
+  switch (status) {
+    case "success":
+      return "success";
+    case "error":
+      return "exception";
+    case "uploading":
+    case "pending":
+    default:
+      return undefined; // 默认颜色
+  }
 };
 </script>
 
 <style scoped>
+/* 样式基本保持不变，增加一些细节 */
 .upload-progress-panel {
   position: fixed;
   bottom: 20px;
@@ -127,6 +172,22 @@ const clearFinished = () => {
 .item-status {
   font-size: 20px;
   margin-left: 12px;
+  display: flex;
+  align-items: center;
+}
+.cancel-icon {
+  cursor: pointer;
+  color: #c0c4cc;
+}
+.cancel-icon:hover {
+  color: #909399;
+}
+.error-message {
+  font-size: 12px;
+  color: var(--el-color-error);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .empty-queue {
   text-align: center;
