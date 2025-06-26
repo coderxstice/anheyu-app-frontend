@@ -27,7 +27,7 @@
       <div class="drag-content">
         <el-icon><UploadFilled /></el-icon>
         <span>松开鼠标开始上传</span>
-        <p>拖拽文件至此</p>
+        <p>将文件或目录拖拽至此</p>
       </div>
     </div>
 
@@ -46,10 +46,11 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, computed, ref } from "vue";
+import { computed } from "vue";
 import { useFileStore } from "@/store/modules/fileStore";
 import { useContextMenuHandler } from "./hooks/useContextMenuHandler";
 import { usePageInteractions } from "./hooks/usePageInteractions";
+import { useDirectoryUpload } from "./hooks/useDirectoryUpload"; // 1. 引入新的 Hook
 
 // 引入所有需要的子组件
 import FileHeard from "./components/FileHeard.vue";
@@ -64,6 +65,7 @@ import { UploadFilled } from "@element-plus/icons-vue";
 
 // --- 初始化 Store 和 Hooks ---
 const fileStore = useFileStore();
+const { handleFiles } = useDirectoryUpload(); // 2. 初始化上传 Hook
 
 const {
   contextMenuTriggerEvent,
@@ -73,15 +75,14 @@ const {
   openBlankMenu
 } = useContextMenuHandler();
 
-// 注意：usePageInteractions 中返回的 dragHandlers 内部函数已包含 preventDefault
-// 所以模板中不再需要 .prevent 修饰符
+// 3. 将上传处理函数传递给页面交互 Hook
 const {
   isDragging,
   dragHandlers,
   isSearchVisible,
   searchOrigin,
   openSearchFromElement
-} = usePageInteractions();
+} = usePageInteractions(handleFiles);
 
 // --- 视图状态 ---
 const viewComponents = {

@@ -165,10 +165,14 @@ export const createItemApi = (
 
   console.log(`调用创建 API (内部拼接 URI): 类型 ${type}, URI '${fullUri}'`);
 
+  if (type !== FileType.File && type !== FileType.Dir) {
+    throw new Error("Invalid type: must be 0 (File) or 1 (Dir)");
+  }
+
   return http.request("post", baseUrlApi("file/create"), {
     data: {
       type: type, // 直接使用传入的数字类型
-      path: fullUri, // 传递拼接好的完整 URI
+      uri: fullUri, // 传递拼接好的完整 URI
       err_on_conflict: errOnConflict
     }
   });

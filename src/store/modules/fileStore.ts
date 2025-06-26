@@ -9,7 +9,6 @@ import {
   createItemApi
 } from "@/api/sys-file/sys-file";
 
-// 引入更新后的类型定义
 import {
   type FileItem,
   type UploadItem,
@@ -17,10 +16,9 @@ import {
   type ParentInfo,
   type FileProps,
   type StoragePolicy,
-  FileType // 引入 FileType 枚举 (0: File, 1: Dir)
+  FileType
 } from "@/api/sys-file/type";
 
-// 为排序规则定义一个类型，增强代码健壮性
 export type SortKey =
   | "name_asc"
   | "name_desc"
@@ -33,7 +31,7 @@ export type SortKey =
 
 // 定义 Store 的状态接口
 interface FileState {
-  path: string; // 存储当前目录的逻辑路径，例如 "/" 或 "/Documents"
+  path: string;
   files: FileItem[];
   selectedFiles: Set<string>;
   lastSelectedId: string | null;
@@ -43,58 +41,52 @@ interface FileState {
   pagination: PaginationInfo | null;
   parentInfo: ParentInfo | null;
   currentProps: FileProps | null;
-  storagePolicy: StoragePolicy | null; // 新增：存储当前目录的存储策略
+  storagePolicy: StoragePolicy | null;
   uploadQueue: UploadItem[];
   showUploadProgress: boolean;
   pageSize: number;
+  isProcessingQueue: boolean;
+  _loadFilesDebounceTimer: number | null;
 }
 
-// 用于上传队列中项目的唯一 ID (仅前端渲染使用)
 let uploadId = 0;
 
-/**
- * 辅助函数：从完整的后端 URI (e.g., "anzhiyu://my/Documents") 中提取逻辑路径 (e.g., "/Documents")
- */
 const extractLogicalPathFromUri = (uri: string): string => {
   if (uri.startsWith("anzhiyu://my")) {
-    // 截取 'anzhiyu://my' 之后的部分
     let path = uri.substring("anzhiyu://my".length);
-    // 如果路径是空的（对应 anzhiyu://my）或只有一个斜杠，都视为根目录 "/"
-    // 否则，如果不是以 / 开头，则补上
+    // 确保根目录返回的是 "/"
     if (path === "" || path === "/") return "/";
+    // 确保返回的路径以 "/" 开头
     return path.startsWith("/") ? path : `/${path}`;
   }
-  console.warn(`尝试从意外的 URI 格式中提取逻辑路径: ${uri}`);
+  // 如果传入的已经是逻辑路径，则直接返回
   return uri;
 };
 
 export const useFileStore = defineStore("file", {
-  // state: 定义所有初始状态
   state: (): FileState => ({
-    path: "/", // 初始根路径现在是逻辑路径 "/"
+    path: "/",
     files: [],
     selectedFiles: new Set(),
     lastSelectedId: null,
     viewMode: "list",
-    sortKey: "updated_at_desc", // 默认排序
+    sortKey: "updated_at_desc",
     loading: false,
     pagination: null,
     parentInfo: null,
     currentProps: null,
-    storagePolicy: null, // 初始化存储策略为 null
+    storagePolicy: null,
     uploadQueue: [],
     showUploadProgress: false,
-    pageSize: 50
+    pageSize: 50,
+    isProcessingQueue: false,
+    _loadFilesDebounceTimer: null
   }),
-
-  // getters: 派生状态（计算属性）
   getters: {
     pathSegments: state => {
       if (state.path === "/") return [{ name: "我的文件", path: "/" }];
-
       const segments = state.path.split("/").filter(Boolean);
       const result = [{ name: "我的文件", path: "/" }];
-
       let currentLogicalPath = "";
       for (const segment of segments) {
         currentLogicalPath += `/${segment}`;
@@ -102,26 +94,21 @@ export const useFileStore = defineStore("file", {
       }
       return result;
     },
-
     isAllSelected: state => {
       if (state.files.length === 0) return false;
       return state.selectedFiles.size === state.files.length;
     },
-
     sortedFiles: (state): FileItem[] => {
       const filesToSort = [...state.files];
       const sortParts = state.sortKey.split("_");
       let orderKey = sortParts[0];
       let direction = sortParts[sortParts.length - 1];
-
       if (sortParts.length > 2) {
         orderKey = sortParts.slice(0, -1).join("_");
       }
-
       filesToSort.sort((a, b) => {
         if (a.type === FileType.Dir && b.type !== FileType.Dir) return -1;
         if (a.type !== FileType.Dir && b.type === FileType.Dir) return 1;
-
         let comparison = 0;
         switch (orderKey) {
           case "name":
@@ -143,12 +130,9 @@ export const useFileStore = defineStore("file", {
         }
         return direction === "asc" ? comparison : -comparison;
       });
-
       return filesToSort;
     }
   },
-
-  // actions: 定义修改状态的方法
   actions: {
     setPageSize(size: number) {
       this.pageSize = size;
@@ -161,11 +145,13 @@ export const useFileStore = defineStore("file", {
     setViewMode(mode: "list" | "grid") {
       this.viewMode = mode;
     },
-
-    async loadFiles(logicalPath: string | undefined, page = 1) {
+    async loadFiles(pathToLoad: string | undefined, page = 1) {
       this.loading = true;
-      const finalLogicalPath = logicalPath || "/";
-      this.path = finalLogicalPath;
+
+      // **修复**: 无论传入什么路径，都先净化为标准的逻辑路径
+      const logicalPath = extractLogicalPathFromUri(pathToLoad || "/");
+
+      this.path = logicalPath; // 将净化后的逻辑路径存入 state
       this.clearSelection();
 
       try {
@@ -175,44 +161,39 @@ export const useFileStore = defineStore("file", {
         if (sortParts.length > 2) {
           order = sortParts.slice(0, -1).join("_");
         }
-
+        // **修复**: 将净化后的逻辑路径传递给 API
         const response = await fetchFilesByPathApi(
-          finalLogicalPath,
+          logicalPath,
           order,
           direction,
           page,
           this.pageSize
         );
-
         if (response.code === 200) {
           const { files, parent, pagination, props, storage_policy } =
             response.data;
           this.files = files;
           this.pagination = pagination;
           this.parentInfo = parent
-            ? {
-                ...parent,
-                path: extractLogicalPathFromUri(parent.path)
-              }
+            ? { ...parent, path: extractLogicalPathFromUri(parent.path) }
             : null;
           this.currentProps = props;
-          this.storagePolicy = storage_policy; // **修复**: 保存从后端获取的存储策略
+          this.storagePolicy = storage_policy;
         } else {
           ElMessage.error(response.message || "文件列表加载失败");
           this.files = [];
-          this.storagePolicy = null; // 加载失败时清空
+          this.storagePolicy = null;
         }
       } catch (error) {
         console.error("文件加载失败:", error);
         ElMessage.error("文件加载失败，请检查网络连接。");
         this.files = [];
-        this.storagePolicy = null; // 加载失败时清空
+        this.storagePolicy = null;
       } finally {
         this.loading = false;
       }
     },
 
-    // --- 选择相关的 Actions ---
     selectSingle(fileId: string) {
       this.selectedFiles.clear();
       this.selectedFiles.add(fileId);
@@ -260,26 +241,17 @@ export const useFileStore = defineStore("file", {
       this.selectedFiles = newSelectedFiles;
     },
 
-    /**
-     * 健壮的路径拼接辅助函数
-     * @param basePath 基础逻辑路径 (e.g., '/', '/Documents')
-     * @param name 文件或文件夹名 (e.g., 'file.txt')
-     * @returns 拼接后的完整逻辑路径 (e.g., '/file.txt', '/Documents/file.txt')
-     */
     _joinPath(basePath: string, name: string): string {
+      if (!name) return basePath;
       if (basePath === "/") {
         return `/${name}`;
       }
-      // 移除 basePath 可能存在的尾部斜杠，然后拼接
       return `${basePath.replace(/\/$/, "")}/${name}`;
     },
 
-    // --- 创建文件和文件夹的 Actions ---
     async createFile(name: string) {
       try {
-        // **优化**: 使用辅助函数进行路径拼接
         const fullFileLogicalPath = this._joinPath(this.path, name);
-
         const response = await createItemApi(
           FileType.File,
           fullFileLogicalPath
@@ -297,9 +269,7 @@ export const useFileStore = defineStore("file", {
     },
     async createFolder(name: string) {
       try {
-        // **优化**: 使用辅助函数进行路径拼接
         const fullFolderLogicalPath = this._joinPath(this.path, name);
-
         const response = await createItemApi(
           FileType.Dir,
           fullFolderLogicalPath
@@ -316,88 +286,179 @@ export const useFileStore = defineStore("file", {
       }
     },
 
-    // --- 上传相关的 Actions ---
-    addFilesToUpload(files: File[]) {
-      if (files.length === 0) return;
+    addUploadsToQueue(
+      uploads: Omit<
+        UploadItem,
+        "id" | "status" | "progress" | "uploadedChunks" | "abortController"
+      >[]
+    ) {
+      if (uploads.length === 0) return;
       this.showUploadProgress = true;
-      const newUploads: UploadItem[] = Array.from(files).map(file => ({
+
+      const newUploadItems: UploadItem[] = uploads.map(u => ({
+        ...u,
         id: uploadId++,
-        name: file.name,
-        size: file.size,
         status: "pending",
         progress: 0,
-        file: file,
         uploadedChunks: new Set()
       }));
-      this.uploadQueue.push(...newUploads);
+
+      this.uploadQueue.push(...newUploadItems);
+      console.log(
+        `[Queue] 已添加 ${newUploadItems.length} 个新项目到上传队列。`
+      );
       this.processUploadQueue();
     },
+
     async processUploadQueue() {
-      const uploadTasks = this.uploadQueue
-        .filter(item => item.status === "pending")
-        .map(async item => {
+      if (this.isProcessingQueue) {
+        return;
+      }
+
+      this.isProcessingQueue = true;
+
+      try {
+        while (true) {
+          const currentItem = this.uploadQueue.find(
+            item => item.status === "pending"
+          );
+
+          if (!currentItem) {
+            break;
+          }
+
           try {
-            item.status = "uploading";
-
-            // **修复**: 检查存储策略是否存在
-            if (!this.storagePolicy?.id) {
-              throw new Error("存储策略未加载，无法开始上传。");
-            }
-
-            // **优化**: 使用辅助函数拼接上传路径
-            const uploadLogicalPath = this._joinPath(this.path, item.name);
-
-            const sessionRes = await createUploadSessionApi(
-              uploadLogicalPath,
-              item.size,
-              this.storagePolicy.id // **修复**: 使用从 state 中获取的动态存储策略 ID
-            );
-            if (sessionRes.code !== 200) throw new Error(sessionRes.message);
-
-            const { session_id, chunk_size } = sessionRes.data;
-            item.sessionId = session_id;
-            const totalChunks = Math.ceil(item.size / chunk_size);
-            item.totalChunks = totalChunks;
-
-            const chunkPromises = [];
-            for (let i = 0; i < totalChunks; i++) {
-              const start = i * chunk_size;
-              const end = Math.min(start + chunk_size, item.size);
-              const chunk = item.file.slice(start, end);
-
-              const promise = uploadChunkApi(session_id, i, chunk).then(() => {
-                item.uploadedChunks.add(i);
-                item.progress = Math.round(
-                  (item.uploadedChunks.size / totalChunks) * 100
-                );
-              });
-              chunkPromises.push(promise);
-            }
-            await Promise.all(chunkPromises);
-            item.status = "success";
+            await this._uploadFile(currentItem);
           } catch (error: any) {
-            item.status = "error";
-            item.errorMessage = error.message || `上传文件 ${item.name} 失败`;
-            console.error(`上传文件 ${item.name} 失败:`, error);
-            if (item.sessionId) {
-              // 删除时也使用正确的逻辑路径
-              const logicalPath = this._joinPath(this.path, item.name);
-              await deleteUploadSessionApi(item.sessionId, logicalPath);
+            if (error.name !== "AbortError") {
+              console.error(
+                `[Processor] 处理文件 ${currentItem.name} 时发生致命错误:`,
+                error
+              );
+              currentItem.status = "error";
+              currentItem.errorMessage = error.message || "未知上传错误";
             }
           }
-        });
-
-      await Promise.all(uploadTasks);
-      // 只有在全部上传任务（无论成功失败）处理完毕后，才刷新一次文件列表
-      const hasSuccessUploads = this.uploadQueue.some(
-        item => item.status === "success"
-      );
-      if (hasSuccessUploads) {
-        this.loadFiles(this.path);
+        }
+      } finally {
+        this.isProcessingQueue = false;
       }
     },
-    removeFromQueue(id: number) {
-      this.uploadQueue = this.uploadQueue.filter(item => item.id !== id);
+
+    async _uploadFile(item: UploadItem) {
+      const controller = new AbortController();
+      item.abortController = controller;
+      item.status = "uploading";
+
+      try {
+        if (!this.storagePolicy?.id) {
+          throw new Error("存储策略未加载，无法开始上传。");
+        }
+
+        const uploadLogicalPath = this._joinPath(
+          item.targetPath,
+          item.relativePath
+        );
+        const sessionRes = await createUploadSessionApi(
+          uploadLogicalPath,
+          item.size,
+          this.storagePolicy.id
+        );
+
+        if (sessionRes.code !== 200) {
+          throw new Error(sessionRes.message || "创建上传会话失败");
+        }
+
+        const { session_id, chunk_size } = sessionRes.data;
+        item.sessionId = session_id;
+        const totalChunks = Math.ceil(item.size / chunk_size);
+        item.totalChunks = totalChunks;
+
+        const CONCURRENT_CHUNKS = 4;
+        const chunkIndexes = Array.from({ length: totalChunks }, (_, i) => i);
+        const promises: Promise<void>[] = [];
+
+        const worker = async () => {
+          while (true) {
+            if (controller.signal.aborted)
+              throw new DOMException("Aborted", "AbortError");
+            const chunkIndex = chunkIndexes.shift();
+            if (chunkIndex === undefined) break;
+
+            try {
+              const start = chunkIndex * chunk_size;
+              const end = Math.min(start + chunk_size, item.size);
+              const chunk = item.file.slice(start, end);
+              await uploadChunkApi(session_id, chunkIndex, chunk);
+              item.uploadedChunks.add(chunkIndex);
+              item.progress = Math.round(
+                (item.uploadedChunks.size / totalChunks) * 100
+              );
+            } catch (err) {
+              chunkIndexes.push(chunkIndex);
+              throw err;
+            }
+          }
+        };
+
+        for (let i = 0; i < CONCURRENT_CHUNKS; i++) {
+          promises.push(worker());
+        }
+        await Promise.all(promises);
+
+        item.progress = 100;
+        item.status = "success";
+
+        if (this.path === item.targetPath) {
+          this._debounceLoadFiles();
+        }
+      } catch (error: any) {
+        if (error.name !== "AbortError") {
+          console.error(`上传文件 ${item.name} 失败:`, error);
+        }
+        throw error;
+      } finally {
+        delete item.abortController;
+      }
+    },
+
+    _debounceLoadFiles() {
+      if (this._loadFilesDebounceTimer) {
+        clearTimeout(this._loadFilesDebounceTimer);
+      }
+      this._loadFilesDebounceTimer = window.setTimeout(() => {
+        if (this.path) {
+          this.loadFiles(this.path);
+        }
+      }, 500);
+    },
+
+    async cancelUpload(itemId: number) {
+      const itemIndex = this.uploadQueue.findIndex(item => item.id === itemId);
+      if (itemIndex === -1) return;
+
+      const itemToCancel = this.uploadQueue[itemIndex];
+
+      if (itemToCancel.status === "uploading" && itemToCancel.abortController) {
+        itemToCancel.abortController.abort();
+      }
+
+      if (itemToCancel.sessionId) {
+        try {
+          await deleteUploadSessionApi(
+            itemToCancel.sessionId,
+            this._joinPath(itemToCancel.targetPath, itemToCancel.relativePath)
+          );
+        } catch (error) {
+          console.error(
+            `删除后端上传会话 ${itemToCancel.sessionId} 失败:`,
+            error
+          );
+        }
+      }
+
+      this.uploadQueue.splice(itemIndex, 1);
+
       if (this.uploadQueue.length === 0) {
         this.showUploadProgress = false;
       }

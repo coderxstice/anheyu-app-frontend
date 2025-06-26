@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-24 14:15:05
+ * @LastEditTime: 2025-06-26 17:31:01
+ * @LastEditors: 安知鱼
+ */
 import { h } from "vue";
 import { ElIcon } from "element-plus";
 
@@ -11,6 +18,7 @@ import {
   Tickets,
   Postcard
 } from "@element-plus/icons-vue";
+import { FileType } from "@/api/sys-file/type";
 
 // 假设你也可能想为某些特定文件类型使用 Iconify 图标，这是一个兼容的例子
 // import PythonIcon from '@iconify-icons/logos/python'; // 示例
@@ -48,11 +56,10 @@ export function formatTime(timestamp: number): string {
 }
 
 // 根据文件类型获取图标
-// 【已修正】确保函数始终返回一个可渲染的 VNode (Vue Node)
-export function getFileIcon(item: { type: string; extension?: string }) {
+export function getFileIcon(item: { type: number; extension?: string }) {
   let iconComponent: object;
 
-  if (item.type === "folder") {
+  if (item.type === FileType.Dir) {
     iconComponent = Folder;
     // 对于文件夹，可以给一个特定的颜色
     return h(ElIcon, { size: 20, color: "#FFCA28" }, () => h(iconComponent));

@@ -50,6 +50,9 @@ export interface UploadItem {
   status: "pending" | "uploading" | "success" | "error"; // 增加 pending 状态
   progress: number;
   file: File; // 原始 File 对象
+  relativePath: string; // 文件在所选目录中的相对路径
+  targetPath: string; // 上传任务启动时所在的目标目录路径
+  abortController?: AbortController; // 用于取消上传的控制器
 
   // 用于分块上传的状态管理
   sessionId?: string; // 上传会话ID
