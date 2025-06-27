@@ -67,7 +67,9 @@
             </el-icon>
           </el-tooltip>
         </div>
-        <div class="column-size">{{ formatSize(item.size) }}</div>
+        <div v-if="item.type === FileType.File" class="column-size">
+          {{ formatSize(item.size) }}
+        </div>
         <div class="column-modified">{{ item.created_at }}</div>
       </li>
     </ul>
@@ -80,7 +82,7 @@ import { formatSize } from "@/utils/format";
 import { useFileIcons } from "../hooks/useFileIcons";
 import gsap from "gsap";
 import { FileItem, FileType } from "@/api/sys-file/type";
-import { Loading } from "@element-plus/icons-vue"; // **核心新增**: 引入 Loading 图标
+import { Loading } from "@element-plus/icons-vue";
 
 // --- 1. 定义 Props 和 Emits ---
 const props = defineProps<{

@@ -14,9 +14,22 @@ import { baseUrlApi } from "@/utils/http/config";
 import { buildFullUri } from "@/utils/fileUtils";
 import { ElMessage } from "element-plus";
 
-/**
- * 封装获取文件/目录详情的 API 响应类型
- */
+// --- 新增: 文件夹内容树 API 的类型定义 ---
+export interface FolderTreeFile {
+  url: string;
+  relative_path: string;
+  size: number;
+}
+export interface FolderTreeData {
+  files: FolderTreeFile[];
+  expires: string;
+}
+export interface FolderTreeResponse {
+  code: number;
+  message: string;
+  data: FolderTreeData;
+}
+
 export interface FileDetailResponse {
   code: number;
   message: string;
@@ -24,8 +37,51 @@ export interface FileDetailResponse {
 }
 
 /**
- * 1. 获取文件列表
+ * 核心重构：从任意 URL 获取文件内容的底层函数
+ * 它不使用全局 http 实例，以避免为预签名 URL 添加不必要的 `Authorization` 头。
+ * @param url 要获取内容的完整 URL
+ * @returns Promise<Blob>
  */
+export const fetchBlobFromUrl = async (url: string): Promise<Blob> => {
+  // 对于后端返回的相对路径（如本地文件的签名URL），需要拼接上基础路径
+  const finalUrl = url.startsWith("http")
+    ? url
+    : `${window.location.origin}${baseUrlApi()}${
+        url.startsWith("/") ? "" : "/"
+      }${url}`;
+
+  try {
+    const response = await fetch(finalUrl); // 使用原生 fetch
+    if (!response.ok) {
+      throw new Error(
+        `文件下载失败，状态: ${response.status} ${response.statusText}`
+      );
+    }
+    return await response.blob();
+  } catch (error) {
+    console.error(`请求 URL [${finalUrl}] 出错:`, error);
+    throw error;
+  }
+};
+
+/**
+ * 触发浏览器下载的辅助函数
+ * @param blob 文件内容的 Blob 对象
+ * @param fileName 下载时要显示的文件名
+ */
+const triggerBrowserDownload = (blob: Blob, fileName: string) => {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", fileName);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+
+// --- API 函数 ---
+
 export const fetchFilesByPathApi = async (
   path: string,
   order: string,
@@ -34,41 +90,23 @@ export const fetchFilesByPathApi = async (
   pageSize: number
 ): Promise<FileListResponse> => {
   const fullUri = buildFullUri(path);
-
   try {
-    const response = await http.request<FileListResponse>(
-      "get",
-      baseUrlApi("file"),
-      {
-        params: {
-          uri: fullUri,
-          order: order,
-          direction: direction,
-          page: String(page),
-          page_size: String(pageSize)
-        }
-      }
-    );
-
-    console.log("fetchFilesByPathApi 后端返回数据:", response);
-    return response;
+    return await http.request<FileListResponse>("get", baseUrlApi("file"), {
+      params: { uri: fullUri, order, direction, page, page_size: pageSize }
+    });
   } catch (error) {
     console.error("fetchFilesByPathApi 请求失败:", error);
     throw error;
   }
 };
 
-/**
- * 2. 创建上传会话
- */
 export const createUploadSessionApi = (
   fullPath: string,
   size: number,
   policyId: string,
-  overwrite: boolean = false
+  overwrite = false
 ): Promise<CreateUploadSessionResponse> => {
   const fullUri = buildFullUri(fullPath);
-
   return http.request<CreateUploadSessionResponse>(
     "put",
     baseUrlApi("file/upload"),
@@ -78,9 +116,6 @@ export const createUploadSessionApi = (
   );
 };
 
-/**
- * 3. 上传文件块
- */
 export const uploadChunkApi = (
   sessionId: string,
   index: number,
@@ -92,66 +127,30 @@ export const uploadChunkApi = (
   });
 };
 
-/**
- * 4. 删除/中止上传会话
- */
 export const deleteUploadSessionApi = (
   sessionId: string,
   fullPath: string
 ): Promise<any> => {
   const fullUri = buildFullUri(fullPath);
-
   return http.request("delete", baseUrlApi("file/upload"), {
     data: { id: sessionId, uri: fullUri }
   });
 };
 
-/**
- * 5. 创建空文件或目录
- */
 export const createItemApi = (
   type: number,
   logicalPath: string,
-  errOnConflict: boolean = false
+  errOnConflict = false
 ): Promise<any> => {
   const fullUri = buildFullUri(logicalPath);
-
-  console.log(`调用创建 API (内部拼接 URI): 类型 ${type}, URI '${fullUri}'`);
-
   if (type !== FileType.File && type !== FileType.Dir) {
-    throw new Error("Invalid type: must be 0 (File) or 1 (Dir)");
+    throw new Error("类型错误: 必须是文件或文件夹");
   }
-
   return http.request("post", baseUrlApi("file/create"), {
-    data: {
-      type: type,
-      uri: fullUri,
-      err_on_conflict: errOnConflict
-    }
+    data: { type, uri: fullUri, err_on_conflict: errOnConflict }
   });
 };
 
-// --- 创建文件和文件夹的辅助函数 ---
-export const createFileApi = (
-  logicalPath: string,
-  errOnConflict: boolean = false
-): Promise<any> => {
-  return createItemApi(FileType.File, logicalPath, errOnConflict);
-};
-
-export const createFolderApi = (
-  logicalPath: string,
-  errOnConflict: boolean = false
-): Promise<any> => {
-  return createItemApi(FileType.Dir, logicalPath, errOnConflict);
-};
-
-/**
- * 更新文件夹的视图配置
- * @param folder_id 文件夹的公共 ID
- * @param viewConfig 新的视图配置对象
- * @returns Promise<UpdateFolderViewResponse>
- */
 export const updateFolderViewApi = (
   folder_id: string,
   viewConfig: FolderViewConfig
@@ -160,19 +159,11 @@ export const updateFolderViewApi = (
     "put",
     baseUrlApi("folder/view"),
     {
-      data: {
-        folder_id: folder_id,
-        view: viewConfig
-      }
+      data: { folder_id, view: viewConfig }
     }
   );
 };
 
-/**
- * 检查上传会话状态 (断点续传)
- * @param sessionId 会话 ID
- * @returns Promise<ValidateUploadSessionResponse>
- */
 export const validateUploadSessionApi = (
   sessionId: string
 ): Promise<ValidateUploadSessionResponse> => {
@@ -182,71 +173,44 @@ export const validateUploadSessionApi = (
   );
 };
 
-/**
- * 删除一个或多个文件/文件夹
- * @param ids 要删除的项目ID列表
- * @returns Promise<any>
- */
 export const deleteFilesApi = (ids: string[]): Promise<any> => {
-  return http.request("delete", baseUrlApi("file"), {
-    data: {
-      ids: ids
-    }
-  });
+  return http.request("delete", baseUrlApi("file"), { data: { ids } });
 };
 
-/**
- * 重命名一个文件或文件夹
- * @param id 要重命名的项目ID
- * @param newName 新的名称
- * @returns Promise<any> 包含更新后的 FileItem
- */
 export const renameFileApi = (id: string, newName: string): Promise<any> => {
   return http.request("put", baseUrlApi("file/rename"), {
-    data: {
-      id: id,
-      new_name: newName
-    }
+    data: { id, new_name: newName }
   });
 };
 
-/**
- * 根据ID获取文件或目录的详细信息
- * @param {string} id 文件或目录的公共ID
- * @returns {Promise<FileDetailResponse>}
- */
 export const getFileDetailsApi = (id: string): Promise<FileDetailResponse> => {
-  // 根据 API 文档，id 是路径参数，正确地将其拼接到 URL 中
   return http.request<FileDetailResponse>("get", baseUrlApi(`file/${id}`));
 };
 
 /**
- * 下载文件
- * @param id 要下载的文件的公共 ID
- * @param fileName 文件名，用于下载时显示
+ * 下载单个文件（标准认证接口）
  */
 export const downloadFileApi = async (id: string, fileName: string) => {
   try {
-    const response = await http.request(
+    const blob = await http.request<Blob>(
       "get",
       baseUrlApi(`file/download/${id}`),
       { responseType: "blob" }
     );
-
-    const blob = new Blob([response as any], {
-      type: "application/octet-stream"
-    });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", fileName);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+    triggerBrowserDownload(blob, fileName);
   } catch (error: any) {
     console.error("下载失败:", error);
     ElMessage.error(error.message || `下载文件 "${fileName}" 失败`);
     throw error;
   }
+};
+
+/**
+ * 新增：获取文件夹内容树（用于打包下载）
+ */
+export const getFolderTreeApi = (id: string): Promise<FolderTreeResponse> => {
+  return http.request<FolderTreeResponse>(
+    "get",
+    baseUrlApi(`folder/tree/${id}`)
+  );
 };

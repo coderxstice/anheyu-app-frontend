@@ -30,6 +30,7 @@
       <FileBreadcrumb
         class="flex-1 mb-2"
         @show-details="handleShowDetailsForId"
+        @download-folder="handleDownloadFolder"
       />
       <FileToolbar
         class="mb-2 ml-2"
@@ -86,7 +87,6 @@
       @select="onMenuSelect"
       @closed="handleContextMenuClosed"
     />
-
     <UploadProgress
       :visible="isPanelVisible"
       :is-collapsed="isPanelCollapsed"
@@ -100,8 +100,6 @@
       @global-command="handleUploadGlobalCommand"
       @add-files="handleUploadFile"
     />
-
-    <!-- 文件详情面板 -->
     <FileDetailsPanel
       :file="detailsPanelFile"
       @close="detailsPanelFile = null"
@@ -110,23 +108,27 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch, onMounted } from "vue";
+import { computed, ref, watch, onMounted, h } from "vue";
 import { storeToRefs } from "pinia";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { ElMessage, ElMessageBox, ElNotification } from "element-plus";
+import JSZip from "jszip";
 
 // --- API ---
-import { getFileDetailsApi, downloadFileApi } from "@/api/sys-file/sys-file";
-
+import {
+  getFileDetailsApi,
+  downloadFileApi,
+  getFolderTreeApi,
+  fetchBlobFromUrl,
+  type FolderTreeFile
+} from "@/api/sys-file/sys-file";
 // --- 核心状态管理 ---
 import {
   useFileStore,
   type SortKey,
   type UploaderActions
 } from "@/store/modules/fileStore";
-
 // --- 类型定义 ---
 import { type FileItem, FileType } from "@/api/sys-file/type";
-
 // --- 引入所有需要的 Hooks ---
 import { useFileUploader } from "@/composables/useFileUploader";
 import { useFileSelection } from "@/composables/useFileSelection";
@@ -134,7 +136,6 @@ import { useFileActions } from "./hooks/useFileActions";
 import { useDirectoryUpload } from "./hooks/useDirectoryUpload";
 import { useContextMenuHandler } from "./hooks/useContextMenuHandler";
 import { usePageInteractions } from "./hooks/usePageInteractions";
-
 // --- 引入所有需要的子组件 ---
 import FileHeard from "./components/FileHeard.vue";
 import FileBreadcrumb from "./components/FileBreadcrumb.vue";
@@ -147,6 +148,7 @@ import SearchOverlay from "./components/SearchOverlay.vue";
 import { UploadFilled } from "@element-plus/icons-vue";
 import FileDetailsPanel from "./components/FileDetailsPanel.vue";
 
+// --- 1. 初始化核心 Store 和状态 ---
 const fileStore = useFileStore();
 const {
   sortedFiles,
@@ -158,8 +160,9 @@ const {
   pageSize
 } = storeToRefs(fileStore);
 
-const detailsPanelFile = ref<FileItem | null>(null);
+// --- 2. 初始化核心功能 Hooks ---
 
+// 2.1 文件选择 Hook
 const {
   selectedFiles,
   selectSingle,
@@ -170,6 +173,13 @@ const {
   invertSelection
 } = useFileSelection(sortedFiles);
 
+// 2.2 定义需要在其他 Hooks 之前创建的状态
+const hasSelection = computed(() => selectedFiles.value.size > 0);
+const isSingleSelection = computed(() => selectedFiles.value.size === 1);
+const getSelectedFileItems = () =>
+  sortedFiles.value.filter(f => selectedFiles.value.has(f.id));
+
+// 2.3 文件上传 Hook
 const {
   uploadQueue,
   addUploadsToQueue,
@@ -190,8 +200,36 @@ const {
 );
 
 const uploaderActions: UploaderActions = { addResumableTaskFromFileItem };
+
+// --- 3. 初始化其他 Hooks---
+
+// 3.1 文件操作相关 Hooks (创建、重命名等)
+const {
+  handleUploadFile,
+  handleUploadDir,
+  handleCreateFile,
+  handleCreateFolder,
+  handleRename,
+  handleDelete
+} = useFileActions(addUploadsToQueue, path);
+
+// 3.2 拖拽上传 Hook (必须在 pageInteractions 之前)
+const { handleDrop } = useDirectoryUpload(addUploadsToQueue, path);
+
+// 3.3 页面交互 Hook
+const {
+  isDragging,
+  dragHandlers,
+  isSearchVisible,
+  searchOrigin,
+  openSearchFromElement
+} = usePageInteractions(handleDrop);
+
+// --- 4. 详细信息面板 ---
+const detailsPanelFile = ref<FileItem | null>(null);
+
 const loadPath = (newPath: string) => {
-  detailsPanelFile.value = null;
+  detailsPanelFile.value = null; // 切换目录时关闭详情面板
   fileStore.loadFiles(newPath, uploaderActions);
 };
 
@@ -208,57 +246,171 @@ const handleShowDetailsForId = async (id: string) => {
   }
 };
 
-const {
-  handleUploadFile,
-  handleUploadDir,
-  handleCreateFile,
-  handleCreateFolder,
-  handleRename,
-  handleDelete
-} = useFileActions(addUploadsToQueue, path);
+// --- 5. 下载逻辑 ---
 
-const { handleDrop } = useDirectoryUpload(addUploadsToQueue, path);
+/**
+ * 核心功能：处理打包下载
+ */
+const handlePackageDownload = async (
+  itemsToDownload: FileItem[],
+  zipName: string
+) => {
+  const notificationTitle = ref("正在准备打包下载");
+  const notificationMessage = ref("正在获取文件列表，请稍候...");
 
-const {
-  isDragging,
-  dragHandlers,
-  isSearchVisible,
-  searchOrigin,
-  openSearchFromElement
-} = usePageInteractions(handleDrop);
+  // 关键修复: 使用 h() 渲染函数包装响应式 ref，并传递给 message
+  const notification = ElNotification({
+    message: h("div", null, [
+      h(
+        "p",
+        { style: "font-weight: bold; margin: 0; padding-bottom: 6px;" },
+        notificationTitle.value
+      ),
+      h(
+        "p",
+        { style: "margin: 0; font-size: 12px;" },
+        notificationMessage.value
+      )
+    ]),
+    duration: 0,
+    showClose: false,
+    type: "info",
+    position: "bottom-left"
+  });
 
-// --- 核心修改：重写 onActionDownload 函数 ---
+  const zip = new JSZip();
+  const filesToFetch: FolderTreeFile[] = [];
+
+  try {
+    for (const item of itemsToDownload) {
+      if (item.type === FileType.Dir) {
+        notificationMessage.value = `正在分析文件夹 [${item.name}]...`;
+        const treeResponse = await getFolderTreeApi(item.id);
+        if (treeResponse.code === 200 && treeResponse.data.files) {
+          const filesInFolder = treeResponse.data.files.map(file => ({
+            ...file,
+            relative_path: `${item.name}/${file.relative_path}`
+          }));
+          filesToFetch.push(...filesInFolder);
+        }
+      } else {
+        const detailResponse = await getFileDetailsApi(item.id);
+        if (detailResponse.code === 200 && detailResponse.data.url) {
+          filesToFetch.push({
+            url: detailResponse.data.url,
+            relative_path: item.name,
+            size: item.size
+          });
+        }
+      }
+    }
+
+    if (filesToFetch.length === 0) {
+      notification.close();
+      ElMessage.info("所选项目中没有可下载的文件。");
+      return;
+    }
+
+    const totalFiles = filesToFetch.length;
+    notificationTitle.value = `开始打包下载 (${totalFiles}个文件)`; // 更新 ref
+    ElMessage.info({
+      message: "正在下载文件内容，请勿关闭浏览器。",
+      duration: 5000
+    });
+
+    let fileIndex = 0;
+    for (const file of filesToFetch) {
+      fileIndex++;
+      notificationMessage.value = `(${fileIndex}/${totalFiles}) 正在处理: ${file.relative_path}`; // 更新 ref
+      try {
+        const blob = await fetchBlobFromUrl(file.url);
+        zip.file(file.relative_path, blob);
+      } catch (e: any) {
+        console.error(`下载文件 ${file.relative_path} 失败:`, e);
+        zip.file(
+          `${file.relative_path}.error.txt`,
+          `下载此文件失败: ${e.message}`
+        );
+      }
+    }
+
+    notificationTitle.value = "正在生成 ZIP 文件";
+    notificationMessage.value = "文件已全部处理，正在进行最终打包...";
+
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    const url = window.URL.createObjectURL(zipBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `${zipName}.zip`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    notification.close();
+    ElNotification.success({
+      title: "下载完成",
+      message: `文件 [${zipName}.zip] 已成功打包并开始下载。`,
+      position: "bottom-left"
+    });
+  } catch (error: any) {
+    console.error("打包下载过程中发生错误:", error);
+    notification.close();
+    ElMessage.error(error.message || "打包下载失败");
+  }
+};
+
+/**
+ * 顶级下载动作处理器
+ */
 async function onActionDownload() {
   const selectedItems = getSelectedFileItems();
   if (selectedItems.length === 0) {
-    ElMessage.warning("请至少选择一个文件进行下载");
+    ElMessage.warning("请选择要下载的项目");
     return;
   }
-
-  const filesToDownload = selectedItems.filter(
-    item => item.type === FileType.File
-  );
-
-  if (filesToDownload.length === 0) {
-    ElMessage.info("选择的项目中不包含可下载的文件（文件夹暂不支持直接下载）");
+  if (selectedItems.length === 1 && selectedItems[0].type === FileType.File) {
+    ElMessage.info(`开始下载文件: ${selectedItems[0].name}`);
+    await downloadFileApi(selectedItems[0].id, selectedItems[0].name);
     return;
   }
-
-  ElMessage.info(`已开始下载 ${filesToDownload.length} 个文件...`);
-
-  // 依次下载每个文件
-  for (const file of filesToDownload) {
-    try {
-      // 为了防止浏览器因连续快速触发下载而产生阻止，可以加入一个微小的延迟
-      await new Promise(resolve => setTimeout(resolve, 300));
-      await downloadFileApi(file.id, file.name);
-    } catch (error) {
-      // 错误已在 downloadFileApi 中通过 ElMessage 提示，这里仅在控制台记录
-      console.error(`下载文件 ${file.name} 失败:`, error);
-    }
+  let zipName = "打包下载";
+  if (selectedItems.length === 1 && selectedItems[0].type === FileType.Dir) {
+    zipName = selectedItems[0].name;
   }
+  handlePackageDownload(selectedItems, zipName);
 }
 
+/**
+ * 处理从面包屑触发的文件夹下载
+ */
+const handleDownloadFolder = (folderId: string) => {
+  getFileDetailsApi(folderId).then(res => {
+    if (res.code === 200 && res.data) {
+      handlePackageDownload([res.data], res.data.name);
+    } else {
+      ElMessage.error(res.message || "无法获取文件夹信息以下载");
+    }
+  });
+};
+
+function onActionRename() {
+  if (isSingleSelection.value) handleRename(getSelectedFileItems()[0]);
+}
+function onActionDelete() {
+  handleDelete(getSelectedFileItems());
+}
+function onActionCopy() {
+  console.log("Copy:", getSelectedFileItems());
+}
+function onActionMove() {
+  console.log("Move:", getSelectedFileItems());
+}
+function onActionShare() {
+  console.log("Share:", getSelectedFileItems());
+}
+
+// --- 6. 右键菜单 Hook ---
 const {
   contextMenuTriggerEvent,
   onMenuSelect,
@@ -273,26 +425,21 @@ const {
   onRefresh: () => loadPath(path.value),
   onRename: onActionRename,
   onDelete: onActionDelete,
-  onDownload: onActionDownload, // 确保这里连接的是新的 onActionDownload
+  onDownload: onActionDownload,
   onCopy: onActionCopy,
   onMove: onActionMove,
   onShare: onActionShare,
   onInfo: () => {
-    const selectedItems = getSelectedFileItems();
-    if (selectedItems.length > 0) {
-      handleShowDetailsForId(selectedItems[0].id);
-    }
+    const selected = getSelectedFileItems();
+    if (selected.length > 0) handleShowDetailsForId(selected[0].id);
   }
 });
 
-const hasSelection = computed(() => selectedFiles.value.size > 0);
-const isSingleSelection = computed(() => selectedFiles.value.size === 1);
+// --- 7. 其他事件处理器和生命周期 ---
 const selectionCountLabel = computed(
   () => `${selectedFiles.value.size} 个对象`
 );
-
 const fileManagerContainerRef = ref(null);
-
 const handleContainerClick = (event: MouseEvent) => {
   if (detailsPanelFile.value) {
     const panel = (event.target as HTMLElement).closest(
@@ -322,7 +469,6 @@ const handleContainerClick = (event: MouseEvent) => {
   }
   clearSelection();
 };
-
 const handleContextMenuTrigger = (event: MouseEvent) => {
   const target = event.target as HTMLElement;
   const clickedOnItem = target.closest(".file-item, .grid-item");
@@ -331,57 +477,31 @@ const handleContextMenuTrigger = (event: MouseEvent) => {
   }
   contextMenuTriggerEvent.value = event;
 };
-
-const getSelectedFileItems = () =>
-  sortedFiles.value.filter(f => selectedFiles.value.has(f.id));
-
-function onActionRename() {
-  if (isSingleSelection.value) handleRename(getSelectedFileItems()[0]);
-}
-function onActionDelete() {
-  handleDelete(getSelectedFileItems());
-}
-function onActionCopy() {
-  console.log("Copy:", getSelectedFileItems());
-}
-function onActionMove() {
-  console.log("Move:", getSelectedFileItems());
-}
-function onActionShare() {
-  console.log("Share:", getSelectedFileItems());
-}
-
 const handleRefresh = () => loadPath(path.value);
 const handleSetViewMode = (mode: "list" | "grid") =>
   fileStore.setViewMode(mode);
 const handleSetPageSize = (size: number) => fileStore.setPageSize(size);
 const handleSetSortKey = (key: SortKey) => fileStore.setSort(key);
-
 const handleNavigate = (newPath: string) => {
   clearSelection();
   loadPath(newPath);
 };
-
 onMounted(() => {
   if (fileStore.files.length === 0 && !fileStore.loading) {
     loadPath("/");
   }
 });
-
 const isPanelVisible = ref(false);
 const isPanelCollapsed = ref(false);
-
 watch(
   () => uploadQueue.length,
   newLength => {
     if (newLength > 0) isPanelVisible.value = true;
   }
 );
-
 const handlePanelClose = () => {
   isPanelVisible.value = false;
 };
-
 const handleUploadGlobalCommand = (command: string, value: any) => {
   switch (command) {
     case "overwrite-all":
@@ -417,7 +537,6 @@ const handleUploadGlobalCommand = (command: string, value: any) => {
       break;
   }
 };
-
 const viewComponents = { list: FileListView, grid: FileGridView };
 const activeViewComponent = computed(() => viewComponents[viewMode.value]);
 </script>

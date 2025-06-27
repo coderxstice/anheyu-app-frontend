@@ -139,6 +139,7 @@ import Delete from "@iconify-icons/ep/delete";
 
 const emit = defineEmits<{
   (e: "show-details", id: string): void;
+  (e: "download-folder", id: string): void; // 新增事件
 }>();
 
 const fileStore = useFileStore();
@@ -166,9 +167,7 @@ const goToPath = (newPath: string) => {
 
 const handleSubmit = () => {
   let finalPath = pathInput.value.trim();
-  if (!finalPath.startsWith("/")) {
-    finalPath = `/${finalPath}`;
-  }
+  if (!finalPath.startsWith("/")) finalPath = `/${finalPath}`;
   if (finalPath.length > 1 && finalPath.endsWith("/")) {
     finalPath = finalPath.slice(0, -1);
   }
@@ -199,27 +198,22 @@ interface CommandPayload {
 
 const handleCommand = (command: CommandPayload) => {
   const { action } = command;
+  if (!parentInfo.value?.id) {
+    ElMessage.warning("无法获取当前目录信息");
+    return;
+  }
 
   switch (action) {
     case "enter":
       goToPath(path.value);
       break;
-
     case "info":
-      if (parentInfo.value?.id) {
-        emit("show-details", parentInfo.value.id);
-      } else {
-        ElMessage.warning("无法获取当前目录ID");
-      }
+      emit("show-details", parentInfo.value.id);
       break;
-
-    // 核心修改: 处理文件夹下载
     case "download":
-      ElMessage.info("暂不支持直接下载整个文件夹。");
+      emit("download-folder", parentInfo.value.id);
       break;
-
     case "delete":
-      if (!parentInfo.value) return;
       ElMessageBox.confirm(
         `确定要删除文件夹 "${parentInfo.value.name}" 吗？此操作不可恢复。`,
         "警告",
@@ -232,11 +226,8 @@ const handleCommand = (command: CommandPayload) => {
         .then(() => {
           ElMessage.success(`文件夹 "${parentInfo.value?.name}" 已删除`);
         })
-        .catch(() => {
-          ElMessage.info("已取消删除");
-        });
+        .catch(() => ElMessage.info("已取消删除"));
       break;
-
     default:
       ElMessage.info(`功能 [${action}] 正在开发中...`);
       break;
