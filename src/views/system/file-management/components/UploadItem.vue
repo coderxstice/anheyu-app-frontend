@@ -4,13 +4,30 @@
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
   >
+    <!-- 进度条现在是独立的，作为背景 -->
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fg" :style="{ width: item.progress + '%' }" />
+    </div>
+
     <div class="item-icon">
       <el-icon><Document /></el-icon>
     </div>
-    <!-- **CSS 修复**: 移除了 item-info 的 overflow: hidden -->
-    <div class="item-info">
-      <div class="item-name" :title="item.name">{{ item.name }}</div>
 
+    <div class="item-info">
+      <div class="item-name">
+        <span :title="item.name">{{ item.name }}</span>
+        <!-- 根据 isResuming 标志显示"断点续传"标签 -->
+        <el-tag
+          v-if="item.isResuming && item.status !== 'success'"
+          type="info"
+          size="small"
+          class="status-tag"
+        >
+          断点续传
+        </el-tag>
+      </div>
+
+      <!-- 主要信息显示区域 -->
       <div class="status-action-wrapper">
         <Transition
           :css="false"
@@ -18,19 +35,34 @@
           @enter="onAnimateEnter"
           @leave="onAnimateLeave"
         >
-          <!-- 状态/进度条 (非悬停时显示) -->
+          <!-- 详细信息或状态文本 (非悬停时显示) -->
           <div
             v-if="!isHovered"
             :key="`status-${item.id}`"
             class="item-status-display"
           >
-            <el-progress
-              v-if="['pending', 'uploading'].includes(item.status)"
-              :percentage="item.progress"
-              :status="getProgressStatus(item.status)"
-              :stroke-width="2"
-              :show-text="false"
-            />
+            <!-- 上传中/可续传时，显示详细信息 -->
+            <div
+              v-if="['uploading', 'resumable'].includes(item.status)"
+              class="item-detail-info"
+            >
+              <!-- 根据父组件传入的速度模式，显示瞬时或平均速度 -->
+              <span class="speed"
+                >{{
+                  formatBytes(
+                    speedMode === "average"
+                      ? item.averageSpeed
+                      : item.instantSpeed,
+                    2
+                  )
+                }}/s</span
+              >
+              <span class="size-info">
+                已上传 {{ formatBytes(item.uploadedSize, 1) }}, 共
+                {{ formatBytes(item.size, 1) }} - {{ item.progress }}%
+              </span>
+            </div>
+            <!-- 其他状态，显示简单文本 -->
             <div v-else class="item-message" :class="`is-${item.status}`">
               {{ getStatusText(item) }}
             </div>
@@ -38,7 +70,7 @@
 
           <!-- 操作按钮 (悬停时显示) -->
           <div v-else :key="`actions-${item.id}`" class="item-actions">
-            <!-- 成功状态: 新增“删除记录”按钮 -->
+            <!-- 成功状态: 删除记录 -->
             <template v-if="item.status === 'success'">
               <el-tooltip content="删除记录" placement="top">
                 <el-button
@@ -92,6 +124,24 @@
               </el-tooltip>
             </template>
 
+            <!-- 可续传状态: 继续上传, 删除 -->
+            <template v-if="item.status === 'resumable'">
+              <el-tooltip content="继续上传" placement="top">
+                <el-button
+                  circle
+                  :icon="RefreshRight"
+                  @click="emit('retry-item', item.id)"
+                />
+              </el-tooltip>
+              <el-tooltip content="删除任务" placement="top">
+                <el-button
+                  circle
+                  :icon="Delete"
+                  @click="emit('remove-item', item.id)"
+                />
+              </el-tooltip>
+            </template>
+
             <!-- 进行中/等待中: 取消 -->
             <template v-if="['uploading', 'pending'].includes(item.status)">
               <el-tooltip content="取消" placement="top">
@@ -113,6 +163,7 @@
 import { ref } from "vue";
 import gsap from "gsap";
 import type { UploadItem } from "@/api/sys-file/type";
+import { formatBytes } from "@/utils/fileUtils"; // 引入格式化函数
 import {
   Delete,
   Document,
@@ -121,10 +172,10 @@ import {
   Switch,
   EditPen
 } from "@element-plus/icons-vue";
-import type { ProgressProps } from "element-plus";
 
 const props = defineProps<{
   item: UploadItem;
+  speedMode: "instant" | "average";
 }>();
 
 const emit = defineEmits<{
@@ -139,14 +190,6 @@ const emit = defineEmits<{
 
 const isHovered = ref(false);
 
-const getProgressStatus = (
-  status: UploadItem["status"]
-): ProgressProps["status"] => {
-  if (status === "success") return "success";
-  if (status === "error" || status === "conflict") return "exception";
-  return undefined;
-};
-
 const getStatusText = (item: UploadItem): string => {
   switch (item.status) {
     case "error":
@@ -157,10 +200,11 @@ const getStatusText = (item: UploadItem): string => {
       return "上传成功";
     case "pending":
       return "等待上传...";
-    case "uploading":
-      return `正在上传... ${item.progress}%`;
+    case "canceled":
+      return "已取消";
     default:
-      return "已完成";
+      // 对于 uploading 和 resumable，我们显示详细信息，所以这里可以返回空
+      return "";
   }
 };
 
@@ -191,6 +235,7 @@ const onAnimateLeave = (el: Element, done: () => void) => {
   border-radius: 8px;
   transition: background-color 0.2s;
   position: relative;
+  overflow: hidden;
 }
 .upload-item:hover {
   background-color: #f5f7fa;
@@ -200,15 +245,18 @@ const onAnimateLeave = (el: Element, done: () => void) => {
   margin-right: 12px;
   color: #909399;
   flex-shrink: 0;
+  position: relative;
+  z-index: 2;
 }
 .item-info {
   flex-grow: 1;
-  /* **CSS 修复**: 增加 min-width: 0 来解决 flex 布局下的 overflow 问题 */
   min-width: 0;
   min-height: 38px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  position: relative;
+  z-index: 2;
 }
 .item-name {
   font-size: 14px;
@@ -216,6 +264,15 @@ const onAnimateLeave = (el: Element, done: () => void) => {
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.status-tag {
+  height: 18px;
+  padding: 0 6px;
+  line-height: 16px;
+  border: none;
 }
 .status-action-wrapper {
   position: relative;
@@ -225,6 +282,23 @@ const onAnimateLeave = (el: Element, done: () => void) => {
 }
 .item-status-display {
   width: 100%;
+}
+.item-detail-info {
+  font-size: 12px;
+  color: #606266;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.speed {
+  color: var(--el-color-primary);
+  font-weight: 500;
+  min-width: 75px;
+  text-align: left;
+}
+.size-info {
+  color: #909399;
 }
 .item-message {
   font-size: 12px;
@@ -242,18 +316,36 @@ const onAnimateLeave = (el: Element, done: () => void) => {
 .item-message.is-success {
   color: var(--el-color-success);
 }
+.item-message.is-resumable {
+  color: var(--el-color-warning);
+}
 .item-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   width: 100%;
   gap: 8px;
+  /* 添加一个半透明背景，使其在悬停时能覆盖住下面的文字信息 */
+  background-color: rgba(245, 247, 250, 0.85);
+  backdrop-filter: blur(2px);
+  padding: 0 4px;
 }
 .item-actions .el-button {
   width: 28px;
   height: 28px;
 }
-:deep(.el-progress-bar__inner) {
-  transition: width 0.3s ease !important;
+.progress-bar-bg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #e9e9eb;
+  z-index: 1;
+}
+.progress-bar-fg {
+  height: 100%;
+  background-color: var(--el-color-primary);
+  transition: width 0.3s ease;
 }
 </style>

@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-06-27 01:51:23
+ * @LastEditTime: 2025-06-27 12:33:39
  * @LastEditors: 安知鱼
  */
 
@@ -53,7 +53,8 @@ export interface UploadItem {
     | "success"
     | "error"
     | "conflict"
-    | "canceled";
+    | "canceled"
+    | "resumable";
   overwrite?: boolean; // 用于单个文件覆盖
   progress: number;
   file: File; // 原始 File 对象
@@ -70,6 +71,17 @@ export interface UploadItem {
   uploadedChunks?: Set<number>; // 已上传的块索引集合
   errorMessage?: string; // 上传失败时的错误信息
   retries?: number; // 重试次数
+
+  // --- 用于丰富 UI 显示和速度计算的字段 ---
+  instantSpeed: number; // 瞬时速度 (Bytes/s)
+  averageSpeed: number; // +++ 新增: 平均速度 (Bytes/s) +++
+  uploadedSize: number; // 已上传大小 (Bytes)
+  isResuming?: boolean; // 是否为断点续传任务
+
+  // --- 用于计算速度的内部状态字段 ---
+  startTime?: number; // 上传开始时间戳
+  lastSize?: number; // 上一次计算速度时的大小
+  lastTime?: number; // 上一次计算速度时的时间戳
 }
 
 // =================================================================
@@ -187,4 +199,41 @@ export interface CreateUploadSessionResponse {
   code: number;
   message: string;
   data: UploadSessionData;
+}
+
+export interface UpdateFolderViewResponse {
+  code: number;
+  data: {
+    view: FolderViewConfig;
+  } | null;
+  message: string;
+}
+
+/**
+ * `GET file/upload/session/{sessionId}` 接口成功时 `data` 字段的结构
+ */
+export interface UploadSessionStatus {
+  session_id: string;
+  is_valid: true; // 成功时 is_valid 总是 true
+  chunk_size: number;
+  total_chunks: number;
+  uploaded_chunks: number[];
+  expires_at: string;
+}
+
+/**
+ * `GET file/upload/session/{sessionId}` 接口失败时 `data` 字段的结构
+ */
+export interface InvalidUploadSessionStatus {
+  is_valid: false;
+}
+
+/**
+ * `GET file/upload/session/{sessionId}` 接口的完整响应体结构
+ */
+export interface ValidateUploadSessionResponse {
+  code: number;
+  // data 字段是两种可能类型的联合类型
+  data: UploadSessionStatus | InvalidUploadSessionStatus;
+  message: string;
 }

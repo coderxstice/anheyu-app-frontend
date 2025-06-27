@@ -25,7 +25,7 @@
                 </span>
               </el-tooltip>
 
-              <!-- **核心修改**: 移除外层的 Tooltip，直接使用 Popover -->
+              <!-- Popover for More Actions -->
               <el-popover
                 ref="popoverRef"
                 v-model:visible="isMoreActionsPopoverVisible"
@@ -37,7 +37,6 @@
                 :teleported="true"
               >
                 <template #reference>
-                  <!-- 触发器就是一个简单的带 title 的 span -->
                   <span
                     class="icon-wrapper"
                     :title="isMoreActionsPopoverVisible ? '' : '更多操作'"
@@ -46,13 +45,27 @@
                   </span>
                 </template>
 
-                <!-- Popover 的内容 -->
+                <!-- **核心修改**: 在菜单中添加速度切换选项 -->
                 <ul class="popover-menu">
+                  <li
+                    :class="{ active: speedMode === 'instant' }"
+                    @click="handleCommand('set-speed-mode', 'instant')"
+                  >
+                    瞬时速度
+                  </li>
+                  <li
+                    :class="{ active: speedMode === 'average' }"
+                    @click="handleCommand('set-speed-mode', 'average')"
+                  >
+                    平均速度
+                  </li>
+                  <li class="divider" />
+                  <li @click="handleCommand('set-concurrency')">设置并发数</li>
+                  <li class="divider" />
                   <li @click="handleCommand('overwrite-all')">
                     覆盖所有同名文件
                   </li>
                   <li @click="handleCommand('retry-all')">重试所有失败任务</li>
-                  <li @click="handleCommand('set-concurrency')">设置并发数</li>
                   <li class="divider" />
                   <li @click="handleCommand('clear-finished')">
                     清除已完成任务
@@ -84,6 +97,7 @@
                   v-for="item in queue"
                   :key="item.id"
                   :item="item"
+                  :speed-mode="speedMode"
                   @retry-item="emit('retry-item', $event)"
                   @remove-item="emit('remove-item', $event)"
                   @resolve-conflict="
@@ -116,6 +130,7 @@ const props = defineProps<{
   visible: boolean;
   isCollapsed: boolean;
   queue: UploadItem[];
+  speedMode: "instant" | "average";
 }>();
 
 const emit = defineEmits<{
@@ -140,8 +155,8 @@ const activeUploadsCount = computed(
       .length
 );
 
-const handleCommand = (command: string) => {
-  emit("global-command", command);
+const handleCommand = (command: string, value?: any) => {
+  emit("global-command", command, value);
   isMoreActionsPopoverVisible.value = false;
 };
 </script>
@@ -185,10 +200,26 @@ const handleCommand = (command: string) => {
   font-size: 14px;
   cursor: pointer;
   transition: background-color 0.2s;
+  position: relative;
 }
 .popover-menu li:hover {
   background-color: #f5f7fa;
 }
+/* **新增**: 为选中的菜单项添加高亮样式 */
+.popover-menu li.active {
+  color: var(--el-color-primary);
+  font-weight: 500;
+}
+/* **新增**: 用伪元素模拟一个对勾 */
+.popover-menu li.active::before {
+  content: "✓";
+  position: absolute;
+  left: 8px; /* 根据需要调整位置 */
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+}
+
 .popover-menu li.divider {
   height: 1px;
   padding: 0;
@@ -208,7 +239,6 @@ const handleCommand = (command: string) => {
 }
 
 /* Scoped 样式保持不变 */
-/* ... (复制粘贴你之前所有的 scoped 样式) ... */
 .list-enter-active,
 .list-leave-active {
   transition: all 0.4s ease;

@@ -5,7 +5,8 @@ import {
   type CreateUploadSessionResponse,
   FileType,
   type FolderViewConfig,
-  type UpdateFolderViewResponse
+  type UpdateFolderViewResponse,
+  type ValidateUploadSessionResponse
 } from "./type";
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
@@ -13,7 +14,6 @@ import { buildFullUri } from "@/utils/fileUtils";
 
 /**
  * 1. 获取文件列表
- * (此函数保持不变，因为它已经在使用 buildFullUri)
  */
 export const fetchFilesByPathApi = async (
   path: string,
@@ -108,7 +108,6 @@ export const deleteUploadSessionApi = (
 
 /**
  * 5. 创建空文件或目录
- * (此函数保持不变)
  */
 export const createItemApi = (
   type: number,
@@ -166,5 +165,19 @@ export const updateFolderViewApi = (
         view: viewConfig
       }
     }
+  );
+};
+
+/**
+ * 检查上传会话状态 (断点续传)
+ * @param sessionId 会话 ID
+ * @returns Promise<ValidateUploadSessionResponse>
+ */
+export const validateUploadSessionApi = (
+  sessionId: string
+): Promise<ValidateUploadSessionResponse> => {
+  return http.request<ValidateUploadSessionResponse>(
+    "get",
+    baseUrlApi(`file/upload/session/${sessionId}`)
   );
 };

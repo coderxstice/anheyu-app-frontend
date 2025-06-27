@@ -89,6 +89,7 @@
       :visible="isPanelVisible"
       :is-collapsed="isPanelCollapsed"
       :queue="uploadQueue"
+      :speed-mode="speedMode"
       @close="handlePanelClose"
       @toggle-collapse="isPanelCollapsed = !isPanelCollapsed"
       @retry-item="retryItem"
@@ -101,7 +102,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, Ref } from "vue";
 import { storeToRefs } from "pinia";
 import { ElMessageBox } from "element-plus";
 import { onClickOutside } from "@vueuse/core";
@@ -229,6 +230,7 @@ const selectionCountLabel = computed(
 // --- 核心交互逻辑 ---
 
 const fileManagerContainerRef = ref(null);
+const speedMode: Ref<"instant" | "average"> = ref("instant");
 
 // **策略一: 处理组件外部的点击**
 onClickOutside(
