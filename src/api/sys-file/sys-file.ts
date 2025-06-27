@@ -1,51 +1,28 @@
+// src/api/sys-file/sys-file.ts
+
 import {
   type FileListResponse,
   type CreateUploadSessionResponse,
-  FileType
+  FileType,
+  type FolderViewConfig,
+  type UpdateFolderViewResponse
 } from "./type";
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
-
-/**
- * 构建完整的后端期望的 URI 格式：anzhiyu://my/{path}
- * 例如：'/Documents' -> 'anzhiyu://my/Documents'
- * '/' -> 'anzhiyu://my/'
- *
- * @param logicalPath 逻辑路径，例如 "/" 或 "/Documents"
- * @returns 完整的 URI 字符串
- */
-const buildFullUri = (logicalPath: string): string => {
-  // 确保传入的 logicalPath 是以 / 开头的绝对路径
-  const normalizedPath = logicalPath.startsWith("/")
-    ? logicalPath
-    : `/${logicalPath}`;
-  // 根目录 '/' 特殊处理为 'anzhiyu://my/'，其他为 'anzhiyu://my/Documents'
-  return normalizedPath === "/"
-    ? `anzhiyu://my/`
-    : `anzhiyu://my${normalizedPath}`;
-};
+import { buildFullUri } from "@/utils/fileUtils";
 
 /**
  * 1. 获取文件列表
- * 该方法只负责向后端请求文件列表。
- * `path` 参数现在是逻辑路径，例如 "/" 或 "/Documents"。
- * API 内部负责拼接 'anzhiyu://my/' 前缀。
- *
- * @param path 目标目录的逻辑路径，例如 "/" 或 "/Documents"
- * @param order 排序字段，例如 "name", "size", "created_at", "updated_at"
- * @param direction 排序方向，"asc" 或 "desc"
- * @param page 页码
- * @param pageSize 每页大小
- * @returns Promise<FileListResponse>
+ * (此函数保持不变，因为它已经在使用 buildFullUri)
  */
 export const fetchFilesByPathApi = async (
-  path: string, // 现在接收逻辑路径
+  path: string,
   order: string,
   direction: string,
   page: number,
   pageSize: number
 ): Promise<FileListResponse> => {
-  const fullUri = buildFullUri(path); // 在 API 层拼接完整 URI
+  const fullUri = buildFullUri(path);
 
   console.log("fetchFilesByPathApi 请求参数 (内部拼接 URI):", {
     uri: fullUri,
@@ -61,7 +38,7 @@ export const fetchFilesByPathApi = async (
       baseUrlApi("file"),
       {
         params: {
-          uri: fullUri, // 传递拼接好的完整 URI
+          uri: fullUri,
           order: order,
           direction: direction,
           page: String(page),
@@ -80,21 +57,15 @@ export const fetchFilesByPathApi = async (
 
 /**
  * 2. 创建上传会话
- * `fullPath` 参数现在是逻辑路径，例如 "/Documents/new_file.zip"。
- * API 内部负责拼接 'anzhiyu://my/' 前缀。
- *
- * @param fullPath 包含文件名的完整逻辑路径，例如 "/Documents/new_file.zip"
- * @param size 文件总大小（字节）
- * @param policyId 存储策略的 ID
- * @returns Promise<CreateUploadSessionResponse>
+ * (此函数保持不变)
  */
 export const createUploadSessionApi = (
   fullPath: string,
   size: number,
   policyId: string,
-  overwrite: boolean = false // 是否覆盖同名文件
+  overwrite: boolean = false
 ): Promise<CreateUploadSessionResponse> => {
-  const fullUri = buildFullUri(fullPath);
+  const fullUri = buildFullUri(fullPath); // 现在使用的是从 utils 导入的函数
 
   return http.request<CreateUploadSessionResponse>(
     "put",
@@ -106,12 +77,8 @@ export const createUploadSessionApi = (
 };
 
 /**
- * 3. 上传文件块 (保持不变，因为路径在 Endpoint 中)
- *
- * @param sessionId 从上一步获取的会话 ID
- * @param index 当前块的索引，从 0 开始
- * @param chunk 文件块的原始二进制数据 (Blob)
- * @returns Promise<any>
+ * 3. 上传文件块
+ * (此函数保持不变)
  */
 export const uploadChunkApi = (
   sessionId: string,
@@ -126,43 +93,29 @@ export const uploadChunkApi = (
 
 /**
  * 4. 删除/中止上传会话
- * `fullPath` 参数现在是逻辑路径，例如 "/Documents/deleted_file.txt"。
- * API 内部负责拼接 'anzhiyu://my/' 前缀。
- *
- * @param sessionId 要删除的会话 ID
- * @param fullPath 创建会话时使用的目标文件逻辑路径
- * @returns Promise<any>
+ * (此函数保持不变)
  */
 export const deleteUploadSessionApi = (
   sessionId: string,
-  fullPath: string // 现在接收逻辑路径
+  fullPath: string
 ): Promise<any> => {
-  const fullUri = buildFullUri(fullPath); // 在 API 层拼接完整 URI
+  const fullUri = buildFullUri(fullPath);
 
   return http.request("delete", baseUrlApi("file/upload"), {
-    data: { id: sessionId, uri: fullUri } // 传递拼接好的完整 URI
+    data: { id: sessionId, uri: fullUri }
   });
 };
 
 /**
  * 5. 创建空文件或目录
- * `type` 必须是后端期望的数字 (0 代表文件，1 代表文件夹)。
- * `logicalPath` 必须是后端期望的完整逻辑路径，例如 "/New Folder" 或 "/newfile.txt"。
- * API 内部负责拼接 'anzhiyu://my/' 前缀。
- *
- * Endpoint: POST /file/create
- *
- * @param type 后端期望的数字类型，0 (文件) 或 1 (文件夹)
- * @param logicalPath 要创建的文件或目录的完整逻辑路径
- * @param errOnConflict 如果为 true，当目标已存在时返回错误。
- * @returns Promise<any> 返回新创建的文件/目录的 FileItem 信息。
+ * (此函数保持不变)
  */
 export const createItemApi = (
   type: number,
-  logicalPath: string, // 现在接收逻辑路径
+  logicalPath: string,
   errOnConflict: boolean = false
 ): Promise<any> => {
-  const fullUri = buildFullUri(logicalPath); // 在 API 层拼接完整 URI
+  const fullUri = buildFullUri(logicalPath);
 
   console.log(`调用创建 API (内部拼接 URI): 类型 ${type}, URI '${fullUri}'`);
 
@@ -172,37 +125,46 @@ export const createItemApi = (
 
   return http.request("post", baseUrlApi("file/create"), {
     data: {
-      type: type, // 直接使用传入的数字类型
-      uri: fullUri, // 传递拼接好的完整 URI
+      type: type,
+      uri: fullUri,
       err_on_conflict: errOnConflict
     }
   });
 };
 
-// --- 以下为创建文件和文件夹的辅助函数，它们只负责调用 createItemApi 并传递处理好的参数 ---
-
-/**
- * 创建空文件的辅助 API
- * @param logicalPath 要创建的文件完整逻辑路径
- * @param errOnConflict 如果为 true，当目标已存在时返回错误。
- * @returns Promise<any>
- */
+// --- 创建文件和文件夹的辅助函数 (保持不变) ---
 export const createFileApi = (
   logicalPath: string,
   errOnConflict: boolean = false
 ): Promise<any> => {
-  return createItemApi(FileType.File, logicalPath, errOnConflict); // 0 代表文件 (通过 FileType.File)
+  return createItemApi(FileType.File, logicalPath, errOnConflict);
 };
 
-/**
- * 创建文件夹的辅助 API
- * @param logicalPath 要创建的文件夹完整逻辑路径
- * @param errOnConflict 如果为 true，当目标已存在时返回错误。
- * @returns Promise<any>
- */
 export const createFolderApi = (
   logicalPath: string,
   errOnConflict: boolean = false
 ): Promise<any> => {
-  return createItemApi(FileType.Dir, logicalPath, errOnConflict); // 1 代表文件夹 (通过 FileType.Dir)
+  return createItemApi(FileType.Dir, logicalPath, errOnConflict);
+};
+
+/**
+ * 更新文件夹的视图配置
+ * @param folder_id 文件夹的公共 ID
+ * @param viewConfig 新的视图配置对象
+ * @returns Promise<UpdateFolderViewResponse>
+ */
+export const updateFolderViewApi = (
+  folder_id: string, // 参数从 uri 变为 folder_id
+  viewConfig: FolderViewConfig
+): Promise<UpdateFolderViewResponse> => {
+  return http.request<UpdateFolderViewResponse>(
+    "put",
+    baseUrlApi("folder/view"),
+    {
+      data: {
+        folder_id: folder_id, // 传递 folder_id
+        view: viewConfig
+      }
+    }
+  );
 };

@@ -58,20 +58,22 @@
                 />
               </div>
             </el-button-group>
+
             <!-- 分页大小 -->
             <div>
               <h1 class="text-base mt-2">分页大小</h1>
-              <!-- 使用 v-model:model-value 和 @change 来同步数据 -->
+              <!-- **核心修改**: 分离 input 和 change 事件 -->
               <el-slider
-                :model-value="pageSize"
+                :model-value="localPageSize"
                 :min="10"
                 :max="200"
                 :step="10"
                 size="small"
-                @update:model-value="onPageSizeChange"
+                @input="onPageSizeInput"
+                @change="onPageSizeChange"
               />
               <div class="text-xs text-gray-500">
-                当前分页大小: {{ pageSize }} 条
+                当前分页大小: {{ localPageSize }} 条
               </div>
             </div>
           </el-popover>
@@ -151,7 +153,8 @@
 </template>
 
 <script setup lang="ts">
-import type { SortKey } from "@/store/modules/fileStore"; // 依然需要类型
+import { ref, watch } from "vue"; // +++ 新增引入 ref 和 watch
+import type { SortKey } from "@/store/modules/fileStore";
 import {
   Refresh,
   Grid,
@@ -161,7 +164,6 @@ import {
   FullScreen
 } from "@element-plus/icons-vue";
 
-// --- 1. 定义 Props 和 Emits ---
 const props = defineProps<{
   viewMode: "list" | "grid";
   sortKey: SortKey;
@@ -179,27 +181,41 @@ const emit = defineEmits<{
   (e: "set-sort-key", key: SortKey): void;
 }>();
 
-// --- 2. 处理本地状态与父组件的同步 ---
-// ElSlider 的 @update:model-value 事件提供了新值
+// **核心修改**: 处理 el-slider 的状态同步
+const localPageSize = ref(props.pageSize);
+
+// 当外部 prop 变化时（例如，加载了一个有不同配置的文件夹），同步更新本地值
+watch(
+  () => props.pageSize,
+  newValue => {
+    localPageSize.value = newValue;
+  }
+);
+
+// 在拖动滑块时，只更新本地的 ref，用于实时显示
+const onPageSizeInput = (value: number) => {
+  localPageSize.value = value;
+};
+
+// 仅在拖动结束后，才发出事件通知父组件，以触发 API 调用
 const onPageSizeChange = (value: number) => {
   emit("set-page-size", value);
 };
 </script>
 
 <style scoped lang="scss">
-/* 样式保持不变 */
 .file-toolbar {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding: 4px 12px; /* 调整了内边距以适应更紧凑的布局 */
+  padding: 4px 12px;
   background-color: #fff;
   border: var(--style-border);
 }
 .right-actions {
   display: flex;
   align-items: center;
-  gap: 8px; /* 减小间距 */
+  gap: 8px;
 }
 :deep(.el-slider__button) {
   width: 16px !important;

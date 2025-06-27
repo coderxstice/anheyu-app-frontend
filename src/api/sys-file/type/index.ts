@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-06-26 18:36:16
+ * @LastEditTime: 2025-06-27 01:51:23
  * @LastEditors: 安知鱼
  */
 
@@ -76,6 +76,28 @@ export interface UploadItem {
 // II. API 响应类型 (API Response Types)
 // =================================================================
 
+/**
+ * 文件夹视图配置对象类型
+ * 用于 GET /file 响应 和 PUT /folder/view 请求/响应
+ */
+export interface FolderViewConfig {
+  view: "list" | "grid";
+  order: string;
+  page_size: number;
+  order_direction: "asc" | "desc";
+}
+
+/**
+ * 更新文件夹视图配置接口的响应体结构
+ */
+export interface UpdateFolderViewResponse {
+  code: number;
+  data: {
+    view: FolderViewConfig;
+  } | null;
+  message: string;
+}
+
 // --- 1. 获取文件列表 (Endpoint: GET /file) ---
 
 /**
@@ -133,7 +155,8 @@ export interface FileListData {
   pagination: PaginationInfo;
   props: FileProps;
   context_hint?: string;
-  storage_policy?: StoragePolicy; // **修改**: 使用导出的 StoragePolicy 接口
+  storage_policy?: StoragePolicy;
+  view?: FolderViewConfig;
 }
 
 /**

@@ -2,7 +2,7 @@
  * @Description: 文件图标相关的 Hook
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:30:17
- * @LastEditTime: 2025-06-26 18:19:09
+ * @LastEditTime: 2025-06-27 10:24:48
  * @LastEditors: 安知鱼
  */
 import type { Component } from "vue";
@@ -17,19 +17,31 @@ import FileZip from "@/assets/icons/file-zip.svg?component";
 import FileRar from "@/assets/icons/file-rar.svg?component";
 import FileExcel from "@/assets/icons/file-excel.svg?component";
 import FilePpt from "@/assets/icons/file-ppt.svg?component";
+import FilePython from "@/assets/icons/file-python.svg?component";
 import FileTxt from "@/assets/icons/file-txt.svg?component";
 import FileHtml from "@/assets/icons/file-html.svg?component";
 import FileCss from "@/assets/icons/file-css.svg?component";
 import FileJs from "@/assets/icons/file-js.svg?component";
+import FileJson from "@/assets/icons/file-json.svg?component";
 import FileImage from "@/assets/icons/file-image.svg?component";
 import FilePdf from "@/assets/icons/file-pdf.svg?component";
 import FileExe from "@/assets/icons/file-exe.svg?component";
 import FileOther from "@/assets/icons/file-other.svg?component";
+import FileWord from "@/assets/icons/file-wps.svg?component";
+import FileVue from "@/assets/icons/vue.svg?component";
+import FilePSD from "@/assets/icons/file-psd.svg?component";
+import FileGif from "@/assets/icons/file-gif.svg?component";
+import FileMP3 from "@/assets/icons/file-mp3.svg?component";
+import FilePHP from "@/assets/icons/file-php.svg?component";
+import FileAVI from "@/assets/icons/file-avi.svg?component";
+import FileMOV from "@/assets/icons/file-mov.svg?component";
+import FileSQL from "@/assets/icons/file-sql.svg?component";
+import FileDLL from "@/assets/icons/file-dll.svg?component";
 
 // 图标映射表
 const iconMap: Record<string, Component> = {
   // 音频
-  mp3: FileMusic,
+  mp3: FileMP3,
   wav: FileMusic,
   flac: FileMusic,
   aac: FileMusic,
@@ -38,8 +50,8 @@ const iconMap: Record<string, Component> = {
 
   // 视频
   mp4: FileVideo,
-  mov: FileVideo,
-  avi: FileVideo,
+  mov: FileMOV,
+  avi: FileAVI,
   mkv: FileVideo,
   wmv: FileVideo,
   flv: FileVideo,
@@ -51,6 +63,7 @@ const iconMap: Record<string, Component> = {
   "7z": FileZip, // 7z 也可以映射到 zip 图标
   tar: FileZip,
   gz: FileZip,
+  bz2: FileZip,
 
   // 文档
   xls: FileExcel,
@@ -65,22 +78,24 @@ const iconMap: Record<string, Component> = {
   htm: FileHtml,
   css: FileCss,
   js: FileJs,
-  ts: FileJs, // TypeScript
-  json: FileJs, // JSON
-  xml: FileHtml, // XML 可以用 HTML 图标或自定义
+  ts: FileJs,
+  json: FileJson,
+  xml: FileHtml,
+  py: FilePython,
+  vue: FileVue,
+  php: FilePHP,
+  sql: FileSQL,
+  dll: FileDLL,
 
   // 图片
   png: FileImage,
   jpg: FileImage,
   jpeg: FileImage,
-  gif: FileImage,
+  gif: FileGif,
   svg: FileImage,
   webp: FileImage,
   bmp: FileImage,
   ico: FileImage,
-
-  // PDF
-  pdf: FilePdf,
 
   // 可执行文件
   exe: FileExe,
@@ -88,9 +103,11 @@ const iconMap: Record<string, Component> = {
   bat: FileExe,
   sh: FileExe,
 
-  // 其他常见文件类型（如果需要可以添加更多）
-  doc: FileTxt, // Word 文档默认用 txt 或自定义
-  docx: FileTxt // Word 文档
+  // 文档
+  doc: FileWord,
+  docx: FileWord,
+  pdf: FilePdf,
+  psd: FilePSD
 };
 
 export function useFileIcons() {

@@ -1,12 +1,17 @@
 import { defineStore } from "pinia";
 import { ElMessage } from "element-plus";
-import { fetchFilesByPathApi, createItemApi } from "@/api/sys-file/sys-file";
+import {
+  fetchFilesByPathApi,
+  createItemApi,
+  updateFolderViewApi
+} from "@/api/sys-file/sys-file";
 import {
   type FileItem,
   type PaginationInfo,
   type ParentInfo,
   type FileProps,
   type StoragePolicy,
+  type FolderViewConfig,
   FileType
 } from "@/api/sys-file/type";
 import { joinPath, extractLogicalPathFromUri } from "@/utils/fileUtils";
@@ -21,7 +26,6 @@ export type SortKey =
   | "created_at_asc"
   | "created_at_desc";
 
-// State 接口现在变得更加聚焦
 interface FileState {
   path: string;
   files: FileItem[];
@@ -33,7 +37,21 @@ interface FileState {
   currentProps: FileProps | null;
   storagePolicy: StoragePolicy | null;
   pageSize: number;
+  currentFolderId: string | null;
 }
+
+/**
+ * ++ 核心辅助函数 ++
+ * 从 sortKey (例如 "created_at_desc") 中解析出排序字段和方向
+ * @param sortKey
+ * @returns [order_field, order_direction]
+ */
+const parseSortKey = (sortKey: SortKey): [string, "asc" | "desc"] => {
+  const parts = sortKey.split("_");
+  const direction = parts.pop() as "asc" | "desc";
+  const order = parts.join("_");
+  return [order, direction];
+};
 
 export const useFileStore = defineStore("file", {
   state: (): FileState => ({
@@ -46,7 +64,8 @@ export const useFileStore = defineStore("file", {
     parentInfo: null,
     currentProps: null,
     storagePolicy: null,
-    pageSize: 50
+    pageSize: 50,
+    currentFolderId: null
   }),
 
   getters: {
@@ -61,15 +80,10 @@ export const useFileStore = defineStore("file", {
       }
       return result;
     },
-    // sortedFiles getter 仍然保留，因为它直接关系到 store 中文件的展示
     sortedFiles: (state): FileItem[] => {
       const filesToSort = [...state.files];
-      const sortParts = state.sortKey.split("_");
-      let orderKey = sortParts[0];
-      let direction = sortParts[sortParts.length - 1];
-      if (sortParts.length > 2) {
-        orderKey = sortParts.slice(0, -1).join("_");
-      }
+      const [orderKey, direction] = parseSortKey(state.sortKey); // 使用辅助函数
+
       filesToSort.sort((a, b) => {
         if (a.type === FileType.Dir && b.type !== FileType.Dir) return -1;
         if (a.type !== FileType.Dir && b.type === FileType.Dir) return 1;
@@ -99,34 +113,66 @@ export const useFileStore = defineStore("file", {
   },
 
   actions: {
+    async updateViewConfig() {
+      if (!this.currentFolderId) {
+        return;
+      }
+
+      try {
+        // **核心修复**: 使用健壮的解析函数
+        const [order, order_direction] = parseSortKey(this.sortKey);
+
+        const newViewConfig: FolderViewConfig = {
+          view: this.viewMode,
+          order: order,
+          page_size: this.pageSize,
+          order_direction: order_direction
+        };
+
+        const response = await updateFolderViewApi(
+          this.currentFolderId,
+          newViewConfig
+        );
+        if (response.code === 200) {
+          console.log("文件夹视图配置已成功同步到后端:", response.data);
+        } else {
+          console.error("后端返回错误，更新视图配置失败:", response.message);
+        }
+      } catch (error) {
+        console.error("更新文件夹视图配置时发生网络错误:", error);
+      }
+    },
+
     setPageSize(size: number) {
+      if (this.pageSize === size) return;
       this.pageSize = size;
-      this.loadFiles(this.path, 1);
+      this.updateViewConfig();
     },
 
     setSort(key: SortKey) {
+      if (this.sortKey === key) return;
       this.sortKey = key;
-      this.loadFiles(this.path, 1);
+      // 在 loadFiles 之前更新配置，这样 loadFiles 会使用新的排序规则
+      this.updateViewConfig().then(() => {
+        this.loadFiles(this.path, 1);
+      });
     },
 
     setViewMode(mode: "list" | "grid") {
+      if (this.viewMode === mode) return;
       this.viewMode = mode;
+      this.updateViewConfig();
     },
 
     async loadFiles(pathToLoad: string | undefined, page = 1) {
       this.loading = true;
       const logicalPath = extractLogicalPathFromUri(pathToLoad || "/");
       this.path = logicalPath;
-      // 注意：清空选择不再是 store 的职责。
-      // 使用选择 Hook 的组件应该自己调用 `clearSelection()`。
 
       try {
-        const sortParts = this.sortKey.split("_");
-        let order = sortParts[0];
-        let direction = sortParts[sortParts.length - 1];
-        if (sortParts.length > 2) {
-          order = sortParts.slice(0, -1).join("_");
-        }
+        // **核心修复**: 使用健壮的解析函数
+        const [order, direction] = parseSortKey(this.sortKey);
+
         const response = await fetchFilesByPathApi(
           logicalPath,
           order,
@@ -136,7 +182,7 @@ export const useFileStore = defineStore("file", {
         );
 
         if (response.code === 200) {
-          const { files, parent, pagination, props, storage_policy } =
+          const { files, parent, pagination, props, storage_policy, view } =
             response.data;
           this.files = files;
           this.pagination = pagination;
@@ -145,6 +191,18 @@ export const useFileStore = defineStore("file", {
             : null;
           this.currentProps = props;
           this.storagePolicy = storage_policy;
+          this.currentFolderId = this.parentInfo?.id || null;
+
+          if (view) {
+            this.viewMode = view.view;
+            this.pageSize = view.page_size;
+            const backendSortKey =
+              `${view.order}_${view.order_direction}` as SortKey;
+
+            if (this.sortKey !== backendSortKey) {
+              this.sortKey = backendSortKey;
+            }
+          }
         } else {
           ElMessage.error(response.message || "文件列表加载失败");
           this.files = [];
@@ -163,20 +221,14 @@ export const useFileStore = defineStore("file", {
     async _createItem(type: FileType, name: string) {
       try {
         const fullLogicalPath = joinPath(this.path, name);
-        const response = await createItemApi(type, fullLogicalPath);
+        await createItemApi(type, fullLogicalPath);
         const itemType = type === FileType.Dir ? "文件夹" : "文件";
-
-        if (response.code === 200) {
-          ElMessage.success(`${itemType} ${name} 创建成功`);
-          // 重新加载当前路径的文件列表以显示新项目
-          this.loadFiles(this.path);
-        } else {
-          ElMessage.error(response.message || `${itemType} ${name} 创建失败`);
-        }
-      } catch (error) {
+        ElMessage.success(`${itemType} '${name}' 创建成功`);
+        this.loadFiles(this.path);
+      } catch (error: any) {
         const itemType = type === FileType.Dir ? "文件夹" : "文件";
         console.error(`创建${itemType}失败:`, error);
-        ElMessage.error(`${itemType} ${name} 创建失败，请检查网络连接或权限。`);
+        ElMessage.error(error.message || `${itemType} '${name}' 创建失败`);
       }
     },
 
