@@ -2,7 +2,6 @@
   <div
     ref="fileManagerContainerRef"
     class="file-management-container"
-    @click="handleInternalClick"
     @dragenter="dragHandlers.onDragEnter"
     @dragover="dragHandlers.onDragOver"
     @dragleave="dragHandlers.onDragLeave"
@@ -89,7 +88,7 @@
       :visible="isPanelVisible"
       :is-collapsed="isPanelCollapsed"
       :queue="uploadQueue"
-      :speed-mode="speedMode"
+      :speed-mode="speedDisplayMode"
       @close="handlePanelClose"
       @toggle-collapse="isPanelCollapsed = !isPanelCollapsed"
       @retry-item="retryItem"
@@ -102,7 +101,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch, Ref } from "vue";
+import { computed, ref, watch, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { ElMessageBox } from "element-plus";
 import { onClickOutside } from "@vueuse/core";
@@ -158,6 +157,7 @@ const {
 const {
   uploadQueue,
   addUploadsToQueue,
+  addResumableTaskFromFileItem, // 引入新方法
   removeItem,
   retryItem,
   retryAllFailed,
@@ -165,14 +165,18 @@ const {
   setGlobalOverwriteAndRetry,
   clearFinishedUploads,
   setConcurrency,
-  concurrency
+  speedDisplayMode, // 引入速度模式状态
+  setSpeedMode // 引入设置速度模式的方法
 } = useFileUploader(
   sortedFiles,
   computed(() => storagePolicy.value),
-  () => fileStore.loadFiles(path.value)
+  () => loadAndRestore(path.value) // 上传完成后，调用新的加载函数
 );
 
-// --- 3. 初始化与用户交互相关的 Hooks ---
+// --- 核心修改: 创建一个新的加载函数，用于连接 store 和 uploader ---
+const loadAndRestore = (newPath: string) => {
+  fileStore.loadFiles(newPath, { addResumableTaskFromFileItem });
+};
 
 // 3.1 文件操作 Hook
 const {
@@ -208,7 +212,7 @@ const {
   onCreateFolder: handleCreateFolder,
   onCreateMd: () => handleCreateFile("md"),
   onCreateTxt: () => handleCreateFile("txt"),
-  onRefresh: () => fileStore.loadFiles(path.value),
+  onRefresh: () => loadAndRestore(path.value), // 使用新函数
   onRename: onActionRename,
   onDelete: onActionDelete,
   onDownload: onActionDownload,
@@ -230,9 +234,7 @@ const selectionCountLabel = computed(
 // --- 核心交互逻辑 ---
 
 const fileManagerContainerRef = ref(null);
-const speedMode: Ref<"instant" | "average"> = ref("instant");
 
-// **策略一: 处理组件外部的点击**
 onClickOutside(
   fileManagerContainerRef,
   () => {
@@ -251,40 +253,6 @@ onClickOutside(
   }
 );
 
-/**
- * **策略二: 处理组件内部的点击**
- */
-const handleInternalClick = (event: MouseEvent) => {
-  if (!hasSelection.value) return;
-
-  const target = event.target as HTMLElement;
-
-  // 关键逻辑: 如果点击的是任何明确的交互项，则不取消选择。
-  // 我们不再依赖特定 class，而是通过更通用的方式判断。
-
-  // 1. 如果点击的是文件项，则不取消选择
-  if (target.closest(".file-item, .grid-item")) {
-    return;
-  }
-
-  // 2. 如果点击的是 Element Plus 的按钮或输入框，则不取消选择
-  if (target.closest(".el-button, .el-input, .el-select, .el-dropdown")) {
-    return;
-  }
-
-  // 3. 如果点击的是我们自定义的、可点击的图标，也不取消选择
-  // (这是一个备用规则，以防有些图标不是el-button)
-  if (target.closest(".action-icon")) {
-    return;
-  }
-
-  // 如果代码能执行到这里，说明点击的是组件内部的“空白区域”。
-  clearSelection();
-};
-
-/**
- * 处理右键点击
- */
 const handleContextMenuTrigger = (event: MouseEvent) => {
   const target = event.target as HTMLElement;
   const clickedOnItem = target.closest(".file-item, .grid-item");
@@ -320,7 +288,7 @@ function onActionShare() {
 }
 
 // 4.3 为 FileToolbar 实现事件处理器
-const handleRefresh = () => fileStore.loadFiles(path.value);
+const handleRefresh = () => loadAndRestore(path.value); // 使用新函数
 const handleSetViewMode = (mode: "list" | "grid") =>
   fileStore.setViewMode(mode);
 const handleSetPageSize = (size: number) => fileStore.setPageSize(size);
@@ -329,12 +297,19 @@ const handleSetSortKey = (key: SortKey) => fileStore.setSort(key);
 // 4.4 为 FileList / FileGrid 实现事件处理器
 const handleNavigate = (newPath: string) => {
   clearSelection();
-  fileStore.loadFiles(newPath);
+  loadAndRestore(newPath); // 使用新函数
 };
 const handleLoadInitial = () => {
-  if (sortedFiles.value.length === 0 && !loading.value)
-    fileStore.loadFiles("/");
+  // 初始加载时也要检查续传任务
+  if (sortedFiles.value.length === 0 && !loading.value) {
+    loadAndRestore("/");
+  }
 };
+
+// 在组件挂载时执行初始加载
+onMounted(() => {
+  handleLoadInitial();
+});
 
 // 4.5 为 UploadProgress 处理显示逻辑和事件
 const isPanelVisible = ref(false);
@@ -342,11 +317,12 @@ const isPanelCollapsed = ref(false);
 
 watch(
   () => uploadQueue.length,
-  (newLength, oldLength) => {
-    if (newLength > 0 && oldLength === 0) {
+  newLength => {
+    // 只要队列中有任务，就确保面板是可见的
+    if (newLength > 0) {
       isPanelVisible.value = true;
-      isPanelCollapsed.value = false;
     }
+    // 注意：面板的关闭现在由用户手动操作，或者在队列清空后考虑自动关闭
   }
 );
 
@@ -355,7 +331,7 @@ const handlePanelClose = () => {
 };
 
 // 实现处理全局上传命令的函数
-const handleUploadGlobalCommand = (command: string) => {
+const handleUploadGlobalCommand = (command: string, value: any) => {
   switch (command) {
     case "overwrite-all":
       setGlobalOverwriteAndRetry(true);
@@ -370,7 +346,13 @@ const handleUploadGlobalCommand = (command: string) => {
       ElMessageBox.prompt("请输入新的并发上传数 (1-10)", "设置并发数", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
-        inputValue: String(concurrency.value),
+        inputValue: String(
+          useFileUploader(
+            sortedFiles,
+            computed(() => storagePolicy.value),
+            () => {}
+          ).concurrency.value
+        ),
         inputPattern: /^[1-9]$|^10$/,
         inputErrorMessage: "请输入 1 到 10 之间的整数"
       })
@@ -378,6 +360,9 @@ const handleUploadGlobalCommand = (command: string) => {
           setConcurrency(Number(value));
         })
         .catch(() => {});
+      break;
+    case "set-speed-mode": // **新增**: 处理速度模式切换
+      setSpeedMode(value);
       break;
   }
 };

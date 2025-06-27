@@ -77,12 +77,12 @@ export const buildFullUri = (logicalPath: string): string => {
 
 /**
  * 为文件生成一个基于其属性的唯一标识（指纹）。
- * 这是一个简化的实现，对于大多数场景已经足够。
+ * **核心修改**: 移除 lastModified，只使用 name 和 size，以提高匹配的可靠性。
  * @param file 文件对象
- * @returns 文件的唯一标识字符串，例如 "file-document.pdf-123456-1677654321000"
+ * @returns 文件的唯一标识字符串，例如 "file-document.pdf-123456"
  */
 export const getFileFingerprint = (file: File): string => {
-  return `file-${file.name}-${file.size}-${file.lastModified}`;
+  return `file-${file.name}-${file.size}`;
 };
 
 /**

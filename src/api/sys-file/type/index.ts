@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-06-27 12:33:39
+ * @LastEditTime: 2025-06-27 13:53:45
  * @LastEditors: 安知鱼
  */
 
@@ -38,6 +38,10 @@ export interface FileItem {
 
   // 以下字段根据后端实际返回情况，可能需要调整为可选或移除
   ext?: string; // 文件扩展名，如果后端不返回，则需要前端根据名称推断
+  metadata?: {
+    "sys:upload_session_id"?: string; // 可选的上传会话ID
+    [key: string]: any; // 兼容其他可能的 metadata 字段
+  };
 }
 
 /**

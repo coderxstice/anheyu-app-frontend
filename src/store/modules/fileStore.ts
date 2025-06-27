@@ -53,6 +53,11 @@ const parseSortKey = (sortKey: SortKey): [string, "asc" | "desc"] => {
   return [order, direction];
 };
 
+// 定义一个类型，让 store 可以与 uploader 通信
+interface UploaderActions {
+  addResumableTaskFromFileItem: (fileItem: FileItem) => Promise<void>;
+}
+
 export const useFileStore = defineStore("file", {
   state: (): FileState => ({
     path: "/",
@@ -119,7 +124,6 @@ export const useFileStore = defineStore("file", {
       }
 
       try {
-        // **核心修复**: 使用健壮的解析函数
         const [order, order_direction] = parseSortKey(this.sortKey);
 
         const newViewConfig: FolderViewConfig = {
@@ -164,13 +168,16 @@ export const useFileStore = defineStore("file", {
       this.updateViewConfig();
     },
 
-    async loadFiles(pathToLoad: string | undefined, page = 1) {
+    async loadFiles(
+      pathToLoad: string | undefined,
+      uploader: UploaderActions,
+      page = 1
+    ) {
       this.loading = true;
       const logicalPath = extractLogicalPathFromUri(pathToLoad || "/");
       this.path = logicalPath;
 
       try {
-        // **核心修复**: 使用健壮的解析函数
         const [order, direction] = parseSortKey(this.sortKey);
 
         const response = await fetchFilesByPathApi(
@@ -185,6 +192,18 @@ export const useFileStore = defineStore("file", {
           const { files, parent, pagination, props, storage_policy, view } =
             response.data;
           this.files = files;
+
+          // 处理断点续传的文件
+          for (const fileItem of this.files) {
+            if (fileItem.metadata?.["sys:upload_session_id"]) {
+              console.log(
+                `[Store] 发现未完成的上传文件: ${fileItem.name}，正在尝试恢复...`
+              );
+              // 调用 uploader 的方法来处理
+              uploader.addResumableTaskFromFileItem(fileItem);
+            }
+          }
+
           this.pagination = pagination;
           this.parentInfo = parent
             ? { ...parent, path: extractLogicalPathFromUri(parent.path) }

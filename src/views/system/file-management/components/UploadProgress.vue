@@ -279,7 +279,7 @@ const handleCommand = (command: string, value?: any) => {
     0 12px 48px 16px rgba(0, 0, 0, 0.03);
   display: flex;
   flex-direction: column;
-  z-index: 2050;
+  z-index: 2000;
   color: #303133;
   transition:
     max-height 0.3s ease-in-out,

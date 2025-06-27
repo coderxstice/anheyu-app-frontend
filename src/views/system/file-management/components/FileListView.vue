@@ -6,8 +6,7 @@
       <div class="column-modified">创建时间</div>
     </div>
 
-    <ul class="file-list-body">
-      <!-- v-if/v-else 已被 v-loading 指令替代，这里只处理空状态 -->
+    <ul class="file-list-body" data-is-file-container="true">
       <li v-if="!files.length && !loading" class="state-view">
         <span>这里什么都没有</span>
       </li>
@@ -16,7 +15,10 @@
         :key="item.id"
         class="file-item"
         :data-id="item.id"
-        :class="{ selected: selectedFileIds.has(item.id) }"
+        :class="{
+          selected: selectedFileIds.has(item.id),
+          'is-uploading': item.metadata?.['sys:upload_session_id']
+        }"
         @click="handleItemClick(item, $event)"
         @dblclick="handleItemDblClick(item)"
         @mouseenter="hoveredFileId = item.id"
@@ -54,6 +56,16 @@
             />
           </Transition>
           <span>{{ item.name }}</span>
+
+          <el-tooltip
+            v-if="item.metadata?.['sys:upload_session_id']"
+            content="文件上传中..."
+            placement="top"
+          >
+            <el-icon class="uploading-indicator">
+              <Loading />
+            </el-icon>
+          </el-tooltip>
         </div>
         <div class="column-size">{{ formatSize(item.size) }}</div>
         <div class="column-modified">{{ item.created_at }}</div>
@@ -68,6 +80,7 @@ import { formatSize } from "@/utils/format";
 import { useFileIcons } from "../hooks/useFileIcons";
 import gsap from "gsap";
 import { FileItem, FileType } from "@/api/sys-file/type";
+import { Loading } from "@element-plus/icons-vue"; // **核心新增**: 引入 Loading 图标
 
 // --- 1. 定义 Props 和 Emits ---
 const props = defineProps<{
@@ -127,6 +140,11 @@ const handleMouseUp = (event: MouseEvent) => {
 
 // --- 4. 修改事件处理器，通过 emit 发出意图 ---
 const handleItemClick = (item: FileItem, event: MouseEvent) => {
+  // **核心修改**: 如果文件正在上传中，则禁止所有点击交互
+  if (item.metadata?.["sys:upload_session_id"]) {
+    return;
+  }
+
   if (event.shiftKey) {
     emit("select-range", item.id);
   } else if (event.metaKey || event.ctrlKey) {
@@ -137,6 +155,11 @@ const handleItemClick = (item: FileItem, event: MouseEvent) => {
 };
 
 const handleItemDblClick = (item: FileItem) => {
+  // **核心修改**: 如果文件正在上传中，则禁止双击导航
+  if (item.metadata?.["sys:upload_session_id"]) {
+    return;
+  }
+
   if (item.type === FileType.Dir) {
     emit("navigate-to", item.path);
   }
@@ -154,7 +177,6 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
 // --- 5. 生命周期钩子 ---
 onMounted(() => {
-  // 不再直接加载数据，而是通知父组件加载
   emit("load-initial");
   window.addEventListener("keydown", handleKeyDown);
 });
@@ -165,7 +187,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
-/* 样式保持不变 */
 .file-list-container {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
@@ -187,6 +208,9 @@ onUnmounted(() => {
   cursor: pointer;
   border-radius: 6px;
   user-select: none;
+  transition:
+    opacity 0.3s ease,
+    background-color 0.2s ease; /* 平滑过渡 */
 }
 
 .file-list-header {
@@ -208,6 +232,14 @@ onUnmounted(() => {
     color: #fff;
   }
 }
+
+/* **核心新增**: 上传中状态的样式 */
+.file-item.is-uploading {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none; /* 彻底禁用所有鼠标事件 */
+}
+
 .column-name {
   flex: 5;
   display: flex;
@@ -234,6 +266,21 @@ onUnmounted(() => {
 }
 .hover-icon {
   color: #a0a0a0;
+}
+
+/* **核心新增**: 上传中标志的样式 */
+.uploading-indicator {
+  animation: spin 1.5s linear infinite;
+  color: var(--el-color-primary);
+  font-size: 16px;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .column-size {
