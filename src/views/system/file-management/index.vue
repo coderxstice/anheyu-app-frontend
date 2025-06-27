@@ -250,6 +250,8 @@ const handleShowDetailsForId = async (id: string) => {
 
 /**
  * 核心功能：处理打包下载
+ * @param itemsToDownload 用户选择的 FileItem 列表
+ * @param zipName 最终生成的 zip 文件名 (不含 .zip 后缀)
  */
 const handlePackageDownload = async (
   itemsToDownload: FileItem[],
@@ -258,8 +260,9 @@ const handlePackageDownload = async (
   const notificationTitle = ref("正在准备打包下载");
   const notificationMessage = ref("正在获取文件列表，请稍候...");
 
-  // 关键修复: 使用 h() 渲染函数包装响应式 ref，并传递给 message
+  // 使用 h() 渲染函数包装响应式 ref，并传递给 message，使其能够动态更新
   const notification = ElNotification({
+    title: "打包下载",
     message: h("div", null, [
       h(
         "p",
@@ -275,18 +278,20 @@ const handlePackageDownload = async (
     duration: 0,
     showClose: false,
     type: "info",
-    position: "bottom-left"
+    position: "bottom-right"
   });
 
   const zip = new JSZip();
   const filesToFetch: FolderTreeFile[] = [];
 
   try {
+    // 步骤1: 收集所有需要下载的文件信息
     for (const item of itemsToDownload) {
       if (item.type === FileType.Dir) {
         notificationMessage.value = `正在分析文件夹 [${item.name}]...`;
         const treeResponse = await getFolderTreeApi(item.id);
         if (treeResponse.code === 200 && treeResponse.data.files) {
+          // 为文件夹内的文件路径添加顶层文件夹名
           const filesInFolder = treeResponse.data.files.map(file => ({
             ...file,
             relative_path: `${item.name}/${file.relative_path}`
@@ -294,6 +299,7 @@ const handlePackageDownload = async (
           filesToFetch.push(...filesInFolder);
         }
       } else {
+        // 对于单个文件，直接获取其下载信息
         const detailResponse = await getFileDetailsApi(item.id);
         if (detailResponse.code === 200 && detailResponse.data.url) {
           filesToFetch.push({
@@ -312,21 +318,23 @@ const handlePackageDownload = async (
     }
 
     const totalFiles = filesToFetch.length;
-    notificationTitle.value = `开始打包下载 (${totalFiles}个文件)`; // 更新 ref
+    notificationTitle.value = `开始打包下载 (${totalFiles}个文件)`;
     ElMessage.info({
       message: "正在下载文件内容，请勿关闭浏览器。",
       duration: 5000
     });
 
+    // 步骤2: 并发下载所有文件内容并添加到 zip
     let fileIndex = 0;
     for (const file of filesToFetch) {
       fileIndex++;
-      notificationMessage.value = `(${fileIndex}/${totalFiles}) 正在处理: ${file.relative_path}`; // 更新 ref
+      notificationMessage.value = `(${fileIndex}/${totalFiles}) 正在处理: ${file.relative_path}`;
       try {
         const blob = await fetchBlobFromUrl(file.url);
         zip.file(file.relative_path, blob);
       } catch (e: any) {
         console.error(`下载文件 ${file.relative_path} 失败:`, e);
+        // 在 zip 中添加一个错误文件，告知用户哪个文件下载失败
         zip.file(
           `${file.relative_path}.error.txt`,
           `下载此文件失败: ${e.message}`
@@ -334,6 +342,7 @@ const handlePackageDownload = async (
       }
     }
 
+    // 步骤3: 生成并下载 ZIP 文件
     notificationTitle.value = "正在生成 ZIP 文件";
     notificationMessage.value = "文件已全部处理，正在进行最终打包...";
 
@@ -351,7 +360,7 @@ const handlePackageDownload = async (
     ElNotification.success({
       title: "下载完成",
       message: `文件 [${zipName}.zip] 已成功打包并开始下载。`,
-      position: "bottom-left"
+      position: "bottom-right"
     });
   } catch (error: any) {
     console.error("打包下载过程中发生错误:", error);
@@ -369,29 +378,37 @@ async function onActionDownload() {
     ElMessage.warning("请选择要下载的项目");
     return;
   }
+  // 优化：如果只选择了一个文件，直接调用标准下载接口，不打包
   if (selectedItems.length === 1 && selectedItems[0].type === FileType.File) {
     ElMessage.info(`开始下载文件: ${selectedItems[0].name}`);
     await downloadFileApi(selectedItems[0].id, selectedItems[0].name);
     return;
   }
+  // 确定 zip 文件名
   let zipName = "打包下载";
   if (selectedItems.length === 1 && selectedItems[0].type === FileType.Dir) {
     zipName = selectedItems[0].name;
   }
+  // 启动打包下载流程
   handlePackageDownload(selectedItems, zipName);
 }
 
 /**
  * 处理从面包屑触发的文件夹下载
+ * @param folderId 要下载的文件夹 ID
  */
-const handleDownloadFolder = (folderId: string) => {
-  getFileDetailsApi(folderId).then(res => {
+const handleDownloadFolder = async (folderId: string) => {
+  try {
+    const res = await getFileDetailsApi(folderId);
     if (res.code === 200 && res.data) {
+      // 启动单文件夹打包下载
       handlePackageDownload([res.data], res.data.name);
     } else {
       ElMessage.error(res.message || "无法获取文件夹信息以下载");
     }
-  });
+  } catch (error: any) {
+    ElMessage.error(error.message || "请求文件夹信息失败");
+  }
 };
 
 function onActionRename() {
@@ -402,12 +419,15 @@ function onActionDelete() {
 }
 function onActionCopy() {
   console.log("Copy:", getSelectedFileItems());
+  ElMessage.info("复制功能正在开发中...");
 }
 function onActionMove() {
   console.log("Move:", getSelectedFileItems());
+  ElMessage.info("移动功能正在开发中...");
 }
 function onActionShare() {
   console.log("Share:", getSelectedFileItems());
+  ElMessage.info("分享功能正在开发中...");
 }
 
 // --- 6. 右键菜单 Hook ---

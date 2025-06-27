@@ -2,7 +2,7 @@
  * @Description: 处理文件和目录上传的 Hook (包含目录遍历逻辑)
  * @Author: 安知鱼
  * @Date: 2025-06-26 16:44:23
- * @LastEditTime: 2025-06-26 17:48:47
+ * @LastEditTime: 2025-06-28 03:30:41
  * @LastEditors: 安知鱼
  */
 import type { UploadItem } from "@/api/sys-file/type";
@@ -81,7 +81,15 @@ export function useDirectoryUpload(
   addUploadsToQueue: (
     uploads: Omit<
       UploadItem,
-      "id" | "status" | "progress" | "uploadedChunks" | "abortController"
+      | "id"
+      | "status"
+      | "progress"
+      | "uploadedChunks"
+      | "abortController"
+      // **核心修复 B**: 这里也同步更新一下类型定义，因为它与 useFileActions.ts 一致。
+      | "instantSpeed"
+      | "averageSpeed"
+      | "uploadedSize"
     >[]
   ) => void,
   currentPath: Ref<string>
@@ -128,9 +136,18 @@ export function useDirectoryUpload(
         return;
       }
 
+      // **核心修复 A**: 在这里创建对象时，不再需要手动添加 instantSpeed 等字段，
+      // 因为它们已经从 Omit 类型中排除了，这与 useFileActions.ts 保持了一致。
       const newUploads: Omit<
         UploadItem,
-        "id" | "status" | "progress" | "uploadedChunks" | "abortController"
+        | "id"
+        | "status"
+        | "progress"
+        | "uploadedChunks"
+        | "abortController"
+        | "instantSpeed"
+        | "averageSpeed"
+        | "uploadedSize"
       >[] = allFiles.map(file => ({
         // 在 UI 上显示相对路径，这样用户可以区分同名但不同目录的文件
         name: file.webkitRelativePath || file.name,

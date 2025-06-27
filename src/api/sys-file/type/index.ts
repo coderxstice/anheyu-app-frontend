@@ -42,6 +42,8 @@ export interface FileItem {
     "sys:upload_session_id"?: string; // 可选的上传会话ID
     [key: string]: any; // 兼容其他可能的 metadata 字段
   };
+  url?: string; // 可选的文件访问 URL，如果后端不返回，则需要前端根据逻辑生成
+  relative_path?: string; // 可选的相对路径，如果后端不返回，则
 }
 
 /**
@@ -240,4 +242,41 @@ export interface ValidateUploadSessionResponse {
   // data 字段是两种可能类型的联合类型
   data: UploadSessionStatus | InvalidUploadSessionStatus;
   message: string;
+}
+
+// --- 文件详情与文件夹树 (新增) ---
+
+/**
+ * 文件详情接口的响应体
+ */
+export interface FileDetailResponse {
+  code: number;
+  message: string;
+  data: FileItem; // FileItem 现在包含可选的 url 字段
+}
+
+/**
+ * 文件夹内容树中的单个文件节点
+ */
+export interface FolderTreeFile {
+  url: string;
+  relative_path: string;
+  size: number;
+}
+
+/**
+ * 文件夹内容树接口 `data` 字段的结构
+ */
+export interface FolderTreeData {
+  files: FolderTreeFile[];
+  expires: string;
+}
+
+/**
+ * 文件夹内容树接口的完整响应体
+ */
+export interface FolderTreeResponse {
+  code: number;
+  message: string;
+  data: FolderTreeData;
 }

@@ -2,7 +2,7 @@
  * @Description: 文件操作的组合式函数
  * @Author: 安知鱼
  * @Date: 2025-06-25 09:49:46
- * @LastEditTime: 2025-06-27 22:39:52
+ * @LastEditTime: 2025-06-28 03:25:02
  * @LastEditors: 安知鱼
  */
 import { useFileStore } from "@/store/modules/fileStore";
@@ -48,9 +48,12 @@ export function useFileActions(
       if (files && files.length > 0) {
         const newUploads = Array.from(files).map(file => ({
           file: file,
-          name: file.name,
+          // **核心修复**: 使用 webkitRelativePath 作为 UI 显示名称，以保持目录结构可见。
+          // 这与 useDirectoryUpload.ts (拖拽上传) 的逻辑保持了一致。
+          name: file.webkitRelativePath || file.name,
           size: file.size,
           targetPath: currentPath.value,
+          // `relativePath` 用于后端重建目录，此字段已正确。
           relativePath: file.webkitRelativePath || file.name,
           needsRefresh: true
         }));
