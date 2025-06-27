@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-06-21 15:19:18
+ * @LastEditTime: 2025-06-27 10:30:37
  * @LastEditors: 安知鱼
  */
 import { Plugin as importToCDN } from "vite-plugin-cdn-import";
@@ -59,6 +59,12 @@ export const cdn = importToCDN({
       name: "dayjs",
       var: "dayjs",
       path: "dayjs.min.js",
+      prodUrl: "https://cdn.cbd.int/{name}@{version}/{path}"
+    },
+    {
+      name: "gsap",
+      var: "gsap",
+      path: "dist/gsap.min.js",
       prodUrl: "https://cdn.cbd.int/{name}@{version}/{path}"
     }
   ]

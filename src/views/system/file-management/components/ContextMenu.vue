@@ -50,9 +50,9 @@ import { ref, watch } from "vue";
 import gsap from "gsap";
 import AnIconBox from "@/components/AnIconBox/index.vue";
 
-// 图标（保持不变）
 import Upload from "@iconify-icons/ep/upload";
 import FolderAdd from "@iconify-icons/ep/folder-add";
+import Folder from "@iconify-icons/ep/folder";
 import DocumentAdd from "@iconify-icons/ep/document-add";
 import Refresh from "@iconify-icons/ep/refresh";
 import EditPen from "@iconify-icons/ep/edit-pen";
@@ -107,7 +107,7 @@ const blankMenu: MenuItem[] = [
   {
     label: "创建文件夹",
     action: "create-folder",
-    icon: FolderAdd,
+    icon: Folder,
     color: "#A15FDE"
   },
   {

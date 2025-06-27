@@ -3,14 +3,23 @@
     <div class="right-actions">
       <!-- 刷新 -->
       <el-tooltip content="刷新" placement="bottom">
-        <el-button circle :icon="Refresh" @click="emit('refresh')" />
+        <el-button
+          circle
+          :icon="RefreshSvg"
+          class="!text-[var(--anzhiyu-white)] !border-none !bg-[var(--anzhiyu-theme)]"
+          @click="emit('refresh')"
+        />
       </el-tooltip>
 
       <!-- 选择操作 -->
       <el-tooltip content="选择操作" placement="bottom">
         <div>
           <el-dropdown trigger="click" placement="bottom-end">
-            <el-button circle :icon="FullScreen" />
+            <el-button
+              circle
+              :icon="FullScreen"
+              class="!text-[var(--anzhiyu-white)] !border-none !bg-[#8468F3]"
+            />
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item @click="emit('select-all')">
@@ -41,7 +50,11 @@
             trigger="click"
           >
             <template #reference>
-              <el-button circle :icon="Operation" />
+              <el-button
+                circle
+                :icon="Setting"
+                class="!text-[var(--anzhiyu-white)] !border-none !bg-[#73A6F5]"
+              />
             </template>
             <!-- 视图切换 -->
             <el-button-group class="view-switcher">
@@ -89,7 +102,11 @@
             class="sort-dropdown"
             @command="(key: SortKey) => emit('set-sort-key', key)"
           >
-            <el-button circle :icon="Sort" />
+            <el-button
+              circle
+              :icon="Sort"
+              class="!text-[var(--anzhiyu-white)] !border-none !bg-[#6EB65E]"
+            />
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item
@@ -153,16 +170,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue"; // +++ 新增引入 ref 和 watch
+import { ref, watch } from "vue";
 import type { SortKey } from "@/store/modules/fileStore";
 import {
-  Refresh,
   Grid,
   Tickets,
-  Operation,
+  Setting,
   Sort,
   FullScreen
 } from "@element-plus/icons-vue";
+import RefreshSvg from "@/assets/icons/refresh.svg?component";
 
 const props = defineProps<{
   viewMode: "list" | "grid";

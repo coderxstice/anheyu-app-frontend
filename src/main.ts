@@ -2,7 +2,7 @@
  * @Description: 主入口文件
  * @Author: 安知鱼
  * @Date: 2025-06-11 11:59:32
- * @LastEditTime: 2025-06-19 15:55:43
+ * @LastEditTime: 2025-06-27 10:26:52
  * @LastEditors: 安知鱼
  */
 import App from "./App.vue";
@@ -63,10 +63,8 @@ setupStore(app);
 initializeConfigs(app)
   .then(async () => {
     app.use(router);
-    await router.isReady(); // 等待路由就绪
-
-    // 从 app.config.globalProperties.$config 获取配置
-    // 注入响应式存储，确保 config 的类型匹配
+    await router.isReady();
+    // 确保平台配置已成功加载
     const platformConfig = app.config.globalProperties
       .$config as PlatformConfigs;
     if (!platformConfig) {

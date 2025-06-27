@@ -267,6 +267,11 @@ div.el-textarea__inner {
   border-radius: 12px;
 }
 
+.el-popper .view-switcher.el-button-group button.el-button.el-button--primary {
+  border-right-color: transparent !important;
+  border-left-color: transparent !important;
+}
+
 @media screen and (max-width: 470px) {
   .el-pagination .el-pagination__total {
     width: 50%;
