@@ -25,7 +25,10 @@
       @share="onActionShare"
     />
     <div class="flex w-full">
-      <FileBreadcrumb class="flex-1 mb-2" />
+      <FileBreadcrumb
+        class="flex-1 mb-2"
+        @show-details="handleShowDetailsForId"
+      />
       <FileToolbar
         class="mb-2 ml-2"
         :view-mode="viewMode"
@@ -92,15 +95,21 @@
       @global-command="handleUploadGlobalCommand"
       @add-files="handleUploadFile"
     />
+
+    <FileDetailsPanel
+      :file="detailsPanelFile"
+      @close="detailsPanelFile = null"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref, watch, onMounted } from "vue";
 import { storeToRefs } from "pinia";
-import { ElMessageBox } from "element-plus";
-// --- 核心修改: 不再需要 onClickOutside ---
-// import { onClickOutside } from "@vueuse/core";
+import { ElMessage, ElMessageBox } from "element-plus";
+
+// --- API ---
+import { getFileDetailsApi } from "@/api/sys-file/sys-file";
 
 // --- 核心状态管理 ---
 import {
@@ -108,6 +117,9 @@ import {
   type SortKey,
   type UploaderActions
 } from "@/store/modules/fileStore";
+
+// --- 类型定义 ---
+import { type FileItem } from "@/api/sys-file/type";
 
 // --- 引入所有需要的 Hooks ---
 import { useFileUploader } from "@/composables/useFileUploader";
@@ -127,6 +139,7 @@ import UploadProgress from "./components/UploadProgress.vue";
 import ContextMenu from "./components/ContextMenu.vue";
 import SearchOverlay from "./components/SearchOverlay.vue";
 import { UploadFilled } from "@element-plus/icons-vue";
+import FileDetailsPanel from "./components/FileDetailsPanel.vue";
 
 // --- 1. 初始化核心 Store 和状态 ---
 const fileStore = useFileStore();
@@ -140,8 +153,11 @@ const {
   pageSize
 } = storeToRefs(fileStore);
 
-// --- 2. 初始化核心功能 Hooks ---
+// --- 详细信息面板状态 ---
+const detailsPanelFile = ref<FileItem | null>(null);
 
+// --- 2. 初始化核心功能 Hooks ---
+// ... 此处省略未变化的代码 ...
 // 2.1 文件选择 Hook
 const {
   selectedFiles,
@@ -152,7 +168,6 @@ const {
   clearSelection,
   invertSelection
 } = useFileSelection(sortedFiles);
-
 // 2.2 文件上传 Hook
 const {
   uploadQueue,
@@ -176,7 +191,28 @@ const {
 // --- 统一的加载函数 ---
 const uploaderActions: UploaderActions = { addResumableTaskFromFileItem };
 const loadPath = (newPath: string) => {
+  detailsPanelFile.value = null; // 切换目录时关闭详情面板
   fileStore.loadFiles(newPath, uploaderActions);
+};
+
+// --- 详细信息面板处理函数 ---
+/**
+ * @description: 根据ID调用API获取详情并显示面板
+ * @param {string} id 要查询的文件或目录ID
+ */
+const handleShowDetailsForId = async (id: string) => {
+  try {
+    // 可以在这里设置一个加载状态，比如 detailsPanelFile.value = { id: id, loading: true }
+    const response = await getFileDetailsApi(id);
+    if (response.code === 200 && response.data) {
+      detailsPanelFile.value = response.data;
+    } else {
+      ElMessage.error(response.message || "获取文件详情失败");
+    }
+  } catch (error: any) {
+    ElMessage.error(error.message || "请求文件详情时发生错误");
+    console.error(error);
+  }
 };
 
 // 3.1 文件操作 Hook
@@ -220,11 +256,15 @@ const {
   onCopy: onActionCopy,
   onMove: onActionMove,
   onShare: onActionShare,
-  onInfo: () => console.log("Info action triggered")
+  onInfo: () => {
+    const selectedItems = getSelectedFileItems();
+    if (selectedItems.length > 0) {
+      handleShowDetailsForId(selectedItems[0].id); // 直接调用API
+    }
+  }
 });
 
 // --- 4. 准备传递给子组件的 Props 和事件处理器 ---
-
 const hasSelection = computed(() => selectedFiles.value.size > 0);
 const isSingleSelection = computed(() => selectedFiles.value.size === 1);
 const selectionCountLabel = computed(
@@ -232,42 +272,38 @@ const selectionCountLabel = computed(
 );
 
 // --- 核心交互逻辑 ---
-
 const fileManagerContainerRef = ref(null);
 
-// --- 核心修改: 移除 onClickOutside, 替换为 handleContainerClick ---
 const handleContainerClick = (event: MouseEvent) => {
-  // 如果没有文件被选中，则无需执行任何操作
+  // 如果详情面板是打开的，则点击任何地方都可能需要判断是否关闭它
+  if (detailsPanelFile.value) {
+    // 检查点击是否发生在详情面板内部
+    const panel = (event.target as HTMLElement).closest(
+      ".details-panel-drawer"
+    );
+    if (panel) return; // 点击在面板内，不操作
+  }
+
   if (!hasSelection.value) return;
-
   const target = event.target as HTMLElement;
-
-  // 定义一个列表，包含所有不应触发“清空选择”的元素的选择器
-  // 这包括文件项、按钮、输入框、下拉菜单和所有弹窗/浮层
   const ignoredSelectors = [
-    ".file-item", // 列表视图中的文件项
-    ".grid-item", // 网格视图中的文件项
-    "[role=button]", // 各种按钮
-    "[role=menu]", // 菜单
-    "[role=listbox]", // 下拉列表
-    "input", // 输入框
-    "button", //原生按钮
-    ".el-button", // Element Plus 按钮
-    ".el-popper", // 所有 Element Plus 弹窗
-    ".el-overlay", // 遮罩层
-    ".upload-progress-panel", // 上传面板
-    ".context-menu", // 自定义右键菜单
-    ".search-overlay-container" // 搜索浮层
+    ".file-item",
+    ".grid-item",
+    "[role=button]",
+    "[role=menu]",
+    "[role=listbox]",
+    "input",
+    "button",
+    ".el-button",
+    ".el-popper",
+    ".el-overlay",
+    ".upload-progress-panel",
+    ".context-menu",
+    ".search-overlay-container"
   ];
-
-  // 使用 closest 检查点击事件的目标或其任何父元素是否匹配忽略列表中的任何一个选择器
-  // 如果匹配，说明点击的是一个交互元素，此时不应清空选择
   if (ignoredSelectors.some(selector => target.closest(selector))) {
     return;
   }
-
-  // 如果代码执行到这里，说明用户点击的是组件内的“空白”区域
-  // 因此，清空当前的文件选择
   clearSelection();
 };
 
@@ -323,20 +359,18 @@ onMounted(() => {
 });
 
 // 4.5 为 UploadProgress 处理显示逻辑和事件
+// ... 此处省略未变化的代码 ...
 const isPanelVisible = ref(false);
 const isPanelCollapsed = ref(false);
-
 watch(
   () => uploadQueue.length,
   newLength => {
     if (newLength > 0) isPanelVisible.value = true;
   }
 );
-
 const handlePanelClose = () => {
   isPanelVisible.value = false;
 };
-
 const handleUploadGlobalCommand = (command: string, value: any) => {
   switch (command) {
     case "overwrite-all":
@@ -379,6 +413,7 @@ const activeViewComponent = computed(() => viewComponents[viewMode.value]);
 </script>
 
 <style>
+/* 样式与之前保持一致，此处省略 */
 .file-management-container {
   height: 100%;
   display: flex;

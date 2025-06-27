@@ -1,31 +1,53 @@
 /*
- * @Description: 格式化文件大小，提高可读性
+ * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:29:06
- * @LastEditTime: 2025-06-26 16:25:42
+ * @LastEditTime: 2025-06-27 23:53:44
  * @LastEditors: 安知鱼
  */
+// @/utils/format.ts
+
 /**
- * 格式化文件大小，提高可读性
- * @param bytes 文件大小 (单位: B)
- * @returns 格式化后的字符串
+ * 格式化文件大小
+ * @param bytes - 文件大小 (字节)
+ * @returns 格式化后的大小字符串，如 "1.23 MB"
  */
-export const formatSize = (bytes?: number): string => {
-  // 处理 undefined, null, NaN 或负数等无效输入
-  if (bytes === undefined || bytes === null || isNaN(bytes) || bytes < 0) {
+export const formatSize = (bytes: number | undefined | null): string => {
+  if (bytes === null || typeof bytes === "undefined" || isNaN(bytes)) {
     return "-";
   }
+  if (bytes === 0) return "0 B";
 
-  // 单独处理目录或空文件的情况
-  if (bytes === 0) return "-";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  const units = ["B", "KB", "MB", "GB", "TB", "PB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+};
 
-  // 对B单位不保留小数，KB及以上保留1位小数
-  const precision = i === 0 ? 0 : 1;
-
-  const value = (bytes / Math.pow(1024, i)).toFixed(precision);
-
-  return `${value} ${units[i]}`;
+/**
+ * 格式化 ISO 8601 日期时间字符串
+ * @param isoString - 后端返回的日期字符串
+ * @returns 'YYYY-MM-DD HH:mm:ss' 格式的字符串，或在无效时返回原始字符串
+ */
+export const formatDateTime = (
+  isoString: string | undefined | null
+): string => {
+  if (!isoString) return "未知";
+  try {
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) {
+      return isoString;
+    }
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  } catch (error) {
+    console.error("日期格式化错误:", error);
+    return isoString;
+  }
 };

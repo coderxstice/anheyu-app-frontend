@@ -27,68 +27,62 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item :command="{ action: 'enter', segment }">
+                <el-dropdown-item :command="{ action: 'enter' }">
                   <IconifyIconOffline :icon="Back" class="dropdown-icon" />进入
                 </el-dropdown-item>
-                <el-dropdown-item :command="{ action: 'download', segment }">
+                <el-dropdown-item :command="{ action: 'download' }">
                   <IconifyIconOffline
                     :icon="Download"
                     class="dropdown-icon"
                   />下载
                 </el-dropdown-item>
-                <el-dropdown-item :command="{ action: 'share', segment }">
+                <el-dropdown-item :command="{ action: 'share' }">
                   <IconifyIconOffline :icon="Share" class="dropdown-icon" />分享
                 </el-dropdown-item>
-                <el-dropdown-item :command="{ action: 'rename', segment }">
+                <el-dropdown-item :command="{ action: 'rename' }">
                   <IconifyIconOffline
                     :icon="EditPen"
                     class="dropdown-icon"
                   />重命名
                 </el-dropdown-item>
-                <el-dropdown-item :command="{ action: 'copy', segment }">
+                <el-dropdown-item :command="{ action: 'copy' }">
                   <IconifyIconOffline
                     :icon="CopyDocument"
                     class="dropdown-icon"
                   />复制
                 </el-dropdown-item>
-                <el-dropdown-item :command="{ action: 'link', segment }">
+                <el-dropdown-item :command="{ action: 'link' }">
                   <IconifyIconOffline
                     :icon="Link"
                     class="dropdown-icon"
                   />获取直链
                 </el-dropdown-item>
-                <el-dropdown-item
-                  :command="{ action: 'tags', segment }"
-                  divided
-                >
+                <el-dropdown-item :command="{ action: 'tags' }" divided>
                   <IconifyIconOffline
                     :icon="PriceTag"
                     class="dropdown-icon"
                   />标签
                 </el-dropdown-item>
-                <el-dropdown-item :command="{ action: 'organize', segment }">
+                <el-dropdown-item :command="{ action: 'organize' }">
                   <IconifyIconOffline
                     :icon="FolderOpened"
                     class="dropdown-icon"
                   />整理
                 </el-dropdown-item>
-                <el-dropdown-item :command="{ action: 'more', segment }">
+                <el-dropdown-item :command="{ action: 'more' }">
                   <IconifyIconOffline
                     :icon="Setting"
                     class="dropdown-icon"
                   />更多操作
                 </el-dropdown-item>
-                <el-dropdown-item
-                  :command="{ action: 'info', segment }"
-                  divided
-                >
+                <el-dropdown-item :command="{ action: 'info' }" divided>
                   <IconifyIconOffline
                     :icon="InfoFilled"
                     class="dropdown-icon"
                   />详细信息
                 </el-dropdown-item>
                 <el-dropdown-item
-                  :command="{ action: 'delete', segment }"
+                  :command="{ action: 'delete' }"
                   class="danger-item"
                 >
                   <IconifyIconOffline
@@ -128,6 +122,7 @@
 import { computed, ref, nextTick } from "vue";
 import { useFileStore } from "@/store/modules/fileStore";
 import { ElMessage, ElMessageBox } from "element-plus";
+import { storeToRefs } from "pinia";
 
 // --- 图标引入 ---
 import { HomeFilled, ArrowRight } from "@element-plus/icons-vue";
@@ -143,8 +138,13 @@ import Setting from "@iconify-icons/ep/setting";
 import InfoFilled from "@iconify-icons/ep/info-filled";
 import Delete from "@iconify-icons/ep/delete";
 
+const emit = defineEmits<{
+  (e: "show-details", id: string): void; // 事件参数改为 ID (string)
+}>();
+
 const fileStore = useFileStore();
-const pathSegments = computed(() => fileStore.pathSegments);
+const { path, pathSegments, parentInfo } = storeToRefs(fileStore); // 从 store 中获取 parentInfo
+
 const isEditing = ref(false);
 const pathInput = ref("");
 const pathInputRef = ref<HTMLInputElement | null>(null);
@@ -153,14 +153,16 @@ const isDropdownVisible = ref(false);
 const switchToEditMode = () => {
   if (isDropdownVisible.value) return;
   isEditing.value = true;
-  pathInput.value = fileStore.path;
+  pathInput.value = path.value;
   nextTick(() => {
     pathInputRef.value?.focus();
   });
 };
 
-const goToPath = (path: string) => {
-  fileStore.loadFiles(path);
+const goToPath = (newPath: string) => {
+  fileStore.loadFiles(newPath, {
+    addResumableTaskFromFileItem: async () => {}
+  });
 };
 
 const handleSubmit = () => {
@@ -171,12 +173,10 @@ const handleSubmit = () => {
   if (finalPath.length > 1 && finalPath.endsWith("/")) {
     finalPath = finalPath.slice(0, -1);
   }
-
-  if (finalPath === fileStore.path) {
+  if (finalPath === path.value) {
     isEditing.value = false;
     return;
   }
-
   goToPath(finalPath);
   isEditing.value = false;
 };
@@ -196,19 +196,27 @@ type CommandAction =
 
 interface CommandPayload {
   action: CommandAction;
-  segment: { name: string; path: string };
 }
 
 const handleCommand = (command: CommandPayload) => {
-  const { action, segment } = command;
-  ElMessage.info(`你点击了 [${segment.name}] 的 [${action}] 操作`);
+  const { action } = command;
+
   switch (action) {
     case "enter":
-      goToPath(segment.path);
+      goToPath(path.value);
+      break;
+    case "info":
+      // 下拉菜单只在当前目录显示，其信息存储在 parentInfo 中
+      if (parentInfo.value?.id) {
+        emit("show-details", parentInfo.value.id);
+      } else {
+        ElMessage.warning("无法获取当前目录ID");
+      }
       break;
     case "delete":
+      if (!parentInfo.value) return;
       ElMessageBox.confirm(
-        `确定要删除文件夹 "${segment.name}" 吗？此操作不可恢复。`,
+        `确定要删除文件夹 "${parentInfo.value.name}" 吗？此操作不可恢复。`,
         "警告",
         {
           confirmButtonText: "确定删除",
@@ -217,23 +225,24 @@ const handleCommand = (command: CommandPayload) => {
         }
       )
         .then(() => {
-          ElMessage.success(`文件夹 "${segment.name}" 已删除`);
+          ElMessage.success(`文件夹 "${parentInfo.value?.name}" 已删除`);
         })
         .catch(() => {
           ElMessage.info("已取消删除");
         });
       break;
     default:
+      ElMessage.info(`功能 [${action}] 正在开发中...`);
       break;
   }
 };
 </script>
 
 <style scoped lang="scss">
+/* 样式与之前保持一致，此处省略 */
 .dropdown-icon {
   margin-right: 8px;
 }
-
 :root {
   --style-border: 1px solid #e0e0e0;
 }
@@ -274,12 +283,10 @@ const handleCommand = (command: CommandPayload) => {
   color: var(--el-color-primary);
   background-color: #f5f7fa;
 }
-/* 我们让所有非下拉菜单的链接都保持一致的样式 */
 .el-breadcrumb__item:not(:last-child) .is-link {
   color: var(--anzhiyu-fontcolor);
   font-weight: normal;
 }
-
 .el-breadcrumb__item:first-child .is-link {
   color: var(--anzhiyu-fontcolor);
 }
@@ -293,7 +300,6 @@ const handleCommand = (command: CommandPayload) => {
   border-radius: 4px;
   transition: background-color 0.2s;
 }
-
 .el-dropdown-link .el-icon--right {
   margin-left: 5px;
   font-size: 12px;
@@ -313,7 +319,6 @@ const handleCommand = (command: CommandPayload) => {
 .danger-item:hover .dropdown-icon {
   color: #fff !important;
 }
-
 .el-dropdown-link:hover {
   background-color: #f5f7fa !important;
 }

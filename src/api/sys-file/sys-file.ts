@@ -6,11 +6,21 @@ import {
   FileType,
   type FolderViewConfig,
   type UpdateFolderViewResponse,
-  type ValidateUploadSessionResponse
+  type ValidateUploadSessionResponse,
+  type FileItem
 } from "./type";
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
 import { buildFullUri } from "@/utils/fileUtils";
+
+/**
+ * 封装获取文件/目录详情的 API 响应类型
+ */
+export interface FileDetailResponse {
+  code: number;
+  message: string;
+  data: FileItem & { url?: string };
+}
 
 /**
  * 1. 获取文件列表
@@ -49,7 +59,6 @@ export const fetchFilesByPathApi = async (
 
 /**
  * 2. 创建上传会话
- * (此函数保持不变)
  */
 export const createUploadSessionApi = (
   fullPath: string,
@@ -57,7 +66,7 @@ export const createUploadSessionApi = (
   policyId: string,
   overwrite: boolean = false
 ): Promise<CreateUploadSessionResponse> => {
-  const fullUri = buildFullUri(fullPath); // 现在使用的是从 utils 导入的函数
+  const fullUri = buildFullUri(fullPath);
 
   return http.request<CreateUploadSessionResponse>(
     "put",
@@ -70,7 +79,6 @@ export const createUploadSessionApi = (
 
 /**
  * 3. 上传文件块
- * (此函数保持不变)
  */
 export const uploadChunkApi = (
   sessionId: string,
@@ -85,7 +93,6 @@ export const uploadChunkApi = (
 
 /**
  * 4. 删除/中止上传会话
- * (此函数保持不变)
  */
 export const deleteUploadSessionApi = (
   sessionId: string,
@@ -123,7 +130,7 @@ export const createItemApi = (
   });
 };
 
-// --- 创建文件和文件夹的辅助函数 (保持不变) ---
+// --- 创建文件和文件夹的辅助函数 ---
 export const createFileApi = (
   logicalPath: string,
   errOnConflict: boolean = false
@@ -145,7 +152,7 @@ export const createFolderApi = (
  * @returns Promise<UpdateFolderViewResponse>
  */
 export const updateFolderViewApi = (
-  folder_id: string, // 参数从 uri 变为 folder_id
+  folder_id: string,
   viewConfig: FolderViewConfig
 ): Promise<UpdateFolderViewResponse> => {
   return http.request<UpdateFolderViewResponse>(
@@ -153,7 +160,7 @@ export const updateFolderViewApi = (
     baseUrlApi("folder/view"),
     {
       data: {
-        folder_id: folder_id, // 传递 folder_id
+        folder_id: folder_id,
         view: viewConfig
       }
     }
@@ -200,4 +207,14 @@ export const renameFileApi = (id: string, newName: string): Promise<any> => {
       new_name: newName
     }
   });
+};
+
+/**
+ * 新增: 根据ID获取文件或目录的详细信息
+ * @param {string} id 文件或目录的公共ID
+ * @returns {Promise<FileDetailResponse>}
+ */
+export const getFileDetailsApi = (id: string): Promise<FileDetailResponse> => {
+  // 根据 API 文档，id 是路径参数，正确地将其拼接到 URL 中
+  return http.request<FileDetailResponse>("get", baseUrlApi(`file/${id}`));
 };
