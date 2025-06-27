@@ -12,6 +12,7 @@ import {
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
 import { buildFullUri } from "@/utils/fileUtils";
+import { ElMessage } from "element-plus";
 
 /**
  * 封装获取文件/目录详情的 API 响应类型
@@ -210,11 +211,42 @@ export const renameFileApi = (id: string, newName: string): Promise<any> => {
 };
 
 /**
- * 新增: 根据ID获取文件或目录的详细信息
+ * 根据ID获取文件或目录的详细信息
  * @param {string} id 文件或目录的公共ID
  * @returns {Promise<FileDetailResponse>}
  */
 export const getFileDetailsApi = (id: string): Promise<FileDetailResponse> => {
   // 根据 API 文档，id 是路径参数，正确地将其拼接到 URL 中
   return http.request<FileDetailResponse>("get", baseUrlApi(`file/${id}`));
+};
+
+/**
+ * 下载文件
+ * @param id 要下载的文件的公共 ID
+ * @param fileName 文件名，用于下载时显示
+ */
+export const downloadFileApi = async (id: string, fileName: string) => {
+  try {
+    const response = await http.request(
+      "get",
+      baseUrlApi(`file/download/${id}`),
+      { responseType: "blob" }
+    );
+
+    const blob = new Blob([response as any], {
+      type: "application/octet-stream"
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error: any) {
+    console.error("下载失败:", error);
+    ElMessage.error(error.message || `下载文件 "${fileName}" 失败`);
+    throw error;
+  }
 };

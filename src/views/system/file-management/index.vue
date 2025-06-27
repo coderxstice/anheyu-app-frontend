@@ -9,6 +9,7 @@
     @contextmenu.prevent="handleContextMenuTrigger"
     @click="handleContainerClick"
   >
+    <!-- 头部区域 -->
     <FileHeard
       class="mb-2"
       :has-selection="hasSelection"
@@ -24,6 +25,7 @@
       @move="onActionMove"
       @share="onActionShare"
     />
+    <!-- 面包屑和工具栏 -->
     <div class="flex w-full">
       <FileBreadcrumb
         class="flex-1 mb-2"
@@ -45,6 +47,7 @@
       />
     </div>
 
+    <!-- 主内容区 -->
     <div class="file-management-main rounded-2xl overflow-hidden">
       <div class="file-content-area">
         <component
@@ -61,6 +64,7 @@
       </div>
     </div>
 
+    <!-- 拖拽上传遮罩层 -->
     <div v-if="isDragging" class="drag-overlay">
       <div class="drag-content">
         <el-icon><UploadFilled /></el-icon>
@@ -69,6 +73,7 @@
       </div>
     </div>
 
+    <!-- 其他浮层组件 -->
     <SearchOverlay
       :visible="isSearchVisible"
       :origin="searchOrigin"
@@ -96,6 +101,7 @@
       @add-files="handleUploadFile"
     />
 
+    <!-- 文件详情面板 -->
     <FileDetailsPanel
       :file="detailsPanelFile"
       @close="detailsPanelFile = null"
@@ -109,7 +115,7 @@ import { storeToRefs } from "pinia";
 import { ElMessage, ElMessageBox } from "element-plus";
 
 // --- API ---
-import { getFileDetailsApi } from "@/api/sys-file/sys-file";
+import { getFileDetailsApi, downloadFileApi } from "@/api/sys-file/sys-file";
 
 // --- 核心状态管理 ---
 import {
@@ -119,7 +125,7 @@ import {
 } from "@/store/modules/fileStore";
 
 // --- 类型定义 ---
-import { type FileItem } from "@/api/sys-file/type";
+import { type FileItem, FileType } from "@/api/sys-file/type";
 
 // --- 引入所有需要的 Hooks ---
 import { useFileUploader } from "@/composables/useFileUploader";
@@ -141,7 +147,6 @@ import SearchOverlay from "./components/SearchOverlay.vue";
 import { UploadFilled } from "@element-plus/icons-vue";
 import FileDetailsPanel from "./components/FileDetailsPanel.vue";
 
-// --- 1. 初始化核心 Store 和状态 ---
 const fileStore = useFileStore();
 const {
   sortedFiles,
@@ -153,12 +158,8 @@ const {
   pageSize
 } = storeToRefs(fileStore);
 
-// --- 详细信息面板状态 ---
 const detailsPanelFile = ref<FileItem | null>(null);
 
-// --- 2. 初始化核心功能 Hooks ---
-// ... 此处省略未变化的代码 ...
-// 2.1 文件选择 Hook
 const {
   selectedFiles,
   selectSingle,
@@ -168,7 +169,7 @@ const {
   clearSelection,
   invertSelection
 } = useFileSelection(sortedFiles);
-// 2.2 文件上传 Hook
+
 const {
   uploadQueue,
   addUploadsToQueue,
@@ -188,21 +189,14 @@ const {
   () => fileStore.refreshCurrentPath({ addResumableTaskFromFileItem })
 );
 
-// --- 统一的加载函数 ---
 const uploaderActions: UploaderActions = { addResumableTaskFromFileItem };
 const loadPath = (newPath: string) => {
-  detailsPanelFile.value = null; // 切换目录时关闭详情面板
+  detailsPanelFile.value = null;
   fileStore.loadFiles(newPath, uploaderActions);
 };
 
-// --- 详细信息面板处理函数 ---
-/**
- * @description: 根据ID调用API获取详情并显示面板
- * @param {string} id 要查询的文件或目录ID
- */
 const handleShowDetailsForId = async (id: string) => {
   try {
-    // 可以在这里设置一个加载状态，比如 detailsPanelFile.value = { id: id, loading: true }
     const response = await getFileDetailsApi(id);
     if (response.code === 200 && response.data) {
       detailsPanelFile.value = response.data;
@@ -211,11 +205,9 @@ const handleShowDetailsForId = async (id: string) => {
     }
   } catch (error: any) {
     ElMessage.error(error.message || "请求文件详情时发生错误");
-    console.error(error);
   }
 };
 
-// 3.1 文件操作 Hook
 const {
   handleUploadFile,
   handleUploadDir,
@@ -225,10 +217,8 @@ const {
   handleDelete
 } = useFileActions(addUploadsToQueue, path);
 
-// 3.2 拖拽上传 Hook
 const { handleDrop } = useDirectoryUpload(addUploadsToQueue, path);
 
-// 3.3 页面交互 Hook
 const {
   isDragging,
   dragHandlers,
@@ -237,7 +227,38 @@ const {
   openSearchFromElement
 } = usePageInteractions(handleDrop);
 
-// 3.4 上下文菜单 Hook
+// --- 核心修改：重写 onActionDownload 函数 ---
+async function onActionDownload() {
+  const selectedItems = getSelectedFileItems();
+  if (selectedItems.length === 0) {
+    ElMessage.warning("请至少选择一个文件进行下载");
+    return;
+  }
+
+  const filesToDownload = selectedItems.filter(
+    item => item.type === FileType.File
+  );
+
+  if (filesToDownload.length === 0) {
+    ElMessage.info("选择的项目中不包含可下载的文件（文件夹暂不支持直接下载）");
+    return;
+  }
+
+  ElMessage.info(`已开始下载 ${filesToDownload.length} 个文件...`);
+
+  // 依次下载每个文件
+  for (const file of filesToDownload) {
+    try {
+      // 为了防止浏览器因连续快速触发下载而产生阻止，可以加入一个微小的延迟
+      await new Promise(resolve => setTimeout(resolve, 300));
+      await downloadFileApi(file.id, file.name);
+    } catch (error) {
+      // 错误已在 downloadFileApi 中通过 ElMessage 提示，这里仅在控制台记录
+      console.error(`下载文件 ${file.name} 失败:`, error);
+    }
+  }
+}
+
 const {
   contextMenuTriggerEvent,
   onMenuSelect,
@@ -252,38 +273,33 @@ const {
   onRefresh: () => loadPath(path.value),
   onRename: onActionRename,
   onDelete: onActionDelete,
-  onDownload: onActionDownload,
+  onDownload: onActionDownload, // 确保这里连接的是新的 onActionDownload
   onCopy: onActionCopy,
   onMove: onActionMove,
   onShare: onActionShare,
   onInfo: () => {
     const selectedItems = getSelectedFileItems();
     if (selectedItems.length > 0) {
-      handleShowDetailsForId(selectedItems[0].id); // 直接调用API
+      handleShowDetailsForId(selectedItems[0].id);
     }
   }
 });
 
-// --- 4. 准备传递给子组件的 Props 和事件处理器 ---
 const hasSelection = computed(() => selectedFiles.value.size > 0);
 const isSingleSelection = computed(() => selectedFiles.value.size === 1);
 const selectionCountLabel = computed(
   () => `${selectedFiles.value.size} 个对象`
 );
 
-// --- 核心交互逻辑 ---
 const fileManagerContainerRef = ref(null);
 
 const handleContainerClick = (event: MouseEvent) => {
-  // 如果详情面板是打开的，则点击任何地方都可能需要判断是否关闭它
   if (detailsPanelFile.value) {
-    // 检查点击是否发生在详情面板内部
     const panel = (event.target as HTMLElement).closest(
       ".details-panel-drawer"
     );
-    if (panel) return; // 点击在面板内，不操作
+    if (panel) return;
   }
-
   if (!hasSelection.value) return;
   const target = event.target as HTMLElement;
   const ignoredSelectors = [
@@ -316,17 +332,14 @@ const handleContextMenuTrigger = (event: MouseEvent) => {
   contextMenuTriggerEvent.value = event;
 };
 
-// 4.2 为 FileHeard 和右键菜单实现事件处理器
 const getSelectedFileItems = () =>
   sortedFiles.value.filter(f => selectedFiles.value.has(f.id));
+
 function onActionRename() {
   if (isSingleSelection.value) handleRename(getSelectedFileItems()[0]);
 }
 function onActionDelete() {
   handleDelete(getSelectedFileItems());
-}
-function onActionDownload() {
-  console.log("Download:", getSelectedFileItems());
 }
 function onActionCopy() {
   console.log("Copy:", getSelectedFileItems());
@@ -338,39 +351,37 @@ function onActionShare() {
   console.log("Share:", getSelectedFileItems());
 }
 
-// 4.3 为 FileToolbar 实现事件处理器
 const handleRefresh = () => loadPath(path.value);
 const handleSetViewMode = (mode: "list" | "grid") =>
   fileStore.setViewMode(mode);
 const handleSetPageSize = (size: number) => fileStore.setPageSize(size);
 const handleSetSortKey = (key: SortKey) => fileStore.setSort(key);
 
-// 4.4 为 FileList / FileGrid 实现事件处理器
 const handleNavigate = (newPath: string) => {
   clearSelection();
   loadPath(newPath);
 };
 
-// 初始加载逻辑
 onMounted(() => {
   if (fileStore.files.length === 0 && !fileStore.loading) {
     loadPath("/");
   }
 });
 
-// 4.5 为 UploadProgress 处理显示逻辑和事件
-// ... 此处省略未变化的代码 ...
 const isPanelVisible = ref(false);
 const isPanelCollapsed = ref(false);
+
 watch(
   () => uploadQueue.length,
   newLength => {
     if (newLength > 0) isPanelVisible.value = true;
   }
 );
+
 const handlePanelClose = () => {
   isPanelVisible.value = false;
 };
+
 const handleUploadGlobalCommand = (command: string, value: any) => {
   switch (command) {
     case "overwrite-all":
@@ -407,13 +418,11 @@ const handleUploadGlobalCommand = (command: string, value: any) => {
   }
 };
 
-// --- 5. 视图状态 ---
 const viewComponents = { list: FileListView, grid: FileGridView };
 const activeViewComponent = computed(() => viewComponents[viewMode.value]);
 </script>
 
 <style>
-/* 样式与之前保持一致，此处省略 */
 .file-management-container {
   height: 100%;
   display: flex;

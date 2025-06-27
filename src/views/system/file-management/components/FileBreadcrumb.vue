@@ -124,7 +124,6 @@ import { useFileStore } from "@/store/modules/fileStore";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { storeToRefs } from "pinia";
 
-// --- 图标引入 ---
 import { HomeFilled, ArrowRight } from "@element-plus/icons-vue";
 import Back from "@iconify-icons/ep/back";
 import Download from "@iconify-icons/ep/download";
@@ -139,11 +138,11 @@ import InfoFilled from "@iconify-icons/ep/info-filled";
 import Delete from "@iconify-icons/ep/delete";
 
 const emit = defineEmits<{
-  (e: "show-details", id: string): void; // 事件参数改为 ID (string)
+  (e: "show-details", id: string): void;
 }>();
 
 const fileStore = useFileStore();
-const { path, pathSegments, parentInfo } = storeToRefs(fileStore); // 从 store 中获取 parentInfo
+const { path, pathSegments, parentInfo } = storeToRefs(fileStore);
 
 const isEditing = ref(false);
 const pathInput = ref("");
@@ -205,14 +204,20 @@ const handleCommand = (command: CommandPayload) => {
     case "enter":
       goToPath(path.value);
       break;
+
     case "info":
-      // 下拉菜单只在当前目录显示，其信息存储在 parentInfo 中
       if (parentInfo.value?.id) {
         emit("show-details", parentInfo.value.id);
       } else {
         ElMessage.warning("无法获取当前目录ID");
       }
       break;
+
+    // 核心修改: 处理文件夹下载
+    case "download":
+      ElMessage.info("暂不支持直接下载整个文件夹。");
+      break;
+
     case "delete":
       if (!parentInfo.value) return;
       ElMessageBox.confirm(
@@ -231,6 +236,7 @@ const handleCommand = (command: CommandPayload) => {
           ElMessage.info("已取消删除");
         });
       break;
+
     default:
       ElMessage.info(`功能 [${action}] 正在开发中...`);
       break;
@@ -239,10 +245,10 @@ const handleCommand = (command: CommandPayload) => {
 </script>
 
 <style scoped lang="scss">
-/* 样式与之前保持一致，此处省略 */
 .dropdown-icon {
   margin-right: 8px;
 }
+
 :root {
   --style-border: 1px solid #e0e0e0;
 }
