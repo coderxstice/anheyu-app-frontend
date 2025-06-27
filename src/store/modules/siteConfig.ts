@@ -102,7 +102,7 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
         this.siteConfig.API_URL += "/";
       }
 
-      console.log("合并后的站点配置:", this.siteConfig);
+      // console.log("合并后的站点配置:", this.siteConfig);
 
       // 传递 SiteAnnouncement 给公告函数
       if (this.siteConfig.SITE_ANNOUNCEMENT !== undefined) {
@@ -115,7 +115,7 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
         timestamp: Date.now()
       };
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToCache));
-      console.log("站点配置已更新并缓存到 localStorage:", this.siteConfig);
+      // console.log("站点配置已更新并缓存到 localStorage:", this.siteConfig);
     },
 
     // 异步获取并合并站点公共配置（用于应用初始化）
@@ -138,7 +138,7 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
           if (Date.now() - timestamp < CACHE_EXPIRATION_TIME) {
             this._updateStateAndCache(cachedConfig);
             this.isLoaded = true;
-            console.log("站点配置已从 localStorage 缓存中加载。");
+            // console.log("站点配置已从 localStorage 缓存中加载。");
             return;
           } else {
             localStorage.removeItem(LOCAL_STORAGE_KEY);

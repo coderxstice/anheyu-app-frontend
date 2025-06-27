@@ -24,14 +24,6 @@ export const fetchFilesByPathApi = async (
 ): Promise<FileListResponse> => {
   const fullUri = buildFullUri(path);
 
-  console.log("fetchFilesByPathApi 请求参数 (内部拼接 URI):", {
-    uri: fullUri,
-    order: order,
-    direction: direction,
-    page: String(page),
-    page_size: String(pageSize)
-  });
-
   try {
     const response = await http.request<FileListResponse>(
       "get",

@@ -56,7 +56,6 @@
           @toggle-selection="toggleSelection"
           @select-all="selectAll"
           @navigate-to="handleNavigate"
-          @load-initial="handleLoadInitial"
         />
       </div>
     </div>
@@ -107,7 +106,11 @@ import { ElMessageBox } from "element-plus";
 import { onClickOutside } from "@vueuse/core";
 
 // --- 核心状态管理 ---
-import { useFileStore, type SortKey } from "@/store/modules/fileStore";
+import {
+  useFileStore,
+  type SortKey,
+  type UploaderActions
+} from "@/store/modules/fileStore";
 
 // --- 引入所有需要的 Hooks ---
 import { useFileUploader } from "@/composables/useFileUploader";
@@ -157,7 +160,7 @@ const {
 const {
   uploadQueue,
   addUploadsToQueue,
-  addResumableTaskFromFileItem, // 引入新方法
+  addResumableTaskFromFileItem,
   removeItem,
   retryItem,
   retryAllFailed,
@@ -165,17 +168,18 @@ const {
   setGlobalOverwriteAndRetry,
   clearFinishedUploads,
   setConcurrency,
-  speedDisplayMode, // 引入速度模式状态
-  setSpeedMode // 引入设置速度模式的方法
+  speedDisplayMode,
+  setSpeedMode
 } = useFileUploader(
   sortedFiles,
   computed(() => storagePolicy.value),
-  () => loadAndRestore(path.value) // 上传完成后，调用新的加载函数
+  () => fileStore.refreshCurrentPath({ addResumableTaskFromFileItem })
 );
 
-// --- 核心修改: 创建一个新的加载函数，用于连接 store 和 uploader ---
-const loadAndRestore = (newPath: string) => {
-  fileStore.loadFiles(newPath, { addResumableTaskFromFileItem });
+// --- 统一的加载函数 ---
+const uploaderActions: UploaderActions = { addResumableTaskFromFileItem };
+const loadPath = (newPath: string) => {
+  fileStore.loadFiles(newPath, uploaderActions);
 };
 
 // 3.1 文件操作 Hook
@@ -212,7 +216,7 @@ const {
   onCreateFolder: handleCreateFolder,
   onCreateMd: () => handleCreateFile("md"),
   onCreateTxt: () => handleCreateFile("txt"),
-  onRefresh: () => loadAndRestore(path.value), // 使用新函数
+  onRefresh: () => loadPath(path.value),
   onRename: onActionRename,
   onDelete: onActionDelete,
   onDownload: onActionDownload,
@@ -224,7 +228,6 @@ const {
 
 // --- 4. 准备传递给子组件的 Props 和事件处理器 ---
 
-// 4.1 为 FileHeard 和 FileToolbar 计算 Props
 const hasSelection = computed(() => selectedFiles.value.size > 0);
 const isSingleSelection = computed(() => selectedFiles.value.size === 1);
 const selectionCountLabel = computed(
@@ -234,13 +237,10 @@ const selectionCountLabel = computed(
 // --- 核心交互逻辑 ---
 
 const fileManagerContainerRef = ref(null);
-
 onClickOutside(
   fileManagerContainerRef,
   () => {
-    if (hasSelection.value) {
-      clearSelection();
-    }
+    if (hasSelection.value) clearSelection();
   },
   {
     ignore: [
@@ -256,11 +256,8 @@ onClickOutside(
 const handleContextMenuTrigger = (event: MouseEvent) => {
   const target = event.target as HTMLElement;
   const clickedOnItem = target.closest(".file-item, .grid-item");
-
-  if (!clickedOnItem) {
-    if (hasSelection.value) {
-      clearSelection();
-    }
+  if (!clickedOnItem && hasSelection.value) {
+    clearSelection();
   }
   contextMenuTriggerEvent.value = event;
 };
@@ -288,7 +285,7 @@ function onActionShare() {
 }
 
 // 4.3 为 FileToolbar 实现事件处理器
-const handleRefresh = () => loadAndRestore(path.value); // 使用新函数
+const handleRefresh = () => loadPath(path.value);
 const handleSetViewMode = (mode: "list" | "grid") =>
   fileStore.setViewMode(mode);
 const handleSetPageSize = (size: number) => fileStore.setPageSize(size);
@@ -297,18 +294,14 @@ const handleSetSortKey = (key: SortKey) => fileStore.setSort(key);
 // 4.4 为 FileList / FileGrid 实现事件处理器
 const handleNavigate = (newPath: string) => {
   clearSelection();
-  loadAndRestore(newPath); // 使用新函数
-};
-const handleLoadInitial = () => {
-  // 初始加载时也要检查续传任务
-  if (sortedFiles.value.length === 0 && !loading.value) {
-    loadAndRestore("/");
-  }
+  loadPath(newPath);
 };
 
-// 在组件挂载时执行初始加载
+// 初始加载逻辑
 onMounted(() => {
-  handleLoadInitial();
+  if (fileStore.files.length === 0 && !fileStore.loading) {
+    loadPath("/");
+  }
 });
 
 // 4.5 为 UploadProgress 处理显示逻辑和事件
@@ -318,11 +311,7 @@ const isPanelCollapsed = ref(false);
 watch(
   () => uploadQueue.length,
   newLength => {
-    // 只要队列中有任务，就确保面板是可见的
-    if (newLength > 0) {
-      isPanelVisible.value = true;
-    }
-    // 注意：面板的关闭现在由用户手动操作，或者在队列清空后考虑自动关闭
+    if (newLength > 0) isPanelVisible.value = true;
   }
 );
 
@@ -330,7 +319,6 @@ const handlePanelClose = () => {
   isPanelVisible.value = false;
 };
 
-// 实现处理全局上传命令的函数
 const handleUploadGlobalCommand = (command: string, value: any) => {
   switch (command) {
     case "overwrite-all":
@@ -361,7 +349,7 @@ const handleUploadGlobalCommand = (command: string, value: any) => {
         })
         .catch(() => {});
       break;
-    case "set-speed-mode": // **新增**: 处理速度模式切换
+    case "set-speed-mode":
       setSpeedMode(value);
       break;
   }

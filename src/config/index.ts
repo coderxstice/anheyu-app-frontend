@@ -55,7 +55,7 @@ export const initializeConfigs = async (app: App): Promise<void> => {
         frontConfig
       );
       setConfig(app.config.globalProperties.$config); // 更新内部 config 变量
-      console.log("前端平台配置已加载并合并:", frontConfig);
+      // console.log("前端平台配置已加载并合并:", frontConfig);
     } else {
       console.warn("未找到或前端平台配置格式不正确");
     }

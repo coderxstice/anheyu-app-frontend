@@ -177,7 +177,6 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
 // --- 5. 生命周期钩子 ---
 onMounted(() => {
-  emit("load-initial");
   window.addEventListener("keydown", handleKeyDown);
 });
 

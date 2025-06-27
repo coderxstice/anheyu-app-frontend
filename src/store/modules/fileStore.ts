@@ -40,12 +40,6 @@ interface FileState {
   currentFolderId: string | null;
 }
 
-/**
- * ++ 核心辅助函数 ++
- * 从 sortKey (例如 "created_at_desc") 中解析出排序字段和方向
- * @param sortKey
- * @returns [order_field, order_direction]
- */
 const parseSortKey = (sortKey: SortKey): [string, "asc" | "desc"] => {
   const parts = sortKey.split("_");
   const direction = parts.pop() as "asc" | "desc";
@@ -53,8 +47,7 @@ const parseSortKey = (sortKey: SortKey): [string, "asc" | "desc"] => {
   return [order, direction];
 };
 
-// 定义一个类型，让 store 可以与 uploader 通信
-interface UploaderActions {
+export interface UploaderActions {
   addResumableTaskFromFileItem: (fileItem: FileItem) => Promise<void>;
 }
 
@@ -87,8 +80,7 @@ export const useFileStore = defineStore("file", {
     },
     sortedFiles: (state): FileItem[] => {
       const filesToSort = [...state.files];
-      const [orderKey, direction] = parseSortKey(state.sortKey); // 使用辅助函数
-
+      const [orderKey, direction] = parseSortKey(state.sortKey);
       filesToSort.sort((a, b) => {
         if (a.type === FileType.Dir && b.type !== FileType.Dir) return -1;
         if (a.type !== FileType.Dir && b.type === FileType.Dir) return 1;
@@ -119,27 +111,20 @@ export const useFileStore = defineStore("file", {
 
   actions: {
     async updateViewConfig() {
-      if (!this.currentFolderId) {
-        return;
-      }
-
+      if (!this.currentFolderId) return;
       try {
         const [order, order_direction] = parseSortKey(this.sortKey);
-
         const newViewConfig: FolderViewConfig = {
           view: this.viewMode,
-          order: order,
+          order,
           page_size: this.pageSize,
-          order_direction: order_direction
+          order_direction
         };
-
         const response = await updateFolderViewApi(
           this.currentFolderId,
           newViewConfig
         );
-        if (response.code === 200) {
-          console.log("文件夹视图配置已成功同步到后端:", response.data);
-        } else {
+        if (response.code !== 200) {
           console.error("后端返回错误，更新视图配置失败:", response.message);
         }
       } catch (error) {
@@ -150,15 +135,20 @@ export const useFileStore = defineStore("file", {
     setPageSize(size: number) {
       if (this.pageSize === size) return;
       this.pageSize = size;
-      this.updateViewConfig();
+      this.updateViewConfig().then(() => {
+        this.loadFiles(this.path, {
+          addResumableTaskFromFileItem: async () => {}
+        });
+      });
     },
 
     setSort(key: SortKey) {
       if (this.sortKey === key) return;
       this.sortKey = key;
-      // 在 loadFiles 之前更新配置，这样 loadFiles 会使用新的排序规则
       this.updateViewConfig().then(() => {
-        this.loadFiles(this.path, 1);
+        this.loadFiles(this.path, {
+          addResumableTaskFromFileItem: async () => {}
+        });
       });
     },
 
@@ -173,13 +163,21 @@ export const useFileStore = defineStore("file", {
       uploader: UploaderActions,
       page = 1
     ) {
+      // **核心修复：加载锁**
+      if (this.loading) {
+        console.warn(
+          "[Store] loadFiles is already in progress. Aborting redundant call.",
+          { pathToLoad }
+        );
+        return;
+      }
+
       this.loading = true;
       const logicalPath = extractLogicalPathFromUri(pathToLoad || "/");
       this.path = logicalPath;
 
       try {
         const [order, direction] = parseSortKey(this.sortKey);
-
         const response = await fetchFilesByPathApi(
           logicalPath,
           order,
@@ -193,13 +191,8 @@ export const useFileStore = defineStore("file", {
             response.data;
           this.files = files;
 
-          // 处理断点续传的文件
           for (const fileItem of this.files) {
             if (fileItem.metadata?.["sys:upload_session_id"]) {
-              console.log(
-                `[Store] 发现未完成的上传文件: ${fileItem.name}，正在尝试恢复...`
-              );
-              // 调用 uploader 的方法来处理
               uploader.addResumableTaskFromFileItem(fileItem);
             }
           }
@@ -217,7 +210,6 @@ export const useFileStore = defineStore("file", {
             this.pageSize = view.page_size;
             const backendSortKey =
               `${view.order}_${view.order_direction}` as SortKey;
-
             if (this.sortKey !== backendSortKey) {
               this.sortKey = backendSortKey;
             }
@@ -225,16 +217,19 @@ export const useFileStore = defineStore("file", {
         } else {
           ElMessage.error(response.message || "文件列表加载失败");
           this.files = [];
-          this.storagePolicy = null;
         }
       } catch (error) {
         console.error("文件加载失败:", error);
         ElMessage.error("文件加载失败，请检查网络连接。");
         this.files = [];
-        this.storagePolicy = null;
       } finally {
         this.loading = false;
       }
+    },
+
+    // 新增一个简单的刷新 action，供 uploader 回调使用
+    async refreshCurrentPath(uploader: UploaderActions) {
+      await this.loadFiles(this.path, uploader);
     },
 
     async _createItem(type: FileType, name: string) {
@@ -243,7 +238,9 @@ export const useFileStore = defineStore("file", {
         await createItemApi(type, fullLogicalPath);
         const itemType = type === FileType.Dir ? "文件夹" : "文件";
         ElMessage.success(`${itemType} '${name}' 创建成功`);
-        this.loadFiles(this.path);
+        this.refreshCurrentPath({
+          addResumableTaskFromFileItem: async () => {}
+        });
       } catch (error: any) {
         const itemType = type === FileType.Dir ? "文件夹" : "文件";
         console.error(`创建${itemType}失败:`, error);
