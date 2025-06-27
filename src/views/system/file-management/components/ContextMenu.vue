@@ -1,6 +1,11 @@
 <template>
   <Teleport to="body">
-    <div v-if="localVisible" class="context-menu-overlay" @click="closeMenu" />
+    <div
+      v-if="localVisible"
+      class="context-menu-overlay"
+      @click="closeMenu"
+      @contextmenu.prevent="handleOverlayRightClick"
+    />
 
     <Transition
       name="context-menu-fade-scale"
@@ -46,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, nextTick } from "vue";
 import gsap from "gsap";
 import AnIconBox from "@/components/AnIconBox/index.vue";
 
@@ -73,9 +78,7 @@ export interface MenuItem {
 }
 
 const props = defineProps<{
-  /** 接收触发菜单的鼠标事件 */
   triggerEvent: MouseEvent | null;
-  /** 接收当前已选择的文件ID集合 */
   selectedFileIds: Set<string>;
 }>();
 
@@ -86,15 +89,15 @@ const emit = defineEmits<{
   (e: "request-clear-selection"): void;
 }>();
 
-// --- 内部状态管理 ---
 const contextMenuRef = ref<HTMLElement | null>(null);
 const localVisible = ref(false);
 const x = ref(0);
 const y = ref(0);
 const localItems = ref<MenuItem[]>([]);
 const menuContext = ref<any>(null);
+// 核心新增: 用于动态控制动画变换原点的 ref
+const transformOrigin = ref("top left");
 
-// --- 右键菜单定义 (保持不变) ---
 const blankMenu: MenuItem[] = [
   { label: "上传文件", action: "upload-file", icon: Upload, color: "#1677FF" },
   {
@@ -143,42 +146,85 @@ const itemMenu: MenuItem[] = [
   }
 ];
 
-// --- 菜单操作函数 ---
-const openMenu = (event: MouseEvent) => {
+// 核心修改: 完整的 openMenu 逻辑，包含边缘检测
+const openMenu = async (event: MouseEvent) => {
   event.preventDefault();
-  x.value = event.clientX;
-  y.value = event.clientY;
+
+  if (localVisible.value) {
+    localVisible.value = false;
+    await nextTick();
+  }
+
+  const initialX = event.clientX;
+  const initialY = event.clientY;
 
   const target = event.target as HTMLElement;
-  const itemElement = target.closest(
-    ".deselect-safe-zone.file-item, .deselect-safe-zone.grid-item"
-  );
+  const itemElement = target.closest(".file-item, .grid-item");
 
   if (itemElement) {
     const itemId = (itemElement as HTMLElement).dataset.id;
     let finalSelectedIds = new Set(props.selectedFileIds);
 
     if (itemId && !props.selectedFileIds.has(itemId)) {
-      //  发出事件请求父组件进行单选，而不是自己操作
       emit("request-select-single", itemId);
-      // 父组件会同步更新 selectedFileIds prop，我们在这里乐观更新
       finalSelectedIds = new Set([itemId]);
     }
     localItems.value = itemMenu;
     menuContext.value = { selectedIds: [...finalSelectedIds] };
   } else {
-    // 点击空白区域
+    if (props.selectedFileIds.size > 0) {
+      emit("request-clear-selection");
+    }
     localItems.value = blankMenu;
-    menuContext.value = null; // 空白区域没有上下文
+    menuContext.value = null;
   }
 
   localVisible.value = true;
+  await nextTick();
+
+  // --- 边缘检测与位置调整 ---
+  const menuEl = contextMenuRef.value;
+  if (!menuEl) return;
+
+  const menuWidth = menuEl.offsetWidth;
+  const menuHeight = menuEl.offsetHeight;
+  const { innerWidth: winWidth, innerHeight: winHeight } = window;
+
+  let finalX = initialX;
+  let finalY = initialY;
+  let originX = "left";
+  let originY = "top";
+
+  // 检查并修正右侧溢出
+  if (initialX + menuWidth > winWidth) {
+    finalX = initialX - menuWidth;
+    originX = "right";
+  }
+
+  // 检查并修正底部溢出
+  if (initialY + menuHeight > winHeight) {
+    finalY = initialY - menuHeight;
+    originY = "bottom";
+  }
+
+  // 防止修正后菜单超出左侧或顶部
+  if (finalX < 5) finalX = 5;
+  if (finalY < 5) finalY = 5;
+
+  // 更新最终位置和动画原点
+  x.value = finalX;
+  y.value = finalY;
+  transformOrigin.value = `${originY} ${originX}`;
 };
 
 const closeMenu = () => {
   if (!localVisible.value) return;
   localVisible.value = false;
   emit("closed");
+};
+
+const handleOverlayRightClick = (event: MouseEvent) => {
+  openMenu(event);
 };
 
 const onItemClick = (item: MenuItem) => {
@@ -188,11 +234,11 @@ const onItemClick = (item: MenuItem) => {
   closeMenu();
 };
 
-// --- 动画钩子 (保持不变) ---
+// 核心修改: 动画的 transformOrigin 使用动态 ref
 const onMenuEnter = (el: Element, done: () => void) => {
   gsap.fromTo(
     el,
-    { opacity: 0, scale: 0.8, transformOrigin: "top left" },
+    { opacity: 0, scale: 0.8, transformOrigin: transformOrigin.value },
     {
       opacity: 1,
       scale: 1,
@@ -202,6 +248,7 @@ const onMenuEnter = (el: Element, done: () => void) => {
     }
   );
 };
+
 const onMenuLeave = (el: Element, done: () => void) => {
   gsap.to(el, {
     opacity: 0,
@@ -212,7 +259,6 @@ const onMenuLeave = (el: Element, done: () => void) => {
   });
 };
 
-// --- 监听 ---
 watch(
   () => props.triggerEvent,
   newEvent => {
@@ -226,7 +272,6 @@ watch(
 </script>
 
 <style scoped lang="scss">
-// 样式保持不变
 .context-menu-overlay {
   position: fixed;
   top: 0;
@@ -236,8 +281,8 @@ watch(
   background-color: transparent;
   z-index: 2999;
   cursor: default;
+  user-select: none;
 }
-
 .context-menu {
   position: fixed;
   z-index: 3000;

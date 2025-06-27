@@ -180,15 +180,11 @@ export const validateUploadSessionApi = (
  * @returns Promise<any>
  */
 export const deleteFilesApi = (ids: string[]): Promise<any> => {
-  return http.request(
-    "delete",
-    baseUrlApi("files"), // 注意: endpoint 是 /files
-    {
-      data: {
-        ids: ids
-      }
+  return http.request("delete", baseUrlApi("file"), {
+    data: {
+      ids: ids
     }
-  );
+  });
 };
 
 /**
@@ -198,14 +194,10 @@ export const deleteFilesApi = (ids: string[]): Promise<any> => {
  * @returns Promise<any> 包含更新后的 FileItem
  */
 export const renameFileApi = (id: string, newName: string): Promise<any> => {
-  return http.request(
-    "put",
-    baseUrlApi("file/rename"), // 注意: endpoint 是 /file/rename
-    {
-      data: {
-        id: id,
-        new_name: newName
-      }
+  return http.request("put", baseUrlApi("file/rename"), {
+    data: {
+      id: id,
+      new_name: newName
     }
-  );
+  });
 };
