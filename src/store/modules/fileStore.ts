@@ -226,8 +226,24 @@ export const useFileStore = defineStore("file", {
         this.loading = false;
       }
     },
+    // 用于在删除成功后，从 state 中移除文件
+    removeFilesFromState(fileIds: string[]) {
+      const idsToRemove = new Set(fileIds);
+      this.files = this.files.filter(file => !idsToRemove.has(file.id));
+      console.log(`[Store] 从状态中移除了 ${fileIds.length} 个文件。`);
+    },
 
-    // 新增一个简单的刷新 action，供 uploader 回调使用
+    // 用于在重命名成功后，更新 state 中的文件信息
+    updateFileInState(updatedFile: FileItem) {
+      const index = this.files.findIndex(file => file.id === updatedFile.id);
+      if (index !== -1) {
+        // 使用 Object.assign 或 {...} 来确保响应性
+        this.files[index] = { ...this.files[index], ...updatedFile };
+        console.log(`[Store] 更新了文件 '${updatedFile.name}' 的状态。`);
+      }
+    },
+
+    // 一个简单的刷新 action，供 uploader 回调使用
     async refreshCurrentPath(uploader: UploaderActions) {
       await this.loadFiles(this.path, uploader);
     },

@@ -173,3 +173,39 @@ export const validateUploadSessionApi = (
     baseUrlApi(`file/upload/session/${sessionId}`)
   );
 };
+
+/**
+ * 删除一个或多个文件/文件夹
+ * @param ids 要删除的项目ID列表
+ * @returns Promise<any>
+ */
+export const deleteFilesApi = (ids: string[]): Promise<any> => {
+  return http.request(
+    "delete",
+    baseUrlApi("files"), // 注意: endpoint 是 /files
+    {
+      data: {
+        ids: ids
+      }
+    }
+  );
+};
+
+/**
+ * 重命名一个文件或文件夹
+ * @param id 要重命名的项目ID
+ * @param newName 新的名称
+ * @returns Promise<any> 包含更新后的 FileItem
+ */
+export const renameFileApi = (id: string, newName: string): Promise<any> => {
+  return http.request(
+    "put",
+    baseUrlApi("file/rename"), // 注意: endpoint 是 /file/rename
+    {
+      data: {
+        id: id,
+        new_name: newName
+      }
+    }
+  );
+};

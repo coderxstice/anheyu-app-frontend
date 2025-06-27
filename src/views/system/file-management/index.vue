@@ -7,8 +7,8 @@
     @dragleave="dragHandlers.onDragLeave"
     @drop="dragHandlers.onDrop"
     @contextmenu.prevent="handleContextMenuTrigger"
+    @click="handleContainerClick"
   >
-    <!-- 头部区域 -->
     <FileHeard
       class="mb-2"
       :has-selection="hasSelection"
@@ -24,7 +24,6 @@
       @move="onActionMove"
       @share="onActionShare"
     />
-    <!-- 面包屑和工具栏 -->
     <div class="flex w-full">
       <FileBreadcrumb class="flex-1 mb-2" />
       <FileToolbar
@@ -43,7 +42,6 @@
       />
     </div>
 
-    <!-- 主内容区 -->
     <div class="file-management-main rounded-2xl overflow-hidden">
       <div class="file-content-area">
         <component
@@ -60,7 +58,6 @@
       </div>
     </div>
 
-    <!-- 拖拽上传遮罩层 -->
     <div v-if="isDragging" class="drag-overlay">
       <div class="drag-content">
         <el-icon><UploadFilled /></el-icon>
@@ -69,7 +66,6 @@
       </div>
     </div>
 
-    <!-- 其他浮层组件 -->
     <SearchOverlay
       :visible="isSearchVisible"
       :origin="searchOrigin"
@@ -103,7 +99,8 @@
 import { computed, ref, watch, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { ElMessageBox } from "element-plus";
-import { onClickOutside } from "@vueuse/core";
+// --- 核心修改: 不再需要 onClickOutside ---
+// import { onClickOutside } from "@vueuse/core";
 
 // --- 核心状态管理 ---
 import {
@@ -237,21 +234,42 @@ const selectionCountLabel = computed(
 // --- 核心交互逻辑 ---
 
 const fileManagerContainerRef = ref(null);
-onClickOutside(
-  fileManagerContainerRef,
-  () => {
-    if (hasSelection.value) clearSelection();
-  },
-  {
-    ignore: [
-      ".el-popper",
-      ".el-overlay",
-      ".upload-progress-panel",
-      ".context-menu-overlay",
-      ".context-menu"
-    ]
+
+// --- 核心修改: 移除 onClickOutside, 替换为 handleContainerClick ---
+const handleContainerClick = (event: MouseEvent) => {
+  // 如果没有文件被选中，则无需执行任何操作
+  if (!hasSelection.value) return;
+
+  const target = event.target as HTMLElement;
+
+  // 定义一个列表，包含所有不应触发“清空选择”的元素的选择器
+  // 这包括文件项、按钮、输入框、下拉菜单和所有弹窗/浮层
+  const ignoredSelectors = [
+    ".file-item", // 列表视图中的文件项
+    ".grid-item", // 网格视图中的文件项
+    "[role=button]", // 各种按钮
+    "[role=menu]", // 菜单
+    "[role=listbox]", // 下拉列表
+    "input", // 输入框
+    "button", //原生按钮
+    ".el-button", // Element Plus 按钮
+    ".el-popper", // 所有 Element Plus 弹窗
+    ".el-overlay", // 遮罩层
+    ".upload-progress-panel", // 上传面板
+    ".context-menu", // 自定义右键菜单
+    ".search-overlay-container" // 搜索浮层
+  ];
+
+  // 使用 closest 检查点击事件的目标或其任何父元素是否匹配忽略列表中的任何一个选择器
+  // 如果匹配，说明点击的是一个交互元素，此时不应清空选择
+  if (ignoredSelectors.some(selector => target.closest(selector))) {
+    return;
   }
-);
+
+  // 如果代码执行到这里，说明用户点击的是组件内的“空白”区域
+  // 因此，清空当前的文件选择
+  clearSelection();
+};
 
 const handleContextMenuTrigger = (event: MouseEvent) => {
   const target = event.target as HTMLElement;

@@ -123,7 +123,8 @@ const blankMenu: MenuItem[] = [
     color: "#5FDEB8"
   },
   { divider: true },
-  { label: "刷新", action: "refresh", icon: Refresh, color: "#4F6BF6" }
+  { label: "刷新", action: "refresh", icon: Refresh, color: "#4F6BF6" },
+  { label: "删除", action: "delete", icon: Delete, color: "#F6775C" }
 ];
 const itemMenu: MenuItem[] = [
   { label: "重命名", action: "rename", icon: EditPen, color: "#4F6BF6" },
@@ -158,7 +159,7 @@ const openMenu = (event: MouseEvent) => {
     let finalSelectedIds = new Set(props.selectedFileIds);
 
     if (itemId && !props.selectedFileIds.has(itemId)) {
-      // **关键修改点**: 发出事件请求父组件进行单选，而不是自己操作
+      //  发出事件请求父组件进行单选，而不是自己操作
       emit("request-select-single", itemId);
       // 父组件会同步更新 selectedFileIds prop，我们在这里乐观更新
       finalSelectedIds = new Set([itemId]);
