@@ -2,7 +2,7 @@
  * @Description: 处理文件和目录上传的 Hook (包含目录遍历逻辑)
  * @Author: 安知鱼
  * @Date: 2025-06-26 16:44:23
- * @LastEditTime: 2025-06-28 03:30:41
+ * @LastEditTime: 2025-06-28 03:47:21
  * @LastEditors: 安知鱼
  */
 import type { UploadItem } from "@/api/sys-file/type";
@@ -94,6 +94,11 @@ export function useDirectoryUpload(
   ) => void,
   currentPath: Ref<string>
 ) {
+  console.log(
+    "%c[Check-1B useDirectoryUpload] Hook Initialized. Current Path:",
+    "color: blue; font-weight: bold;",
+    currentPath.value
+  );
   /**
    * 处理拖拽事件的核心函数。
    * @param dataTransfer - 从拖拽事件中获取的 DataTransfer 对象。

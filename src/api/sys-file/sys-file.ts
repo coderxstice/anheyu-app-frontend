@@ -14,7 +14,7 @@ import { baseUrlApi } from "@/utils/http/config";
 import { buildFullUri } from "@/utils/fileUtils";
 import { ElMessage } from "element-plus";
 
-// --- 新增: 文件夹内容树 API 的类型定义 ---
+// --- 文件夹内容树 API 的类型定义 ---
 export interface FolderTreeFile {
   url: string;
   relative_path: string;
@@ -44,11 +44,10 @@ export interface FileDetailResponse {
  */
 export const fetchBlobFromUrl = async (url: string): Promise<Blob> => {
   // 对于后端返回的相对路径（如本地文件的签名URL），需要拼接上基础路径
-  const finalUrl = url.startsWith("http")
-    ? url
-    : `${window.location.origin}${baseUrlApi()}${
-        url.startsWith("/") ? "" : "/"
-      }${url}`;
+  const finalUrl = url.startsWith("http") ? url : `${baseUrlApi(url)}`;
+  // `http://localhost:8091/api/${url}`"/download/ARgsz?expires=1751059147\u0026sign=XrAcDPV0Oy8o4ln6w0aiHXzHWtUHw5H3K9ES2fL1RY4=";
+
+  console.log(`请求 URL: ${finalUrl}`); // 调试输出请求的 URL
 
   try {
     const response = await fetch(finalUrl); // 使用原生 fetch
@@ -173,16 +172,19 @@ export const validateUploadSessionApi = (
   );
 };
 
+// 获取文件列表
 export const deleteFilesApi = (ids: string[]): Promise<any> => {
   return http.request("delete", baseUrlApi("file"), { data: { ids } });
 };
 
+// 重命名文件
 export const renameFileApi = (id: string, newName: string): Promise<any> => {
   return http.request("put", baseUrlApi("file/rename"), {
     data: { id, new_name: newName }
   });
 };
 
+// 获取文件详情
 export const getFileDetailsApi = (id: string): Promise<FileDetailResponse> => {
   return http.request<FileDetailResponse>("get", baseUrlApi(`file/${id}`));
 };
@@ -206,7 +208,7 @@ export const downloadFileApi = async (id: string, fileName: string) => {
 };
 
 /**
- * 新增：获取文件夹内容树（用于打包下载）
+ * 获取文件夹内容树（用于打包下载）
  */
 export const getFolderTreeApi = (id: string): Promise<FolderTreeResponse> => {
   return http.request<FolderTreeResponse>(

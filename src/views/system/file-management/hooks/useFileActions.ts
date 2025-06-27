@@ -2,7 +2,7 @@
  * @Description: 文件操作的组合式函数
  * @Author: 安知鱼
  * @Date: 2025-06-25 09:49:46
- * @LastEditTime: 2025-06-28 03:25:02
+ * @LastEditTime: 2025-06-28 03:46:41
  * @LastEditors: 安知鱼
  */
 import { useFileStore } from "@/store/modules/fileStore";
@@ -34,6 +34,11 @@ export function useFileActions(
   ) => void,
   currentPath: Ref<string>
 ) {
+  console.log(
+    "%c[Check-1A useFileActions] Hook Initialized. Current Path:",
+    "color: blue; font-weight: bold;",
+    currentPath.value
+  );
   const fileStore = useFileStore();
 
   const _triggerUpload = (isDir: boolean) => {
