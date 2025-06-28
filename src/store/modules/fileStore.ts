@@ -7,7 +7,7 @@ import {
 } from "@/api/sys-file/sys-file";
 import {
   type FileItem,
-  type PaginationInfo,
+  type Pagination,
   type ParentInfo,
   type FileProps,
   type StoragePolicy,
@@ -32,7 +32,8 @@ interface FileState {
   viewMode: "list" | "grid";
   sortKey: SortKey;
   loading: boolean;
-  pagination: PaginationInfo | null;
+  isMoreLoading: boolean;
+  pagination: Pagination | null;
   parentInfo: ParentInfo | null;
   currentProps: FileProps | null;
   storagePolicy: StoragePolicy | null;
@@ -58,7 +59,13 @@ export const useFileStore = defineStore("file", {
     viewMode: "list",
     sortKey: "updated_at_desc",
     loading: false,
-    pagination: null,
+    isMoreLoading: false,
+    pagination: {
+      page: 1,
+      page_size: 50,
+      total: 0,
+      total_page: 1
+    },
     parentInfo: null,
     currentProps: null,
     storagePolicy: null,
@@ -136,9 +143,11 @@ export const useFileStore = defineStore("file", {
       if (this.pageSize === size) return;
       this.pageSize = size;
       this.updateViewConfig().then(() => {
-        this.loadFiles(this.path, {
-          addResumableTaskFromFileItem: async () => {}
-        });
+        this.loadFiles(
+          this.path,
+          { addResumableTaskFromFileItem: async () => {} },
+          1
+        );
       });
     },
 
@@ -146,9 +155,11 @@ export const useFileStore = defineStore("file", {
       if (this.sortKey === key) return;
       this.sortKey = key;
       this.updateViewConfig().then(() => {
-        this.loadFiles(this.path, {
-          addResumableTaskFromFileItem: async () => {}
-        });
+        this.loadFiles(
+          this.path,
+          { addResumableTaskFromFileItem: async () => {} },
+          1
+        );
       });
     },
 
@@ -163,35 +174,43 @@ export const useFileStore = defineStore("file", {
       uploader: UploaderActions,
       page = 1
     ) {
-      // **核心修复：加载锁**
-      if (this.loading) {
-        console.warn(
-          "[Store] loadFiles is already in progress. Aborting redundant call.",
-          { pathToLoad }
-        );
-        return;
-      }
+      // 区分不同类型的加载锁，防止重复请求
+      if (page > 1 && this.isMoreLoading) return;
+      if (page === 1 && this.loading) return;
 
-      this.loading = true;
-      const logicalPath = extractLogicalPathFromUri(pathToLoad || "/");
-      this.path = logicalPath;
+      // 根据页码设置正确的加载状态
+      if (page > 1) {
+        this.isMoreLoading = true;
+      } else {
+        this.loading = true;
+        // 如果是加载第一页，重置路径（这对于导航到新目录至关重要）
+        const logicalPath = extractLogicalPathFromUri(pathToLoad || "/");
+        this.path = logicalPath;
+      }
 
       try {
         const [order, direction] = parseSortKey(this.sortKey);
         const response = await fetchFilesByPathApi(
-          logicalPath,
+          this.path, // 始终使用 state 中的当前路径
           order,
           direction,
           page,
           this.pageSize
         );
 
-        if (response.code === 200) {
+        if (response.code === 200 && response.data) {
           const { files, parent, pagination, props, storage_policy, view } =
             response.data;
-          this.files = files;
 
-          for (const fileItem of this.files) {
+          // 关键逻辑：根据页码决定是替换还是追加
+          if (page === 1) {
+            this.files = files; // 替换
+          } else {
+            this.files.push(...files); // 追加
+          }
+
+          // 检查并恢复上传任务
+          for (const fileItem of files) {
             if (fileItem.metadata?.["sys:upload_session_id"]) {
               uploader.addResumableTaskFromFileItem(fileItem);
             }
@@ -205,7 +224,8 @@ export const useFileStore = defineStore("file", {
           this.storagePolicy = storage_policy;
           this.currentFolderId = this.parentInfo?.id || null;
 
-          if (view) {
+          if (page === 1 && view) {
+            // 仅在加载第一页时同步服务器端的视图设置
             this.viewMode = view.view;
             this.pageSize = view.page_size;
             const backendSortKey =
@@ -216,16 +236,22 @@ export const useFileStore = defineStore("file", {
           }
         } else {
           ElMessage.error(response.message || "文件列表加载失败");
-          this.files = [];
+          if (page === 1) this.files = [];
         }
       } catch (error) {
         console.error("文件加载失败:", error);
         ElMessage.error("文件加载失败，请检查网络连接。");
-        this.files = [];
+        if (page === 1) this.files = [];
       } finally {
-        this.loading = false;
+        // 重置正确的加载状态
+        if (page > 1) {
+          this.isMoreLoading = false;
+        } else {
+          this.loading = false;
+        }
       }
     },
+
     // 用于在删除成功后，从 state 中移除文件
     removeFilesFromState(fileIds: string[]) {
       const idsToRemove = new Set(fileIds);
@@ -245,7 +271,7 @@ export const useFileStore = defineStore("file", {
 
     // 一个简单的刷新 action，供 uploader 回调使用
     async refreshCurrentPath(uploader: UploaderActions) {
-      await this.loadFiles(this.path, uploader);
+      await this.loadFiles(this.path, uploader, 1);
     },
 
     async _createItem(type: FileType, name: string) {

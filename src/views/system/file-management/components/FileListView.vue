@@ -1,5 +1,5 @@
 <template>
-  <div v-loading="loading" class="file-list-container">
+  <div v-loading="loading && !files.length" class="file-list-container">
     <div class="file-list-header">
       <div class="column-name">名称</div>
       <div class="column-size">文件大小</div>
@@ -79,6 +79,10 @@
         <div v-else class="column-size">--</div>
         <div class="column-modified">{{ formatDateTime(item.created_at) }}</div>
       </li>
+      <li v-if="isMoreLoading" class="state-view load-more-indicator">
+        <el-icon class="is-loading"><Loading /></el-icon>
+        <span>加载中...</span>
+      </li>
     </ul>
   </div>
 </template>
@@ -93,7 +97,6 @@ import { Loading } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import { extractLogicalPathFromUri } from "@/utils/fileUtils";
 
-// --- 1. 定义 Props 和 Emits ---
 const props = defineProps({
   files: {
     type: Array as PropType<FileItem[]>,
@@ -110,6 +113,10 @@ const props = defineProps({
   disabledFileIds: {
     type: Set as PropType<Set<string>>,
     default: () => new Set()
+  },
+  isMoreLoading: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -121,11 +128,9 @@ const emit = defineEmits<{
   (e: "navigate-to", path: string): void;
 }>();
 
-// --- 2. 初始化独立的 Hooks 和本地状态 ---
 const { getFileIcon } = useFileIcons();
 const hoveredFileId = ref<string | null>(null);
 
-// --- 3. 动画处理 ---
 const onIconEnter = (el: Element, done: () => void) => {
   gsap.fromTo(
     el,
@@ -161,7 +166,6 @@ const handleMouseUp = (event: MouseEvent) => {
   });
 };
 
-// --- 4. 事件处理器 ---
 const handleItemClick = (item: FileItem, event: MouseEvent) => {
   if (props.disabledFileIds?.has(item.id)) return;
   if (item.metadata?.["sys:upload_session_id"]) return;
@@ -183,7 +187,6 @@ const handleItemDblClick = (item: FileItem) => {
   if (item.metadata?.["sys:upload_session_id"]) return;
 
   if (item.type === FileType.Dir) {
-    // 2. 核心修复：在 emit 事件前，转换路径为逻辑路径
     const logicalPath = extractLogicalPathFromUri(item.path);
     emit("navigate-to", logicalPath);
   }
@@ -199,7 +202,6 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 };
 
-// --- 5. 生命周期钩子 ---
 onMounted(() => {
   window.addEventListener("keydown", handleKeyDown);
 });
@@ -262,7 +264,6 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
-/* 新增：被禁用的文件项样式 */
 .file-item.is-disabled {
   cursor: not-allowed;
   color: #a8abb2;
@@ -333,5 +334,12 @@ onUnmounted(() => {
   padding: 60px 20px;
   color: #909399;
   font-size: 14px;
+}
+
+.load-more-indicator {
+  padding: 15px 0;
+  .el-icon {
+    margin-right: 8px;
+  }
 }
 </style>

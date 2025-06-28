@@ -39,6 +39,21 @@ export interface FileDetailResponse {
 }
 
 /**
+ * 复制一个或多个文件/文件夹到指定目录
+ * @param sourceIDs 要复制的项目的公共ID数组
+ * @param destinationID 目标文件夹的公共ID
+ * @returns Promise
+ */
+export const copyFilesApi = (sourceIDs: string[], destinationID: string) => {
+  return http.post<BaseResponse<null>, any>(baseUrlApi("file/copy"), {
+    data: {
+      sourceIDs,
+      destinationID
+    }
+  });
+};
+
+/**
  * 核心重构：从任意 URL 获取文件内容的底层函数
  * 它不使用全局 http 实例，以避免为预签名 URL 添加不必要的 `Authorization` 头。
  * @param url 要获取内容的完整 URL

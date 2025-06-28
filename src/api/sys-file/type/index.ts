@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-06-28 16:20:43
+ * @LastEditTime: 2025-06-29 02:39:23
  * @LastEditors: 安知鱼
  */
 
@@ -127,7 +127,7 @@ export interface UpdateFolderViewResponse {
 /**
  * API 返回的分页信息结构
  */
-export interface PaginationInfo {
+export interface Pagination {
   page: number;
   page_size: number;
   total: number;
@@ -176,7 +176,7 @@ export interface StoragePolicy {
 export interface FileListData {
   files: FileItem[];
   parent: ParentInfo | null;
-  pagination: PaginationInfo;
+  pagination: Pagination;
   props: FileProps;
   context_hint?: string;
   storage_policy?: StoragePolicy;

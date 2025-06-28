@@ -32,6 +32,14 @@
       </div>
       <div class="item-name">{{ file.name }}</div>
     </div>
+
+    <div v-if="isMoreLoading" class="grid-item-full-width">
+      <div class="load-more-indicator">
+        <el-icon class="is-loading"><Loading /></el-icon>
+        <span>加载中...</span>
+      </div>
+    </div>
+
     <el-empty
       v-if="files.length === 0 && !loading"
       description="这里什么都没有"
@@ -49,7 +57,7 @@ import { Loading } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import { extractLogicalPathFromUri } from "@/utils/fileUtils";
 
-// --- 1. 定义 Props 和 Emits ---
+// --- 核心修改：新增 isMoreLoading prop ---
 const props = defineProps({
   files: {
     type: Array as PropType<FileItem[]>,
@@ -66,6 +74,10 @@ const props = defineProps({
   disabledFileIds: {
     type: Set as PropType<Set<string>>,
     default: () => new Set()
+  },
+  isMoreLoading: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -77,10 +89,8 @@ const emit = defineEmits<{
   (e: "navigate-to", path: string): void;
 }>();
 
-// --- 2. 初始化独立的 Hooks ---
 const { getFileIcon } = useFileIcons();
 
-// --- 3. 动画处理 ---
 const handleMouseDown = (event: MouseEvent) => {
   gsap.to(event.currentTarget as HTMLElement, {
     scale: 0.95,
@@ -103,7 +113,6 @@ const handleMouseLeave = (event: MouseEvent) => {
   });
 };
 
-// --- 4. 事件处理器 ---
 const handleItemClick = (file: FileItem, event: MouseEvent) => {
   if (props.disabledFileIds?.has(file.id)) return;
   if (file.metadata?.["sys:upload_session_id"]) return;
@@ -140,7 +149,6 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 };
 
-// --- 5. 生命周期钩子 ---
 onMounted(() => {
   window.addEventListener("keydown", handleKeyDown);
 });
@@ -188,11 +196,10 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
-/* 新增：被禁用的文件项样式 */
 .grid-item.is-disabled {
   cursor: not-allowed;
   color: #a8abb2;
-  opacity: 0.6; /* 网格视图下，禁用也给一点透明度 */
+  opacity: 0.6;
 }
 .grid-item.is-disabled:hover {
   background-color: transparent;
@@ -258,5 +265,21 @@ onUnmounted(() => {
 }
 .grid-empty {
   grid-column: 1 / -1;
+}
+
+/* 新增：加载提示的样式 */
+.grid-item-full-width {
+  grid-column: 1 / -1; /* 让这个div撑满整行 */
+}
+.load-more-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px 0;
+  color: #909399;
+  font-size: 14px;
+}
+.load-more-indicator .el-icon {
+  margin-right: 8px;
 }
 </style>

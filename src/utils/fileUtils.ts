@@ -2,7 +2,7 @@
  * @Description: 文件处理相关的工具函数
  * @Author: 安知鱼
  * @Date: 2025-06-26 18:32:39
- * @LastEditTime: 2025-06-27 12:40:00
+ * @LastEditTime: 2025-06-29 01:51:21
  * @LastEditors: 安知鱼
  */
 
@@ -192,4 +192,21 @@ export const formatBytes = (bytes: number, decimals = 2): string => {
   const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+};
+
+/**
+ * 从一个完整的文件或文件夹路径中获取其父目录的路径。
+ * @param path 完整路径，例如 "/A/B/file.txt" 或 "/A/B"
+ * @returns 父目录的路径，例如 "/A/B" 或 "/A"。如果路径就在根目录，则返回 "/"。
+ */
+export const getParentPath = (path: string): string => {
+  if (!path || path === "/") {
+    return "/";
+  }
+  const lastSlashIndex = path.lastIndexOf("/");
+  // 如果找不到斜杠，或者路径是 "/file.txt" 这种，父目录就是根
+  if (lastSlashIndex <= 0) {
+    return "/";
+  }
+  return path.substring(0, lastSlashIndex);
 };

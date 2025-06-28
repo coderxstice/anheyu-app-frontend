@@ -1,14 +1,18 @@
 <template>
   <el-dialog
     v-model="localVisible"
-    title="移动到"
+    :title="modalTitle"
     width="60%"
     top="10vh"
     :close-on-click-modal="false"
     class="move-modal"
     @closed="handleModalClosed"
   >
-    <div v-if="localVisible" class="move-modal-content">
+    <div
+      v-if="localVisible"
+      v-loading="isInitializing"
+      class="move-modal-content"
+    >
       <el-aside width="280px" class="tree-aside">
         <el-tree
           ref="folderTreeRef"
@@ -23,11 +27,8 @@
           node-key="id"
           highlight-current
           :expand-on-click-node="false"
-          :default-expanded-keys="expandedKeysArray"
           :current-node-key="currentNodeKey"
           @node-click="handleTreeNodeClick"
-          @node-expand="handleNodeExpand"
-          @node-collapse="handleNodeCollapse"
         >
           <template #default="{ node }">
             <span
@@ -60,23 +61,22 @@
             @set-view-mode="handleSetModalViewMode"
             @set-page-size="handleSetModalPageSize"
             @set-sort-key="handleSetModalSortKey"
-            @select-all="() => {}"
-            @clear-selection="() => {}"
-            @invert-selection="() => {}"
           />
         </div>
 
         <div
+          ref="fileContentAreaRef"
           v-loading="listLoading"
           class="file-content-area"
-          :class="{ 'dim-files': !!currentTargetFolderInfo }"
+          @scroll="handleScroll"
         >
           <component
             :is="activeViewComponent"
             :files="filesInModal"
-            :loading="listLoading"
+            :loading="false"
             :selected-file-ids="new Set()"
-            :disabled-file-ids="idsToMoveSet"
+            :disabled-file-ids="idsForActionSet"
+            :is-more-loading="isMoreLoading"
             @navigate-to="navigateToPath"
           />
         </div>
@@ -87,7 +87,7 @@
       <div class="dialog-footer">
         <div class="target-info" :title="targetPathBreadcrumb">
           <template v-if="currentTargetFolderInfo">
-            移动到:
+            {{ props.mode === "move" ? "移动到:" : "复制到:" }}
             <el-icon class="ml-2 mr-1"><Folder /></el-icon>
             <span class="font-bold target-path-text">{{
               targetPathBreadcrumb
@@ -101,11 +101,11 @@
           <el-button @click="localVisible = false">取消</el-button>
           <el-button
             type="primary"
-            :loading="isMoving"
-            :disabled="!currentTargetFolderInfo || isMoving"
-            @click="confirmMove"
+            :loading="isSubmitting"
+            :disabled="!currentTargetFolderInfo || isSubmitting"
+            @click="confirmAction"
           >
-            确定移动
+            {{ confirmButtonText }}
           </el-button>
         </div>
       </div>
@@ -114,21 +114,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, nextTick } from "vue";
 import type { PropType } from "vue";
 import { ElMessage, ElTree } from "element-plus";
-import { Folder } from "@element-plus/icons-vue";
+import { Folder, Loading } from "@element-plus/icons-vue";
 
-// === 新增：导入 FileToolbar ===
 import FileToolbar from "./FileToolbar.vue";
 import FileBreadcrumb from "./FileBreadcrumb.vue";
 import FileListView from "./FileListView.vue";
 import FileGridView from "./FileGridView.vue";
-import { fetchFilesByPathApi, moveFilesApi } from "@/api/sys-file/sys-file";
-import { type FileItem, FileType, type ParentInfo } from "@/api/sys-file/type";
-import { extractLogicalPathFromUri } from "@/utils/fileUtils";
+import {
+  fetchFilesByPathApi,
+  moveFilesApi,
+  copyFilesApi
+} from "@/api/sys-file/sys-file";
+import {
+  type FileItem,
+  FileType,
+  type ParentInfo,
+  type Pagination,
+  type FileListResponse
+} from "@/api/sys-file/type";
+import { extractLogicalPathFromUri, getParentPath } from "@/utils/fileUtils";
 
-// SortKey 类型定义
 type SortKey =
   | "name_asc"
   | "name_desc"
@@ -143,104 +151,116 @@ interface TreeNode {
   id: string;
   name: string;
   path: string;
-  isLeaf?: boolean;
-  disabled?: boolean;
-  children?: TreeNode[];
+  isLeaf: boolean;
+  disabled: boolean;
 }
-
-interface Tree {
-  [key: string]: any;
-}
-type Resolve = (data: Tree[]) => void;
+type Resolve = (data: TreeNode[]) => void;
+type ApiData = FileListResponse["data"];
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
-  itemsToMove: { type: Array as PropType<FileItem[]>, default: () => [] }
+  itemsForAction: { type: Array as PropType<FileItem[]>, default: () => [] },
+  mode: { type: String as PropType<"move" | "copy">, required: true }
 });
 
-const emit = defineEmits(["update:modelValue", "move-success"]);
+const emit = defineEmits(["update:modelValue", "success"]);
 
+const modalTitle = computed(() =>
+  props.mode === "move" ? "移动到" : "复制到"
+);
+const confirmButtonText = computed(() =>
+  props.mode === "move" ? "确定移动" : "确定复制"
+);
 const localVisible = computed({
   get: () => props.modelValue,
   set: val => emit("update:modelValue", val)
 });
 
 const folderTreeRef = ref<InstanceType<typeof ElTree> | null>(null);
-const filesInModal = ref<FileItem[]>([]);
+const fileContentAreaRef = ref<HTMLElement | null>(null);
+const isInitializing = ref(false);
 const listLoading = ref(false);
+const isMoreLoading = ref(false);
+const isSubmitting = ref(false);
 const currentPath = ref("/");
-const currentTargetFolderInfo = ref<
-  ParentInfo | { id: string; name: string; path: string } | null
->(null);
-const isMoving = ref(false);
-const currentNodeKey = ref<string>("");
-
-// === 新增：为弹窗创建独立的视图控制状态 ===
+const currentNodeKey = ref("");
+const currentTargetFolderInfo = ref<ParentInfo | null>(null);
+const filesInModal = ref<FileItem[]>([]);
 const modalViewMode = ref<"list" | "grid">("list");
 const modalSortKey = ref<SortKey>("name_asc");
 const modalPageSize = ref(50);
-
-const idsToMoveSet = computed(
-  () => new Set(props.itemsToMove.map(item => item.id))
+const paginationInfo = ref<Pagination>({
+  page: 1,
+  page_size: 50,
+  total: 0,
+  total_page: 1
+});
+const idsForActionSet = computed(
+  () => new Set(props.itemsForAction.map(item => item.id))
 );
+const dataCache = new Map<string, ApiData>();
 
-const expandedKeys = ref(new Set<string>(["root"]));
-const expandedKeysArray = computed(() => Array.from(expandedKeys.value));
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const targetPathBreadcrumb = computed(() => {
   if (!currentTargetFolderInfo.value?.path) return "我的文件";
   const path = currentTargetFolderInfo.value.path;
   if (path === "/") return "我的文件";
   const segments = path.split("/").filter(Boolean);
+  // 删除数组中的前两个特定元素 "anzhiyu:" 和 "my"
+  if (segments.length > 0 && segments[0] === "anzhiyu:") {
+    segments.shift();
+  }
+  if (segments.length > 0 && segments[0] === "my") {
+    segments.shift();
+  }
+  console.log("targetPathBreadcrumb segments:", segments);
   return `我的文件 / ${segments.join(" / ")}`;
 });
 
-// === 修改：navigateToPath 函数现在使用本地的排序和分页状态 ===
-const navigateToPath = async (path: string, page = 1) => {
-  const logicalPath = extractLogicalPathFromUri(path);
-  // 不再检查 currentPath，以允许使用新参数刷新同一路径
-  if (listLoading.value) return;
-
-  currentPath.value = logicalPath;
-  listLoading.value = true;
-
-  const [orderBy, orderDirection] = modalSortKey.value.split("_");
-
-  try {
-    const res = await fetchFilesByPathApi(
-      logicalPath,
-      orderBy,
-      orderDirection,
-      page,
-      modalPageSize.value // 使用本地分页大小
+watch(localVisible, async isVisible => {
+  if (isVisible) {
+    isInitializing.value = true;
+    dataCache.clear();
+    await nextTick();
+    const itemToLocate = props.itemsForAction[0];
+    const initialPath = extractLogicalPathFromUri(
+      itemToLocate ? getParentPath(itemToLocate.path) : "/"
     );
-    if (res.code === 200 && res.data) {
-      filesInModal.value = res.data.files;
-      const parentInfo = res.data.parent;
+    await expandTreeToPath(initialPath);
+    await navigateToPath(initialPath);
+    isInitializing.value = false;
+  }
+});
 
-      if (parentInfo) {
-        // 如果是根目录, API返回的name可能为空, 我们手动修正为"我的文件"用于显示
-        if (logicalPath === "/") {
-          parentInfo.name = "我的文件";
-        }
+const expandTreeToPath = async (path: string) => {
+  const treeInstance = folderTreeRef.value;
+  if (!treeInstance || !path || path === "/") {
+    const rootNode = treeInstance?.getNode("root");
+    if (rootNode) rootNode.expand();
+    treeInstance?.setCurrentKey("root");
+    return;
+  }
+  const pathSegments = path.split("/").filter(Boolean);
+  let currentNode: any | null = treeInstance.getNode("root");
+  if (currentNode) currentNode.expand();
 
-        parentInfo.path = extractLogicalPathFromUri(parentInfo.path);
-
-        // 这样 currentTargetFolderInfo 中将始终包含真实的ID
-        currentTargetFolderInfo.value = parentInfo;
-        currentNodeKey.value = parentInfo.id;
-      }
-    }
-  } finally {
-    listLoading.value = false;
+  for (const segment of pathSegments) {
+    if (!currentNode) break;
+    if (!currentNode.loaded) await currentNode.loadData();
+    currentNode.expand();
+    const childNode = currentNode.childNodes.find(
+      (node: any) => node.data.name === segment
+    );
+    currentNode = childNode || null;
+  }
+  if (currentNode) {
+    treeInstance.setCurrentKey(currentNode.data.id);
   }
 };
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 const loadNode = async (node: any, resolve: Resolve) => {
   if (node.level === 0) {
-    navigateToPath("/");
     return resolve([
       {
         id: "root",
@@ -251,90 +271,140 @@ const loadNode = async (node: any, resolve: Resolve) => {
       }
     ]);
   }
+  const path = extractLogicalPathFromUri(node.data.path);
 
-  if (idsToMoveSet.value.has(node.data.id)) {
-    return resolve([]);
+  if (dataCache.has(path)) {
+    const cachedData = dataCache.get(path)!;
+    const subFolders = cachedData.files
+      .filter(item => item.type === FileType.Dir)
+      .map(folder => ({
+        id: folder.id,
+        name: folder.name,
+        path: extractLogicalPathFromUri(folder.path),
+        isLeaf: idsForActionSet.value.has(folder.id),
+        disabled: idsForActionSet.value.has(folder.id)
+      }));
+    return resolve(subFolders);
   }
 
-  const parentPath = extractLogicalPathFromUri(node.data.path);
-  const MIN_LOADING_TIME = 200;
-  const apiCallPromise = fetchFilesByPathApi(
-    parentPath,
-    "type",
-    "desc",
-    1,
-    9999
-  );
-  const minDelayPromise = sleep(MIN_LOADING_TIME);
+  const minLoadingTime = 200;
+  const apiCallPromise = fetchFilesByPathApi(path, "type", "desc", 1, 9999);
+  const minDelayPromise = sleep(minLoadingTime);
 
   try {
     const [res] = await Promise.all([apiCallPromise, minDelayPromise]);
-    if (res.code === 200 && res.data?.files) {
+    if (res.code === 200 && res.data) {
+      dataCache.set(path, res.data);
       const subFolders = res.data.files
         .filter(item => item.type === FileType.Dir)
-        .map(folder => {
-          const isDisabled = idsToMoveSet.value.has(folder.id);
-          return {
-            id: folder.id,
-            name: folder.name,
-            path: extractLogicalPathFromUri(folder.path),
-            isLeaf: isDisabled,
-            disabled: isDisabled
-          };
-        });
+        .map(folder => ({
+          id: folder.id,
+          name: folder.name,
+          path: extractLogicalPathFromUri(folder.path),
+          isLeaf: idsForActionSet.value.has(folder.id),
+          disabled: idsForActionSet.value.has(folder.id)
+        }));
       resolve(subFolders);
     } else {
       resolve([]);
     }
   } catch (error) {
     await minDelayPromise;
-    console.error("Failed to load tree node:", error);
+    console.error("Failed to lazy load tree node:", error);
     resolve([]);
   }
 };
 
-watch(localVisible, isVisible => {
-  if (isVisible) {
-    expandedKeys.value.clear();
-    expandedKeys.value.add("root");
-  }
-});
+const navigateToPath = async (path: string, page = 1) => {
+  const logicalPath = extractLogicalPathFromUri(path);
+  if (page > 1 && isMoreLoading.value) return;
+  if (page === 1 && listLoading.value) return;
 
-const handleModalClosed = () => {
-  filesInModal.value = [];
+  if (page > 1) isMoreLoading.value = true;
+  else listLoading.value = true;
+
+  if (page === 1) currentPath.value = logicalPath;
+
+  try {
+    const [orderBy, orderDirection] = modalSortKey.value.split("_");
+    const res = await fetchFilesByPathApi(
+      logicalPath,
+      orderBy,
+      orderDirection,
+      page,
+      modalPageSize.value
+    );
+
+    if (res.code === 200 && res.data) {
+      if (page === 1) {
+        dataCache.set(logicalPath, res.data);
+      }
+      processApiResponse(res.data, page);
+    }
+  } catch (error) {
+    console.error("Navigation failed:", error);
+    ElMessage.error("加载文件列表失败");
+  } finally {
+    if (page > 1) isMoreLoading.value = false;
+    else listLoading.value = false;
+  }
+};
+
+const processApiResponse = (data: ApiData, page: number) => {
+  if (page === 1) filesInModal.value = data.files;
+  else filesInModal.value.push(...data.files);
+
+  if (data.pagination) paginationInfo.value = data.pagination;
+
+  const parentInfo = data.parent;
+  if (parentInfo) {
+    if (extractLogicalPathFromUri(parentInfo.path) === "/")
+      parentInfo.name = "我的文件";
+    currentTargetFolderInfo.value = parentInfo;
+    currentNodeKey.value = parentInfo.id || "root";
+  }
+};
+
+let throttleTimer: number | null = null;
+const handleScroll = () => {
+  if (throttleTimer) return;
+  throttleTimer = window.setTimeout(() => {
+    const el = fileContentAreaRef.value;
+    if (!el) return;
+    const canLoadMore =
+      paginationInfo.value.page < paginationInfo.value.total_page;
+    const isAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100;
+    if (
+      isAtBottom &&
+      canLoadMore &&
+      !isMoreLoading.value &&
+      !listLoading.value
+    ) {
+      navigateToPath(currentPath.value, paginationInfo.value.page + 1);
+    }
+    throttleTimer = null;
+  }, 200);
 };
 
 const handleTreeNodeClick = (data: TreeNode) => {
-  if (data.disabled) {
-    ElMessage.warning("不能选择正在移动的文件夹作为目标。");
-    return;
-  }
-  navigateToPath(data.path);
+  if (data.disabled) return;
+  navigateToPath(data.path, 1);
 };
 
-const handleNodeExpand = (data: TreeNode) => {
-  expandedKeys.value.add(data.id);
-};
-
-const handleNodeCollapse = (data: TreeNode) => {
-  expandedKeys.value.delete(data.id);
-};
-
-const confirmMove = async () => {
+const confirmAction = async () => {
   if (!currentTargetFolderInfo.value) {
     ElMessage.warning("无法确定目标文件夹，请重试。");
     return;
   }
-  const destinationID =
-    currentTargetFolderInfo.value.id === "root"
-      ? ""
-      : currentTargetFolderInfo.value.id;
-  const sourceIDs = props.itemsToMove.map(item => item.id);
+  const destinationID = currentTargetFolderInfo.value.id;
+  const sourceIDs = props.itemsForAction.map(item => item.id);
   if (sourceIDs.includes(destinationID)) {
-    ElMessage.error("不能将文件夹移动到其自身。");
+    ElMessage.error(
+      `不能将项目${props.mode === "move" ? "移动" : "复制"}到其自身。`
+    );
     return;
   }
-  const movingFolder = props.itemsToMove.find(
+  const movingFolder = props.itemsForAction.find(
     item =>
       item.type === FileType.Dir &&
       currentTargetFolderInfo.value?.path.startsWith(
@@ -345,29 +415,38 @@ const confirmMove = async () => {
     movingFolder &&
     movingFolder.path !== currentTargetFolderInfo.value?.path
   ) {
-    ElMessage.error(`不能将文件夹 "${movingFolder.name}" 移动到其子目录中。`);
+    const actionText = props.mode === "move" ? "移动" : "复制";
+    ElMessage.error(
+      `不能将文件夹 "${movingFolder.name}" ${actionText}到其子目录中。`
+    );
     return;
   }
-
-  isMoving.value = true;
+  isSubmitting.value = true;
   try {
-    const res = await moveFilesApi(sourceIDs, destinationID);
+    const apiToCall = props.mode === "move" ? moveFilesApi : copyFilesApi;
+    const res = await apiToCall(sourceIDs, destinationID);
     if (res.code === 200) {
-      emit("move-success");
+      emit("success", { mode: props.mode });
       localVisible.value = false;
     } else {
-      ElMessage.error(res.message || "移动失败，发生未知错误。");
+      ElMessage.error(res.message || `${modalTitle.value}失败`);
     }
   } catch (error) {
-    console.error("Move request failed:", error);
+    console.error(`${modalTitle.value} request failed:`, error);
   } finally {
-    isMoving.value = false;
+    isSubmitting.value = false;
   }
 };
 
-// === 新增：处理工具栏事件的函数 ===
+const handleModalClosed = () => {
+  filesInModal.value = [];
+  currentPath.value = "/";
+  paginationInfo.value = { page: 1, page_size: 50, total: 0, total_page: 1 };
+};
+
 const handleModalRefresh = () => {
-  navigateToPath(currentPath.value);
+  dataCache.delete(currentPath.value);
+  navigateToPath(currentPath.value, 1);
 };
 
 const handleSetModalViewMode = (mode: "list" | "grid") => {
@@ -376,22 +455,22 @@ const handleSetModalViewMode = (mode: "list" | "grid") => {
 
 const handleSetModalPageSize = (size: number) => {
   modalPageSize.value = size;
-  navigateToPath(currentPath.value); // 分页变化，重新获取第一页
+  dataCache.clear(); // 页面大小变化，缓存失效
+  navigateToPath(currentPath.value, 1);
 };
 
 const handleSetModalSortKey = (key: SortKey) => {
   modalSortKey.value = key;
-  navigateToPath(currentPath.value); // 排序变化，重新获取第一页
+  dataCache.clear(); // 排序变化，缓存失效
+  navigateToPath(currentPath.value, 1);
 };
 
-// === 修改：activeViewComponent 现在依赖本地的 modalViewMode ===
 const activeViewComponent = computed(() =>
   modalViewMode.value === "list" ? FileListView : FileGridView
 );
 </script>
 
 <style lang="scss">
-/* 样式基本无变化，仅为保持完整性 */
 .move-modal {
   .el-dialog__body {
     padding: 10px 20px;
@@ -436,8 +515,8 @@ const activeViewComponent = computed(() =>
     .file-content-area {
       flex: 1;
       overflow-y: auto;
-      margin-top: 10px;
       position: relative;
+      margin-top: 10px;
       &.dim-files {
         .file-item[data-type="File"] {
           opacity: 0.35;
@@ -478,6 +557,17 @@ const activeViewComponent = computed(() =>
         text-overflow: ellipsis;
       }
     }
+  }
+}
+.load-more-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px 0;
+  color: #909399;
+  font-size: 14px;
+  .el-icon {
+    margin-right: 8px;
   }
 }
 </style>

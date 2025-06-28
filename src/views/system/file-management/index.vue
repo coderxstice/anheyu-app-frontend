@@ -9,7 +9,6 @@
     @contextmenu.prevent="handleContextMenuTrigger"
     @click="handleContainerClick"
   >
-    <!-- 头部区域 -->
     <FileHeard
       class="mb-2"
       :has-selection="hasSelection"
@@ -21,11 +20,10 @@
       @rename="onActionRename"
       @delete="onActionDelete"
       @download="onActionDownload(getSelectedFileItems)"
-      @copy="onActionCopy"
-      @move="onActionMove(getSelectedFileItems)"
       @share="onActionShare"
+      @copy="onActionCopy(getSelectedFileItems)"
+      @move="onActionMove(getSelectedFileItems)"
     />
-    <!-- 面包屑和工具栏 -->
     <div class="flex w-full">
       <FileBreadcrumb
         class="flex-1 mb-2"
@@ -42,6 +40,7 @@
         :sort-key="sortKey"
         :page-size="pageSize"
         :has-selection="hasSelection"
+        :is-simplified="false"
         @refresh="handleRefresh"
         @select-all="selectAll"
         @clear-selection="clearSelection"
@@ -52,14 +51,18 @@
       />
     </div>
 
-    <!-- 主内容区 -->
     <div class="file-management-main rounded-2xl overflow-hidden">
-      <div class="file-content-area">
+      <div
+        ref="fileContentAreaRef"
+        class="file-content-area"
+        @scroll="handleScroll"
+      >
         <component
           :is="activeViewComponent"
           :files="sortedFiles"
           :loading="loading"
           :selected-file-ids="selectedFiles"
+          :is-more-loading="isMoreLoading"
           @select-single="selectSingle"
           @select-range="selectRange"
           @toggle-selection="toggleSelection"
@@ -69,7 +72,6 @@
       </div>
     </div>
 
-    <!-- 拖拽上传遮罩层 -->
     <div v-if="isDragging" class="drag-overlay">
       <div class="drag-content">
         <el-icon><UploadFilled /></el-icon>
@@ -78,22 +80,18 @@
       </div>
     </div>
 
-    <!-- === 浮层组件 === -->
-    <!-- 文件移动 -->
     <MoveModal
-      v-model="isMoveModalVisible"
-      :items-to-move="itemsToMove"
-      @move-success="handleMoveSuccess"
+      v-model="isDestinationModalVisible"
+      :items-for-action="itemsForAction"
+      :mode="destinationModalMode"
+      @success="handleActionSuccess"
     />
-    <!-- 详情面板 -->
     <FileDetailsPanel :file="detailsPanelFile" @close="closeDetailsPanel" />
-    <!-- 搜索 -->
     <SearchOverlay
       :visible="isSearchVisible"
       :origin="searchOrigin"
       @close="isSearchVisible = false"
     />
-    <!-- 右键菜单 -->
     <ContextMenu
       :trigger-event="contextMenuTriggerEvent"
       :selected-file-ids="selectedFiles"
@@ -101,7 +99,6 @@
       @select="onMenuSelect"
       @closed="handleContextMenuClosed"
     />
-    <!-- 上传进度 -->
     <UploadProgress
       :visible="isPanelVisible"
       :is-collapsed="isPanelCollapsed"
@@ -123,13 +120,11 @@ import { computed, ref, watch, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { ElMessageBox } from "element-plus";
 
-// --- 核心状态管理 ---
 import {
   useFileStore,
   type SortKey,
   type UploaderActions
 } from "@/store/modules/fileStore";
-// --- 引入所有需要的 Hooks ---
 import { useFileUploader } from "@/composables/useFileUploader";
 import { useFileSelection } from "@/composables/useFileSelection";
 import { useFileActions } from "./hooks/useFileActions";
@@ -138,7 +133,7 @@ import { useContextMenuHandler } from "./hooks/useContextMenuHandler";
 import { usePageInteractions } from "./hooks/usePageInteractions";
 import { useFileDownload } from "./hooks/useFileDownload";
 import { useFileModals } from "./hooks/useFileModals";
-// --- 引入所有需要的子组件 ---
+
 import FileHeard from "./components/FileHeard.vue";
 import FileBreadcrumb from "./components/FileBreadcrumb.vue";
 import FileToolbar from "./components/FileToolbar.vue";
@@ -161,7 +156,10 @@ const {
   storagePolicy,
   viewMode,
   sortKey,
-  pageSize
+  pageSize,
+  // 核心修改：从 store 获取分页和加载状态
+  pagination,
+  isMoreLoading
 } = storeToRefs(fileStore);
 
 // 2. 初始化基础 Hooks
@@ -181,22 +179,25 @@ const getSelectedFileItems = () =>
 
 // 3. 页面导航与刷新逻辑
 const uploaderActions: UploaderActions = {
-  addResumableTaskFromFileItem: async () => {} // 提供符合类型的占位符
+  addResumableTaskFromFileItem: async () => {}
 };
-const handleRefresh = () => fileStore.loadFiles(path.value, uploaderActions);
+// 核心修改：刷新和导航时，确保从第1页开始加载
+const handleRefresh = () => fileStore.loadFiles(path.value, uploaderActions, 1);
 const handleNavigate = (newPath: string) => {
   clearSelection();
-  fileStore.loadFiles(newPath, uploaderActions);
+  fileStore.loadFiles(newPath, uploaderActions, 1);
 };
 
-// 4. 初始化功能性 Hooks (依赖基础方法)
+// 4. 初始化功能性 Hooks
 const { isDownloading, onActionDownload, handleDownloadFolder } =
   useFileDownload();
 const {
-  isMoveModalVisible,
-  itemsToMove,
+  isDestinationModalVisible,
+  itemsForAction,
+  destinationModalMode,
   onActionMove,
-  handleMoveSuccess,
+  onActionCopy,
+  handleActionSuccess,
   detailsPanelFile,
   handleShowDetailsForId,
   closeDetailsPanel
@@ -211,7 +212,7 @@ const {
   computed(() => storagePolicy.value),
   () => fileStore.refreshCurrentPath(uploaderActions)
 );
-uploaderActions.addResumableTaskFromFileItem = addResumableTaskFromFileItem; // 补全 uploaderActions
+uploaderActions.addResumableTaskFromFileItem = addResumableTaskFromFileItem;
 const {
   handleUploadFile,
   handleUploadDir,
@@ -229,21 +230,18 @@ const {
   openSearchFromElement
 } = usePageInteractions(handleDrop);
 
-// 5. 简单操作 Action (连接到具体实现)
+// 5. 简单操作 Action
 const onActionRename = () => {
   if (isSingleSelection.value) handleRename(getSelectedFileItems()[0]);
 };
 const onActionDelete = () => {
   handleDelete(getSelectedFileItems());
 };
-const onActionCopy = () => {
-  console.log("Copy action triggered");
-};
 const onActionShare = () => {
   console.log("Share action triggered");
 };
 
-// 6. 右键菜单 Hook (连接所有 actions)
+// 6. 右键菜单 Hook
 const {
   contextMenuTriggerEvent,
   onMenuSelect,
@@ -259,7 +257,7 @@ const {
   onRename: onActionRename,
   onDelete: onActionDelete,
   onDownload: () => onActionDownload(getSelectedFileItems),
-  onCopy: onActionCopy,
+  onCopy: () => onActionCopy(getSelectedFileItems),
   onMove: () => onActionMove(getSelectedFileItems),
   onShare: onActionShare,
   onInfo: () => {
@@ -273,10 +271,14 @@ const selectionCountLabel = computed(
   () => `${selectedFiles.value.size} 个对象`
 );
 const fileManagerContainerRef = ref(null);
+const fileContentAreaRef = ref<HTMLElement | null>(null); // 新增 ref
+
 const handleContainerClick = (event: MouseEvent) => {
-  if (detailsPanelFile.value) {
-    if ((event.target as HTMLElement).closest(".details-panel-drawer")) return;
-  }
+  if (
+    detailsPanelFile.value &&
+    (event.target as HTMLElement).closest(".details-panel-drawer")
+  )
+    return;
   if (!hasSelection.value) return;
   const ignoredSelectors = [
     ".file-item",
@@ -316,10 +318,31 @@ const handleSetPageSize = (size: number) => fileStore.setPageSize(size);
 const handleSetSortKey = (key: SortKey) => fileStore.setSort(key);
 
 onMounted(() => {
-  if (fileStore.files.length === 0 && !fileStore.loading) handleNavigate("/");
+  if (fileStore.files.length === 0 && !fileStore.loading) {
+    handleNavigate("/");
+  }
 });
 
-// 8. 上传面板逻辑 (未来可抽离为 Hook)
+let throttleTimer: number | null = null;
+const handleScroll = () => {
+  if (throttleTimer) return;
+  throttleTimer = window.setTimeout(() => {
+    const el = fileContentAreaRef.value;
+    if (!el) return;
+
+    const canLoadMore = pagination.value.page < pagination.value.total_page;
+    const isAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 200;
+
+    if (isAtBottom && canLoadMore && !loading.value && !isMoreLoading.value) {
+      const nextPage = pagination.value.page + 1;
+      fileStore.loadFiles(path.value, uploaderActions, nextPage);
+    }
+
+    throttleTimer = null;
+  }, 200);
+};
+
+// 8. 上传面板逻辑
 const isPanelVisible = ref(false);
 const isPanelCollapsed = ref(false);
 watch(
@@ -372,6 +395,8 @@ const activeViewComponent = computed(() => viewComponents[viewMode.value]);
   display: flex;
   flex-direction: column;
   position: relative;
+  margin: 0 auto !important;
+  padding: 24px;
 }
 .file-management-main {
   width: 100%;
