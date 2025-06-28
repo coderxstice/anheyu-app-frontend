@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-06-27 13:53:45
+ * @LastEditTime: 2025-06-28 15:16:49
  * @LastEditors: 安知鱼
  */
 
@@ -279,4 +279,23 @@ export interface FolderTreeResponse {
   code: number;
   message: string;
   data: FolderTreeData;
+}
+
+/**
+ * API 返回的文件夹大小计算结果结构
+ * (对应 API 文档中的 FolderSize 对象)
+ */
+export interface FolderSizeData {
+  logicalSize: number; // 逻辑大小 (Bytes)
+  storageConsumption: number; // 实际占用空间 (Bytes)
+  fileCount: number; // 文件总数
+}
+
+/**
+ * 计算文件夹大小接口 (GET /api/file/size/:id) 的完整响应体结构
+ */
+export interface FolderSizeResponse {
+  code: number;
+  message: string;
+  data: FolderSizeData;
 }

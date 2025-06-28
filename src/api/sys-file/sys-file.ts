@@ -7,7 +7,8 @@ import {
   type FolderViewConfig,
   type UpdateFolderViewResponse,
   type ValidateUploadSessionResponse,
-  type FileItem
+  type FileItem,
+  type FolderSizeResponse
 } from "./type";
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
@@ -214,5 +215,17 @@ export const getFolderTreeApi = (id: string): Promise<FolderTreeResponse> => {
   return http.request<FolderTreeResponse>(
     "get",
     baseUrlApi(`folder/tree/${id}`)
+  );
+};
+
+/**
+ * 计算指定文件夹的大小信息
+ * @param folderId 要计算的文件夹的公共ID
+ * @returns Promise<FolderSizeResponse>
+ */
+export const calculateFolderSize = (folderId: string) => {
+  return http.request<FolderSizeResponse>(
+    "get",
+    baseUrlApi(`folder/size/${folderId}`)
   );
 };
