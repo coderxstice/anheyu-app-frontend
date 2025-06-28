@@ -11,10 +11,12 @@
     <div
       v-if="localVisible"
       v-loading="isInitializing"
+      element-loading-text="正在初始化..."
       class="move-modal-content"
     >
       <el-aside width="280px" class="tree-aside">
         <el-tree
+          v-if="!isInitializing"
           ref="folderTreeRef"
           lazy
           :load="loadNode"
@@ -27,6 +29,7 @@
           node-key="id"
           highlight-current
           :expand-on-click-node="false"
+          :default-expanded-keys="defaultExpandedKeys"
           :current-node-key="currentNodeKey"
           @node-click="handleTreeNodeClick"
         >
@@ -117,7 +120,7 @@
 import { ref, computed, watch, nextTick } from "vue";
 import type { PropType } from "vue";
 import { ElMessage, ElTree } from "element-plus";
-import { Folder, Loading } from "@element-plus/icons-vue";
+import { Folder } from "@element-plus/icons-vue";
 
 import FileToolbar from "./FileToolbar.vue";
 import FileBreadcrumb from "./FileBreadcrumb.vue";
@@ -165,6 +168,7 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue", "success"]);
 
+// --- 基本计算属性和响应式引用 ---
 const modalTitle = computed(() =>
   props.mode === "move" ? "移动到" : "复制到"
 );
@@ -175,15 +179,24 @@ const localVisible = computed({
   get: () => props.modelValue,
   set: val => emit("update:modelValue", val)
 });
+const idsForActionSet = computed(
+  () => new Set(props.itemsForAction.map(item => item.id))
+);
 
+// --- 组件引用 ---
 const folderTreeRef = ref<InstanceType<typeof ElTree> | null>(null);
 const fileContentAreaRef = ref<HTMLElement | null>(null);
+
+// --- 状态管理 ---
 const isInitializing = ref(false);
 const listLoading = ref(false);
 const isMoreLoading = ref(false);
 const isSubmitting = ref(false);
+
+// --- 数据模型 ---
 const currentPath = ref("/");
 const currentNodeKey = ref("");
+const defaultExpandedKeys = ref<string[]>([]);
 const currentTargetFolderInfo = ref<ParentInfo | null>(null);
 const filesInModal = ref<FileItem[]>([]);
 const modalViewMode = ref<"list" | "grid">("list");
@@ -195,70 +208,152 @@ const paginationInfo = ref<Pagination>({
   total: 0,
   total_page: 1
 });
-const idsForActionSet = computed(
-  () => new Set(props.itemsForAction.map(item => item.id))
-);
+
+// --- 核心数据缓存 ---
 const dataCache = new Map<string, ApiData>();
 
+// --- 类型兼容的占位数据工厂 ---
+const createPlaceholderFileItem = (
+  id: string,
+  name: string,
+  path: string
+): FileItem => ({
+  id,
+  name,
+  path,
+  type: FileType.Dir,
+  size: 0,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  owned: true,
+  shared: false,
+  permission: null,
+  capability: "",
+  primary_entity_public_id: ""
+});
+
+const createPlaceholderApiData = (childFileItem: FileItem): ApiData => ({
+  files: [childFileItem],
+  parent: null,
+  pagination: { page: 1, page_size: 1, total: 1, total_page: 1 },
+  props: {
+    order_by_options: ["name", "size", "updated_at", "created_at"],
+    order_direction_options: ["asc", "desc"]
+  },
+  context_hint: "",
+  storage_policy: { id: "", name: "", type: "", max_size: 0 },
+  view: { view: "list", order: "name", page_size: 50, order_direction: "asc" }
+});
+
+// --- 工具函数 ---
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const targetPathBreadcrumb = computed(() => {
   if (!currentTargetFolderInfo.value?.path) return "我的文件";
-  const path = currentTargetFolderInfo.value.path;
+  const path = extractLogicalPathFromUri(currentTargetFolderInfo.value.path);
   if (path === "/") return "我的文件";
   const segments = path.split("/").filter(Boolean);
-  // 删除数组中的前两个特定元素 "anzhiyu:" 和 "my"
-  if (segments.length > 0 && segments[0] === "anzhiyu:") {
-    segments.shift();
-  }
-  if (segments.length > 0 && segments[0] === "my") {
-    segments.shift();
-  }
-  console.log("targetPathBreadcrumb segments:", segments);
   return `我的文件 / ${segments.join(" / ")}`;
 });
 
-watch(localVisible, async isVisible => {
+// --- 初始化逻辑 ---
+watch(localVisible, isVisible => {
   if (isVisible) {
-    isInitializing.value = true;
-    dataCache.clear();
-    await nextTick();
-    const itemToLocate = props.itemsForAction[0];
-    const initialPath = extractLogicalPathFromUri(
-      itemToLocate ? getParentPath(itemToLocate.path) : "/"
-    );
-    await expandTreeToPath(initialPath);
-    await navigateToPath(initialPath);
-    isInitializing.value = false;
+    initializeComponent();
   }
 });
 
-const expandTreeToPath = async (path: string) => {
-  const treeInstance = folderTreeRef.value;
-  if (!treeInstance || !path || path === "/") {
-    const rootNode = treeInstance?.getNode("root");
-    if (rootNode) rootNode.expand();
-    treeInstance?.setCurrentKey("root");
-    return;
-  }
-  const pathSegments = path.split("/").filter(Boolean);
-  let currentNode: any | null = treeInstance.getNode("root");
-  if (currentNode) currentNode.expand();
+const initializeComponent = async () => {
+  isInitializing.value = true;
+  resetState();
 
-  for (const segment of pathSegments) {
-    if (!currentNode) break;
-    if (!currentNode.loaded) await currentNode.loadData();
-    currentNode.expand();
-    const childNode = currentNode.childNodes.find(
-      (node: any) => node.data.name === segment
+  const itemToLocate = props.itemsForAction[0];
+  const initialPath = extractLogicalPathFromUri(
+    itemToLocate ? getParentPath(itemToLocate.path) : "/"
+  );
+
+  // 修正: 在初始化开始时，立即同步 currentPath，确保顶部面包屑正确显示
+  currentPath.value = initialPath;
+
+  try {
+    const [orderBy, orderDirection] = modalSortKey.value.split("_");
+    const res = await fetchFilesByPathApi(
+      initialPath,
+      orderBy,
+      orderDirection,
+      1,
+      modalPageSize.value
     );
-    currentNode = childNode || null;
-  }
-  if (currentNode) {
-    treeInstance.setCurrentKey(currentNode.data.id);
+
+    if (res.code !== 200 || !res.data) {
+      ElMessage.error("初始化失败，无法加载目标位置。");
+      isInitializing.value = false;
+      return;
+    }
+
+    const targetData = res.data;
+    dataCache.set(initialPath, targetData);
+
+    primeAncestorCaches(targetData);
+    processApiResponse(targetData, 1);
+    defaultExpandedKeys.value = generatePathKeys(initialPath);
+  } catch (error) {
+    console.error("Initialization failed:", error);
+    ElMessage.error("初始化加载失败！");
+  } finally {
+    await nextTick();
+    isInitializing.value = false;
   }
 };
 
+const primeAncestorCaches = (targetData: ApiData) => {
+  let childInfo: FileItem | ParentInfo | null = targetData.parent;
+
+  if (!childInfo) return;
+  const childLogicalPath = extractLogicalPathFromUri(childInfo.path);
+  if (childLogicalPath === "/") return;
+
+  let currentLogicalPathToPrime = getParentPath(childLogicalPath);
+  let correctedChildInfo: FileItem = {
+    ...childInfo,
+    path: childLogicalPath
+  } as FileItem;
+
+  while (true) {
+    if (!correctedChildInfo) break;
+
+    const placeholderData = createPlaceholderApiData(correctedChildInfo);
+    dataCache.set(currentLogicalPathToPrime, placeholderData);
+
+    if (currentLogicalPathToPrime === "/") break;
+
+    const parentLogicalPath = getParentPath(currentLogicalPathToPrime);
+    correctedChildInfo = createPlaceholderFileItem(
+      currentLogicalPathToPrime,
+      currentLogicalPathToPrime.split("/").pop() || "",
+      currentLogicalPathToPrime
+    );
+
+    currentLogicalPathToPrime = parentLogicalPath;
+  }
+};
+
+const generatePathKeys = (path: string): string[] => {
+  const keys = ["root"];
+  const segments = path.split("/").filter(Boolean);
+  let currentPath = "";
+  for (const segment of segments) {
+    currentPath += `/${segment}`;
+    keys.push(currentPath);
+  }
+
+  if (currentTargetFolderInfo.value?.id) {
+    keys.push(currentTargetFolderInfo.value.id);
+  }
+  return [...new Set(keys)];
+};
+
+// --- Tree 和导航逻辑 ---
 const loadNode = async (node: any, resolve: Resolve) => {
   if (node.level === 0) {
     return resolve([
@@ -271,14 +366,16 @@ const loadNode = async (node: any, resolve: Resolve) => {
       }
     ]);
   }
-  const path = extractLogicalPathFromUri(node.data.path);
+
+  const path =
+    node.data.id === "root" ? "/" : extractLogicalPathFromUri(node.data.path);
 
   if (dataCache.has(path)) {
     const cachedData = dataCache.get(path)!;
     const subFolders = cachedData.files
       .filter(item => item.type === FileType.Dir)
       .map(folder => ({
-        id: folder.id,
+        id: folder.id || extractLogicalPathFromUri(folder.path),
         name: folder.name,
         path: extractLogicalPathFromUri(folder.path),
         isLeaf: idsForActionSet.value.has(folder.id),
@@ -317,8 +414,9 @@ const loadNode = async (node: any, resolve: Resolve) => {
 
 const navigateToPath = async (path: string, page = 1) => {
   const logicalPath = extractLogicalPathFromUri(path);
-  if (page > 1 && isMoreLoading.value) return;
-  if (page === 1 && listLoading.value) return;
+  if ((page > 1 && isMoreLoading.value) || (page === 1 && listLoading.value)) {
+    return;
+  }
 
   if (page > 1) isMoreLoading.value = true;
   else listLoading.value = true;
@@ -336,7 +434,7 @@ const navigateToPath = async (path: string, page = 1) => {
     );
 
     if (res.code === 200 && res.data) {
-      if (page === 1) {
+      if (!isInitializing.value) {
         dataCache.set(logicalPath, res.data);
       }
       processApiResponse(res.data, page);
@@ -358,13 +456,15 @@ const processApiResponse = (data: ApiData, page: number) => {
 
   const parentInfo = data.parent;
   if (parentInfo) {
-    if (extractLogicalPathFromUri(parentInfo.path) === "/")
+    if (extractLogicalPathFromUri(parentInfo.path) === "/") {
       parentInfo.name = "我的文件";
+    }
     currentTargetFolderInfo.value = parentInfo;
     currentNodeKey.value = parentInfo.id || "root";
   }
 };
 
+// --- 事件处理 ---
 let throttleTimer: number | null = null;
 const handleScroll = () => {
   if (throttleTimer) return;
@@ -396,24 +496,31 @@ const confirmAction = async () => {
     ElMessage.warning("无法确定目标文件夹，请重试。");
     return;
   }
+
   const destinationID = currentTargetFolderInfo.value.id;
+
   const sourceIDs = props.itemsForAction.map(item => item.id);
-  if (sourceIDs.includes(destinationID)) {
+  if (destinationID && sourceIDs.includes(destinationID)) {
     ElMessage.error(
       `不能将项目${props.mode === "move" ? "移动" : "复制"}到其自身。`
     );
     return;
   }
-  const movingFolder = props.itemsForAction.find(
-    item =>
-      item.type === FileType.Dir &&
-      currentTargetFolderInfo.value?.path.startsWith(
-        item.path + (item.path === "/" ? "" : "/")
-      )
-  );
+
+  const movingFolder = props.itemsForAction.find(item => {
+    if (item.type !== FileType.Dir || !currentTargetFolderInfo.value)
+      return false;
+    const targetPath = extractLogicalPathFromUri(
+      currentTargetFolderInfo.value.path
+    );
+    const sourcePath = extractLogicalPathFromUri(item.path);
+    return targetPath.startsWith(sourcePath + (sourcePath === "/" ? "" : "/"));
+  });
+
   if (
     movingFolder &&
-    movingFolder.path !== currentTargetFolderInfo.value?.path
+    extractLogicalPathFromUri(movingFolder.path) !==
+      extractLogicalPathFromUri(currentTargetFolderInfo.value.path)
   ) {
     const actionText = props.mode === "move" ? "移动" : "复制";
     ElMessage.error(
@@ -421,6 +528,7 @@ const confirmAction = async () => {
     );
     return;
   }
+
   isSubmitting.value = true;
   try {
     const apiToCall = props.mode === "move" ? moveFilesApi : copyFilesApi;
@@ -438,10 +546,18 @@ const confirmAction = async () => {
   }
 };
 
-const handleModalClosed = () => {
+const resetState = () => {
+  dataCache.clear();
   filesInModal.value = [];
   currentPath.value = "/";
   paginationInfo.value = { page: 1, page_size: 50, total: 0, total_page: 1 };
+  currentNodeKey.value = "";
+  defaultExpandedKeys.value = [];
+  currentTargetFolderInfo.value = null;
+};
+
+const handleModalClosed = () => {
+  resetState();
 };
 
 const handleModalRefresh = () => {
@@ -455,13 +571,13 @@ const handleSetModalViewMode = (mode: "list" | "grid") => {
 
 const handleSetModalPageSize = (size: number) => {
   modalPageSize.value = size;
-  dataCache.clear(); // 页面大小变化，缓存失效
+  dataCache.clear();
   navigateToPath(currentPath.value, 1);
 };
 
 const handleSetModalSortKey = (key: SortKey) => {
   modalSortKey.value = key;
-  dataCache.clear(); // 排序变化，缓存失效
+  dataCache.clear();
   navigateToPath(currentPath.value, 1);
 };
 
