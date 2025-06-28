@@ -1,7 +1,6 @@
 <template>
   <div class="file-toolbar rounded-2xl overflow-hidden bg-white">
     <div class="right-actions">
-      <!-- 刷新 -->
       <el-tooltip content="刷新" placement="bottom">
         <el-button
           circle
@@ -11,8 +10,7 @@
         />
       </el-tooltip>
 
-      <!-- 选择操作 -->
-      <el-tooltip content="选择操作" placement="bottom">
+      <el-tooltip v-if="!isSimplified" content="选择操作" placement="bottom">
         <div>
           <el-dropdown trigger="click" placement="bottom-end">
             <el-button
@@ -40,7 +38,6 @@
         </div>
       </el-tooltip>
 
-      <!-- 视图设置 -->
       <el-tooltip content="视图设置" placement="bottom">
         <div>
           <el-popover
@@ -56,7 +53,6 @@
                 class="!text-[var(--anzhiyu-white)] !border-none !bg-[#73A6F5]"
               />
             </template>
-            <!-- 视图切换 -->
             <el-button-group class="view-switcher">
               <div>
                 <el-button
@@ -72,10 +68,8 @@
               </div>
             </el-button-group>
 
-            <!-- 分页大小 -->
             <div>
               <h1 class="text-base mt-2">分页大小</h1>
-              <!-- **核心修改**: 分离 input 和 change 事件 -->
               <el-slider
                 :model-value="localPageSize"
                 :min="10"
@@ -93,7 +87,6 @@
         </div>
       </el-tooltip>
 
-      <!-- 排序 -->
       <el-tooltip content="排序" placement="bottom">
         <div>
           <el-dropdown
@@ -186,6 +179,7 @@ const props = defineProps<{
   sortKey: SortKey;
   pageSize: number;
   hasSelection: boolean;
+  isSimplified?: boolean; // 设为可选，默认为 false
 }>();
 
 const emit = defineEmits<{
@@ -198,7 +192,6 @@ const emit = defineEmits<{
   (e: "set-sort-key", key: SortKey): void;
 }>();
 
-// **核心修改**: 处理 el-slider 的状态同步
 const localPageSize = ref(props.pageSize);
 
 // 当外部 prop 变化时（例如，加载了一个有不同配置的文件夹），同步更新本地值

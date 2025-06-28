@@ -42,11 +42,30 @@
       </el-aside>
 
       <el-main class="file-browser-main">
-        <FileBreadcrumb
-          :key="currentPath"
-          :path="currentPath"
-          @navigate="navigateToPath"
-        />
+        <div class="flex w-full">
+          <FileBreadcrumb
+            :key="currentPath"
+            class="flex-1 mb-2"
+            :path="currentPath"
+            @navigate="navigateToPath"
+          />
+          <FileToolbar
+            class="mb-2 ml-2"
+            :view-mode="modalViewMode"
+            :sort-key="modalSortKey"
+            :page-size="modalPageSize"
+            :has-selection="false"
+            :is-simplified="true"
+            @refresh="handleModalRefresh"
+            @set-view-mode="handleSetModalViewMode"
+            @set-page-size="handleSetModalPageSize"
+            @set-sort-key="handleSetModalSortKey"
+            @select-all="() => {}"
+            @clear-selection="() => {}"
+            @invert-selection="() => {}"
+          />
+        </div>
+
         <div
           v-loading="listLoading"
           class="file-content-area"
@@ -100,12 +119,25 @@ import type { PropType } from "vue";
 import { ElMessage, ElTree } from "element-plus";
 import { Folder } from "@element-plus/icons-vue";
 
+// === 新增：导入 FileToolbar ===
+import FileToolbar from "./FileToolbar.vue";
 import FileBreadcrumb from "./FileBreadcrumb.vue";
 import FileListView from "./FileListView.vue";
 import FileGridView from "./FileGridView.vue";
 import { fetchFilesByPathApi, moveFilesApi } from "@/api/sys-file/sys-file";
 import { type FileItem, FileType, type ParentInfo } from "@/api/sys-file/type";
 import { extractLogicalPathFromUri } from "@/utils/fileUtils";
+
+// SortKey 类型定义
+type SortKey =
+  | "name_asc"
+  | "name_desc"
+  | "size_asc"
+  | "size_desc"
+  | "updated_at_asc"
+  | "updated_at_desc"
+  | "created_at_asc"
+  | "created_at_desc";
 
 interface TreeNode {
   id: string;
@@ -116,7 +148,6 @@ interface TreeNode {
   children?: TreeNode[];
 }
 
-// 定义 el-tree lazy load 需要的类型
 interface Tree {
   [key: string]: any;
 }
@@ -138,12 +169,16 @@ const folderTreeRef = ref<InstanceType<typeof ElTree> | null>(null);
 const filesInModal = ref<FileItem[]>([]);
 const listLoading = ref(false);
 const currentPath = ref("/");
-const viewMode = ref("list");
 const currentTargetFolderInfo = ref<
   ParentInfo | { id: string; name: string; path: string } | null
 >(null);
 const isMoving = ref(false);
 const currentNodeKey = ref<string>("");
+
+// === 新增：为弹窗创建独立的视图控制状态 ===
+const modalViewMode = ref<"list" | "grid">("list");
+const modalSortKey = ref<SortKey>("name_asc");
+const modalPageSize = ref(50);
 
 const idsToMoveSet = computed(
   () => new Set(props.itemsToMove.map(item => item.id))
@@ -160,24 +195,38 @@ const targetPathBreadcrumb = computed(() => {
   return `我的文件 / ${segments.join(" / ")}`;
 });
 
-// navigateToPath 现在只负责更新右侧文件列表
-const navigateToPath = async (path: string) => {
+// === 修改：navigateToPath 函数现在使用本地的排序和分页状态 ===
+const navigateToPath = async (path: string, page = 1) => {
   const logicalPath = extractLogicalPathFromUri(path);
-  if (listLoading.value && currentPath.value === logicalPath) return;
+  // 不再检查 currentPath，以允许使用新参数刷新同一路径
+  if (listLoading.value) return;
 
   currentPath.value = logicalPath;
   listLoading.value = true;
+
+  const [orderBy, orderDirection] = modalSortKey.value.split("_");
+
   try {
-    const res = await fetchFilesByPathApi(logicalPath, "name", "asc", 1, 500);
+    const res = await fetchFilesByPathApi(
+      logicalPath,
+      orderBy,
+      orderDirection,
+      page,
+      modalPageSize.value // 使用本地分页大小
+    );
     if (res.code === 200 && res.data) {
       filesInModal.value = res.data.files;
-      const parentInfo =
-        logicalPath === "/"
-          ? { id: "root", name: "我的文件", path: "/" }
-          : res.data.parent;
+      const parentInfo = res.data.parent;
 
       if (parentInfo) {
+        // 如果是根目录, API返回的name可能为空, 我们手动修正为"我的文件"用于显示
+        if (logicalPath === "/") {
+          parentInfo.name = "我的文件";
+        }
+
         parentInfo.path = extractLogicalPathFromUri(parentInfo.path);
+
+        // 这样 currentTargetFolderInfo 中将始终包含真实的ID
         currentTargetFolderInfo.value = parentInfo;
         currentNodeKey.value = parentInfo.id;
       }
@@ -187,12 +236,9 @@ const navigateToPath = async (path: string) => {
   }
 };
 
-// 辅助函数：创建一个延时 Promise
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// el-tree 的 lazy load 方法 (已包含防闪烁处理)
 const loadNode = async (node: any, resolve: Resolve) => {
-  // 1. 加载根节点
   if (node.level === 0) {
     navigateToPath("/");
     return resolve([
@@ -206,17 +252,14 @@ const loadNode = async (node: any, resolve: Resolve) => {
     ]);
   }
 
-  // 2. 如果节点本身是待移动项，则将其视为叶子节点，不可展开
   if (idsToMoveSet.value.has(node.data.id)) {
     return resolve([]);
   }
 
-  // 3. 异步获取当前节点的子文件夹 (防闪烁处理)
-  const MIN_LOADING_TIME = 200; // 最小加载时间，单位毫秒
-
-  // 同时开始API请求和计时
+  const parentPath = extractLogicalPathFromUri(node.data.path);
+  const MIN_LOADING_TIME = 200;
   const apiCallPromise = fetchFilesByPathApi(
-    extractLogicalPathFromUri(node.data.path),
+    parentPath,
     "type",
     "desc",
     1,
@@ -225,9 +268,7 @@ const loadNode = async (node: any, resolve: Resolve) => {
   const minDelayPromise = sleep(MIN_LOADING_TIME);
 
   try {
-    // 使用 Promise.all 等待 API 和最小延时都完成
     const [res] = await Promise.all([apiCallPromise, minDelayPromise]);
-
     if (res.code === 200 && res.data?.files) {
       const subFolders = res.data.files
         .filter(item => item.type === FileType.Dir)
@@ -246,17 +287,14 @@ const loadNode = async (node: any, resolve: Resolve) => {
       resolve([]);
     }
   } catch (error) {
-    // 即使出错，也最好等待最小延时结束，以保持UI行为一致性
     await minDelayPromise;
     console.error("Failed to load tree node:", error);
     resolve([]);
   }
 };
 
-// watch 逻辑简化
 watch(localVisible, isVisible => {
   if (isVisible) {
-    // 每次打开弹窗时，重置状态
     expandedKeys.value.clear();
     expandedKeys.value.add("root");
   }
@@ -271,11 +309,9 @@ const handleTreeNodeClick = (data: TreeNode) => {
     ElMessage.warning("不能选择正在移动的文件夹作为目标。");
     return;
   }
-  // 点击节点文字时，更新右侧文件列表
   navigateToPath(data.path);
 };
 
-// 这两个方法现在用于管理 expandedKeys，以便在重新打开时恢复树的展开状态
 const handleNodeExpand = (data: TreeNode) => {
   expandedKeys.value.add(data.id);
 };
@@ -329,12 +365,33 @@ const confirmMove = async () => {
   }
 };
 
+// === 新增：处理工具栏事件的函数 ===
+const handleModalRefresh = () => {
+  navigateToPath(currentPath.value);
+};
+
+const handleSetModalViewMode = (mode: "list" | "grid") => {
+  modalViewMode.value = mode;
+};
+
+const handleSetModalPageSize = (size: number) => {
+  modalPageSize.value = size;
+  navigateToPath(currentPath.value); // 分页变化，重新获取第一页
+};
+
+const handleSetModalSortKey = (key: SortKey) => {
+  modalSortKey.value = key;
+  navigateToPath(currentPath.value); // 排序变化，重新获取第一页
+};
+
+// === 修改：activeViewComponent 现在依赖本地的 modalViewMode ===
 const activeViewComponent = computed(() =>
-  viewMode.value === "list" ? FileListView : FileGridView
+  modalViewMode.value === "list" ? FileListView : FileGridView
 );
 </script>
 
 <style lang="scss">
+/* 样式基本无变化，仅为保持完整性 */
 .move-modal {
   .el-dialog__body {
     padding: 10px 20px;
