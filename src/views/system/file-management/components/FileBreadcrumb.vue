@@ -2,7 +2,7 @@
   <div class="file-breadcrumb-wrapper" @click="switchToEditMode">
     <div v-if="!isEditing" class="file-breadcrumb">
       <el-tooltip content="返回根目录" placement="bottom">
-        <el-icon class="home-icon" @click.stop="goToPath('/')"
+        <el-icon class="home-icon" @click.stop="onNavigate('/')"
           ><HomeFilled
         /></el-icon>
       </el-tooltip>
@@ -11,8 +11,9 @@
           v-for="(segment, index) in pathSegments"
           :key="segment.path"
         >
+          <!-- 最后一个 segment 且需要显示下拉菜单时 -->
           <el-dropdown
-            v-if="index === pathSegments.length - 1 && index !== 0"
+            v-if="isLastSegment(index) && showDropdown"
             trigger="click"
             placement="bottom-start"
             @command="handleCommand"
@@ -94,7 +95,8 @@
             </template>
           </el-dropdown>
 
-          <span v-else class="is-link" @click.stop="goToPath(segment.path)">
+          <!-- 其他情况，作为普通链接 -->
+          <span v-else class="is-link" @click.stop="onNavigate(segment.path)">
             {{ segment.name }}
           </span>
         </el-breadcrumb-item>
@@ -103,7 +105,7 @@
 
     <div v-else class="input-mode">
       <el-tooltip content="返回根目录" placement="bottom">
-        <el-icon class="home-icon" @click.stop="goToPath('/')"
+        <el-icon class="home-icon" @click.stop="onNavigate('/')"
           ><HomeFilled
         /></el-icon>
       </el-tooltip>
@@ -119,10 +121,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, nextTick } from "vue";
-import { useFileStore } from "@/store/modules/fileStore";
+import { computed, ref, nextTick, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { storeToRefs } from "pinia";
+import { extractLogicalPathFromUri } from "@/utils/fileUtils";
 
 import { HomeFilled, ArrowRight } from "@element-plus/icons-vue";
 import Back from "@iconify-icons/ep/back";
@@ -137,85 +138,102 @@ import Setting from "@iconify-icons/ep/setting";
 import InfoFilled from "@iconify-icons/ep/info-filled";
 import Delete from "@iconify-icons/ep/delete";
 
-const emit = defineEmits<{
-  (e: "show-details", id: string): void;
-  (e: "download-folder", id: string): void; // 新增事件
+const props = defineProps<{
+  path: string;
+  parentInfo?: { id: string; name: string } | null;
+  showDropdown?: boolean;
 }>();
 
-const fileStore = useFileStore();
-const { path, pathSegments, parentInfo } = storeToRefs(fileStore);
+const emit = defineEmits<{
+  (e: "navigate", path: string): void;
+  (e: "show-details", id: string): void;
+  (e: "download-folder", id: string): void;
+}>();
 
 const isEditing = ref(false);
-const pathInput = ref("");
+const pathInput = ref(props.path);
 const pathInputRef = ref<HTMLInputElement | null>(null);
 const isDropdownVisible = ref(false);
+
+const pathSegments = computed(() => {
+  const logicalPath = extractLogicalPathFromUri(props.path || "/");
+
+  if (logicalPath === "/") {
+    return [{ name: "我的文件", path: "/" }];
+  }
+
+  const segments = logicalPath.split("/").filter(Boolean);
+  const result = [{ name: "我的文件", path: "/" }];
+  let cumulativePath = "";
+  for (const segment of segments) {
+    cumulativePath += `/${segment}`;
+    result.push({ name: segment, path: cumulativePath });
+  }
+
+  return result;
+});
+
+const isLastSegment = (index: number) => {
+  return (
+    index === pathSegments.value.length - 1 && pathSegments.value.length > 1
+  );
+};
+
+const onNavigate = (newPath: string) => {
+  const logicalPath = extractLogicalPathFromUri(newPath);
+  if (logicalPath === props.path && logicalPath !== "/") return;
+  emit("navigate", logicalPath);
+};
 
 const switchToEditMode = () => {
   if (isDropdownVisible.value) return;
   isEditing.value = true;
-  pathInput.value = path.value;
   nextTick(() => {
     pathInputRef.value?.focus();
   });
 };
 
-const goToPath = (newPath: string) => {
-  fileStore.loadFiles(newPath, {
-    addResumableTaskFromFileItem: async () => {}
-  });
-};
-
 const handleSubmit = () => {
   let finalPath = pathInput.value.trim();
-  if (!finalPath.startsWith("/")) finalPath = `/${finalPath}`;
+  // 使用工具函数确保是逻辑路径
+  finalPath = extractLogicalPathFromUri(finalPath);
+  // 规范化路径，移除末尾斜杠
   if (finalPath.length > 1 && finalPath.endsWith("/")) {
     finalPath = finalPath.slice(0, -1);
   }
-  if (finalPath === path.value) {
-    isEditing.value = false;
-    return;
+  if (!finalPath.startsWith("/")) {
+    finalPath = `/${finalPath}`;
   }
-  goToPath(finalPath);
+
   isEditing.value = false;
+  if (finalPath === props.path) return;
+  onNavigate(finalPath);
 };
 
-type CommandAction =
-  | "enter"
-  | "download"
-  | "share"
-  | "rename"
-  | "copy"
-  | "link"
-  | "tags"
-  | "organize"
-  | "more"
-  | "info"
-  | "delete";
-
 interface CommandPayload {
-  action: CommandAction;
+  action: string;
 }
 
 const handleCommand = (command: CommandPayload) => {
   const { action } = command;
-  if (!parentInfo.value?.id) {
+  if (!props.parentInfo?.id) {
     ElMessage.warning("无法获取当前目录信息");
     return;
   }
 
   switch (action) {
     case "enter":
-      goToPath(path.value);
+      onNavigate(props.path);
       break;
     case "info":
-      emit("show-details", parentInfo.value.id);
+      emit("show-details", props.parentInfo.id);
       break;
     case "download":
-      emit("download-folder", parentInfo.value.id);
+      emit("download-folder", props.parentInfo.id);
       break;
     case "delete":
       ElMessageBox.confirm(
-        `确定要删除文件夹 "${parentInfo.value.name}" 吗？此操作不可恢复。`,
+        `确定要删除文件夹 "${props.parentInfo.name}" 吗？此操作不可恢复。`,
         "警告",
         {
           confirmButtonText: "确定删除",
@@ -224,7 +242,7 @@ const handleCommand = (command: CommandPayload) => {
         }
       )
         .then(() => {
-          ElMessage.success(`文件夹 "${parentInfo.value?.name}" 已删除`);
+          ElMessage.info("删除操作应由父组件处理");
         })
         .catch(() => ElMessage.info("已取消删除"));
       break;
@@ -233,6 +251,14 @@ const handleCommand = (command: CommandPayload) => {
       break;
   }
 };
+
+watch(
+  () => props.path,
+  newPath => {
+    pathInput.value = extractLogicalPathFromUri(newPath);
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped lang="scss">

@@ -2,13 +2,19 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-06-28 15:16:49
+ * @LastEditTime: 2025-06-28 16:20:43
  * @LastEditors: 安知鱼
  */
 
 // =================================================================
 // I. 前端内部使用的核心类型 (Core Frontend Types)
 // =================================================================
+
+export interface BaseResponse<T> {
+  code: number; // 响应状态码
+  message: string; // 响应消息
+  data: T;
+}
 
 /**
  * 对应后端 type 字段的枚举，提高代码可读性

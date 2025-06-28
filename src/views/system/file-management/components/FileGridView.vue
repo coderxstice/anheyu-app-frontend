@@ -1,14 +1,15 @@
 <template>
   <div v-loading="loading" class="file-grid-view" data-is-file-container="true">
-    <!-- 使用从 props 传入的文件列表 -->
     <div
       v-for="file in files"
       :key="file.id"
       class="grid-item"
       :data-id="file.id"
+      :data-type="file.type === FileType.Dir ? 'Dir' : 'File'"
       :class="{
         selected: selectedFileIds.has(file.id),
-        'is-uploading': file.metadata?.['sys:upload_session_id']
+        'is-uploading': file.metadata?.['sys:upload_session_id'],
+        'is-disabled': disabledFileIds?.has(file.id)
       }"
       @click="handleItemClick(file, $event)"
       @dblclick="handleItemDblClick(file)"
@@ -18,8 +19,6 @@
     >
       <div class="item-icon">
         <component :is="getFileIcon(file)" class="file-icon" />
-
-        <!-- **核心新增**: 上传中状态的叠加层 -->
         <div
           v-if="file.metadata?.['sys:upload_session_id']"
           class="uploading-overlay"
@@ -42,18 +41,33 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, type PropType } from "vue";
 import { useFileIcons } from "../hooks/useFileIcons";
 import gsap from "gsap";
 import { FileItem, FileType } from "@/api/sys-file/type";
-import { Loading } from "@element-plus/icons-vue"; // **核心新增**: 引入 Loading 图标
+import { Loading } from "@element-plus/icons-vue";
+import { ElMessage } from "element-plus";
+import { extractLogicalPathFromUri } from "@/utils/fileUtils";
 
 // --- 1. 定义 Props 和 Emits ---
-const props = defineProps<{
-  files: FileItem[];
-  loading: boolean;
-  selectedFileIds: Set<string>;
-}>();
+const props = defineProps({
+  files: {
+    type: Array as PropType<FileItem[]>,
+    required: true
+  },
+  loading: {
+    type: Boolean,
+    default: false
+  },
+  selectedFileIds: {
+    type: Set as PropType<Set<string>>,
+    required: true
+  },
+  disabledFileIds: {
+    type: Set as PropType<Set<string>>,
+    default: () => new Set()
+  }
+});
 
 const emit = defineEmits<{
   (e: "select-single", fileId: string): void;
@@ -66,7 +80,7 @@ const emit = defineEmits<{
 // --- 2. 初始化独立的 Hooks ---
 const { getFileIcon } = useFileIcons();
 
-// --- 3. 动画处理 (保持不变) ---
+// --- 3. 动画处理 ---
 const handleMouseDown = (event: MouseEvent) => {
   gsap.to(event.currentTarget as HTMLElement, {
     scale: 0.95,
@@ -89,12 +103,10 @@ const handleMouseLeave = (event: MouseEvent) => {
   });
 };
 
-// --- 4. 修改事件处理器，通过 emit 发出意图 ---
+// --- 4. 事件处理器 ---
 const handleItemClick = (file: FileItem, event: MouseEvent) => {
-  // **核心修改**: 如果文件正在上传中，则禁止所有点击交互
-  if (file.metadata?.["sys:upload_session_id"]) {
-    return;
-  }
+  if (props.disabledFileIds?.has(file.id)) return;
+  if (file.metadata?.["sys:upload_session_id"]) return;
 
   if (event.shiftKey) {
     emit("select-range", file.id);
@@ -106,13 +118,15 @@ const handleItemClick = (file: FileItem, event: MouseEvent) => {
 };
 
 const handleItemDblClick = (file: FileItem) => {
-  // **核心修改**: 如果文件正在上传中，则禁止双击导航
-  if (file.metadata?.["sys:upload_session_id"]) {
+  if (props.disabledFileIds?.has(file.id)) {
+    ElMessage.warning("不能进入正在移动的文件夹。");
     return;
   }
+  if (file.metadata?.["sys:upload_session_id"]) return;
 
   if (file.type === FileType.Dir) {
-    emit("navigate-to", file.path);
+    const logicalPath = extractLogicalPathFromUri(file.path);
+    emit("navigate-to", logicalPath);
   }
 };
 
@@ -126,7 +140,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 };
 
-// --- 生命周期钩子 (保持不变) ---
+// --- 5. 生命周期钩子 ---
 onMounted(() => {
   window.addEventListener("keydown", handleKeyDown);
 });
@@ -155,10 +169,10 @@ onUnmounted(() => {
   transition:
     background-color 0.2s ease,
     border-color 0.2s ease,
-    opacity 0.3s ease; /* 平滑过渡 */
+    opacity 0.3s ease;
   text-align: center;
   user-select: none;
-  position: relative; /* 为叠加层定位 */
+  position: relative;
 }
 .grid-item:hover {
   background-color: #f5f7fa;
@@ -168,11 +182,23 @@ onUnmounted(() => {
   border-color: var(--el-color-primary);
 }
 
-/* **核心新增**: 上传中状态的样式 */
 .grid-item.is-uploading {
   opacity: 0.5;
   cursor: not-allowed;
-  pointer-events: none; /* 彻底禁用所有鼠标事件 */
+  pointer-events: none;
+}
+
+/* 新增：被禁用的文件项样式 */
+.grid-item.is-disabled {
+  cursor: not-allowed;
+  color: #a8abb2;
+  opacity: 0.6; /* 网格视图下，禁用也给一点透明度 */
+}
+.grid-item.is-disabled:hover {
+  background-color: transparent;
+}
+.grid-item.is-disabled .file-icon {
+  color: #c0c4cc;
 }
 
 .item-icon {
@@ -182,10 +208,9 @@ onUnmounted(() => {
   justify-content: center;
   align-items: center;
   margin-bottom: 12px;
-  position: relative; /* 为叠加层定位 */
+  position: relative;
 }
 
-/* **核心新增**: 上传中叠加层和指示器样式 */
 .uploading-overlay {
   position: absolute;
   top: 0;
@@ -197,7 +222,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px; /* 匹配图标区域的圆角 */
+  border-radius: 8px;
 }
 .uploading-indicator {
   font-size: 24px;

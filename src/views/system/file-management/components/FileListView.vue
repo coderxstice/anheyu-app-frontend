@@ -15,9 +15,11 @@
         :key="item.id"
         class="file-item"
         :data-id="item.id"
+        :data-type="item.type === FileType.Dir ? 'Dir' : 'File'"
         :class="{
           selected: selectedFileIds.has(item.id),
-          'is-uploading': item.metadata?.['sys:upload_session_id']
+          'is-uploading': item.metadata?.['sys:upload_session_id'],
+          'is-disabled': disabledFileIds?.has(item.id)
         }"
         @click="handleItemClick(item, $event)"
         @dblclick="handleItemDblClick(item)"
@@ -41,7 +43,11 @@
               @click.stop="emit('toggle-selection', item.id)"
             />
             <IconifyIconOnline
-              v-else-if="selectedFileIds.size > 0 && hoveredFileId === item.id"
+              v-else-if="
+                selectedFileIds.size > 0 &&
+                hoveredFileId === item.id &&
+                !disabledFileIds?.has(item.id)
+              "
               :key="item.id + '-hover'"
               icon="charm:circle"
               class="file-icon hover-icon"
@@ -70,26 +76,42 @@
         <div v-if="item.type === FileType.File" class="column-size">
           {{ formatSize(item.size) }}
         </div>
-        <div class="column-modified">{{ item.created_at }}</div>
+        <div v-else class="column-size">--</div>
+        <div class="column-modified">{{ formatDateTime(item.created_at) }}</div>
       </li>
     </ul>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from "vue";
-import { formatSize } from "@/utils/format";
+import { onMounted, onUnmounted, ref, type PropType } from "vue";
+import { formatSize, formatDateTime } from "@/utils/format";
 import { useFileIcons } from "../hooks/useFileIcons";
 import gsap from "gsap";
 import { FileItem, FileType } from "@/api/sys-file/type";
 import { Loading } from "@element-plus/icons-vue";
+import { ElMessage } from "element-plus";
+import { extractLogicalPathFromUri } from "@/utils/fileUtils";
 
 // --- 1. 定义 Props 和 Emits ---
-const props = defineProps<{
-  files: FileItem[];
-  loading: boolean;
-  selectedFileIds: Set<string>;
-}>();
+const props = defineProps({
+  files: {
+    type: Array as PropType<FileItem[]>,
+    required: true
+  },
+  loading: {
+    type: Boolean,
+    default: false
+  },
+  selectedFileIds: {
+    type: Set as PropType<Set<string>>,
+    required: true
+  },
+  disabledFileIds: {
+    type: Set as PropType<Set<string>>,
+    default: () => new Set()
+  }
+});
 
 const emit = defineEmits<{
   (e: "select-single", fileId: string): void;
@@ -97,14 +119,13 @@ const emit = defineEmits<{
   (e: "toggle-selection", fileId: string): void;
   (e: "select-all"): void;
   (e: "navigate-to", path: string): void;
-  (e: "load-initial"): void;
 }>();
 
 // --- 2. 初始化独立的 Hooks 和本地状态 ---
 const { getFileIcon } = useFileIcons();
 const hoveredFileId = ref<string | null>(null);
 
-// --- 3. 动画处理 (保持不变) ---
+// --- 3. 动画处理 ---
 const onIconEnter = (el: Element, done: () => void) => {
   gsap.fromTo(
     el,
@@ -140,12 +161,10 @@ const handleMouseUp = (event: MouseEvent) => {
   });
 };
 
-// --- 4. 修改事件处理器，通过 emit 发出意图 ---
+// --- 4. 事件处理器 ---
 const handleItemClick = (item: FileItem, event: MouseEvent) => {
-  // **核心修改**: 如果文件正在上传中，则禁止所有点击交互
-  if (item.metadata?.["sys:upload_session_id"]) {
-    return;
-  }
+  if (props.disabledFileIds?.has(item.id)) return;
+  if (item.metadata?.["sys:upload_session_id"]) return;
 
   if (event.shiftKey) {
     emit("select-range", item.id);
@@ -157,13 +176,16 @@ const handleItemClick = (item: FileItem, event: MouseEvent) => {
 };
 
 const handleItemDblClick = (item: FileItem) => {
-  // **核心修改**: 如果文件正在上传中，则禁止双击导航
-  if (item.metadata?.["sys:upload_session_id"]) {
+  if (props.disabledFileIds?.has(item.id)) {
+    ElMessage.warning("不能进入正在移动的文件夹。");
     return;
   }
+  if (item.metadata?.["sys:upload_session_id"]) return;
 
   if (item.type === FileType.Dir) {
-    emit("navigate-to", item.path);
+    // 2. 核心修复：在 emit 事件前，转换路径为逻辑路径
+    const logicalPath = extractLogicalPathFromUri(item.path);
+    emit("navigate-to", logicalPath);
   }
 };
 
@@ -211,7 +233,7 @@ onUnmounted(() => {
   user-select: none;
   transition:
     opacity 0.3s ease,
-    background-color 0.2s ease; /* 平滑过渡 */
+    background-color 0.2s ease;
 }
 
 .file-list-header {
@@ -234,11 +256,22 @@ onUnmounted(() => {
   }
 }
 
-/* **核心新增**: 上传中状态的样式 */
 .file-item.is-uploading {
   opacity: 0.5;
   cursor: not-allowed;
-  pointer-events: none; /* 彻底禁用所有鼠标事件 */
+  pointer-events: none;
+}
+
+/* 新增：被禁用的文件项样式 */
+.file-item.is-disabled {
+  cursor: not-allowed;
+  color: #a8abb2;
+  &:hover {
+    background-color: transparent;
+  }
+  .file-icon {
+    color: #c0c4cc;
+  }
 }
 
 .column-name {
@@ -269,7 +302,6 @@ onUnmounted(() => {
   color: #a0a0a0;
 }
 
-/* **核心新增**: 上传中标志的样式 */
 .uploading-indicator {
   animation: spin 1.5s linear infinite;
   color: var(--el-color-primary);

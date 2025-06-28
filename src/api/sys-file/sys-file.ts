@@ -8,7 +8,8 @@ import {
   type UpdateFolderViewResponse,
   type ValidateUploadSessionResponse,
   type FileItem,
-  type FolderSizeResponse
+  type FolderSizeResponse,
+  type BaseResponse
 } from "./type";
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
@@ -228,4 +229,37 @@ export const calculateFolderSize = (folderId: string) => {
     "get",
     baseUrlApi(`folder/size/${folderId}`)
   );
+};
+
+/**
+ * 移动一个或多个文件/文件夹到指定目录
+ * @param sourceIDs 要移动的项目的公共ID数组
+ * @param destinationID 目标文件夹的公共ID
+ * @returns Promise 返回一个基础响应，成功时 data 为 null
+ */
+export const moveFilesApi = (sourceIDs: string[], destinationID: string) => {
+  return http.post<BaseResponse<null>, any>(baseUrlApi(`folder/move`), {
+    sourceIDs,
+    destinationID
+  });
+};
+
+/**
+ * [懒加载专用] 获取指定路径下的子文件夹列表
+ * @param path 父文件夹的路径
+ */
+export const getSubFoldersApi = async (path: string): Promise<FileItem[]> => {
+  try {
+    // 调用现有的 API，但只请求第一页，并假设后端支持按类型过滤
+    // 如果后端不支持 type 过滤，则需要请求所有文件然后前端过滤
+    const res = await fetchFilesByPathApi(path, "name", "asc", 1, 9999); // 获取该目录下所有项
+    if (res.code === 200 && res.data && res.data.files) {
+      // 在前端进行过滤，只返回文件夹
+      return res.data.files.filter(item => item.type === FileType.Dir);
+    }
+    return [];
+  } catch (error) {
+    console.error("getSubFoldersApi failed:", error);
+    return []; // 出错时返回空数组
+  }
 };
