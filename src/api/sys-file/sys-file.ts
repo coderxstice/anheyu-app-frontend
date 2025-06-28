@@ -43,14 +43,14 @@ export interface FileDetailResponse {
  * @returns Promise<Blob>
  */
 export const fetchBlobFromUrl = async (url: string): Promise<Blob> => {
-  // 对于后端返回的相对路径（如本地文件的签名URL），需要拼接上基础路径
-  const finalUrl = url.startsWith("http") ? url : `${baseUrlApi(url)}`;
+  // 对于后端返回的相对路径（如本地文件的签名URL），需要拼接上基础路径，如果是本地存储的话，会返回相对路径
+  const finalUrl = url;
   // `http://localhost:8091/api/${url}`"/download/ARgsz?expires=1751059147\u0026sign=XrAcDPV0Oy8o4ln6w0aiHXzHWtUHw5H3K9ES2fL1RY4=";
 
-  console.log(`请求 URL: ${finalUrl}`); // 调试输出请求的 URL
+  console.log(`请求 URL: ${finalUrl}`);
 
   try {
-    const response = await fetch(finalUrl); // 使用原生 fetch
+    const response = await fetch(finalUrl);
     if (!response.ok) {
       throw new Error(
         `文件下载失败，状态: ${response.status} ${response.statusText}`
