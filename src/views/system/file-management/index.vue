@@ -235,7 +235,13 @@ const onActionRename = () => {
   if (isSingleSelection.value) handleRename(getSelectedFileItems()[0]);
 };
 const onActionDelete = () => {
-  handleDelete(getSelectedFileItems());
+  // handleDelete 是一个 async 函数，它返回一个 Promise
+  handleDelete(getSelectedFileItems()).then(success => {
+    // 只有当删除操作成功时（用户没有取消对话框），才清空选择
+    if (success) {
+      clearSelection();
+    }
+  });
 };
 const onActionShare = () => {
   console.log("Share action triggered");

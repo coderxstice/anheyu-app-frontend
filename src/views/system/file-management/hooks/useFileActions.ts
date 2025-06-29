@@ -202,36 +202,46 @@ export function useFileActions(
   /**
    * 处理删除操作
    * @param files 要删除的文件项数组
+   * @returns Promise<boolean> - 返回一个布尔值，表示删除操作是否被用户确认并成功执行。
    */
-  const handleDelete = (files: FileItem[]) => {
+  const handleDelete = async (files: FileItem[]): Promise<boolean> => {
     if (!files || files.length === 0) {
       ElMessage.warning("请先选择要删除的项目。");
-      return;
+      return false; // 操作未执行
     }
+
     const names = files.map(f => `'${f.name}'`).join("、");
     const message = `确定要永久删除这 ${files.length} 个项目吗：${names}？此操作不可恢复！`;
-    ElMessageBox.confirm(message, "删除确认", {
-      confirmButtonText: "确定删除",
-      cancelButtonText: "取消",
-      type: "warning"
-    })
-      .then(async () => {
-        try {
-          const idsToDelete = files.map(f => f.id);
-          const response = await deleteFilesApi(idsToDelete);
-          if (response.code === 200) {
-            ElMessage.success("项目已删除");
-            callbacks.onSuccess(); // 通知外部刷新
-          } else {
-            ElMessage.error(response.message || "删除失败");
-          }
-        } catch (error: any) {
-          ElMessage.error(error.message || "删除时发生错误");
-        }
-      })
-      .catch(() => {
-        ElMessage.info("已取消删除操作");
+
+    try {
+      // ElMessageBox.confirm 在用户点击“确定”时会 resolve，点击“取消”或关闭时会 reject。
+      await ElMessageBox.confirm(message, "删除确认", {
+        confirmButtonText: "确定删除",
+        cancelButtonText: "取消",
+        type: "warning"
       });
+
+      // 如果代码能执行到这里，说明用户点击了“确定删除”
+      try {
+        const idsToDelete = files.map(f => f.id);
+        const response = await deleteFilesApi(idsToDelete);
+        if (response.code === 200) {
+          ElMessage.success("项目已删除");
+          callbacks.onSuccess(); // 通知外部刷新
+          return true; // 返回 true，表示操作成功
+        } else {
+          ElMessage.error(response.message || "删除失败");
+          return false; // 返回 false，表示API操作失败
+        }
+      } catch (error: any) {
+        ElMessage.error(error.message || "删除时发生错误");
+        return false; // 返回 false，表示API操作失败
+      }
+    } catch {
+      // 用户点击了“取消”或关闭了对话框，Promise 会被 reject，进入 catch 块
+      ElMessage.info("已取消删除操作");
+      return false; // 返回 false，表示用户取消了操作
+    }
   };
 
   return {
