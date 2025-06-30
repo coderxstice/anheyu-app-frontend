@@ -2,7 +2,7 @@
  * @Description: 封装文件和文件夹的创建、重命名和删除等操作
  * @Author: 安知鱼
  * @Date: 2025-06-25 14:26:59
- * @LastEditTime: 2025-06-30 10:36:08
+ * @LastEditTime: 2025-06-30 19:46:12
  * @LastEditors: 安知鱼
  */
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -53,15 +53,16 @@ export function useFileActions(
             webkitRelativePath: file.webkitRelativePath, // 预期: 'A/B/C/aaa.txt'
             size: file.size
           });
+          const fileName = file.name;
 
-          const relativePath = file.webkitRelativePath || file.name;
+          const webkitRelativePath = file.webkitRelativePath || fileName;
 
           return {
             file: file,
-            name: relativePath,
+            name: fileName,
             size: file.size,
             targetPath: currentPath.value,
-            relativePath: relativePath,
+            relativePath: webkitRelativePath,
             needsRefresh: true
           };
         });

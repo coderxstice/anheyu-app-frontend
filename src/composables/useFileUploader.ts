@@ -1,38 +1,29 @@
 /*
- * @Description: 文件上传核心 Composable，使用任务池(Pool)来管理和调度上传任务，实现高效并行上传。
+ * @Description: 文件上传核心 Composable，实现文件级流畅并行，并通过路径创建锁解决后端死锁问题，同时过滤系统文件。
  * @Author: 安知鱼
- * @Date: 2025-06-27 15:02:40
- * @LastEditTime: 2025-06-30 15:17:41
+ * @Date: 2025-07-01 04:30:00
+ * @LastEditTime: 2025-06-30 19:42:58
  * @LastEditors: 安知鱼
  */
-import {
-  ref,
-  computed,
-  onUnmounted,
-  type ComputedRef,
-  shallowRef,
-  nextTick
-} from "vue";
+import { ref, computed, onUnmounted, type ComputedRef, reactive } from "vue";
 import { ElMessageBox } from "element-plus";
 import type { UploadItem, StoragePolicy, FileItem } from "@/api/sys-file/type";
 import {
+  createUploadSessionApi,
   deleteUploadSessionApi,
   validateUploadSessionApi
 } from "@/api/sys-file/sys-file";
 import {
   joinPath,
   extractLogicalPathFromUri,
-  getFileFingerprint
+  getFileFingerprint,
+  getParentPath
 } from "@/utils/fileUtils";
 import { useUploadQueue } from "./upload.queue";
-import { Pool } from "./upload/pool";
-import { SessionUploader } from "./upload/session-uploader";
-import { ChunkUploader } from "./upload/chunk-uploader";
+import { uploadFileChunksWorker } from "./upload.worker";
 
 /**
  * 动态创建一个隐藏的文件输入框，用于触发文件选择对话框。
- * @param callback 用户选择文件后的回调函数
- * @param options 输入框的配置，如多选、接受的文件类型
  */
 function createFileInput(
   callback: (files: FileList) => void,
@@ -61,102 +52,29 @@ export function useFileUploader(
   storagePolicy: ComputedRef<StoragePolicy | null>,
   onQueueFinished: () => void
 ) {
-  const { uploadQueue, addTask, removeTask, findTask, clearFinishedTasks } =
-    useUploadQueue();
+  const {
+    uploadQueue,
+    addTask,
+    removeTask,
+    findTask,
+    findPendingTask,
+    clearFinishedTasks
+  } = useUploadQueue();
 
-  const pool = shallowRef<Pool | null>(null);
-
-  const concurrency = ref(3);
+  const concurrency = ref(4);
+  const isProcessingQueue = ref(false);
   const globalOverwrite = ref(false);
   const speedDisplayMode = ref<"instant" | "average">("instant");
+
+  const pathCreationLock = new Map<string, Promise<any>>();
 
   let speedInterval: number | null = null;
   let debounceTimer: number | null = null;
 
   const showUploadProgress = computed(() => uploadQueue.length > 0);
 
-  // --- 内部核心方法 ---
-
-  const startUploadProcess = (item: UploadItem) => {
-    if (!pool.value) {
-      pool.value = new Pool(concurrency.value);
-    }
-
-    item.status = "uploading";
-    item.startTime = Date.now();
-    item.lastTime = Date.now();
-    manageSpeedCalculator();
-
-    const sessionUploader = new SessionUploader(item, {
-      storagePolicyId: storagePolicy.value!.id,
-      overwrite: item.overwrite || globalOverwrite.value
-    });
-
-    pool.value
-      .enqueue(sessionUploader)
-      .then(() => {
-        if (
-          item.uploadedChunks &&
-          item.totalChunks === item.uploadedChunks.size
-        ) {
-          return Promise.resolve();
-        }
-
-        const chunkPromises: Promise<void>[] = [];
-        for (let i = 0; i < item.totalChunks!; i++) {
-          if (!item.uploadedChunks?.has(i)) {
-            const chunkUploader = new ChunkUploader(item, i);
-            const chunkPromise = pool.value!.enqueue(chunkUploader);
-            chunkPromises.push(chunkPromise);
-          }
-        }
-
-        // 【类型修复】使用 .then(() => {}) 将 Promise<void[]> 转换为 Promise<void>
-        return Promise.all(chunkPromises).then(() => {});
-      })
-      .then(() => {
-        console.log(
-          `[UPLOADER] 文件 ${item.name} 上传流程完成。`,
-          item.status,
-          item
-        );
-        if (item.status !== "error" && item.status !== "canceled") {
-          nextTick(() => {
-            item.status = "success";
-          });
-          console.log(`[UPLOADER] 文件 ${item.name} 上传成功。`);
-          if (debounceTimer) clearTimeout(debounceTimer);
-          debounceTimer = window.setTimeout(onQueueFinished, 500);
-        }
-      })
-      .catch((error: any) => {
-        console.error(`[UPLOADER] 文件 ${item.name} 上传流程失败:`, error);
-        if (item.status !== "canceled") {
-          // 尝试从不同层级提取最详细的错误信息
-          const backendMessage = error?.response?.data?.message;
-          const finalErrorMessage =
-            backendMessage || error.message || "上传失败";
-
-          item.status = "error";
-          item.errorMessage = finalErrorMessage;
-
-          // 判断冲突错误
-          const isConflictError =
-            error.isConflict ||
-            error?.response?.data?.code === 409 ||
-            finalErrorMessage.includes("冲突");
-          if (isConflictError) {
-            item.status = "conflict";
-            item.errorMessage = finalErrorMessage
-              .replace("创建失败: ", "")
-              .replace("创建目录冲突后查询失败: ", ""); // 可以做一些清理
-          }
-        }
-      })
-      .finally(() => {
-        manageSpeedCalculator();
-      });
-  };
+  // 定义一个需要忽略的文件名列表
+  const ignoredFileNames = new Set([".DS_Store", "Thumbs.db"]);
 
   const calculateSpeed = () => {
     uploadQueue.forEach(item => {
@@ -196,7 +114,102 @@ export function useFileUploader(
     if (debounceTimer) clearTimeout(debounceTimer);
   });
 
-  // --- 暴露给外部的 API ---
+  const _debounceRefresh = () => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = window.setTimeout(onQueueFinished, 500);
+  };
+
+  const createSessionWithLock = async (item: UploadItem): Promise<void> => {
+    const parentPath = getParentPath(
+      joinPath(item.targetPath, item.relativePath)
+    );
+
+    while (pathCreationLock.has(parentPath)) {
+      await pathCreationLock.get(parentPath);
+    }
+
+    const promise = createUploadSessionApi(
+      joinPath(item.targetPath, item.relativePath),
+      item.size,
+      storagePolicy.value!.id,
+      item.overwrite || globalOverwrite.value
+    )
+      .then(sessionRes => {
+        if (!sessionRes || sessionRes.code !== 200) {
+          const message = sessionRes?.message || "创建上传会话失败";
+          const error: any = new Error(message);
+          if (sessionRes?.code === 409 || message.includes("冲突")) {
+            error.isConflict = true;
+          }
+          throw error;
+        }
+        const { session_id, chunk_size } = sessionRes.data;
+        item.sessionId = session_id;
+        item.totalChunks = Math.ceil(item.size / chunk_size);
+        item.chunkSize = chunk_size;
+        console.log(
+          `[UPLOADER] ${item.name}: 会话创建成功, ID: ${item.sessionId}`
+        );
+      })
+      .finally(() => {
+        pathCreationLock.delete(parentPath);
+      });
+
+    pathCreationLock.set(parentPath, promise);
+    return promise;
+  };
+
+  const processFilePipeline = async (item: UploadItem): Promise<void> => {
+    try {
+      item.status = "uploading";
+      item.startTime = Date.now();
+      manageSpeedCalculator();
+
+      await createSessionWithLock(item);
+      await uploadFileChunksWorker(item);
+    } catch (error: any) {
+      if (item.status !== "canceled") {
+        item.status = error.isConflict ? "conflict" : "error";
+        item.errorMessage = error.message || "未知错误";
+      }
+    } finally {
+      if (item.status === "success" && item.needsRefresh) {
+        _debounceRefresh();
+      }
+      manageSpeedCalculator();
+    }
+  };
+
+  const processUploadQueue = async () => {
+    if (isProcessingQueue.value) return;
+    isProcessingQueue.value = true;
+    console.log(
+      `[UPLOADER] 启动文件级流畅并行上传，并发数: ${concurrency.value}`
+    );
+
+    const workers = new Set<Promise<void>>();
+
+    const loop = () => {
+      while (workers.size < concurrency.value) {
+        const item = findPendingTask();
+        if (!item) break;
+
+        const promise = processFilePipeline(item).finally(() => {
+          workers.delete(promise);
+          loop();
+        });
+
+        workers.add(promise);
+      }
+
+      if (workers.size === 0 && !findPendingTask()) {
+        isProcessingQueue.value = false;
+        console.log("[UPLOADER] 所有文件处理完毕。");
+      }
+    };
+
+    loop();
+  };
 
   const addUploadsToQueue = async (
     uploads: Pick<
@@ -204,18 +217,47 @@ export function useFileUploader(
       "name" | "size" | "file" | "relativePath" | "targetPath"
     >[]
   ) => {
-    if (uploads.length === 0) return;
-    const existingFileNames = new Set(existingFiles.value.map(f => f.name));
+    if (!storagePolicy.value) {
+      ElMessageBox.alert("没有可用的存储策略，无法上传文件。", "错误", {
+        type: "error"
+      });
+      return;
+    }
 
-    const itemsToStart: UploadItem[] = [];
+    if (uploads.length === 0) return;
+    const existingFileLogicalPaths = new Set(
+      existingFiles.value.map(f => extractLogicalPathFromUri(f.path))
+    );
 
     for (const u of uploads) {
-      const isConflict = existingFileNames.has(u.name);
-      // 1. 先准备好数据
-      const uploadData: Omit<UploadItem, "id"> = {
+      // 过滤系统文件
+      if (ignoredFileNames.has(u.name)) {
+        console.log(`[UPLOADER] 忽略系统文件: ${u.name}`);
+        continue;
+      }
+
+      const uploadLogicalPath = joinPath(u.targetPath, u.relativePath);
+
+      const isAlreadyInQueue = uploadQueue.some(
+        item =>
+          joinPath(item.targetPath, item.relativePath) === uploadLogicalPath
+      );
+
+      if (isAlreadyInQueue) {
+        console.warn(
+          `文件 "${uploadLogicalPath}" 已存在于上传队列中，跳过添加。`
+        );
+        continue;
+      }
+
+      const isConflictOnServer =
+        existingFileLogicalPaths.has(uploadLogicalPath);
+
+      const newItemData: UploadItem = {
+        id: Date.now() + Math.random(),
         name: u.name,
         size: u.size,
-        status: isConflict ? "conflict" : "pending",
+        status: isConflictOnServer ? "conflict" : "pending",
         progress: 0,
         file: u.file,
         relativePath: u.relativePath,
@@ -223,24 +265,19 @@ export function useFileUploader(
         uploadedSize: 0,
         instantSpeed: 0,
         averageSpeed: 0,
-        errorMessage: isConflict ? "同名文件已存在" : undefined,
+        errorMessage: isConflictOnServer ? "目标位置已存在同名文件" : undefined,
         overwrite: false,
         needsRefresh: true,
-        uploadedChunks: new Set<number>() // 明确一下 Set 的泛型
-        // 如果 UploadItem 中还有其他非可选属性，需要在这里补全
+        uploadedChunks: new Set()
       };
 
-      // 2. 调用 addTask，并获取返回的【响应式对象】
-      const reactiveItem = addTask(uploadData);
-
-      // 3. 如果文件不是冲突状态，将【响应式对象】放入待启动列表
-      if (!isConflict) {
-        itemsToStart.push(reactiveItem);
-      }
+      const reactiveItem = reactive(newItemData);
+      addTask(reactiveItem);
     }
 
-    // 4. 现在，startUploadProcess 接收到的就是正确的、与UI共享的响应式对象了
-    itemsToStart.forEach(startUploadProcess);
+    if (!isProcessingQueue.value) {
+      processUploadQueue();
+    }
   };
 
   const addResumableTaskFromFileItem = async (fileItem: FileItem) => {
@@ -270,7 +307,7 @@ export function useFileUploader(
             ""
           ) || "/";
 
-        const resumableItem: UploadItem = {
+        const resumableData: UploadItem = {
           id: Date.now() + Math.random(),
           name: fileItem.name,
           size: fileItem.size,
@@ -291,7 +328,8 @@ export function useFileUploader(
           overwrite: false,
           needsRefresh: true
         };
-        addTask(resumableItem);
+        const reactiveItem = reactive(resumableData);
+        addTask(reactiveItem);
       }
     } catch (e) {
       console.error(`验证会话 ${sessionId} 失败`, e);
@@ -302,7 +340,6 @@ export function useFileUploader(
     const itemToRemove = findTask(itemId);
     if (!itemToRemove) return;
 
-    // TODO: 实现更精细的取消逻辑，例如通过 AbortController 真正中断请求
     itemToRemove.status = "canceled";
 
     if (itemToRemove.sessionId) {
@@ -312,11 +349,11 @@ export function useFileUploader(
           joinPath(itemToRemove.targetPath, itemToRemove.relativePath)
         );
         console.log(
-          `[UPLOADER] 成功请求删除后端会话: ${itemToRemove.sessionId}`
+          `[Uploader] 成功请求删除后端会话: ${itemToRemove.sessionId}`
         );
       } catch (err) {
         console.error(
-          `[UPLOADER] 请求删除后端会话 ${itemToRemove.sessionId} 失败:`,
+          `[Uploader] 请求删除后端会话 ${itemToRemove.sessionId} 失败:`,
           err
         );
       }
@@ -347,8 +384,12 @@ export function useFileUploader(
               getFileFingerprint(userFile) === `file-${item.name}-${item.size}`
             ) {
               item.file = userFile;
+              item.status = "pending";
+              item.errorMessage = undefined;
               item.isResuming = false;
-              startUploadProcess(item);
+              if (!isProcessingQueue.value) {
+                processUploadQueue();
+              }
             } else {
               ElMessageBox.alert(
                 "您选择的文件与待续传的文件不匹配 (文件名或大小不同)。",
@@ -371,15 +412,29 @@ export function useFileUploader(
     item.chunkSize = undefined;
     item.totalChunks = undefined;
 
-    startUploadProcess(item);
+    if (!isProcessingQueue.value) {
+      processUploadQueue();
+    }
   };
 
   const retryAllFailed = () => {
+    let hasFailedTasks = false;
     uploadQueue.forEach(item => {
       if (item.status === "error") {
-        retryItem(item.id);
+        item.status = "pending";
+        item.errorMessage = undefined;
+        item.progress = 0;
+        item.uploadedChunks = new Set();
+        item.uploadedSize = 0;
+        item.sessionId = undefined;
+        item.chunkSize = undefined;
+        item.totalChunks = undefined;
+        hasFailedTasks = true;
       }
     });
+    if (hasFailedTasks && !isProcessingQueue.value) {
+      processUploadQueue();
+    }
   };
 
   const resolveConflict = (
@@ -429,10 +484,6 @@ export function useFileUploader(
 
   const setConcurrency = (num: number) => {
     concurrency.value = Math.max(1, Math.min(10, num));
-    if (pool.value) {
-      pool.value.limit = concurrency.value;
-      pool.value.check();
-    }
   };
 
   const setSpeedMode = (mode: "instant" | "average") => {
