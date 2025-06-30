@@ -2,7 +2,7 @@
  * @Description: 文件处理相关的工具函数
  * @Author: 安知鱼
  * @Date: 2025-06-26 18:32:39
- * @LastEditTime: 2025-06-29 01:51:21
+ * @LastEditTime: 2025-06-30 12:18:09
  * @LastEditors: 安知鱼
  */
 
@@ -97,7 +97,7 @@ export interface UploadRecord {
   name: string;
   size: number;
   lastModified: number;
-  chunkSize?: number; // +++ 核心修改: 存下分片大小，用于精确恢复进度
+  chunkSize?: number; // 存下分片大小，用于精确恢复进度
 }
 
 // 创建一个 localStorage 的包装器，方便管理

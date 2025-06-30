@@ -181,7 +181,7 @@ class AnHttp {
 
       // 对于失败的响应进行统一处理
       async (error: AnHttpError) => {
-        const { config, response } = error;
+        const { config, response }: any = error;
 
         // 如果是请求被取消或配置不存在，则直接将错误抛出
         if (Axios.isCancel(error) || !config) {
@@ -215,6 +215,18 @@ class AnHttp {
             // 如果已有请求正在刷新Token，则将当前请求加入待重试队列
             return AnHttp.addRetryRequest(config);
           }
+        }
+
+        // 我们需要它抛出到业务层，以便对单个上传任务进行状态管理
+        const isUploadRequest = config.url?.includes("/file/upload");
+        if (isUploadRequest) {
+          // 对于上传相关的错误，直接将原始错误抛出
+          // 让 Uploader 类和 useFileUploader 的 .catch 去处理
+          console.warn(
+            "检测到上传接口错误，将错误传递到业务层处理:",
+            response?.data?.message || "未知错误"
+          );
+          return Promise.reject(error);
         }
 
         // 对于其他所有错误（如404, 500等），调用全局错误处理器显示UI提示

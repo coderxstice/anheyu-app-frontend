@@ -106,9 +106,9 @@
       :speed-mode="speedDisplayMode"
       @close="handlePanelClose"
       @toggle-collapse="isPanelCollapsed = !isPanelCollapsed"
-      @retry-item="uploader.retryItem"
-      @remove-item="uploader.removeItem"
-      @resolve-conflict="uploader.resolveConflict"
+      @retry-item="retryItem"
+      @remove-item="removeItem"
+      @resolve-conflict="resolveConflict"
       @global-command="handleUploadGlobalCommand"
       @add-files="handleUploadFile"
     />
@@ -157,12 +157,37 @@ const {
   viewMode,
   sortKey,
   pageSize,
-  // 核心修改：从 store 获取分页和加载状态
   pagination,
   isMoreLoading
 } = storeToRefs(fileStore);
 
-// 2. 初始化基础 Hooks
+// 2. 初始化上传核心 Hook (Uploader)
+const {
+  uploadQueue,
+  showUploadProgress,
+  concurrency,
+  speedDisplayMode,
+  addUploadsToQueue,
+  addResumableTaskFromFileItem,
+  removeItem,
+  retryItem,
+  retryAllFailed,
+  resolveConflict,
+  setGlobalOverwriteAndRetry,
+  clearFinishedUploads,
+  setConcurrency,
+  setSpeedMode
+} = useFileUploader(
+  sortedFiles,
+  computed(() => storagePolicy.value),
+  () => fileStore.refreshCurrentPath(uploaderActions)
+);
+
+const uploaderActions: UploaderActions = {
+  addResumableTaskFromFileItem
+};
+
+// 3. 初始化文件选择 Hook
 const {
   selectedFiles,
   selectSingle,
@@ -177,18 +202,14 @@ const isSingleSelection = computed(() => selectedFiles.value.size === 1);
 const getSelectedFileItems = () =>
   sortedFiles.value.filter(f => selectedFiles.value.has(f.id));
 
-// 3. 页面导航与刷新逻辑
-const uploaderActions: UploaderActions = {
-  addResumableTaskFromFileItem: async () => {}
-};
-// 核心修改：刷新和导航时，确保从第1页开始加载
+// 4. 页面导航与刷新逻辑
 const handleRefresh = () => fileStore.loadFiles(path.value, uploaderActions, 1);
 const handleNavigate = (newPath: string) => {
   clearSelection();
   fileStore.loadFiles(newPath, uploaderActions, 1);
 };
 
-// 4. 初始化功能性 Hooks
+// 5. 初始化功能性 Hooks
 const { isDownloading, onActionDownload, handleDownloadFolder } =
   useFileDownload();
 const {
@@ -202,17 +223,7 @@ const {
   handleShowDetailsForId,
   closeDetailsPanel
 } = useFileModals({ refresh: handleRefresh, clearSelection });
-const {
-  uploadQueue,
-  addUploadsToQueue,
-  addResumableTaskFromFileItem,
-  ...uploader
-} = useFileUploader(
-  sortedFiles,
-  computed(() => storagePolicy.value),
-  () => fileStore.refreshCurrentPath(uploaderActions)
-);
-uploaderActions.addResumableTaskFromFileItem = addResumableTaskFromFileItem;
+
 const {
   handleUploadFile,
   handleUploadDir,
@@ -230,14 +241,12 @@ const {
   openSearchFromElement
 } = usePageInteractions(handleDrop);
 
-// 5. 简单操作 Action
+// 6. 简单操作 Action
 const onActionRename = () => {
   if (isSingleSelection.value) handleRename(getSelectedFileItems()[0]);
 };
 const onActionDelete = () => {
-  // handleDelete 是一个 async 函数，它返回一个 Promise
   handleDelete(getSelectedFileItems()).then(success => {
-    // 只有当删除操作成功时（用户没有取消对话框），才清空选择
     if (success) {
       clearSelection();
     }
@@ -247,7 +256,7 @@ const onActionShare = () => {
   console.log("Share action triggered");
 };
 
-// 6. 右键菜单 Hook
+// 7. 右键菜单 Hook
 const {
   contextMenuTriggerEvent,
   onMenuSelect,
@@ -272,12 +281,12 @@ const {
   }
 });
 
-// 7. 视图与杂项事件处理器
+// 8. 视图与杂项事件处理器
 const selectionCountLabel = computed(
   () => `${selectedFiles.value.size} 个对象`
 );
 const fileManagerContainerRef = ref(null);
-const fileContentAreaRef = ref<HTMLElement | null>(null); // 新增 ref
+const fileContentAreaRef = ref<HTMLElement | null>(null);
 
 const handleContainerClick = (event: MouseEvent) => {
   if (
@@ -323,6 +332,7 @@ const handleSetViewMode = (mode: "list" | "grid") =>
 const handleSetPageSize = (size: number) => fileStore.setPageSize(size);
 const handleSetSortKey = (key: SortKey) => fileStore.setSort(key);
 
+// 9. onMounted 和滚动加载逻辑
 onMounted(() => {
   if (fileStore.files.length === 0 && !fileStore.loading) {
     handleNavigate("/");
@@ -348,48 +358,72 @@ const handleScroll = () => {
   }, 200);
 };
 
-// 8. 上传面板逻辑
+// 10. 上传面板逻辑
 const isPanelVisible = ref(false);
 const isPanelCollapsed = ref(false);
-watch(
-  () => uploadQueue.length,
-  newLength => {
-    if (newLength > 0) isPanelVisible.value = true;
-  }
-);
+
+watch(showUploadProgress, isVisible => {
+  isPanelVisible.value = isVisible;
+});
+
 const handlePanelClose = () => {
-  isPanelVisible.value = false;
+  if (
+    uploadQueue.some(item =>
+      ["uploading", "pending", "error", "conflict"].includes(item.status)
+    )
+  ) {
+    ElMessageBox.confirm(
+      "关闭面板会取消所有进行中和待处理的上传任务，确定吗？",
+      "警告",
+      {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }
+    )
+      .then(() => {
+        [...uploadQueue].forEach(item => {
+          if (item.status !== "success" && item.status !== "canceled") {
+            removeItem(item.id);
+          }
+        });
+        isPanelVisible.value = false;
+      })
+      .catch(() => {});
+  } else {
+    isPanelVisible.value = false;
+  }
 };
+
 const handleUploadGlobalCommand = (command: string, value: any) => {
   switch (command) {
     case "overwrite-all":
-      uploader.setGlobalOverwriteAndRetry(true);
+      setGlobalOverwriteAndRetry(true);
       break;
     case "retry-all":
-      uploader.retryAllFailed();
+      retryAllFailed();
       break;
     case "clear-finished":
-      uploader.clearFinishedUploads();
+      clearFinishedUploads();
       break;
     case "set-concurrency":
-      ElMessageBox.prompt("请输入新的并发上传数 (1-10)", "设置并发数", {
+      ElMessageBox.prompt("请输入新的并行上传数 (1-10)", "设置并发数", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
-        inputValue: String(uploader.concurrency.value),
+        inputValue: String(concurrency.value),
         inputPattern: /^[1-9]$|^10$/,
         inputErrorMessage: "请输入 1 到 10 之间的整数"
       })
         .then(({ value }) => {
-          uploader.setConcurrency(Number(value));
+          setConcurrency(Number(value));
         })
         .catch(() => {});
       break;
     case "set-speed-mode":
-      uploader.setSpeedMode(value);
+      setSpeedMode(value);
       break;
   }
 };
-const speedDisplayMode = computed(() => uploader.speedDisplayMode.value);
 
 const viewComponents = { list: FileListView, grid: FileGridView };
 const activeViewComponent = computed(() => viewComponents[viewMode.value]);

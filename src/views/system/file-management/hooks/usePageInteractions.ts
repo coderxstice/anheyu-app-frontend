@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-25 14:26:59
+ * @LastEditTime: 2025-06-30 10:11:11
+ * @LastEditors: 安知鱼
+ */
 import { ref } from "vue";
 
 /**
@@ -5,7 +12,7 @@ import { ref } from "vue";
  * @param onDrop - 当文件或目录被拖拽到窗口并释放时触发的回调函数。
  */
 export function usePageInteractions(
-  // **修复**: 回调函数现在接收完整的 DataTransfer 对象
+  // 回调函数现在接收完整的 DataTransfer 对象
   onDrop: (dataTransfer: DataTransfer) => void
 ) {
   const isDragging = ref(false);

@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-06-29 02:39:23
+ * @LastEditTime: 2025-06-30 12:19:59
  * @LastEditors: 安知鱼
  */
 
@@ -80,6 +80,7 @@ export interface UploadItem {
   // 用于分块上传的状态管理
   sessionId?: string; // 上传会话ID
   totalChunks?: number; // 文件总块数
+  chunkSize?: number; // 分块大小 (Bytes)
   uploadedChunks?: Set<number>; // 已上传的块索引集合
   errorMessage?: string; // 上传失败时的错误信息
   retries?: number; // 重试次数
