@@ -9,7 +9,7 @@ import { uploadChunkApi } from "@/api/sys-file/sys-file";
 import type { UploadItem } from "@/api/sys-file/type";
 
 /**
- * 【新】只负责串行上传一个文件的所有分片。
+ * 只负责串行上传一个文件的所有分片。
  * @param item - 要上传的文件项 (必须是响应式对象，且已包含有效的 sessionId)
  */
 export async function uploadFileChunksWorker(item: UploadItem): Promise<void> {
