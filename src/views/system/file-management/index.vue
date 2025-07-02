@@ -110,7 +110,7 @@
       @remove-item="removeItem"
       @resolve-conflict="resolveConflict"
       @global-command="handleUploadGlobalCommand"
-      @add-files="handleUploadFile"
+      @add-files="() => handleUploadFile()"
     />
   </div>
 </template>
@@ -210,6 +210,20 @@ const handleNavigate = (newPath: string) => {
 };
 
 // 5. 初始化功能性 Hooks
+const isPanelVisible = ref(false);
+const isPanelCollapsed = ref(false);
+
+/**
+ * @description: [面板修复] 定义一个通用的回调，在有新上传任务被添加后，确保上传面板可见并展开。
+ * @param {boolean} hasAdded - 指示是否至少有一个新任务被成功添加到队列中。
+ */
+const handleNewUploadsAdded = (hasAdded: boolean) => {
+  if (hasAdded) {
+    isPanelVisible.value = true;
+    isPanelCollapsed.value = false;
+  }
+};
+
 const { isDownloading, onActionDownload, handleDownloadFolder } =
   useFileDownload();
 const {
@@ -231,15 +245,38 @@ const {
   handleCreateFolder,
   handleRename,
   handleDelete
-} = useFileActions(addUploadsToQueue, path, { onSuccess: handleRefresh });
-const { handleDrop } = useDirectoryUpload(addUploadsToQueue, path);
+} = useFileActions(addUploadsToQueue, path, {
+  onSuccess: handleRefresh,
+  onNewUploads: handleNewUploadsAdded
+});
+
+// [类型修复] 从 useDirectoryUpload 中解构出 handleDrop，并重命名为 processDroppedFiles
+const { handleDrop: processDroppedFiles } = useDirectoryUpload(
+  addUploadsToQueue,
+  path,
+  handleNewUploadsAdded
+);
+
+/**
+ * @description: [类型修复] 创建一个适配器函数。
+ * 它的签名 (event: DragEvent) => void 符合 usePageInteractions 的要求。
+ * 它的作用是从 DragEvent 中提取出 dataTransfer 对象，然后调用真正的文件处理函数。
+ * @param {DragEvent} event - DOM 拖放事件。
+ */
+const onDropAdapter = (event: DragEvent) => {
+  if (event.dataTransfer) {
+    processDroppedFiles(event.dataTransfer);
+  }
+};
+
+// [类型修复] 将适配器函数 onDropAdapter 传递给 usePageInteractions
 const {
   isDragging,
   dragHandlers,
   isSearchVisible,
   searchOrigin,
   openSearchFromElement
-} = usePageInteractions(handleDrop);
+} = usePageInteractions(onDropAdapter);
 
 // 6. 简单操作 Action
 const onActionRename = () => {
@@ -359,11 +396,11 @@ const handleScroll = () => {
 };
 
 // 10. 上传面板逻辑
-const isPanelVisible = ref(false);
-const isPanelCollapsed = ref(false);
-
+// [面板修复] watch现在只负责在队列为空时，自动关闭面板
 watch(showUploadProgress, isVisible => {
-  isPanelVisible.value = isVisible;
+  if (!isVisible) {
+    isPanelVisible.value = false;
+  }
 });
 
 const handlePanelClose = () => {

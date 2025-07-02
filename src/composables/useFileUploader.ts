@@ -2,7 +2,7 @@
  * @Description: 文件上传核心 Composable，实现文件级流畅并行，并通过路径创建锁解决后端死锁问题，同时过滤系统文件。
  * @Author: 安知鱼
  * @Date: 2025-07-01 04:30:00
- * @LastEditTime: 2025-07-02 10:15:40
+ * @LastEditTime: 2025-07-02 14:37:11
  * @LastEditors: 安知鱼
  */
 import { ref, computed, onUnmounted, type ComputedRef, reactive } from "vue";
@@ -63,10 +63,6 @@ export function useFileUploader(
   storagePolicy: ComputedRef<StoragePolicy | null>,
   onQueueFinished: () => void
 ) {
-  // 用于 API 节流的时间戳，记录上一次允许调用的时间
-  let lastApiCallTimestamp = 0;
-  const API_CALL_INTERVAL = 20; // 毫秒
-
   const {
     uploadQueue,
     addTask,
@@ -84,8 +80,11 @@ export function useFileUploader(
   // 路径创建锁，用于解决上传文件夹时，多个文件同时创建同一个父目录导致的后端竞态问题
   const pathCreationLock = new Map<string, Promise<any>>();
 
+  // 用于 API 节流的时间戳，记录上一次允许调用的时间
+  let lastApiCallTimestamp = 0;
+  const API_CALL_INTERVAL = 20; // 毫秒
+
   let speedInterval: number | null = null; // 速度计算器的定时器ID
-  let debounceTimer: number | null = null; // 用于防抖刷新文件列表的定时器ID
 
   const showUploadProgress = computed(() => uploadQueue.length > 0);
 
@@ -144,21 +143,12 @@ export function useFileUploader(
    */
   onUnmounted(() => {
     if (speedInterval) clearInterval(speedInterval);
-    if (debounceTimer) clearTimeout(debounceTimer);
   });
 
   /**
-   * @description: 对 onQueueFinished 回调进行防抖处理，避免在短时间内频繁刷新文件列表。
-   * @returns {void}
-   */
-  const _debounceRefresh = () => {
-    if (debounceTimer) clearTimeout(debounceTimer);
-    debounceTimer = window.setTimeout(onQueueFinished, 500);
-  };
-
-  /**
-   * @description: 使用异步锁来创建上传会话。
+   * @description: 使用异步锁来创建上传会话，并内置API节流。
    * 这可以防止在上传文件夹时，多个属于同一目录的文件同时请求创建该目录，从而避免后端API冲突。
+   * 同时，它确保了连续的API调用之间有最小时间间隔。
    * @param {UploadItem} item - 要为其创建会话的上传项。
    * @returns {Promise<void>}
    */
@@ -175,6 +165,7 @@ export function useFileUploader(
     // 将 API 调用包装在一个新的 Promise 中，并在其内部实现节流
     const promise = (async () => {
       try {
+        // --- API 节流逻辑 ---
         const now = Date.now();
         const timeSinceLastCall = now - lastApiCallTimestamp;
 
@@ -186,6 +177,7 @@ export function useFileUploader(
 
         // 更新时间戳为“现在”，表示令牌已被使用
         lastApiCallTimestamp = Date.now();
+        // --- 节流逻辑结束 ---
 
         const sessionRes = await createUploadSessionApi(
           joinPath(item.targetPath, item.relativePath),
@@ -245,10 +237,6 @@ export function useFileUploader(
         item.errorMessage = error.message || "未知错误";
       }
     } finally {
-      // 任务结束后，如果是成功状态且需要刷新，则触发防抖刷新
-      if (item.status === "success" && item.needsRefresh) {
-        _debounceRefresh();
-      }
       // 重新评估是否需要运行速度计算器
       manageSpeedCalculator();
     }
@@ -257,6 +245,7 @@ export function useFileUploader(
   /**
    * @description: 并发调度器，负责管理整个上传队列的执行。
    * 它会根据设定的并发数，从队列中取出待处理任务并分配给“工人”去执行。
+   * 在所有任务处理完毕后，如果期间有成功的上传，则触发一次全局刷新。
    * @returns {Promise<void>}
    */
   const processUploadQueue = async () => {
@@ -267,28 +256,45 @@ export function useFileUploader(
     );
 
     const workers = new Set<Promise<void>>();
+    let hasSuccessfulUploads = false; // 标志位，用于判断队列完成后是否需要刷新
 
     const loop = () => {
+      // 当正在工作的“工人”数量小于并发限制，并且队列中还有待处理任务时
       while (workers.size < concurrency.value) {
         const item = findPendingTask();
-        if (!item) break;
+        if (!item) break; // 没有待处理任务了，退出循环
 
-        // [关键修复] 在调度器拾取任务后，立即同步修改其状态！
-        // 这样，下一次 while 循环就不会再找到这个任务了。
-        // 我们用一个临时的 "processing" 状态来表示“已被调度，即将开始”。
+        // [竞态条件修复] 立即同步修改任务状态，防止被重复调度
         item.status = "processing";
 
+        // 分配一个新任务
         const promise = processFilePipeline(item).finally(() => {
+          // 当一个任务完成后（无论成功或失败）...
+
+          // [刷新逻辑优化] 检查此任务是否成功上传并需要刷新
+          if (item.status === "success" && item.needsRefresh) {
+            hasSuccessfulUploads = true;
+          }
+
+          // 从工作集中移除此任务
           workers.delete(promise);
+          // 立即尝试分配下一个任务，以保持并发数
           loop();
         });
 
         workers.add(promise);
       }
 
+      // 如果工作集为空，并且队列中再也找不到待处理任务，说明所有任务都已处理完毕
       if (workers.size === 0 && !findPendingTask()) {
         isProcessingQueue.value = false;
         console.log("[UPLOADER] 所有文件处理完毕。");
+
+        // [刷新逻辑优化] 如果在这次队列处理中有成功的上传，则在最后执行一次刷新
+        if (hasSuccessfulUploads) {
+          console.log("[UPLOADER] 队列处理完毕，有成功上传的任务，触发刷新。");
+          onQueueFinished(); // 直接调用全局回调
+        }
       }
     };
 
@@ -298,26 +304,28 @@ export function useFileUploader(
   /**
    * @description: 将用户选择的文件或文件夹添加到上传队列中。
    * @param {Pick<UploadItem, "name" | "size" | "file" | "relativePath" | "targetPath">[]} uploads - 要添加的上传项数组。
-   * @returns {Promise<void>}
+   * @returns {Promise<boolean>} - 返回一个布尔值，表示是否至少有一个新任务被成功添加到队列中。
    */
   const addUploadsToQueue = async (
     uploads: Pick<
       UploadItem,
       "name" | "size" | "file" | "relativePath" | "targetPath"
     >[]
-  ) => {
+  ): Promise<boolean> => {
     if (!storagePolicy.value) {
       ElMessageBox.alert("没有可用的存储策略，无法上传文件。", "错误", {
         type: "error"
       });
-      return;
+      return false;
     }
 
-    if (uploads.length === 0) return;
+    if (uploads.length === 0) return false;
 
     const existingFileLogicalPaths = new Set(
       existingFiles.value.map(f => extractLogicalPathFromUri(f.path))
     );
+
+    let addedCount = 0; // 记录本次实际添加的任务数
 
     for (const u of uploads) {
       // 过滤系统文件
@@ -363,12 +371,18 @@ export function useFileUploader(
 
       const reactiveItem = reactive(newItemData);
       addTask(reactiveItem);
+      addedCount++;
     }
 
-    // 如果调度器当前未运行，则启动它
-    if (!isProcessingQueue.value) {
+    const hasAddedTasks = addedCount > 0;
+
+    // 如果确实添加了新任务，并且调度器当前未运行，则启动它
+    if (hasAddedTasks && !isProcessingQueue.value) {
       processUploadQueue();
     }
+
+    // [面板修复] 返回是否添加了新任务的标志
+    return hasAddedTasks;
   };
 
   /**

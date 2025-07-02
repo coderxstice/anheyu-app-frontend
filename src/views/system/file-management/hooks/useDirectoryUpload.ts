@@ -2,19 +2,29 @@
  * @Description: 处理文件和目录上传的 Hook (包含目录遍历逻辑)
  * @Author: 安知鱼
  * @Date: 2025-06-26 16:44:23
- * @LastEditTime: 2025-07-02 10:06:02
+ * @LastEditTime: 2025-07-02 14:41:31
  * @LastEditors: 安知鱼
  */
 import type { UploadItem } from "@/api/sys-file/type";
 import { ElMessage } from "element-plus";
 import type { Ref } from "vue";
 
-// --- 目录遍历核心函数 (保持不变) ---
+/**
+ * @description: 异步地从 FileSystemFileEntry 获取 File 对象。
+ * @param {FileSystemFileEntry} fileEntry - 文件系统文件条目。
+ * @returns {Promise<File>} - 返回一个解析为 File 对象的 Promise。
+ */
 const getFileFromFileEntry = (
   fileEntry: FileSystemFileEntry
 ): Promise<File> => {
   return new Promise((resolve, reject) => fileEntry.file(resolve, reject));
 };
+
+/**
+ * @description: 递归地遍历目录，并返回所有文件的扁平化列表。
+ * @param {FileSystemDirectoryEntry} directoryEntry - 文件系统目录条目。
+ * @returns {Promise<File[]>} - 返回一个解析为 File 对象数组的 Promise。
+ */
 const traverseDirectory = (
   directoryEntry: FileSystemDirectoryEntry
 ): Promise<File[]> => {
@@ -51,9 +61,10 @@ const traverseDirectory = (
 };
 
 /**
- * 处理文件和目录拖拽上传的 Hook
- * @param addUploadsToQueue - 一个能将文件添加至上传队列的函数。
- * @param currentPath - 一个包含当前文件浏览器路径的响应式引用 (Ref)。
+ * @description: 处理文件和目录拖拽上传的 Hook
+ * @param addUploadsToQueue - 一个能将文件添加至上传队列的函数，现在应返回 Promise<boolean>
+ * @param currentPath - 一个包含当前文件浏览器路径的响应式引用 (Ref)
+ * @param onNewUploads - 当添加新上传任务后触发的回调函数
  */
 export function useDirectoryUpload(
   addUploadsToQueue: (
@@ -68,9 +79,14 @@ export function useDirectoryUpload(
       | "averageSpeed"
       | "uploadedSize"
     >[]
-  ) => void,
-  currentPath: Ref<string>
+  ) => Promise<boolean>, // 确认函数签名返回 Promise<boolean>
+  currentPath: Ref<string>,
+  onNewUploads: (hasAdded: boolean) => void // 直接接收回调函数
 ) {
+  /**
+   * @description: 处理拖放事件，遍历拖入的项目，并将其添加到上传队列
+   * @param {DataTransfer} dataTransfer - 拖放事件中的 DataTransfer 对象
+   */
   const handleDrop = async (dataTransfer: DataTransfer) => {
     const currentTargetPath = currentPath.value;
     const promises: Promise<File | File[] | null>[] = [];
@@ -98,27 +114,28 @@ export function useDirectoryUpload(
       }
 
       const newUploads = allFiles.map(file => {
-        // --- 核心修复与调试 ---
         console.log(`[Upload Debug] 正在处理文件 (拖拽):`, {
           name: file.name,
           webkitRelativePath: file.webkitRelativePath,
           size: file.size
         });
 
-        // 如果 webkitRelativePath 为空 (例如拖拽单个文件)，则使用文件名本身
         const relativePath = file.webkitRelativePath || file.name;
 
         return {
-          name: file.name, // [修复] UI上显示的名称应该是纯粹的文件名
+          name: file.name,
           size: file.size,
           file: file,
-          relativePath: relativePath, // [正确] 用于后端构建路径的应包含目录结构
+          relativePath: relativePath,
           targetPath: currentTargetPath,
           needsRefresh: true
         };
       });
 
-      addUploadsToQueue(newUploads);
+      // 等待 addUploadsToQueue 完成，并获取是否成功添加了任务的结果
+      const hasAdded = await addUploadsToQueue(newUploads);
+      // 调用回调函数，通知父组件处理 UI 变化（如显示上传面板）
+      onNewUploads(hasAdded);
     } catch (error) {
       console.error("[UploadHook] 遍历文件或目录时出错:", error);
       ElMessage.error("读取拖拽内容时出错，请重试。");
