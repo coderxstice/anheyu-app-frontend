@@ -2,7 +2,7 @@
  * @Description: 文件上传核心 Composable，实现文件级流畅并行，并通过路径创建锁解决后端死锁问题，同时过滤系统文件。
  * @Author: 安知鱼
  * @Date: 2025-07-01 04:30:00
- * @LastEditTime: 2025-07-02 14:37:11
+ * @LastEditTime: 2025-07-02 15:09:09
  * @LastEditors: 安知鱼
  */
 import { ref, computed, onUnmounted, type ComputedRef, reactive } from "vue";
@@ -652,6 +652,7 @@ export function useFileUploader(
     showUploadProgress,
     concurrency,
     speedDisplayMode,
+    globalOverwrite,
     addUploadsToQueue,
     addResumableTaskFromFileItem,
     removeItem,

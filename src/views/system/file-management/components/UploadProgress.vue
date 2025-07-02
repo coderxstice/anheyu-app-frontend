@@ -31,7 +31,7 @@
                 v-model:visible="isMoreActionsPopoverVisible"
                 placement="bottom-end"
                 trigger="click"
-                :width="180"
+                :width="200"
                 popper-class="upload-panel-popover"
                 transition="dropdown-scale"
                 :teleported="true"
@@ -45,8 +45,8 @@
                   </span>
                 </template>
 
-                <!-- **核心修改**: 在菜单中添加速度切换选项 -->
                 <ul class="popover-menu">
+                  <!-- 速度设置 -->
                   <li
                     :class="{ active: speedMode === 'instant' }"
                     @click="handleCommand('set-speed-mode', 'instant')"
@@ -60,13 +60,39 @@
                     平均速度
                   </li>
                   <li class="divider" />
-                  <li @click="handleCommand('set-concurrency')">设置并发数</li>
+                  <!-- 视图设置 -->
+                  <li
+                    :class="{ active: hideCompleted }"
+                    @click="toggleHideCompleted"
+                  >
+                    隐藏已完成任务
+                  </li>
                   <li class="divider" />
-                  <li @click="handleCommand('overwrite-all')">
+                  <!-- 排序设置 -->
+                  <li
+                    :class="{ active: sortOrder === 'asc' }"
+                    @click="setSortOrder('asc')"
+                  >
+                    最先添加靠前
+                  </li>
+                  <li
+                    :class="{ active: sortOrder === 'desc' }"
+                    @click="setSortOrder('desc')"
+                  >
+                    最后添加靠前
+                  </li>
+                  <li class="divider" />
+                  <!-- 上传设置 -->
+                  <li @click="handleCommand('set-concurrency')">设置并发数</li>
+                  <li
+                    :class="{ active: isGlobalOverwrite }"
+                    @click="handleCommand('toggle-overwrite-all')"
+                  >
                     覆盖所有同名文件
                   </li>
-                  <li @click="handleCommand('retry-all')">重试所有失败任务</li>
                   <li class="divider" />
+                  <!-- 批量操作 -->
+                  <li @click="handleCommand('retry-all')">重试所有失败任务</li>
                   <li @click="handleCommand('clear-finished')">
                     清除已完成任务
                   </li>
@@ -89,12 +115,14 @@
 
           <div class="collapsible-content">
             <div class="panel-body">
-              <div v-if="queue.length === 0" class="empty-queue">
-                没有上传任务
+              <div v-if="processedQueue.length === 0" class="empty-queue">
+                <span v-if="queue.length > 0">所有任务已完成</span>
+                <span v-else>没有上传任务</span>
               </div>
               <TransitionGroup name="list" tag="div">
+                <!-- [核心修改] v-for 循环现在使用计算属性 processedQueue -->
                 <UploadItemComponent
-                  v-for="item in queue"
+                  v-for="item in processedQueue"
                   :key="item.id"
                   :item="item"
                   :speed-mode="speedMode"
@@ -131,6 +159,8 @@ const props = defineProps<{
   isCollapsed: boolean;
   queue: UploadItem[];
   speedMode: "instant" | "average";
+  // [新增 Prop] 接收全局覆盖状态
+  isGlobalOverwrite: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -147,16 +177,76 @@ const emit = defineEmits<{
   (e: "global-command", command: string, value?: any): void;
 }>();
 
+// --- 新增本地状态 ---
 const isMoreActionsPopoverVisible = ref(false);
+/**
+ * @description: 是否隐藏已完成（成功或取消）的任务
+ */
+const hideCompleted = ref(false);
+/**
+ * @description: 任务列表的排序顺序, 'asc' - 正序 (id小在前), 'desc' - 倒序 (id大在前)
+ */
+const sortOrder = ref<"asc" | "desc">("asc");
+// ---
 
 const activeUploadsCount = computed(
   () =>
-    props.queue.filter(item => ["uploading", "pending"].includes(item.status))
-      .length
+    props.queue.filter(item =>
+      ["uploading", "pending", "processing"].includes(item.status)
+    ).length
 );
 
+/**
+ * @description: [核心新增] 一个计算属性，根据“隐藏”和“排序”选项来处理原始队列
+ */
+const processedQueue = computed(() => {
+  let queue = [...props.queue]; // 创建一个副本以防修改 props
+
+  // 1. 根据 "隐藏已完成" 过滤
+  if (hideCompleted.value) {
+    queue = queue.filter(
+      item => !["success", "canceled"].includes(item.status)
+    );
+  }
+
+  // 2. 根据排序顺序排序
+  if (sortOrder.value === "desc") {
+    // id 越大越新，所以倒序就是 id 降序
+    queue.sort((a, b) => b.id - a.id);
+  } else {
+    // 默认是 'asc'，id 越小越旧，所以正序就是 id 升序
+    queue.sort((a, b) => a.id - b.id);
+  }
+
+  return queue;
+});
+
+/**
+ * @description: 切换“隐藏已完成”状态
+ */
+const toggleHideCompleted = () => {
+  hideCompleted.value = !hideCompleted.value;
+  isMoreActionsPopoverVisible.value = false;
+};
+
+/**
+ * @description: 设置排序顺序
+ */
+const setSortOrder = (order: "asc" | "desc") => {
+  sortOrder.value = order;
+  isMoreActionsPopoverVisible.value = false;
+};
+
+/**
+ * @description: 处理来自菜单的全局命令
+ */
 const handleCommand = (command: string, value?: any) => {
-  emit("global-command", command, value);
+  // [修改] 为覆盖选项创建一个新的命令
+  if (command === "toggle-overwrite-all") {
+    emit("global-command", "set-overwrite-all", !props.isGlobalOverwrite);
+  } else {
+    emit("global-command", command, value);
+  }
   isMoreActionsPopoverVisible.value = false;
 };
 </script>
@@ -194,9 +284,12 @@ const handleCommand = (command: string, value?: any) => {
   list-style: none;
   margin: 0;
   padding: 0;
+  user-select: none;
 }
 .popover-menu li {
-  padding: 8px 16px;
+  display: flex; /* 改为 flex 布局 */
+  align-items: center; /* 垂直居中 */
+  padding: 8px 24px 8px 32px; /* 调整 padding 为勾选图标留出空间 */
   font-size: 14px;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -205,19 +298,19 @@ const handleCommand = (command: string, value?: any) => {
 .popover-menu li:hover {
   background-color: #f5f7fa;
 }
-/* **新增**: 为选中的菜单项添加高亮样式 */
+
 .popover-menu li.active {
   color: var(--el-color-primary);
   font-weight: 500;
 }
-/* **新增**: 用伪元素模拟一个对勾 */
 .popover-menu li.active::before {
   content: "✓";
   position: absolute;
-  left: 8px; /* 根据需要调整位置 */
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 12px;
+  font-weight: bold;
 }
 
 .popover-menu li.divider {

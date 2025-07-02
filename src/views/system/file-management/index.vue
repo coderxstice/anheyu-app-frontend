@@ -104,6 +104,7 @@
       :is-collapsed="isPanelCollapsed"
       :queue="uploadQueue"
       :speed-mode="speedDisplayMode"
+      :is-global-overwrite="globalOverwrite"
       @close="handlePanelClose"
       @toggle-collapse="isPanelCollapsed = !isPanelCollapsed"
       @retry-item="retryItem"
@@ -173,6 +174,7 @@ const {
   retryItem,
   retryAllFailed,
   resolveConflict,
+  globalOverwrite,
   setGlobalOverwriteAndRetry,
   clearFinishedUploads,
   setConcurrency,
@@ -434,8 +436,8 @@ const handlePanelClose = () => {
 
 const handleUploadGlobalCommand = (command: string, value: any) => {
   switch (command) {
-    case "overwrite-all":
-      setGlobalOverwriteAndRetry(true);
+    case "set-overwrite-all":
+      setGlobalOverwriteAndRetry(value);
       break;
     case "retry-all":
       retryAllFailed();
