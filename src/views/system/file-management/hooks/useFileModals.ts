@@ -68,7 +68,7 @@ export function useFileModals(actions: ModalActions) {
     itemsForAction,
     destinationModalMode,
     onActionMove,
-    onActionCopy, // 新增导出
+    onActionCopy,
     handleActionSuccess,
     // 详情面板
     detailsPanelFile,

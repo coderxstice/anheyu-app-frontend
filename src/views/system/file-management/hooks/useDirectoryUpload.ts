@@ -2,7 +2,7 @@
  * @Description: 处理文件和目录上传的 Hook (包含目录遍历逻辑)
  * @Author: 安知鱼
  * @Date: 2025-06-26 16:44:23
- * @LastEditTime: 2025-06-30 17:11:24
+ * @LastEditTime: 2025-07-02 10:06:02
  * @LastEditors: 安知鱼
  */
 import type { UploadItem } from "@/api/sys-file/type";
@@ -100,20 +100,19 @@ export function useDirectoryUpload(
       const newUploads = allFiles.map(file => {
         // --- 核心修复与调试 ---
         console.log(`[Upload Debug] 正在处理文件 (拖拽):`, {
-          name: file.name, // 预期: 'aaa.txt'
-          webkitRelativePath: file.webkitRelativePath, // 预期: 'A/B/C/aaa.txt'
+          name: file.name,
+          webkitRelativePath: file.webkitRelativePath,
           size: file.size
         });
 
-        // 如果 webkitRelativePath 为空或 undefined，上传的目录结构将会丢失。
-        // 这通常意味着浏览器或选择模式存在问题。
+        // 如果 webkitRelativePath 为空 (例如拖拽单个文件)，则使用文件名本身
         const relativePath = file.webkitRelativePath || file.name;
 
         return {
-          name: relativePath, // UI上显示完整路径以便区分
+          name: file.name, // [修复] UI上显示的名称应该是纯粹的文件名
           size: file.size,
           file: file,
-          relativePath: relativePath, // 传递给后端用于创建目录结构
+          relativePath: relativePath, // [正确] 用于后端构建路径的应包含目录结构
           targetPath: currentTargetPath,
           needsRefresh: true
         };

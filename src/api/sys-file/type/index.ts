@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-06-30 12:19:59
+ * @LastEditTime: 2025-07-02 10:08:36
  * @LastEditors: 安知鱼
  */
 
@@ -66,7 +66,8 @@ export interface UploadItem {
     | "error"
     | "conflict"
     | "canceled"
-    | "resumable";
+    | "resumable"
+    | "processing";
   overwrite?: boolean; // 用于单个文件覆盖
   progress: number;
   file: File; // 原始 File 对象

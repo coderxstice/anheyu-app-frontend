@@ -2,7 +2,7 @@
  * @Description: 封装文件和文件夹的创建、重命名和删除等操作
  * @Author: 安知鱼
  * @Date: 2025-06-25 14:26:59
- * @LastEditTime: 2025-06-30 19:46:12
+ * @LastEditTime: 2025-07-02 10:05:33
  * @LastEditors: 安知鱼
  */
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -47,22 +47,22 @@ export function useFileActions(
       const files = (e.target as HTMLInputElement).files;
       if (files && files.length > 0) {
         const newUploads = Array.from(files).map(file => {
-          // --- 核心修复与调试 ---
           console.log(`[Upload Debug] 正在处理文件 (按钮点击):`, {
-            name: file.name, // 预期: 'aaa.txt'
-            webkitRelativePath: file.webkitRelativePath, // 预期: 'A/B/C/aaa.txt'
+            name: file.name,
+            webkitRelativePath: file.webkitRelativePath,
             size: file.size
           });
-          const fileName = file.name;
 
-          const webkitRelativePath = file.webkitRelativePath || fileName;
+          const fileName = file.name;
+          // [统一逻辑] 确保当 webkitRelativePath 为空时，使用文件名作为相对路径
+          const relativePath = file.webkitRelativePath || fileName;
 
           return {
             file: file,
-            name: fileName,
+            name: fileName, // UI显示名称
             size: file.size,
             targetPath: currentPath.value,
-            relativePath: webkitRelativePath,
+            relativePath: relativePath, // 后端路径
             needsRefresh: true
           };
         });

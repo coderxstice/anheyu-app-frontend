@@ -36,6 +36,10 @@ export async function uploadFileChunksWorker(item: UploadItem): Promise<void> {
         console.log(`[ChunkWorker] ${item.name}: 任务被取消，中断上传。`);
         return;
       }
+      console.log(
+        `[DEBUG-SPEED-LIMIT] Waiting 500ms before uploading chunk ${i}...`
+      );
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       const start = i * item.chunkSize!;
       const end = Math.min(start + item.chunkSize!, item.size);
