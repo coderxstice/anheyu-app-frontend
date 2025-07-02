@@ -61,6 +61,8 @@ export const useUserStore = defineStore("yuyu-user", () => {
     const response = await getLogin(data);
     if (response?.code === 200) {
       setToken(response.data);
+      console.log(response.data.userInfo);
+
       SET_USER_INFO(response.data.userInfo);
       return response.data;
     } else {

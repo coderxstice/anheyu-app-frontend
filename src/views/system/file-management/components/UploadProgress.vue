@@ -15,7 +15,7 @@
               </span>
             </el-tooltip>
 
-            <span>上传队列 ({{ activeUploadsCount }}/{{ queue.length }})</span>
+            <span>上传队列</span>
 
             <div class="header-actions">
               <!-- Tooltip for Add Icon -->

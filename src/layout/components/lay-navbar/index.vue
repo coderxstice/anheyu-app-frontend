@@ -76,13 +76,6 @@ const {
           </el-dropdown-menu>
         </template>
       </el-dropdown>
-      <!-- <span
-        class="set-icon navbar-bg-hover"
-        title="打开系统配置"
-        @click="onPanel"
-      >
-        <IconifyIconOffline :icon="Setting" />
-      </span> -->
     </div>
   </div>
 </template>
@@ -92,7 +85,6 @@ const {
   width: 100%;
   height: 48px;
   overflow: hidden;
-  /* border-bottom: var(--style-border); */
 
   .hamburger-container {
     float: left;
