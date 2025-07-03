@@ -136,7 +136,7 @@ export const useFileStore = defineStore("file", {
 
   actions: {
     /**
-     * @description [重构] 更新文件夹的视图配置。这是改变排序的唯一入口。
+     * @description 更新文件夹的视图配置。这是改变排序的唯一入口。
      */
     async updateViewConfig() {
       if (!this.currentFolderId) {
@@ -160,7 +160,7 @@ export const useFileStore = defineStore("file", {
     },
 
     /**
-     * @description [重构] 设置分页大小。先更新后端配置，成功后再强制刷新列表。
+     * @description 设置分页大小。先更新后端配置，成功后再强制刷新列表。
      * @param {number} size - 新的页面大小。
      */
     setPageSize(size: number) {
@@ -178,7 +178,7 @@ export const useFileStore = defineStore("file", {
     },
 
     /**
-     * @description [重构] 设置排序规则。先更新后端配置，成功后再强制刷新列表。
+     * @description 设置排序规则。先更新后端配置，成功后再强制刷新列表。
      * @param {SortKey} key - 新的排序键。
      */
     setSort(key: SortKey) {
@@ -206,7 +206,7 @@ export const useFileStore = defineStore("file", {
     },
 
     /**
-     * @description [重构] 核心函数，适配后端驱动的排序和游标分页。
+     * @description 核心函数，适配后端驱动的排序和游标分页。
      * @param {string} pathToLoad - 需要加载的目标路径URI。
      * @param {UploaderActions} uploader - 上传器实例的回调。
      * @param {boolean} [isRefresh=false] - 是否为刷新操作。true表示强制从头加载。
