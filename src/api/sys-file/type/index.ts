@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-07-02 10:08:36
+ * @LastEditTime: 2025-07-03 10:17:41
  * @LastEditors: 安知鱼
  */
 
@@ -129,11 +129,27 @@ export interface UpdateFolderViewResponse {
 /**
  * API 返回的分页信息结构
  */
+/**
+ * @description [适配游标分页] API返回的分页信息对象。
+ */
 export interface Pagination {
+  /**
+   * @description 提供上下文的页码。首次请求为 1，后续请求为 0。不用于分页逻辑。
+   */
   page: number;
+  /**
+   * @description 本次实际返回的项目数量。
+   */
   page_size: number;
-  total: number;
-  total_page: number;
+  /**
+   * @description 固定为 true，表示正在使用游标分页。
+   */
+  is_cursor: boolean;
+  /**
+   * @description 获取下一页数据的令牌（游标）。如果这是最后一页，此字段将被省略。
+   * @optional
+   */
+  next_token?: string;
 }
 
 /**

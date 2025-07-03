@@ -40,6 +40,15 @@
       </div>
     </div>
 
+    <div
+      v-if="!isMoreLoading && !hasMore && files.length > 0"
+      class="grid-item-full-width"
+    >
+      <div class="no-more-indicator">
+        <span>— 没有更多了 —</span>
+      </div>
+    </div>
+
     <el-empty
       v-if="files.length === 0 && !loading"
       description="这里什么都没有"
@@ -57,7 +66,6 @@ import { Loading } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import { extractLogicalPathFromUri } from "@/utils/fileUtils";
 
-// --- 核心修改：新增 isMoreLoading prop ---
 const props = defineProps({
   files: {
     type: Array as PropType<FileItem[]>,
@@ -78,6 +86,11 @@ const props = defineProps({
   isMoreLoading: {
     type: Boolean,
     default: false
+  },
+  // [新增] 接收 hasMore prop，用于判断是否已加载所有数据
+  hasMore: {
+    type: Boolean,
+    default: true
   }
 });
 
@@ -91,6 +104,10 @@ const emit = defineEmits<{
 
 const { getFileIcon } = useFileIcons();
 
+/**
+ * @description 鼠标按下时的动画效果
+ * @param {MouseEvent} event - 鼠标事件
+ */
 const handleMouseDown = (event: MouseEvent) => {
   gsap.to(event.currentTarget as HTMLElement, {
     scale: 0.95,
@@ -98,6 +115,11 @@ const handleMouseDown = (event: MouseEvent) => {
     ease: "power2.out"
   });
 };
+
+/**
+ * @description 鼠标松开时的动画效果
+ * @param {MouseEvent} event - 鼠标事件
+ */
 const handleMouseUp = (event: MouseEvent) => {
   gsap.to(event.currentTarget as HTMLElement, {
     scale: 1,
@@ -105,6 +127,11 @@ const handleMouseUp = (event: MouseEvent) => {
     ease: "elastic.out(1, 0.5)"
   });
 };
+
+/**
+ * @description 鼠标移出时的动画效果
+ * @param {MouseEvent} event - 鼠标事件
+ */
 const handleMouseLeave = (event: MouseEvent) => {
   gsap.to(event.currentTarget as HTMLElement, {
     scale: 1,
@@ -113,6 +140,11 @@ const handleMouseLeave = (event: MouseEvent) => {
   });
 };
 
+/**
+ * @description 处理文件项的点击事件，用于选择文件
+ * @param {FileItem} file - 被点击的文件项
+ * @param {MouseEvent} event - 鼠标事件
+ */
 const handleItemClick = (file: FileItem, event: MouseEvent) => {
   if (props.disabledFileIds?.has(file.id)) return;
   if (file.metadata?.["sys:upload_session_id"]) return;
@@ -126,6 +158,10 @@ const handleItemClick = (file: FileItem, event: MouseEvent) => {
   }
 };
 
+/**
+ * @description 处理文件项的双击事件，用于导航到文件夹
+ * @param {FileItem} file - 被双击的文件项
+ */
 const handleItemDblClick = (file: FileItem) => {
   if (props.disabledFileIds?.has(file.id)) {
     ElMessage.warning("不能进入正在移动的文件夹。");
@@ -139,6 +175,10 @@ const handleItemDblClick = (file: FileItem) => {
   }
 };
 
+/**
+ * @description 处理全局键盘按下事件，用于全选
+ * @param {KeyboardEvent} event - 键盘事件
+ */
 const handleKeyDown = (event: KeyboardEvent) => {
   const target = event.target as HTMLElement;
   if (["INPUT", "TEXTAREA"].includes(target.tagName)) return;
@@ -267,9 +307,8 @@ onUnmounted(() => {
   grid-column: 1 / -1;
 }
 
-/* 新增：加载提示的样式 */
 .grid-item-full-width {
-  grid-column: 1 / -1; /* 让这个div撑满整行 */
+  grid-column: 1 / -1;
 }
 .load-more-indicator {
   display: flex;
@@ -281,5 +320,14 @@ onUnmounted(() => {
 }
 .load-more-indicator .el-icon {
   margin-right: 8px;
+}
+
+.no-more-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 0 20px;
+  color: #c0c4cc;
+  font-size: 13px;
 }
 </style>

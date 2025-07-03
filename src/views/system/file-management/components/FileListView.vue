@@ -83,6 +83,13 @@
         <el-icon class="is-loading"><Loading /></el-icon>
         <span>加载中...</span>
       </li>
+
+      <li
+        v-if="!isMoreLoading && !hasMore && files.length > 0"
+        class="state-view no-more-indicator"
+      >
+        <span>— 没有更多了 —</span>
+      </li>
     </ul>
   </div>
 </template>
@@ -117,6 +124,10 @@ const props = defineProps({
   isMoreLoading: {
     type: Boolean,
     default: false
+  },
+  hasMore: {
+    type: Boolean,
+    default: true
   }
 });
 
@@ -341,5 +352,33 @@ onUnmounted(() => {
   .el-icon {
     margin-right: 8px;
   }
+}
+
+.load-more-indicator,
+.no-more-indicator {
+  padding: 0 0 20px;
+}
+
+.load-more-indicator {
+  .el-icon {
+    margin-right: 8px;
+  }
+}
+
+.no-more-indicator {
+  color: #c0c4cc;
+  font-size: 13px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.is-loading {
+  animation: spin 1.5s linear infinite;
 }
 </style>

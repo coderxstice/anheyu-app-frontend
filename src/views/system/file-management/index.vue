@@ -63,6 +63,7 @@
           :loading="loading"
           :selected-file-ids="selectedFiles"
           :is-more-loading="isMoreLoading"
+          :has-more="hasMore"
           @select-single="selectSingle"
           @select-range="selectRange"
           @toggle-selection="toggleSelection"
@@ -147,7 +148,7 @@ import { UploadFilled } from "@element-plus/icons-vue";
 import FileDetailsPanel from "./components/FileDetailsPanel.vue";
 import MoveModal from "./components/MoveModal.vue";
 
-// 1. 初始化核心 Store 和状态
+// [适配游标分页] 1. 更新从Store中获取的状态
 const fileStore = useFileStore();
 const {
   sortedFiles,
@@ -158,8 +159,8 @@ const {
   viewMode,
   sortKey,
   pageSize,
-  pagination,
-  isMoreLoading
+  isMoreLoading,
+  hasMore
 } = storeToRefs(fileStore);
 
 // 2. 初始化上传核心 Hook (Uploader)
@@ -204,21 +205,19 @@ const isSingleSelection = computed(() => selectedFiles.value.size === 1);
 const getSelectedFileItems = () =>
   sortedFiles.value.filter(f => selectedFiles.value.has(f.id));
 
-// 4. 页面导航与刷新逻辑
-const handleRefresh = () => fileStore.loadFiles(path.value, uploaderActions, 1);
+// 4. 更新页面导航与刷新逻辑的调用方式
+const handleRefresh = () =>
+  fileStore.loadFiles(path.value, uploaderActions, true); // isRefresh = true
+
 const handleNavigate = (newPath: string) => {
   clearSelection();
-  fileStore.loadFiles(newPath, uploaderActions, 1);
+  fileStore.loadFiles(newPath, uploaderActions, true); // isRefresh = true
 };
 
 // 5. 初始化功能性 Hooks
 const isPanelVisible = ref(false);
 const isPanelCollapsed = ref(false);
 
-/**
- * @description: [面板修复] 定义一个通用的回调，在有新上传任务被添加后，确保上传面板可见并展开。
- * @param {boolean} hasAdded - 指示是否至少有一个新任务被成功添加到队列中。
- */
 const handleNewUploadsAdded = (hasAdded: boolean) => {
   if (hasAdded) {
     isPanelVisible.value = true;
@@ -252,26 +251,18 @@ const {
   onNewUploads: handleNewUploadsAdded
 });
 
-// [类型修复] 从 useDirectoryUpload 中解构出 handleDrop，并重命名为 processDroppedFiles
 const { handleDrop: processDroppedFiles } = useDirectoryUpload(
   addUploadsToQueue,
   path,
   handleNewUploadsAdded
 );
 
-/**
- * @description: [类型修复] 创建一个适配器函数。
- * 它的签名 (event: DragEvent) => void 符合 usePageInteractions 的要求。
- * 它的作用是从 DragEvent 中提取出 dataTransfer 对象，然后调用真正的文件处理函数。
- * @param {DragEvent} event - DOM 拖放事件。
- */
 const onDropAdapter = (event: DragEvent) => {
   if (event.dataTransfer) {
     processDroppedFiles(event.dataTransfer);
   }
 };
 
-// [类型修复] 将适配器函数 onDropAdapter 传递给 usePageInteractions
 const {
   isDragging,
   dragHandlers,
@@ -381,24 +372,24 @@ onMounted(() => {
 let throttleTimer: number | null = null;
 const handleScroll = () => {
   if (throttleTimer) return;
+
   throttleTimer = window.setTimeout(() => {
     const el = fileContentAreaRef.value;
     if (!el) return;
 
-    const canLoadMore = pagination.value.page < pagination.value.total_page;
+    // 直接使用 store 中的 hasMore 状态
+    const canLoadMore = hasMore.value;
     const isAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 200;
 
+    // 调用 loadFiles 时不再需要传递页码，isRefresh 默认为 false
     if (isAtBottom && canLoadMore && !loading.value && !isMoreLoading.value) {
-      const nextPage = pagination.value.page + 1;
-      fileStore.loadFiles(path.value, uploaderActions, nextPage);
+      fileStore.loadFiles(path.value, uploaderActions);
     }
-
     throttleTimer = null;
   }, 200);
 };
 
 // 10. 上传面板逻辑
-// [面板修复] watch现在只负责在队列为空时，自动关闭面板
 watch(showUploadProgress, isVisible => {
   if (!isVisible) {
     isPanelVisible.value = false;
@@ -414,11 +405,7 @@ const handlePanelClose = () => {
     ElMessageBox.confirm(
       "关闭面板会取消所有进行中和待处理的上传任务，确定吗？",
       "警告",
-      {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      }
+      { confirmButtonText: "确定", cancelButtonText: "取消", type: "warning" }
     )
       .then(() => {
         [...uploadQueue].forEach(item => {
@@ -470,12 +457,12 @@ const activeViewComponent = computed(() => viewComponents[viewMode.value]);
 
 <style>
 .file-management-container {
-  height: 100%;
+  height: calc(100vh - 152px);
   display: flex;
   flex-direction: column;
   position: relative;
   margin: 0 auto !important;
-  padding: 24px;
+  padding: 24px 24px 0;
 }
 .file-management-main {
   width: 100%;

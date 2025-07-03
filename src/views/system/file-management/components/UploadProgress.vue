@@ -116,8 +116,18 @@
           <div class="collapsible-content">
             <div class="panel-body">
               <div v-if="processedQueue.length === 0" class="empty-queue">
-                <span v-if="queue.length > 0">所有任务已完成</span>
-                <span v-else>没有上传任务</span>
+                <span
+                  v-if="
+                    queue.length > 0 &&
+                    queue.every(item =>
+                      ['success', 'canceled'].includes(item.status)
+                    )
+                  "
+                >
+                  所有任务已处理完毕
+                </span>
+                <span v-else-if="queue.length > 0"> 所有活动任务已完成 </span>
+                <span v-else> 没有上传任务 </span>
               </div>
               <TransitionGroup name="list" tag="div">
                 <!-- [核心修改] v-for 循环现在使用计算属性 processedQueue -->

@@ -98,17 +98,29 @@ const triggerBrowserDownload = (blob: Blob, fileName: string) => {
 
 // --- API 函数 ---
 
+/**
+ * @description 获取文件列表。排序规则由后端根据文件夹设置决定。
+ * @param {string} path - 目标路径的逻辑部分, 例如 "/Images"。
+ * @param {string | null} [next_token] - 可选的分页游标。
+ * @returns {Promise<FileListResponse>}
+ */
 export const fetchFilesByPathApi = async (
   path: string,
-  order: string,
-  direction: string,
-  page: number,
-  pageSize: number
+  next_token?: string | null
 ): Promise<FileListResponse> => {
   const fullUri = buildFullUri(path);
+
+  const params: any = {
+    uri: fullUri
+  };
+
+  if (next_token) {
+    params.next_token = next_token;
+  }
+
   try {
     return await http.request<FileListResponse>("get", baseUrlApi("file"), {
-      params: { uri: fullUri, order, direction, page, page_size: pageSize }
+      params
     });
   } catch (error) {
     console.error("fetchFilesByPathApi 请求失败:", error);
@@ -257,24 +269,4 @@ export const moveFilesApi = (sourceIDs: string[], destinationID: string) => {
     sourceIDs,
     destinationID
   });
-};
-
-/**
- * [懒加载专用] 获取指定路径下的子文件夹列表
- * @param path 父文件夹的路径
- */
-export const getSubFoldersApi = async (path: string): Promise<FileItem[]> => {
-  try {
-    // 调用现有的 API，但只请求第一页，并假设后端支持按类型过滤
-    // 如果后端不支持 type 过滤，则需要请求所有文件然后前端过滤
-    const res = await fetchFilesByPathApi(path, "name", "asc", 1, 9999); // 获取该目录下所有项
-    if (res.code === 200 && res.data && res.data.files) {
-      // 在前端进行过滤，只返回文件夹
-      return res.data.files.filter(item => item.type === FileType.Dir);
-    }
-    return [];
-  } catch (error) {
-    console.error("getSubFoldersApi failed:", error);
-    return []; // 出错时返回空数组
-  }
 };
