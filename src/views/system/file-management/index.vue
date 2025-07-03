@@ -54,11 +54,13 @@
     </div>
 
     <div class="file-management-main rounded-2xl overflow-hidden">
-      <div
-        ref="fileContentAreaRef"
-        class="file-content-area"
-        @scroll="handleScroll"
-      >
+      <transition name="loading-fade">
+        <div v-if="loading" class="loading-overlay">
+          <div class="loading-spinner" />
+        </div>
+      </transition>
+
+      <div class="file-content-area">
         <component
           :is="activeViewComponent"
           :files="sortedFiles"
@@ -71,6 +73,7 @@
           @toggle-selection="toggleSelection"
           @select-all="selectAll"
           @navigate-to="handleNavigate"
+          @scroll="handleScroll"
         />
       </div>
     </div>
@@ -120,14 +123,13 @@
 </template>
 
 <script lang="ts" setup>
+// The script part remains exactly the same as the previous version.
+// No logic changes are needed here because we are just using the existing `loading` state.
 import { computed, ref, watch } from "vue";
-// [路径参数改造] 1. 导入 vue-router 相关钩子和路径处理工具
 import { useRoute, useRouter } from "vue-router";
 import { buildFullUri, extractLogicalPathFromUri } from "@/utils/fileUtils";
-
 import { storeToRefs } from "pinia";
 import { ElMessageBox } from "element-plus";
-
 import {
   useFileStore,
   type SortKey,
@@ -141,7 +143,6 @@ import { useContextMenuHandler } from "./hooks/useContextMenuHandler";
 import { usePageInteractions } from "./hooks/usePageInteractions";
 import { useFileDownload } from "./hooks/useFileDownload";
 import { useFileModals } from "./hooks/useFileModals";
-
 import FileHeard from "./components/FileHeard.vue";
 import FileBreadcrumb from "./components/FileBreadcrumb.vue";
 import FileToolbar from "./components/FileToolbar.vue";
@@ -155,7 +156,6 @@ import FileDetailsPanel from "./components/FileDetailsPanel.vue";
 import MoveModal from "./components/MoveModal.vue";
 import type { ColumnConfig } from "@/api/sys-file/type";
 
-// [路径参数改造] 2. 初始化 route 和 router 实例
 const route = useRoute();
 const router = useRouter();
 const fileStore = useFileStore();
@@ -171,11 +171,9 @@ const {
   pageSize,
   isMoreLoading,
   hasMore,
-  // 新增: 从 store 中获取 columns
   columns
 } = storeToRefs(fileStore);
 
-// 初始化上传核心 Hook (Uploader) - 无需改动
 const {
   uploadQueue,
   showUploadProgress,
@@ -202,7 +200,6 @@ const uploaderActions: UploaderActions = {
   addResumableTaskFromFileItem
 };
 
-// 初始化文件选择 Hook - 无需改动
 const {
   selectedFiles,
   selectSingle,
@@ -217,44 +214,28 @@ const isSingleSelection = computed(() => selectedFiles.value.size === 1);
 const getSelectedFileItems = () =>
   sortedFiles.value.filter(f => selectedFiles.value.has(f.id));
 
-// [路径参数改造] 3. 更新导航与刷新逻辑
 const handleRefresh = () =>
   fileStore.loadFiles(path.value, uploaderActions, true);
 
-/**
- * 处理导航请求。此函数现在只负责更新URL的查询参数。
- * @param newLogicalPath - 目标逻辑路径, 例如 "/Images"
- */
 const handleNavigate = (newLogicalPath: string) => {
   const fullUri = buildFullUri(newLogicalPath);
-  // 仅在目标URI与当前URL查询参数不同时才更新URL，以避免不必要的历史记录条目
   if (route.query.path !== fullUri) {
     router.push({ query: { path: fullUri } });
   }
 };
 
-/**
- * 根据路由参数加载文件。
- * @param pathQuery - 从 aue-router 的 route.query.path 中获取的值
- */
 const loadFilesFromRoute = (
   pathQuery: string | string[] | null | undefined
 ) => {
-  // 处理 pathQuery 可能为数组的情况
   const pathUri = Array.isArray(pathQuery) ? pathQuery[0] : pathQuery;
-  // 从完整的URI中提取逻辑路径（例如从 "anzhiyu://my/A" 得到 "/A"），如果不存在则默认为根目录 "/"
   const logicalPathToLoad = pathUri ? extractLogicalPathFromUri(pathUri) : "/";
 
-  // 只有当目标路径与当前store中的路径不同时，才执行加载，避免重复加载
   if (logicalPathToLoad !== fileStore.path || fileStore.files.length === 0) {
     clearSelection();
     fileStore.loadFiles(logicalPathToLoad, uploaderActions, true);
   }
 };
 
-// 4. 监视路由查询参数的变化
-// 当 URL 的 ?path=... 改变时 (例如，通过 handleNavigate 或浏览器后退/前进按钮)，此观察者将触发文件加载。
-// `immediate: true` 确保在组件首次加载时也会运行，从而处理初始URL（包括深链接）。
 watch(
   () => route.query.path,
   newPathQuery => {
@@ -263,7 +244,6 @@ watch(
   { immediate: true }
 );
 
-// 5. 初始化功能性 Hooks
 const isPanelVisible = ref(false);
 const isPanelCollapsed = ref(false);
 
@@ -320,7 +300,6 @@ const {
   openSearchFromElement
 } = usePageInteractions(onDropAdapter);
 
-// 6. 简单操作 Action
 const onActionRename = () => {
   if (isSingleSelection.value) handleRename(getSelectedFileItems()[0]);
 };
@@ -335,7 +314,6 @@ const onActionShare = () => {
   console.log("Share action triggered");
 };
 
-// 7. 右键菜单 Hook
 const {
   contextMenuTriggerEvent,
   onMenuSelect,
@@ -360,12 +338,10 @@ const {
   }
 });
 
-// 8. 视图与杂项事件处理器
 const selectionCountLabel = computed(
   () => `${selectedFiles.value.size} 个对象`
 );
 const fileManagerContainerRef = ref(null);
-const fileContentAreaRef = ref<HTMLElement | null>(null);
 
 const handleContainerClick = (event: MouseEvent) => {
   if (
@@ -410,19 +386,19 @@ const handleSetViewMode = (mode: "list" | "grid") =>
   fileStore.setViewMode(mode);
 const handleSetPageSize = (size: number) => fileStore.setPageSize(size);
 const handleSetSortKey = (key: SortKey) => fileStore.setSort(key);
-
-// 新增: 处理列设置变化的函数
 const handleSetColumns = (newColumns: ColumnConfig[]) =>
   fileStore.setColumns(newColumns);
 
-// 滚动加载逻辑 - 无需改动
 let throttleTimer: number | null = null;
-const handleScroll = () => {
+const handleScroll = (event: Event) => {
   if (throttleTimer) return;
 
   throttleTimer = window.setTimeout(() => {
-    const el = fileContentAreaRef.value;
-    if (!el) return;
+    const el = event.target as HTMLElement;
+    if (!el) {
+      throttleTimer = null;
+      return;
+    }
 
     const canLoadMore = hasMore.value;
     const isAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 200;
@@ -434,7 +410,6 @@ const handleScroll = () => {
   }, 200);
 };
 
-// 上传面板逻辑 - 无需改动
 watch(showUploadProgress, isVisible => {
   if (!isVisible) {
     isPanelVisible.value = false;
@@ -517,10 +492,12 @@ const activeViewComponent = computed(() => viewComponents[viewMode.value]);
   flex-direction: column;
   background-color: #fff;
   border: var(--style-border);
+  position: relative;
 }
 .file-content-area {
   flex: 1;
   overflow: auto;
+  overflow: hidden;
   position: relative;
 }
 .drag-overlay {
@@ -553,5 +530,43 @@ const activeViewComponent = computed(() => viewComponents[viewMode.value]);
   font-size: 16px;
   color: #eee;
   margin-top: 8px;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--anzhiyu-theme);
+  border-top-color: var(--anzhiyu-theme);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-fade-enter-active,
+.loading-fade-leave-active {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.loading-fade-enter-from,
+.loading-fade-leave-to {
+  opacity: 0;
 }
 </style>

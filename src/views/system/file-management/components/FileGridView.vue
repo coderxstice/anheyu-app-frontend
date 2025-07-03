@@ -1,5 +1,11 @@
 <template>
-  <div v-loading="loading" class="file-grid-view" data-is-file-container="true">
+  <!-- 1. 添加 @scroll 监听器，并赋予滚动能力（通过CSS） -->
+  <div
+    v-loading="loading && !files.length"
+    class="file-grid-view"
+    data-is-file-container="true"
+    @scroll="handleLocalScroll"
+  >
     <div
       v-for="file in files"
       :key="file.id"
@@ -33,6 +39,7 @@
       <div class="item-name">{{ file.name }}</div>
     </div>
 
+    <!-- 加载更多和无更多数据的指示器保持不变 -->
     <div v-if="isMoreLoading" class="grid-item-full-width">
       <div class="load-more-indicator">
         <el-icon class="is-loading"><Loading /></el-icon>
@@ -49,8 +56,9 @@
       </div>
     </div>
 
+    <!-- 空状态也保持不变 -->
     <el-empty
-      v-if="files.length === 0 && !loading"
+      v-if="files.length === 0 && !loading && !isMoreLoading"
       description="这里什么都没有"
       class="grid-empty"
     />
@@ -87,7 +95,6 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  // [新增] 接收 hasMore prop，用于判断是否已加载所有数据
   hasMore: {
     type: Boolean,
     default: true
@@ -100,14 +107,19 @@ const emit = defineEmits<{
   (e: "toggle-selection", fileId: string): void;
   (e: "select-all"): void;
   (e: "navigate-to", path: string): void;
+  // 2. 定义新的 emit 事件
+  (e: "scroll", event: Event): void;
 }>();
+
+// 3. 创建处理本地滚动的函数
+const handleLocalScroll = (event: Event) => {
+  emit("scroll", event);
+};
+
+// --- 其他 script 内容保持不变 ---
 
 const { getFileIcon } = useFileIcons();
 
-/**
- * @description 鼠标按下时的动画效果
- * @param {MouseEvent} event - 鼠标事件
- */
 const handleMouseDown = (event: MouseEvent) => {
   gsap.to(event.currentTarget as HTMLElement, {
     scale: 0.95,
@@ -116,10 +128,6 @@ const handleMouseDown = (event: MouseEvent) => {
   });
 };
 
-/**
- * @description 鼠标松开时的动画效果
- * @param {MouseEvent} event - 鼠标事件
- */
 const handleMouseUp = (event: MouseEvent) => {
   gsap.to(event.currentTarget as HTMLElement, {
     scale: 1,
@@ -128,10 +136,6 @@ const handleMouseUp = (event: MouseEvent) => {
   });
 };
 
-/**
- * @description 鼠标移出时的动画效果
- * @param {MouseEvent} event - 鼠标事件
- */
 const handleMouseLeave = (event: MouseEvent) => {
   gsap.to(event.currentTarget as HTMLElement, {
     scale: 1,
@@ -140,11 +144,6 @@ const handleMouseLeave = (event: MouseEvent) => {
   });
 };
 
-/**
- * @description 处理文件项的点击事件，用于选择文件
- * @param {FileItem} file - 被点击的文件项
- * @param {MouseEvent} event - 鼠标事件
- */
 const handleItemClick = (file: FileItem, event: MouseEvent) => {
   if (props.disabledFileIds?.has(file.id)) return;
   if (file.metadata?.["sys:upload_session_id"]) return;
@@ -158,10 +157,6 @@ const handleItemClick = (file: FileItem, event: MouseEvent) => {
   }
 };
 
-/**
- * @description 处理文件项的双击事件，用于导航到文件夹
- * @param {FileItem} file - 被双击的文件项
- */
 const handleItemDblClick = (file: FileItem) => {
   if (props.disabledFileIds?.has(file.id)) {
     ElMessage.warning("不能进入正在移动的文件夹。");
@@ -175,10 +170,6 @@ const handleItemDblClick = (file: FileItem) => {
   }
 };
 
-/**
- * @description 处理全局键盘按下事件，用于全选
- * @param {KeyboardEvent} event - 键盘事件
- */
 const handleKeyDown = (event: KeyboardEvent) => {
   const target = event.target as HTMLElement;
   if (["INPUT", "TEXTAREA"].includes(target.tagName)) return;
@@ -199,11 +190,17 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* 4. 修改样式 */
 .file-grid-view {
   padding: 24px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 20px;
+  /* 关键：让这个容器自身可以滚动 */
+  height: 100%;
+  overflow-y: auto;
+  /* 确保 v-loading 遮罩层能正确显示 */
+  position: relative;
 }
 .grid-item {
   display: flex;
@@ -305,6 +302,9 @@ onUnmounted(() => {
 }
 .grid-empty {
   grid-column: 1 / -1;
+  /* 确保空状态在容器内居中 */
+  align-self: center;
+  justify-self: center;
 }
 
 .grid-item-full-width {
@@ -320,6 +320,9 @@ onUnmounted(() => {
 }
 .load-more-indicator .el-icon {
   margin-right: 8px;
+}
+.is-loading {
+  animation: spin 1.5s linear infinite;
 }
 
 .no-more-indicator {

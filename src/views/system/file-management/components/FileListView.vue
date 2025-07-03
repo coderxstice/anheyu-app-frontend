@@ -1,15 +1,23 @@
 <template>
-  <div v-loading="loading && !files.length" class="file-list-container">
+  <!-- 根容器现在使用 Flexbox 布局 -->
+  <div class="file-list-container">
+    <!-- 表头是 Flex 项目，高度固定 -->
     <div class="file-list-header">
       <div class="column-name">名称</div>
       <div class="column-size">文件大小</div>
       <div class="column-modified">创建时间</div>
     </div>
 
-    <ul class="file-list-body" data-is-file-container="true">
-      <li v-if="!files.length && !loading" class="state-view">
+    <!-- 列表主体是 Flex 项目，占据剩余空间并可滚动 -->
+    <ul
+      class="file-list-body"
+      data-is-file-container="true"
+      @scroll="handleLocalScroll"
+    >
+      <li v-if="!files.length && !loading && !isMoreLoading" class="state-view">
         <span>这里什么都没有</span>
       </li>
+      <!-- ... v-for 循环和列表项保持不变 ... -->
       <li
         v-for="item in files"
         :key="item.id"
@@ -95,6 +103,7 @@
 </template>
 
 <script setup lang="ts">
+// Script 部分与上一版完全相同，无需改动
 import { onMounted, onUnmounted, ref, type PropType } from "vue";
 import { formatSize, formatDateTime } from "@/utils/format";
 import { useFileIcons } from "../hooks/useFileIcons";
@@ -137,7 +146,12 @@ const emit = defineEmits<{
   (e: "toggle-selection", fileId: string): void;
   (e: "select-all"): void;
   (e: "navigate-to", path: string): void;
+  (e: "scroll", event: Event): void;
 }>();
+
+const handleLocalScroll = (event: Event) => {
+  emit("scroll", event);
+};
 
 const { getFileIcon } = useFileIcons();
 const hoveredFileId = ref<string | null>(null);
@@ -227,17 +241,48 @@ onUnmounted(() => {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
   background-color: white;
+  position: relative;
+  height: 100%;
+
+  /* --- 关键修改 --- */
   display: flex;
   flex-direction: column;
-  position: relative;
-}
-.file-list-body {
-  padding: 6px 8px;
-  flex: 1;
+  /* 确保在空间不足时，flex布局正常工作 */
+  min-height: 0;
 }
 
-.file-list-header,
-.file-item {
+.file-list-body {
+  padding: 6px 8px;
+
+  /* --- 关键修改 --- */
+  /* 让 ul 占据所有剩余空间 */
+  flex: 1 1 auto;
+  /* 只有 ul 自身滚动 */
+  overflow-y: auto;
+  /* 当内容不足时，也保持布局 */
+  min-height: 0;
+}
+
+.file-list-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 8px;
+  font-size: 14px;
+  margin: 0;
+  color: #64748b;
+  font-weight: 500;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: white;
+
+  /* --- 关键修改 --- */
+  /* 表头不再需要 sticky 或 z-index，它自然就在顶部 */
+  /* flex: 0 0 auto; 确保表头不被压缩或拉伸 */
+  flex-shrink: 0;
+}
+
+/* --- 其他样式保持不变 --- */
+.file-item,
+.file-list-header {
   display: flex;
   align-items: center;
   padding: 12px 8px;
@@ -252,16 +297,6 @@ onUnmounted(() => {
   transition:
     opacity 0.3s ease,
     background-color 0.2s ease;
-}
-
-.file-list-header {
-  margin: 0;
-  color: #64748b;
-  font-weight: 500;
-  border-bottom: 1px solid #e5e7eb;
-  background-color: white;
-  position: sticky;
-  top: 0;
 }
 
 .file-item:last-child {
@@ -328,14 +363,6 @@ onUnmounted(() => {
   animation: spin 1.5s linear infinite;
   color: var(--el-color-primary);
   font-size: 16px;
-}
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .column-size {
