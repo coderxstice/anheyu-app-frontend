@@ -1,23 +1,57 @@
 <template>
-  <!-- 根容器现在使用 Flexbox 布局 -->
   <div class="file-list-container">
-    <!-- 表头是 Flex 项目，高度固定 -->
+    <!-- 表头区域 -->
     <div class="file-list-header">
-      <div class="column-name">名称</div>
-      <div class="column-size">文件大小</div>
-      <div class="column-modified">创建时间</div>
+      <!-- 直接通过 v-for 渲染所有列 -->
+      <div
+        v-for="col in columns"
+        :key="col.type"
+        :class="['column', `column-${columnTypeMap[col.type].key}`]"
+        @click="handleHeaderClick(columnTypeMap[col.type].key)"
+        @mouseenter="hoveredHeaderKey = columnTypeMap[col.type].key"
+        @mouseleave="hoveredHeaderKey = null"
+      >
+        <span>{{ columnTypeMap[col.type].name }}</span>
+
+        <div class="sort-indicator-wrapper">
+          <!-- 当前激活的排序列 -->
+          <div
+            v-if="currentSort.key === columnTypeMap[col.type].key"
+            class="sort-indicator active"
+          >
+            <el-icon v-if="currentSort.dir === 'asc'"><CaretTop /></el-icon>
+            <el-icon v-else><CaretBottom /></el-icon>
+          </div>
+          <!-- 鼠标悬浮时显示的预备排序列 -->
+          <div
+            v-else-if="hoveredHeaderKey === columnTypeMap[col.type].key"
+            class="sort-indicator-hover"
+          >
+            <el-icon><CaretBottom /></el-icon>
+          </div>
+        </div>
+      </div>
+
+      <!-- 添加列按钮 -->
+      <div class="column-add">
+        <el-tooltip content="配置列" placement="top">
+          <el-icon @click="emit('open-column-settings')"><Plus /></el-icon>
+        </el-tooltip>
+      </div>
     </div>
 
-    <!-- 列表主体是 Flex 项目，占据剩余空间并可滚动 -->
+    <!-- 列表主体区域 -->
     <ul
       class="file-list-body"
       data-is-file-container="true"
       @scroll="handleLocalScroll"
     >
+      <!-- 空状态 -->
       <li v-if="!files.length && !loading && !isMoreLoading" class="state-view">
         <span>这里什么都没有</span>
       </li>
-      <!-- ... v-for 循环和列表项保持不变 ... -->
+
+      <!-- 文件列表项 -->
       <li
         v-for="item in files"
         :key="item.id"
@@ -31,67 +65,55 @@
         }"
         @click="handleItemClick(item, $event)"
         @dblclick="handleItemDblClick(item)"
-        @mouseenter="hoveredFileId = item.id"
-        @mouseleave="hoveredFileId = null"
         @mousedown="handleMouseDown"
         @mouseup="handleMouseUp"
       >
-        <div class="column-name">
-          <Transition
-            name="icon-swap"
-            mode="out-in"
-            @enter="onIconEnter"
-            @leave="onIconLeave"
-          >
-            <IconifyIconOnline
-              v-if="selectedFileIds.has(item.id)"
-              :key="item.id + '-selected'"
-              icon="material-symbols:check-circle-rounded"
-              class="file-icon selected-icon"
-              @click.stop="emit('toggle-selection', item.id)"
-            />
-            <IconifyIconOnline
-              v-else-if="
-                selectedFileIds.size > 0 &&
-                hoveredFileId === item.id &&
-                !disabledFileIds?.has(item.id)
-              "
-              :key="item.id + '-hover'"
-              icon="charm:circle"
-              class="file-icon hover-icon"
-              @click.stop="emit('toggle-selection', item.id)"
-              @dblclick.stop
-            />
-            <component
-              :is="getFileIcon(item)"
-              v-else
-              :key="item.id + '-default'"
-              class="file-icon"
-            />
-          </Transition>
-          <span>{{ item.name }}</span>
-
-          <el-tooltip
-            v-if="item.metadata?.['sys:upload_session_id']"
-            content="文件上传中..."
-            placement="top"
-          >
-            <el-icon class="uploading-indicator">
-              <Loading />
-            </el-icon>
-          </el-tooltip>
+        <!-- 动态列单元格 -->
+        <div
+          v-for="col in columns"
+          :key="col.type"
+          :class="['column', `column-${columnTypeMap[col.type].key}`]"
+        >
+          <!-- 名称列特殊处理，包含图标 -->
+          <template v-if="columnTypeMap[col.type].key === 'name'">
+            <div class="column-name-content">
+              <Transition name="icon-swap" mode="out-in">
+                <IconifyIconOnline
+                  v-if="selectedFileIds.has(item.id)"
+                  icon="material-symbols:check-circle-rounded"
+                  class="file-icon selected-icon"
+                  @click.stop="emit('toggle-selection', item.id)"
+                />
+                <component :is="getFileIcon(item)" v-else class="file-icon" />
+              </Transition>
+              <span class="file-name-text">{{ item.name }}</span>
+              <el-tooltip
+                v-if="item.metadata?.['sys:upload_session_id']"
+                content="文件上传中..."
+                placement="top"
+              >
+                <el-icon class="uploading-indicator"><Loading /></el-icon>
+              </el-tooltip>
+            </div>
+          </template>
+          <!-- 其他列正常渲染 -->
+          <template v-else-if="columnTypeMap[col.type].key === 'size'">
+            {{ item.type === FileType.File ? formatSize(item.size) : "--" }}
+          </template>
+          <template v-else-if="columnTypeMap[col.type].key === 'updated_at'">
+            {{ formatDateTime(item.updated_at) }}
+          </template>
+          <template v-else-if="columnTypeMap[col.type].key === 'created_at'">
+            {{ formatDateTime(item.created_at) }}
+          </template>
         </div>
-        <div v-if="item.type === FileType.File" class="column-size">
-          {{ formatSize(item.size) }}
-        </div>
-        <div v-else class="column-size">--</div>
-        <div class="column-modified">{{ formatDateTime(item.created_at) }}</div>
       </li>
+
+      <!-- 加载指示器 -->
       <li v-if="isMoreLoading" class="state-view load-more-indicator">
         <el-icon class="is-loading"><Loading /></el-icon>
         <span>加载中...</span>
       </li>
-
       <li
         v-if="!isMoreLoading && !hasMore && files.length > 0"
         class="state-view no-more-indicator"
@@ -103,41 +125,28 @@
 </template>
 
 <script setup lang="ts">
-// Script 部分与上一版完全相同，无需改动
-import { onMounted, onUnmounted, ref, type PropType } from "vue";
+import { computed, onMounted, onUnmounted, ref, type PropType } from "vue";
 import { formatSize, formatDateTime } from "@/utils/format";
 import { useFileIcons } from "../hooks/useFileIcons";
 import gsap from "gsap";
-import { FileItem, FileType } from "@/api/sys-file/type";
-import { Loading } from "@element-plus/icons-vue";
+import { FileItem, FileType, type ColumnConfig } from "@/api/sys-file/type";
+import { Loading, CaretTop, CaretBottom, Plus } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import { extractLogicalPathFromUri } from "@/utils/fileUtils";
+import type { SortKey } from "@/store/modules/fileStore";
 
 const props = defineProps({
-  files: {
-    type: Array as PropType<FileItem[]>,
-    required: true
-  },
-  loading: {
-    type: Boolean,
-    default: false
-  },
-  selectedFileIds: {
-    type: Set as PropType<Set<string>>,
-    required: true
-  },
+  files: { type: Array as PropType<FileItem[]>, required: true },
+  loading: { type: Boolean, default: false },
+  selectedFileIds: { type: Set as PropType<Set<string>>, required: true },
   disabledFileIds: {
     type: Set as PropType<Set<string>>,
     default: () => new Set()
   },
-  isMoreLoading: {
-    type: Boolean,
-    default: false
-  },
-  hasMore: {
-    type: Boolean,
-    default: true
-  }
+  isMoreLoading: { type: Boolean, default: false },
+  hasMore: { type: Boolean, default: true },
+  columns: { type: Array as PropType<ColumnConfig[]>, required: true },
+  sortKey: { type: String as PropType<SortKey>, required: true }
 });
 
 const emit = defineEmits<{
@@ -147,35 +156,48 @@ const emit = defineEmits<{
   (e: "select-all"): void;
   (e: "navigate-to", path: string): void;
   (e: "scroll", event: Event): void;
+  (e: "set-sort-key", key: SortKey): void;
+  (e: "open-column-settings"): void;
 }>();
 
-const handleLocalScroll = (event: Event) => {
-  emit("scroll", event);
+const columnTypeMap = {
+  0: { key: "name", name: "文件名" },
+  1: { key: "size", name: "大小" },
+  2: { key: "updated_at", name: "修改日期" },
+  3: { key: "created_at", name: "创建日期" }
+} as const;
+
+type ColumnKey = (typeof columnTypeMap)[keyof typeof columnTypeMap]["key"];
+
+/**
+ * [关键修正]
+ * 计算属性，解析当前排序键为 { key, dir } 对象。
+ * 采用更健壮的分割方式，以处理键名中包含下划线的情况 (如 'updated_at')。
+ */
+const currentSort = computed(() => {
+  const parts = props.sortKey.split("_");
+  // pop() 会移除并返回数组的最后一个元素
+  const dir = parts.pop();
+  // join('_') 会将数组剩余的所有部分用下划线重新连接起来
+  const key = parts.join("_");
+  return { key, dir };
+});
+
+const handleHeaderClick = (key: ColumnKey) => {
+  if (currentSort.value.key === key) {
+    const newDir = currentSort.value.dir === "asc" ? "desc" : "asc";
+    emit("set-sort-key", `${key}_${newDir}` as SortKey);
+  } else {
+    const newDir = key === "name" ? "asc" : "desc";
+    emit("set-sort-key", `${key}_${newDir}` as SortKey);
+  }
 };
 
 const { getFileIcon } = useFileIcons();
-const hoveredFileId = ref<string | null>(null);
+const hoveredHeaderKey = ref<ColumnKey | null>(null);
 
-const onIconEnter = (el: Element, done: () => void) => {
-  gsap.fromTo(
-    el,
-    { opacity: 0 },
-    {
-      opacity: 1,
-      duration: 0.125,
-      ease: "cubic-bezier(0.4, 0, 0.2, 1)",
-      onComplete: done
-    }
-  );
-};
-const onIconLeave = (el: Element, done: () => void) => {
-  gsap.to(el, {
-    opacity: 0,
-    duration: 0.105,
-    ease: "cubic-bezier(0.4, 0, 0.2, 1)",
-    onComplete: done
-  });
-};
+const handleLocalScroll = (event: Event) => emit("scroll", event);
+
 const handleMouseDown = (event: MouseEvent) => {
   gsap.to(event.currentTarget as HTMLElement, {
     scale: 0.995,
@@ -183,6 +205,7 @@ const handleMouseDown = (event: MouseEvent) => {
     ease: "power2.out"
   });
 };
+
 const handleMouseUp = (event: MouseEvent) => {
   gsap.to(event.currentTarget as HTMLElement, {
     scale: 1,
@@ -192,9 +215,11 @@ const handleMouseUp = (event: MouseEvent) => {
 };
 
 const handleItemClick = (item: FileItem, event: MouseEvent) => {
-  if (props.disabledFileIds?.has(item.id)) return;
-  if (item.metadata?.["sys:upload_session_id"]) return;
-
+  if (
+    props.disabledFileIds?.has(item.id) ||
+    item.metadata?.["sys:upload_session_id"]
+  )
+    return;
   if (event.shiftKey) {
     emit("select-range", item.id);
   } else if (event.metaKey || event.ctrlKey) {
@@ -210,7 +235,6 @@ const handleItemDblClick = (item: FileItem) => {
     return;
   }
   if (item.metadata?.["sys:upload_session_id"]) return;
-
   if (item.type === FileType.Dir) {
     const logicalPath = extractLogicalPathFromUri(item.path);
     emit("navigate-to", logicalPath);
@@ -220,106 +244,180 @@ const handleItemDblClick = (item: FileItem) => {
 const handleKeyDown = (event: KeyboardEvent) => {
   const target = event.target as HTMLElement;
   if (["INPUT", "TEXTAREA"].includes(target.tagName)) return;
-
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "a") {
     event.preventDefault();
     emit("select-all");
   }
 };
 
-onMounted(() => {
-  window.addEventListener("keydown", handleKeyDown);
-});
-
-onUnmounted(() => {
-  window.removeEventListener("keydown", handleKeyDown);
-});
+onMounted(() => window.addEventListener("keydown", handleKeyDown));
+onUnmounted(() => window.removeEventListener("keydown", handleKeyDown));
 </script>
 
 <style scoped lang="scss">
+/* --- 整体布局 --- */
 .file-list-container {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  background-color: white;
-  position: relative;
-  height: 100%;
-
-  /* --- 关键修改 --- */
   display: flex;
   flex-direction: column;
-  /* 确保在空间不足时，flex布局正常工作 */
+  height: 100%;
   min-height: 0;
-}
-
-.file-list-body {
-  padding: 6px 8px;
-
-  /* --- 关键修改 --- */
-  /* 让 ul 占据所有剩余空间 */
-  flex: 1 1 auto;
-  /* 只有 ul 自身滚动 */
-  overflow-y: auto;
-  /* 当内容不足时，也保持布局 */
-  min-height: 0;
+  background-color: white;
+  position: relative;
 }
 
 .file-list-header {
   display: flex;
   align-items: center;
-  padding: 12px 8px;
-  font-size: 14px;
-  margin: 0;
   color: #64748b;
   font-weight: 500;
   border-bottom: 1px solid #e5e7eb;
-  background-color: white;
-
-  /* --- 关键修改 --- */
-  /* 表头不再需要 sticky 或 z-index，它自然就在顶部 */
-  /* flex: 0 0 auto; 确保表头不被压缩或拉伸 */
+  padding: 0 8px;
   flex-shrink: 0;
+  user-select: none;
 }
 
-/* --- 其他样式保持不变 --- */
-.file-item,
-.file-list-header {
-  display: flex;
-  align-items: center;
+.file-list-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 6px 8px;
+}
+
+/* --- 列通用样式 --- */
+.column {
   padding: 12px 8px;
   font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+
+  &.column-name {
+    flex: 5;
+    padding-left: 20px;
+  }
+  &.column-size {
+    flex: 1.5;
+    justify-content: flex-start;
+    color: #64748b;
+  }
+  &.column-updated_at,
+  &.column-created_at {
+    flex: 2.5;
+    color: #64748b;
+  }
 }
 
-.file-item {
-  margin: 1px 0;
+.file-list-header .column {
   cursor: pointer;
-  border-radius: 6px;
-  user-select: none;
-  transition:
-    opacity 0.3s ease,
-    background-color 0.2s ease;
 }
 
-.file-item:last-child {
-  border-bottom: none;
+/* --- 名称列的特殊内容 --- */
+.column-name-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
 }
+.file-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.selected-icon {
+  color: gold;
+  cursor: pointer;
+}
+.file-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- 文件行项目 --- */
+.file-item {
+  display: flex;
+  align-items: center;
+  margin: 1px 0;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+/* --- 排序和添加按钮 --- */
+.sort-indicator-wrapper {
+  margin-left: 4px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sort-indicator.active {
+  color: var(--el-color-primary);
+}
+.sort-indicator-hover {
+  color: #c0c4cc;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+.file-list-header .column:hover .sort-indicator-hover {
+  opacity: 1;
+}
+
+.column-add {
+  margin-left: auto; /* 将按钮推到最右边 */
+  padding: 0 16px;
+  .el-icon {
+    cursor: pointer;
+    font-size: 16px;
+    color: #909399;
+    &:hover {
+      color: var(--el-color-primary);
+    }
+  }
+}
+
+/* --- 动画 --- */
+.header-list-move,
+.header-list-enter-active,
+.header-list-leave-active,
+.cell-list-move,
+.cell-list-enter-active,
+.cell-list-leave-active {
+  transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+}
+.header-list-enter-from,
+.header-list-leave-to,
+.cell-list-enter-from,
+.cell-list-leave-to {
+  opacity: 0;
+  transform: scaleY(0.01);
+}
+.header-list-leave-active,
+.cell-list-leave-active {
+  position: absolute;
+  width: 100%;
+}
+
+/* --- 其他状态样式 --- */
 .file-item:hover {
   background-color: #f8fafc;
 }
 .file-item.selected {
   color: #fff;
   background-color: var(--anzhiyu-theme, #007bff) !important;
-  .column-size,
-  .column-modified {
-    color: #fff;
+  .column-name-content,
+  .column.column-size,
+  .column.column-updated_at,
+  .column.column-created_at {
+    color: #fff !important;
   }
 }
-
 .file-item.is-uploading {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
 }
-
 .file-item.is-disabled {
   cursor: not-allowed;
   color: #a8abb2;
@@ -331,50 +429,6 @@ onUnmounted(() => {
   }
 }
 
-.column-name {
-  flex: 5;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding-left: 12px;
-}
-.file-icon {
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-}
-
-.selected-icon,
-.hover-icon {
-  cursor: pointer;
-}
-
-.selected-icon {
-  color: gold;
-}
-.hover-icon {
-  color: #a0a0a0;
-}
-
-.uploading-indicator {
-  animation: spin 1.5s linear infinite;
-  color: var(--el-color-primary);
-  font-size: 16px;
-}
-
-.column-size {
-  flex: 1.5;
-  text-align: left;
-  color: #64748b;
-}
-.column-modified {
-  flex: 2.5;
-  color: #64748b;
-}
-
 .state-view {
   display: flex;
   justify-content: center;
@@ -383,30 +437,13 @@ onUnmounted(() => {
   color: #909399;
   font-size: 14px;
 }
-
-.load-more-indicator {
-  padding: 15px 0;
-  .el-icon {
-    margin-right: 8px;
-  }
-}
-
 .load-more-indicator,
 .no-more-indicator {
-  padding: 0 0 20px;
+  padding: 20px 0;
 }
-
-.load-more-indicator {
-  .el-icon {
-    margin-right: 8px;
-  }
+.is-loading {
+  animation: spin 1.5s linear infinite;
 }
-
-.no-more-indicator {
-  color: #c0c4cc;
-  font-size: 13px;
-}
-
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -415,7 +452,8 @@ onUnmounted(() => {
     transform: rotate(360deg);
   }
 }
-.is-loading {
+.uploading-indicator {
   animation: spin 1.5s linear infinite;
+  margin-left: 8px;
 }
 </style>

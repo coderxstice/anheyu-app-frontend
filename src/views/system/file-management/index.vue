@@ -35,6 +35,7 @@
         @download-folder="handleDownloadFolder"
       />
       <FileToolbar
+        ref="fileToolbarRef"
         class="mb-2 ml-2"
         :view-mode="viewMode"
         :sort-key="sortKey"
@@ -68,12 +69,16 @@
           :selected-file-ids="selectedFiles"
           :is-more-loading="isMoreLoading"
           :has-more="hasMore"
+          :columns="columns"
+          :sort-key="sortKey"
           @select-single="selectSingle"
           @select-range="selectRange"
           @toggle-selection="toggleSelection"
           @select-all="selectAll"
           @navigate-to="handleNavigate"
           @scroll="handleScroll"
+          @set-sort-key="handleSetSortKey"
+          @open-column-settings="handleOpenColumnSettings"
         />
       </div>
     </div>
@@ -123,18 +128,22 @@
 </template>
 
 <script lang="ts" setup>
-// The script part remains exactly the same as the previous version.
-// No logic changes are needed here because we are just using the existing `loading` state.
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { buildFullUri, extractLogicalPathFromUri } from "@/utils/fileUtils";
 import { storeToRefs } from "pinia";
 import { ElMessageBox } from "element-plus";
+import { UploadFilled } from "@element-plus/icons-vue";
+
+// 工具 & Store
+import { buildFullUri, extractLogicalPathFromUri } from "@/utils/fileUtils";
 import {
   useFileStore,
   type SortKey,
   type UploaderActions
 } from "@/store/modules/fileStore";
+import type { ColumnConfig } from "@/api/sys-file/type";
+
+// Composables
 import { useFileUploader } from "@/composables/useFileUploader";
 import { useFileSelection } from "@/composables/useFileSelection";
 import { useFileActions } from "./hooks/useFileActions";
@@ -143,22 +152,24 @@ import { useContextMenuHandler } from "./hooks/useContextMenuHandler";
 import { usePageInteractions } from "./hooks/usePageInteractions";
 import { useFileDownload } from "./hooks/useFileDownload";
 import { useFileModals } from "./hooks/useFileModals";
+
+// Components
+import FileToolbar from "./components/FileToolbar.vue";
 import FileHeard from "./components/FileHeard.vue";
 import FileBreadcrumb from "./components/FileBreadcrumb.vue";
-import FileToolbar from "./components/FileToolbar.vue";
 import FileListView from "./components/FileListView.vue";
 import FileGridView from "./components/FileGridView.vue";
 import UploadProgress from "./components/UploadProgress.vue";
 import ContextMenu from "./components/ContextMenu.vue";
 import SearchOverlay from "./components/SearchOverlay.vue";
-import { UploadFilled } from "@element-plus/icons-vue";
 import FileDetailsPanel from "./components/FileDetailsPanel.vue";
 import MoveModal from "./components/MoveModal.vue";
-import type { ColumnConfig } from "@/api/sys-file/type";
 
+// --- 1. 核心实例和状态 ---
 const route = useRoute();
 const router = useRouter();
 const fileStore = useFileStore();
+const fileToolbarRef = ref<InstanceType<typeof FileToolbar> | null>(null);
 
 const {
   sortedFiles,
@@ -174,6 +185,43 @@ const {
   columns
 } = storeToRefs(fileStore);
 
+const viewComponents = { list: FileListView, grid: FileGridView };
+const activeViewComponent = computed(() => viewComponents[viewMode.value]);
+
+// --- 2. 动作与事件处理器 (在此处声明所有将被 Hooks 使用的函数) ---
+const handleRefresh = () => fileStore.refreshCurrentPath(uploaderActions);
+const handleNavigate = (newLogicalPath: string) => {
+  const fullUri = buildFullUri(newLogicalPath);
+  if (route.query.path !== fullUri) {
+    router.push({ query: { path: fullUri } });
+  }
+};
+const getSelectedFileItems = () =>
+  sortedFiles.value.filter(f => selectedFiles.value.has(f.id));
+
+const onActionRename = () => {
+  if (isSingleSelection.value) handleRename(getSelectedFileItems()[0]);
+};
+const onActionDelete = () => {
+  handleDelete(getSelectedFileItems()).then(success => {
+    if (success) clearSelection();
+  });
+};
+const onActionShare = () => {
+  console.log("Share action triggered");
+};
+
+const handleSetViewMode = (mode: "list" | "grid") =>
+  fileStore.setViewMode(mode);
+const handleSetPageSize = (size: number) => fileStore.setPageSize(size);
+const handleSetColumns = (newColumns: ColumnConfig[]) =>
+  fileStore.setColumns(newColumns);
+const handleSetSortKey = (key: SortKey) => fileStore.setSort(key);
+const handleOpenColumnSettings = () => {
+  fileToolbarRef.value?.openDialog();
+};
+
+// --- 3. 核心功能 Hooks ---
 const {
   uploadQueue,
   showUploadProgress,
@@ -193,12 +241,10 @@ const {
 } = useFileUploader(
   sortedFiles,
   computed(() => storagePolicy.value),
-  () => fileStore.refreshCurrentPath(uploaderActions)
+  handleRefresh // 直接传递 handleRefresh
 );
 
-const uploaderActions: UploaderActions = {
-  addResumableTaskFromFileItem
-};
+const uploaderActions: UploaderActions = { addResumableTaskFromFileItem };
 
 const {
   selectedFiles,
@@ -211,42 +257,9 @@ const {
 } = useFileSelection(sortedFiles);
 const hasSelection = computed(() => selectedFiles.value.size > 0);
 const isSingleSelection = computed(() => selectedFiles.value.size === 1);
-const getSelectedFileItems = () =>
-  sortedFiles.value.filter(f => selectedFiles.value.has(f.id));
-
-const handleRefresh = () =>
-  fileStore.loadFiles(path.value, uploaderActions, true);
-
-const handleNavigate = (newLogicalPath: string) => {
-  const fullUri = buildFullUri(newLogicalPath);
-  if (route.query.path !== fullUri) {
-    router.push({ query: { path: fullUri } });
-  }
-};
-
-const loadFilesFromRoute = (
-  pathQuery: string | string[] | null | undefined
-) => {
-  const pathUri = Array.isArray(pathQuery) ? pathQuery[0] : pathQuery;
-  const logicalPathToLoad = pathUri ? extractLogicalPathFromUri(pathUri) : "/";
-
-  if (logicalPathToLoad !== fileStore.path || fileStore.files.length === 0) {
-    clearSelection();
-    fileStore.loadFiles(logicalPathToLoad, uploaderActions, true);
-  }
-};
-
-watch(
-  () => route.query.path,
-  newPathQuery => {
-    loadFilesFromRoute(newPathQuery);
-  },
-  { immediate: true }
-);
 
 const isPanelVisible = ref(false);
 const isPanelCollapsed = ref(false);
-
 const handleNewUploadsAdded = (hasAdded: boolean) => {
   if (hasAdded) {
     isPanelVisible.value = true;
@@ -256,6 +269,7 @@ const handleNewUploadsAdded = (hasAdded: boolean) => {
 
 const { isDownloading, onActionDownload, handleDownloadFolder } =
   useFileDownload();
+
 const {
   isDestinationModalVisible,
   itemsForAction,
@@ -300,20 +314,6 @@ const {
   openSearchFromElement
 } = usePageInteractions(onDropAdapter);
 
-const onActionRename = () => {
-  if (isSingleSelection.value) handleRename(getSelectedFileItems()[0]);
-};
-const onActionDelete = () => {
-  handleDelete(getSelectedFileItems()).then(success => {
-    if (success) {
-      clearSelection();
-    }
-  });
-};
-const onActionShare = () => {
-  console.log("Share action triggered");
-};
-
 const {
   contextMenuTriggerEvent,
   onMenuSelect,
@@ -337,6 +337,43 @@ const {
       handleShowDetailsForId(getSelectedFileItems()[0].id);
   }
 });
+
+// --- 4. 导航、滚动与其他事件处理 ---
+const loadFilesFromRoute = (
+  pathQuery: string | string[] | null | undefined
+) => {
+  const pathUri = Array.isArray(pathQuery) ? pathQuery[0] : pathQuery;
+  const logicalPathToLoad = pathUri ? extractLogicalPathFromUri(pathUri) : "/";
+  if (logicalPathToLoad !== fileStore.path || fileStore.files.length === 0) {
+    clearSelection();
+    fileStore.loadFiles(logicalPathToLoad, uploaderActions, true);
+  }
+};
+watch(
+  () => route.query.path,
+  newPathQuery => {
+    loadFilesFromRoute(newPathQuery);
+  },
+  { immediate: true }
+);
+
+let throttleTimer: number | null = null;
+const handleScroll = (event: Event) => {
+  if (throttleTimer) return;
+  throttleTimer = window.setTimeout(() => {
+    const el = event.target as HTMLElement;
+    if (!el) {
+      throttleTimer = null;
+      return;
+    }
+    const canLoadMore = hasMore.value;
+    const isAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 200;
+    if (isAtBottom && canLoadMore && !loading.value && !isMoreLoading.value) {
+      fileStore.loadFiles(path.value, uploaderActions);
+    }
+    throttleTimer = null;
+  }, 200);
+};
 
 const selectionCountLabel = computed(
   () => `${selectedFiles.value.size} 个对象`
@@ -382,34 +419,8 @@ const handleContextMenuTrigger = (event: MouseEvent) => {
   }
   contextMenuTriggerEvent.value = event;
 };
-const handleSetViewMode = (mode: "list" | "grid") =>
-  fileStore.setViewMode(mode);
-const handleSetPageSize = (size: number) => fileStore.setPageSize(size);
-const handleSetSortKey = (key: SortKey) => fileStore.setSort(key);
-const handleSetColumns = (newColumns: ColumnConfig[]) =>
-  fileStore.setColumns(newColumns);
 
-let throttleTimer: number | null = null;
-const handleScroll = (event: Event) => {
-  if (throttleTimer) return;
-
-  throttleTimer = window.setTimeout(() => {
-    const el = event.target as HTMLElement;
-    if (!el) {
-      throttleTimer = null;
-      return;
-    }
-
-    const canLoadMore = hasMore.value;
-    const isAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 200;
-
-    if (isAtBottom && canLoadMore && !loading.value && !isMoreLoading.value) {
-      fileStore.loadFiles(path.value, uploaderActions);
-    }
-    throttleTimer = null;
-  }, 200);
-};
-
+// --- 5. 上传面板逻辑 ---
 watch(showUploadProgress, isVisible => {
   if (!isVisible) {
     isPanelVisible.value = false;
@@ -470,14 +481,11 @@ const handleUploadGlobalCommand = (command: string, value: any) => {
       break;
   }
 };
-
-const viewComponents = { list: FileListView, grid: FileGridView };
-const activeViewComponent = computed(() => viewComponents[viewMode.value]);
 </script>
 
 <style>
 .file-management-container {
-  height: calc(100vh - 152px);
+  height: calc(100vh - 135px);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -496,7 +504,6 @@ const activeViewComponent = computed(() => viewComponents[viewMode.value]);
 }
 .file-content-area {
   flex: 1;
-  overflow: auto;
   overflow: hidden;
   position: relative;
 }
@@ -531,7 +538,6 @@ const activeViewComponent = computed(() => viewComponents[viewMode.value]);
   color: #eee;
   margin-top: 8px;
 }
-
 .loading-overlay {
   position: absolute;
   top: 0;
@@ -544,27 +550,23 @@ const activeViewComponent = computed(() => viewComponents[viewMode.value]);
   justify-content: center;
   z-index: 10;
 }
-
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid var(--anzhiyu-theme);
-  border-top-color: var(--anzhiyu-theme);
+  border: 4px solid var(--el-color-primary-light-7);
+  border-top-color: var(--el-color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
-
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
-
 .loading-fade-enter-active,
 .loading-fade-leave-active {
   transition: opacity 0.3s ease-in-out;
 }
-
 .loading-fade-enter-from,
 .loading-fade-leave-to {
   opacity: 0;

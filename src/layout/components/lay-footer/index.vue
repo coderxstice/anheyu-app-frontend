@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-06-18 13:05:58
+ * @LastEditTime: 2025-07-04 00:23:26
  * @LastEditors: 安知鱼
 -->
 <script lang="ts" setup>
@@ -18,7 +18,7 @@ const TITLE = getConfig("Title");
     Copyright © 2025-present
     <a
       class="hover:text-primary"
-      href="https://github.com/pure-admin"
+      href="https://github.com/anzhiyu-c"
       target="_blank"
     >
       &nbsp;{{ TITLE }}

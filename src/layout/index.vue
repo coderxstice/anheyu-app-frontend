@@ -29,6 +29,7 @@ import LayContent from "./components/lay-content/index.vue";
 import LaySetting from "./components/lay-setting/index.vue";
 import NavVertical from "./components/lay-sidebar/NavVertical.vue";
 import BackTopIcon from "@/assets/svg/back_top.svg?component";
+import LayFooter from "./components/lay-footer/index.vue";
 
 const appWrapperRef = ref();
 const { isDark } = useDark();
@@ -113,6 +114,10 @@ useResizeObserver(appWrapperRef, entries => {
   }
 });
 
+const hideFooter = computed(() => {
+  return $storage?.configure.hideFooter;
+});
+
 onMounted(() => {
   if (isMobile) {
     toggle("mobile", false);
@@ -171,6 +176,8 @@ const LayHeader = defineComponent({
         <!-- 主体内容 -->
         <LayContent :fixed-header="set.fixedHeader" />
       </div>
+
+      <LayFooter v-if="!hideFooter" />
       <el-scrollbar v-else>
         <el-backtop
           title="回到顶部"
