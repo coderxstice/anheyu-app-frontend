@@ -251,7 +251,6 @@ export default defineComponent({
           {...attrs}
           class={[
             "w-[99/100]",
-            "px-2",
             "pb-2",
             "bg-bg_color",
             isFullscreen.value

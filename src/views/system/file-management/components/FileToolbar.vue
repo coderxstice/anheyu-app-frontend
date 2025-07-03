@@ -71,7 +71,7 @@
 
             <!-- 列设置 -->
             <div v-if="viewMode === 'list'">
-              <h1 class="text-base mt-4 mb-2">列设置</h1>
+              <h1 class="text-base font-semibold mt-4 mb-2">列设置</h1>
               <el-button class="w-full" :icon="Operation" @click="openDialog">
                 列设置
               </el-button>
