@@ -2,13 +2,25 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-07-03 10:17:41
+ * @LastEditTime: 2025-07-03 23:15:01
  * @LastEditors: 安知鱼
  */
 
 // =================================================================
 // I. 前端内部使用的核心类型 (Core Frontend Types)
 // =================================================================
+
+export interface ColumnConfig {
+  type: number;
+}
+
+export interface FolderViewConfig {
+  view: "list" | "grid";
+  order: string;
+  order_direction: "asc" | "desc";
+  page_size: number;
+  columns?: ColumnConfig[]; // 设为可选
+}
 
 export interface BaseResponse<T> {
   code: number; // 响应状态码

@@ -41,6 +41,7 @@
         :page-size="pageSize"
         :has-selection="hasSelection"
         :is-simplified="false"
+        :columns="columns"
         @refresh="handleRefresh"
         @select-all="selectAll"
         @clear-selection="clearSelection"
@@ -48,6 +49,7 @@
         @set-view-mode="handleSetViewMode"
         @set-page-size="handleSetPageSize"
         @set-sort-key="handleSetSortKey"
+        @set-columns="handleSetColumns"
       />
     </div>
 
@@ -118,7 +120,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch, onMounted } from "vue";
+import { computed, ref, watch } from "vue";
 // [路径参数改造] 1. 导入 vue-router 相关钩子和路径处理工具
 import { useRoute, useRouter } from "vue-router";
 import { buildFullUri, extractLogicalPathFromUri } from "@/utils/fileUtils";
@@ -151,6 +153,7 @@ import SearchOverlay from "./components/SearchOverlay.vue";
 import { UploadFilled } from "@element-plus/icons-vue";
 import FileDetailsPanel from "./components/FileDetailsPanel.vue";
 import MoveModal from "./components/MoveModal.vue";
+import type { ColumnConfig } from "@/api/sys-file/type";
 
 // [路径参数改造] 2. 初始化 route 和 router 实例
 const route = useRoute();
@@ -167,7 +170,9 @@ const {
   sortKey,
   pageSize,
   isMoreLoading,
-  hasMore
+  hasMore,
+  // 新增: 从 store 中获取 columns
+  columns
 } = storeToRefs(fileStore);
 
 // 初始化上传核心 Hook (Uploader) - 无需改动
@@ -406,13 +411,9 @@ const handleSetViewMode = (mode: "list" | "grid") =>
 const handleSetPageSize = (size: number) => fileStore.setPageSize(size);
 const handleSetSortKey = (key: SortKey) => fileStore.setSort(key);
 
-// [路径参数改造] 5. 移除 onMounted 钩子
-// onMounted 的初始加载逻辑现在由 watch 侦听器的 `immediate: true` 选项处理。
-// onMounted(() => {
-//   if (fileStore.files.length === 0 && !fileStore.loading) {
-//     handleNavigate("/");
-//   }
-// });
+// 新增: 处理列设置变化的函数
+const handleSetColumns = (newColumns: ColumnConfig[]) =>
+  fileStore.setColumns(newColumns);
 
 // 滚动加载逻辑 - 无需改动
 let throttleTimer: number | null = null;

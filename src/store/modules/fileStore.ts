@@ -1,3 +1,4 @@
+// src/store/modules/fileStore.ts
 import { defineStore } from "pinia";
 import { ElMessage } from "element-plus";
 import {
@@ -11,7 +12,8 @@ import {
   type FileProps,
   type StoragePolicy,
   type FolderViewConfig,
-  FileType
+  FileType,
+  type ColumnConfig
 } from "@/api/sys-file/type";
 import { joinPath, extractLogicalPathFromUri } from "@/utils/fileUtils";
 
@@ -25,11 +27,6 @@ export type SortKey =
   | "created_at_asc"
   | "created_at_desc";
 
-/**
- * @description [适配游标分页] 更新State接口以适应新的分页模型。
- * - nextToken 用于存储下一页的游标。
- * - hasMore 用于判断是否还有更多数据。
- */
 interface FileState {
   path: string;
   files: FileItem[];
@@ -44,13 +41,9 @@ interface FileState {
   currentFolderId: string | null;
   nextToken: string | null;
   hasMore: boolean;
+  columns: ColumnConfig[];
 }
 
-/**
- * @description 解析排序键，返回排序字段和排序方向。
- * @param {SortKey} sortKey - 组合的排序键，例如 'name_asc'。
- * @returns {[string, "asc" | "desc"]} - 返回一个包含排序字段和方向的元组。
- */
 const parseSortKey = (sortKey: SortKey): [string, "asc" | "desc"] => {
   const parts = sortKey.split("_");
   const direction = parts.pop() as "asc" | "desc";
@@ -58,17 +51,11 @@ const parseSortKey = (sortKey: SortKey): [string, "asc" | "desc"] => {
   return [order, direction];
 };
 
-/**
- * @description 定义上传器需要暴露给Store的回调函数接口。
- */
 export interface UploaderActions {
   addResumableTaskFromFileItem: (fileItem: FileItem) => Promise<void>;
 }
 
 export const useFileStore = defineStore("file", {
-  /**
-   * @description [适配游標分頁] 初始化Store的状态，使用nextToken和hasMore代替旧的pagination对象。
-   */
   state: (): FileState => ({
     path: "/",
     files: [],
@@ -82,13 +69,12 @@ export const useFileStore = defineStore("file", {
     pageSize: 50,
     currentFolderId: null,
     nextToken: null,
-    hasMore: true
+    hasMore: true,
+    columns: []
   }),
 
   getters: {
-    /**
-     * @description 计算并返回当前路径的面包屑导航段。
-     */
+    // ... getters aare unchanged
     pathSegments: state => {
       if (state.path === "/") return [{ name: "我的文件", path: "/" }];
       const segments = state.path.split("/").filter(Boolean);
@@ -100,9 +86,6 @@ export const useFileStore = defineStore("file", {
       }
       return result;
     },
-    /**
-     * @description 根据当前排序规则对文件列表进行前端排序。
-     */
     sortedFiles: (state): FileItem[] => {
       const filesToSort = [...state.files];
       const [orderKey, direction] = parseSortKey(state.sortKey);
@@ -135,9 +118,6 @@ export const useFileStore = defineStore("file", {
   },
 
   actions: {
-    /**
-     * @description 更新文件夹的视图配置。这是改变排序的唯一入口。
-     */
     async updateViewConfig() {
       if (!this.currentFolderId) {
         console.warn("无法更新视图配置：currentFolderId 为空。");
@@ -145,11 +125,12 @@ export const useFileStore = defineStore("file", {
       }
       try {
         const [order, order_direction] = parseSortKey(this.sortKey);
-        const newViewConfig: FolderViewConfig = {
+        const newViewConfig: FolderViewConfig & { columns: ColumnConfig[] } = {
           view: this.viewMode,
           order,
           page_size: this.pageSize,
-          order_direction
+          order_direction,
+          columns: this.columns
         };
         await updateFolderViewApi(this.currentFolderId, newViewConfig);
       } catch (error) {
@@ -159,10 +140,6 @@ export const useFileStore = defineStore("file", {
       }
     },
 
-    /**
-     * @description 设置分页大小。先更新后端配置，成功后再强制刷新列表。
-     * @param {number} size - 新的页面大小。
-     */
     setPageSize(size: number) {
       if (this.pageSize === size) return;
       this.pageSize = size;
@@ -177,10 +154,6 @@ export const useFileStore = defineStore("file", {
         });
     },
 
-    /**
-     * @description 设置排序规则。先更新后端配置，成功后再强制刷新列表。
-     * @param {SortKey} key - 新的排序键。
-     */
     setSort(key: SortKey) {
       if (this.sortKey === key) return;
       this.sortKey = key;
@@ -195,10 +168,6 @@ export const useFileStore = defineStore("file", {
         });
     },
 
-    /**
-     * @description 设置视图模式（列表/网格），并更新到后端。
-     * @param {'list' | 'grid'} mode - 新的视图模式。
-     */
     setViewMode(mode: "list" | "grid") {
       if (this.viewMode === mode) return;
       this.viewMode = mode;
@@ -206,24 +175,57 @@ export const useFileStore = defineStore("file", {
     },
 
     /**
-     * @description 核心函数，适配后端驱动的排序和游标分页。
-     * @param {string} pathToLoad - 需要加载的目标路径URI。
-     * @param {UploaderActions} uploader - 上传器实例的回调。
-     * @param {boolean} [isRefresh=false] - 是否为刷新操作。true表示强制从头加载。
+     * @description 设置列配置，更新后端，并强制刷新列表
+     * @param {ColumnConfig[]} columns - 新的列配置数组
      */
+    async setColumns(columns: ColumnConfig[]) {
+      // 检查配置是否真的改变，避免不必要的刷新
+      // 使用 JSON.stringify 是一个简单有效的深比较方法
+      if (JSON.stringify(this.columns) === JSON.stringify(columns)) {
+        return;
+      }
+
+      this.columns = columns;
+
+      try {
+        // 调用 updateViewConfig 将更改持久化
+        await this.updateViewConfig();
+
+        // 成功保存后，刷新文件列表以应用新视图
+        // refreshCurrentPath 会重置分页游标(nextToken)和文件列表(files)
+        await this.refreshCurrentPath({
+          addResumableTaskFromFileItem: async () => {}
+        });
+
+        ElMessage.success("列配置已更新");
+      } catch {
+        // updateViewConfig 内部已经有错误处理和 ElMessage
+        console.error("设置列配置失败，因为配置未能保存到后端。");
+        // 这里可以选择是否将 this.columns 还原回旧值，但目前保持与 setSort 等一致，不作还原
+      }
+    },
+
     async loadFiles(
       pathToLoad: string,
       uploader: UploaderActions,
       isRefresh: boolean = false
     ) {
-      if (!isRefresh && (this.isMoreLoading || !this.hasMore)) {
-        return;
-      }
+      // isRefresh 为 true 时，会重置 loading, path, nextToken
       if (isRefresh) {
         this.loading = true;
         this.path = extractLogicalPathFromUri(pathToLoad || "/");
-        this.nextToken = null;
-      } else {
+        this.nextToken = null; // 关键：刷新时重置游标
+        // 关键：刷新时清空现有文件
+        this.files = [];
+      }
+
+      // 如果不是刷新，并且正在加载或没有更多数据，则返回
+      if (!isRefresh && (this.isMoreLoading || !this.hasMore)) {
+        return;
+      }
+
+      // 如果不是刷新，则认为是加载更多
+      if (!isRefresh) {
         this.isMoreLoading = true;
       }
 
@@ -234,10 +236,8 @@ export const useFileStore = defineStore("file", {
           const { files, parent, pagination, props, storage_policy, view } =
             response.data;
 
-          if (isRefresh) {
-            this.files = [];
-          }
-
+          // isRefresh 为 true 时，this.files 已经在前面被清空
+          // 所以这里直接 push 即可，无需再判断
           const existingIds = new Set(this.files.map(f => f.id));
           const uniqueNewFiles = files.filter(f => !existingIds.has(f.id));
           this.files.push(...uniqueNewFiles);
@@ -250,10 +250,18 @@ export const useFileStore = defineStore("file", {
             this.hasMore = false;
           }
 
+          // 不论是否刷新，都应该更新视图配置，因为可能是从另一个文件夹导航过来的
           if (view) {
             this.viewMode = view.view;
             this.pageSize = view.page_size;
             this.sortKey = `${view.order}_${view.order_direction}` as SortKey;
+            this.columns = view.columns?.length
+              ? view.columns
+              : [
+                  { type: 0 }, // 文件名
+                  { type: 1 }, // 大小
+                  { type: 2 } // 修改时间
+                ];
           }
 
           if (isRefresh) {
@@ -276,27 +284,17 @@ export const useFileStore = defineStore("file", {
       }
     },
 
-    /**
-     * @description 刷新当前路径，强制从头开始加载。
-     * @param {UploaderActions} uploader - 上传器回调。
-     */
+    // ... 其他 actions 不变 ...
     async refreshCurrentPath(uploader: UploaderActions) {
+      // 调用 loadFiles 并将 isRefresh 标志设为 true
       await this.loadFiles(this.path, uploader, true);
     },
 
-    /**
-     * @description 从当前状态中移除指定ID的文件，用于删除操作后的UI更新。
-     * @param {string[]} fileIds - 需要被移除的文件ID数组。
-     */
     removeFilesFromState(fileIds: string[]) {
       const idsToRemove = new Set(fileIds);
       this.files = this.files.filter(file => !idsToRemove.has(file.id));
     },
 
-    /**
-     * @description 更新状态中指定文件的信息，用于重命名等操作后的UI更新。
-     * @param {FileItem} updatedFile - 已更新的文件对象。
-     */
     updateFileInState(updatedFile: FileItem) {
       const index = this.files.findIndex(file => file.id === updatedFile.id);
       if (index !== -1) {
@@ -304,11 +302,6 @@ export const useFileStore = defineStore("file", {
       }
     },
 
-    /**
-     * @description 创建文件或文件夹的内部通用方法。
-     * @param {FileType} type - 创建类型，文件或文件夹。
-     * @param {string} name - 新建项目的名称。
-     */
     async _createItem(type: FileType, name: string) {
       try {
         const fullLogicalPath = joinPath(this.path, name);
@@ -325,18 +318,10 @@ export const useFileStore = defineStore("file", {
       }
     },
 
-    /**
-     * @description 创建一个新文件。
-     * @param {string} name - 文件名。
-     */
     async createFile(name: string) {
       await this._createItem(FileType.File, name);
     },
 
-    /**
-     * @description 创建一个新文件夹。
-     * @param {string} name - 文件夹名称。
-     */
     async createFolder(name: string) {
       await this._createItem(FileType.Dir, name);
     }

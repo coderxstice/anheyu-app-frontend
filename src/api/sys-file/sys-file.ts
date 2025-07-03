@@ -9,7 +9,8 @@ import {
   type ValidateUploadSessionResponse,
   type FileItem,
   type FolderSizeResponse,
-  type BaseResponse
+  type BaseResponse,
+  type ColumnConfig
 } from "./type";
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
@@ -179,9 +180,15 @@ export const createItemApi = (
   });
 };
 
+/**
+ * @description 更新文件夹的视图配置，现在包括列配置
+ * @param folder_id 文件夹ID
+ * @param viewConfig 视图配置对象，包含排序、分页、视图模式和列
+ * @returns Promise<UpdateFolderViewResponse>
+ */
 export const updateFolderViewApi = (
   folder_id: string,
-  viewConfig: FolderViewConfig
+  viewConfig: FolderViewConfig & { columns?: ColumnConfig[] }
 ): Promise<UpdateFolderViewResponse> => {
   return http.request<UpdateFolderViewResponse>(
     "put",
