@@ -227,15 +227,13 @@ onUnmounted(() => {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
   background-color: white;
-  height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 .file-list-body {
   padding: 6px 8px;
   flex: 1;
-  overflow-y: auto;
-  min-height: 0;
 }
 
 .file-list-header,
@@ -261,6 +259,9 @@ onUnmounted(() => {
   color: #64748b;
   font-weight: 500;
   border-bottom: 1px solid #e5e7eb;
+  background-color: white;
+  position: sticky;
+  top: 0;
 }
 
 .file-item:last-child {
