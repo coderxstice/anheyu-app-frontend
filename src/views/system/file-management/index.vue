@@ -119,6 +119,10 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch, onMounted } from "vue";
+// [路径参数改造] 1. 导入 vue-router 相关钩子和路径处理工具
+import { useRoute, useRouter } from "vue-router";
+import { buildFullUri, extractLogicalPathFromUri } from "@/utils/fileUtils";
+
 import { storeToRefs } from "pinia";
 import { ElMessageBox } from "element-plus";
 
@@ -148,8 +152,11 @@ import { UploadFilled } from "@element-plus/icons-vue";
 import FileDetailsPanel from "./components/FileDetailsPanel.vue";
 import MoveModal from "./components/MoveModal.vue";
 
-// [适配游标分页] 1. 更新从Store中获取的状态
+// [路径参数改造] 2. 初始化 route 和 router 实例
+const route = useRoute();
+const router = useRouter();
 const fileStore = useFileStore();
+
 const {
   sortedFiles,
   loading,
@@ -163,7 +170,7 @@ const {
   hasMore
 } = storeToRefs(fileStore);
 
-// 2. 初始化上传核心 Hook (Uploader)
+// 初始化上传核心 Hook (Uploader) - 无需改动
 const {
   uploadQueue,
   showUploadProgress,
@@ -190,7 +197,7 @@ const uploaderActions: UploaderActions = {
   addResumableTaskFromFileItem
 };
 
-// 3. 初始化文件选择 Hook
+// 初始化文件选择 Hook - 无需改动
 const {
   selectedFiles,
   selectSingle,
@@ -205,14 +212,51 @@ const isSingleSelection = computed(() => selectedFiles.value.size === 1);
 const getSelectedFileItems = () =>
   sortedFiles.value.filter(f => selectedFiles.value.has(f.id));
 
-// 4. 更新页面导航与刷新逻辑的调用方式
+// [路径参数改造] 3. 更新导航与刷新逻辑
 const handleRefresh = () =>
-  fileStore.loadFiles(path.value, uploaderActions, true); // isRefresh = true
+  fileStore.loadFiles(path.value, uploaderActions, true);
 
-const handleNavigate = (newPath: string) => {
-  clearSelection();
-  fileStore.loadFiles(newPath, uploaderActions, true); // isRefresh = true
+/**
+ * 处理导航请求。此函数现在只负责更新URL的查询参数。
+ * @param newLogicalPath - 目标逻辑路径, 例如 "/Images"
+ */
+const handleNavigate = (newLogicalPath: string) => {
+  const fullUri = buildFullUri(newLogicalPath);
+  // 仅在目标URI与当前URL查询参数不同时才更新URL，以避免不必要的历史记录条目
+  if (route.query.path !== fullUri) {
+    router.push({ query: { path: fullUri } });
+  }
 };
+
+/**
+ * 根据路由参数加载文件。
+ * @param pathQuery - 从 aue-router 的 route.query.path 中获取的值
+ */
+const loadFilesFromRoute = (
+  pathQuery: string | string[] | null | undefined
+) => {
+  // 处理 pathQuery 可能为数组的情况
+  const pathUri = Array.isArray(pathQuery) ? pathQuery[0] : pathQuery;
+  // 从完整的URI中提取逻辑路径（例如从 "anzhiyu://my/A" 得到 "/A"），如果不存在则默认为根目录 "/"
+  const logicalPathToLoad = pathUri ? extractLogicalPathFromUri(pathUri) : "/";
+
+  // 只有当目标路径与当前store中的路径不同时，才执行加载，避免重复加载
+  if (logicalPathToLoad !== fileStore.path || fileStore.files.length === 0) {
+    clearSelection();
+    fileStore.loadFiles(logicalPathToLoad, uploaderActions, true);
+  }
+};
+
+// 4. 监视路由查询参数的变化
+// 当 URL 的 ?path=... 改变时 (例如，通过 handleNavigate 或浏览器后退/前进按钮)，此观察者将触发文件加载。
+// `immediate: true` 确保在组件首次加载时也会运行，从而处理初始URL（包括深链接）。
+watch(
+  () => route.query.path,
+  newPathQuery => {
+    loadFilesFromRoute(newPathQuery);
+  },
+  { immediate: true }
+);
 
 // 5. 初始化功能性 Hooks
 const isPanelVisible = ref(false);
@@ -362,13 +406,15 @@ const handleSetViewMode = (mode: "list" | "grid") =>
 const handleSetPageSize = (size: number) => fileStore.setPageSize(size);
 const handleSetSortKey = (key: SortKey) => fileStore.setSort(key);
 
-// 9. onMounted 和滚动加载逻辑
-onMounted(() => {
-  if (fileStore.files.length === 0 && !fileStore.loading) {
-    handleNavigate("/");
-  }
-});
+// [路径参数改造] 5. 移除 onMounted 钩子
+// onMounted 的初始加载逻辑现在由 watch 侦听器的 `immediate: true` 选项处理。
+// onMounted(() => {
+//   if (fileStore.files.length === 0 && !fileStore.loading) {
+//     handleNavigate("/");
+//   }
+// });
 
+// 滚动加载逻辑 - 无需改动
 let throttleTimer: number | null = null;
 const handleScroll = () => {
   if (throttleTimer) return;
@@ -377,11 +423,9 @@ const handleScroll = () => {
     const el = fileContentAreaRef.value;
     if (!el) return;
 
-    // 直接使用 store 中的 hasMore 状态
     const canLoadMore = hasMore.value;
     const isAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 200;
 
-    // 调用 loadFiles 时不再需要传递页码，isRefresh 默认为 false
     if (isAtBottom && canLoadMore && !loading.value && !isMoreLoading.value) {
       fileStore.loadFiles(path.value, uploaderActions);
     }
@@ -389,7 +433,7 @@ const handleScroll = () => {
   }, 200);
 };
 
-// 10. 上传面板逻辑
+// 上传面板逻辑 - 无需改动
 watch(showUploadProgress, isVisible => {
   if (!isVisible) {
     isPanelVisible.value = false;

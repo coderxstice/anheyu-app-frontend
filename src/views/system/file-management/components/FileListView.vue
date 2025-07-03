@@ -226,6 +226,7 @@ onUnmounted(() => {
 .file-list-container {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
+  background-color: white;
 }
 .file-list-body {
   padding: 6px 8px;
@@ -237,10 +238,10 @@ onUnmounted(() => {
   align-items: center;
   padding: 12px 8px;
   font-size: 14px;
-  margin: 1px 0;
 }
 
 .file-item {
+  margin: 1px 0;
   cursor: pointer;
   border-radius: 6px;
   user-select: none;
@@ -250,9 +251,16 @@ onUnmounted(() => {
 }
 
 .file-list-header {
+  margin: 0;
   color: #64748b;
   font-weight: 500;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
 }
+/* --- 修改结束 --- */
 
 .file-item:last-child {
   border-bottom: none;
