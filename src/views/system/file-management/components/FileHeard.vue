@@ -171,6 +171,7 @@ const onToolbarLeave = (el: HTMLElement, done: () => void) => {
   align-items: center;
   .new-btn {
     border: var(--style-border);
+    height: 40px;
   }
 }
 .actions-container {

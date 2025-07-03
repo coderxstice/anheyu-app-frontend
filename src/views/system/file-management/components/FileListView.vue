@@ -1,7 +1,11 @@
 <template>
   <div class="file-list-container">
     <!-- 表头区域 -->
-    <div class="file-list-header">
+    <div
+      class="file-list-header"
+      @mouseenter="isHeaderHovered = true"
+      @mouseleave="isHeaderHovered = false"
+    >
       <!-- 直接通过 v-for 渲染所有列 -->
       <div
         v-for="col in columns"
@@ -33,11 +37,15 @@
       </div>
 
       <!-- 添加列按钮 -->
-      <div class="column-add">
-        <el-tooltip content="配置列" placement="top">
-          <el-icon @click="emit('open-column-settings')"><Plus /></el-icon>
-        </el-tooltip>
-      </div>
+      <transition name="add-btn-slide">
+        <div v-if="isHeaderHovered" class="column-add">
+          <el-tooltip content="配置列" placement="top">
+            <div class="add-btn-wrapper">
+              <el-icon @click="emit('open-column-settings')"><Plus /></el-icon>
+            </div>
+          </el-tooltip>
+        </div>
+      </transition>
     </div>
 
     <!-- 列表主体区域 -->
@@ -169,16 +177,9 @@ const columnTypeMap = {
 
 type ColumnKey = (typeof columnTypeMap)[keyof typeof columnTypeMap]["key"];
 
-/**
- * [关键修正]
- * 计算属性，解析当前排序键为 { key, dir } 对象。
- * 采用更健壮的分割方式，以处理键名中包含下划线的情况 (如 'updated_at')。
- */
 const currentSort = computed(() => {
   const parts = props.sortKey.split("_");
-  // pop() 会移除并返回数组的最后一个元素
   const dir = parts.pop();
-  // join('_') 会将数组剩余的所有部分用下划线重新连接起来
   const key = parts.join("_");
   return { key, dir };
 });
@@ -193,6 +194,7 @@ const handleHeaderClick = (key: ColumnKey) => {
   }
 };
 
+const isHeaderHovered = ref(false);
 const { getFileIcon } = useFileIcons();
 const hoveredHeaderKey = ref<ColumnKey | null>(null);
 
@@ -271,9 +273,9 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeyDown));
   color: #64748b;
   font-weight: 500;
   border-bottom: 1px solid #e5e7eb;
-  padding: 0 8px;
   flex-shrink: 0;
   user-select: none;
+  position: relative;
 }
 
 .file-list-body {
@@ -311,6 +313,10 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeyDown));
 
 .file-list-header .column {
   cursor: pointer;
+  transition: background-color 0.2s;
+  &:hover {
+    background-color: #f8fafc;
+  }
 }
 
 /* --- 名称列的特殊内容 --- */
@@ -341,9 +347,10 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeyDown));
   margin: 1px 0;
   border-radius: 6px;
   transition: background-color 0.2s ease;
+  user-select: none;
 }
 
-/* --- 排序和添加按钮 --- */
+/* --- 排序指示器 --- */
 .sort-indicator-wrapper {
   margin-left: 4px;
   width: 16px;
@@ -364,42 +371,54 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeyDown));
   opacity: 1;
 }
 
+/* --- 添加列按钮 --- */
 .column-add {
-  margin-left: auto; /* 将按钮推到最右边 */
-  padding: 0 16px;
-  .el-icon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .add-btn-wrapper {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    font-size: 16px;
-    color: #909399;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease-in-out;
+
+    .el-icon {
+      font-size: 18px;
+      color: #606266;
+    }
+
     &:hover {
-      color: var(--el-color-primary);
+      background-color: var(--el-color-primary);
+      .el-icon {
+        color: #fff;
+      }
     }
   }
 }
 
-/* --- 动画 --- */
-.header-list-move,
-.header-list-enter-active,
-.header-list-leave-active,
-.cell-list-move,
-.cell-list-enter-active,
-.cell-list-leave-active {
-  transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+/* --- 添加按钮动画 --- */
+.add-btn-slide-enter-active,
+.add-btn-slide-leave-active {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.header-list-enter-from,
-.header-list-leave-to,
-.cell-list-enter-from,
-.cell-list-leave-to {
+.add-btn-slide-enter-from,
+.add-btn-slide-leave-to {
   opacity: 0;
-  transform: scaleY(0.01);
-}
-.header-list-leave-active,
-.cell-list-leave-active {
-  position: absolute;
-  width: 100%;
+  transform: translateY(-50%) translateX(20px);
 }
 
-/* --- 其他状态样式 --- */
+/* --- 其他状态和动画 --- */
 .file-item:hover {
   background-color: #f8fafc;
 }
@@ -428,7 +447,6 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeyDown));
     color: #c0c4cc;
   }
 }
-
 .state-view {
   display: flex;
   justify-content: center;
