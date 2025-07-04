@@ -8,7 +8,7 @@
       @mouseleave="isHeaderHovered = false"
     >
       <div
-        v-for="(col, index) in columns"
+        v-for="(col, index) in localColumns"
         :key="col.type"
         :style="getColumnStyle(col)"
         :class="['column', `column-${columnTypeMap[col.type].key}`]"
@@ -16,19 +16,6 @@
         @mouseenter="hoveredHeaderKey = columnTypeMap[col.type].key"
         @mouseleave="hoveredHeaderKey = null"
       >
-        <!-- 移除原有的 column-divider，仅使用 column-resizer 来作为分隔线和拖拽热区 -->
-        <!-- <div
-          v-if="index > 0"
-          :class="[
-            'column-divider',
-            {
-              'divider-visible':
-                hoveredHeaderKey === columnTypeMap[col.type].key ||
-                hoveredHeaderKey === columnTypeMap[columns[index - 1].type].key
-            }
-          ]"
-        /> -->
-
         <span>{{ columnTypeMap[col.type].name }}</span>
 
         <div class="sort-indicator-wrapper">
@@ -48,7 +35,7 @@
         </div>
 
         <div
-          v-if="index < columns.length - 1"
+          v-if="index < localColumns.length - 1"
           class="column-resizer"
           :class="{
             'is-hovered': hoveredResizerIndex === index,
@@ -99,7 +86,7 @@
         @mouseup="handleMouseUp"
       >
         <div
-          v-for="col in columns"
+          v-for="col in localColumns"
           :key="col.type"
           :style="getColumnStyle(col)"
           :class="['column', `column-${columnTypeMap[col.type].key}`]"
@@ -158,7 +145,8 @@ import {
   onUnmounted,
   ref,
   type PropType,
-  reactive
+  reactive,
+  watch
 } from "vue";
 import { formatSize, formatRelativeTime } from "@/utils/format";
 import { useFileIcons } from "../hooks/useFileIcons";
@@ -202,6 +190,26 @@ const columnTypeMap = {
   3: { key: "created_at", name: "创建日期" }
 } as const;
 
+const localColumns = ref<ColumnConfig[]>([]);
+
+const resizeState = reactive({
+  isResizing: false,
+  startClientX: 0,
+  startWidth: 0,
+  columnIndex: -1,
+  minWidth: 80
+});
+
+watch(
+  () => props.columns,
+  newColumns => {
+    if (!resizeState.isResizing) {
+      localColumns.value = JSON.parse(JSON.stringify(newColumns));
+    }
+  },
+  { immediate: true, deep: true }
+);
+
 type ColumnKey = (typeof columnTypeMap)[keyof typeof columnTypeMap]["key"];
 
 const currentSort = computed(() => {
@@ -212,7 +220,7 @@ const currentSort = computed(() => {
 });
 
 const justFinishedResizing = ref(false);
-const hoveredResizerIndex = ref<number | null>(null); // 新增：追踪鼠标悬停的 resizer 索引
+const hoveredResizerIndex = ref<number | null>(null);
 
 const handleHeaderClick = (key: ColumnKey) => {
   if (justFinishedResizing.value) {
@@ -232,63 +240,53 @@ const isHeaderHovered = ref(false);
 const { getFileIcon } = useFileIcons();
 const hoveredHeaderKey = ref<ColumnKey | null>(null);
 
-const headerRef = ref<HTMLElement | null>(null);
-const resizeState = reactive({
-  isResizing: false,
-  startClientX: 0,
-  startWidth: 0,
-  columnIndex: -1,
-  minWidth: 80
-});
-
 const startResize = (event: MouseEvent, index: number) => {
   event.preventDefault();
   event.stopPropagation();
-  const headerElements = headerRef.value?.querySelectorAll(".column");
-  if (!headerElements || !headerElements[index]) return;
-  const targetColumn = headerElements[index] as HTMLElement;
-  resizeState.isResizing = true;
+
+  const currentColumn = localColumns.value[index];
+  if (!currentColumn) return;
+
+  const columnElement = (event.target as HTMLElement).closest<HTMLElement>(
+    ".column"
+  );
+  const startWidth =
+    currentColumn.width || columnElement?.offsetWidth || resizeState.minWidth;
+
   resizeState.columnIndex = index;
   resizeState.startClientX = event.clientX;
-  resizeState.startWidth = targetColumn.offsetWidth;
+  resizeState.startWidth = startWidth;
+
   window.addEventListener("mousemove", handleResizing);
   window.addEventListener("mouseup", stopResizing);
 };
 
 const handleResizing = (event: MouseEvent) => {
-  if (!resizeState.isResizing) return;
+  if (resizeState.columnIndex === -1) return;
+  if (!resizeState.isResizing) {
+    resizeState.isResizing = true;
+  }
+
   const deltaX = event.clientX - resizeState.startClientX;
   const newWidth = Math.max(
     resizeState.startWidth + deltaX,
     resizeState.minWidth
   );
-  const headerElements = headerRef.value?.querySelectorAll(".column");
-  if (headerElements && headerElements[resizeState.columnIndex]) {
-    (headerElements[resizeState.columnIndex] as HTMLElement).style.width =
-      `${newWidth}px`;
-    (headerElements[resizeState.columnIndex] as HTMLElement).style.flex =
-      "none";
+
+  if (localColumns.value[resizeState.columnIndex]) {
+    localColumns.value[resizeState.columnIndex].width = Math.round(newWidth);
   }
 };
 
-const stopResizing = (event: MouseEvent) => {
-  if (!resizeState.isResizing) return;
-  event.stopPropagation();
+const stopResizing = () => {
   window.removeEventListener("mousemove", handleResizing);
   window.removeEventListener("mouseup", stopResizing);
 
-  justFinishedResizing.value = true;
-  hoveredResizerIndex.value = null; // 停止拖拽后重置悬停状态
-
-  const deltaX = event.clientX - resizeState.startClientX;
-  const newWidth = Math.round(
-    Math.max(resizeState.startWidth + deltaX, resizeState.minWidth)
-  );
-  const plainColumns = JSON.parse(JSON.stringify(props.columns));
-  if (plainColumns[resizeState.columnIndex]) {
-    plainColumns[resizeState.columnIndex].width = newWidth;
+  if (resizeState.isResizing) {
+    justFinishedResizing.value = true;
+    emit("set-columns", JSON.parse(JSON.stringify(localColumns.value)));
   }
-  emit("set-columns", plainColumns);
+
   resizeState.isResizing = false;
   resizeState.columnIndex = -1;
 };
@@ -461,6 +459,7 @@ onUnmounted(() => {
     left: -7px;
     right: -7px;
     background-color: transparent;
+    cursor: col-resize;
   }
 
   &.is-hovered,
