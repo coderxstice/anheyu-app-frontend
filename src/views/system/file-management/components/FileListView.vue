@@ -2,23 +2,36 @@
   <div class="file-list-container">
     <!-- 表头区域 -->
     <div
+      ref="headerRef"
       class="file-list-header"
       @mouseenter="isHeaderHovered = true"
       @mouseleave="isHeaderHovered = false"
     >
-      <!-- 直接通过 v-for 渲染所有列 -->
       <div
-        v-for="col in columns"
+        v-for="(col, index) in columns"
         :key="col.type"
+        :style="getColumnStyle(col)"
         :class="['column', `column-${columnTypeMap[col.type].key}`]"
         @click="handleHeaderClick(columnTypeMap[col.type].key)"
         @mouseenter="hoveredHeaderKey = columnTypeMap[col.type].key"
         @mouseleave="hoveredHeaderKey = null"
       >
+        <!-- 移除原有的 column-divider，仅使用 column-resizer 来作为分隔线和拖拽热区 -->
+        <!-- <div
+          v-if="index > 0"
+          :class="[
+            'column-divider',
+            {
+              'divider-visible':
+                hoveredHeaderKey === columnTypeMap[col.type].key ||
+                hoveredHeaderKey === columnTypeMap[columns[index - 1].type].key
+            }
+          ]"
+        /> -->
+
         <span>{{ columnTypeMap[col.type].name }}</span>
 
         <div class="sort-indicator-wrapper">
-          <!-- 当前激活的排序列 -->
           <div
             v-if="currentSort.key === columnTypeMap[col.type].key"
             class="sort-indicator active"
@@ -26,7 +39,6 @@
             <el-icon v-if="currentSort.dir === 'asc'"><CaretTop /></el-icon>
             <el-icon v-else><CaretBottom /></el-icon>
           </div>
-          <!-- 鼠标悬浮时显示的预备排序列 -->
           <div
             v-else-if="hoveredHeaderKey === columnTypeMap[col.type].key"
             class="sort-indicator-hover"
@@ -34,9 +46,21 @@
             <el-icon><CaretBottom /></el-icon>
           </div>
         </div>
+
+        <div
+          v-if="index < columns.length - 1"
+          class="column-resizer"
+          :class="{
+            'is-hovered': hoveredResizerIndex === index,
+            'is-resizing':
+              resizeState.isResizing && resizeState.columnIndex === index
+          }"
+          @mousedown="startResize($event, index)"
+          @mouseenter="hoveredResizerIndex = index"
+          @mouseleave="hoveredResizerIndex = null"
+        />
       </div>
 
-      <!-- 添加列按钮 -->
       <transition name="add-btn-slide">
         <div v-if="isHeaderHovered" class="column-add">
           <el-tooltip content="配置列" placement="top">
@@ -54,12 +78,10 @@
       data-is-file-container="true"
       @scroll="handleLocalScroll"
     >
-      <!-- 空状态 -->
       <li v-if="!files.length && !loading && !isMoreLoading" class="state-view">
         <span>这里什么都没有</span>
       </li>
 
-      <!-- 文件列表项 -->
       <li
         v-for="item in files"
         :key="item.id"
@@ -76,13 +98,12 @@
         @mousedown="handleMouseDown"
         @mouseup="handleMouseUp"
       >
-        <!-- 动态列单元格 -->
         <div
           v-for="col in columns"
           :key="col.type"
+          :style="getColumnStyle(col)"
           :class="['column', `column-${columnTypeMap[col.type].key}`]"
         >
-          <!-- 名称列特殊处理，包含图标 -->
           <template v-if="columnTypeMap[col.type].key === 'name'">
             <div class="column-name-content">
               <Transition name="icon-swap" mode="out-in">
@@ -104,20 +125,18 @@
               </el-tooltip>
             </div>
           </template>
-          <!-- 其他列正常渲染 -->
           <template v-else-if="columnTypeMap[col.type].key === 'size'">
             {{ item.type === FileType.File ? formatSize(item.size) : "--" }}
           </template>
           <template v-else-if="columnTypeMap[col.type].key === 'updated_at'">
-            {{ formatDateTime(item.updated_at) }}
+            {{ formatRelativeTime(item.updated_at) }}
           </template>
           <template v-else-if="columnTypeMap[col.type].key === 'created_at'">
-            {{ formatDateTime(item.created_at) }}
+            {{ formatRelativeTime(item.created_at) }}
           </template>
         </div>
       </li>
 
-      <!-- 加载指示器 -->
       <li v-if="isMoreLoading" class="state-view load-more-indicator">
         <el-icon class="is-loading"><Loading /></el-icon>
         <span>加载中...</span>
@@ -133,8 +152,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, type PropType } from "vue";
-import { formatSize, formatDateTime } from "@/utils/format";
+import {
+  computed,
+  onMounted,
+  onUnmounted,
+  ref,
+  type PropType,
+  reactive
+} from "vue";
+import { formatSize, formatRelativeTime } from "@/utils/format";
 import { useFileIcons } from "../hooks/useFileIcons";
 import gsap from "gsap";
 import { FileItem, FileType, type ColumnConfig } from "@/api/sys-file/type";
@@ -166,6 +192,7 @@ const emit = defineEmits<{
   (e: "scroll", event: Event): void;
   (e: "set-sort-key", key: SortKey): void;
   (e: "open-column-settings"): void;
+  (e: "set-columns", columns: ColumnConfig[]): void;
 }>();
 
 const columnTypeMap = {
@@ -184,7 +211,14 @@ const currentSort = computed(() => {
   return { key, dir };
 });
 
+const justFinishedResizing = ref(false);
+const hoveredResizerIndex = ref<number | null>(null); // 新增：追踪鼠标悬停的 resizer 索引
+
 const handleHeaderClick = (key: ColumnKey) => {
+  if (justFinishedResizing.value) {
+    justFinishedResizing.value = false;
+    return;
+  }
   if (currentSort.value.key === key) {
     const newDir = currentSort.value.dir === "asc" ? "desc" : "asc";
     emit("set-sort-key", `${key}_${newDir}` as SortKey);
@@ -197,6 +231,88 @@ const handleHeaderClick = (key: ColumnKey) => {
 const isHeaderHovered = ref(false);
 const { getFileIcon } = useFileIcons();
 const hoveredHeaderKey = ref<ColumnKey | null>(null);
+
+const headerRef = ref<HTMLElement | null>(null);
+const resizeState = reactive({
+  isResizing: false,
+  startClientX: 0,
+  startWidth: 0,
+  columnIndex: -1,
+  minWidth: 80
+});
+
+const startResize = (event: MouseEvent, index: number) => {
+  event.preventDefault();
+  event.stopPropagation();
+  const headerElements = headerRef.value?.querySelectorAll(".column");
+  if (!headerElements || !headerElements[index]) return;
+  const targetColumn = headerElements[index] as HTMLElement;
+  resizeState.isResizing = true;
+  resizeState.columnIndex = index;
+  resizeState.startClientX = event.clientX;
+  resizeState.startWidth = targetColumn.offsetWidth;
+  window.addEventListener("mousemove", handleResizing);
+  window.addEventListener("mouseup", stopResizing);
+};
+
+const handleResizing = (event: MouseEvent) => {
+  if (!resizeState.isResizing) return;
+  const deltaX = event.clientX - resizeState.startClientX;
+  const newWidth = Math.max(
+    resizeState.startWidth + deltaX,
+    resizeState.minWidth
+  );
+  const headerElements = headerRef.value?.querySelectorAll(".column");
+  if (headerElements && headerElements[resizeState.columnIndex]) {
+    (headerElements[resizeState.columnIndex] as HTMLElement).style.width =
+      `${newWidth}px`;
+    (headerElements[resizeState.columnIndex] as HTMLElement).style.flex =
+      "none";
+  }
+};
+
+const stopResizing = (event: MouseEvent) => {
+  if (!resizeState.isResizing) return;
+  event.stopPropagation();
+  window.removeEventListener("mousemove", handleResizing);
+  window.removeEventListener("mouseup", stopResizing);
+
+  justFinishedResizing.value = true;
+  hoveredResizerIndex.value = null; // 停止拖拽后重置悬停状态
+
+  const deltaX = event.clientX - resizeState.startClientX;
+  const newWidth = Math.round(
+    Math.max(resizeState.startWidth + deltaX, resizeState.minWidth)
+  );
+  const plainColumns = JSON.parse(JSON.stringify(props.columns));
+  if (plainColumns[resizeState.columnIndex]) {
+    plainColumns[resizeState.columnIndex].width = newWidth;
+  }
+  emit("set-columns", plainColumns);
+  resizeState.isResizing = false;
+  resizeState.columnIndex = -1;
+};
+
+const getColumnStyle = (col: ColumnConfig) => {
+  if (col.width) {
+    return {
+      flex: "none",
+      width: `${col.width}px`
+    };
+  }
+  const key = columnTypeMap[col.type].key;
+  switch (key) {
+    case "name":
+      return { flex: "5" };
+    case "size":
+      return { flex: "1.5", justifyContent: "flex-start" };
+    case "updated_at":
+    case "created_at":
+      return { flex: "2.5" };
+    default:
+      return { flex: "1" };
+  }
+};
 
 const handleLocalScroll = (event: Event) => emit("scroll", event);
 
@@ -252,12 +368,18 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 };
 
-onMounted(() => window.addEventListener("keydown", handleKeyDown));
-onUnmounted(() => window.removeEventListener("keydown", handleKeyDown));
+onMounted(() => {
+  window.addEventListener("keydown", handleKeyDown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleKeyDown);
+  window.removeEventListener("mousemove", handleResizing);
+  window.removeEventListener("mouseup", stopResizing);
+});
 </script>
 
 <style scoped lang="scss">
-/* --- 整体布局 --- */
 .file-list-container {
   display: flex;
   flex-direction: column;
@@ -285,7 +407,6 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeyDown));
   padding: 6px 8px;
 }
 
-/* --- 列通用样式 --- */
 .column {
   padding: 12px 8px;
   font-size: 14px;
@@ -294,19 +415,16 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeyDown));
   text-overflow: ellipsis;
   display: flex;
   align-items: center;
+  position: relative;
 
   &.column-name {
-    flex: 5;
     padding-left: 20px;
   }
   &.column-size {
-    flex: 1.5;
-    justify-content: flex-start;
     color: #64748b;
   }
   &.column-updated_at,
   &.column-created_at {
-    flex: 2.5;
     color: #64748b;
   }
 }
@@ -319,7 +437,39 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeyDown));
   }
 }
 
-/* --- 名称列的特殊内容 --- */
+.column-resizer {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  bottom: 0;
+  width: 3px;
+  height: 60%;
+  border-radius: 8px;
+  cursor: col-resize;
+  z-index: 10;
+  background-color: transparent;
+  transition:
+    background-color 0.2s ease-in-out,
+    width 0.2s ease-in-out;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    bottom: -10px;
+    left: -7px;
+    right: -7px;
+    background-color: transparent;
+  }
+
+  &.is-hovered,
+  &.is-resizing {
+    background-color: var(--anzhiyu-theme);
+    width: 5px;
+  }
+}
+
 .column-name-content {
   display: flex;
   align-items: center;
@@ -339,8 +489,6 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeyDown));
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-/* --- 文件行项目 --- */
 .file-item {
   display: flex;
   align-items: center;
@@ -349,8 +497,6 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeyDown));
   transition: background-color 0.2s ease;
   user-select: none;
 }
-
-/* --- 排序指示器 --- */
 .sort-indicator-wrapper {
   margin-left: 4px;
   width: 16px;
@@ -370,8 +516,6 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeyDown));
 .file-list-header .column:hover .sort-indicator-hover {
   opacity: 1;
 }
-
-/* --- 添加列按钮 --- */
 .column-add {
   position: absolute;
   right: 16px;
@@ -406,8 +550,6 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeyDown));
     }
   }
 }
-
-/* --- 添加按钮动画 --- */
 .add-btn-slide-enter-active,
 .add-btn-slide-leave-active {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -417,8 +559,6 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeyDown));
   opacity: 0;
   transform: translateY(-50%) translateX(20px);
 }
-
-/* --- 其他状态和动画 --- */
 .file-item:hover {
   background-color: #f8fafc;
 }

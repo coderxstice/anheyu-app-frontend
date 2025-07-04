@@ -74,7 +74,6 @@ export const useFileStore = defineStore("file", {
   }),
 
   getters: {
-    // ... getters aare unchanged
     pathSegments: state => {
       if (state.path === "/") return [{ name: "我的文件", path: "/" }];
       const segments = state.path.split("/").filter(Boolean);
@@ -118,20 +117,41 @@ export const useFileStore = defineStore("file", {
   },
 
   actions: {
-    async updateViewConfig() {
+    /**
+     * @description (核心) 仅负责将当前 store 的视图配置同步到后端。不执行任何其他操作。
+     */
+    async _syncViewConfigToBackend() {
+      // +++ 新增调试日志 +++
+      console.log(
+        "%c[Sync View Config] Triggered!",
+        "color: blue; font-weight: bold;"
+      );
+      console.trace("Call stack for _syncViewConfigToBackend");
+      // +++++++++++++++++++++
+
       if (!this.currentFolderId) {
         console.warn("无法更新视图配置：currentFolderId 为空。");
         return;
       }
       try {
         const [order, order_direction] = parseSortKey(this.sortKey);
+        const plainColumns = JSON.parse(JSON.stringify(this.columns));
         const newViewConfig: FolderViewConfig & { columns: ColumnConfig[] } = {
           view: this.viewMode,
           order,
           page_size: this.pageSize,
           order_direction,
-          columns: this.columns
+          columns: plainColumns
         };
+
+        // +++ 新增调试日志 +++
+        console.log(
+          "%c[Sync View Config] Sending Request Body:",
+          "color: green;",
+          newViewConfig
+        );
+        // +++++++++++++++++++++
+
         await updateFolderViewApi(this.currentFolderId, newViewConfig);
       } catch (error) {
         console.error("更新文件夹视图配置时发生网络错误:", error);
@@ -139,69 +159,67 @@ export const useFileStore = defineStore("file", {
         throw error;
       }
     },
-
-    setPageSize(size: number) {
+    /**
+     * @description 设置分页大小，保存配置，然后刷新列表
+     */
+    async setPageSize(size: number) {
       if (this.pageSize === size) return;
       this.pageSize = size;
-      this.updateViewConfig()
-        .then(() => {
-          this.refreshCurrentPath({
-            addResumableTaskFromFileItem: async () => {}
-          });
-        })
-        .catch(() => {
-          console.error("设置分页大小失败，因为配置未能保存到后端。");
-        });
-    },
-
-    setSort(key: SortKey) {
-      if (this.sortKey === key) return;
-      this.sortKey = key;
-      this.updateViewConfig()
-        .then(() => {
-          this.refreshCurrentPath({
-            addResumableTaskFromFileItem: async () => {}
-          });
-        })
-        .catch(() => {
-          console.error("设置排序失败，因为配置未能保存到后端。");
-        });
-    },
-
-    setViewMode(mode: "list" | "grid") {
-      if (this.viewMode === mode) return;
-      this.viewMode = mode;
-      this.updateViewConfig();
-    },
-
-    /**
-     * @description 设置列配置，更新后端，并强制刷新列表
-     * @param {ColumnConfig[]} columns - 新的列配置数组
-     */
-    async setColumns(columns: ColumnConfig[]) {
-      // 检查配置是否真的改变，避免不必要的刷新
-      // 使用 JSON.stringify 是一个简单有效的深比较方法
-      if (JSON.stringify(this.columns) === JSON.stringify(columns)) {
-        return;
-      }
-
-      this.columns = columns;
-
       try {
-        // 调用 updateViewConfig 将更改持久化
-        await this.updateViewConfig();
-
-        // 成功保存后，刷新文件列表以应用新视图
-        // refreshCurrentPath 会重置分页游标(nextToken)和文件列表(files)
+        await this._syncViewConfigToBackend();
+        // 只有改变分页大小需要刷新
         await this.refreshCurrentPath({
           addResumableTaskFromFileItem: async () => {}
         });
+      } catch {
+        // _syncViewConfigToBackend 内部已处理错误消息
+      }
+    },
 
+    /**
+     * @description 设置排序，保存配置，然后刷新列表
+     */
+    async setSort(key: SortKey) {
+      if (this.sortKey === key) return;
+      this.sortKey = key;
+      try {
+        await this._syncViewConfigToBackend();
+        // 只有改变排序需要刷新
+        await this.refreshCurrentPath({
+          addResumableTaskFromFileItem: async () => {}
+        });
+      } catch {
+        // _syncViewConfigToBackend 内部已处理错误消息
+      }
+    },
+
+    /**
+     * @description 设置视图模式，仅保存配置，不刷新列表
+     */
+    async setViewMode(mode: "list" | "grid") {
+      if (this.viewMode === mode) return;
+      this.viewMode = mode;
+      await this._syncViewConfigToBackend(); // 调用但不等待，或根据需要等待
+    },
+
+    /**
+     * @description (重构后) 设置列配置，仅保存配置，不刷新列表
+     * @param {ColumnConfig[]} newColumnsConfig - 新的列配置数组
+     */
+    async setColumns(newColumnsConfig: ColumnConfig[]) {
+      if (JSON.stringify(this.columns) === JSON.stringify(newColumnsConfig)) {
+        return;
+      }
+
+      // 就地修改数组以保持响应性
+      this.columns.splice(0, this.columns.length, ...newColumnsConfig);
+
+      try {
+        // 只调用同步方法，不刷新列表
+        await this._syncViewConfigToBackend();
         ElMessage.success("列配置已更新");
       } catch {
-        // updateViewConfig 内部已经有错误处理和 ElMessage
-        console.error("设置列配置失败，因为配置未能保存到后端。");
-        // 这里可以选择是否将 this.columns 还原回旧值，但目前保持与 setSort 等一致，不作还原
+        // 错误已在 _syncViewConfigToBackend 中处理
       }
     },
 
@@ -210,21 +228,17 @@ export const useFileStore = defineStore("file", {
       uploader: UploaderActions,
       isRefresh: boolean = false
     ) {
-      // isRefresh 为 true 时，会重置 loading, path, nextToken
       if (isRefresh) {
         this.loading = true;
         this.path = extractLogicalPathFromUri(pathToLoad || "/");
-        this.nextToken = null; // 关键：刷新时重置游标
-        // 关键：刷新时清空现有文件
+        this.nextToken = null;
         this.files = [];
       }
 
-      // 如果不是刷新，并且正在加载或没有更多数据，则返回
       if (!isRefresh && (this.isMoreLoading || !this.hasMore)) {
         return;
       }
 
-      // 如果不是刷新，则认为是加载更多
       if (!isRefresh) {
         this.isMoreLoading = true;
       }
@@ -236,8 +250,6 @@ export const useFileStore = defineStore("file", {
           const { files, parent, pagination, props, storage_policy, view } =
             response.data;
 
-          // isRefresh 为 true 时，this.files 已经在前面被清空
-          // 所以这里直接 push 即可，无需再判断
           const existingIds = new Set(this.files.map(f => f.id));
           const uniqueNewFiles = files.filter(f => !existingIds.has(f.id));
           this.files.push(...uniqueNewFiles);
@@ -250,18 +262,15 @@ export const useFileStore = defineStore("file", {
             this.hasMore = false;
           }
 
-          // 不论是否刷新，都应该更新视图配置，因为可能是从另一个文件夹导航过来的
-          if (view) {
+          // **关键优化**：只在首次加载或强制刷新时，才用后端数据覆盖本地视图状态
+          // 这样就避免了因其他操作（如setColumns）触发的刷新覆盖了用户刚刚设置的UI状态
+          if (isRefresh && view) {
             this.viewMode = view.view;
             this.pageSize = view.page_size;
             this.sortKey = `${view.order}_${view.order_direction}` as SortKey;
             this.columns = view.columns?.length
               ? view.columns
-              : [
-                  { type: 0 }, // 文件名
-                  { type: 1 }, // 大小
-                  { type: 2 } // 修改时间
-                ];
+              : [{ type: 0 }, { type: 1 }, { type: 2 }];
           }
 
           if (isRefresh) {
@@ -284,12 +293,11 @@ export const useFileStore = defineStore("file", {
       }
     },
 
-    // ... 其他 actions 不变 ...
     async refreshCurrentPath(uploader: UploaderActions) {
-      // 调用 loadFiles 并将 isRefresh 标志设为 true
       await this.loadFiles(this.path, uploader, true);
     },
 
+    // ... 其他 actions (removeFilesFromState, updateFileInState, _createItem, etc.) 保持不变 ...
     removeFilesFromState(fileIds: string[]) {
       const idsToRemove = new Set(fileIds);
       this.files = this.files.filter(file => !idsToRemove.has(file.id));

@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-07-03 23:15:01
+ * @LastEditTime: 2025-07-04 16:58:29
  * @LastEditors: 安知鱼
  */
 
@@ -12,6 +12,7 @@
 
 export interface ColumnConfig {
   type: number;
+  width?: number;
 }
 
 export interface FolderViewConfig {

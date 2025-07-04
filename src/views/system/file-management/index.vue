@@ -79,6 +79,7 @@
           @scroll="handleScroll"
           @set-sort-key="handleSetSortKey"
           @open-column-settings="handleOpenColumnSettings"
+          @set-columns="handleSetColumns"
         />
       </div>
     </div>
@@ -214,8 +215,19 @@ const onActionShare = () => {
 const handleSetViewMode = (mode: "list" | "grid") =>
   fileStore.setViewMode(mode);
 const handleSetPageSize = (size: number) => fileStore.setPageSize(size);
-const handleSetColumns = (newColumns: ColumnConfig[]) =>
-  fileStore.setColumns(newColumns);
+const handleSetColumns = (newColumns: ColumnConfig[]) => {
+  console.log(
+    "LOG 2.1: index.vue - handleSetColumns - 已监听到事件，收到的 newColumns:",
+    JSON.stringify(newColumns, null, 2)
+  );
+
+  setTimeout(() => {
+    fileStore.setColumns(newColumns);
+    console.log(
+      "LOG 2.2: index.vue - handleSetColumns - 已在下一个 tick 中调用 fileStore.setColumns"
+    );
+  }, 0);
+};
 const handleSetSortKey = (key: SortKey) => fileStore.setSort(key);
 const handleOpenColumnSettings = () => {
   fileToolbarRef.value?.openDialog();
