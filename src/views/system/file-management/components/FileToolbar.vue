@@ -1,6 +1,7 @@
 <template>
   <div class="file-toolbar rounded-2xl overflow-hidden bg-white ml-2 mb-2">
     <div class="right-actions">
+      <!-- 刷新按钮 -->
       <el-tooltip content="刷新" placement="bottom">
         <el-button
           circle
@@ -10,6 +11,7 @@
         />
       </el-tooltip>
 
+      <!-- 选择操作 -->
       <el-tooltip v-if="!isSimplified" content="选择操作" placement="bottom">
         <div>
           <el-dropdown trigger="click" placement="bottom-end">
@@ -38,65 +40,83 @@
         </div>
       </el-tooltip>
 
-      <el-tooltip content="视图设置" placement="bottom">
+      <!-- 视图设置 (定向展开动画) -->
+      <el-tooltip
+        content="视图设置"
+        placement="bottom"
+        :disabled="isSettingsPopoverVisible"
+        :hide-after="0"
+      >
         <div>
           <el-popover
+            ref="settingsPopoverRef"
             placement="bottom-end"
-            title="布局设置"
             :width="250"
-            trigger="click"
+            :visible="isSettingsPopoverVisible"
+            popper-class="directional-reveal-popover"
+            :show-arrow="false"
+            transition="none"
           >
             <template #reference>
               <el-button
+                ref="settingsButtonRef"
                 circle
                 :icon="Setting"
                 class="!text-[var(--anzhiyu-white)] !border-none !bg-[#73A6F5]"
+                @click="toggleSettingsPopover"
               />
             </template>
-            <!-- 视图切换 -->
-            <el-button-group class="view-switcher">
-              <div>
-                <el-button
-                  :type="viewMode === 'grid' ? 'primary' : 'default'"
-                  :icon="Grid"
-                  @click="emit('set-view-mode', 'grid')"
-                />
-                <el-button
-                  :type="viewMode === 'list' ? 'primary' : 'default'"
-                  :icon="Tickets"
-                  @click="emit('set-view-mode', 'list')"
-                />
+            <div class="popover-content">
+              <div class="popover-section">
+                <h1 class="popover-title">布局</h1>
+                <el-button-group class="view-switcher">
+                  <el-button
+                    :type="viewMode === 'grid' ? 'primary' : 'default'"
+                    :icon="Grid"
+                    @click="handleViewChange('grid')"
+                    >网格</el-button
+                  >
+                  <el-button
+                    :type="viewMode === 'list' ? 'primary' : 'default'"
+                    :icon="Tickets"
+                    @click="handleViewChange('list')"
+                    >列表</el-button
+                  >
+                </el-button-group>
               </div>
-            </el-button-group>
-
-            <!-- 列设置 -->
-            <div v-if="viewMode === 'list'">
-              <h1 class="text-base font-semibold mt-4 mb-2">列设置</h1>
-              <el-button class="w-full" :icon="Operation" @click="openDialog">
-                列设置
-              </el-button>
-            </div>
-
-            <!-- 分页大小设置 -->
-            <div>
-              <h1 class="text-base mt-4">分页大小</h1>
-              <el-slider
-                :model-value="localPageSize"
-                :min="10"
-                :max="200"
-                :step="10"
-                size="small"
-                @input="onPageSizeInput"
-                @change="onPageSizeChange"
-              />
-              <div class="text-xs text-gray-500">
-                当前分页大小: {{ localPageSize }} 条
+              <el-divider />
+              <div v-if="viewMode === 'list'" class="popover-section">
+                <h1 class="popover-title">列设置</h1>
+                <el-button
+                  class="w-full"
+                  :icon="Operation"
+                  @click="handleOpenDialog"
+                >
+                  自定义列表列
+                </el-button>
+              </div>
+              <el-divider v-if="viewMode === 'list'" />
+              <div class="popover-section">
+                <h1 class="popover-title">分页大小</h1>
+                <div class="slider-wrapper">
+                  <el-slider
+                    :model-value="localPageSize"
+                    :min="10"
+                    :max="200"
+                    :step="10"
+                    size="small"
+                    @input="onPageSizeInput"
+                    @change="onPageSizeChange"
+                  />
+                  <span class="slider-value">{{ localPageSize }}</span>
+                </div>
               </div>
             </div>
           </el-popover>
         </div>
       </el-tooltip>
 
+      <!-- 排序 -->
       <el-tooltip content="排序" placement="bottom">
         <div>
           <el-dropdown
@@ -115,54 +135,46 @@
                 <el-dropdown-item
                   command="name_asc"
                   :class="{ active: sortKey === 'name_asc' }"
+                  >A-Z</el-dropdown-item
                 >
-                  A-Z
-                </el-dropdown-item>
                 <el-dropdown-item
                   command="name_desc"
                   :class="{ active: sortKey === 'name_desc' }"
+                  >Z-A</el-dropdown-item
                 >
-                  Z-A
-                </el-dropdown-item>
                 <el-dropdown-item
                   divided
                   command="size_asc"
                   :class="{ active: sortKey === 'size_asc' }"
+                  >最小</el-dropdown-item
                 >
-                  最小
-                </el-dropdown-item>
                 <el-dropdown-item
                   command="size_desc"
                   :class="{ active: sortKey === 'size_desc' }"
+                  >最大</el-dropdown-item
                 >
-                  最大
-                </el-dropdown-item>
                 <el-dropdown-item
                   divided
                   command="updated_at_desc"
                   :class="{ active: sortKey === 'updated_at_desc' }"
+                  >最新修改</el-dropdown-item
                 >
-                  最新修改
-                </el-dropdown-item>
                 <el-dropdown-item
                   command="updated_at_asc"
                   :class="{ active: sortKey === 'updated_at_asc' }"
+                  >最早修改</el-dropdown-item
                 >
-                  最早修改
-                </el-dropdown-item>
                 <el-dropdown-item
                   divided
                   command="created_at_desc"
                   :class="{ active: sortKey === 'created_at_desc' }"
+                  >最新上传</el-dropdown-item
                 >
-                  最新上传
-                </el-dropdown-item>
                 <el-dropdown-item
                   command="created_at_asc"
                   :class="{ active: sortKey === 'created_at_asc' }"
+                  >最早上传</el-dropdown-item
                 >
-                  最早上传
-                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -171,7 +183,6 @@
     </div>
   </div>
 
-  <!-- 列设置对话框 -->
   <el-dialog
     v-model="dialogVisible"
     title="列设置"
@@ -214,7 +225,6 @@
         </div>
       </transition-group>
     </div>
-
     <template #footer>
       <div class="dialog-footer">
         <el-dropdown trigger="click" placement="top-start">
@@ -244,7 +254,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, toRaw } from "vue";
+import {
+  ref,
+  watch,
+  computed,
+  toRaw,
+  type ComponentPublicInstance,
+  nextTick
+} from "vue";
+import type { ElButton, ElPopover } from "element-plus";
+import gsap from "gsap";
 import type { SortKey } from "@/store/modules/fileStore";
 import type { ColumnConfig } from "@/api/sys-file/type";
 import {
@@ -261,7 +280,6 @@ import {
 } from "@element-plus/icons-vue";
 import RefreshSvg from "@/assets/icons/refresh.svg?component";
 
-// --- 列定义 ---
 enum ColumnType {
   Name = 0,
   Size = 1,
@@ -276,7 +294,6 @@ const columnTypeMap = new Map<ColumnType, { name: string }>([
   [ColumnType.CreatedAt, { name: "创建日期" }]
 ]);
 
-// --- Props & Emits ---
 const props = defineProps<{
   viewMode: "list" | "grid";
   sortKey: SortKey;
@@ -297,7 +314,6 @@ const emit = defineEmits<{
   (e: "set-columns", columns: ColumnConfig[]): void;
 }>();
 
-// --- 分页滑块逻辑 ---
 const localPageSize = ref(props.pageSize);
 watch(
   () => props.pageSize,
@@ -312,21 +328,17 @@ const onPageSizeChange = (value: number) => {
   emit("set-page-size", value);
 };
 
-// --- 列设置对话框逻辑 ---
 const dialogVisible = ref(false);
 const editableColumns = ref<ColumnConfig[]>([]);
-
 const openDialog = () => {
   editableColumns.value = structuredClone(toRaw(props.columns));
   dialogVisible.value = true;
 };
-
 const availableColumnsToAdd = computed(() => {
   const allColumnTypes = Array.from(columnTypeMap.keys());
   const currentColTypes = new Set(editableColumns.value.map(c => c.type));
   return allColumnTypes.filter(type => !currentColTypes.has(type));
 });
-
 const addColumn = (type: ColumnType) => editableColumns.value.push({ type });
 const removeColumn = (index: number) => editableColumns.value.splice(index, 1);
 const moveColumn = (index: number, direction: -1 | 1) => {
@@ -336,21 +348,146 @@ const moveColumn = (index: number, direction: -1 | 1) => {
   editableColumns.value[index] = editableColumns.value[newIndex];
   editableColumns.value[newIndex] = temp;
 };
-
 const handleConfirm = () => {
   emit("set-columns", editableColumns.value);
   dialogVisible.value = false;
 };
 
-// --- Expose ---
-// 使用 defineExpose 暴露 openDialog 方法，使其可以被父组件通过 ref 调用
+const settingsButtonRef = ref<ComponentPublicInstance<typeof ElButton>>();
+const settingsPopoverRef = ref<InstanceType<typeof ElPopover>>();
+const isSettingsPopoverVisible = ref(false);
+
+const closePopover = () => {
+  const popoverEl = settingsPopoverRef.value?.popperRef?.contentRef;
+  if (!popoverEl) return;
+  gsap.to(popoverEl, {
+    scale: 0.6,
+    opacity: 0,
+    duration: 0.2,
+    ease: "cubic-bezier(0.4, 0, 1, 1)",
+    onComplete: () => {
+      isSettingsPopoverVisible.value = false;
+    }
+  });
+};
+
+const openPopover = async () => {
+  isSettingsPopoverVisible.value = true;
+  await nextTick();
+  const popoverEl = settingsPopoverRef.value?.popperRef?.contentRef;
+  if (!popoverEl) return;
+  gsap.fromTo(
+    popoverEl,
+    { scale: 0.6, opacity: 0 },
+    {
+      scale: 1,
+      opacity: 1,
+      duration: 0.25,
+      ease: "cubic-bezier(0, 0, 0.2, 1)"
+    }
+  );
+};
+
+const toggleSettingsPopover = () => {
+  if (isSettingsPopoverVisible.value) {
+    closePopover();
+  } else {
+    openPopover();
+  }
+};
+
+const handleClickOutside = (event: MouseEvent) => {
+  if (!isSettingsPopoverVisible.value) return;
+  const popoverContentEl = settingsPopoverRef.value?.popperRef?.contentRef;
+  const buttonEl = settingsButtonRef.value?.$el;
+  if (
+    buttonEl &&
+    !buttonEl.contains(event.target as Node) &&
+    popoverContentEl &&
+    !popoverContentEl.contains(event.target as Node)
+  ) {
+    closePopover();
+  }
+};
+
+watch(isSettingsPopoverVisible, isVisible => {
+  if (isVisible) {
+    document.addEventListener("mousedown", handleClickOutside);
+  } else {
+    document.removeEventListener("mousedown", handleClickOutside);
+  }
+});
+
+const handleViewChange = (mode: "list" | "grid") => {
+  emit("set-view-mode", mode);
+};
+
+const handleOpenDialog = () => {
+  openDialog();
+  isSettingsPopoverVisible.value = false;
+};
+
 defineExpose({
   openDialog
 });
 </script>
 
+<style lang="scss">
+.directional-reveal-popover {
+  padding: 0 !important;
+  border-radius: 12px !important;
+  border: none !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
+  background-color: var(--anzhiyu-maskbgdeep, rgba(255, 255, 255, 0.9));
+  backdrop-filter: blur(20px);
+  transform-origin: top right;
+
+  .popover-content {
+    padding: 8px;
+  }
+  .popover-section {
+    padding: 8px;
+  }
+  .popover-title {
+    font-size: 13px;
+    color: #909399;
+    margin-bottom: 12px;
+    font-weight: 500;
+    padding-left: 4px;
+  }
+  .el-button-group.view-switcher {
+    width: 100%;
+    display: flex;
+    .el-button {
+      flex: 1;
+    }
+  }
+  .slider-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 4px;
+    .el-slider {
+      flex-grow: 1;
+    }
+    .slider-value {
+      font-size: 14px;
+      color: var(--el-text-color-primary);
+      background-color: var(--el-fill-color-light);
+      padding: 2px 8px;
+      border-radius: 4px;
+      min-width: 45px;
+      text-align: center;
+      user-select: none;
+    }
+  }
+  .el-divider--horizontal {
+    margin: 8px 0;
+  }
+}
+</style>
+
 <style scoped lang="scss">
-/* --- 样式与之前版本相同，此处省略以保持简洁 --- */
 .file-toolbar {
   display: flex;
   justify-content: flex-end;
@@ -363,19 +500,6 @@ defineExpose({
   display: flex;
   align-items: center;
   gap: 8px;
-}
-.view-switcher {
-  width: 100%;
-  > div {
-    display: flex;
-    .el-button {
-      flex: 1;
-    }
-  }
-}
-:deep(.el-slider__button) {
-  width: 16px !important;
-  height: 16px !important;
 }
 :deep(.el-dropdown-menu__item.active) {
   color: var(--el-color-primary, #409eff);
@@ -439,12 +563,12 @@ defineExpose({
 .list-anim-move,
 .list-anim-enter-active,
 .list-anim-leave-active {
-  transition: all 0.3s cubic-bezier(0.55, 0, 0.1, 1);
+  transition: all 0.4s cubic-bezier(0.55, 0, 0.1, 1);
 }
 .list-anim-enter-from,
 .list-anim-leave-to {
   opacity: 0;
-  transform: scaleY(0.01) translate(30px, 0);
+  transform: translateX(30px);
 }
 .list-anim-leave-active {
   position: absolute;
