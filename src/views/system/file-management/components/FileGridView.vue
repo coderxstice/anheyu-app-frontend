@@ -201,6 +201,10 @@ onUnmounted(() => {
   overflow-y: auto;
   /* 确保 v-loading 遮罩层能正确显示 */
   position: relative;
+  /* 新增：让所有网格项作为一个整体，在垂直方向上靠上对齐 */
+  align-content: flex-start;
+  /* 新增：让所有网格项作为一个整体，在水平方向上靠左对齐。这能防止最后一行被拉伸。 */
+  justify-content: flex-start;
 }
 .grid-item {
   display: flex;

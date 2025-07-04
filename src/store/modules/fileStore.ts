@@ -217,7 +217,6 @@ export const useFileStore = defineStore("file", {
       try {
         // 只调用同步方法，不刷新列表
         await this._syncViewConfigToBackend();
-        ElMessage.success("列配置已更新");
       } catch {
         // 错误已在 _syncViewConfigToBackend 中处理
       }
