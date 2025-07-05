@@ -107,13 +107,16 @@ const emit = defineEmits<{
   (e: "toggle-selection", fileId: string): void;
   (e: "select-all"): void;
   (e: "navigate-to", path: string): void;
-  // 2. 定义新的 emit 事件
-  (e: "scroll", event: Event): void;
+  (e: "scroll-to-load"): void;
 }>();
 
 // 3. 创建处理本地滚动的函数
 const handleLocalScroll = (event: Event) => {
-  emit("scroll", event);
+  const el = event.target as HTMLElement;
+  const isAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 200;
+  if (isAtBottom && props.hasMore && !props.isMoreLoading) {
+    emit("scroll-to-load");
+  }
 };
 
 // --- 其他 script 内容保持不变 ---

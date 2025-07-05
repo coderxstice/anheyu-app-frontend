@@ -76,7 +76,7 @@
           @toggle-selection="toggleSelection"
           @select-all="selectAll"
           @navigate-to="handleNavigate"
-          @scroll="handleScroll"
+          @scroll-to-load="handleLoadMore"
           @set-sort-key="handleSetSortKey"
           @open-column-settings="handleOpenColumnSettings"
           @set-columns="handleSetColumns"
@@ -129,7 +129,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { ElMessageBox } from "element-plus";
@@ -171,6 +171,7 @@ const route = useRoute();
 const router = useRouter();
 const fileStore = useFileStore();
 const fileToolbarRef = ref<InstanceType<typeof FileToolbar> | null>(null);
+const fileManagerContainerRef = ref<HTMLElement | null>(null);
 
 const {
   sortedFiles,
@@ -216,17 +217,7 @@ const handleSetViewMode = (mode: "list" | "grid") =>
   fileStore.setViewMode(mode);
 const handleSetPageSize = (size: number) => fileStore.setPageSize(size);
 const handleSetColumns = (newColumns: ColumnConfig[]) => {
-  console.log(
-    "LOG 2.1: index.vue - handleSetColumns - 已监听到事件，收到的 newColumns:",
-    JSON.stringify(newColumns, null, 2)
-  );
-
-  setTimeout(() => {
-    fileStore.setColumns(newColumns);
-    console.log(
-      "LOG 2.2: index.vue - handleSetColumns - 已在下一个 tick 中调用 fileStore.setColumns"
-    );
-  }, 0);
+  fileStore.setColumns(newColumns);
 };
 const handleSetSortKey = (key: SortKey) => fileStore.setSort(key);
 const handleOpenColumnSettings = () => {
@@ -370,17 +361,10 @@ watch(
 );
 
 let throttleTimer: number | null = null;
-const handleScroll = (event: Event) => {
+const handleLoadMore = () => {
   if (throttleTimer) return;
   throttleTimer = window.setTimeout(() => {
-    const el = event.target as HTMLElement;
-    if (!el) {
-      throttleTimer = null;
-      return;
-    }
-    const canLoadMore = hasMore.value;
-    const isAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 200;
-    if (isAtBottom && canLoadMore && !loading.value && !isMoreLoading.value) {
+    if (hasMore.value && !loading.value && !isMoreLoading.value) {
       fileStore.loadFiles(path.value, uploaderActions);
     }
     throttleTimer = null;
@@ -390,7 +374,6 @@ const handleScroll = (event: Event) => {
 const selectionCountLabel = computed(
   () => `${selectedFiles.value.size} 个对象`
 );
-const fileManagerContainerRef = ref(null);
 
 const handleContainerClick = (event: MouseEvent) => {
   if (
@@ -430,6 +413,50 @@ const handleContextMenuTrigger = (event: MouseEvent) => {
     clearSelection();
   }
   contextMenuTriggerEvent.value = event;
+};
+
+// --- 阻止触控板手势导航 ---
+const preventSwipeNavigation = (event: WheelEvent) => {
+  // 仅当事件发生在文件管理器组件内部时才处理
+  if (!fileManagerContainerRef.value?.contains(event.target as Node)) {
+    return;
+  }
+
+  // 核心判断：是横向滑动
+  if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
+    let currentTarget = event.target as HTMLElement | null;
+
+    // 递归向上查找，看路径上是否有可横向滚动的元素
+    while (currentTarget && currentTarget !== fileManagerContainerRef.value) {
+      const canScrollHorizontally =
+        currentTarget.scrollWidth > currentTarget.clientWidth;
+      const computedStyle = window.getComputedStyle(currentTarget);
+      const overflowX = computedStyle.overflowX;
+
+      // 如果元素可以横向滚动 (auto 或 scroll) 并且确实有内容可供滚动
+      if (
+        (overflowX === "auto" || overflowX === "scroll") &&
+        canScrollHorizontally
+      ) {
+        // 找到了可滚动的祖先元素，不阻止默认行为
+        return;
+      }
+      currentTarget = currentTarget.parentElement;
+    }
+
+    // 如果事件的目标是输入框等，也不阻止
+    const target = event.target as HTMLElement;
+    if (
+      target.tagName === "INPUT" ||
+      target.tagName === "TEXTAREA" ||
+      target.isContentEditable
+    ) {
+      return;
+    }
+
+    // 循环结束都没找到可滚动的父元素，阻止默认的导航行为
+    event.preventDefault();
+  }
 };
 
 // --- 5. 上传面板逻辑 ---
@@ -493,6 +520,16 @@ const handleUploadGlobalCommand = (command: string, value: any) => {
       break;
   }
 };
+
+// --- 6. 生命周期钩子 ---
+onMounted(() => {
+  // 监听器绑定到 window，但处理函数内部会判断事件是否在组件内
+  window.addEventListener("wheel", preventSwipeNavigation, { passive: false });
+});
+
+onUnmounted(() => {
+  window.removeEventListener("wheel", preventSwipeNavigation);
+});
 </script>
 
 <style>

@@ -4,6 +4,10 @@
     <div
       ref="headerRef"
       class="file-list-header"
+      :style="{
+        transform: `translateX(-${scrollLeft}px)`,
+        paddingRight: `${scrollbarWidth}px`
+      }"
       @mouseenter="isHeaderHovered = true"
       @mouseleave="isHeaderHovered = false"
     >
@@ -48,93 +52,116 @@
         />
       </div>
 
-      <transition name="add-btn-slide">
-        <div v-if="isHeaderHovered" class="column-add">
-          <el-tooltip content="配置列" placement="top">
-            <div class="add-btn-wrapper">
-              <el-icon @click="emit('open-column-settings')"><Plus /></el-icon>
-            </div>
-          </el-tooltip>
-        </div>
-      </transition>
+      <!-- + 按钮现在在 flex 布局的末尾 -->
+      <div class="column-add-container">
+        <transition name="add-btn-slide">
+          <div v-if="isHeaderHovered" class="column-add">
+            <el-tooltip content="配置列" placement="top">
+              <div class="add-btn-wrapper">
+                <el-icon @click="emit('open-column-settings')"
+                  ><Plus
+                /></el-icon>
+              </div>
+            </el-tooltip>
+          </div>
+        </transition>
+      </div>
     </div>
 
-    <!-- 列表主体区域 -->
-    <ul
-      class="file-list-body"
-      data-is-file-container="true"
-      @scroll="handleLocalScroll"
+    <!-- 虚拟滚动容器 -->
+    <div
+      ref="scrollContainerRef"
+      class="virtual-scroll-container"
+      @scroll="handleScroll"
     >
-      <li v-if="!files.length && !loading && !isMoreLoading" class="state-view">
-        <span>这里什么都没有</span>
-      </li>
+      <!-- “幽灵”占位符，撑开滚动条 -->
+      <div
+        class="virtual-sizer"
+        :style="{ height: `${totalHeight}px`, width: `${actualTotalWidth}px` }"
+      />
 
-      <li
-        v-for="item in files"
-        :key="item.id"
-        class="file-item"
-        :data-id="item.id"
-        :data-type="item.type === FileType.Dir ? 'Dir' : 'File'"
-        :class="{
-          selected: selectedFileIds.has(item.id),
-          'is-uploading': item.metadata?.['sys:upload_session_id'],
-          'is-disabled': disabledFileIds?.has(item.id)
-        }"
-        @click="handleItemClick(item, $event)"
-        @dblclick="handleItemDblClick(item)"
-        @mousedown="handleMouseDown"
-        @mouseup="handleMouseUp"
+      <!-- 内容渲染区域 -->
+      <ul
+        class="file-list-body"
+        :style="{ transform: `translateY(${contentOffset}px)` }"
       >
-        <div
-          v-for="col in localColumns"
-          :key="col.type"
-          :style="getColumnStyle(col)"
-          :class="['column', `column-${columnTypeMap[col.type].key}`]"
+        <li
+          v-if="!visibleFiles.length && !loading && !isMoreLoading"
+          class="state-view"
+          :style="{ width: `${actualTotalWidth}px` }"
         >
-          <template v-if="columnTypeMap[col.type].key === 'name'">
-            <div class="column-name-content">
-              <Transition name="icon-swap" mode="out-in">
-                <IconifyIconOnline
-                  v-if="selectedFileIds.has(item.id)"
-                  icon="material-symbols:check-circle-rounded"
-                  class="file-icon selected-icon"
-                  @click.stop="emit('toggle-selection', item.id)"
-                />
-                <component :is="getFileIcon(item)" v-else class="file-icon" />
-              </Transition>
-              <span class="file-name-text">{{ item.name }}</span>
-              <el-tooltip
-                v-if="item.metadata?.['sys:upload_session_id']"
-                content="文件上传中..."
-                placement="top"
-              >
-                <el-icon class="uploading-indicator"><Loading /></el-icon>
-              </el-tooltip>
-            </div>
-          </template>
-          <template v-else-if="columnTypeMap[col.type].key === 'size'">
-            {{ item.type === FileType.File ? formatSize(item.size) : "--" }}
-          </template>
-          <template v-else-if="columnTypeMap[col.type].key === 'updated_at'">
-            {{ formatRelativeTime(item.updated_at) }}
-          </template>
-          <template v-else-if="columnTypeMap[col.type].key === 'created_at'">
-            {{ formatRelativeTime(item.created_at) }}
-          </template>
-        </div>
-      </li>
+          <span>这里什么都没有</span>
+        </li>
 
-      <li v-if="isMoreLoading" class="state-view load-more-indicator">
+        <li
+          v-for="item in visibleFiles"
+          :key="item.id"
+          class="file-item"
+          :data-id="item.id"
+          :data-type="item.type === FileType.Dir ? 'Dir' : 'File'"
+          :class="{
+            selected: selectedFileIds.has(item.id),
+            'is-uploading': item.metadata?.['sys:upload_session_id'],
+            'is-disabled': disabledFileIds?.has(item.id)
+          }"
+          @click="handleItemClick(item, $event)"
+          @dblclick="handleItemDblClick(item)"
+          @mousedown="handleMouseDown"
+          @mouseup="handleMouseUp"
+        >
+          <div
+            v-for="col in localColumns"
+            :key="col.type"
+            :style="getColumnStyle(col)"
+            :class="['column', `column-${columnTypeMap[col.type].key}`]"
+          >
+            <!-- ...模板内容不变... -->
+            <template v-if="columnTypeMap[col.type].key === 'name'">
+              <div class="column-name-content">
+                <Transition name="icon-swap" mode="out-in">
+                  <IconifyIconOnline
+                    v-if="selectedFileIds.has(item.id)"
+                    icon="material-symbols:check-circle-rounded"
+                    class="file-icon selected-icon"
+                    @click.stop="emit('toggle-selection', item.id)"
+                  />
+                  <component :is="getFileIcon(item)" v-else class="file-icon" />
+                </Transition>
+                <span class="file-name-text">{{ item.name }}</span>
+                <el-tooltip
+                  v-if="item.metadata?.['sys:upload_session_id']"
+                  content="文件上传中..."
+                  placement="top"
+                >
+                  <el-icon class="uploading-indicator"><Loading /></el-icon>
+                </el-tooltip>
+              </div>
+            </template>
+            <template v-else-if="columnTypeMap[col.type].key === 'size'">
+              {{ item.type === FileType.File ? formatSize(item.size) : "--" }}
+            </template>
+            <template v-else-if="columnTypeMap[col.type].key === 'updated_at'">
+              {{ formatRelativeTime(item.updated_at) }}
+            </template>
+            <template v-else-if="columnTypeMap[col.type].key === 'created_at'">
+              {{ formatRelativeTime(item.created_at) }}
+            </template>
+          </div>
+        </li>
+      </ul>
+
+      <!-- 状态指示器 -->
+      <div v-if="isMoreLoading" class="state-view-overlay bottom-indicator">
         <el-icon class="is-loading"><Loading /></el-icon>
         <span>加载中...</span>
-      </li>
-      <li
-        v-if="!isMoreLoading && !hasMore && files.length > 0"
-        class="state-view no-more-indicator"
+      </div>
+      <div
+        v-else-if="!hasMore && files.length > 0"
+        class="state-view-overlay bottom-indicator"
       >
         <span>— 没有更多了 —</span>
-      </li>
-    </ul>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -177,7 +204,7 @@ const emit = defineEmits<{
   (e: "toggle-selection", fileId: string): void;
   (e: "select-all"): void;
   (e: "navigate-to", path: string): void;
-  (e: "scroll", event: Event): void;
+  (e: "scroll-to-load"): void;
   (e: "set-sort-key", key: SortKey): void;
   (e: "open-column-settings"): void;
   (e: "set-columns", columns: ColumnConfig[]): void;
@@ -190,8 +217,97 @@ const columnTypeMap = {
   3: { key: "created_at", name: "创建日期" }
 } as const;
 
-const localColumns = ref<ColumnConfig[]>([]);
+// --- 虚拟滚动核心状态 ---
+const scrollContainerRef = ref<HTMLElement | null>(null);
+const itemHeight = 40;
+const bufferSize = 5;
 
+const viewportHeight = ref(0);
+const scrollTop = ref(0);
+const scrollLeft = ref(0);
+
+// --- 本地列状态 & 宽度计算 ---
+const localColumns = ref<ColumnConfig[]>([]);
+const actualTotalWidth = ref(0); // 改为 ref，用于存储测量后的真实宽度
+
+// --- 虚拟滚动计算属性 ---
+const totalHeight = computed(() => props.files.length * itemHeight);
+const visibleItemCount = computed(() => {
+  if (viewportHeight.value === 0) return 0;
+  return Math.ceil(viewportHeight.value / itemHeight);
+});
+const startIndex = computed(() => {
+  const start = Math.floor(scrollTop.value / itemHeight);
+  return Math.max(0, start - bufferSize);
+});
+const endIndex = computed(() => {
+  const end = startIndex.value + visibleItemCount.value + bufferSize * 2;
+  return Math.min(props.files.length, end);
+});
+const visibleFiles = computed(() => {
+  return props.files.slice(startIndex.value, endIndex.value);
+});
+const contentOffset = computed(() => {
+  return startIndex.value * itemHeight;
+});
+
+// --- 事件处理 ---
+const handleScroll = () => {
+  if (!scrollContainerRef.value) return;
+  const {
+    scrollTop: newScrollTop,
+    scrollLeft: newScrollLeft,
+    scrollHeight,
+    clientHeight
+  } = scrollContainerRef.value;
+  scrollTop.value = newScrollTop;
+  scrollLeft.value = newScrollLeft;
+
+  const proactiveThreshold = clientHeight * 1.5;
+  const shouldLoadMore =
+    scrollHeight > 0 &&
+    scrollHeight - newScrollTop - clientHeight < proactiveThreshold;
+
+  if (shouldLoadMore && props.hasMore && !props.isMoreLoading) {
+    emit("scroll-to-load");
+  }
+};
+
+// --- 生命周期钩子 & 观察器 ---
+let vScrollObserver: ResizeObserver | null = null;
+let headerObserver: ResizeObserver | null = null;
+
+onMounted(() => {
+  // 观察滚动容器的高度变化
+  if (scrollContainerRef.value) {
+    viewportHeight.value = scrollContainerRef.value.clientHeight;
+    vScrollObserver = new ResizeObserver(entries => {
+      viewportHeight.value = entries[0]?.contentRect.height || 0;
+    });
+    vScrollObserver.observe(scrollContainerRef.value);
+  }
+
+  // 观察表头的宽度变化
+  if (headerRef.value) {
+    headerObserver = new ResizeObserver(entries => {
+      actualTotalWidth.value = entries[0]?.target.scrollWidth || 0;
+    });
+    headerObserver.observe(headerRef.value);
+  }
+
+  window.addEventListener("keydown", handleKeyDown);
+});
+
+onUnmounted(() => {
+  vScrollObserver?.disconnect();
+  headerObserver?.disconnect();
+  window.removeEventListener("keydown", handleKeyDown);
+  window.removeEventListener("mousemove", handleResizing);
+  window.removeEventListener("mouseup", stopResizing);
+});
+
+const headerRef = ref<HTMLElement | null>(null);
+const scrollbarWidth = ref(0);
 const resizeState = reactive({
   isResizing: false,
   startClientX: 0,
@@ -221,6 +337,8 @@ const currentSort = computed(() => {
 
 const justFinishedResizing = ref(false);
 const hoveredResizerIndex = ref<number | null>(null);
+const isHeaderHovered = ref(false);
+const hoveredHeaderKey = ref<ColumnKey | null>(null);
 
 const handleHeaderClick = (key: ColumnKey) => {
   if (justFinishedResizing.value) {
@@ -236,27 +354,19 @@ const handleHeaderClick = (key: ColumnKey) => {
   }
 };
 
-const isHeaderHovered = ref(false);
-const { getFileIcon } = useFileIcons();
-const hoveredHeaderKey = ref<ColumnKey | null>(null);
-
 const startResize = (event: MouseEvent, index: number) => {
   event.preventDefault();
   event.stopPropagation();
-
   const currentColumn = localColumns.value[index];
   if (!currentColumn) return;
-
   const columnElement = (event.target as HTMLElement).closest<HTMLElement>(
     ".column"
   );
   const startWidth =
     currentColumn.width || columnElement?.offsetWidth || resizeState.minWidth;
-
   resizeState.columnIndex = index;
   resizeState.startClientX = event.clientX;
   resizeState.startWidth = startWidth;
-
   window.addEventListener("mousemove", handleResizing);
   window.addEventListener("mouseup", stopResizing);
 };
@@ -266,13 +376,11 @@ const handleResizing = (event: MouseEvent) => {
   if (!resizeState.isResizing) {
     resizeState.isResizing = true;
   }
-
   const deltaX = event.clientX - resizeState.startClientX;
   const newWidth = Math.max(
     resizeState.startWidth + deltaX,
     resizeState.minWidth
   );
-
   if (localColumns.value[resizeState.columnIndex]) {
     localColumns.value[resizeState.columnIndex].width = Math.round(newWidth);
   }
@@ -281,22 +389,17 @@ const handleResizing = (event: MouseEvent) => {
 const stopResizing = () => {
   window.removeEventListener("mousemove", handleResizing);
   window.removeEventListener("mouseup", stopResizing);
-
   if (resizeState.isResizing) {
     justFinishedResizing.value = true;
     emit("set-columns", JSON.parse(JSON.stringify(localColumns.value)));
   }
-
   resizeState.isResizing = false;
   resizeState.columnIndex = -1;
 };
 
 const getColumnStyle = (col: ColumnConfig) => {
   if (col.width) {
-    return {
-      flex: "none",
-      width: `${col.width}px`
-    };
+    return { flex: "none", width: `${col.width}px` };
   }
   const key = columnTypeMap[col.type].key;
   switch (key) {
@@ -312,8 +415,7 @@ const getColumnStyle = (col: ColumnConfig) => {
   }
 };
 
-const handleLocalScroll = (event: Event) => emit("scroll", event);
-
+const { getFileIcon } = useFileIcons();
 const handleMouseDown = (event: MouseEvent) => {
   gsap.to(event.currentTarget as HTMLElement, {
     scale: 0.995,
@@ -321,7 +423,6 @@ const handleMouseDown = (event: MouseEvent) => {
     ease: "power2.out"
   });
 };
-
 const handleMouseUp = (event: MouseEvent) => {
   gsap.to(event.currentTarget as HTMLElement, {
     scale: 1,
@@ -329,22 +430,16 @@ const handleMouseUp = (event: MouseEvent) => {
     ease: "elastic.out(1, 0.5)"
   });
 };
-
 const handleItemClick = (item: FileItem, event: MouseEvent) => {
   if (
     props.disabledFileIds?.has(item.id) ||
     item.metadata?.["sys:upload_session_id"]
   )
     return;
-  if (event.shiftKey) {
-    emit("select-range", item.id);
-  } else if (event.metaKey || event.ctrlKey) {
-    emit("toggle-selection", item.id);
-  } else {
-    emit("select-single", item.id);
-  }
+  if (event.shiftKey) emit("select-range", item.id);
+  else if (event.metaKey || event.ctrlKey) emit("toggle-selection", item.id);
+  else emit("select-single", item.id);
 };
-
 const handleItemDblClick = (item: FileItem) => {
   if (props.disabledFileIds?.has(item.id)) {
     ElMessage.warning("不能进入正在移动的文件夹。");
@@ -356,7 +451,6 @@ const handleItemDblClick = (item: FileItem) => {
     emit("navigate-to", logicalPath);
   }
 };
-
 const handleKeyDown = (event: KeyboardEvent) => {
   const target = event.target as HTMLElement;
   if (["INPUT", "TEXTAREA"].includes(target.tagName)) return;
@@ -365,16 +459,6 @@ const handleKeyDown = (event: KeyboardEvent) => {
     emit("select-all");
   }
 };
-
-onMounted(() => {
-  window.addEventListener("keydown", handleKeyDown);
-});
-
-onUnmounted(() => {
-  window.removeEventListener("keydown", handleKeyDown);
-  window.removeEventListener("mousemove", handleResizing);
-  window.removeEventListener("mouseup", stopResizing);
-});
 </script>
 
 <style scoped lang="scss">
@@ -382,9 +466,8 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 0;
-  background-color: white;
   position: relative;
+  overflow: hidden;
 }
 
 .file-list-header {
@@ -396,13 +479,48 @@ onUnmounted(() => {
   flex-shrink: 0;
   user-select: none;
   position: relative;
+  z-index: 10;
+  background-color: #fff;
+  box-sizing: border-box;
+  /* 让内容宽度决定自身宽度，而不是100% */
+  width: fit-content;
+  min-width: 100%;
+}
+
+.virtual-scroll-container {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  min-height: 0;
+}
+
+.virtual-sizer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 0;
+  /* width 由JS动态设置 */
 }
 
 .file-list-body {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  min-height: 0;
-  padding: 6px 8px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100%; /* 确保在内容少时也撑满 */
+  width: fit-content; /* 宽度由内容决定 */
+  padding: 0 8px;
+  box-sizing: border-box;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  height: 38px;
+  margin: 1px 0;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+  user-select: none;
+  box-sizing: border-box;
 }
 
 .column {
@@ -414,6 +532,8 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   position: relative;
+  flex-shrink: 0;
+  box-sizing: border-box;
 
   &.column-name {
     padding-left: 20px;
@@ -424,6 +544,35 @@ onUnmounted(() => {
   &.column-updated_at,
   &.column-created_at {
     color: #64748b;
+  }
+}
+
+.state-view {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  color: #909399;
+  font-size: 14px;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.state-view-overlay {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #909399;
+  font-size: 14px;
+  pointer-events: none;
+
+  &.bottom-indicator {
+    bottom: 20px;
   }
 }
 
@@ -469,6 +618,23 @@ onUnmounted(() => {
   }
 }
 
+.column-add-container {
+  flex-grow: 1; /* 占据所有剩余空间 */
+  position: relative;
+  min-width: 50px; /* 保证有一个最小宽度 */
+}
+
+.column-add {
+  position: absolute;
+  /* 不再使用 right 定位，而是 left */
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .column-name-content {
   display: flex;
   align-items: center;
@@ -488,14 +654,7 @@ onUnmounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.file-item {
-  display: flex;
-  align-items: center;
-  margin: 1px 0;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
-  user-select: none;
-}
+
 .sort-indicator-wrapper {
   margin-left: 4px;
   width: 16px;
@@ -515,40 +674,32 @@ onUnmounted(() => {
 .file-list-header .column:hover .sort-indicator-hover {
   opacity: 1;
 }
-.column-add {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
+
+.add-btn-wrapper {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
 
-  .add-btn-wrapper {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease-in-out;
+  .el-icon {
+    font-size: 18px;
+    color: #606266;
+  }
 
+  &:hover {
+    background-color: var(--el-color-primary);
     .el-icon {
-      font-size: 18px;
-      color: #606266;
-    }
-
-    &:hover {
-      background-color: var(--el-color-primary);
-      .el-icon {
-        color: #fff;
-      }
+      color: #fff;
     }
   }
 }
+
 .add-btn-slide-enter-active,
 .add-btn-slide-leave-active {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -586,18 +737,7 @@ onUnmounted(() => {
     color: #c0c4cc;
   }
 }
-.state-view {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 60px 20px;
-  color: #909399;
-  font-size: 14px;
-}
-.load-more-indicator,
-.no-more-indicator {
-  padding: 20px 0;
-}
+
 .is-loading {
   animation: spin 1.5s linear infinite;
 }
