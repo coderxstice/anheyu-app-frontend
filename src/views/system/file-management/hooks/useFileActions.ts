@@ -2,7 +2,7 @@
  * @Description: 封装文件和文件夹的创建、重命名和删除等操作
  * @Author: 安知鱼
  * @Date: 2025-06-25 14:26:59
- * @LastEditTime: 2025-07-02 14:41:06
+ * @LastEditTime: 2025-07-05 12:30:19
  * @LastEditors: 安知鱼
  */
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -11,28 +11,22 @@ import type { UploadItem, FileItem } from "@/api/sys-file/type";
 import {
   createItemApi,
   deleteFilesApi,
-  renameFileApi
+  renameFileApi // API 名称已根据您的代码更新为 renameFileApi
 } from "@/api/sys-file/sys-file";
 import { FileType } from "@/api/sys-file/type";
+import { useFileStore } from "@/store/modules/fileStore"; // 1. 导入 useFileStore
 
 /**
  * @description: useFileActions 的回调函数接口
  */
 export interface FileActionCallbacks {
-  /**
-   * @description: 当操作（如创建、重命名、删除）成功后触发，通常用于刷新列表
-   */
   onSuccess: () => void;
-  /**
-   * @description: 当添加新上传任务后触发
-   * @param {boolean} hasAdded - 指示是否至少有一个新任务被成功添加到队列中
-   */
   onNewUploads: (hasAdded: boolean) => void;
 }
 
 /**
  * @description: 封装文件和文件夹相关操作的 Hook
- * @param addUploadsToQueue - 一个能将文件添加至上传队列的函数，现在应返回 Promise<boolean>
+ * @param addUploadsToQueue - 一个能将文件添加至上传队列的函数
  * @param currentPath - 一个包含当前文件浏览器路径的响应式引用 (Ref)
  * @param callbacks - 包含各种操作回调函数的对象
  */
@@ -49,14 +43,12 @@ export function useFileActions(
       | "averageSpeed"
       | "uploadedSize"
     >[]
-  ) => Promise<boolean>, // 确认函数签名返回 Promise<boolean>
+  ) => Promise<boolean>,
   currentPath: Ref<string>,
   callbacks: FileActionCallbacks
 ) {
-  /**
-   * @description: 内部函数，通过创建隐藏的 input[type=file] 元素来触发文件/文件夹选择
-   * @param {boolean} isDir - 如果为 true，则启用文件夹选择模式 (webkitdirectory)
-   */
+  const fileStore = useFileStore(); // 2. 获取 store 实例
+
   const _triggerUpload = (isDir: boolean) => {
     const input = document.createElement("input");
     input.type = "file";
@@ -64,20 +56,12 @@ export function useFileActions(
     if (isDir) {
       input.webkitdirectory = true;
     }
-    // 将 onchange 事件处理器改为 async 以便使用 await
     input.onchange = async e => {
       const files = (e.target as HTMLInputElement).files;
       if (files && files.length > 0) {
         const newUploads = Array.from(files).map(file => {
-          console.log(`[Upload Debug] 正在处理文件 (按钮点击):`, {
-            name: file.name,
-            webkitRelativePath: file.webkitRelativePath,
-            size: file.size
-          });
-
           const fileName = file.name;
           const relativePath = file.webkitRelativePath || fileName;
-
           return {
             file: file,
             name: fileName,
@@ -87,32 +71,16 @@ export function useFileActions(
             needsRefresh: true
           };
         });
-
-        // 等待 addUploadsToQueue 完成，并获取是否成功添加了任务的结果
         const hasAdded = await addUploadsToQueue(newUploads as any);
-        // 调用新的回调函数，通知父组件处理 UI 变化（如显示上传面板）
         callbacks.onNewUploads(hasAdded);
       }
     };
     input.click();
   };
 
-  /**
-   * @description: 触发上传文件对话框
-   */
   const handleUploadFile = () => _triggerUpload(false);
-
-  /**
-   * @description: 触发上传文件夹对话框
-   */
   const handleUploadDir = () => _triggerUpload(true);
 
-  /**
-   * @description: 内部函数，处理创建文件或文件夹的通用逻辑
-   * @param {"file" | "folder"} type - 创建类型
-   * @param {string} promptTitle - ElMessageBox 提示框的标题
-   * @param {string} defaultName - 输入框中的默认名称
-   */
   const _handleCreate = (
     type: "file" | "folder",
     promptTitle: string,
@@ -160,16 +128,9 @@ export function useFileActions(
     });
   };
 
-  /**
-   * @description: 触发创建文件对话框
-   * @param {"md" | "txt"} ext - 文件扩展名
-   */
   const handleCreateFile = (ext: "md" | "txt") =>
     _handleCreate("file", "文件", `新文件.${ext}`);
 
-  /**
-   * @description: 触发创建文件夹对话框
-   */
   const handleCreateFolder = () =>
     _handleCreate("folder", "文件夹", `新建文件夹`);
 
@@ -192,8 +153,15 @@ export function useFileActions(
         try {
           const response = await renameFileApi(item.id, value);
           if (response.code === 200) {
+            // --- 3. 关键修改：执行乐观更新 ---
+            fileStore.updateFileInState(item.id, {
+              name: value,
+              updated_at: new Date().toISOString()
+            });
             ElMessage.success("重命名成功");
-            callbacks.onSuccess();
+
+            // 旧的刷新逻辑，现在被乐观更新取代
+            // callbacks.onSuccess();
           } else {
             ElMessage.error(response.message || "重命名失败");
           }
@@ -202,7 +170,7 @@ export function useFileActions(
         }
       })
       .catch(() => {
-        ElMessage.info("已取消重命名操作");
+        // ElMessage.info("已取消重命名操作"); // 取消时一般不需要提示
       });
 
     nextTick(() => {
@@ -219,11 +187,6 @@ export function useFileActions(
     });
   };
 
-  /**
-   * @description: 处理删除操作
-   * @param {FileItem[]} files - 要删除的文件项数组
-   * @returns {Promise<boolean>} - 操作是否成功
-   */
   const handleDelete = async (files: FileItem[]): Promise<boolean> => {
     if (!files || files.length === 0) {
       ElMessage.warning("请先选择要删除的项目。");

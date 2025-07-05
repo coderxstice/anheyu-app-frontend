@@ -134,7 +134,7 @@ export function useFileDownload({ getSelectedItems }: UseFileDownloadOptions) {
       selectedItems.length === 1 && selectedItems[0].type === FileType.Dir
         ? selectedItems[0].name
         : "打包下载";
-    handlePackageDownload(selectedItems, zipName);
+    await handlePackageDownload(selectedItems, zipName);
   };
 
   const handleDownloadFolder = async (folderId: string) => {

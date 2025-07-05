@@ -121,13 +121,11 @@ export const useFileStore = defineStore("file", {
      * @description (核心) 仅负责将当前 store 的视图配置同步到后端。不执行任何其他操作。
      */
     async _syncViewConfigToBackend() {
-      // +++ 新增调试日志 +++
       console.log(
         "%c[Sync View Config] Triggered!",
         "color: blue; font-weight: bold;"
       );
       console.trace("Call stack for _syncViewConfigToBackend");
-      // +++++++++++++++++++++
 
       if (!this.currentFolderId) {
         console.warn("无法更新视图配置：currentFolderId 为空。");
@@ -296,16 +294,25 @@ export const useFileStore = defineStore("file", {
       await this.loadFiles(this.path, uploader, true);
     },
 
-    // ... 其他 actions (removeFilesFromState, updateFileInState, _createItem, etc.) 保持不变 ...
     removeFilesFromState(fileIds: string[]) {
       const idsToRemove = new Set(fileIds);
       this.files = this.files.filter(file => !idsToRemove.has(file.id));
     },
 
-    updateFileInState(updatedFile: FileItem) {
-      const index = this.files.findIndex(file => file.id === updatedFile.id);
+    /**
+     * @description 仅在前端更新单个文件的状态，用于重命名等操作。
+     * @param {string} fileId 要更新的文件ID
+     * @param {Partial<FileItem>} updates 要更新的字段对象 (例如 { name: '新文件名.txt' })
+     */
+    updateFileInState(fileId: string, updates: Partial<FileItem>) {
+      const index = this.files.findIndex(file => file.id === fileId);
       if (index !== -1) {
-        this.files[index] = { ...this.files[index], ...updatedFile };
+        // 使用 Object.assign 来合并更新，确保响应性
+        this.files[index] = Object.assign(this.files[index], updates);
+        console.log(
+          `[Optimistic Update] File ${fileId} updated with:`,
+          updates
+        );
       }
     },
 

@@ -138,12 +138,16 @@
 import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { UploadFilled } from "@element-plus/icons-vue";
+
+// 工具 & Store
 import {
   useFileStore,
   type SortKey,
   type UploaderActions
 } from "@/store/modules/fileStore";
 import type { ColumnConfig } from "@/api/sys-file/type";
+
+// 自定义 Hooks
 import { useFileUploader } from "@/composables/useFileUploader";
 import { useFileSelection } from "@/composables/useFileSelection";
 import { useFileActions } from "./hooks/useFileActions";
@@ -155,6 +159,8 @@ import { useFileModals } from "./hooks/useFileModals";
 import { useUploadPanel } from "./hooks/useUploadPanel";
 import { useDataLoading } from "./hooks/useDataLoading";
 import { useSwipeNavigationBlocker } from "./hooks/useSwipeNavigationBlocker";
+
+// 子组件
 import FileToolbar from "./components/FileToolbar.vue";
 import FileHeard from "./components/FileHeard.vue";
 import FileBreadcrumb from "./components/FileBreadcrumb.vue";
@@ -166,10 +172,14 @@ import SearchOverlay from "./components/SearchOverlay.vue";
 import FileDetailsPanel from "./components/FileDetailsPanel.vue";
 import MoveModal from "./components/MoveModal.vue";
 
+// ========================================================================
 // 1. 核心实例和状态
+// ========================================================================
+
 const fileStore = useFileStore();
 const fileToolbarRef = ref<InstanceType<typeof FileToolbar> | null>(null);
 const fileManagerContainerRef = ref<HTMLElement | null>(null);
+
 const {
   sortedFiles,
   loading,
@@ -183,11 +193,15 @@ const {
   hasMore,
   columns
 } = storeToRefs(fileStore);
+
 const viewComponents = { list: FileListView, grid: FileGridView };
 const activeViewComponent = computed(() => viewComponents[viewMode.value]);
 
-// 2. 核心功能 Hooks (注意调用顺序)
+// ========================================================================
+// 2. 核心功能 Hooks (已修正调用顺序和参数)
+// ========================================================================
 
+// 文件上传核心逻辑
 const {
   uploadQueue,
   showUploadProgress,
@@ -211,6 +225,7 @@ const {
 );
 const uploaderActions: UploaderActions = { addResumableTaskFromFileItem };
 
+// 文件选择逻辑 (必须在依赖它的Hooks之前)
 const {
   selectedFiles,
   selectSingle,
@@ -228,16 +243,19 @@ const selectionCountLabel = computed(
 const getSelectedFileItems = () =>
   sortedFiles.value.filter(f => selectedFiles.value.has(f.id));
 
+// 数据加载、刷新、导航
 const { handleRefresh, handleNavigate, handleLoadMore } = useDataLoading({
   uploaderActions,
   clearSelection: clearSelection
 });
 
+// 文件下载
 const { isDownloading, onActionDownload, handleDownloadFolder } =
   useFileDownload({
     getSelectedItems: getSelectedFileItems
   });
 
+// 各种弹窗（移动、复制、详情）
 const {
   isDestinationModalVisible,
   itemsForAction,
@@ -254,6 +272,7 @@ const {
   clearSelection
 });
 
+// 上传面板交互
 const {
   isPanelVisible,
   isPanelCollapsed,
@@ -272,6 +291,7 @@ const {
   getConcurrency: () => concurrency.value
 });
 
+// 文件操作（创建、重命名、删除等）
 const {
   handleUploadFile,
   handleUploadDir,
@@ -284,6 +304,7 @@ const {
   onNewUploads: handleNewUploadsAdded
 });
 
+// 拖拽上传
 const { handleDrop: processDroppedFiles } = useDirectoryUpload(
   addUploadsToQueue,
   path,
@@ -293,6 +314,7 @@ const onDropAdapter = (event: DragEvent) => {
   if (event.dataTransfer) processDroppedFiles(event.dataTransfer);
 };
 
+// 页面交互（拖拽覆盖、搜索、点击空白、手势阻止）
 const {
   isDragging,
   dragHandlers,
@@ -308,6 +330,7 @@ const {
 });
 useSwipeNavigationBlocker(fileManagerContainerRef);
 
+// 右键菜单
 const onActionRename = () => {
   if (isSingleSelection.value) handleRename(getSelectedFileItems()[0]);
 };
@@ -319,7 +342,6 @@ const onActionDelete = () => {
 const onActionShare = () => {
   console.log("Share action triggered");
 };
-
 const {
   contextMenuTriggerEvent,
   onMenuSelect,
@@ -347,7 +369,10 @@ const {
   clearSelection
 });
 
+// ========================================================================
 // 3. 视图设置处理器
+// ========================================================================
+
 const handleSetViewMode = (mode: "list" | "grid") =>
   fileStore.setViewMode(mode);
 const handleSetPageSize = (size: number) => fileStore.setPageSize(size);

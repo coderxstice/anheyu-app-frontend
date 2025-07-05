@@ -149,18 +149,6 @@
           </div>
         </li>
       </ul>
-
-      <!-- 状态指示器 -->
-      <div v-if="isMoreLoading" class="state-view-overlay bottom-indicator">
-        <el-icon class="is-loading"><Loading /></el-icon>
-        <span>加载中...</span>
-      </div>
-      <div
-        v-else-if="!hasMore && files.length > 0"
-        class="state-view-overlay bottom-indicator"
-      >
-        <span>— 没有更多了 —</span>
-      </div>
     </div>
   </div>
 </template>
@@ -319,7 +307,8 @@ const resizeState = reactive({
 watch(
   () => props.columns,
   newColumns => {
-    if (!resizeState.isResizing) {
+    // 只有在非拖拽状态，并且 newColumns 是一个有效数组时才更新
+    if (!resizeState.isResizing && Array.isArray(newColumns)) {
       localColumns.value = JSON.parse(JSON.stringify(newColumns));
     }
   },
