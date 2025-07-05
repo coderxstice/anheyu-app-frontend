@@ -1,82 +1,75 @@
 /*
- * @Description: 管理页面级别的交互，如拖拽上传的UI状态和搜索的触发。
+ * @Description: 管理页面级别的交互，如拖拽上传的UI状态、搜索和点击空白区域。
  * @Author: 安知鱼
  * @Date: 2025-06-25 14:26:59
- * @LastEditTime: 2025-07-02 14:43:57
+ * @LastEditTime: 2025-07-05 12:12:27
  * @LastEditors: 安知鱼
  */
-import { ref } from "vue";
+import { ref, type Ref } from "vue";
+import type { FileItem } from "@/api/sys-file/type";
 
 /**
- * @description: 管理页面级别的交互状态，如拖拽上传和搜索。
- * @param {(event: DragEvent) => void} onDrop - 当文件或目录被拖拽到窗口并释放时触发的回调函数。
- * 回调函数现在接收完整的 DragEvent 对象，将数据提取的责任交给调用方。
+ * 定义 usePageInteractions hook 的选项参数类型
  */
-export function usePageInteractions(onDrop: (event: DragEvent) => void) {
-  /**
-   * @description: 一个响应式引用，指示当前是否有文件或目录正在被拖拽到窗口上方。
-   * @type {import('vue').Ref<boolean>}
-   */
-  const isDragging = ref(false);
+interface UsePageInteractionsOptions {
+  onDrop: (event: DragEvent) => void;
+  detailsPanelFile: Ref<FileItem | null>;
+  hasSelection: Ref<boolean>;
+  clearSelection: () => void;
+}
 
-  /**
-   * @description: 一个响应式引用，控制搜索浮层是否可见。
-   * @type {import('vue').Ref<boolean>}
-   */
+/**
+ * @description: 管理页面级别的交互状态，如拖拽上传、搜索和点击空白区域。
+ * @param {UsePageInteractionsOptions} options - 包含所有依赖项和回调函数的选项对象。
+ */
+export function usePageInteractions({
+  onDrop,
+  detailsPanelFile,
+  hasSelection,
+  clearSelection
+}: UsePageInteractionsOptions) {
+  const isDragging = ref(false);
   const isSearchVisible = ref(false);
 
-  /**
-   * @description: 一个响应式引用，存储触发搜索浮层时的鼠标坐标，用于定位浮层。
-   * @type {import('vue').Ref<{ x: number; y: number }>}
-   */
+  // 关键修复：将 searchOrigin 的类型改回坐标对象
   const searchOrigin = ref({ x: 0, y: 0 });
 
-  // 拖拽计数器，用于正确处理嵌套元素的 dragenter 和 dragleave 事件。
   let dragCounter = 0;
 
-  /**
-   * @description: 包含所有拖拽事件处理器的对象，可以直接在模板中使用 `v-on` 或 `@` 进行绑定。
-   */
   const dragHandlers = {
-    /**
-     * @description: 处理 dragenter 事件。增加计数器并设置 isDragging 状态。
-     * @param {DragEvent} event - DOM 拖拽事件对象。
-     */
     onDragEnter: (event: DragEvent) => {
       event.preventDefault();
       dragCounter++;
-      // 仅当拖拽内容包含文件时，才显示拖拽覆盖层
       if (event.dataTransfer?.types.includes("Files")) {
         isDragging.value = true;
       }
     },
-    /**
-     * @description: 处理 dragover 事件。必须阻止默认行为才能使 drop 事件生效。
-     * @param {DragEvent} event - DOM 拖拽事件对象。
-     */
     onDragOver: (event: DragEvent) => {
       event.preventDefault();
-    },
-    /**
-     * @description: 处理 dragleave 事件。减少计数器，并在计数器归零时重置 isDragging 状态。
-     * @param {DragEvent} event - DOM 拖拽事件对象。
-     */
-    onDragLeave: (event: DragEvent) => {
-      event.preventDefault();
-      dragCounter--;
-      if (dragCounter === 0) {
-        isDragging.value = false;
+      if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = "copy";
       }
     },
-    /**
-     * @description: 处理 drop 事件。重置状态，并调用传入的 onDrop 回调来处理拖放内容。
-     * @param {DragEvent} event - DOM 拖拽事件对象。
-     */
+    onDragLeave: (event: DragEvent) => {
+      event.preventDefault();
+      if (
+        !(event.currentTarget as HTMLElement).contains(
+          event.relatedTarget as Node
+        )
+      ) {
+        dragCounter = 0;
+        isDragging.value = false;
+      } else {
+        dragCounter--;
+        if (dragCounter <= 0) {
+          isDragging.value = false;
+        }
+      }
+    },
     onDrop: (event: DragEvent) => {
       event.preventDefault();
       isDragging.value = false;
       dragCounter = 0;
-      // 将完整的 DragEvent 对象传递给外部回调，由外部决定如何处理
       onDrop(event);
     }
   };
@@ -86,6 +79,7 @@ export function usePageInteractions(onDrop: (event: DragEvent) => void) {
    * @param {MouseEvent} event - DOM 鼠标事件对象。
    */
   const openSearchFromElement = (event: MouseEvent) => {
+    // 关键修复：存储事件的 clientX/Y 坐标，而不是 DOM 元素
     searchOrigin.value = {
       x: event.clientX,
       y: event.clientY
@@ -93,11 +87,48 @@ export function usePageInteractions(onDrop: (event: DragEvent) => void) {
     isSearchVisible.value = true;
   };
 
+  const handleContainerClick = (event: MouseEvent) => {
+    if (
+      detailsPanelFile.value &&
+      (event.target as HTMLElement).closest(".details-panel-drawer")
+    ) {
+      return;
+    }
+    if (!hasSelection.value) return;
+
+    const ignoredSelectors = [
+      ".file-item",
+      ".grid-item",
+      "[role=button]",
+      "[role=menu]",
+      "[role=listbox]",
+      "input",
+      "button",
+      ".el-button",
+      ".el-popper",
+      ".el-overlay",
+      ".upload-progress-panel",
+      ".context-menu",
+      ".search-overlay-container"
+    ];
+
+    if (
+      ignoredSelectors.some(selector =>
+        (event.target as HTMLElement).closest(selector)
+      )
+    ) {
+      return;
+    }
+
+    clearSelection();
+  };
+
   return {
     isDragging,
     dragHandlers,
     isSearchVisible,
     searchOrigin,
-    openSearchFromElement
+    openSearchFromElement,
+    handleContainerClick
   };
 }

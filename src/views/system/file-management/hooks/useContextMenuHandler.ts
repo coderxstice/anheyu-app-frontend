@@ -2,10 +2,10 @@
  * @Description: 处理右键菜单所有逻辑的组合式函数 (Hook)
  * @Author: 安知鱼
  * @Date: 2025-06-25 14:18:45
- * @LastEditTime: 2025-06-26 18:52:28
+ * @LastEditTime: 2025-07-05 12:09:22
  * @LastEditors: 安知鱼
  */
-import { ref } from "vue";
+import { ref, type Ref } from "vue";
 import { ElMessage } from "element-plus";
 
 /**
@@ -29,12 +29,23 @@ export interface ContextMenuActions {
 }
 
 /**
- * 这是一个专门处理右键菜单所有逻辑的组合式函数 (Hook)。
- * 它接收一个包含所有菜单操作实现的对象作为参数。
- *
- * @param actions - 包含所有菜单项对应操作函数的对象。
+ * 定义 Hook 的完整参数类型
  */
-export function useContextMenuHandler(actions: Partial<ContextMenuActions>) {
+interface UseContextMenuHandlerOptions extends Partial<ContextMenuActions> {
+  hasSelection: Ref<boolean>;
+  clearSelection: () => void;
+}
+
+/**
+ * 这是一个专门处理右键菜单所有逻辑的组合式函数 (Hook)。
+ * 它接收一个包含所有菜单操作实现和所需状态的对象作为参数。
+ *
+ * @param options - 包含所有菜单项对应操作函数及所需状态的对象。
+ */
+export function useContextMenuHandler(options: UseContextMenuHandlerOptions) {
+  // 从 options 中解构出所需的状态和 action 函数
+  const { hasSelection, clearSelection, ...actions } = options;
+
   // 这是与 ContextMenu 组件交互的唯一状态
   const contextMenuTriggerEvent = ref<MouseEvent | null>(null);
 
@@ -43,6 +54,13 @@ export function useContextMenuHandler(actions: Partial<ContextMenuActions>) {
    * @param event 鼠标右键事件
    */
   const handleContextMenuTrigger = (event: MouseEvent) => {
+    // 整合逻辑：如果在非文件/文件夹项上右键，并且当前有选中项，则清空选择
+    if (
+      !(event.target as HTMLElement).closest(".file-item, .grid-item") &&
+      hasSelection.value
+    ) {
+      clearSelection();
+    }
     contextMenuTriggerEvent.value = event;
   };
 

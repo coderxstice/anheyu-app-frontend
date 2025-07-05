@@ -177,11 +177,11 @@ const emit = defineEmits<{
   (e: "close"): void;
   (e: "toggle-collapse"): void;
   (e: "add-files"): void;
-  (e: "retry-item", itemId: number): void;
-  (e: "remove-item", itemId: number): void;
+  (e: "retry-item", itemId: string): void;
+  (e: "remove-item", itemId: string): void;
   (
     e: "resolve-conflict",
-    itemId: number,
+    itemId: string,
     strategy: "overwrite" | "rename"
   ): void;
   (e: "global-command", command: string, value?: any): void;
@@ -210,23 +210,22 @@ const activeUploadsCount = computed(
  * @description: [核心新增] 一个计算属性，根据“隐藏”和“排序”选项来处理原始队列
  */
 const processedQueue = computed(() => {
-  let queue = [...props.queue]; // 创建一个副本以防修改 props
-
-  // 1. 根据 "隐藏已完成" 过滤
+  let queue = [...props.queue];
   if (hideCompleted.value) {
     queue = queue.filter(
       item => !["success", "canceled"].includes(item.status)
     );
   }
 
-  // 2. 根据排序顺序排序
-  if (sortOrder.value === "desc") {
-    // id 越大越新，所以倒序就是 id 降序
-    queue.sort((a, b) => b.id - a.id);
-  } else {
-    // 默认是 'asc'，id 越小越旧，所以正序就是 id 升序
-    queue.sort((a, b) => a.id - b.id);
-  }
+  // 修正：因为 id 现在是字符串，不能直接用减法排序
+  queue.sort((a, b) => {
+    if (sortOrder.value === "desc") {
+      // 字符串比较
+      return b.id.localeCompare(a.id);
+    }
+    // 默认 asc
+    return a.id.localeCompare(b.id);
+  });
 
   return queue;
 });

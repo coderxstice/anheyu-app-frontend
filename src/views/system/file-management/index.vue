@@ -9,6 +9,7 @@
     @contextmenu.prevent="handleContextMenuTrigger"
     @click="handleContainerClick"
   >
+    <!-- 头部操作区 -->
     <FileHeard
       class="mb-2"
       :has-selection="hasSelection"
@@ -19,11 +20,13 @@
       @clear-selection="clearSelection"
       @rename="onActionRename"
       @delete="onActionDelete"
-      @download="onActionDownload(getSelectedFileItems)"
+      @download="onActionDownload"
       @share="onActionShare"
-      @copy="onActionCopy(getSelectedFileItems)"
-      @move="onActionMove(getSelectedFileItems)"
+      @copy="onActionCopy"
+      @move="onActionMove"
     />
+
+    <!-- 路径和工具栏 -->
     <div class="flex w-full">
       <FileBreadcrumb
         class="flex-1 mb-2"
@@ -54,9 +57,10 @@
       />
     </div>
 
+    <!-- 主内容区 -->
     <div class="file-management-main rounded-2xl overflow-hidden">
       <transition name="loading-fade">
-        <div v-if="loading" class="loading-overlay">
+        <div v-if="loading && !sortedFiles.length" class="loading-overlay">
           <div class="loading-spinner" />
         </div>
       </transition>
@@ -84,6 +88,7 @@
       </div>
     </div>
 
+    <!-- 拖拽上传遮罩 -->
     <div v-if="isDragging" class="drag-overlay">
       <div class="drag-content">
         <el-icon><UploadFilled /></el-icon>
@@ -92,6 +97,7 @@
       </div>
     </div>
 
+    <!-- 弹窗和侧边栏 -->
     <MoveModal
       v-model="isDestinationModalVisible"
       :items-for-action="itemsForAction"
@@ -129,22 +135,15 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch, onMounted, onUnmounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
-import { ElMessageBox } from "element-plus";
 import { UploadFilled } from "@element-plus/icons-vue";
-
-// 工具 & Store
-import { buildFullUri, extractLogicalPathFromUri } from "@/utils/fileUtils";
 import {
   useFileStore,
   type SortKey,
   type UploaderActions
 } from "@/store/modules/fileStore";
 import type { ColumnConfig } from "@/api/sys-file/type";
-
-// Composables
 import { useFileUploader } from "@/composables/useFileUploader";
 import { useFileSelection } from "@/composables/useFileSelection";
 import { useFileActions } from "./hooks/useFileActions";
@@ -153,8 +152,9 @@ import { useContextMenuHandler } from "./hooks/useContextMenuHandler";
 import { usePageInteractions } from "./hooks/usePageInteractions";
 import { useFileDownload } from "./hooks/useFileDownload";
 import { useFileModals } from "./hooks/useFileModals";
-
-// Components
+import { useUploadPanel } from "./hooks/useUploadPanel";
+import { useDataLoading } from "./hooks/useDataLoading";
+import { useSwipeNavigationBlocker } from "./hooks/useSwipeNavigationBlocker";
 import FileToolbar from "./components/FileToolbar.vue";
 import FileHeard from "./components/FileHeard.vue";
 import FileBreadcrumb from "./components/FileBreadcrumb.vue";
@@ -166,13 +166,10 @@ import SearchOverlay from "./components/SearchOverlay.vue";
 import FileDetailsPanel from "./components/FileDetailsPanel.vue";
 import MoveModal from "./components/MoveModal.vue";
 
-// --- 1. 核心实例和状态 ---
-const route = useRoute();
-const router = useRouter();
+// 1. 核心实例和状态
 const fileStore = useFileStore();
 const fileToolbarRef = ref<InstanceType<typeof FileToolbar> | null>(null);
 const fileManagerContainerRef = ref<HTMLElement | null>(null);
-
 const {
   sortedFiles,
   loading,
@@ -186,45 +183,11 @@ const {
   hasMore,
   columns
 } = storeToRefs(fileStore);
-
 const viewComponents = { list: FileListView, grid: FileGridView };
 const activeViewComponent = computed(() => viewComponents[viewMode.value]);
 
-// --- 2. 动作与事件处理器 (在此处声明所有将被 Hooks 使用的函数) ---
-const handleRefresh = () => fileStore.refreshCurrentPath(uploaderActions);
-const handleNavigate = (newLogicalPath: string) => {
-  const fullUri = buildFullUri(newLogicalPath);
-  if (route.query.path !== fullUri) {
-    router.push({ query: { path: fullUri } });
-  }
-};
-const getSelectedFileItems = () =>
-  sortedFiles.value.filter(f => selectedFiles.value.has(f.id));
+// 2. 核心功能 Hooks (注意调用顺序)
 
-const onActionRename = () => {
-  if (isSingleSelection.value) handleRename(getSelectedFileItems()[0]);
-};
-const onActionDelete = () => {
-  handleDelete(getSelectedFileItems()).then(success => {
-    if (success) clearSelection();
-  });
-};
-const onActionShare = () => {
-  console.log("Share action triggered");
-};
-
-const handleSetViewMode = (mode: "list" | "grid") =>
-  fileStore.setViewMode(mode);
-const handleSetPageSize = (size: number) => fileStore.setPageSize(size);
-const handleSetColumns = (newColumns: ColumnConfig[]) => {
-  fileStore.setColumns(newColumns);
-};
-const handleSetSortKey = (key: SortKey) => fileStore.setSort(key);
-const handleOpenColumnSettings = () => {
-  fileToolbarRef.value?.openDialog();
-};
-
-// --- 3. 核心功能 Hooks ---
 const {
   uploadQueue,
   showUploadProgress,
@@ -244,9 +207,8 @@ const {
 } = useFileUploader(
   sortedFiles,
   computed(() => storagePolicy.value),
-  handleRefresh // 直接传递 handleRefresh
+  () => handleRefresh()
 );
-
 const uploaderActions: UploaderActions = { addResumableTaskFromFileItem };
 
 const {
@@ -260,18 +222,21 @@ const {
 } = useFileSelection(sortedFiles);
 const hasSelection = computed(() => selectedFiles.value.size > 0);
 const isSingleSelection = computed(() => selectedFiles.value.size === 1);
+const selectionCountLabel = computed(
+  () => `${selectedFiles.value.size} 个对象`
+);
+const getSelectedFileItems = () =>
+  sortedFiles.value.filter(f => selectedFiles.value.has(f.id));
 
-const isPanelVisible = ref(false);
-const isPanelCollapsed = ref(false);
-const handleNewUploadsAdded = (hasAdded: boolean) => {
-  if (hasAdded) {
-    isPanelVisible.value = true;
-    isPanelCollapsed.value = false;
-  }
-};
+const { handleRefresh, handleNavigate, handleLoadMore } = useDataLoading({
+  uploaderActions,
+  clearSelection: clearSelection
+});
 
 const { isDownloading, onActionDownload, handleDownloadFolder } =
-  useFileDownload();
+  useFileDownload({
+    getSelectedItems: getSelectedFileItems
+  });
 
 const {
   isDestinationModalVisible,
@@ -283,7 +248,29 @@ const {
   detailsPanelFile,
   handleShowDetailsForId,
   closeDetailsPanel
-} = useFileModals({ refresh: handleRefresh, clearSelection });
+} = useFileModals({
+  getSelectedItems: getSelectedFileItems,
+  refresh: handleRefresh,
+  clearSelection
+});
+
+const {
+  isPanelVisible,
+  isPanelCollapsed,
+  handlePanelClose,
+  handleUploadGlobalCommand,
+  handleNewUploadsAdded
+} = useUploadPanel({
+  uploadQueue,
+  showUploadProgress,
+  removeItem,
+  retryAllFailed,
+  clearFinishedUploads,
+  setGlobalOverwriteAndRetry,
+  setConcurrency,
+  setSpeedMode,
+  getConcurrency: () => concurrency.value
+});
 
 const {
   handleUploadFile,
@@ -302,11 +289,8 @@ const { handleDrop: processDroppedFiles } = useDirectoryUpload(
   path,
   handleNewUploadsAdded
 );
-
 const onDropAdapter = (event: DragEvent) => {
-  if (event.dataTransfer) {
-    processDroppedFiles(event.dataTransfer);
-  }
+  if (event.dataTransfer) processDroppedFiles(event.dataTransfer);
 };
 
 const {
@@ -314,14 +298,34 @@ const {
   dragHandlers,
   isSearchVisible,
   searchOrigin,
-  openSearchFromElement
-} = usePageInteractions(onDropAdapter);
+  openSearchFromElement,
+  handleContainerClick
+} = usePageInteractions({
+  onDrop: onDropAdapter,
+  detailsPanelFile,
+  hasSelection,
+  clearSelection
+});
+useSwipeNavigationBlocker(fileManagerContainerRef);
+
+const onActionRename = () => {
+  if (isSingleSelection.value) handleRename(getSelectedFileItems()[0]);
+};
+const onActionDelete = () => {
+  handleDelete(getSelectedFileItems()).then(success => {
+    if (success) clearSelection();
+  });
+};
+const onActionShare = () => {
+  console.log("Share action triggered");
+};
 
 const {
   contextMenuTriggerEvent,
   onMenuSelect,
   handleContextMenuClosed,
-  openBlankMenu
+  openBlankMenu,
+  handleContextMenuTrigger
 } = useContextMenuHandler({
   onUploadFile: handleUploadFile,
   onUploadDir: handleUploadDir,
@@ -331,205 +335,27 @@ const {
   onRefresh: handleRefresh,
   onRename: onActionRename,
   onDelete: onActionDelete,
-  onDownload: () => onActionDownload(getSelectedFileItems),
-  onCopy: () => onActionCopy(getSelectedFileItems),
-  onMove: () => onActionMove(getSelectedFileItems),
+  onDownload: onActionDownload,
+  onCopy: onActionCopy,
+  onMove: onActionMove,
   onShare: onActionShare,
   onInfo: () => {
-    if (getSelectedFileItems().length > 0)
+    if (isSingleSelection.value)
       handleShowDetailsForId(getSelectedFileItems()[0].id);
-  }
-});
-
-// --- 4. 导航、滚动与其他事件处理 ---
-const loadFilesFromRoute = (
-  pathQuery: string | string[] | null | undefined
-) => {
-  const pathUri = Array.isArray(pathQuery) ? pathQuery[0] : pathQuery;
-  const logicalPathToLoad = pathUri ? extractLogicalPathFromUri(pathUri) : "/";
-  if (logicalPathToLoad !== fileStore.path || fileStore.files.length === 0) {
-    clearSelection();
-    fileStore.loadFiles(logicalPathToLoad, uploaderActions, true);
-  }
-};
-watch(
-  () => route.query.path,
-  newPathQuery => {
-    loadFilesFromRoute(newPathQuery);
   },
-  { immediate: true }
-);
-
-let throttleTimer: number | null = null;
-const handleLoadMore = () => {
-  if (throttleTimer) return;
-  throttleTimer = window.setTimeout(() => {
-    if (hasMore.value && !loading.value && !isMoreLoading.value) {
-      fileStore.loadFiles(path.value, uploaderActions);
-    }
-    throttleTimer = null;
-  }, 200);
-};
-
-const selectionCountLabel = computed(
-  () => `${selectedFiles.value.size} 个对象`
-);
-
-const handleContainerClick = (event: MouseEvent) => {
-  if (
-    detailsPanelFile.value &&
-    (event.target as HTMLElement).closest(".details-panel-drawer")
-  )
-    return;
-  if (!hasSelection.value) return;
-  const ignoredSelectors = [
-    ".file-item",
-    ".grid-item",
-    "[role=button]",
-    "[role=menu]",
-    "[role=listbox]",
-    "input",
-    "button",
-    ".el-button",
-    ".el-popper",
-    ".el-overlay",
-    ".upload-progress-panel",
-    ".context-menu",
-    ".search-overlay-container"
-  ];
-  if (
-    ignoredSelectors.some(selector =>
-      (event.target as HTMLElement).closest(selector)
-    )
-  )
-    return;
-  clearSelection();
-};
-const handleContextMenuTrigger = (event: MouseEvent) => {
-  if (
-    !(event.target as HTMLElement).closest(".file-item, .grid-item") &&
-    hasSelection.value
-  ) {
-    clearSelection();
-  }
-  contextMenuTriggerEvent.value = event;
-};
-
-// --- 阻止触控板手势导航 ---
-const preventSwipeNavigation = (event: WheelEvent) => {
-  // 仅当事件发生在文件管理器组件内部时才处理
-  if (!fileManagerContainerRef.value?.contains(event.target as Node)) {
-    return;
-  }
-
-  // 核心判断：是横向滑动
-  if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
-    let currentTarget = event.target as HTMLElement | null;
-
-    // 递归向上查找，看路径上是否有可横向滚动的元素
-    while (currentTarget && currentTarget !== fileManagerContainerRef.value) {
-      const canScrollHorizontally =
-        currentTarget.scrollWidth > currentTarget.clientWidth;
-      const computedStyle = window.getComputedStyle(currentTarget);
-      const overflowX = computedStyle.overflowX;
-
-      // 如果元素可以横向滚动 (auto 或 scroll) 并且确实有内容可供滚动
-      if (
-        (overflowX === "auto" || overflowX === "scroll") &&
-        canScrollHorizontally
-      ) {
-        // 找到了可滚动的祖先元素，不阻止默认行为
-        return;
-      }
-      currentTarget = currentTarget.parentElement;
-    }
-
-    // 如果事件的目标是输入框等，也不阻止
-    const target = event.target as HTMLElement;
-    if (
-      target.tagName === "INPUT" ||
-      target.tagName === "TEXTAREA" ||
-      target.isContentEditable
-    ) {
-      return;
-    }
-
-    // 循环结束都没找到可滚动的父元素，阻止默认的导航行为
-    event.preventDefault();
-  }
-};
-
-// --- 5. 上传面板逻辑 ---
-watch(showUploadProgress, isVisible => {
-  if (!isVisible) {
-    isPanelVisible.value = false;
-  }
+  hasSelection,
+  clearSelection
 });
 
-const handlePanelClose = () => {
-  if (
-    uploadQueue.some(item =>
-      ["uploading", "pending", "error", "conflict"].includes(item.status)
-    )
-  ) {
-    ElMessageBox.confirm(
-      "关闭面板会取消所有进行中和待处理的上传任务，确定吗？",
-      "警告",
-      { confirmButtonText: "确定", cancelButtonText: "取消", type: "warning" }
-    )
-      .then(() => {
-        [...uploadQueue].forEach(item => {
-          if (item.status !== "success" && item.status !== "canceled") {
-            removeItem(item.id);
-          }
-        });
-        isPanelVisible.value = false;
-      })
-      .catch(() => {});
-  } else {
-    isPanelVisible.value = false;
-  }
+// 3. 视图设置处理器
+const handleSetViewMode = (mode: "list" | "grid") =>
+  fileStore.setViewMode(mode);
+const handleSetPageSize = (size: number) => fileStore.setPageSize(size);
+const handleSetColumns = (newColumns: ColumnConfig[]) => {
+  setTimeout(() => fileStore.setColumns(newColumns), 0);
 };
-
-const handleUploadGlobalCommand = (command: string, value: any) => {
-  switch (command) {
-    case "set-overwrite-all":
-      setGlobalOverwriteAndRetry(value);
-      break;
-    case "retry-all":
-      retryAllFailed();
-      break;
-    case "clear-finished":
-      clearFinishedUploads();
-      break;
-    case "set-concurrency":
-      ElMessageBox.prompt("请输入新的并行上传数 (1-10)", "设置并发数", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        inputValue: String(concurrency.value),
-        inputPattern: /^[1-9]$|^10$/,
-        inputErrorMessage: "请输入 1 到 10 之间的整数"
-      })
-        .then(({ value }) => {
-          setConcurrency(Number(value));
-        })
-        .catch(() => {});
-      break;
-    case "set-speed-mode":
-      setSpeedMode(value);
-      break;
-  }
-};
-
-// --- 6. 生命周期钩子 ---
-onMounted(() => {
-  // 监听器绑定到 window，但处理函数内部会判断事件是否在组件内
-  window.addEventListener("wheel", preventSwipeNavigation, { passive: false });
-});
-
-onUnmounted(() => {
-  window.removeEventListener("wheel", preventSwipeNavigation);
-});
+const handleSetSortKey = (key: SortKey) => fileStore.setSort(key);
+const handleOpenColumnSettings = () => fileToolbarRef.value?.openDialog();
 </script>
 
 <style>

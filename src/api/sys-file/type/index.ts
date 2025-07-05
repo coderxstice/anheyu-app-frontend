@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-07-04 16:58:29
+ * @LastEditTime: 2025-07-05 11:43:42
  * @LastEditors: 安知鱼
  */
 
@@ -69,7 +69,7 @@ export interface FileItem {
  * 上传队列项的类型定义 (仅在上传组件和 Store 中使用)
  */
 export interface UploadItem {
-  id: number; // 前端生成的唯一ID
+  id: string;
   name: string;
   size: number;
   status:

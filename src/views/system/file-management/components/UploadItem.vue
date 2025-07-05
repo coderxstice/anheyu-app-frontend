@@ -166,11 +166,11 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "retry-item", itemId: number): void;
-  (e: "remove-item", itemId: number): void;
+  (e: "retry-item", itemId: string): void;
+  (e: "remove-item", itemId: string): void;
   (
     e: "resolve-conflict",
-    itemId: number,
+    itemId: string,
     strategy: "overwrite" | "rename"
   ): void;
 }>();

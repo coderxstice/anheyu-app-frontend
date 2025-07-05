@@ -1,6 +1,6 @@
 // src/views/system/file-management/hooks/useFileDownload.ts
 
-import { ref, h } from "vue";
+import { ref, h } from "vue"; // h 函数从 'vue' 导入，这是正确的
 import { ElMessage, ElNotification } from "element-plus";
 import JSZip from "jszip";
 import {
@@ -9,11 +9,15 @@ import {
   fetchBlobFromUrl,
   getFileDetailsApi
 } from "@/api/sys-file/sys-file";
-import type { FolderTreeFile } from "@/api/sys-file/sys-file";
-import { type FileItem, FileType } from "@/api/sys-file/type";
+import type { FolderTreeFile, FileItem } from "@/api/sys-file/type";
+import { FileType } from "@/api/sys-file/type";
 
-export function useFileDownload() {
-  const isDownloading = ref(false); // 可以用来在UI上禁用其他操作
+interface UseFileDownloadOptions {
+  getSelectedItems: () => FileItem[];
+}
+
+export function useFileDownload({ getSelectedItems }: UseFileDownloadOptions) {
+  const isDownloading = ref(false);
 
   const handlePackageDownload = async (
     itemsToDownload: FileItem[],
@@ -25,16 +29,17 @@ export function useFileDownload() {
 
     const notification = ElNotification({
       title: "打包下载",
+      // 这里的 h 函数来自 'vue'
       message: h("div", null, [
         h(
           "p",
           { style: "font-weight: bold; margin: 0; padding-bottom: 6px;" },
-          notificationTitle.value // 必须使用.value获取
+          notificationTitle.value
         ),
         h(
           "p",
           { style: "margin: 0; font-size: 12px;" },
-          notificationMessage.value // 必须使用.value获取
+          notificationMessage.value
         )
       ]),
       duration: 0,
@@ -77,19 +82,21 @@ export function useFileDownload() {
 
       notificationTitle.value = `开始打包下载 (${filesToFetch.length}个文件)`;
       for (let i = 0; i < filesToFetch.length; i++) {
-        notificationMessage.value = `(${i + 1}/${filesToFetch.length}) 正在处理: ${filesToFetch[i].relative_path}`;
+        const currentFile = filesToFetch[i];
+        notificationMessage.value = `(${i + 1}/${filesToFetch.length}) 正在处理: ${currentFile.relative_path}`;
         try {
-          const blob = await fetchBlobFromUrl(filesToFetch[i].url);
-          zip.file(filesToFetch[i].relative_path, blob);
+          const blob = await fetchBlobFromUrl(currentFile.url);
+          zip.file(currentFile.relative_path, blob);
         } catch (e: any) {
           zip.file(
-            `${filesToFetch[i].relative_path}.error.txt`,
+            `${currentFile.relative_path}.error.txt`,
             `下载此文件失败: ${e.message}`
           );
         }
       }
 
       notificationTitle.value = "正在生成 ZIP 文件";
+      notificationMessage.value = "这个过程可能需要一些时间，请不要关闭页面...";
       const zipBlob = await zip.generateAsync({ type: "blob" });
       const url = window.URL.createObjectURL(zipBlob);
       const link = document.createElement("a");
@@ -112,8 +119,8 @@ export function useFileDownload() {
     }
   };
 
-  const onActionDownload = async (getSelectedFileItems: () => FileItem[]) => {
-    const selectedItems = getSelectedFileItems();
+  const onActionDownload = async () => {
+    const selectedItems = getSelectedItems();
     if (selectedItems.length === 0) {
       ElMessage.warning("请选择要下载的项目");
       return;

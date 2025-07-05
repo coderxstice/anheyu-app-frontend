@@ -2,7 +2,7 @@
  * @Description: 上传队列的状态管理 Composable，提供对全局上传队列的增删查改等原子操作。
  * @Author: 安知鱼
  * @Date: 2025-06-27 15:01:34
- * @LastEditTime: 2025-07-01 18:35:40
+ * @LastEditTime: 2025-07-05 11:47:33
  * @LastEditors: 安知鱼
  */
 import { reactive } from "vue";
@@ -30,10 +30,10 @@ export function useUploadQueue() {
 
   /**
    * @description: 根据任务ID从上传队列中移除一个任务。
-   * @param {number} itemId - 要移除的任务的唯一ID。
+   * @param {string} itemId - 要移除的任务的唯一ID。
    * @returns {boolean} - 如果找到并成功移除则返回 true，否则返回 false。
    */
-  const removeTask = (itemId: number): boolean => {
+  const removeTask = (itemId: string): boolean => {
     const index = uploadQueue.findIndex(item => item.id === itemId);
     if (index > -1) {
       uploadQueue.splice(index, 1);
@@ -44,10 +44,10 @@ export function useUploadQueue() {
 
   /**
    * @description: 根据任务ID在上传队列中查找一个任务。
-   * @param {number} itemId - 要查找的任务的唯一ID。
+   * @param {string} itemId - 要查找的任务的唯一ID。
    * @returns {UploadItem | undefined} - 如果找到则返回任务对象，否则返回 undefined。
    */
-  const findTask = (itemId: number): UploadItem | undefined => {
+  const findTask = (itemId: string): UploadItem | undefined => {
     return uploadQueue.find(item => item.id === itemId);
   };
 
