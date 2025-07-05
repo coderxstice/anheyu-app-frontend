@@ -46,11 +46,9 @@ export interface FileDetailResponse {
  * @returns Promise
  */
 export const copyFilesApi = (sourceIDs: string[], destinationID: string) => {
-  return http.post<BaseResponse<null>, any>(baseUrlApi("file/copy"), {
-    data: {
-      sourceIDs,
-      destinationID
-    }
+  return http.post<BaseResponse<null>, any>(baseUrlApi("folder/copy"), {
+    sourceIDs,
+    destinationID
   });
 };
 

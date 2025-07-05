@@ -35,23 +35,25 @@
             @node-expand="handleNodeExpand"
           >
             <template #default="{ node, data }">
+              <div v-if="data.isOptimisticNode" class="optimistic-loading-node">
+                <el-icon class="is-loading"><Loading /></el-icon>
+                <span class="ml-2">{{ node.label }}</span>
+              </div>
+
               <div
-                v-if="data.isLoadMoreNode"
+                v-else-if="data.isLoadMoreNode"
                 class="load-more-node"
                 @click.stop="handleLoadMoreInTree(node)"
               >
                 <span>{{ node.label }}</span>
               </div>
+
               <span
                 v-else
                 class="custom-tree-node"
                 :class="{ 'is-current-path': node.data.path === currentPath }"
               >
-                <el-icon
-                  :class="{ 'is-loading': data.isLoading }"
-                  class="folder-icon"
-                  ><Folder
-                /></el-icon>
+                <el-icon class="folder-icon"><Folder /></el-icon>
                 <span class="ml-2">{{ node.label }}</span>
               </span>
             </template>
@@ -69,16 +71,16 @@
           />
           <FileToolbar
             class="mb-2 ml-2"
-            :view-mode="modalViewMode"
-            :sort-key="modalSortKey"
-            :page-size="modalPageSize"
+            :view-mode="viewMode"
+            :sort-key="sortKey"
+            :page-size="pageSize"
             :columns="activeColumns"
             :has-selection="false"
             :is-simplified="true"
             @refresh="handleModalRefresh"
-            @set-view-mode="handleSetModalViewMode"
-            @set-sort-key="handleSetModalSortKey"
-            @set-page-size="handleSetModalPageSize"
+            @set-view-mode="handleSetViewMode"
+            @set-sort-key="handleSetSortKey"
+            @set-page-size="handleSetPageSize"
           />
         </div>
 
@@ -89,11 +91,11 @@
         >
           <template v-if="!listLoading">
             <FileListView
-              v-if="modalViewMode === 'list'"
+              v-if="viewMode === 'list'"
               :key="currentPath"
               :files="filesInModal"
               :columns="activeColumns"
-              :sort-key="modalSortKey"
+              :sort-key="sortKey"
               :loading="false"
               :selected-file-ids="new Set()"
               :disabled-file-ids="disabledIdsForRightPanel"
@@ -103,7 +105,7 @@
               @scroll-to-load="loadMoreFiles"
             />
             <FileGridView
-              v-if="modalViewMode === 'grid'"
+              v-if="viewMode === 'grid'"
               :key="currentPath"
               :files="filesInModal"
               :loading="false"
@@ -151,7 +153,9 @@
 import { ref, computed, watch } from "vue";
 import type { PropType } from "vue";
 import { ElMessage, ElTree } from "element-plus";
-import { Folder } from "@element-plus/icons-vue";
+import { Folder, Loading } from "@element-plus/icons-vue";
+
+import { useFileStore } from "@/store/modules/fileStore";
 
 import FileToolbar from "./FileToolbar.vue";
 import FileBreadcrumb from "./FileBreadcrumb.vue";
@@ -172,13 +176,9 @@ import {
 import { extractLogicalPathFromUri, getParentPath } from "@/utils/fileUtils";
 
 // --- 类型定义 ---
-/**
- * 使用 TypeScript 的高级类型推导出 Element Plus 内部的 Node 类型, 避免直接导入私有类型
- */
 type ElTreeNode = NonNullable<
   ReturnType<InstanceType<typeof ElTree>["getNode"]>
 >;
-
 type SortKey =
   | "name_asc"
   | "name_desc"
@@ -188,37 +188,22 @@ type SortKey =
   | "updated_at_desc"
   | "created_at_asc"
   | "created_at_desc";
-
-/**
- * API 返回的文件列表数据的缓存结构
- */
 type CachedApiData = FileListResponse["data"] & { hasMore: boolean };
-
-/**
- * 树节点的数据结构定义
- */
 interface TreeNodeData {
-  id: string; // 原始ID，用于业务逻辑
-  name: string; // 显示名称
-  path: string; // 逻辑路径，作为 node-key
-  children?: TreeNodeData[]; // 子节点
-  isLeaf: boolean; // 是否为叶子节点
-  disabled: boolean; // 是否禁用
-  isLoadMoreNode?: boolean; // 是否为"加载更多"节点
-  isLoading?: boolean; // 节点是否正在加载子数据
-  isLoaded?: boolean; // 节点是否已成功加载过子数据
+  id: string;
+  name: string;
+  path: string;
+  children?: TreeNodeData[];
+  isLeaf: boolean;
+  disabled: boolean;
+  isLoadMoreNode?: boolean;
+  isLoading?: boolean;
+  isLoaded?: boolean;
+  isOptimisticNode?: boolean; // 乐观加载节点标记
 }
-
-/**
- * "加载更多"节点的专用类型
- */
 type LoadMoreNodeData = Required<
   Pick<TreeNodeData, "id" | "name" | "path" | "isLoadMoreNode">
 >;
-
-/**
- * 树中所有节点的联合类型
- */
 type UnifiedNodeData = TreeNodeData | LoadMoreNodeData;
 
 // --- Props & Emits ---
@@ -228,6 +213,9 @@ const props = defineProps({
   mode: { type: String as PropType<"move" | "copy">, required: true }
 });
 const emit = defineEmits(["update:modelValue", "success"]);
+
+// --- Store 实例 ---
+const fileStore = useFileStore();
 
 // --- 工具函数 ---
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -268,17 +256,9 @@ const activeColumns = computed<ColumnConfig[]>(() => {
 });
 
 // --- 用于判断禁用逻辑的计算属性 ---
-
-/**
- * 判断当前操作是否涉及文件夹
- */
 const isActionOnFolders = computed(() =>
   props.itemsForAction.some(item => item.type === FileType.Dir)
 );
-
-/**
- * 获取所有正在被操作的源文件夹的路径集合
- */
 const sourceActionFolderPaths = computed(() => {
   if (!isActionOnFolders.value) return new Set();
   return new Set(
@@ -287,12 +267,7 @@ const sourceActionFolderPaths = computed(() => {
       .map(item => extractLogicalPathFromUri(item.path))
   );
 });
-
-/**
- * 计算右侧文件列表中需要被禁用的项的ID集合
- */
 const disabledIdsForRightPanel = computed(() => {
-  // 禁用所有“文件”类型的列表项，以及那些正在被操作的项
   const fileIdsInView = filesInModal.value
     .filter(item => item.type !== FileType.Dir)
     .map(item => item.id);
@@ -317,10 +292,10 @@ const currentTargetFolderInfo = ref<ParentInfo | null>(null);
 const defaultExpandedKeys = ref<string[]>([]);
 const treeData = ref<TreeNodeData[]>([]);
 
-// --- 视图状态 ---
-const modalViewMode = ref<"list" | "grid">("list");
-const modalSortKey = ref<SortKey>("name_asc");
-const modalPageSize = ref(50);
+// --- 视图状态 (从 Store 读取) ---
+const viewMode = computed(() => fileStore.viewMode);
+const sortKey = computed(() => fileStore.sortKey);
+const pageSize = computed(() => fileStore.pageSize);
 
 // --- 辅助函数 ---
 
@@ -330,14 +305,9 @@ const modalPageSize = ref(50);
  * @param id 节点的原始ID
  */
 const isTreeNodeDisabled = (path: string, id: string): boolean => {
-  // 规则1：如果节点本身就是正在操作的对象之一，则禁用
-  if (idsForActionSet.value.has(id)) {
-    return true;
-  }
-  // 规则2：仅当操作涉及文件夹时，才进行路径检查
+  if (idsForActionSet.value.has(id)) return true;
   if (isActionOnFolders.value) {
     for (const sourcePath of sourceActionFolderPaths.value) {
-      // 如果当前节点路径与源文件夹路径相同，或为其子孙目录
       if (path === sourcePath || path.startsWith(sourcePath + "/")) {
         return true;
       }
@@ -360,6 +330,23 @@ const createLoadMoreNode = (
 });
 
 /**
+ * 创建一个乐观加载中...的占位符节点
+ * @param parentNodeData 父节点的数据
+ */
+const createOptimisticLoadingNode = (
+  parentNodeData: TreeNodeData
+): TreeNodeData => ({
+  id: `optimistic-loader-${parentNodeData.path}`,
+  path: `optimistic-loader-${parentNodeData.path}`,
+  name: "正在加载...",
+  children: [],
+  isLeaf: true,
+  disabled: true,
+  isLoaded: true,
+  isOptimisticNode: true
+});
+
+/**
  * 将API返回的文件夹项目转换为树节点数据结构
  * @param folder 从API获取的文件夹对象
  */
@@ -369,7 +356,7 @@ const fileItemToTreeNode = (folder: FileItem): TreeNodeData => {
     id: folder.id,
     name: folder.name,
     path: folderPath,
-    children: [], // 始终创建一个空的 children 数组，以显示展开箭头
+    children: [], // 始终创建空的 children 数组，以显示展开箭头
     isLeaf: false,
     disabled: isTreeNodeDisabled(folderPath, folder.id),
     isLoaded: false
@@ -399,19 +386,15 @@ const initializeComponent = async () => {
   );
   console.log(`[Init] 初始目标路径为: ${initialPath}`);
 
-  // 核心：仅请求一次初始路径的数据
   const data = await getDirectoryContents(initialPath, true);
   if (!data) {
     isInitializing.value = false;
     ElMessage.error("初始化文件夹数据失败！");
     return;
   }
-
   console.log("[Init] 初始数据获取成功，开始构建UI状态...");
-  // 1. 更新右侧文件列表
   processApiResponse(data, initialPath);
 
-  // 2. 手动构建左侧树的初始状态
   const pathSegments = initialPath.split("/").filter(Boolean);
   const rootNode: TreeNodeData = {
     id: "/",
@@ -422,10 +405,8 @@ const initializeComponent = async () => {
     isLoaded: initialPath === "/",
     disabled: isTreeNodeDisabled("/", "/")
   };
-
   let currentNode = rootNode;
   const expandedKeys = ["/"];
-
   pathSegments.forEach(segment => {
     const parentPath = currentNode.path;
     const newPath =
@@ -445,19 +426,14 @@ const initializeComponent = async () => {
   });
 
   console.log(`[Init] 手动构建树路径完成，当前节点路径: ${currentNode.path}`);
-
-  // 3. 将API返回的文件夹数据挂载到当前树节点
   updateTreeNodeChildren(currentNode, data);
-  currentNode.isLoaded = true; // 标记当前节点已加载
-
-  // 4. 设置树的最终数据和展开状态
+  currentNode.isLoaded = true;
   treeData.value = [rootNode];
   defaultExpandedKeys.value = expandedKeys;
   console.log("[Init] 树结构和展开状态设置完毕:", {
     treeData: treeData.value,
     defaultExpandedKeys: defaultExpandedKeys.value
   });
-
   isInitializing.value = false;
   console.log("[Init] ✅ 初始化完成！");
 };
@@ -478,21 +454,16 @@ const getDirectoryContents = async (
     console.log(`[Cache] 命中缓存: ${logicalPath}`);
     return sharedDataSource.get(logicalPath)!;
   }
-
   console.log(
     `[API] 🚀 请求数据 for path: ${logicalPath}, 是否强制刷新: ${forceRefresh}`
   );
-  const apiCallPromise = fetchFilesByPathApi(logicalPath);
-  const minDelayPromise = sleep(200); // 防闪烁
   try {
-    const [res] = await Promise.all([apiCallPromise, minDelayPromise]);
-
+    const res = await fetchFilesByPathApi(logicalPath);
     if (res.code !== 200 || !res.data) {
       ElMessage.error(res.message || "获取文件列表失败");
       return null;
     }
     console.log(`[API] ✅ 请求成功 for path: ${logicalPath}`);
-
     const dataToCache: CachedApiData = {
       ...res.data,
       hasMore: !!res.data.pagination?.next_token
@@ -515,7 +486,6 @@ const processApiResponse = (data: CachedApiData, path: string) => {
   filesInModal.value = data.files;
   hasMore.value = data.hasMore;
   currentPath.value = path;
-
   const parentInfo = data.parent;
   if (parentInfo) {
     parentInfo.name =
@@ -535,9 +505,30 @@ const processApiResponse = (data: CachedApiData, path: string) => {
  */
 const updateTreeNodeChildren = (node: TreeNodeData, data: CachedApiData) => {
   console.log(`[Tree Update] 更新节点 ${node.path} 的子节点...`);
+
+  // [核心优化] 不再直接创建新节点，而是优先复用已有节点
   const subFolders = data.files
     .filter(item => item.type === FileType.Dir)
-    .map(fileItemToTreeNode);
+    .map((folder): TreeNodeData => {
+      const folderPath = extractLogicalPathFromUri(folder.path);
+      const existingNode = folderTreeRef.value?.getNode(folderPath);
+
+      // 如果节点已存在于树中，则复用它，以保持其状态（如展开、子节点）
+      if (existingNode) {
+        console.log(
+          `[Tree Merge] 节点 ${folderPath} 已存在，复用现有节点数据。`
+        );
+        // 仅更新可能变化的数据
+        const existingNodeData = existingNode.data as TreeNodeData;
+        existingNodeData.name = folder.name;
+        existingNodeData.disabled = isTreeNodeDisabled(folderPath, folder.id);
+        return existingNodeData;
+      } else {
+        // 如果节点不存在，则创建新节点
+        console.log(`[Tree Merge] 节点 ${folderPath} 不存在，创建新节点。`);
+        return fileItemToTreeNode(folder);
+      }
+    });
 
   let finalChildren: UnifiedNodeData[] = subFolders;
 
@@ -553,7 +544,7 @@ const updateTreeNodeChildren = (node: TreeNodeData, data: CachedApiData) => {
 
   node.children = finalChildren as TreeNodeData[];
 
-  // 判断是否应该将当前节点设置为叶子节点
+  // 判断是否应该将当前节点设置为叶子节点的逻辑保持不变
   const allFoldersAreLoaded = !data.hasMore || !allItemsInResponseAreFolders;
   if (allFoldersAreLoaded && subFolders.length === 0) {
     console.log(
@@ -574,11 +565,22 @@ const handleNodeExpand = async (data: TreeNodeData) => {
     return;
   }
 
+  // 1. 设置加载状态并添加乐观加载节点
+  console.log(`[Tree Optimistic] 为节点 ${data.path} 添加乐观加载子节点。`);
   data.isLoading = true;
+  data.children = [createOptimisticLoadingNode(data)];
+
+  // 2. 异步获取真实数据
   const apiData = await getDirectoryContents(data.path);
+
+  // 3. 更新UI
   if (apiData) {
+    // 使用真实数据替换子节点，会覆盖掉乐观加载节点
     updateTreeNodeChildren(data, apiData);
     data.isLoaded = true;
+  } else {
+    // 如果API调用失败，清空子节点，移除乐观加载节点
+    data.children = [];
   }
   data.isLoading = false;
 };
@@ -589,7 +591,7 @@ const handleNodeExpand = async (data: TreeNodeData) => {
  */
 const handleTreeNodeClick = (data: TreeNodeData) => {
   console.log(`[Tree Click] 用户点击节点: ${data.path}`);
-  if (data.disabled || (data as any).isLoadMoreNode) return;
+  if (data.disabled || data.isLoadMoreNode || data.isOptimisticNode) return;
   navigateToPath(data.path);
 };
 
@@ -601,26 +603,20 @@ const handleLoadMoreInTree = async (node: ElTreeNode) => {
   const parentNode = node.parent;
   const parentData = parentNode.data as TreeNodeData;
   console.log(`[Tree Load More] 点击“加载更多”，父节点: ${parentData.path}`);
-
   const existingData = sharedDataSource.get(parentData.path);
   if (!existingData || !existingData.hasMore) return;
-
   const res = await fetchFilesByPathApi(
     parentData.path,
     existingData.pagination.next_token
   );
-
   if (res.code === 200 && res.data) {
-    // 合并数据
     const existingIds = new Set(existingData.files.map(f => f.id));
     const uniqueNewFiles = res.data.files.filter(f => !existingIds.has(f.id));
     existingData.files.push(...uniqueNewFiles);
     existingData.pagination = res.data.pagination;
     existingData.hasMore = !!res.data.pagination?.next_token;
     sharedDataSource.set(parentData.path, existingData);
-
     updateTreeNodeChildren(parentData, existingData);
-
     if (currentPath.value === parentData.path) {
       processApiResponse(existingData, parentData.path);
     }
@@ -642,10 +638,8 @@ const navigateToPath = async (path: string) => {
   }
   listLoading.value = true;
   const data = await getDirectoryContents(logicalPath, false);
-
   if (data) {
     processApiResponse(data, logicalPath);
-
     const nodeData = folderTreeRef.value?.getNode(logicalPath)
       ?.data as TreeNodeData;
     if (nodeData) {
@@ -672,7 +666,6 @@ const navigateToPath = async (path: string) => {
  */
 const loadMoreFiles = async () => {
   if (isMoreLoading.value || !hasMore.value) return;
-
   console.log(
     `[Right Panel Load More] 滚动加载更多 for path: ${currentPath.value}`
   );
@@ -682,7 +675,6 @@ const loadMoreFiles = async () => {
     isMoreLoading.value = false;
     return;
   }
-
   const res = await fetchFilesByPathApi(
     currentPath.value,
     existingData.pagination.next_token
@@ -694,10 +686,7 @@ const loadMoreFiles = async () => {
     existingData.pagination = res.data.pagination;
     existingData.hasMore = !!res.data.pagination?.next_token;
     sharedDataSource.set(currentPath.value, existingData);
-
     processApiResponse(existingData, currentPath.value);
-
-    // 同步更新左侧树
     const treeNode = folderTreeRef.value?.getNode(currentPath.value)
       ?.data as TreeNodeData;
     if (treeNode) {
@@ -707,7 +696,7 @@ const loadMoreFiles = async () => {
   isMoreLoading.value = false;
 };
 
-// --- 其他函数 ---
+// --- 其他函数与事件处理 ---
 
 /**
  * 处理手动刷新事件
@@ -745,15 +734,46 @@ const resetState = () => {
  * 处理弹窗关闭事件
  */
 const handleModalClosed = () => resetState();
-const handleSetModalViewMode = (mode: "list" | "grid") => {
-  modalViewMode.value = mode;
+
+/**
+ * 处理视图模式变更事件，调用 store action
+ * @param mode 新的视图模式 'list' | 'grid'
+ */
+const handleSetViewMode = (mode: "list" | "grid") => {
+  console.log(`[Settings] 调用 store action 设置视图模式: ${mode}`);
+  fileStore.setViewMode(mode);
 };
-const handleSetModalSortKey = (key: SortKey) => {
-  modalSortKey.value = key;
+
+/**
+ * 处理分页大小变更事件，调用 store action
+ * @param size 新的分页大小
+ */
+const handleSetPageSize = (size: number) => {
+  console.log(`[Settings] 调用 store action 设置分页大小: ${size}`);
+  fileStore.setPageSize(size);
 };
-const handleSetModalPageSize = (size: number) => {
-  modalPageSize.value = size;
+
+/**
+ * 处理排序键变更事件，调用 store action
+ * @param key 新的排序键
+ */
+const handleSetSortKey = (key: SortKey) => {
+  console.log(`[Settings] 调用 store action 设置排序: ${key}`);
+  fileStore.setSort(key);
 };
+
+/**
+ * 监听 Store 中设置的变化，以刷新弹窗内的数据
+ */
+watch(
+  () => [fileStore.sortKey, fileStore.pageSize],
+  () => {
+    if (isInitializing.value) return;
+    console.log("[Store Watch] 检测到全局视图设置变更，正在刷新弹窗内数据...");
+    handleModalRefresh();
+  },
+  { deep: true }
+);
 
 /**
  * 最终确认移动/复制操作
@@ -868,7 +888,17 @@ const confirmAction = async () => {
       opacity: 0.7;
     }
 
-    .folder-icon.is-loading {
+    .optimistic-loading-node {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      font-size: 14px;
+      color: #909399;
+      cursor: progress;
+      padding: 0 8px;
+    }
+
+    .is-loading {
       animation: rotating 1.5s linear infinite;
     }
   }
