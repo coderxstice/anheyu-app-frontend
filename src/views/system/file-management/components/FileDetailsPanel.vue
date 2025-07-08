@@ -212,7 +212,7 @@ watch(
     display: flex;
     align-items: center;
     padding: 16px 20px;
-    border-bottom: 1px solid #e0e0e0;
+    border: var(--style-border);
     .file-icon-wrapper {
       flex-shrink: 0;
       .file-icon {

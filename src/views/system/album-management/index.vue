@@ -43,7 +43,7 @@ function onFullscreen() {
       ref="formRef"
       :inline="true"
       :model="form"
-      class="search-form bg-bg_color w-full pl-8 pt-[12px] overflow-auto rounded-3xl"
+      class="search-form bg-bg_color w-full pl-8 pt-[12px] overflow-auto rounded-2xl"
     >
       <el-form-item label="上传时间：" prop="createdAt">
         <el-date-picker
@@ -93,7 +93,7 @@ function onFullscreen() {
       title="相册图片管理"
       :columns="columns"
       :tableRef="tableRef?.getTableRef()"
-      class="rounded-3xl"
+      class="table-bar rounded-2xl"
       @refresh="onSearch"
       @fullscreen="onFullscreen"
     >
@@ -173,7 +173,11 @@ function onFullscreen() {
   margin: 24px 24px 0 !important;
 }
 
+:deep(.table-bar) {
+  border: var(--style-border);
+}
 .search-form {
+  border: var(--style-border);
   :deep(.el-form-item) {
     margin-bottom: 12px;
   }
