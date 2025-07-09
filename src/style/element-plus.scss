@@ -282,6 +282,41 @@ div.el-textarea__inner {
   }
 }
 
+.direct-links-dialog .el-message-box__headerbtn .el-message-box__close {
+  color: var(--el-color-info) !important;
+}
+
+.direct-links-dialog {
+  width: 80% !important;
+  max-width: 720px !important;
+}
 .direct-links-dialog .el-message-box__message {
   width: 100%;
+}
+
+.direct-links-dialog .link-list-container {
+  max-height: 60vh;
+
+  overflow-y: auto;
+
+  padding-right: 8px;
+  margin-right: -8px;
+}
+
+.direct-links-dialog .link-list-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.direct-links-dialog .link-list-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.direct-links-dialog .link-list-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.direct-links-dialog .link-list-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }

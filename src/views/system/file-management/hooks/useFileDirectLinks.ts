@@ -25,28 +25,65 @@ export function useFileDirectLinks({
 }: UseFileDirectLinksOptions) {
   const isCreatingLinks = ref(false);
 
-  // recursivelyFetchAllFileIds 函数保持不变
+  /**
+   * 从完整的 URI (如 "anzhiyu://my/folder/file.txt") 中提取逻辑路径 (如 "/folder/file.txt")
+   * @param uri - 完整的 URI 字符串
+   * @returns 逻辑路径字符串
+   */
+  const extractLogicalPathFromUri = (uri: string): string => {
+    if (!uri) return "/";
+    // 正则表达式匹配 "协议://my" 或 "协议://" 后面的所有内容
+    const match = uri.match(/^.+?:\/\/(?:my)?(.*)$/);
+    // 如果匹配成功，返回捕获组1；否则返回根路径'/'。如果捕获组为空（例如 "anzhiyu://my"），也返回根路径。
+    return match ? match[1] || "/" : uri;
+  };
+
+  /**
+   * (最终调试版) 递归获取文件夹内所有文件ID。
+   * 内置并发、频率控制及详细日志。
+   * @param initialUri - 初始要扫描的文件夹的完整URI
+   * @returns Promise<string[]> - 包含所有文件ID的数组
+   */
   const recursivelyFetchAllFileIds = async (
-    initialPath: string
+    initialUri: string
   ): Promise<string[]> => {
+    // --- 配置 ---
     const MAX_CONCURRENT_REQUESTS = 5;
     const RATE_LIMIT_COUNT = 5;
     const RATE_LIMIT_WINDOW_MS = 50;
 
+    // --- 状态变量 ---
     const allFileIds: string[] = [];
-    const taskQueue: string[] = [initialPath];
+    // 使用逻辑路径启动任务队列
+    const initialLogicalPath = extractLogicalPathFromUri(initialUri);
+    const taskQueue: string[] = [initialLogicalPath];
     let activeRequests = 0;
 
+    // --- 频率控制状态 ---
     let requestsInCurrentWindow = 0;
     let windowStartTime = Date.now();
 
+    console.log(
+      `[SCANNER] === Scan Started for URI: "${initialUri}" -> Logical Path: "${initialLogicalPath}" ===`
+    );
+
     return new Promise(resolve => {
       const processQueue = async () => {
+        // --- 日志 ---
+        console.log(
+          `[SCANNER] processQueue | Queue size: ${taskQueue.length}, Active requests: ${activeRequests}`
+        );
+
+        // 任务完成条件
         if (taskQueue.length === 0 && activeRequests === 0) {
+          console.log(
+            `[SCANNER] === Scan Finished. Total files found: ${allFileIds.length} ===`
+          );
           resolve(allFileIds);
           return;
         }
 
+        // 循环启动新任务
         while (
           taskQueue.length > 0 &&
           activeRequests < MAX_CONCURRENT_REQUESTS
@@ -59,6 +96,9 @@ export function useFileDirectLinks({
 
           if (requestsInCurrentWindow >= RATE_LIMIT_COUNT) {
             const waitTime = RATE_LIMIT_WINDOW_MS - (now - windowStartTime);
+            console.log(
+              `[SCANNER] Rate limit reached. Waiting for ${waitTime > 0 ? waitTime : 0}ms.`
+            );
             await new Promise(r => setTimeout(r, waitTime > 0 ? waitTime : 0));
             continue;
           }
@@ -70,31 +110,63 @@ export function useFileDirectLinks({
 
           const worker = async (path: string) => {
             let nextToken: string | null | undefined = null;
+            console.log(`[SCANNER] --> Worker started for path: "${path}"`);
             try {
               do {
+                // --- 日志 ---
+                console.log(
+                  `[SCANNER]      Fetching: "${path}", next_token: ${nextToken}`
+                );
+                // ** 使用逻辑路径调用API **
                 const res = await fetchFilesByPathApi(path, nextToken);
+
                 if (res.code === 200 && res.data) {
                   const { files, pagination } = res.data;
+                  console.log(
+                    `[SCANNER]      Received ${files.length} items for "${path}"`
+                  );
+
                   for (const item of files) {
-                    if (item.type === 1) allFileIds.push(item.id);
-                    else if (item.type === 2) taskQueue.push(item.path);
+                    if (item.type === 1) {
+                      allFileIds.push(item.id);
+                    } else if (item.type === 2) {
+                      // ** 将子文件夹的完整 URI 转换为逻辑路径再加入队列 **
+                      const childLogicalPath = extractLogicalPathFromUri(
+                        item.path
+                      );
+                      taskQueue.push(childLogicalPath);
+                      console.log(
+                        `[SCANNER]      Queued subfolder: "${item.path}" -> "${childLogicalPath}"`
+                      );
+                    }
                   }
                   nextToken = pagination?.next_token;
                 } else {
-                  console.error(`获取路径 "${path}" 内容失败:`, res.message);
+                  console.error(
+                    `[SCANNER] API Error for path "${path}":`,
+                    res.message
+                  );
                   nextToken = null;
                 }
               } while (nextToken);
             } catch (error) {
-              console.error(`扫描文件夹 "${path}" 时出错:`, error);
+              console.error(
+                `[SCANNER] Network Error for path "${path}":`,
+                error
+              );
             } finally {
               activeRequests--;
+              console.log(
+                `[SCANNER] <-- Worker finished for path: "${path}". Active requests now: ${activeRequests}`
+              );
               processQueue();
             }
           };
+
           worker(currentPath);
         }
       };
+
       processQueue();
     });
   };
@@ -173,50 +245,42 @@ export function useFileDirectLinks({
   };
 
   /**
-   * (重构后) 在弹窗中显示链接，适配新的UI。
+   * 在弹窗中为每个链接显示一个独立的输入框。
    * @param linkItems - 从API返回的链接对象数组
    */
   const displayLinksInModal = (linkItems: DirectLinkItem[]) => {
-    const urls = linkItems.map(item => item.link);
-    let messageNode;
+    const extractFileName = (url: string) =>
+      url.substring(url.lastIndexOf("/") + 1);
 
-    const handleCopy = (content: string, message: string) => {
-      navigator.clipboard.writeText(content).then(() => {
-        ElMessage.success(message);
-      });
-    };
+    const inputNodes = linkItems.map((item, index) => {
+      const fileName = extractFileName(item.file_url);
 
-    if (urls.length === 1) {
-      // --- 单个链接：使用 el-input ---
-      const url = urls[0];
-      messageNode = h(ElInput, {
-        modelValue: url,
-        label: "文件直链",
-        readonly: true,
-        size: "large", // 使输入框看起来更大一些
-        onClick: () => handleCopy(url, "直链已复制到剪贴板！")
-      });
-    } else {
-      // --- 多个链接：使用 el-textarea ---
-      const textContent = urls.join("\n");
-      messageNode = h(ElInput, {
-        type: "textarea",
-        modelValue: textContent,
-        label: "文件直链",
-        readonly: true,
-        // 根据链接数量自动调整行数，最多显示10行
-        rows: Math.min(urls.length, 10),
-        resize: "none", // 禁止调整大小
-        onClick: () => handleCopy(textContent, "所有链接已复制到剪贴板！")
-      });
-    }
+      return h(
+        "div",
+        {
+          class: "link-item",
+          style: index < linkItems.length - 1 ? "margin-bottom: 12px;" : ""
+        },
+        [
+          h(ElInput, {
+            modelValue: item.link,
+            label: fileName || "文件直链",
+            readonly: true,
+            size: "large",
+            onClick: () => {
+              navigator.clipboard.writeText(item.link).then(() => {
+                ElMessage.success(`“${fileName}”的链接已复制！`);
+              });
+            }
+          })
+        ]
+      );
+    });
 
     ElMessageBox({
       title: "获取文件直链",
-      message: messageNode,
-      // 只显示右上角的关闭按钮，不显示底部的确认/取消按钮
+      message: h("div", { class: "link-list-container" }, inputNodes),
       showConfirmButton: false,
-      // 添加一个自定义类，方便后续进行样式微调
       customClass: "direct-links-dialog"
     });
   };
