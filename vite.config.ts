@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-15 11:31:00
+ * @LastEditTime: 2025-07-09 17:40:59
+ * @LastEditors: 安知鱼
+ */
 import { getPluginsList } from "./build/plugins";
 import { include, exclude } from "./build/optimize";
 import { type UserConfigExport, type ConfigEnv, loadEnv } from "vite";
@@ -26,6 +33,10 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
       // 本地跨域代理 https://cn.vitejs.dev/config/server-options.html#server-proxy
       proxy: {
         "/api": {
+          target: "http://localhost:8091",
+          changeOrigin: true
+        },
+        "/f": {
           target: "http://localhost:8091",
           changeOrigin: true
         }

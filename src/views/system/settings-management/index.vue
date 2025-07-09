@@ -55,7 +55,7 @@ export interface SettingsForm {
   page: PageSittingInfo;
 }
 
-const activeName = "siteConfig";
+let activeName = "siteConfig";
 // 现在使用统一的 siteConfigStore
 const siteConfigStore = useSiteConfigStore();
 
