@@ -2,7 +2,7 @@
  * @Description: 文件处理相关的工具函数
  * @Author: 安知鱼
  * @Date: 2025-06-26 18:32:39
- * @LastEditTime: 2025-06-30 12:18:09
+ * @LastEditTime: 2025-07-09 16:13:10
  * @LastEditors: 安知鱼
  */
 
@@ -209,4 +209,14 @@ export const getParentPath = (path: string): string => {
     return "/";
   }
   return path.substring(0, lastSlashIndex);
+};
+
+/**
+ * 从一个完整的 URI 或 URL 中提取最后的文件名部分
+ * @param url - 例如 "anzhiyu://my/folder/file.jpg" 或 "http://.../file.jpg"
+ * @returns 文件名，例如 "file.jpg"
+ */
+export const extractFileNameFromUrl = (url: string): string => {
+  if (!url) return "";
+  return url.substring(url.lastIndexOf("/") + 1);
 };
