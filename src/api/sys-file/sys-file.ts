@@ -10,7 +10,9 @@ import {
   type FileItem,
   type FolderSizeResponse,
   type BaseResponse,
-  type ColumnConfig
+  type ColumnConfig,
+  type CreateDirectLinksRequest,
+  type CreateDirectLinksResponse
 } from "./type";
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
@@ -274,4 +276,23 @@ export const moveFilesApi = (sourceIDs: string[], destinationID: string) => {
     sourceIDs,
     destinationID
   });
+};
+
+/**
+ * 为一个或多个文件创建直链。
+ * @param fileIds 要创建直链的文件的公共ID数组
+ * @returns Promise<CreateDirectLinksResponse> - 返回一个Promise，它解析为完整的API响应对象。
+ */
+export const createDirectLinksApi = (
+  fileIds: string[]
+): Promise<CreateDirectLinksResponse> => {
+  // <-- **核心修正：更新函数的返回类型**
+  const requestData: CreateDirectLinksRequest = {
+    file_ids: fileIds
+  };
+
+  return http.post<CreateDirectLinksResponse, CreateDirectLinksRequest>(
+    baseUrlApi("direct-links"),
+    requestData
+  );
 };

@@ -26,6 +26,7 @@ export interface ContextMenuActions {
   onMove: () => void;
   onShare: () => void;
   onInfo: () => void;
+  onGetLink: () => void;
 }
 
 /**
@@ -95,6 +96,7 @@ export function useContextMenuHandler(options: UseContextMenuHandlerOptions) {
       "create-folder": actions.onCreateFolder,
       "create-md": actions.onCreateMd,
       "create-txt": actions.onCreateTxt,
+      "get-link": actions.onGetLink,
       refresh: actions.onRefresh,
       rename: actions.onRename,
       delete: actions.onDelete,

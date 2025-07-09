@@ -2,7 +2,7 @@
  * @Description: 封装文件和文件夹的创建、重命名和删除等操作
  * @Author: 安知鱼
  * @Date: 2025-06-25 14:26:59
- * @LastEditTime: 2025-07-05 12:30:19
+ * @LastEditTime: 2025-07-09 14:06:53
  * @LastEditors: 安知鱼
  */
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -11,10 +11,10 @@ import type { UploadItem, FileItem } from "@/api/sys-file/type";
 import {
   createItemApi,
   deleteFilesApi,
-  renameFileApi // API 名称已根据您的代码更新为 renameFileApi
+  renameFileApi
 } from "@/api/sys-file/sys-file";
 import { FileType } from "@/api/sys-file/type";
-import { useFileStore } from "@/store/modules/fileStore"; // 1. 导入 useFileStore
+import { useFileStore } from "@/store/modules/fileStore";
 
 /**
  * @description: useFileActions 的回调函数接口

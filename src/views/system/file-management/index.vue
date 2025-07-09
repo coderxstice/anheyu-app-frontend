@@ -159,6 +159,7 @@ import { useFileModals } from "./hooks/useFileModals";
 import { useUploadPanel } from "./hooks/useUploadPanel";
 import { useDataLoading } from "./hooks/useDataLoading";
 import { useSwipeNavigationBlocker } from "./hooks/useSwipeNavigationBlocker";
+import { useFileDirectLinks } from "./hooks/useFileDirectLinks";
 
 // 子组件
 import FileToolbar from "./components/FileToolbar.vue";
@@ -198,7 +199,7 @@ const viewComponents = { list: FileListView, grid: FileGridView };
 const activeViewComponent = computed(() => viewComponents[viewMode.value]);
 
 // ========================================================================
-// 2. 核心功能 Hooks (已修正调用顺序和参数)
+// 2. 核心功能 Hooks
 // ========================================================================
 
 // 文件上传核心逻辑
@@ -342,6 +343,11 @@ const onActionDelete = () => {
 const onActionShare = () => {
   console.log("Share action triggered");
 };
+
+const { onActionGetLinks } = useFileDirectLinks({
+  getSelectedItems: getSelectedFileItems
+});
+
 const {
   contextMenuTriggerEvent,
   onMenuSelect,
@@ -361,6 +367,7 @@ const {
   onCopy: onActionCopy,
   onMove: onActionMove,
   onShare: onActionShare,
+  onGetLink: onActionGetLinks,
   onInfo: () => {
     if (isSingleSelection.value)
       handleShowDetailsForId(getSelectedFileItems()[0].id);

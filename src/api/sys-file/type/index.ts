@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-07-05 11:43:42
+ * @LastEditTime: 2025-07-09 15:10:41
  * @LastEditors: 安知鱼
  */
 
@@ -336,3 +336,31 @@ export interface FolderSizeResponse {
   message: string;
   data: FolderSizeData;
 }
+
+/**
+ * 创建直链接口请求体的结构
+ */
+export interface CreateDirectLinksRequest {
+  file_ids: string[];
+}
+
+/**
+ * 创建直链时，返回数组中的单个链接对象结构
+ */
+export interface DirectLinkItem {
+  link: string; // 生成的公开直链 URL
+  file_url: string; // 文件的内部 URI，例如 "cloudreve://my/年度报告.docx"
+}
+
+/**
+ * 创建直链接口成功时，响应体中 `data` 字段的结构。
+ * 现在是一个包含多个链接对象的数组。
+ */
+export type CreateDirectLinksData = DirectLinkItem[];
+
+/**
+ * 创建直链接口的完整 API 响应体结构。
+ * 这是 BaseResponse 的一个具体化别名。
+ */
+export type CreateDirectLinksResponse =
+  BaseResponse<CreateDirectLinksData | null>;
