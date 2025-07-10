@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-07-09 17:40:59
+ * @LastEditTime: 2025-07-10 11:35:39
  * @LastEditors: 安知鱼
  */
 import { getPluginsList } from "./build/plugins";
@@ -36,7 +36,7 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
           target: "http://localhost:8091",
           changeOrigin: true
         },
-        "/f": {
+        "/f/": {
           target: "http://localhost:8091",
           changeOrigin: true
         }
