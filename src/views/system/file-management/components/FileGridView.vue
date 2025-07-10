@@ -1,5 +1,5 @@
 <template>
-  <!-- 1. 添加 @scroll 监听器，并赋予滚动能力（通过CSS） -->
+  <!-- 1. 监听 @scroll 事件 -->
   <div
     v-loading="loading && !files.length"
     class="file-grid-view"
@@ -24,7 +24,10 @@
       @mouseleave="handleMouseLeave"
     >
       <div class="item-icon">
-        <component :is="getFileIcon(file)" class="file-icon" />
+        <!-- 【核心修改】使用新的 FileThumbnail 组件来显示图标或预览图 -->
+        <FileThumbnail :file="file" />
+
+        <!-- 上传遮罩层保持不变 -->
         <div
           v-if="file.metadata?.['sys:upload_session_id']"
           class="uploading-overlay"
@@ -39,7 +42,7 @@
       <div class="item-name">{{ file.name }}</div>
     </div>
 
-    <!-- 加载更多和无更多数据的指示器保持不变 -->
+    <!-- 加载更多和无更多数据的指示器 -->
     <div v-if="isMoreLoading" class="grid-item-full-width">
       <div class="load-more-indicator">
         <el-icon class="is-loading"><Loading /></el-icon>
@@ -56,7 +59,7 @@
       </div>
     </div>
 
-    <!-- 空状态也保持不变 -->
+    <!-- 空状态 -->
     <el-empty
       v-if="files.length === 0 && !loading && !isMoreLoading"
       description="这里什么都没有"
@@ -67,12 +70,14 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, type PropType } from "vue";
-import { useFileIcons } from "../hooks/useFileIcons";
 import gsap from "gsap";
 import { FileItem, FileType } from "@/api/sys-file/type";
 import { Loading } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import { extractLogicalPathFromUri } from "@/utils/fileUtils";
+
+// 【新增】导入新的 FileThumbnail 组件
+import FileThumbnail from "./FileThumbnail.vue";
 
 const props = defineProps({
   files: {
@@ -110,7 +115,7 @@ const emit = defineEmits<{
   (e: "scroll-to-load"): void;
 }>();
 
-// 3. 创建处理本地滚动的函数
+// 处理滚动加载
 const handleLocalScroll = (event: Event) => {
   const el = event.target as HTMLElement;
   const isAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 200;
@@ -119,10 +124,10 @@ const handleLocalScroll = (event: Event) => {
   }
 };
 
-// --- 其他 script 内容保持不变 ---
+// 【移除】不再需要 useFileIcons，因为逻辑已移至 FileThumbnail
+// const { getFileIcon } = useFileIcons();
 
-const { getFileIcon } = useFileIcons();
-
+// GSAP 动画效果
 const handleMouseDown = (event: MouseEvent) => {
   gsap.to(event.currentTarget as HTMLElement, {
     scale: 0.95,
@@ -147,6 +152,7 @@ const handleMouseLeave = (event: MouseEvent) => {
   });
 };
 
+// 文件/文件夹点击事件
 const handleItemClick = (file: FileItem, event: MouseEvent) => {
   if (props.disabledFileIds?.has(file.id)) return;
   if (file.metadata?.["sys:upload_session_id"]) return;
@@ -160,6 +166,7 @@ const handleItemClick = (file: FileItem, event: MouseEvent) => {
   }
 };
 
+// 文件/文件夹双击事件
 const handleItemDblClick = (file: FileItem) => {
   if (props.disabledFileIds?.has(file.id)) {
     ElMessage.warning("不能进入正在移动的文件夹。");
@@ -173,6 +180,7 @@ const handleItemDblClick = (file: FileItem) => {
   }
 };
 
+// 键盘事件监听 (Ctrl+A 全选)
 const handleKeyDown = (event: KeyboardEvent) => {
   const target = event.target as HTMLElement;
   if (["INPUT", "TEXTAREA"].includes(target.tagName)) return;
@@ -193,7 +201,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 4. 修改样式 */
 .file-grid-view {
   padding: 24px;
   display: grid;
@@ -202,11 +209,8 @@ onUnmounted(() => {
   /* 关键：让这个容器自身可以滚动 */
   height: 100%;
   overflow-y: auto;
-  /* 确保 v-loading 遮罩层能正确显示 */
   position: relative;
-  /* 新增：让所有网格项作为一个整体，在垂直方向上靠上对齐 */
   align-content: flex-start;
-  /* 新增：让所有网格项作为一个整体，在水平方向上靠左对齐。这能防止最后一行被拉伸。 */
   justify-content: flex-start;
 }
 .grid-item {
@@ -253,8 +257,8 @@ onUnmounted(() => {
 }
 
 .item-icon {
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -289,11 +293,6 @@ onUnmounted(() => {
   }
 }
 
-.file-icon {
-  font-size: 50px;
-  width: 50px;
-  height: 50px;
-}
 .item-name {
   width: 100%;
   min-width: 0;
@@ -309,7 +308,6 @@ onUnmounted(() => {
 }
 .grid-empty {
   grid-column: 1 / -1;
-  /* 确保空状态在容器内居中 */
   align-self: center;
   justify-self: center;
 }
@@ -339,5 +337,8 @@ onUnmounted(() => {
   padding: 0 0 20px;
   color: #c0c4cc;
   font-size: 13px;
+}
+.grid-item:hover :deep(.thumbnail-image) {
+  transform: scale(1.1);
 }
 </style>
