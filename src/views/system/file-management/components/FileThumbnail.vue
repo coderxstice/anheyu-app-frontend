@@ -99,7 +99,7 @@ const fetchPreview = async () => {
     return; // 阻止发送没有认证的请求
   }
 
-  const previewUrl = `/api/preview/${props.file.id}`;
+  const previewUrl = `/api/thumbnail/${props.file.id}`;
 
   try {
     const response = await fetch(previewUrl, {
@@ -217,7 +217,6 @@ watch(
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f7f8fa;
   border-radius: 6px;
   overflow: hidden;
 }
