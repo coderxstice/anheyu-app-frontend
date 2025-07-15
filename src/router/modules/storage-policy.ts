@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-23 16:45:39
+ * @LastEditTime: 2025-07-15 16:22:53
+ * @LastEditors: 安知鱼
+ */
 const Layout = () => import("@/layout/index.vue");
 
 export default {
@@ -28,6 +35,17 @@ export default {
       meta: {
         title: "编辑策略",
         activePath: "/storage-policy/index",
+        showLink: false,
+        roles: ["1"]
+      }
+    },
+    {
+      path: "/storage-policy/oauth",
+      name: "StoragePolicyOAuth",
+      component: () =>
+        import("@/views/system/storage-policy-management/oauth.vue"),
+      meta: {
+        title: "授权回调",
         showLink: false,
         roles: ["1"]
       }

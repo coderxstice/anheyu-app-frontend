@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-24 19:24:57
- * @LastEditTime: 2025-06-26 15:29:57
+ * @LastEditTime: 2025-07-15 15:27:35
  * @LastEditors: 安知鱼
  */
 import { http } from "@/utils/http";
@@ -31,6 +31,12 @@ export interface StoragePolicy {
   base_path?: string;
   virtual_path?: string;
   settings?: any;
+
+  endpoint?: string;
+  client_id?: string;
+  client_secret?: string;
+  refresh_token?: string;
+  chunk_size?: number;
 }
 
 /** 列表请求的响应数据结构 */
@@ -89,5 +95,30 @@ export const getPolicyById = (id: string) => {
   return http.request<Result<StoragePolicy>>(
     "get",
     baseUrlApi(`policies/${id}`)
+  );
+};
+
+/**
+ * @description 为策略获取微软授权链接
+ * @param id 策略ID
+ */
+export const getOneDriveAuthUrl = (id: number | string) => {
+  return http.request<Result<{ url: string }>>(
+    "get",
+    baseUrlApi(`policies/connect/onedrive/${id}`)
+  );
+};
+
+/**
+ * @description 完成 OneDrive 授权流程
+ * @param data 包含 code 和 state 的对象
+ */
+export const completeOneDriveAuth = (data: { code: string; state: string }) => {
+  return http.request<Result<null>>(
+    "post",
+    baseUrlApi("policies/authorize/onedrive"),
+    {
+      data
+    }
   );
 };
