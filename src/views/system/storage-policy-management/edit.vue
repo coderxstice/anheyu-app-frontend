@@ -9,25 +9,23 @@ import {
 import { message } from "@/utils/message";
 import Form from "./form.vue";
 
-// --- 动态导入授权组件 ---
 import OneDriveAuthorization from "./components/onedrive/Authorization.vue";
 
 defineOptions({
   name: "StoragePolicyEdit"
 });
 
-// --- 注册授权组件 ---
 const providerAuthorizations = shallowRef({
   onedrive: OneDriveAuthorization
 });
 
-// --- 页面核心逻辑 ---
 const route = useRoute();
 const router = useRouter();
 const formRef = ref();
 const policyId: string = String(route.params.id);
 const formData = ref<Partial<StoragePolicy>>({});
 const isLoading = ref(true);
+const pageTitle = ref("加载中...");
 
 // 动态选择当前策略需要的授权组件
 const providerAuthComponent = computed(() => {
@@ -42,6 +40,7 @@ async function fetchData() {
   try {
     const { data } = await getPolicyById(policyId);
     formData.value = data;
+    pageTitle.value = data.name;
   } finally {
     isLoading.value = false;
   }
@@ -54,7 +53,6 @@ async function onSave() {
   await form.validate();
   await updatePolicy(formData.value);
   message("保存成功", { type: "success" });
-  // 保存后刷新一下数据，确保授权状态等能正确更新
   fetchData();
 }
 
@@ -72,9 +70,7 @@ onMounted(() => {
   <el-card shadow="never">
     <template #header>
       <div class="card-header">
-        <span class="font-medium">
-          编辑存储策略 - {{ formData.name || "加载中..." }}
-        </span>
+        <span class="font-medium"> 编辑存储策略 - {{ pageTitle }} </span>
         <div>
           <el-button @click="goBack">返回</el-button>
           <el-button type="primary" @click="onSave">保存</el-button>

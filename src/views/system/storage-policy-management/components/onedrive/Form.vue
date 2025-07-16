@@ -12,12 +12,12 @@ const units = [
   { label: "MB", value: 1024 * 1024 },
   { label: "GB", value: 1024 * 1024 * 1024 }
 ];
-const chunkSizeValue = ref(10);
+const chunkSizeValue = ref(50);
 const chunkSizeUnit = ref(1024 * 1024);
 
 function bytesToHuman(bytes: number): [number, number] {
-  // 如果未设置或为0，默认显示为 10 MB (后端默认值)
-  if (!bytes) return [10, 1024 * 1024];
+  // 如果未设置或为0，默认显示为 50 MB (后端默认值)
+  if (!bytes) return [50, 1024 * 1024];
   for (let i = units.length - 1; i >= 0; i--) {
     const unit = units[i];
     if (bytes >= unit.value && bytes % unit.value === 0) {
