@@ -169,7 +169,6 @@ const props = defineProps<{
   isCollapsed: boolean;
   queue: UploadItem[];
   speedMode: "instant" | "average";
-  // [新增 Prop] 接收全局覆盖状态
   isGlobalOverwrite: boolean;
 }>();
 

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:42:04
- * @LastEditTime: 2025-06-21 18:42:09
+ * @LastEditTime: 2025-07-16 18:17:19
  * @LastEditors: 安知鱼
  */
 /**
@@ -61,6 +61,7 @@ const KeySmtpForceSSL: SettingKey = "SMTP_FORCE_SSL";
 const KeySiteAnnouncement: SettingKey = "SITE_ANNOUNCEMENT";
 const KeyFooterCode: SettingKey = "FOOTER_CODE";
 
+const DEFAULT_CHUNK_SIZE = 50 * 1024 * 1024;
 /**
  * 将所有常量组合到一个对象中导出
  */
@@ -99,5 +100,6 @@ export const constant = {
   KeySmtpReplyToEmail,
   KeySmtpForceSSL,
   KeySiteAnnouncement,
-  KeyFooterCode
+  KeyFooterCode,
+  DEFAULT_CHUNK_SIZE
 };

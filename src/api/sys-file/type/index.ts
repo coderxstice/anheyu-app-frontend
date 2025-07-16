@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-07-09 15:10:41
+ * @LastEditTime: 2025-07-16 18:11:20
  * @LastEditors: 安知鱼
  */
 
@@ -81,34 +81,46 @@ export interface UploadItem {
     | "canceled"
     | "resumable"
     | "processing";
-  overwrite?: boolean; // 用于单个文件覆盖
+  overwrite?: boolean;
   progress: number;
-  file: File; // 原始 File 对象
-  relativePath: string; // 文件在所选目录中的相对路径
-  targetPath: string; // 上传任务启动时所在的目标目录路径
-  abortController?: AbortController; // 用于取消上传的控制器
-
-  // 用于告知调用方是否需要在完成后刷新列表;
+  file: File;
+  relativePath: string;
+  targetPath: string;
+  abortController?: AbortController;
   needsRefresh?: boolean;
 
   // 用于分块上传的状态管理
-  sessionId?: string; // 上传会话ID
-  totalChunks?: number; // 文件总块数
-  chunkSize?: number; // 分块大小 (Bytes)
-  uploadedChunks?: Set<number>; // 已上传的块索引集合
-  errorMessage?: string; // 上传失败时的错误信息
-  retries?: number; // 重试次数
+  sessionId?: string;
+  totalChunks?: number;
+  chunkSize?: number;
+  uploadedChunks?: Set<number>;
+  errorMessage?: string;
+  retries?: number;
 
   // --- 用于丰富 UI 显示和速度计算的字段 ---
-  instantSpeed: number; // 瞬时速度 (Bytes/s)
-  averageSpeed: number; // +++ 新增: 平均速度 (Bytes/s) +++
-  uploadedSize: number; // 已上传大小 (Bytes)
-  isResuming?: boolean; // 是否为断点续传任务
+  instantSpeed: number;
+  averageSpeed: number;
+  uploadedSize: number;
+  isResuming?: boolean;
 
   // --- 用于计算速度的内部状态字段 ---
-  startTime?: number; // 上传开始时间戳
-  lastSize?: number; // 上一次计算速度时的大小
-  lastTime?: number; // 上一次计算速度时的时间戳
+  startTime?: number;
+  lastSize?: number;
+  lastTime?: number;
+
+  /**
+   * @description 上传模式，由后端在创建会话时指定。
+   * "server": 服务端中转模式（默认）。
+   * "client": 客户端直传模式（如 OneDrive）。
+   * @optional
+   */
+  uploadMethod?: "client" | "server";
+
+  /**
+   * @description 在客户端直传模式下，由后端提供的上传目标 URL。
+   * @optional
+   */
+  uploadUrl?: string;
 }
 
 // =================================================================
@@ -233,6 +245,17 @@ export interface UploadSessionData {
   chunk_size: number;
   expires?: number;
   storage_policy?: Record<string, any>;
+  /**
+   * @description 后端指定的上传模式。
+   * @optional
+   */
+  upload_method?: "client" | "server";
+
+  /**
+   * @description 客户端直传模式下的目标 URL。
+   * @optional
+   */
+  upload_url?: string;
 }
 
 /**

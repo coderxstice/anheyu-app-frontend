@@ -2,7 +2,7 @@
  * @Description: 文件上传核心 Composable，实现文件级流畅并行，并通过路径创建锁解决后端死锁问题，同时过滤系统文件。
  * @Author: 安知鱼
  * @Date: 2025-07-01 04:30:00
- * @LastEditTime: 2025-07-05 11:46:31
+ * @LastEditTime: 2025-07-16 18:17:53
  * @LastEditors: 安知鱼
  */
 import { ref, computed, onUnmounted, type ComputedRef, reactive } from "vue";
@@ -21,6 +21,7 @@ import {
 } from "@/utils/fileUtils";
 import { useUploadQueue } from "./upload.queue";
 import { uploadFileChunksWorker } from "./upload.worker";
+import { constant } from "@/constant";
 
 /**
  * @description: 动态创建一个隐藏的文件输入框，用于以编程方式触发文件选择对话框。
@@ -154,10 +155,25 @@ export function useFileUploader(
           }
           throw error;
         }
-        const { session_id, chunk_size } = sessionRes.data;
-        item.sessionId = session_id;
-        item.totalChunks = Math.ceil(item.size / chunk_size);
-        item.chunkSize = chunk_size;
+        const sessionData = sessionRes.data;
+
+        // 1. 获取 chunk_size，如果后端没有返回，则使用前端的默认值作为回退
+        const chunkSize = sessionData.chunk_size || constant.DEFAULT_CHUNK_SIZE;
+        item.chunkSize = chunkSize;
+        item.totalChunks = Math.ceil(item.size / chunkSize);
+
+        // 2. 判断上传模式并赋值相应字段
+        if (sessionData.upload_method === "client") {
+          item.uploadMethod = "client";
+          item.uploadUrl = sessionData.upload_url;
+          // 在客户端模式下，sessionId 不是必须的，可以不赋值或设为 undefined
+          item.sessionId = undefined;
+        } else {
+          // 默认为服务端中转模式
+          item.uploadMethod = "server";
+          item.sessionId = sessionData.session_id;
+          item.uploadUrl = undefined;
+        }
       } finally {
         pathCreationLock.delete(parentPath);
       }
