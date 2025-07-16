@@ -78,6 +78,16 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
     },
     getLogo(state): string {
       return state.siteConfig?.LOGO_URL_192x192 || "/logo.svg";
+    },
+    getSiteUrl(state): string | null {
+      if (state.siteConfig?.API_URL) {
+        let apiUrl = state.siteConfig.API_URL;
+        if (!apiUrl.endsWith("/")) {
+          apiUrl += "/";
+        }
+        return apiUrl;
+      }
+      return null;
     }
   },
 
