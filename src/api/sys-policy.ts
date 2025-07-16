@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-24 19:24:57
- * @LastEditTime: 2025-07-15 15:27:35
+ * @LastEditTime: 2025-07-15 19:14:38
  * @LastEditors: 安知鱼
  */
 import { http } from "@/utils/http";
@@ -30,13 +30,12 @@ export interface StoragePolicy {
   max_size: number;
   base_path?: string;
   virtual_path?: string;
-  settings?: any;
 
-  endpoint?: string;
-  client_id?: string;
-  client_secret?: string;
-  refresh_token?: string;
-  chunk_size?: number;
+  settings?: {
+    chunk_size?: number;
+    drive_type?: "default" | "sharepoint";
+    drive_id?: string;
+  };
 }
 
 /** 列表请求的响应数据结构 */

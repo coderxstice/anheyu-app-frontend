@@ -11,17 +11,14 @@ import Form from "./form.vue";
 
 // --- 动态导入授权组件 ---
 import OneDriveAuthorization from "./components/onedrive/Authorization.vue";
-// import S3Authorization from "./components/s3/Authorization.vue"; // 未来
 
 defineOptions({
   name: "StoragePolicyEdit"
 });
 
 // --- 注册授权组件 ---
-// 只有需要特殊授权流程的策略才需要在这里注册
 const providerAuthorizations = shallowRef({
   onedrive: OneDriveAuthorization
-  // s3: S3Authorization, // 比如 S3 的“测试连接”组件
 });
 
 // --- 页面核心逻辑 ---
@@ -57,7 +54,7 @@ async function onSave() {
   await form.validate();
   await updatePolicy(formData.value);
   message("保存成功", { type: "success" });
-  // 保存后刷新一下数据，确保状态正确
+  // 保存后刷新一下数据，确保授权状态等能正确更新
   fetchData();
 }
 

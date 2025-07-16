@@ -1,6 +1,5 @@
 <script setup lang="ts">
-// 1. 从 vue 引入 computed
-import { ref, reactive, onMounted, computed } from "vue";
+import { ref, reactive, onMounted, computed, watch } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
 import { type StoragePolicy } from "@/api/sys-policy";
 
@@ -14,14 +13,28 @@ const formRef = ref<FormInstance>();
 const formData = ref<Partial<StoragePolicy>>({
   type: "onedrive",
   name: "",
+  server: "https://graph.microsoft.com/v1.0", // 对应 server
+  bucket_name: "", // 对应 bucket_name (Client ID)
+  secret_key: "", // 对应 secret_key (Client Secret)
+  base_path: "/YuyuAlbum", // OneDrive 内根目录
+  virtual_path: "/onedrive", // 应用内挂载点
   settings: {
-    endpoint: "https://graph.microsoft.com/v1.0",
-    client_id: "",
-    client_secret: ""
+    drive_type: "default",
+    chunk_size: 52428800 // 50MB 默认值
   }
 });
 
-// 2. 创建端点与控制台链接的映射
+const units = [
+  { label: "MB", value: 1024 * 1024 },
+  { label: "GB", value: 1024 * 1024 * 1024 }
+];
+const chunkSizeValue = ref(50);
+const chunkSizeUnit = ref(1024 * 1024);
+watch([chunkSizeValue, chunkSizeUnit], ([newSize, newUnit]) => {
+  if (!formData.value.settings) formData.value.settings = {};
+  formData.value.settings.chunk_size = Math.round(newSize * newUnit);
+});
+
 const portalLinks = {
   "https://graph.microsoft.com/v1.0":
     "https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/Overview",
@@ -29,22 +42,30 @@ const portalLinks = {
     "https://portal.azure.cn/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/Overview"
 };
 
-// 3. 创建一个计算属性来动态生成链接
 const dynamicPortalLink = computed(() => {
-  const endpoint = formData.value.settings.endpoint;
-  // 如果找不到匹配的端点，默认返回国际版链接
+  // 修正：依赖顶层的 server 字段
   return (
-    portalLinks[endpoint] || portalLinks["https://graph.microsoft.com/v1.0"]
+    portalLinks[formData.value.server] ||
+    portalLinks["https://graph.microsoft.com/v1.0"]
   );
 });
 
 const rules = reactive<FormRules>({
   name: [{ required: true, message: "策略名称不能为空", trigger: "blur" }],
-  "settings.client_id": [
+  bucket_name: [
     { required: true, message: "应用(客户端) ID 不能为空", trigger: "blur" }
   ],
-  "settings.client_secret": [
+  secret_key: [
     { required: true, message: "客户端密码不能为空", trigger: "blur" }
+  ],
+  base_path: [
+    { required: true, message: "云端存储根目录不能为空", trigger: "blur" }
+  ],
+  virtual_path: [
+    { required: true, message: "应用内挂载路径不能为空", trigger: "blur" }
+  ],
+  "settings.drive_id": [
+    { required: true, message: "SharePoint Drive ID 不能为空", trigger: "blur" }
   ]
 });
 
@@ -58,17 +79,10 @@ const submitForm = async () => {
 };
 
 onMounted(() => {
-  // 使用 setTimeout 延迟聚焦，确保动画完成后元素可见
-  setTimeout(() => {
-    if (myInput.value) {
-      myInput.value.focus();
-    }
-  }, 100);
+  setTimeout(() => myInput.value?.focus(), 100);
 });
 
-defineExpose({
-  submitForm
-});
+defineExpose({ submitForm });
 </script>
 
 <template>
@@ -84,8 +98,26 @@ defineExpose({
       <div class="form-item-help">存储策略的展示名，也会用于向用户展示。</div>
     </el-form-item>
 
-    <el-form-item label="Microsoft Graph 端点" prop="settings.endpoint">
-      <el-select v-model="formData.settings.endpoint" style="width: 100%">
+    <el-form-item label="应用内挂载路径" prop="virtual_path">
+      <el-input
+        v-model="formData.virtual_path"
+        placeholder="例如 /my-onedrive"
+      />
+      <div class="form-item-help">此策略在应用内部的访问路径，需保证唯一。</div>
+    </el-form-item>
+
+    <el-form-item label="云端存储根目录" prop="base_path">
+      <el-input
+        v-model="formData.base_path"
+        placeholder="例如 /YuyuAlbum/Work"
+      />
+      <div class="form-item-help">
+        文件在 OneDrive 中的存放根目录，以 / 开头。
+      </div>
+    </el-form-item>
+
+    <el-form-item label="Microsoft Graph 端点" prop="server">
+      <el-select v-model="formData.server" style="width: 100%">
         <el-option
           label="公有 (国际版)"
           value="https://graph.microsoft.com/v1.0"
@@ -95,65 +127,66 @@ defineExpose({
           value="https://microsoftgraph.chinacloudapi.cn/v1.0"
         />
       </el-select>
-      <div class="form-item-help">
-        请根据你使用的 Microsoft 365 账号类型选择对应的端点。
-      </div>
     </el-form-item>
 
     <div class="info-block">
       <h3>Entra ID 应用信息</h3>
       <p>
         前往
-        <!-- 4. 将 href 动态绑定到计算属性 -->
-        <el-link type="primary" :href="dynamicPortalLink" target="_blank">
-          Microsoft Entra ID 控制台
-        </el-link>
-        并登录，登录后进入
-        <code>Microsoft Entra ID</code>
-        管理面板，这里登录使用的账号和最终存储使用的 OneDrive 所属账号可以不同。
-      </p>
-      <p>
-        进入左侧
-        <code>应用注册</code>
-        菜单，并点击
-        <code>新注册</code>
-        按钮。填写应用注册表单。其中，名称可任取；
-        <code>受支持的帐户类型</code>
-        选择为
-        <code
-          >任何组织目录(任何 Azure AD 目录 - 多租户)和个人 Microsoft
-          帐户(例如，Skype、Xbox)</code
-        >；
-        <code>重定向 URI (可选)</code>
-        请选择
-        <code>Web</code>
-        ，并填写
-        <code>https://cloud.anzhiyu.site/admin/policy/oauth</code>
-        ；其他保持默认即可。
+        <el-link type="primary" :href="dynamicPortalLink" target="_blank"
+          >Microsoft Entra ID 控制台</el-link
+        >
+        并登录，进行应用注册。
       </p>
     </div>
 
-    <el-form-item label="应用程序(客户端) ID" prop="settings.client_id">
-      <el-input v-model="formData.settings.client_id" />
+    <el-form-item label="应用(客户端) ID" prop="bucket_name">
+      <el-input v-model="formData.bucket_name" />
       <div class="form-item-help">
-        进入应用管理的
-        <code>概览</code>
-        页面，看到的
-        <code>应用程序(客户端) ID</code>
-        的值。
+        即您在 Azure AD 中申请的应用的 Client ID。
       </div>
     </el-form-item>
 
-    <el-form-item label="客户端密码" prop="settings.client_secret">
-      <el-input v-model="formData.settings.client_secret" />
+    <el-form-item label="客户端密码" prop="secret_key">
+      <el-input v-model="formData.secret_key" />
       <div class="form-item-help">
-        客户端密码的创建方式：进入应用管理页面左侧的
-        <code>证书和密码</code>
-        菜单，单击
-        <code>新建客户端密码</code>
-        按钮，
-        <code>截止期限</code>
-        选择为最长时间。客户端密码过期后，需要重新创建并将其填入存储策略设置中。
+        即您在 Azure AD 中申请的应用的 Client Secret。
+      </div>
+    </el-form-item>
+
+    <el-form-item label="OneDrive 类型" prop="settings.drive_type">
+      <el-radio-group v-model="formData.settings.drive_type">
+        <el-radio-button value="default">个人/商业版 Drive</el-radio-button>
+        <el-radio-button value="sharepoint">SharePoint 文档库</el-radio-button>
+      </el-radio-group>
+    </el-form-item>
+
+    <el-form-item
+      v-if="formData.settings.drive_type === 'sharepoint'"
+      label="SharePoint Drive ID"
+      prop="settings.drive_id"
+    >
+      <el-input v-model="formData.settings.drive_id" />
+      <div class="form-item-help">
+        如果类型为 SharePoint，则需要提供目标文档库的 Drive ID。
+      </div>
+    </el-form-item>
+
+    <el-form-item label="上传分块大小" prop="settings.chunk_size">
+      <el-input v-model.number="chunkSizeValue" :min="0" style="width: 180px">
+        <template #append>
+          <el-select v-model="chunkSizeUnit" style="width: 80px">
+            <el-option
+              v-for="u in units"
+              :key="u.value"
+              :label="u.label"
+              :value="u.value"
+            />
+          </el-select>
+        </template>
+      </el-input>
+      <div class="form-item-help">
+        上传大文件时的分块大小，0 表示使用后端默认值。
       </div>
     </el-form-item>
 
@@ -168,14 +201,12 @@ defineExpose({
 .create-form {
   padding: 0 10px;
 }
-
 .form-item-help {
   color: #999;
   font-size: 12px;
   line-height: 1.5;
   margin-top: 4px;
 }
-
 .info-block {
   margin-bottom: 22px;
   h3 {
@@ -202,7 +233,6 @@ defineExpose({
     vertical-align: baseline;
   }
 }
-
 :deep(.el-form-item__label) {
   font-size: 16px;
   font-weight: 600;

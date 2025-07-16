@@ -5,6 +5,7 @@ import { usePolicy } from "./utils/hook";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { IconifyIconOffline } from "@/components/ReIcon";
 import { createPolicy, type StoragePolicy } from "@/api/sys-policy";
+import { message } from "@/utils/message";
 
 import Delete from "@iconify-icons/ep/delete";
 import EditPen from "@iconify-icons/ep/edit-pen";
@@ -12,8 +13,8 @@ import Refresh from "@iconify-icons/ep/refresh";
 import AddFill from "@iconify-icons/ri/add-circle-line";
 import ServerIcon from "@iconify-icons/ri/server-line";
 import CloudIcon from "@iconify-icons/ri/cloud-line";
+// 导入新的 OneDrive 创建表单
 import OneDriveCreateForm from "./components/onedrive/CreateForm.vue";
-import { message } from "@/utils/message";
 
 defineOptions({
   name: "StoragePolicyManagement"
@@ -24,27 +25,26 @@ const {
   loading,
   dataList,
   pagination,
-  handleCreate: handleSimpleCreate,
   onSearch,
-  handleCreate,
+  handleCreate: handleSimpleCreate, // 重命名旧的创建方法
   handleEdit,
   handleDelete,
   onSizeChange,
   onCurrentChange
 } = usePolicy(router);
 
+// --- 创建流程控制 ---
 const chooseTypeDialogVisible = ref(false);
 const oneDriveCreateDialogVisible = ref(false);
 const oneDriveFormRef = ref();
 const isCreating = ref(false);
 
-// 这个数组现在是添加新策略类型的唯一入口点，非常清晰
 const storageTypes = [
   { type: "local", name: "本机存储", icon: ServerIcon },
   { type: "onedrive", name: "OneDrive", icon: CloudIcon }
-  // 未来添加: { type: "s3", name: "S3 兼容存储", icon: S3Icon }
 ] as const;
 
+// 根据类型分发创建流程
 function triggerCreateFlow(type: "local" | "onedrive", typeName: string) {
   chooseTypeDialogVisible.value = false;
   if (type === "onedrive") {
@@ -56,6 +56,7 @@ function triggerCreateFlow(type: "local" | "onedrive", typeName: string) {
   }
 }
 
+// 处理 OneDrive 表单提交
 async function handleOneDriveCreateSubmit(payload: Partial<StoragePolicy>) {
   try {
     isCreating.value = true;
@@ -84,77 +85,72 @@ const typeIconMap = {
 
 <template>
   <div class="card-list-main">
-    <div>
-      <div class="card-list-header">
-        <div class="left-actions">
-          <el-button v-ripple :icon="useRenderIcon(Refresh)" @click="onSearch">
-            刷新
-          </el-button>
-        </div>
+    <div class="card-list-header">
+      <div class="left-actions">
+        <el-button v-ripple :icon="useRenderIcon(Refresh)" @click="onSearch">
+          刷新
+        </el-button>
+      </div>
+    </div>
+
+    <div
+      v-loading="loading"
+      class="card-grid"
+      element-loading-text="正在加载..."
+    >
+      <div
+        v-ripple
+        class="card-item add-card"
+        @click="chooseTypeDialogVisible = true"
+      >
+        <el-icon :size="48" color="var(--el-color-primary)">
+          <IconifyIconOffline :icon="AddFill" />
+        </el-icon>
+        <p>添加存储策略</p>
       </div>
 
       <div
-        v-loading="loading"
-        class="card-grid"
-        element-loading-text="正在加载..."
+        v-for="item in dataList"
+        :key="item.id"
+        class="card-item data-card policy-card"
       >
-        <div
-          v-ripple
-          class="card-item add-card"
-          @click="chooseTypeDialogVisible = true"
-        >
-          <el-icon :size="48" color="var(--el-color-primary)">
-            <IconifyIconOffline :icon="AddFill" />
+        <div class="policy-content">
+          <el-icon :size="40" class="policy-icon">
+            <IconifyIconOffline :icon="typeIconMap[item.type] || CloudIcon" />
           </el-icon>
-          <p>添加存储策略</p>
-        </div>
-
-        <div
-          v-for="item in dataList"
-          :key="item.id"
-          class="card-item data-card policy-card"
-        >
-          <div class="policy-content">
-            <el-icon :size="40" class="policy-icon">
-              <IconifyIconOffline :icon="typeIconMap[item.type] || CloudIcon" />
-            </el-icon>
-            <div class="policy-details">
-              <h4 class="policy-name">{{ item.name }}</h4>
-              <div class="policy-tags">
-                <el-tag
-                  v-if="item.type === 'onedrive'"
-                  :type="item.settings?.refresh_token ? 'success' : 'warning'"
-                  size="small"
-                >
-                  {{ item.settings?.refresh_token ? "已授权" : "未授权" }}
-                </el-tag>
-                <el-tag type="info" size="small">{{ item.type }}</el-tag>
-              </div>
+          <div class="policy-details">
+            <h4 class="policy-name">{{ item.name }}</h4>
+            <div class="policy-tags">
+              <!-- [已更新] 使用 item.access_key 判断授权状态 -->
+              <el-tag
+                v-if="item.type === 'onedrive'"
+                :type="item.access_key ? 'success' : 'warning'"
+                size="small"
+              >
+                {{ item.access_key ? "已授权" : "未授权" }}
+              </el-tag>
+              <el-tag type="info" size="small">{{ item.type }}</el-tag>
             </div>
           </div>
+        </div>
 
-          <div class="card-overlay">
-            <div class="card-actions">
-              <el-tooltip content="修改">
-                <el-button
-                  :icon="useRenderIcon(EditPen)"
-                  circle
-                  @click="handleEdit(item)"
-                />
-              </el-tooltip>
-              <el-popconfirm
-                :title="`确认删除存储策略 ${item.name} 吗?`"
-                @confirm="handleDelete(item)"
-              >
-                <template #reference>
-                  <el-button
-                    :icon="useRenderIcon(Delete)"
-                    circle
-                    type="danger"
-                  />
-                </template>
-              </el-popconfirm>
-            </div>
+        <div class="card-overlay">
+          <div class="card-actions">
+            <el-tooltip content="修改">
+              <el-button
+                :icon="useRenderIcon(EditPen)"
+                circle
+                @click="handleEdit(item)"
+              />
+            </el-tooltip>
+            <el-popconfirm
+              :title="`确认删除存储策略 ${item.name} 吗?`"
+              @confirm="handleDelete(item)"
+            >
+              <template #reference>
+                <el-button :icon="useRenderIcon(Delete)" circle type="danger" />
+              </template>
+            </el-popconfirm>
           </div>
         </div>
       </div>
@@ -173,6 +169,7 @@ const typeIconMap = {
       />
     </div>
 
+    <!-- 选择类型弹窗 -->
     <el-dialog
       v-model="chooseTypeDialogVisible"
       title="选择存储方式"
@@ -194,6 +191,7 @@ const typeIconMap = {
       </div>
     </el-dialog>
 
+    <!-- OneDrive 专属创建弹窗 -->
     <el-dialog
       v-model="oneDriveCreateDialogVisible"
       title="添加 OneDrive 存储策略"
@@ -221,20 +219,20 @@ const typeIconMap = {
 <style lang="scss" scoped>
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
+  flex: 1;
   padding: 4px;
   min-height: 150px;
 }
 .card-list-main {
   display: flex;
   flex-direction: column;
-  height: calc(100% - 48px);
+  height: 100%;
   overflow: hidden;
   background-color: var(--el-bg-color);
   border-radius: 12px;
   padding: 16px;
-  justify-content: space-between;
 }
 .card-list-header {
   display: flex;
@@ -245,7 +243,7 @@ const typeIconMap = {
 }
 .card-item {
   position: relative;
-  height: 120px;
+  height: 130px;
   border-radius: 12px;
   cursor: pointer;
   overflow: hidden;
@@ -269,11 +267,11 @@ const typeIconMap = {
     color: var(--el-color-primary);
   }
 }
-.pagination-container {
-  margin-top: 20px;
-}
 .policy-card {
   padding: 20px;
+  display: flex;
+  align-items: center;
+
   .policy-content {
     display: flex;
     align-items: center;
@@ -346,12 +344,6 @@ const typeIconMap = {
     border-color: var(--el-color-primary);
     background-color: var(--anzhiyu-theme);
     color: var(--anzhiyu-white);
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .card-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
 }
 </style>
