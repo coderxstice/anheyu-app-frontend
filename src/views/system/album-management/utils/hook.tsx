@@ -15,7 +15,7 @@ import type { PaginationProps, LoadingConfig } from "@pureadmin/table";
 
 export function useAlbum() {
   const form = reactive({
-    createdAt: null,
+    created_at: null,
     sort: "display_order_asc"
   });
 
@@ -125,9 +125,9 @@ export function useAlbum() {
     {
       label: "创建时间",
       minWidth: 180,
-      prop: "createdAt",
-      formatter: ({ createdAt }) =>
-        dayjs(createdAt).format("YYYY-MM-DD HH:mm:ss")
+      prop: "created_at",
+      formatter: ({ created_at }) =>
+        dayjs(created_at).format("YYYY-MM-DD HH:mm:ss")
     },
     {
       label: "操作",
@@ -140,7 +140,7 @@ export function useAlbum() {
   function resetForm(formEl) {
     if (!formEl) return;
     formEl.resetFields();
-    form.createdAt = null;
+    form.created_at = null;
     form.sort = "display_order_asc";
     onSearch();
   }
@@ -153,7 +153,7 @@ export function useAlbum() {
     const { data } = await getWallpapertList({
       page: currentPage,
       pageSize: pageSize,
-      createdAt: form.createdAt,
+      created_at: form.created_at,
       sort: form.sort
     });
 

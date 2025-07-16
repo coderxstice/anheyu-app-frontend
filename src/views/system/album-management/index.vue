@@ -45,9 +45,9 @@ function onFullscreen() {
       :model="form"
       class="search-form bg-bg_color w-full pl-8 pt-[12px] overflow-auto rounded-2xl"
     >
-      <el-form-item label="上传时间：" prop="createdAt">
+      <el-form-item label="上传时间：" prop="created_at">
         <el-date-picker
-          v-model="form.createdAt"
+          v-model="form.created_at"
           type="datetimerange"
           range-separator="至"
           start-placeholder="开始时间"

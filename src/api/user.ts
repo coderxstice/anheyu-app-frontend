@@ -15,12 +15,12 @@ export type UserSettings = {
  */
 export type UserGroup = {
   id: number;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
   name: string;
   description: string;
   permissions: number[];
-  maxStorage: number;
+  max_storage: number;
   settings: UserSettings;
 };
 
@@ -29,8 +29,8 @@ export type UserGroup = {
  */
 export type UserInfo = {
   id: number;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
   userId: string;
   username: string;
   nickname: string;
