@@ -1,49 +1,14 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
 import { type StoragePolicy } from "@/api/sys-policy";
 
+// [FIXED] 将 defineModel 的返回值赋给一个变量 (例如 formData)，
+// 这个变量就是一个带有正确类型的 ref。
 const formData = defineModel<Partial<StoragePolicy>>({ required: true });
+
+// 确保 settings 对象存在，防止模板中访问 undefined.xxx 而报错
 if (!formData.value.settings) {
   formData.value.settings = {};
 }
-
-// --- chunk_size 单位换算逻辑 ---
-const units = [
-  { label: "MB", value: 1024 * 1024 },
-  { label: "GB", value: 1024 * 1024 * 1024 }
-];
-const chunkSizeValue = ref(50);
-const chunkSizeUnit = ref(1024 * 1024);
-
-function bytesToHuman(bytes: number): [number, number] {
-  // 如果未设置或为0，默认显示为 50 MB (后端默认值)
-  if (!bytes) return [50, 1024 * 1024];
-  for (let i = units.length - 1; i >= 0; i--) {
-    const unit = units[i];
-    if (bytes >= unit.value && bytes % unit.value === 0) {
-      return [bytes / unit.value, unit.value];
-    }
-  }
-  const mbValue = 1024 * 1024;
-  return [parseFloat((bytes / mbValue).toFixed(2)), mbValue];
-}
-
-// 监听UI变化，更新 formData
-watch([chunkSizeValue, chunkSizeUnit], ([newSize, newUnit]) => {
-  if (!formData.value.settings) formData.value.settings = {};
-  formData.value.settings.chunk_size = Math.round(newSize * newUnit);
-});
-
-// 监听 formData 变化，更新UI (关键：用于初始化编辑数据)
-watch(
-  () => formData.value.settings?.chunk_size,
-  newChunkSize => {
-    [chunkSizeValue.value, chunkSizeUnit.value] = bytesToHuman(
-      newChunkSize ?? 0
-    );
-  },
-  { immediate: true }
-);
 </script>
 
 <template>
@@ -71,14 +36,9 @@ watch(
     </el-form-item>
 
     <el-form-item label="客户端密码" prop="secret_key">
-      <el-input
-        v-model="formData.secret_key"
-        type="password"
-        show-password
-        placeholder="请输入客户端密码"
-      />
+      <el-input v-model="formData.secret_key" placeholder="请输入客户端密码" />
       <div class="form-item-help">
-        密码在保存后将不会再次显示。如需修改，请直接输入新密码。
+        即您在 Azure AD 中申请的应用的 Client Secret。
       </div>
     </el-form-item>
 
@@ -100,7 +60,7 @@ watch(
       </div>
     </el-form-item>
 
-    <el-divider><h2 class="divider-title">路径与性能</h2></el-divider>
+    <el-divider><h2 class="divider-title">路径设置</h2></el-divider>
 
     <el-form-item label="云端存储根目录" prop="base_path">
       <el-input
@@ -118,24 +78,6 @@ watch(
         placeholder="例如 /my-onedrive"
       />
       <div class="form-item-help">此策略在应用内部的访问路径，需保证唯一。</div>
-    </el-form-item>
-
-    <el-form-item label="上传分块大小" prop="settings.chunk_size">
-      <el-input v-model.number="chunkSizeValue" :min="0" style="width: 180px">
-        <template #append>
-          <el-select v-model="chunkSizeUnit" style="width: 80px">
-            <el-option
-              v-for="u in units"
-              :key="u.value"
-              :label="u.label"
-              :value="u.value"
-            />
-          </el-select>
-        </template>
-      </el-input>
-      <div class="form-item-help">
-        上传大文件时的分块大小，0 表示使用后端默认值。
-      </div>
     </el-form-item>
   </div>
 </template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed, watch } from "vue";
+import { ref, reactive, onMounted, computed } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
 import { type StoragePolicy } from "@/api/sys-policy";
 
@@ -13,26 +13,14 @@ const formRef = ref<FormInstance>();
 const formData = ref<Partial<StoragePolicy>>({
   type: "onedrive",
   name: "",
-  server: "https://graph.microsoft.com/v1.0", // 对应 server
-  bucket_name: "", // 对应 bucket_name (Client ID)
-  secret_key: "", // 对应 secret_key (Client Secret)
-  base_path: "/YuyuAlbum", // OneDrive 内根目录
-  virtual_path: "/onedrive", // 应用内挂载点
+  server: "https://graph.microsoft.com/v1.0",
+  bucket_name: "",
+  secret_key: "",
+  base_path: "/YuyuAlbum",
+  virtual_path: "/onedrive",
   settings: {
-    drive_type: "default",
-    chunk_size: 52428800 // 50MB 默认值
+    drive_type: "default"
   }
-});
-
-const units = [
-  { label: "MB", value: 1024 * 1024 },
-  { label: "GB", value: 1024 * 1024 * 1024 }
-];
-const chunkSizeValue = ref(50);
-const chunkSizeUnit = ref(1024 * 1024);
-watch([chunkSizeValue, chunkSizeUnit], ([newSize, newUnit]) => {
-  if (!formData.value.settings) formData.value.settings = {};
-  formData.value.settings.chunk_size = Math.round(newSize * newUnit);
 });
 
 const portalLinks = {
@@ -43,7 +31,6 @@ const portalLinks = {
 };
 
 const dynamicPortalLink = computed(() => {
-  // 修正：依赖顶层的 server 字段
   return (
     portalLinks[formData.value.server] ||
     portalLinks["https://graph.microsoft.com/v1.0"]
@@ -52,6 +39,13 @@ const dynamicPortalLink = computed(() => {
 
 const rules = reactive<FormRules>({
   name: [{ required: true, message: "策略名称不能为空", trigger: "blur" }],
+  server: [
+    {
+      required: true,
+      message: "Microsoft Graph 端点为必选项",
+      trigger: "change"
+    }
+  ],
   bucket_name: [
     { required: true, message: "应用(客户端) ID 不能为空", trigger: "blur" }
   ],
@@ -172,23 +166,7 @@ defineExpose({ submitForm });
       </div>
     </el-form-item>
 
-    <el-form-item label="上传分块大小" prop="settings.chunk_size">
-      <el-input v-model.number="chunkSizeValue" :min="0" style="width: 180px">
-        <template #append>
-          <el-select v-model="chunkSizeUnit" style="width: 80px">
-            <el-option
-              v-for="u in units"
-              :key="u.value"
-              :label="u.label"
-              :value="u.value"
-            />
-          </el-select>
-        </template>
-      </el-input>
-      <div class="form-item-help">
-        上传大文件时的分块大小，0 表示使用后端默认值。
-      </div>
-    </el-form-item>
+    <!-- 此处不再有 chunk_size 的设置 -->
 
     <div class="info-block">
       <h3>账号授权</h3>
@@ -198,6 +176,7 @@ defineExpose({ submitForm });
 </template>
 
 <style lang="scss" scoped>
+/* 样式保持不变 */
 .create-form {
   padding: 0 10px;
 }

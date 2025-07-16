@@ -2,7 +2,7 @@
  * @Description: 本地存储配置表单
  * @Author: 安知鱼
  * @Date: 2025-07-15 15:36:48
- * @LastEditTime: 2025-07-15 15:41:57
+ * @LastEditTime: 2025-07-16 16:52:55
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -11,7 +11,11 @@ const formData = defineModel<Partial<StoragePolicy>>({ required: true });
 </script>
 <template>
   <el-form-item label="Blob 挂载目录" prop="virtual_path">
-    <el-input v-model="formData.virtual_path" placeholder="例如: /uploads" />
+    <el-input
+      v-model="formData.virtual_path"
+      placeholder="例如: /uploads"
+      disabled
+    />
     <div class="form-item-help">
       存储到本系统内对应的挂载路径，需要确保唯一。
     </div>
