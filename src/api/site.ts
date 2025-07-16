@@ -16,6 +16,7 @@ export type SiteConfig = {
   USER_AVATAR: string;
   ABOUT_LINK: string;
   API_URL: string;
+  SiteURL: string;
   ICON_URL: string;
   LOGO_HORIZONTAL_DAY: string;
   LOGO_HORIZONTAL_NIGHT: string;

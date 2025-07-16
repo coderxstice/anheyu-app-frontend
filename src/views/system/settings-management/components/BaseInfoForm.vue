@@ -81,6 +81,8 @@ function checkAndFocusUrl() {
   const backendSiteUrl = siteConfigStore.getSiteUrl;
   const currentOrigin = window.location.origin;
 
+  console.log(backendSiteUrl);
+
   // 定义一个聚焦和高亮的辅助函数
   const focusAndHighlight = () => {
     nextTick(() => {

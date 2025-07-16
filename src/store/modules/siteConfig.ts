@@ -80,12 +80,12 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
       return state.siteConfig?.LOGO_URL_192x192 || "/logo.svg";
     },
     getSiteUrl(state): string | null {
-      if (state.siteConfig?.API_URL) {
-        let apiUrl = state.siteConfig.API_URL;
-        if (!apiUrl.endsWith("/")) {
-          apiUrl += "/";
+      if (state.siteConfig?.SITE_URL) {
+        let siteURL = state.siteConfig.SITE_URL;
+        if (siteURL.endsWith("/")) {
+          siteURL = siteURL.slice(0, -1); // 去掉末尾的斜杠
         }
-        return apiUrl;
+        return siteURL;
       }
       return null;
     }
