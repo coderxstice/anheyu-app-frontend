@@ -85,72 +85,77 @@ const typeIconMap = {
 
 <template>
   <div class="card-list-main">
-    <div class="card-list-header">
-      <div class="left-actions">
-        <el-button v-ripple :icon="useRenderIcon(Refresh)" @click="onSearch">
-          刷新
-        </el-button>
-      </div>
-    </div>
-
-    <div
-      v-loading="loading"
-      class="card-grid"
-      element-loading-text="正在加载..."
-    >
-      <div
-        v-ripple
-        class="card-item add-card"
-        @click="chooseTypeDialogVisible = true"
-      >
-        <el-icon :size="48" color="var(--el-color-primary)">
-          <IconifyIconOffline :icon="AddFill" />
-        </el-icon>
-        <p>添加存储策略</p>
+    <div>
+      <div class="card-list-header">
+        <div class="left-actions">
+          <el-button v-ripple :icon="useRenderIcon(Refresh)" @click="onSearch">
+            刷新
+          </el-button>
+        </div>
       </div>
 
       <div
-        v-for="item in dataList"
-        :key="item.id"
-        class="card-item data-card policy-card"
+        v-loading="loading"
+        class="card-grid"
+        element-loading-text="正在加载..."
       >
-        <div class="policy-content">
-          <el-icon :size="40" class="policy-icon">
-            <IconifyIconOffline :icon="typeIconMap[item.type] || CloudIcon" />
+        <div
+          v-ripple
+          class="card-item add-card"
+          @click="chooseTypeDialogVisible = true"
+        >
+          <el-icon :size="48" color="var(--el-color-primary)">
+            <IconifyIconOffline :icon="AddFill" />
           </el-icon>
-          <div class="policy-details">
-            <h4 class="policy-name">{{ item.name }}</h4>
-            <div class="policy-tags">
-              <!-- [已更新] 使用 item.access_key 判断授权状态 -->
-              <el-tag
-                v-if="item.type === 'onedrive'"
-                :type="item.access_key ? 'success' : 'warning'"
-                size="small"
-              >
-                {{ item.access_key ? "已授权" : "未授权" }}
-              </el-tag>
-              <el-tag type="info" size="small">{{ item.type }}</el-tag>
-            </div>
-          </div>
+          <p>添加存储策略</p>
         </div>
 
-        <div class="card-overlay">
-          <div class="card-actions">
-            <el-tooltip content="修改">
-              <el-button
-                :icon="useRenderIcon(EditPen)"
-                circle
-                @click="handleEdit(item)"
-              />
-            </el-tooltip>
-            <el-popconfirm
-              :title="`确认删除存储策略 ${item.name} 吗?`"
-              @confirm="handleDelete(item)"
-            >
-              <template #reference>
-                <el-button :icon="useRenderIcon(Delete)" circle type="danger" />
-              </template>
-            </el-popconfirm>
+        <div
+          v-for="item in dataList"
+          :key="item.id"
+          class="card-item data-card policy-card"
+        >
+          <div class="policy-content">
+            <el-icon :size="40" class="policy-icon">
+              <IconifyIconOffline :icon="typeIconMap[item.type] || CloudIcon" />
+            </el-icon>
+            <div class="policy-details">
+              <h4 class="policy-name">{{ item.name }}</h4>
+              <div class="policy-tags">
+                <el-tag
+                  v-if="item.type === 'onedrive'"
+                  :type="item.access_key ? 'success' : 'warning'"
+                  size="small"
+                >
+                  {{ item.access_key ? "已授权" : "未授权" }}
+                </el-tag>
+                <el-tag type="info" size="small">{{ item.type }}</el-tag>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-overlay">
+            <div class="card-actions">
+              <el-tooltip content="修改">
+                <el-button
+                  :icon="useRenderIcon(EditPen)"
+                  circle
+                  @click="handleEdit(item)"
+                />
+              </el-tooltip>
+              <el-popconfirm
+                :title="`确认删除存储策略 ${item.name} 吗?`"
+                @confirm="handleDelete(item)"
+              >
+                <template #reference>
+                  <el-button
+                    :icon="useRenderIcon(Delete)"
+                    circle
+                    type="danger"
+                  />
+                </template>
+              </el-popconfirm>
+            </div>
           </div>
         </div>
       </div>
@@ -219,20 +224,20 @@ const typeIconMap = {
 <style lang="scss" scoped>
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
-  flex: 1;
   padding: 4px;
   min-height: 150px;
 }
 .card-list-main {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: calc(100% - 48px);
   overflow: hidden;
   background-color: var(--el-bg-color);
   border-radius: 12px;
   padding: 16px;
+  justify-content: space-between;
 }
 .card-list-header {
   display: flex;
@@ -250,6 +255,9 @@ const typeIconMap = {
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   background-color: var(--el-bg-color-page);
+}
+.pagination-container {
+  margin-top: 20px;
 }
 .add-card {
   display: flex;
@@ -344,6 +352,11 @@ const typeIconMap = {
     border-color: var(--el-color-primary);
     background-color: var(--anzhiyu-theme);
     color: var(--anzhiyu-white);
+  }
+}
+@media screen and (max-width: 768px) {
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
 }
 </style>
