@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-07-19 10:01:12
+ * @LastEditTime: 2025-07-19 12:25:49
  * @LastEditors: 安知鱼
  */
 
@@ -392,7 +392,7 @@ export type CreateDirectLinksResponse =
  * 获取缩略图凭证接口 (GET /thumbnail/{id}) 的响应 data 结构
  */
 export interface ThumbnailCredential {
-  url: string; // 凭证token
+  sign: string; // 凭证sign
   expires: string; // 过期时间
   status?: "processing"; // 如果正在处理中，则包含此字段
 }
