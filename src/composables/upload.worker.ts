@@ -66,7 +66,7 @@ export async function uploadFileChunksWorker(item: UploadItem): Promise<void> {
       const end = Math.min(start + item.chunkSize!, item.size);
       const chunkBlob = item.file.slice(start, end);
 
-      // d. [核心] 根据模式选择上传方式
+      // d. 根据模式选择上传方式
       if (item.uploadMethod === "client") {
         // 模式一：客户端直传
         // (未来可根据 item.storageType 等字段进一步分发到不同的外部 API)

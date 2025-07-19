@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-20 17:40:18
- * @LastEditTime: 2025-06-20 17:41:23
+ * @LastEditTime: 2025-07-19 09:59:47
  * @LastEditors: 安知鱼
  */
 import type { AnHttpError } from "./types.d";
@@ -24,7 +24,7 @@ export function handleBackendError(error: AnHttpError): void {
   // response 存在，说明服务器有响应，只是状态码是错误的
   if (error.response) {
     const { data } = error.response as any; // 使用 any 类型以兼容不同的后端返回格式
-    // 核心：优先使用后端返回的 data.message
+    // 优先使用后端返回的 data.message
     if (data && data.message) {
       message = data.message;
     } else {

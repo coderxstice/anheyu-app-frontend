@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:29:06
- * @LastEditTime: 2025-07-04 17:20:46
+ * @LastEditTime: 2025-07-19 10:00:31
  * @LastEditors: 安知鱼
  */
 // @/utils/format.ts
@@ -70,13 +70,11 @@ export const formatRelativeTime = (dateStr: string): string => {
   const past = new Date(dateStr);
   const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
 
-  // --- 时间单位常量 (秒) ---
   const oneMinute = 60;
   const oneHour = oneMinute * 60;
   const oneDay = oneHour * 24;
   const sevenDays = oneDay * 7;
 
-  // --- 1. 分钟内的逻辑 ---
   if (diffInSeconds < 10) {
     return "刚刚";
   }
@@ -87,12 +85,10 @@ export const formatRelativeTime = (dateStr: string): string => {
     return `${Math.floor(diffInSeconds / oneMinute)} 分钟前`;
   }
 
-  // --- 2. 小时内的逻辑 ---
   if (diffInSeconds < oneDay) {
     return `${Math.floor(diffInSeconds / oneHour)} 小时前`;
   }
 
-  // --- 3. 昨天/前天的逻辑 (核心修改点) ---
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const yesterdayStart = new Date(todayStart.getTime() - oneDay * 1000);
   const beforeYesterdayStart = new Date(
@@ -112,12 +108,10 @@ export const formatRelativeTime = (dateStr: string): string => {
     return "前天";
   }
 
-  // --- 4. 7天内的逻辑 ---
   if (diffInSeconds < sevenDays) {
     // 减去昨天和前天，所以这里是 2 天前 到 6 天前
     return `${Math.floor(diffInSeconds / oneDay)} 天前`;
   }
 
-  // --- 5. 超过7天的逻辑 ---
   return formatDateTime(dateStr);
 };

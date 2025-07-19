@@ -29,7 +29,6 @@ import ActivatePrompt from "./components/ActivatePrompt.vue";
 
 defineOptions({ name: "Login" });
 
-// --- 核心状态和设置 ---
 const siteConfigStore = useSiteConfigStore();
 const router = useRouter();
 const route = useRoute();

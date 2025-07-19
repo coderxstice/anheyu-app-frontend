@@ -205,7 +205,7 @@ const columnTypeMap = {
   3: { key: "created_at", name: "创建日期" }
 } as const;
 
-// --- 虚拟滚动核心状态 ---
+// --- 虚拟滚动状态 ---
 const scrollContainerRef = ref<HTMLElement | null>(null);
 const itemHeight = 40;
 const bufferSize = 5;

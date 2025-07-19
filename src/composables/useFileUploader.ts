@@ -1,8 +1,8 @@
 /*
- * @Description: 文件上传核心 Composable，实现文件级流畅并行，并通过路径创建锁解决后端死锁问题，同时过滤系统文件。
+ * @Description: 文件上传Composable，实现文件级流畅并行，并通过路径创建锁解决后端死锁问题，同时过滤系统文件。
  * @Author: 安知鱼
  * @Date: 2025-07-01 04:30:00
- * @LastEditTime: 2025-07-16 18:17:53
+ * @LastEditTime: 2025-07-19 10:00:26
  * @LastEditors: 安知鱼
  */
 import { ref, computed, onUnmounted, type ComputedRef, reactive } from "vue";
@@ -53,7 +53,7 @@ function createFileInput(
 }
 
 /**
- * @description: 文件上传核心 Composable，管理整个上传流程，包括队列、并发、状态、错误处理和用户交互。
+ * @description: 文件上传 Composable，管理整个上传流程，包括队列、并发、状态、错误处理和用户交互。
  * @param {ComputedRef<FileItem[]>} existingFiles - 一个计算属性，引用当前目录已存在的文件列表，用于预检测冲突。
  * @param {ComputedRef<StoragePolicy | null>} storagePolicy - 一个计算属性，引用当前选中的存储策略。
  * @param {() => void} onQueueFinished - 当队列中所有任务处理完毕后需要执行的回调，通常用于刷新文件列表。

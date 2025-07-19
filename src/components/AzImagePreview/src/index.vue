@@ -303,7 +303,6 @@ function imgLoad() {
 
   const tl = gsap.timeline({
     onComplete: () => {
-      // [优化] 当所有核心动画完成后，再执行“显示操作按钮”的动画
       showControls.value = true;
     }
   });

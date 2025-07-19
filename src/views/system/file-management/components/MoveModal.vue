@@ -277,7 +277,7 @@ const listLoading = ref(false);
 const isMoreLoading = ref(false);
 const isSubmitting = ref(false);
 
-// --- 核心数据模型 ---
+// --- 数据模型 ---
 const sharedDataSource = new Map<string, CachedApiData>();
 const currentPath = ref("/");
 const filesInModal = ref<FileItem[]>([]);

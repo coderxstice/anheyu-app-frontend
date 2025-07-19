@@ -24,7 +24,6 @@
       @mouseleave="handleMouseLeave"
     >
       <div class="item-icon">
-        <!-- 【核心修改】使用新的 FileThumbnail 组件来显示图标或预览图 -->
         <FileThumbnail :file="file" />
 
         <!-- 上传遮罩层保持不变 -->

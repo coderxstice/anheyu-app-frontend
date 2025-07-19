@@ -173,10 +173,6 @@ import SearchOverlay from "./components/SearchOverlay.vue";
 import FileDetailsPanel from "./components/FileDetailsPanel.vue";
 import MoveModal from "./components/MoveModal.vue";
 
-// ========================================================================
-// 1. 核心实例和状态
-// ========================================================================
-
 const fileStore = useFileStore();
 const fileToolbarRef = ref<InstanceType<typeof FileToolbar> | null>(null);
 const fileManagerContainerRef = ref<HTMLElement | null>(null);
@@ -198,11 +194,6 @@ const {
 const viewComponents = { list: FileListView, grid: FileGridView };
 const activeViewComponent = computed(() => viewComponents[viewMode.value]);
 
-// ========================================================================
-// 2. 核心功能 Hooks
-// ========================================================================
-
-// 文件上传核心逻辑
 const {
   uploadQueue,
   showUploadProgress,

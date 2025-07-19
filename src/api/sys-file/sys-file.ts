@@ -12,7 +12,8 @@ import {
   type BaseResponse,
   type ColumnConfig,
   type CreateDirectLinksRequest,
-  type CreateDirectLinksResponse
+  type CreateDirectLinksResponse,
+  type GetThumbnailCredentialResponse
 } from "./type";
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
@@ -55,7 +56,21 @@ export const copyFilesApi = (sourceIDs: string[], destinationID: string) => {
 };
 
 /**
- * 核心重构：从任意 URL 获取文件内容的底层函数
+ * @description 获取指定文件缩略图的访问凭证 (URL token)
+ * @param publicId 文件的公共 ID
+ * @returns {Promise<GetThumbnailCredentialResponse>} 返回一个 Promise，包含可用于访问缩略图的相对 URL
+ */
+export const getThumbnailCredentialApi = (
+  publicId: string
+): Promise<GetThumbnailCredentialResponse> => {
+  return http.request<GetThumbnailCredentialResponse>(
+    "get",
+    baseUrlApi(`thumbnail/${publicId}`)
+  );
+};
+
+/**
+ * 从任意 URL 获取文件内容的底层函数
  * 它不使用全局 http 实例，以避免为预签名 URL 添加不必要的 `Authorization` 头。
  * @param url 要获取内容的完整 URL
  * @returns Promise<Blob>
@@ -286,7 +301,6 @@ export const moveFilesApi = (sourceIDs: string[], destinationID: string) => {
 export const createDirectLinksApi = (
   fileIds: string[]
 ): Promise<CreateDirectLinksResponse> => {
-  // <-- **核心修正：更新函数的返回类型**
   const requestData: CreateDirectLinksRequest = {
     file_ids: fileIds
   };

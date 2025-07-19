@@ -2,12 +2,12 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-07-16 18:11:20
+ * @LastEditTime: 2025-07-19 10:01:12
  * @LastEditors: 安知鱼
  */
 
 // =================================================================
-// I. 前端内部使用的核心类型 (Core Frontend Types)
+// I. 前端内部使用的类型 (Core Frontend Types)
 // =================================================================
 
 export interface ColumnConfig {
@@ -387,3 +387,17 @@ export type CreateDirectLinksData = DirectLinkItem[];
  */
 export type CreateDirectLinksResponse =
   BaseResponse<CreateDirectLinksData | null>;
+
+/**
+ * 获取缩略图凭证接口 (GET /thumbnail/{id}) 的响应 data 结构
+ */
+export interface ThumbnailCredential {
+  url: string; // 凭证token
+  expires: string; // 过期时间
+  status?: "processing"; // 如果正在处理中，则包含此字段
+}
+
+/**
+ * 获取缩略图凭证接口的完整响应体结构
+ */
+export type GetThumbnailCredentialResponse = BaseResponse<ThumbnailCredential>;

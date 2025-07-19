@@ -6,11 +6,12 @@
       <el-icon><Loading /></el-icon>
     </div>
 
-    <!-- 状态 2: 成功获取图片URL (Blob URL)，显示图片 -->
+    <!-- 状态 2: 成功获取图片URL，显示图片 -->
     <img
       v-else-if="imageUrl"
       :src="imageUrl"
       class="thumbnail-image"
+      loading="lazy"
       @error="handleImageError"
     />
 
@@ -27,7 +28,8 @@ import type { PropType } from "vue";
 import { FileItem, FileType } from "@/api/sys-file/type";
 import { useFileIcons } from "../hooks/useFileIcons";
 import { Loading } from "@element-plus/icons-vue";
-import { getToken } from "@/utils/auth";
+import { getThumbnailCredentialApi } from "@/api/sys-file/sys-file"; // 1. 导入新的 API 函数
+import { baseUrlApi } from "@/utils/http/config";
 
 const props = defineProps({
   file: {
@@ -40,27 +42,16 @@ const thumbnailRef = ref<HTMLElement | null>(null);
 const { getFileIcon } = useFileIcons();
 
 const isLoading = ref(false);
-const imageUrl = ref<string | null>(null); // 将存储 Blob URL
+const imageUrl = ref<string | null>(null); // 存储完整的、可访问的缩略图 URL
 let timeoutId: number | null = null;
 const POLLING_INTERVAL = 5000; // 5秒轮询间隔
 
 /**
- * 清理上一个Blob URL，防止内存泄漏。
- * 这是使用 Blob URL 方案时至关重要的一步。
- */
-const cleanupBlobUrl = () => {
-  if (imageUrl.value && imageUrl.value.startsWith("blob:")) {
-    URL.revokeObjectURL(imageUrl.value);
-  }
-  imageUrl.value = null;
-};
-
-/**
  * 检查文件类型是否支持生成预览。
- * @returns {boolean}
  */
 const isPreviewSupported = (): boolean => {
   if (props.file.type === FileType.Dir) return false;
+  // 可以根据后端支持的类型扩展此列表
   const supportedExtensions = [
     "jpg",
     "jpeg",
@@ -69,7 +60,11 @@ const isPreviewSupported = (): boolean => {
     "gif",
     "svg",
     "bmp",
-    "ico"
+    "ico",
+    "heic",
+    "heif",
+    "tiff",
+    "tif"
   ];
   const fileExt = props.file.name.split(".").pop()?.toLowerCase() ?? "";
   return supportedExtensions.includes(fileExt);
@@ -88,68 +83,38 @@ const startFetchingPreview = async () => {
  * 执行API请求、轮询和处理响应的核心逻辑。
  */
 const fetchPreview = async () => {
-  const token = getToken();
-
-  // 在发送请求前，对 Token 进行严格、安全的检查
-  if (!token || !token.accessToken) {
-    console.warn(
-      `预览请求 [${props.file.name}] 中止：Token 或 accessToken 无效。`
-    );
-    isLoading.value = false;
-    return; // 阻止发送没有认证的请求
-  }
-
-  const previewUrl = `/api/thumbnail/${props.file.id}`;
-
   try {
-    const response = await fetch(previewUrl, {
-      headers: {
-        Authorization: `Bearer ${token.accessToken}`
-      }
-    });
+    // 2. 调用新的、类型安全的 API 函数
+    const res = await getThumbnailCredentialApi(props.file.id);
 
-    switch (response.status) {
-      case 200: {
-        const contentType = response.headers.get("content-type");
-        if (contentType?.includes("image")) {
-          // 成功获取图片数据，转换为 Blob URL
-          const imageBlob = await response.blob();
-          cleanupBlobUrl(); // 清理可能存在的旧 URL
-          imageUrl.value = URL.createObjectURL(imageBlob);
-        } else {
-          // 处理 SVG 等直接服务类型
-          const data = await response.json();
-          if (data.status === "ready_direct_serve" && props.file.url) {
-            // 假设 props.file.url 是一个公开可访问的链接
-            cleanupBlobUrl();
-            imageUrl.value = props.file.url;
-          }
-        }
-        isLoading.value = false;
-        break;
-      }
-      case 202:
-        // 正在处理中，继续轮询
-        isLoading.value = true;
-        if (timeoutId) clearTimeout(timeoutId);
-        timeoutId = window.setTimeout(fetchPreview, POLLING_INTERVAL);
-        break;
-      default:
-        // 处理所有其他错误情况 (4xx, 5xx)
-        isLoading.value = false;
-        break;
+    // 3. 处理响应
+    if (res.code === 200 && res.data?.url) {
+      // 成功获取凭证
+      // 将后端返回的相对 URL (/t/...) 与域名拼接成完整 URL
+      const apiBase = baseUrlApi("").replace("/api", ""); // 获取域名部分
+      imageUrl.value = `${apiBase}${res.data.url}`;
+      isLoading.value = false;
+    } else if (res.code === 202) {
+      // 正在处理中，继续轮询
+      isLoading.value = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(fetchPreview, POLLING_INTERVAL);
+    } else {
+      // API 返回了其他错误
+      handleImageError();
     }
   } catch (error) {
-    console.error(`获取文件 [${props.file.name}] 预览失败:`, error);
-    isLoading.value = false;
+    // 网络请求本身失败
+    console.error(`获取文件 [${props.file.name}] 预览凭证失败:`, error);
+    handleImageError();
   }
 };
 
 /**
- * 当 <img> 标签的 src 加载失败时调用（例如，URL有效但内容损坏）。
+ * 当 <img> 标签的 src 加载失败时调用。
  */
 const handleImageError = () => {
-  cleanupBlobUrl();
+  imageUrl.value = null;
   isLoading.value = false;
 };
 
@@ -157,31 +122,24 @@ const handleImageError = () => {
 let observer: IntersectionObserver | null = null;
 
 onMounted(() => {
-  // 仅对支持预览的文件设置观察者
   if (thumbnailRef.value && isPreviewSupported()) {
     observer = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting) {
           startFetchingPreview();
-          // 开始加载后就停止观察，避免重复触发
           if (observer && thumbnailRef.value) {
             observer.unobserve(thumbnailRef.value);
           }
         }
       },
-      {
-        // 元素距离视口底部 200px 时开始加载，提升体验
-        rootMargin: "200px"
-      }
+      { rootMargin: "200px" } // 预加载
     );
     observer.observe(thumbnailRef.value);
   }
 });
 
 onUnmounted(() => {
-  // 组件销毁时，必须清理所有资源
   if (timeoutId) clearTimeout(timeoutId);
-  cleanupBlobUrl(); // 清理 Blob URL
   if (observer && thumbnailRef.value) {
     observer.unobserve(thumbnailRef.value);
   }
@@ -195,7 +153,7 @@ watch(
     if (newId === oldId) return;
 
     // 重置所有状态
-    cleanupBlobUrl();
+    imageUrl.value = null;
     isLoading.value = false;
     if (timeoutId) clearTimeout(timeoutId);
 
@@ -219,6 +177,7 @@ watch(
   align-items: center;
   border-radius: 6px;
   overflow: hidden;
+  background-color: var(--el-fill-color-light);
 }
 
 .thumbnail-image {
@@ -242,7 +201,7 @@ watch(
 
 .thumbnail-placeholder.is-loading .el-icon {
   font-size: 32px;
-  color: var(--el-color-primary);
+  color: var(--el-color-primary-light-3);
   animation: spin 1.5s linear infinite;
 }
 
@@ -259,6 +218,6 @@ watch(
   width: 50px;
   height: 50px;
   font-size: 50px;
-  color: #8c939d;
+  color: #a8abb2;
 }
 </style>

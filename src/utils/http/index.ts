@@ -97,7 +97,7 @@ class AnHttp {
    * @private
    * @static
    * @method handleRefreshToken
-   * @description 统一处理Token刷新的核心逻辑。
+   * @description 统一处理Token刷新逻辑。
    * @returns {Promise<string>} 成功时返回新的accessToken，失败时返回一个被reject的Promise。
    */
   private static async handleRefreshToken(): Promise<string> {

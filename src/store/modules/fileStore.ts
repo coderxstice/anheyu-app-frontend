@@ -118,7 +118,7 @@ export const useFileStore = defineStore("file", {
 
   actions: {
     /**
-     * @description (核心) 仅负责将当前 store 的视图配置同步到后端。不执行任何其他操作。
+     * @description 仅负责将当前 store 的视图配置同步到后端。不执行任何其他操作。
      */
     async _syncViewConfigToBackend() {
       console.log(

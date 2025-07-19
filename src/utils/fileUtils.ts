@@ -2,7 +2,7 @@
  * @Description: 文件处理相关的工具函数
  * @Author: 安知鱼
  * @Date: 2025-06-26 18:32:39
- * @LastEditTime: 2025-07-09 16:13:10
+ * @LastEditTime: 2025-07-19 09:59:38
  * @LastEditors: 安知鱼
  */
 
@@ -71,13 +71,9 @@ export const buildFullUri = (logicalPath: string): string => {
   return `${prefix}${logicalPath}`;
 };
 
-// =================================================================
-// +++ 新增: 断点续传相关工具函数 +++
-// =================================================================
-
 /**
  * 为文件生成一个基于其属性的唯一标识（指纹）。
- * **核心修改**: 移除 lastModified，只使用 name 和 size，以提高匹配的可靠性。
+ * 只使用 name 和 size，以提高匹配的可靠性。
  * @param file 文件对象
  * @returns 文件的唯一标识字符串，例如 "file-document.pdf-123456"
  */

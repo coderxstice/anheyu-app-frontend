@@ -130,7 +130,6 @@
                 <span v-else> 没有上传任务 </span>
               </div>
               <TransitionGroup name="list" tag="div">
-                <!-- [核心修改] v-for 循环现在使用计算属性 processedQueue -->
                 <UploadItemComponent
                   v-for="item in processedQueue"
                   :key="item.id"
@@ -206,7 +205,7 @@ const activeUploadsCount = computed(
 );
 
 /**
- * @description: [核心新增] 一个计算属性，根据“隐藏”和“排序”选项来处理原始队列
+ * @description: 一个计算属性，根据“隐藏”和“排序”选项来处理原始队列
  */
 const processedQueue = computed(() => {
   let queue = [...props.queue];

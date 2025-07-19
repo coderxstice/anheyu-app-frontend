@@ -96,7 +96,7 @@ const x = ref(0);
 const y = ref(0);
 const localItems = ref<MenuItem[]>([]);
 const menuContext = ref<any>(null);
-// 核心新增: 用于动态控制动画变换原点的 ref
+// 用于动态控制动画变换原点的 ref
 const transformOrigin = ref("top left");
 
 const blankMenu: MenuItem[] = [
@@ -148,7 +148,7 @@ const itemMenu: MenuItem[] = [
   }
 ];
 
-// 核心修改: 完整的 openMenu 逻辑，包含边缘检测
+// 完整的 openMenu 逻辑，包含边缘检测
 const openMenu = async (event: MouseEvent) => {
   event.preventDefault();
 
@@ -236,7 +236,7 @@ const onItemClick = (item: MenuItem) => {
   closeMenu();
 };
 
-// 核心修改: 动画的 transformOrigin 使用动态 ref
+// 动画的 transformOrigin 使用动态 ref
 const onMenuEnter = (el: Element, done: () => void) => {
   gsap.fromTo(
     el,
