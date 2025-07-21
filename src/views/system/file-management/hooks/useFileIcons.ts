@@ -2,7 +2,7 @@
  * @Description: 文件图标相关的 Hook
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:30:17
- * @LastEditTime: 2025-07-21 13:06:26
+ * @LastEditTime: 2025-07-21 18:07:43
  * @LastEditors: 安知鱼
  */
 import type { Component } from "vue";
@@ -132,5 +132,27 @@ export function useFileIcons() {
     return FileOther;
   };
 
-  return { getFileIcon };
+  const getLanguageByExtension = (ext: string): string => {
+    const langMap: Record<string, string> = {
+      js: "javascript",
+      ts: "typescript",
+      py: "python",
+      md: "markdown",
+      json: "json",
+      html: "html",
+      css: "css",
+      java: "java",
+      go: "go",
+      cpp: "cpp",
+      c: "c",
+      cs: "csharp",
+      sh: "shell",
+      rb: "ruby",
+      rs: "rust",
+      vue: "vue"
+    };
+    return langMap[ext] || "plaintext";
+  };
+
+  return { getFileIcon, getLanguageByExtension };
 }

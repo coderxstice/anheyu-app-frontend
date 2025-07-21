@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-11 11:59:32
- * @LastEditTime: 2025-07-21 13:07:34
+ * @LastEditTime: 2025-07-21 18:06:17
  * @LastEditors: 安知鱼
  */
 import { cdn } from "./cdn";
@@ -18,6 +18,7 @@ import removeConsole from "vite-plugin-remove-console";
 import { codeInspectorPlugin } from "code-inspector-plugin";
 // import { vitePluginFakeServer } from "vite-plugin-fake-server";
 import { VitePWA } from "vite-plugin-pwa";
+import monacoEditorPlugin from "vite-plugin-monaco-editor";
 
 import { promises as fs } from "node:fs";
 import { resolve } from "node:path";
@@ -81,6 +82,17 @@ export function getPluginsList(
       devOptions: {
         enabled: true
       }
+    }),
+
+    // @ts-ignore
+    monacoEditorPlugin.default({
+      languageWorkers: [
+        "editorWorkerService",
+        "css",
+        "html",
+        "json",
+        "typescript"
+      ]
     }),
 
     // 自定义插件 - 异步加载 CSS

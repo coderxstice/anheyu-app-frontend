@@ -84,7 +84,7 @@
           @set-sort-key="handleSetSortKey"
           @open-column-settings="handleOpenColumnSettings"
           @set-columns="handleSetColumns"
-          @preview-file="previewFile"
+          @preview-file="handlePreviewFile"
           @contextmenu="handleContextMenuTrigger"
         />
       </div>
@@ -136,6 +136,7 @@
 
     <AzImagePreview ref="imagePreviewRef" page="sys-file" />
     <AzVideoPreview ref="videoPreviewRef" />
+    <AzTextPreview ref="textPreviewRef" />
   </div>
 </template>
 
@@ -151,7 +152,7 @@ import {
   type SortKey,
   type UploaderActions
 } from "@/store/modules/fileStore";
-import type { ColumnConfig } from "@/api/sys-file/type";
+import type { ColumnConfig, FileItem } from "@/api/sys-file/type";
 import { regenerateThumbnailApi } from "@/api/sys-file/sys-file";
 
 // 自定义 Hooks
@@ -182,12 +183,14 @@ import FileDetailsPanel from "./components/FileDetailsPanel.vue";
 import MoveModal from "./components/MoveModal.vue";
 import AzImagePreview from "@/components/AzImagePreview";
 import AzVideoPreview from "@/components/AzVideoPreview";
+import AzTextPreview from "@/components/AzTextPreview";
 
 const fileStore = useFileStore();
 const fileToolbarRef = ref<InstanceType<typeof FileToolbar> | null>(null);
 const fileManagerContainerRef = ref<HTMLElement | null>(null);
 const imagePreviewRef = ref<InstanceType<typeof AzImagePreview> | null>(null);
 const videoPreviewRef = ref<InstanceType<typeof AzVideoPreview> | null>(null);
+const textPreviewRef = ref<InstanceType<typeof AzTextPreview> | null>(null);
 
 const {
   sortedFiles,
@@ -259,7 +262,15 @@ const { isDownloading, onActionDownload, handleDownloadFolder } =
     getSelectedItems: getSelectedFileItems
   });
 
-const { previewFile } = useFilePreview(imagePreviewRef, videoPreviewRef);
+const { previewFile } = useFilePreview();
+
+const handlePreviewFile = (item: FileItem) => {
+  previewFile(item, {
+    imagePreviewRef,
+    videoPreviewRef,
+    textPreviewRef
+  });
+};
 
 // 各种弹窗（移动、复制、详情）
 const {
