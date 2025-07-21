@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-11 11:59:32
- * @LastEditTime: 2025-07-09 17:55:50
+ * @LastEditTime: 2025-07-21 13:07:34
  * @LastEditors: 安知鱼
  */
 import { cdn } from "./cdn";
@@ -56,7 +56,8 @@ export function getPluginsList(
         runtimeCaching: [
           {
             // 匹配 /static/img/ 目录下的所有图片文件
-            urlPattern: /\/static\/img\/.*\.(?:png|jpg|jpeg|svg|gif|webp)$/i,
+            urlPattern:
+              /\/static\/img\/.*\.(?:png|jpg|jpeg|svg|gif|webp|avif)$/i,
             // 使用 CacheFirst 策略
             // 1. 请求来了，先去缓存里找。
             // 2. 如果缓存里有，直接从缓存返回（速度极快）。

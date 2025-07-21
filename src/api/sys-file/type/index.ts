@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-07-19 12:25:49
+ * @LastEditTime: 2025-07-21 10:32:09
  * @LastEditors: 安知鱼
  */
 
@@ -401,3 +401,10 @@ export interface ThumbnailCredential {
  * 获取缩略图凭证接口的完整响应体结构
  */
 export type GetThumbnailCredentialResponse = BaseResponse<ThumbnailCredential>;
+
+export interface FilePreviewUrlsData {
+  urls: string[];
+  initialIndex: number;
+}
+
+export type FilePreviewUrlsResponse = BaseResponse<FilePreviewUrlsData>;

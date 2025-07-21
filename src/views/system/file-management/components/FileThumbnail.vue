@@ -54,7 +54,8 @@ const isPreviewSupported = (): boolean => {
     "heic",
     "heif",
     "tiff",
-    "tif"
+    "tif",
+    "avif"
   ];
   const fileExt = props.file.name.split(".").pop()?.toLowerCase() ?? "";
   return supportedExtensions.includes(fileExt);

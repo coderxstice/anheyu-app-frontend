@@ -2,7 +2,7 @@
  * @Description: 文件图标相关的 Hook
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:30:17
- * @LastEditTime: 2025-06-27 10:24:48
+ * @LastEditTime: 2025-07-21 13:06:26
  * @LastEditors: 安知鱼
  */
 import type { Component } from "vue";
@@ -96,6 +96,7 @@ const iconMap: Record<string, Component> = {
   webp: FileImage,
   bmp: FileImage,
   ico: FileImage,
+  avif: FileImage,
 
   // 可执行文件
   exe: FileExe,

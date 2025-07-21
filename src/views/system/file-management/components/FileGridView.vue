@@ -74,8 +74,6 @@ import { FileItem, FileType } from "@/api/sys-file/type";
 import { Loading } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import { extractLogicalPathFromUri } from "@/utils/fileUtils";
-
-// 【新增】导入新的 FileThumbnail 组件
 import FileThumbnail from "./FileThumbnail.vue";
 
 const props = defineProps({
@@ -112,6 +110,7 @@ const emit = defineEmits<{
   (e: "select-all"): void;
   (e: "navigate-to", path: string): void;
   (e: "scroll-to-load"): void;
+  (e: "preview-file", item: FileItem): void;
 }>();
 
 // 处理滚动加载
@@ -122,9 +121,6 @@ const handleLocalScroll = (event: Event) => {
     emit("scroll-to-load");
   }
 };
-
-// 【移除】不再需要 useFileIcons，因为逻辑已移至 FileThumbnail
-// const { getFileIcon } = useFileIcons();
 
 // GSAP 动画效果
 const handleMouseDown = (event: MouseEvent) => {
@@ -176,6 +172,8 @@ const handleItemDblClick = (file: FileItem) => {
   if (file.type === FileType.Dir) {
     const logicalPath = extractLogicalPathFromUri(file.path);
     emit("navigate-to", logicalPath);
+  } else if (file.type === FileType.File) {
+    emit("preview-file", file);
   }
 };
 

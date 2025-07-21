@@ -13,7 +13,8 @@ import {
   type ColumnConfig,
   type CreateDirectLinksRequest,
   type CreateDirectLinksResponse,
-  type GetThumbnailCredentialResponse
+  type GetThumbnailCredentialResponse,
+  type FilePreviewUrlsResponse
 } from "./type";
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
@@ -308,5 +309,22 @@ export const createDirectLinksApi = (
   return http.post<CreateDirectLinksResponse, CreateDirectLinksRequest>(
     baseUrlApi("direct-links"),
     requestData
+  );
+};
+
+/**
+ * @description 获取指定文件所在目录下的所有文件的预览URL列表
+ * @param {string} publicId 文件的 publicID
+ * @returns {Promise<FilePreviewUrlsResponse>}
+ */
+export const getFilePreviewUrlsApi = (
+  publicId: string
+): Promise<FilePreviewUrlsResponse> => {
+  return http.request<FilePreviewUrlsResponse>(
+    "get",
+    baseUrlApi("file/preview-urls"),
+    {
+      params: { id: publicId }
+    }
   );
 };

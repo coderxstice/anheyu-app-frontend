@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-24 14:15:05
- * @LastEditTime: 2025-06-26 17:31:01
+ * @LastEditTime: 2025-07-21 13:08:00
  * @LastEditors: 安知鱼
  */
 import { h } from "vue";
@@ -20,7 +20,7 @@ import {
 } from "@element-plus/icons-vue";
 import { FileType } from "@/api/sys-file/type";
 
-// 假设你也可能想为某些特定文件类型使用 Iconify 图标，这是一个兼容的例子
+// 为某些特定文件类型使用 Iconify 图标，这是一个兼容的例子
 // import PythonIcon from '@iconify-icons/logos/python'; // 示例
 
 // 文件大小格式化
@@ -74,6 +74,9 @@ export function getFileIcon(item: { type: number; extension?: string }) {
     gif: PictureIcon,
     bmp: PictureIcon,
     svg: PictureIcon,
+    webp: PictureIcon,
+    ico: PictureIcon,
+    avif: PictureIcon,
     // Videos
     mp4: VideoPlay,
     avi: VideoPlay,

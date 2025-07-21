@@ -84,6 +84,7 @@
           @set-sort-key="handleSetSortKey"
           @open-column-settings="handleOpenColumnSettings"
           @set-columns="handleSetColumns"
+          @preview-file="previewFile"
         />
       </div>
     </div>
@@ -131,6 +132,9 @@
       @global-command="handleUploadGlobalCommand"
       @add-files="() => handleUploadFile()"
     />
+
+    <AzImagePreview ref="imagePreviewRef" page="sys-file" />
+    <AzVideoPreview ref="videoPreviewRef" />
   </div>
 </template>
 
@@ -160,6 +164,7 @@ import { useUploadPanel } from "./hooks/useUploadPanel";
 import { useDataLoading } from "./hooks/useDataLoading";
 import { useSwipeNavigationBlocker } from "./hooks/useSwipeNavigationBlocker";
 import { useFileDirectLinks } from "./hooks/useFileDirectLinks";
+import { useFilePreview } from "./hooks/useFilePreview";
 
 // 子组件
 import FileToolbar from "./components/FileToolbar.vue";
@@ -172,10 +177,14 @@ import ContextMenu from "./components/ContextMenu.vue";
 import SearchOverlay from "./components/SearchOverlay.vue";
 import FileDetailsPanel from "./components/FileDetailsPanel.vue";
 import MoveModal from "./components/MoveModal.vue";
+import AzImagePreview from "@/components/AzImagePreview";
+import AzVideoPreview from "@/components/AzVideoPreview";
 
 const fileStore = useFileStore();
 const fileToolbarRef = ref<InstanceType<typeof FileToolbar> | null>(null);
 const fileManagerContainerRef = ref<HTMLElement | null>(null);
+const imagePreviewRef = ref<InstanceType<typeof AzImagePreview> | null>(null);
+const videoPreviewRef = ref<InstanceType<typeof AzVideoPreview> | null>(null);
 
 const {
   sortedFiles,
@@ -246,6 +255,8 @@ const { isDownloading, onActionDownload, handleDownloadFolder } =
   useFileDownload({
     getSelectedItems: getSelectedFileItems
   });
+
+const { previewFile } = useFilePreview(imagePreviewRef, videoPreviewRef);
 
 // 各种弹窗（移动、复制、详情）
 const {

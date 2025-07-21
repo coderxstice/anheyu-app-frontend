@@ -196,6 +196,7 @@ const emit = defineEmits<{
   (e: "set-sort-key", key: SortKey): void;
   (e: "open-column-settings"): void;
   (e: "set-columns", columns: ColumnConfig[]): void;
+  (e: "preview-file", item: FileItem): void;
 }>();
 
 const columnTypeMap = {
@@ -429,17 +430,22 @@ const handleItemClick = (item: FileItem, event: MouseEvent) => {
   else if (event.metaKey || event.ctrlKey) emit("toggle-selection", item.id);
   else emit("select-single", item.id);
 };
+
 const handleItemDblClick = (item: FileItem) => {
   if (props.disabledFileIds?.has(item.id)) {
     ElMessage.warning("不能进入正在移动的文件夹。");
     return;
   }
   if (item.metadata?.["sys:upload_session_id"]) return;
+
   if (item.type === FileType.Dir) {
     const logicalPath = extractLogicalPathFromUri(item.path);
     emit("navigate-to", logicalPath);
+  } else if (item.type === FileType.File) {
+    emit("preview-file", item);
   }
 };
+
 const handleKeyDown = (event: KeyboardEvent) => {
   const target = event.target as HTMLElement;
   if (["INPUT", "TEXTAREA"].includes(target.tagName)) return;

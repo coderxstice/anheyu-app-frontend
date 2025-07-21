@@ -26,13 +26,18 @@
           <div v-if="!loading" class="caption">
             <div class="tag-info tag-info-bottom">
               <span
+                v-if="props.page === 'album'"
                 class="tag-device"
                 style="margin-right: 4px; margin-bottom: 2px"
               >
                 <Fire />
                 热度 {{ previewSrcList[currentIndex].viewCount }}
               </span>
-              <span class="tag-location" style="margin-right: 4px">
+              <span
+                v-if="props.page === 'album'"
+                class="tag-location"
+                style="margin-right: 4px"
+              >
                 <Downloads />
                 下载量 {{ downloadCount }}
               </span>
@@ -94,6 +99,13 @@ import { updateWallpaperStat } from "@/api/album-home";
 import DownloadProgressBar from "./downloadProgressBar.vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
+const props = defineProps({
+  page: {
+    type: String,
+    default: "album"
+  }
+});
+
 const progressRef = ref();
 const popupRef = ref<HTMLElement | null>(null);
 const imgRef = ref<HTMLImageElement | null>(null);
@@ -129,16 +141,24 @@ const formatFileSize = (size: number) => {
   }
 };
 const downImage = (imageInfo: any) => {
-  updateWallpaperStat({
-    id: imageInfo.id,
-    type: "download"
-  }).then(() => {
-    downloadCount.value++;
+  if (props.page === "album") {
+    updateWallpaperStat({
+      id: imageInfo.id,
+      type: "download"
+    }).then(() => {
+      downloadCount.value++;
+      const finalDownloadUrl = imageInfo.downloadUrl;
+      const extension = getFileExtension(finalDownloadUrl);
+      const fileName = `${siteName.value}.${extension}`;
+      progressRef.value.downloadImageWithProgress(finalDownloadUrl, fileName);
+    });
+  } else {
+    // 不需要更新下载次数
     const finalDownloadUrl = imageInfo.downloadUrl;
     const extension = getFileExtension(finalDownloadUrl);
     const fileName = `${siteName.value}.${extension}`;
     progressRef.value.downloadImageWithProgress(finalDownloadUrl, fileName);
-  });
+  }
 };
 const getImageSize = (url: string) => {
   return new Promise<{ width: number; height: number }>((resolve, reject) => {
@@ -226,16 +246,18 @@ const open = async (list: Array<any>, index = 0, next = false) => {
 
   isSwitch.value = next;
 
-  updateWallpaperStat({
-    id: list[index].id,
-    type: "view"
-  })
-    .then(() => {
-      list[index].viewCount++;
+  if (props.page === "album") {
+    updateWallpaperStat({
+      id: list[index].id,
+      type: "view"
     })
-    .catch(err => {
-      console.error("Failed to update view count:", err);
-    });
+      .then(() => {
+        list[index].viewCount++;
+      })
+      .catch(err => {
+        console.error("Failed to update view count:", err);
+      });
+  }
 
   await nextTick();
 
