@@ -108,6 +108,7 @@
           @dblclick="handleItemDblClick(item)"
           @mousedown="handleMouseDown"
           @mouseup="handleMouseUp"
+          @contextmenu.prevent.stop="emit('contextmenu', $event, item)"
         >
           <div
             v-for="col in localColumns"
@@ -197,6 +198,7 @@ const emit = defineEmits<{
   (e: "open-column-settings"): void;
   (e: "set-columns", columns: ColumnConfig[]): void;
   (e: "preview-file", item: FileItem): void;
+  (e: "contextmenu", event: MouseEvent, file: FileItem): void;
 }>();
 
 const columnTypeMap = {

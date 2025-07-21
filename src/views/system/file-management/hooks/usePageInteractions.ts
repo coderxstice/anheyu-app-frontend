@@ -2,7 +2,7 @@
  * @Description: 管理页面级别的交互，如拖拽上传的UI状态、搜索和点击空白区域。
  * @Author: 安知鱼
  * @Date: 2025-06-25 14:26:59
- * @LastEditTime: 2025-07-05 12:12:27
+ * @LastEditTime: 2025-07-21 15:35:15
  * @LastEditors: 安知鱼
  */
 import { ref, type Ref } from "vue";
@@ -79,7 +79,7 @@ export function usePageInteractions({
    * @param {MouseEvent} event - DOM 鼠标事件对象。
    */
   const openSearchFromElement = (event: MouseEvent) => {
-    // 关键修复：存储事件的 clientX/Y 坐标，而不是 DOM 元素
+    // 存储事件的 clientX/Y 坐标，而不是 DOM 元素
     searchOrigin.value = {
       x: event.clientX,
       y: event.clientY

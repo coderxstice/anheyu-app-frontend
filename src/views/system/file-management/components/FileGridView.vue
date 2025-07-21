@@ -22,6 +22,7 @@
       @mousedown="handleMouseDown"
       @mouseup="handleMouseUp"
       @mouseleave="handleMouseLeave"
+      @contextmenu.prevent.stop="emit('contextmenu', $event, file)"
     >
       <div class="item-icon">
         <FileThumbnail :file="file" />
@@ -110,6 +111,7 @@ const emit = defineEmits<{
   (e: "navigate-to", path: string): void;
   (e: "scroll-to-load"): void;
   (e: "preview-file", item: FileItem): void;
+  (e: "contextmenu", event: MouseEvent, file: FileItem): void;
 }>();
 
 // 处理滚动加载

@@ -141,7 +141,7 @@ onMounted(() => {
         />
       </div>
 
-      <AzImagePreview ref="previewRef" />
+      <AzImagePreview ref="previewRef" page="album" />
     </div>
   </div>
 </template>

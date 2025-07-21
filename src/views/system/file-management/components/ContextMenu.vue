@@ -54,6 +54,8 @@
 import { ref, watch, nextTick } from "vue";
 import gsap from "gsap";
 import AnIconBox from "@/components/AnIconBox/index.vue";
+import { type ContextMenuTrigger } from "../hooks/useContextMenuHandler";
+import type { FileItem } from "@/api/sys-file/type";
 
 import Upload from "@iconify-icons/ep/upload";
 import FolderAdd from "@iconify-icons/ep/folder-add";
@@ -68,6 +70,7 @@ import CopyDocument from "@iconify-icons/ep/copy-document";
 import Rank from "@iconify-icons/ep/rank";
 import Info from "@iconify-icons/ep/info-filled";
 import Link from "@iconify-icons/ep/link";
+import Sync from "@iconify-icons/ep/refresh-right";
 
 export interface MenuItem {
   label?: string;
@@ -79,7 +82,7 @@ export interface MenuItem {
 }
 
 const props = defineProps<{
-  triggerEvent: MouseEvent | null;
+  trigger: ContextMenuTrigger | null;
   selectedFileIds: Set<string>;
 }>();
 
@@ -87,7 +90,6 @@ const emit = defineEmits<{
   (e: "select", action: string, context?: any): void;
   (e: "closed"): void;
   (e: "request-select-single", fileId: string): void;
-  (e: "request-clear-selection"): void;
 }>();
 
 const contextMenuRef = ref<HTMLElement | null>(null);
@@ -96,7 +98,6 @@ const x = ref(0);
 const y = ref(0);
 const localItems = ref<MenuItem[]>([]);
 const menuContext = ref<any>(null);
-// 用于动态控制动画变换原点的 ref
 const transformOrigin = ref("top left");
 
 const blankMenu: MenuItem[] = [
@@ -127,8 +128,7 @@ const blankMenu: MenuItem[] = [
     color: "#5FDEB8"
   },
   { divider: true },
-  { label: "刷新", action: "refresh", icon: Refresh, color: "#4F6BF6" },
-  { label: "删除", action: "delete", icon: Delete, color: "#F6775C" }
+  { label: "刷新", action: "refresh", icon: Refresh, color: "#4F6BF6" }
 ];
 const itemMenu: MenuItem[] = [
   { label: "重命名", action: "rename", icon: EditPen, color: "#4F6BF6" },
@@ -147,9 +147,15 @@ const itemMenu: MenuItem[] = [
     color: "#F6775C"
   }
 ];
+const regenerateThumbnailMenu: MenuItem = {
+  label: "重新生成缩略图",
+  action: "regenerate-thumbnail",
+  icon: Sync,
+  color: "#f6985c"
+};
 
-// 完整的 openMenu 逻辑，包含边缘检测
-const openMenu = async (event: MouseEvent) => {
+const openMenu = async (trigger: ContextMenuTrigger) => {
+  const { event, file } = trigger;
   event.preventDefault();
 
   if (localVisible.value) {
@@ -160,23 +166,20 @@ const openMenu = async (event: MouseEvent) => {
   const initialX = event.clientX;
   const initialY = event.clientY;
 
-  const target = event.target as HTMLElement;
-  const itemElement = target.closest(".file-item, .grid-item");
-
-  if (itemElement) {
-    const itemId = (itemElement as HTMLElement).dataset.id;
+  if (file) {
+    const itemId = file.id;
     let finalSelectedIds = new Set(props.selectedFileIds);
-
     if (itemId && !props.selectedFileIds.has(itemId)) {
       emit("request-select-single", itemId);
       finalSelectedIds = new Set([itemId]);
     }
-    localItems.value = itemMenu;
+    localItems.value = [...itemMenu];
+    const isThumbnailFailed = file.metadata?.thumb_status === "failed";
+    if (isThumbnailFailed) {
+      localItems.value.unshift(regenerateThumbnailMenu, { divider: true });
+    }
     menuContext.value = { selectedIds: [...finalSelectedIds] };
   } else {
-    if (props.selectedFileIds.size > 0) {
-      emit("request-clear-selection");
-    }
     localItems.value = blankMenu;
     menuContext.value = null;
   }
@@ -184,38 +187,26 @@ const openMenu = async (event: MouseEvent) => {
   localVisible.value = true;
   await nextTick();
 
-  // --- 边缘检测与位置调整 ---
   const menuEl = contextMenuRef.value;
   if (!menuEl) return;
-
   const menuWidth = menuEl.offsetWidth;
   const menuHeight = menuEl.offsetHeight;
   const { innerWidth: winWidth, innerHeight: winHeight } = window;
-
   let finalX = initialX;
   let finalY = initialY;
   let originX = "left";
   let originY = "top";
 
-  // 检查并修正右侧溢出
   if (initialX + menuWidth > winWidth) {
     finalX = initialX - menuWidth;
     originX = "right";
   }
-
-  // 检查并修正底部溢出
   if (initialY + menuHeight > winHeight) {
     finalY = initialY - menuHeight;
     originY = "bottom";
   }
-
-  // 防止修正后菜单超出左侧或顶部
-  if (finalX < 5) finalX = 5;
-  if (finalY < 5) finalY = 5;
-
-  // 更新最终位置和动画原点
-  x.value = finalX;
-  y.value = finalY;
+  x.value = finalX < 5 ? 5 : finalX;
+  y.value = finalY < 5 ? 5 : finalY;
   transformOrigin.value = `${originY} ${originX}`;
 };
 
@@ -226,7 +217,7 @@ const closeMenu = () => {
 };
 
 const handleOverlayRightClick = (event: MouseEvent) => {
-  openMenu(event);
+  openMenu({ event });
 };
 
 const onItemClick = (item: MenuItem) => {
@@ -236,7 +227,6 @@ const onItemClick = (item: MenuItem) => {
   closeMenu();
 };
 
-// 动画的 transformOrigin 使用动态 ref
 const onMenuEnter = (el: Element, done: () => void) => {
   gsap.fromTo(
     el,
@@ -262,11 +252,11 @@ const onMenuLeave = (el: Element, done: () => void) => {
 };
 
 watch(
-  () => props.triggerEvent,
-  newEvent => {
-    if (newEvent) {
-      openMenu(newEvent);
-    } else if (!newEvent && localVisible.value) {
+  () => props.trigger,
+  newTrigger => {
+    if (newTrigger) {
+      openMenu(newTrigger);
+    } else if (localVisible.value) {
       closeMenu();
     }
   }

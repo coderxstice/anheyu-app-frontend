@@ -6,7 +6,7 @@
     @dragover="dragHandlers.onDragOver"
     @dragleave="dragHandlers.onDragLeave"
     @drop="dragHandlers.onDrop"
-    @contextmenu.prevent="handleContextMenuTrigger"
+    @contextmenu.prevent="handleContextMenuTrigger($event)"
     @click="handleContainerClick"
   >
     <!-- 头部操作区 -->
@@ -85,6 +85,7 @@
           @open-column-settings="handleOpenColumnSettings"
           @set-columns="handleSetColumns"
           @preview-file="previewFile"
+          @contextmenu="handleContextMenuTrigger"
         />
       </div>
     </div>
@@ -112,7 +113,7 @@
       @close="isSearchVisible = false"
     />
     <ContextMenu
-      :trigger-event="contextMenuTriggerEvent"
+      :trigger="contextMenuTrigger"
       :selected-file-ids="selectedFiles"
       @request-select-single="selectSingle"
       @select="onMenuSelect"
@@ -142,6 +143,7 @@
 import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { UploadFilled } from "@element-plus/icons-vue";
+import { ElMessage } from "element-plus";
 
 // 工具 & Store
 import {
@@ -150,6 +152,7 @@ import {
   type UploaderActions
 } from "@/store/modules/fileStore";
 import type { ColumnConfig } from "@/api/sys-file/type";
+import { regenerateThumbnailApi } from "@/api/sys-file/sys-file";
 
 // 自定义 Hooks
 import { useFileUploader } from "@/composables/useFileUploader";
@@ -333,7 +336,7 @@ const {
 });
 useSwipeNavigationBlocker(fileManagerContainerRef);
 
-// 右键菜单
+// 右键菜单相关逻辑
 const onActionRename = () => {
   if (isSingleSelection.value) handleRename(getSelectedFileItems()[0]);
 };
@@ -350,8 +353,30 @@ const { onActionGetLinks } = useFileDirectLinks({
   getSelectedItems: getSelectedFileItems
 });
 
+// 实现“重新生成缩略图”的逻辑
+const onActionRegenerateThumbnail = async () => {
+  const selectedItems = getSelectedFileItems();
+  if (selectedItems.length !== 1) {
+    ElMessage.warning("请选择一个文件进行操作。");
+    return;
+  }
+
+  const fileToRegenerate = selectedItems[0];
+  try {
+    const res = await regenerateThumbnailApi(fileToRegenerate.id);
+    if (res.code === 202) {
+      ElMessage.success("重新生成请求已提交，请稍后刷新查看。");
+      handleRefresh(); // 触发一次刷新来更新文件列表状态
+    } else {
+      ElMessage.error(res.message || "请求失败");
+    }
+  } catch (error) {
+    ElMessage.error("操作失败，请检查网络。");
+  }
+};
+
 const {
-  contextMenuTriggerEvent,
+  contextMenuTrigger,
   onMenuSelect,
   handleContextMenuClosed,
   openBlankMenu,
@@ -374,14 +399,12 @@ const {
     if (isSingleSelection.value)
       handleShowDetailsForId(getSelectedFileItems()[0].id);
   },
+  onRegenerateThumbnail: onActionRegenerateThumbnail, // 注入实现
   hasSelection,
   clearSelection
 });
 
-// ========================================================================
-// 3. 视图设置处理器
-// ========================================================================
-
+// 视图设置处理器
 const handleSetViewMode = (mode: "list" | "grid") =>
   fileStore.setViewMode(mode);
 const handleSetPageSize = (size: number) => fileStore.setPageSize(size);

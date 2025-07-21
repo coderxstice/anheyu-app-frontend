@@ -328,3 +328,20 @@ export const getFilePreviewUrlsApi = (
     }
   );
 };
+
+/**
+ * @description 手动触发指定文件缩略图的重新生成
+ * @param {string} publicId 要重新生成缩略图的文件的 publicID
+ * @returns {Promise<BaseResponse<{ status: string }>>}
+ */
+export const regenerateThumbnailApi = (
+  publicId: string
+): Promise<BaseResponse<{ status: string }>> => {
+  return http.request<BaseResponse<{ status: string }>>(
+    "post",
+    baseUrlApi("thumbnail/regenerate"),
+    {
+      data: { id: publicId }
+    }
+  );
+};
