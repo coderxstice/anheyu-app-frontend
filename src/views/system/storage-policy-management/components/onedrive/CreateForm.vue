@@ -176,7 +176,6 @@ defineExpose({ submitForm });
 </template>
 
 <style lang="scss" scoped>
-/* 样式保持不变 */
 .create-form {
   padding: 0 10px;
 }

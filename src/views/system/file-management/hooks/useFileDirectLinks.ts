@@ -171,7 +171,6 @@ export function useFileDirectLinks({
     });
   };
 
-  // onActionGetLinks 函数保持不变
   const onActionGetLinks = async () => {
     const selectedItems = getSelectedItems();
     if (selectedItems.length === 0) {

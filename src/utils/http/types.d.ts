@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-06-20 17:47:32
+ * @LastEditTime: 2025-07-21 15:16:45
  * @LastEditors: 安知鱼
  */
 import type {
@@ -31,7 +31,6 @@ export interface AnHttpResponse extends AxiosResponse {
 }
 
 export interface AnHttpRequestConfig extends InternalAxiosRequestConfig {
-  // 自定义的属性保持不变
   beforeRequestCallback?: (request: AnHttpRequestConfig) => void;
   beforeResponseCallback?: (response: AnHttpResponse) => void;
 }

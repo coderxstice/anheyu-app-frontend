@@ -1,6 +1,5 @@
 <template>
   <div class="file-heard-actions w-full flex items-center">
-    <!-- “新建”按钮的逻辑保持不变，因为它已经通过 emit 与父组件通信 -->
     <el-button
       v-ripple
       :icon="useRenderIcon(UploadIcon)"
@@ -81,7 +80,6 @@
       </Transition>
     </div>
 
-    <!-- 搜索浮层逻辑保持不变 -->
     <SearchOverlay
       :visible="isSearchVisible"
       :origin="searchOrigin"
@@ -130,7 +128,6 @@ const emit = defineEmits<{
   (e: "delete"): void;
 }>();
 
-// --- “新建”和“搜索”按钮逻辑 (大部分保持不变) ---
 const handleNewButtonClick = (event: MouseEvent) => {
   emit("open-new-menu", event);
 };
@@ -144,7 +141,7 @@ const openSearchOverlay = (event: MouseEvent) => {
 
 // --- 选择工具栏按钮处理函数 (现在都通过 emit 实现，所以不再需要本地函数) ---
 
-// --- GSAP 动画钩子 (保持不变) ---
+// --- GSAP 动画钩子 ---
 const onToolbarEnter = (el: HTMLElement, done: () => void) => {
   gsap.fromTo(
     el,
@@ -164,7 +161,6 @@ const onToolbarLeave = (el: HTMLElement, done: () => void) => {
 </script>
 
 <style scoped lang="scss">
-/* 样式保持不变 */
 .file-heard-actions {
   display: flex;
   height: 40px;

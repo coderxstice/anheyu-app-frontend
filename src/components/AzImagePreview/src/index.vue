@@ -130,7 +130,6 @@ const siteName = computed(
   () => siteConfigStore.getSiteConfig?.APP_NAME || "鱼鱼相册"
 );
 
-// formatFileSize, downImage, getImageSize 保持不变
 const formatFileSize = (size: number) => {
   if (size >= 1024 * 1024) {
     return (size / 1024 / 1024).toFixed(2) + " MB";
@@ -170,7 +169,6 @@ const getImageSize = (url: string) => {
   });
 };
 
-// handleResize, handleKeydown, onMounted, onUnmounted 保持不变
 const handleResize = () => {
   if (visible.value && popupRef.value && !loading.value) {
     const isMobile = window.innerWidth < 600;

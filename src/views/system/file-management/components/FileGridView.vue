@@ -26,7 +26,6 @@
       <div class="item-icon">
         <FileThumbnail :file="file" />
 
-        <!-- 上传遮罩层保持不变 -->
         <div
           v-if="file.metadata?.['sys:upload_session_id']"
           class="uploading-overlay"

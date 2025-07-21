@@ -259,7 +259,6 @@ const handleCommand = (command: string, value?: any) => {
 </script>
 
 <style>
-/* 全局样式保持不变 */
 .upload-panel-popover.el-popover {
   padding: 8px 0 !important;
   z-index: 2060 !important;
@@ -338,7 +337,6 @@ const handleCommand = (command: string, value?: any) => {
   cursor: pointer;
 }
 
-/* Scoped 样式保持不变 */
 .list-enter-active,
 .list-leave-active {
   transition: all 0.4s ease;

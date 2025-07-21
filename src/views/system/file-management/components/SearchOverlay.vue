@@ -69,7 +69,7 @@ const handleOverlayClick = (event: MouseEvent) => {
   }
 };
 
-// --- GSAP 动画 (保持不变) ---
+// --- GSAP 动画 ---
 const onEnter = (el: HTMLElement, done: () => void) => {
   const { x, y } = props.origin;
   const radius = Math.hypot(

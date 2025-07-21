@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-05 11:33:12
- * @LastEditTime: 2025-07-05 12:06:55
+ * @LastEditTime: 2025-07-21 15:17:24
  * @LastEditors: 安知鱼
  */
 // src/views/system/file-management/hooks/useInfiniteScroll.ts
@@ -33,7 +33,6 @@ export function useInfiniteScroll({
     if (throttleTimer) return;
 
     throttleTimer = window.setTimeout(() => {
-      // 这里的逻辑保持不变
       if (hasMore.value && !loading.value && !isMoreLoading.value) {
         fileStore.loadFiles(path.value, uploaderActions);
       }

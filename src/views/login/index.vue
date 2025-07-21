@@ -359,9 +359,6 @@ onBeforeUnmount(() =>
 </template>
 
 <style scoped>
-/* 动画样式保持不变 */
-</style>
-<style scoped>
 .slide-next-enter-active,
 .slide-next-leave-active,
 .slide-prev-enter-active,
