@@ -493,7 +493,7 @@ defineExpose({
   justify-content: flex-end;
   align-items: center;
   padding: 4px 12px;
-  background-color: #fff;
+  background-color: var(--anzhiyu-card-bg);
   border: var(--style-border);
 }
 .right-actions {

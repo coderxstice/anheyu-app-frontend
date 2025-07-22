@@ -271,7 +271,7 @@ watch(
 }
 .file-breadcrumb-wrapper {
   padding: 0 24px;
-  background-color: #fff;
+  background-color: var(--anzhiyu-card-bg);
   border: var(--style-border);
   border-radius: 12px;
   overflow: hidden;
@@ -333,14 +333,14 @@ watch(
   color: var(--el-color-error);
 }
 .danger-item:hover {
-  color: #fff !important;
+  color: var(--anzhiyu-card-bg) !important;
   background-color: var(--el-color-error) !important;
 }
 .danger-item .dropdown-icon {
   color: var(--el-color-error);
 }
 .danger-item:hover .dropdown-icon {
-  color: #fff !important;
+  color: var(--anzhiyu-card-bg) !important;
 }
 .el-dropdown-link:hover {
   background-color: #f5f7fa !important;
