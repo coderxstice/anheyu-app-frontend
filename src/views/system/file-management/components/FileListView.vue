@@ -489,6 +489,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
   overflow: auto;
   position: relative;
   min-height: 0;
+  background-color: var(--anzhiyu-card-bg);
 }
 
 .virtual-sizer {

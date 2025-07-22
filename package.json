@@ -1,6 +1,6 @@
 {
-  "name": "pure-admin-thin",
-  "version": "5.9.0",
+  "name": "maoyu",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {

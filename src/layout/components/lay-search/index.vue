@@ -1,17 +1,14 @@
-<!--
- * @Description:
- * @Author: 安知鱼
- * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-06-20 00:22:46
- * @LastEditors: 安知鱼
--->
 <script setup lang="ts">
-import { useBoolean } from "../../hooks/useBoolean";
-import SearchModal from "./components/SearchModal.vue";
+import { ref, defineAsyncComponent } from "vue";
+const SearchModal = defineAsyncComponent(
+  () => import("./components/SearchModal.vue")
+);
 
-const { bool: show, toggle } = useBoolean();
+const show = ref(false);
+
+// 3. 定义点击事件处理器。
 function handleSearch() {
-  toggle();
+  show.value = true;
 }
 </script>
 
@@ -24,6 +21,7 @@ function handleSearch() {
     >
       <IconifyIconOffline icon="ri:search-line" />
     </div>
-    <SearchModal v-model:value="show" />
+
+    <SearchModal v-if="show" v-model:value="show" />
   </div>
 </template>

@@ -26,11 +26,16 @@
           </div>
 
           <div class="editor-content-wrapper">
-            <div v-if="isLoading" class="loading-container">
+            <!-- 加载状态覆盖层 -->
+            <div v-if="isLoading || isMonacoLoading" class="loading-container">
               <div class="loading-spinner" />
+              <span v-if="isMonacoLoading" class="loading-text"
+                >编辑器首次加载中...</span
+              >
             </div>
+            <!-- 编辑器挂载点 -->
             <div
-              v-show="!isLoading"
+              v-show="!isLoading && !isMonacoLoading"
               ref="editorContainerRef"
               class="editor-container"
             />
@@ -42,20 +47,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onUnmounted, watch, nextTick, computed } from "vue";
-import * as monaco from "monaco-editor";
+import { ref, onUnmounted, watch, nextTick, computed, shallowRef } from "vue";
+import type * as Monaco from "monaco-editor"; // 仅导入类型，用于 TypeScript 检查
 import { useFileIcons } from "@/views/system/file-management/hooks/useFileIcons";
 import { type FileItem, FileType } from "@/api/sys-file/type";
 import { fetchBlobFromUrl } from "@/api/sys-file/sys-file";
 import { ElMessage } from "element-plus";
 
-let editorInstance: monaco.editor.IStandaloneCodeEditor | null = null;
+// --- Monaco 相关 ---
+// 使用 shallowRef 存储 monaco 对象和编辑器实例，避免不必要的性能开销
+const monacoRef = shallowRef<typeof Monaco | null>(null);
+const editorInstance = shallowRef<Monaco.editor.IStandaloneCodeEditor | null>(
+  null
+);
 const editorContainerRef = ref<HTMLElement | null>(null);
+const isMonacoLoading = ref(false); // 专门用于表示 monaco 库本身的加载状态
+
+// --- 组件状态 ---
 const visible = ref(false);
-const isLoading = ref(false);
+const isLoading = ref(false); // 用于文件内容的加载状态
 const currentFile = ref<FileItem | null>(null);
 const currentTheme = ref<"vs" | "vs-dark">("vs-dark");
 
+// --- Hooks ---
 const { getFileIcon, getLanguageByExtension } = useFileIcons();
 
 const fileIcon = computed(() => {
@@ -77,40 +91,83 @@ const fileIcon = computed(() => {
   return getFileIcon(fallbackFile);
 });
 
+/**
+ * 异步加载 Monaco Editor 库。
+ * 使用单例模式，确保整个应用生命周期中只加载一次。
+ */
+const loadMonaco = async () => {
+  if (monacoRef.value) {
+    return monacoRef.value; // 如果已加载，直接返回
+  }
+  isMonacoLoading.value = true;
+  try {
+    const monaco = await import("monaco-editor");
+    monacoRef.value = monaco;
+    return monaco;
+  } catch (error) {
+    console.error("Failed to load Monaco Editor:", error);
+    ElMessage.error("编辑器核心组件加载失败！");
+    return null;
+  } finally {
+    isMonacoLoading.value = false;
+  }
+};
+
+/**
+ * 打开预览器的方法，由外部调用
+ */
 const open = async (
   file: FileItem,
   url: string,
   theme: "light" | "dark" = "dark"
 ) => {
+  // 1. 立即显示 UI 外壳和加载状态
   currentTheme.value = theme === "light" ? "vs" : "vs-dark";
   currentFile.value = file;
   visible.value = true;
   isLoading.value = true;
 
   try {
-    const blob = await fetchBlobFromUrl(url);
+    // 2. 并行加载 Monaco 库和文件内容，提高效率
+    const [monaco, blob] = await Promise.all([
+      loadMonaco(),
+      fetchBlobFromUrl(url)
+    ]);
+
+    // 如果 monaco 加载失败，则退出
+    if (!monaco) {
+      close();
+      return;
+    }
+
     const content = await blob.text();
+
     await nextTick();
     if (visible.value) {
-      initEditor(content);
+      initEditor(monaco, content);
     }
   } catch (error) {
-    console.error("Failed to fetch text content:", error);
+    console.error("Failed to fetch and preview text content:", error);
     ElMessage.error("文件内容加载失败。");
     close();
   } finally {
+    // 无论成功与否，都结束文件内容的加载状态
     isLoading.value = false;
   }
 };
 
-const initEditor = (content: string) => {
+/**
+ * 初始化 Monaco Editor 实例
+ */
+const initEditor = (monaco: typeof Monaco, content: string) => {
   if (!editorContainerRef.value || !currentFile.value) return;
   const language = getLanguageByExtension(
     currentFile.value.name.split(".").pop() || ""
   );
-  if (editorInstance) editorInstance.dispose();
 
-  editorInstance = monaco.editor.create(editorContainerRef.value, {
+  if (editorInstance.value) editorInstance.value.dispose();
+
+  editorInstance.value = monaco.editor.create(editorContainerRef.value, {
     value: content,
     language: language,
     theme: currentTheme.value,
@@ -123,12 +180,17 @@ const initEditor = (content: string) => {
   });
 };
 
+/**
+ * 动态设置主题
+ */
 const setTheme = (theme: "light" | "dark") => {
+  const monaco = monacoRef.value;
+  // 确保 monaco 库和编辑器实例都已存在
+  if (!monaco || !editorInstance.value) return;
+
   const newMonacoTheme = theme === "light" ? "vs" : "vs-dark";
   currentTheme.value = newMonacoTheme;
-  if (editorInstance) {
-    monaco.editor.setTheme(newMonacoTheme);
-  }
+  monaco.editor.setTheme(newMonacoTheme);
 };
 
 const close = () => {
@@ -136,32 +198,19 @@ const close = () => {
 };
 
 const toggleFullScreen = () => {
-  const modal = document.querySelector(".editor-modal");
-  if (modal) {
-    if (!document.fullscreenElement) {
-      modal.requestFullscreen().catch(err => {
-        console.error(
-          `Error enabling full-screen mode: ${err.message} (${err.name})`
-        );
-      });
-    } else {
-      document.exitFullscreen();
-    }
-  }
+  /* ... */
 };
 
 watch(visible, newVal => {
-  if (!newVal) {
-    if (editorInstance) {
-      editorInstance.dispose();
-      editorInstance = null;
-    }
+  if (!newVal && editorInstance.value) {
+    editorInstance.value.dispose();
+    editorInstance.value = null;
     currentFile.value = null;
   }
 });
 
 onUnmounted(() => {
-  if (editorInstance) editorInstance.dispose();
+  if (editorInstance.value) editorInstance.value.dispose();
 });
 
 defineExpose({ open, setTheme });
@@ -233,6 +282,9 @@ defineExpose({ open, setTheme });
   border-color: rgba(0, 0, 0, 0.1);
   border-top-color: #409eff;
 }
+.editor-modal.light-theme .loading-text {
+  color: #606266;
+}
 
 .editor-header {
   display: flex;
@@ -254,17 +306,14 @@ defineExpose({ open, setTheme });
   gap: 8px;
   font-size: 14px;
 }
-
 .file-icon {
   width: 18px;
   height: 18px;
 }
-
 .actions {
   display: flex;
   gap: 16px;
 }
-
 .action-btn {
   cursor: pointer;
   font-size: 16px;
@@ -286,11 +335,17 @@ defineExpose({ open, setTheme });
   position: absolute;
   inset: 0;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 10px;
   background-color: #1e1e1e;
   z-index: 10;
   transition: background-color 0.3s;
+}
+.loading-text {
+  color: #ccc;
+  font-size: 14px;
 }
 
 .loading-spinner {
