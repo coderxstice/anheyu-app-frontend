@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getConfig } from "@/config";
+import { getConfig } from "@/config/base";
 import { posix } from "path-browserify";
 import { menuType } from "@/layout/types";
 import { ReText } from "@/components/ReText";

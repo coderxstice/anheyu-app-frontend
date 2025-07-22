@@ -1,8 +1,15 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-15 11:31:00
+ * @LastEditTime: 2025-07-22 11:27:42
+ * @LastEditors: 安知鱼
+ */
 // 响应式storage
 import type { App } from "vue";
 import Storage from "responsive-storage";
 import { routerArrays } from "@/layout/types";
-import { responsiveStorageNameSpace } from "@/config";
+import { responsiveStorageNameSpace } from "@/config/base";
 
 export const injectResponsiveStorage = (app: App, config: PlatformConfigs) => {
   const nameSpace = responsiveStorageNameSpace();

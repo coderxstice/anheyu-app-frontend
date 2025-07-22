@@ -9,7 +9,7 @@ import {
 } from "vue";
 import type { tagsViewsType } from "../types";
 import { useRoute, useRouter } from "vue-router";
-import { responsiveStorageNameSpace } from "@/config";
+import { responsiveStorageNameSpace } from "@/config/base";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 import {

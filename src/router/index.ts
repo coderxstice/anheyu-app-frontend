@@ -1,6 +1,6 @@
 // import "@/utils/sso";
 import Cookies from "js-cookie";
-import { getConfig } from "@/config";
+import { getConfig } from "@/config/base";
 // import NProgress from "@/utils/progress"; // NProgress 通常在 afterEach 中使用
 import { buildHierarchyTree } from "@/utils/tree";
 import remainingRouter from "./modules/remaining";

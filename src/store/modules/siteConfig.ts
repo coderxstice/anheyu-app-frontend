@@ -1,7 +1,7 @@
 // src/store/modules/siteConfig.ts
 
 import { defineStore } from "pinia";
-import { getConfig } from "@/config";
+import { getConfig } from "@/config/base";
 import { getSiteConfigApi, type SiteConfig } from "@/api/site";
 import {
   getSettingsApi,

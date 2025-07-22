@@ -1,78 +1,71 @@
-// config/index.ts
-import axios from "axios";
-import type { App } from "vue";
-import { useSiteConfigStore } from "@/store/modules/siteConfig"; // 引入 siteConfig store
+/*
+ * @Description: 负责应用启动时的配置初始化工作。
+ * 它从前端静态文件和后端API获取配置，并将其设置到全局状态中。
+ * 这个模块依赖 store，必须在 Pinia 初始化后才能调用其函数。
+ * @Author: 安知鱼
+ * @Date: 2025-06-15 11:31:00
+ * @LastEditTime: 2025-07-22 11:26:57
+ * @LastEditors: 安知鱼
+ */
 
-let config: object = {};
+import type { App } from "vue";
+import axios from "axios";
+
+// 从纯净的配置基础模块导入配置的存取函数
+import { getConfig, setConfig } from "./base";
+// 导入需要用到的 store
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
+
 const { VITE_PUBLIC_PATH } = import.meta.env;
 
-const setConfig = (cfg?: unknown) => {
-  config = Object.assign(config, cfg);
-};
-
-const getConfig = (key?: string): any => {
-  // 更改为 any 或更具体的类型
-  if (typeof key === "string") {
-    const arr = key.split(".");
-    if (arr && arr.length) {
-      let data: any = config; // 明确类型
-      arr.forEach(v => {
-        if (data && typeof data[v] !== "undefined") {
-          data = data[v];
-        } else {
-          data = null;
-        }
-      });
-      return data;
-    }
-  }
-  return config;
-};
-
 /**
- * 获取项目所有全局配置：包括前端静态配置和后端动态站点配置
- * 这个函数应该在 Pinia store 被初始化之后调用
+ * 获取项目所有全局配置：包括前端静态配置和后端动态站点配置。
+ * 这个函数应该在 Pinia store 被初始化之后，在挂载应用之前调用。
+ * @param app Vue 应用实例
  */
 export const initializeConfigs = async (app: App): Promise<void> => {
-  // 确保 $config 在 app.config.globalProperties 上可用
+  // 1. 设置初始的全局 $config 对象，让它在应用中可用
   app.config.globalProperties.$config = getConfig();
 
   try {
-    // 1. 获取前端静态配置文件 platform-config.json
-    const { data: frontConfig } = await axios({
-      method: "get",
-      url: `${VITE_PUBLIC_PATH}platform-config.json`
-    });
+    // 2. 获取并合并前端静态配置文件 platform-config.json
+    try {
+      const { data: frontConfig } = await axios({
+        method: "get",
+        url: `${VITE_PUBLIC_PATH}platform-config.json`
+      });
 
-    // 合并前端静态配置到全局 $config
-    if (
-      app &&
-      app.config.globalProperties.$config &&
-      typeof frontConfig === "object"
-    ) {
-      app.config.globalProperties.$config = Object.assign(
-        app.config.globalProperties.$config,
-        frontConfig
-      );
-      setConfig(app.config.globalProperties.$config); // 更新内部 config 变量
-      // console.log("前端平台配置已加载并合并:", frontConfig);
-    } else {
-      console.warn("未找到或前端平台配置格式不正确");
+      if (frontConfig && typeof frontConfig === "object") {
+        // 使用 setConfig 合并前端配置
+        setConfig(frontConfig);
+        console.log("前端平台配置已加载:", frontConfig);
+      } else {
+        console.warn("未找到或前端平台配置格式不正确");
+      }
+    } catch (frontError) {
+      console.error("加载前端平台配置 platform-config.json 失败:", frontError);
     }
 
-    // 2. 获取后端动态站点配置（通过 Pinia Store）
+    // 3. 通过 Pinia Store 获取并合并后端动态站点配置
     const siteConfigStore = useSiteConfigStore();
-    await siteConfigStore.fetchSiteConfig(); // 这个函数内部已处理缓存逻辑
+    // fetchSiteConfig 内部会处理从 API 获取数据并更新 store 状态
+    await siteConfigStore.fetchSiteConfig();
     const siteConfig = siteConfigStore.getSiteConfig;
 
-    // 3. 动态更新页面元信息（从后端配置中获取）
-    if (siteConfig) {
-      // 更新页面标题
-      if (siteConfig.APP_NAME) {
-        document.title = siteConfig.APP_NAME;
-      } else {
-        document.title = "鱼鱼相册";
-      }
+    // 4. 将后端配置也合并到全局配置状态中
+    // 这确保了无论何处调用 getConfig() 都能取到最新、最全的配置
+    if (siteConfig && Object.keys(siteConfig).length > 0) {
+      setConfig(siteConfig);
+      console.log("后端站点配置已加载:", siteConfig);
+    }
+
+    // 5. 再次更新 Vue 全局属性 $config，确保它引用的是合并后的最新配置
+    app.config.globalProperties.$config = getConfig();
+
+    // 6. 使用最终的配置来动态更新页面元信息（标题、Favicon等）
+    const finalConfig = getConfig();
+    if (finalConfig) {
+      document.title = finalConfig.APP_NAME || finalConfig.title || "鱼鱼相册";
 
       // 更新 Favicon
       let faviconLink = document.querySelector(
@@ -83,7 +76,7 @@ export const initializeConfigs = async (app: App): Promise<void> => {
         faviconLink.rel = "icon";
         document.head.appendChild(faviconLink);
       }
-      faviconLink.href = siteConfig.ICON_URL || "/logo.svg";
+      faviconLink.href = finalConfig.ICON_URL || "/logo.svg";
 
       // 更新 Windows Tile Logo
       let msTileImageMeta = document.querySelector(
@@ -94,40 +87,11 @@ export const initializeConfigs = async (app: App): Promise<void> => {
         msTileImageMeta.name = "msapplication-TileImage";
         document.head.appendChild(msTileImageMeta);
       }
-      msTileImageMeta.content = siteConfig.LOGO_URL || "/logo.svg";
-
-      console.log("后端站点配置已获取并更新页面元信息:", siteConfig);
-    } else {
-      console.warn("后端站点配置获取失败或为空。");
-      // 如果后端配置失败，可以设置一个默认的页面元信息
-      document.title = "鱼鱼相册";
-      let faviconLink = document.querySelector(
-        'link[rel="icon"]'
-      ) as HTMLLinkElement;
-      if (!faviconLink) {
-        faviconLink = document.createElement("link");
-        faviconLink.rel = "icon";
-        document.head.appendChild(faviconLink);
-      }
-      faviconLink.href = "/logo.svg";
-      let msTileImageMeta = document.querySelector(
-        'meta[name="msapplication-TileImage"]'
-      ) as HTMLMetaElement;
-      if (!msTileImageMeta) {
-        msTileImageMeta = document.createElement("meta");
-        msTileImageMeta.name = "msapplication-TileImage";
-        document.head.appendChild(msTileImageMeta);
-      }
-      msTileImageMeta.content = "/logo.svg";
+      msTileImageMeta.content = finalConfig.LOGO_URL || "/logo.svg";
     }
   } catch (error) {
-    console.error("加载配置时出错:", error);
-    // 抛出错误以阻止应用继续启动，或者设置默认值
+    console.error("初始化项目配置时发生严重错误:", error);
+    // 抛出错误以通知调用方，例如在 main.ts 中捕获并处理
     throw new Error("初始化项目配置失败，请检查配置文件或后端服务。");
   }
 };
-
-/** 本地响应式存储的命名空间 */
-const responsiveStorageNameSpace = () => getConfig().ResponsiveStorageNameSpace;
-
-export { getConfig, setConfig, responsiveStorageNameSpace };

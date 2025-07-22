@@ -1,5 +1,5 @@
 import { ref } from "vue";
-import { getConfig } from "@/config";
+import { getConfig } from "@/config/base";
 import { useLayout } from "./useLayout";
 import { removeToken } from "@/utils/auth";
 import { routerArrays } from "@/layout/types";

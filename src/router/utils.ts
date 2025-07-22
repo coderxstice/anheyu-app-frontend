@@ -16,7 +16,7 @@ import {
   storageLocal,
   isIncludeAllChildren
 } from "@pureadmin/utils";
-import { getConfig } from "@/config";
+import { getConfig } from "@/config/base";
 import { buildHierarchyTree } from "@/utils/tree";
 import { userKey } from "@/utils/auth";
 import type { LoginResultData } from "@/api/user";

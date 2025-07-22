@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { match } from "pinyin-pro";
-import { getConfig } from "@/config";
+import { getConfig } from "@/config/base";
 import { useRouter } from "vue-router";
 import SearchResult from "./SearchResult.vue";
 import SearchFooter from "./SearchFooter.vue";
