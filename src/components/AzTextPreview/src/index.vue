@@ -198,7 +198,18 @@ const close = () => {
 };
 
 const toggleFullScreen = () => {
-  /* ... */
+  const modal = document.querySelector(".editor-modal");
+  if (modal) {
+    if (!document.fullscreenElement) {
+      modal.requestFullscreen().catch(err => {
+        console.error(
+          `Error attempting to enable full-screen mode: ${err.message} (${err.name})`
+        );
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  }
 };
 
 watch(visible, newVal => {
