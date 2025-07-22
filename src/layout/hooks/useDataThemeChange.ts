@@ -50,7 +50,6 @@ export function useDataThemeChange() {
   ) {
     layoutTheme.value.theme = theme;
     document.documentElement.setAttribute("data-theme", theme);
-    // 如果非isClick，保留之前的themeColor
     const storageThemeColor = $storage.layout.themeColor;
     $storage.layout = {
       layout: layout.value,
@@ -91,7 +90,24 @@ export function useDataThemeChange() {
 
   /** 浅色、深色整体风格切换 */
   function dataThemeChange(overall?: string) {
+    if (!overall) return;
+
+    // 1. 更新 overallStyle 状态
     overallStyle.value = overall;
+
+    // 2. 根据传入的 overall 参数，确定新的 dataTheme (boolean) 值
+    if (overall === "dark") {
+      dataTheme.value = true;
+    } else if (overall === "light") {
+      dataTheme.value = false;
+    } else if (overall === "system") {
+      // 如果是'system'，则根据当前系统设置来决定
+      dataTheme.value = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+    }
+
+    // 3. 根据【新】的 dataTheme.value 来应用所有副作用
     if (useEpThemeStoreHook().epTheme === "light" && dataTheme.value) {
       setLayoutThemeColor("default", false);
     } else {

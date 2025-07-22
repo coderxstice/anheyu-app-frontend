@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { useNav } from "@/layout/hooks/useNav";
 import LaySearch from "../lay-search/index.vue";
-// import LayNotice from "../lay-notice/index.vue";
-import LayNavMix from "../lay-sidebar/NavMix.vue";
 import LaySidebarFullScreen from "../lay-sidebar/components/SidebarFullScreen.vue";
 import LaySidebarBreadCrumb from "../lay-sidebar/components/SidebarBreadCrumb.vue";
 import LaySidebarTopCollapse from "../lay-sidebar/components/SidebarTopCollapse.vue";
+import ThemeSwitcher from "./ThemeSwitcher.vue";
 
 import LogoutCircleRLine from "@iconify-icons/ri/logout-circle-r-line";
 import Setting from "@iconify-icons/ri/settings-3-line";
@@ -37,23 +36,13 @@ const {
       class="breadcrumb-container"
     />
 
-    <LayNavMix v-if="layout === 'mix'" />
-
     <div v-if="layout === 'vertical'" class="vertical-header-right">
-      <!-- 暗色模式/浅色模式 -->
-      <!-- <el-switch
-        v-model="dataTheme"
-        inline-prompt
-        :active-icon="dayIcon"
-        :inactive-icon="darkIcon"
-        @change="dataThemeChange"
-      /> -->
+      <ThemeSwitcher />
+
       <!-- 菜单搜索 -->
       <LaySearch id="header-search" />
       <!-- 全屏 -->
       <LaySidebarFullScreen id="full-screen" />
-      <!-- 消息通知 -->
-      <!-- <LayNotice id="header-notice" /> -->
       <!-- 退出登录 -->
       <el-dropdown trigger="click" popper-class="anzhiyu-dropdown-menu">
         <span v-ripple class="el-dropdown-link navbar-bg-hover select-none">
@@ -81,6 +70,7 @@ const {
 </template>
 
 <style lang="scss" scoped>
+/* 样式保持不变 */
 .navbar {
   width: 100%;
   height: 48px;

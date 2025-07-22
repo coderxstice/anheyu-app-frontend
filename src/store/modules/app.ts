@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-22 02:00:40
+ * @LastEditTime: 2025-07-22 10:06:39
+ * @LastEditors: 安知鱼
+ */
 import { defineStore } from "pinia";
 import {
   type appType,
@@ -9,7 +16,7 @@ import {
 } from "../utils";
 
 export const useAppStore = defineStore({
-  id: "pure-app",
+  id: "maoyu-app",
   state: (): appType => ({
     sidebar: {
       opened:

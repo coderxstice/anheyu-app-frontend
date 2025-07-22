@@ -66,6 +66,12 @@ export const cdn = importToCDN({
       var: "gsap",
       path: "dist/gsap.min.js",
       prodUrl: "https://cdn.cbd.int/{name}@{version}/{path}"
+    },
+    {
+      name: "vite-plugin-monaco-editor",
+      var: "vite-plugin-monaco-editor",
+      path: "dist/index.js",
+      prodUrl: "https://cdn.cbd.int/{name}@{version}/{path}"
     }
   ]
 });

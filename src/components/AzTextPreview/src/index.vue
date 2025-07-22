@@ -2,7 +2,10 @@
   <Teleport to="body">
     <Transition name="az-fade">
       <div v-if="visible" class="az-text-preview-overlay" @click.self="close">
-        <div class="editor-modal">
+        <div
+          class="editor-modal"
+          :class="{ 'light-theme': currentTheme === 'vs' }"
+        >
           <div class="editor-header">
             <div class="file-info">
               <component :is="fileIcon" class="file-icon" />
@@ -22,12 +25,10 @@
             </div>
           </div>
 
-          <!-- 内容区域：根据加载状态显示 spinner 或编辑器 -->
           <div class="editor-content-wrapper">
             <div v-if="isLoading" class="loading-container">
               <div class="loading-spinner" />
             </div>
-            <!-- 使用 v-show 可以在加载完成后平滑显示，避免编辑器重新渲染 -->
             <div
               v-show="!isLoading"
               ref="editorContainerRef"
@@ -56,6 +57,7 @@ const editorContainerRef = ref<HTMLElement | null>(null);
 const visible = ref(false);
 const isLoading = ref(false);
 const currentFile = ref<FileItem | null>(null);
+const currentTheme = ref<"vs" | "vs-dark">("vs-dark"); // 存储当前 Monaco 主题
 
 // Hooks
 const { getFileIcon, getLanguageByExtension } = useFileIcons();
@@ -67,7 +69,6 @@ const fileIcon = computed(() => {
   if (currentFile.value) {
     return getFileIcon(currentFile.value);
   }
-  // 提供一个符合 FileItem 结构的最小默认对象，以避免类型错误
   const fallbackFile: FileItem = {
     id: "",
     name: "unknown",
@@ -86,34 +87,34 @@ const fileIcon = computed(() => {
 });
 
 /**
- * 打开预览器的方法 (由外部调用)
+ * 打开预览器的方法 (新增 theme 参数)
  * @param file - 完整的文件对象
  * @param url - 文件的带签名访问 URL
+ * @param theme - 'light' 或 'dark', 默认为 'dark'
  */
-const open = async (file: FileItem, url: string) => {
-  // 1. 重置状态并显示外壳
+const open = async (
+  file: FileItem,
+  url: string,
+  theme: "light" | "dark" = "dark"
+) => {
+  currentTheme.value = theme === "light" ? "vs" : "vs-dark";
   currentFile.value = file;
   visible.value = true;
   isLoading.value = true;
 
   try {
-    // 2. 组件内部异步获取文件内容
     const blob = await fetchBlobFromUrl(url);
     const content = await blob.text();
-
-    // 3. 等待 DOM 更新，确保编辑器容器 <div ref="editorContainerRef"> 已被渲染
     await nextTick();
 
-    // 4. 再次检查 visible 状态，防止用户在内容加载时就关闭了窗口
     if (visible.value) {
       initEditor(content);
     }
   } catch (error) {
     console.error("Failed to fetch and preview text content:", error);
     ElMessage.error("文件内容加载失败。");
-    close(); // 加载失败时直接关闭窗口
+    close();
   } finally {
-    // 5. 无论成功与否，都结束加载状态
     isLoading.value = false;
   }
 };
@@ -129,16 +130,12 @@ const initEditor = (content: string) => {
     currentFile.value.name.split(".").pop() || ""
   );
 
-  // 销毁可能存在的旧实例
-  if (editorInstance) {
-    editorInstance.dispose();
-  }
+  if (editorInstance) editorInstance.dispose();
 
-  // 创建新实例
   editorInstance = monaco.editor.create(editorContainerRef.value, {
     value: content,
     language: language,
-    theme: "vs-dark",
+    theme: currentTheme.value, // 使用当前主题
     readOnly: true,
     automaticLayout: true,
     minimap: { enabled: true },
@@ -146,6 +143,19 @@ const initEditor = (content: string) => {
     scrollBeyondLastLine: false,
     fontSize: 14
   });
+};
+
+/**
+ * 动态设置主题的方法
+ * @param theme - 'light' 或 'dark'
+ */
+const setTheme = (theme: "light" | "dark") => {
+  const newMonacoTheme = theme === "light" ? "vs" : "vs-dark";
+  currentTheme.value = newMonacoTheme;
+  if (editorInstance) {
+    // 使用 monaco 的全局 API 来切换已存在实例的主题
+    monaco.editor.setTheme(newMonacoTheme);
+  }
 };
 
 /**
@@ -180,7 +190,7 @@ watch(visible, newVal => {
       editorInstance.dispose();
       editorInstance = null;
     }
-    currentFile.value = null; // 清理状态
+    currentFile.value = null;
   }
 });
 
@@ -191,8 +201,8 @@ onUnmounted(() => {
   }
 });
 
-// 暴露 open 方法给父组件
-defineExpose({ open });
+// 暴露 open 和 setTheme 方法给父组件
+defineExpose({ open, setTheme });
 </script>
 
 <style scoped lang="scss">
@@ -228,13 +238,38 @@ defineExpose({ open });
   overflow: hidden;
   transition:
     width 0.3s,
-    height 0.3s;
+    height 0.3s,
+    background-color 0.3s;
 }
 
 .editor-modal:fullscreen {
   width: 100vw;
   height: 100vh;
   border-radius: 0;
+}
+
+/* Light Theme Styles */
+.editor-modal.light-theme {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+}
+.editor-modal.light-theme .editor-header {
+  background-color: #f5f7fa;
+  color: #303133;
+  border-bottom: 1px solid #e0e0e0;
+}
+.editor-modal.light-theme .action-btn {
+  color: #606266;
+  &:hover {
+    color: #303133;
+  }
+}
+.editor-modal.light-theme .loading-container {
+  background-color: #fff;
+}
+.editor-modal.light-theme .loading-spinner {
+  border-color: rgba(0, 0, 0, 0.1);
+  border-top-color: #409eff;
 }
 
 .editor-header {
@@ -246,6 +281,9 @@ defineExpose({ open });
   color: #ccc;
   flex-shrink: 0;
   user-select: none;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
 }
 
 .file-info {
@@ -290,6 +328,7 @@ defineExpose({ open });
   align-items: center;
   background-color: #1e1e1e;
   z-index: 10;
+  transition: background-color 0.3s;
 }
 
 .loading-spinner {
@@ -299,6 +338,7 @@ defineExpose({ open });
   border-top-color: #fff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+  transition: border-color 0.3s;
 }
 
 @keyframes spin {
