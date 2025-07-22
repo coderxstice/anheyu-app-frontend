@@ -14,7 +14,8 @@ import {
   type CreateDirectLinksRequest,
   type CreateDirectLinksResponse,
   type GetThumbnailCredentialResponse,
-  type FilePreviewUrlsResponse
+  type FilePreviewUrlsResponse,
+  type UpdateFileContentData
 } from "./type";
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
@@ -342,6 +343,31 @@ export const regenerateThumbnailApi = (
     baseUrlApi("thumbnail/regenerate"),
     {
       data: { id: publicId }
+    }
+  );
+};
+
+/**
+ * 通过文件的唯一公开ID替换其内容
+ * @param {string} publicId 要更新的文件的唯一公开ID
+ * @param {string} uri 文件当前的规范URI，用于路径验证
+ * @param {string | Blob} content 新的文件内容
+ * @returns {Promise<BaseResponse<...>>}
+ */
+export const updateFileContentByPublicIdApi = (
+  publicId: string,
+  uri: string,
+  content: string | Blob
+): Promise<BaseResponse<UpdateFileContentData>> => {
+  return http.request<BaseResponse<UpdateFileContentData>>(
+    "put",
+    // 使用模板字符串动态构建路径
+    baseUrlApi(`file/content/${publicId}`),
+    {
+      params: { uri }, // uri 作为查询参数
+      data: content,
+      // 根据文档，发送原始字节流
+      headers: { "Content-Type": "application/octet-stream" }
     }
   );
 };

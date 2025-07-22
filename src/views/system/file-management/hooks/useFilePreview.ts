@@ -145,7 +145,12 @@ export function useFilePreview() {
   const previewText = async (
     item: FileItem,
     textPreviewRef: Ref<InstanceType<typeof AzTextPreview> | null>,
-    theme: "light" | "dark"
+    theme: "light" | "dark",
+    onSave: (
+      file: FileItem,
+      content: string,
+      etag?: string
+    ) => Promise<boolean | Partial<FileItem>>
   ) => {
     if (!textPreviewRef.value) {
       return ElMessage.error("文本预览组件不可用。");
@@ -155,7 +160,7 @@ export function useFilePreview() {
       if (res.code === 200 && res.data?.urls?.length > 0) {
         const textUrl = res.data.urls[res.data.initialIndex];
         if (textPreviewRef.value) {
-          textPreviewRef.value.open(item, textUrl, theme);
+          textPreviewRef.value.open(item, textUrl, onSave);
         }
       } else {
         ElMessage.error(res.message || "获取文本预览链接失败");
@@ -176,14 +181,19 @@ export function useFilePreview() {
       videoPreviewRef: Ref<InstanceType<typeof AzVideoPreview> | null>;
       textPreviewRef: Ref<InstanceType<typeof AzTextPreview> | null>;
     },
-    theme: "light" | "dark"
+    theme: "light" | "dark",
+    onSave: (
+      file: FileItem,
+      content: string,
+      etag?: string
+    ) => Promise<boolean | Partial<FileItem>>
   ) => {
     if (isImageFile(item.name)) {
       await previewImage(item, refs.imagePreviewRef);
     } else if (isVideoFile(item.name)) {
       await previewVideo(item, refs.videoPreviewRef);
     } else if (isTextFile(item.name)) {
-      await previewText(item, refs.textPreviewRef, theme);
+      await previewText(item, refs.textPreviewRef, theme, onSave);
     } else {
       ElMessage.info("暂不支持预览此类型的文件。");
     }

@@ -85,7 +85,7 @@
           @open-column-settings="handleOpenColumnSettings"
           @set-columns="handleSetColumns"
           @preview-file="handlePreviewFile"
-          @contextmenu="handleContextMenuTrigger"
+          @contextmenu.stop.prevent="handleContextMenuTrigger"
         />
       </div>
     </div>
@@ -134,6 +134,7 @@
       @add-files="() => handleUploadFile()"
     />
 
+    <!-- 预览组件 -->
     <AzImagePreview ref="imagePreviewRef" page="sys-file" />
     <AzVideoPreview ref="videoPreviewRef" />
     <AzTextPreview ref="textPreviewRef" />
@@ -141,42 +142,23 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
-import { storeToRefs } from "pinia";
+import { defineAsyncComponent } from "vue";
 import { UploadFilled } from "@element-plus/icons-vue";
-import { ElMessage } from "element-plus";
+import { useFileManager } from "./hooks/useFileManager";
 
-// 工具 & Store
-import {
-  useFileStore,
-  type SortKey,
-  type UploaderActions
-} from "@/store/modules/fileStore";
-import type { ColumnConfig, FileItem } from "@/api/sys-file/type";
-import { regenerateThumbnailApi } from "@/api/sys-file/sys-file";
+// --- 子组件导入 ---
+// 使用 defineAsyncComponent 可以在需要时再加载视图，轻微提升初始性能
+const FileListView = defineAsyncComponent(
+  () => import("./components/FileListView.vue")
+);
+const FileGridView = defineAsyncComponent(
+  () => import("./components/FileGridView.vue")
+);
 
-// 自定义 Hooks
-import { useFileUploader } from "@/composables/useFileUploader";
-import { useFileSelection } from "@/composables/useFileSelection";
-import { useFileActions } from "./hooks/useFileActions";
-import { useDirectoryUpload } from "./hooks/useDirectoryUpload";
-import { useContextMenuHandler } from "./hooks/useContextMenuHandler";
-import { usePageInteractions } from "./hooks/usePageInteractions";
-import { useFileDownload } from "./hooks/useFileDownload";
-import { useFileModals } from "./hooks/useFileModals";
-import { useUploadPanel } from "./hooks/useUploadPanel";
-import { useDataLoading } from "./hooks/useDataLoading";
-import { useSwipeNavigationBlocker } from "./hooks/useSwipeNavigationBlocker";
-import { useFileDirectLinks } from "./hooks/useFileDirectLinks";
-import { useFilePreview } from "./hooks/useFilePreview";
-import { useMonacoTheme } from "@/components/AzTextPreview/hooks/useMonacoTheme";
-
-// 子组件
+// 其他组件可以根据需要决定是否异步
 import FileToolbar from "./components/FileToolbar.vue";
 import FileHeard from "./components/FileHeard.vue";
 import FileBreadcrumb from "./components/FileBreadcrumb.vue";
-import FileListView from "./components/FileListView.vue";
-import FileGridView from "./components/FileGridView.vue";
 import UploadProgress from "./components/UploadProgress.vue";
 import ContextMenu from "./components/ContextMenu.vue";
 import SearchOverlay from "./components/SearchOverlay.vue";
@@ -186,246 +168,87 @@ import AzImagePreview from "@/components/AzImagePreview";
 import AzVideoPreview from "@/components/AzVideoPreview";
 import AzTextPreview from "@/components/AzTextPreview";
 
-const fileStore = useFileStore();
-const fileToolbarRef = ref<InstanceType<typeof FileToolbar> | null>(null);
-const fileManagerContainerRef = ref<HTMLElement | null>(null);
-const imagePreviewRef = ref<InstanceType<typeof AzImagePreview> | null>(null);
-const videoPreviewRef = ref<InstanceType<typeof AzVideoPreview> | null>(null);
-const textPreviewRef = ref<InstanceType<typeof AzTextPreview> | null>(null);
-
+// 只需要调用一个 Hook，它会返回所有需要的数据和方法
+// 这个 Hook 就像页面的“大脑”，而这个 .vue 文件只是“骨架”
 const {
-  sortedFiles,
-  loading,
+  // Refs for template
+  fileManagerContainerRef,
+  imagePreviewRef,
+  videoPreviewRef,
+  textPreviewRef,
+  fileToolbarRef,
+  // Store state for template
   path,
   parentInfo,
-  storagePolicy,
+  sortedFiles,
+  loading,
+  isMoreLoading,
+  hasMore,
   viewMode,
   sortKey,
   pageSize,
-  isMoreLoading,
-  hasMore,
-  columns
-} = storeToRefs(fileStore);
-
-const viewComponents = { list: FileListView, grid: FileGridView };
-const activeViewComponent = computed(() => viewComponents[viewMode.value]);
-
-const {
-  uploadQueue,
-  showUploadProgress,
-  concurrency,
-  speedDisplayMode,
-  addUploadsToQueue,
-  addResumableTaskFromFileItem,
-  removeItem,
-  retryItem,
-  retryAllFailed,
-  resolveConflict,
-  globalOverwrite,
-  setGlobalOverwriteAndRetry,
-  clearFinishedUploads,
-  setConcurrency,
-  setSpeedMode
-} = useFileUploader(
-  sortedFiles,
-  computed(() => storagePolicy.value),
-  () => handleRefresh()
-);
-const uploaderActions: UploaderActions = { addResumableTaskFromFileItem };
-
-const { finalMonacoTheme } = useMonacoTheme(textPreviewRef);
-
-// 文件选择逻辑 (必须在依赖它的Hooks之前)
-const {
+  columns,
+  // Selection state for template
   selectedFiles,
   selectSingle,
   selectRange,
   toggleSelection,
   selectAll,
   clearSelection,
-  invertSelection
-} = useFileSelection(sortedFiles);
-const hasSelection = computed(() => selectedFiles.value.size > 0);
-const isSingleSelection = computed(() => selectedFiles.value.size === 1);
-const selectionCountLabel = computed(
-  () => `${selectedFiles.value.size} 个对象`
-);
-const getSelectedFileItems = () =>
-  sortedFiles.value.filter(f => selectedFiles.value.has(f.id));
-
-// 数据加载、刷新、导航
-const { handleRefresh, handleNavigate, handleLoadMore } = useDataLoading({
-  uploaderActions,
-  clearSelection: clearSelection
-});
-
-// 文件下载
-const { isDownloading, onActionDownload, handleDownloadFolder } =
-  useFileDownload({
-    getSelectedItems: getSelectedFileItems
-  });
-
-const { previewFile } = useFilePreview();
-const handlePreviewFile = (item: FileItem) => {
-  previewFile(
-    item,
-    { imagePreviewRef, videoPreviewRef, textPreviewRef },
-    finalMonacoTheme.value
-  );
-};
-
-// 各种弹窗（移动、复制、详情）
-const {
+  invertSelection,
+  hasSelection,
+  isSingleSelection,
+  selectionCountLabel,
+  // Component state for template
+  activeViewComponent,
+  // Modals, panels, overlays state
+  isDragging,
   isDestinationModalVisible,
   itemsForAction,
   destinationModalMode,
-  onActionMove,
-  onActionCopy,
-  handleActionSuccess,
   detailsPanelFile,
-  handleShowDetailsForId,
-  closeDetailsPanel
-} = useFileModals({
-  getSelectedItems: getSelectedFileItems,
-  refresh: handleRefresh,
-  clearSelection
-});
-
-// 上传面板交互
-const {
-  isPanelVisible,
-  isPanelCollapsed,
-  handlePanelClose,
-  handleUploadGlobalCommand,
-  handleNewUploadsAdded
-} = useUploadPanel({
-  uploadQueue,
-  showUploadProgress,
-  removeItem,
-  retryAllFailed,
-  clearFinishedUploads,
-  setGlobalOverwriteAndRetry,
-  setConcurrency,
-  setSpeedMode,
-  getConcurrency: () => concurrency.value
-});
-
-// 文件操作（创建、重命名、删除等）
-const {
-  handleUploadFile,
-  handleUploadDir,
-  handleCreateFile,
-  handleCreateFolder,
-  handleRename,
-  handleDelete
-} = useFileActions(addUploadsToQueue, path, {
-  onSuccess: handleRefresh,
-  onNewUploads: handleNewUploadsAdded
-});
-
-// 拖拽上传
-const { handleDrop: processDroppedFiles } = useDirectoryUpload(
-  addUploadsToQueue,
-  path,
-  handleNewUploadsAdded
-);
-const onDropAdapter = (event: DragEvent) => {
-  if (event.dataTransfer) processDroppedFiles(event.dataTransfer);
-};
-
-// 页面交互（拖拽覆盖、搜索、点击空白、手势阻止）
-const {
-  isDragging,
-  dragHandlers,
   isSearchVisible,
   searchOrigin,
-  openSearchFromElement,
-  handleContainerClick
-} = usePageInteractions({
-  onDrop: onDropAdapter,
-  detailsPanelFile,
-  hasSelection,
-  clearSelection
-});
-useSwipeNavigationBlocker(fileManagerContainerRef);
-
-// 右键菜单相关逻辑
-const onActionRename = () => {
-  if (isSingleSelection.value) handleRename(getSelectedFileItems()[0]);
-};
-const onActionDelete = () => {
-  handleDelete(getSelectedFileItems()).then(success => {
-    if (success) clearSelection();
-  });
-};
-const onActionShare = () => {
-  console.log("Share action triggered");
-};
-
-const { onActionGetLinks } = useFileDirectLinks({
-  getSelectedItems: getSelectedFileItems
-});
-
-// 实现“重新生成缩略图”的逻辑
-const onActionRegenerateThumbnail = async () => {
-  const selectedItems = getSelectedFileItems();
-  if (selectedItems.length !== 1) {
-    ElMessage.warning("请选择一个文件进行操作。");
-    return;
-  }
-
-  const fileToRegenerate = selectedItems[0];
-  try {
-    const res = await regenerateThumbnailApi(fileToRegenerate.id);
-    if (res.code === 202) {
-      ElMessage.success("重新生成请求已提交，请稍后刷新查看。");
-      handleRefresh(); // 触发一次刷新来更新文件列表状态
-    } else {
-      ElMessage.error(res.message || "请求失败");
-    }
-  } catch (error) {
-    ElMessage.error("操作失败，请检查网络。");
-  }
-};
-
-const {
   contextMenuTrigger,
+  isPanelVisible,
+  isPanelCollapsed,
+  uploadQueue,
+  speedDisplayMode,
+  globalOverwrite,
+  // Event handlers for template
+  handleNavigate,
+  handleLoadMore,
+  handlePreviewFile,
+  handleRefresh,
+  handleSetViewMode,
+  handleSetPageSize,
+  handleSetColumns,
+  handleSetSortKey,
+  handleOpenColumnSettings,
+  handleContainerClick,
+  handleContextMenuTrigger,
   onMenuSelect,
   handleContextMenuClosed,
   openBlankMenu,
-  handleContextMenuTrigger
-} = useContextMenuHandler({
-  onUploadFile: handleUploadFile,
-  onUploadDir: handleUploadDir,
-  onCreateFolder: handleCreateFolder,
-  onCreateMd: () => handleCreateFile("md"),
-  onCreateTxt: () => handleCreateFile("txt"),
-  onRefresh: handleRefresh,
-  onRename: onActionRename,
-  onDelete: onActionDelete,
-  onDownload: onActionDownload,
-  onCopy: onActionCopy,
-  onMove: onActionMove,
-  onShare: onActionShare,
-  onGetLink: onActionGetLinks,
-  onInfo: () => {
-    if (isSingleSelection.value)
-      handleShowDetailsForId(getSelectedFileItems()[0].id);
-  },
-  onRegenerateThumbnail: onActionRegenerateThumbnail, // 注入实现
-  hasSelection,
-  clearSelection
-});
-
-// 视图设置处理器
-const handleSetViewMode = (mode: "list" | "grid") =>
-  fileStore.setViewMode(mode);
-const handleSetPageSize = (size: number) => fileStore.setPageSize(size);
-const handleSetColumns = (newColumns: ColumnConfig[]) => {
-  setTimeout(() => fileStore.setColumns(newColumns), 0);
-};
-const handleSetSortKey = (key: SortKey) => fileStore.setSort(key);
-const handleOpenColumnSettings = () => fileToolbarRef.value?.openDialog();
+  dragHandlers,
+  handleUploadFile,
+  onActionDownload,
+  handleDownloadFolder,
+  onActionRename,
+  onActionDelete,
+  onActionShare,
+  onActionCopy,
+  onActionMove,
+  handleActionSuccess,
+  closeDetailsPanel,
+  handleShowDetailsForId,
+  openSearchFromElement,
+  handlePanelClose,
+  retryItem,
+  removeItem,
+  resolveConflict,
+  handleUploadGlobalCommand
+} = useFileManager();
 </script>
 
 <style>

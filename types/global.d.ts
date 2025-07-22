@@ -152,7 +152,7 @@ declare global {
       sidebarStatus?: boolean;
       epThemeColor?: string;
       themeColor?: string;
-      overallStyle?: string;
+      overallStyle?: "light" | "dark" | "system";
     };
     configure: {
       grey?: boolean;

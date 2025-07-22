@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-07-21 10:32:09
+ * @LastEditTime: 2025-07-22 18:12:23
  * @LastEditors: 安知鱼
  */
 
@@ -48,6 +48,7 @@ export interface FileItem {
   size: number; // 单位：字节
   created_at: string; // 创建时间 (ISO 8601 格式字符串)
   updated_at: string; // 更新时间 (ISO 8601 格式字符串)
+  etag?: string; // 可选的 ETag 字段，用于文件版本控制
   path: string; // 完整的 URI 路径，如 "anzhiyu://my/新建文件夹"
   owned: boolean; // 是否拥有
   shared: boolean; // 是否共享
@@ -408,3 +409,12 @@ export interface FilePreviewUrlsData {
 }
 
 export type FilePreviewUrlsResponse = BaseResponse<FilePreviewUrlsData>;
+
+/**
+ * 定义更新文件成功后的响应数据类型
+ */
+export interface UpdateFileContentData {
+  id: string;
+  size: number;
+  updated: string;
+}

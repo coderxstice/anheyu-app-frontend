@@ -2,7 +2,7 @@
  * @Description: 管理页面级别的交互，如拖拽上传的UI状态、搜索和点击空白区域。
  * @Author: 安知鱼
  * @Date: 2025-06-25 14:26:59
- * @LastEditTime: 2025-07-21 15:35:15
+ * @LastEditTime: 2025-07-22 15:25:59
  * @LastEditors: 安知鱼
  */
 import { ref, type Ref } from "vue";
@@ -28,42 +28,39 @@ export function usePageInteractions({
   hasSelection,
   clearSelection
 }: UsePageInteractionsOptions) {
+  // --- Refs ---
   const isDragging = ref(false);
   const isSearchVisible = ref(false);
-
-  // 关键修复：将 searchOrigin 的类型改回坐标对象
   const searchOrigin = ref({ x: 0, y: 0 });
 
+  const containerRef = ref<HTMLElement | null>(null);
+
+  // --- 拖拽上传逻辑 ---
   let dragCounter = 0;
 
   const dragHandlers = {
     onDragEnter: (event: DragEvent) => {
       event.preventDefault();
-      dragCounter++;
+      // 只有当拖拽内容包含文件时才响应
       if (event.dataTransfer?.types.includes("Files")) {
-        isDragging.value = true;
+        dragCounter++;
+        if (dragCounter > 0) {
+          isDragging.value = true;
+        }
       }
     },
     onDragOver: (event: DragEvent) => {
-      event.preventDefault();
+      event.preventDefault(); // 必须阻止默认行为，才能触发 onDrop
       if (event.dataTransfer) {
         event.dataTransfer.dropEffect = "copy";
       }
     },
     onDragLeave: (event: DragEvent) => {
       event.preventDefault();
-      if (
-        !(event.currentTarget as HTMLElement).contains(
-          event.relatedTarget as Node
-        )
-      ) {
-        dragCounter = 0;
+      dragCounter--;
+      if (dragCounter <= 0) {
         isDragging.value = false;
-      } else {
-        dragCounter--;
-        if (dragCounter <= 0) {
-          isDragging.value = false;
-        }
+        dragCounter = 0;
       }
     },
     onDrop: (event: DragEvent) => {
@@ -79,44 +76,47 @@ export function usePageInteractions({
    * @param {MouseEvent} event - DOM 鼠标事件对象。
    */
   const openSearchFromElement = (event: MouseEvent) => {
-    // 存储事件的 clientX/Y 坐标，而不是 DOM 元素
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
     searchOrigin.value = {
-      x: event.clientX,
-      y: event.clientY
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2
     };
     isSearchVisible.value = true;
   };
 
+  /**
+   * @description: 处理在容器内的点击事件，用于实现“点击空白处清空选择”。
+   * @param {MouseEvent} event - DOM 鼠标事件对象。
+   */
   const handleContainerClick = (event: MouseEvent) => {
-    if (
-      detailsPanelFile.value &&
-      (event.target as HTMLElement).closest(".details-panel-drawer")
-    ) {
-      return;
-    }
+    // 如果有文件详情面板打开，则不执行清空操作
+    if (detailsPanelFile.value) return;
     if (!hasSelection.value) return;
 
+    const target = event.target as HTMLElement;
+
+    // 定义一个需要忽略点击的元素选择器列表
     const ignoredSelectors = [
       ".file-item",
       ".grid-item",
-      "[role=button]",
-      "[role=menu]",
-      "[role=listbox]",
+      ".el-button",
+      ".el-dropdown",
+      ".context-menu",
+      ".search-overlay-container",
+      ".upload-progress-panel",
+      // 任何有 role 属性的交互元素
+      "[role='button']",
+      "[role='menu']",
+      "[role='listbox']",
+      // 表单元素
       "input",
       "button",
-      ".el-button",
-      ".el-popper",
-      ".el-overlay",
-      ".upload-progress-panel",
-      ".context-menu",
-      ".search-overlay-container"
+      "textarea"
     ];
 
-    if (
-      ignoredSelectors.some(selector =>
-        (event.target as HTMLElement).closest(selector)
-      )
-    ) {
+    // 如果点击的目标或其任何父元素匹配了忽略列表，则不执行清空操作
+    if (ignoredSelectors.some(selector => target.closest(selector))) {
       return;
     }
 
@@ -124,6 +124,7 @@ export function usePageInteractions({
   };
 
   return {
+    containerRef, // 导出 ref，以便主组件可以绑定
     isDragging,
     dragHandlers,
     isSearchVisible,

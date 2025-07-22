@@ -118,7 +118,6 @@ const emit = defineEmits<{
   // 已有的 emits
   (e: "open-new-menu", event: MouseEvent): void;
   (e: "trigger-search", event: MouseEvent): void;
-  // 新增的 emits，用于文件操作
   (e: "clear-selection"): void;
   (e: "download"): void;
   (e: "copy"): void;
@@ -132,14 +131,12 @@ const handleNewButtonClick = (event: MouseEvent) => {
   emit("open-new-menu", event);
 };
 
-const isSearchVisible = ref(false); // Note: 这个状态可能也应该由父组件管理
+const isSearchVisible = ref(false);
 const searchOrigin = ref({ x: 0, y: 0 });
 
 const openSearchOverlay = (event: MouseEvent) => {
   emit("trigger-search", event);
 };
-
-// --- 选择工具栏按钮处理函数 (现在都通过 emit 实现，所以不再需要本地函数) ---
 
 // --- GSAP 动画钩子 ---
 const onToolbarEnter = (el: HTMLElement, done: () => void) => {

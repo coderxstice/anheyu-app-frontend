@@ -10,7 +10,7 @@ import { darken, lighten, useGlobal, storageLocal } from "@pureadmin/utils";
 
 // --- 单例状态 ---
 const dataTheme = ref<boolean | null>(null);
-const overallStyle = ref<string | null>(null);
+const overallStyle = ref<"light" | "dark" | "system" | null>(null);
 let isInitialized = false;
 
 export function useDataThemeChange() {
@@ -23,7 +23,7 @@ export function useDataThemeChange() {
     const storageLayout = storageLocal().getItem<LayoutType>("layout");
 
     dataTheme.value = storageLayout?.darkMode ?? config.DarkMode;
-    overallStyle.value = storageLayout?.overallStyle ?? config.Layout; // 'Layout' 可能是 'vertical', 'horizontal' 等，根据您的配置而定
+    overallStyle.value = storageLayout?.overallStyle ?? config.Layout;
 
     isInitialized = true;
   }
@@ -80,7 +80,6 @@ export function useDataThemeChange() {
     const layoutConfig = $storage.layout || {};
     layoutConfig.darkMode = dataTheme.value;
     layoutConfig.overallStyle = overallStyle.value;
-    // 不再需要更新 layoutTheme 和 themeColor 等多主题相关的配置
     $storage.layout = layoutConfig;
   }
 
