@@ -17,7 +17,7 @@ import { createFullScreenLoading } from "../utils/loadingService";
 export function useFilePreview() {
   const fileStore = useFileStore();
 
-  // --- 辅助函数 ---
+  // --- 辅助函数，用于判断文件类型 ---
   const isImageFile = (fileName: string): boolean => {
     const imageExtensions = /\.(jpg|jpeg|png|gif|bmp|webp|svg|avif)$/i;
     return imageExtensions.test(fileName);
@@ -62,7 +62,6 @@ export function useFilePreview() {
 
   /**
    * 预览图片文件 (在调用时接收 ref)
-   * 图片预览仍然使用全屏加载，因为图片列表可能需要时间准备。
    */
   const previewImage = async (
     item: FileItem,
@@ -75,17 +74,13 @@ export function useFilePreview() {
     const allImageFilesInDir = fileStore.sortedFiles.filter(f =>
       isImageFile(f.name)
     );
-    if (allImageFilesInDir.length === 0) {
-      // 理论上不会发生，因为我们已经检查了 item 是图片
-      return;
-    }
+    if (allImageFilesInDir.length === 0) return;
 
     const loadingInstance = createFullScreenLoading("正在准备图片预览...");
     try {
       const res = await getFilePreviewUrlsApi(item.id);
       const { urls } = res.data ?? {};
       if (res.code === 200 && urls) {
-        // 使用后端返回的 URL 列表，但与前端筛选出的图片文件列表进行匹配
         const imageListForPreview = urls.map((url, index) => {
           const correspondingFile = allImageFilesInDir[index];
           return {
@@ -120,7 +115,6 @@ export function useFilePreview() {
 
   /**
    * 预览视频文件 (在调用时接收 ref)
-   * 视频也采用组件内加载的模式，先打开外壳，再加载视频。
    */
   const previewVideo = async (
     item: FileItem,
@@ -129,13 +123,11 @@ export function useFilePreview() {
     if (!videoPreviewRef.value) {
       return ElMessage.error("视频预览组件不可用。");
     }
-
     try {
       const res = await getFilePreviewUrlsApi(item.id);
       if (res.code === 200 && res.data.urls.length > 0) {
         const videoUrl = res.data.urls[res.data.initialIndex];
         if (videoPreviewRef.value) {
-          // 直接调用 open，让组件自己处理加载
           videoPreviewRef.value.open(videoUrl);
         }
       } else {
@@ -148,23 +140,22 @@ export function useFilePreview() {
   };
 
   /**
-   * 预览文本文件 (在调用时接收 ref)
-   * 只获取 URL，并将 item 和 URL 交给组件处理
+   * 预览文本文件 (在调用时接收 ref 和 theme)
    */
   const previewText = async (
     item: FileItem,
-    textPreviewRef: Ref<InstanceType<typeof AzTextPreview> | null>
+    textPreviewRef: Ref<InstanceType<typeof AzTextPreview> | null>,
+    theme: "light" | "dark"
   ) => {
     if (!textPreviewRef.value) {
       return ElMessage.error("文本预览组件不可用。");
     }
-
     try {
       const res = await getFilePreviewUrlsApi(item.id);
       if (res.code === 200 && res.data?.urls?.length > 0) {
         const textUrl = res.data.urls[res.data.initialIndex];
         if (textPreviewRef.value) {
-          textPreviewRef.value.open(item, textUrl);
+          textPreviewRef.value.open(item, textUrl, theme);
         }
       } else {
         ElMessage.error(res.message || "获取文本预览链接失败");
@@ -176,7 +167,7 @@ export function useFilePreview() {
   };
 
   /**
-   * 主预览函数 (在调用时接收 item 和所有需要的 refs)
+   * 主预览函数 (在调用时接收 item, refs 和 theme)
    */
   const previewFile = async (
     item: FileItem,
@@ -184,14 +175,15 @@ export function useFilePreview() {
       imagePreviewRef: Ref<InstanceType<typeof AzImagePreview> | null>;
       videoPreviewRef: Ref<InstanceType<typeof AzVideoPreview> | null>;
       textPreviewRef: Ref<InstanceType<typeof AzTextPreview> | null>;
-    }
+    },
+    theme: "light" | "dark"
   ) => {
     if (isImageFile(item.name)) {
       await previewImage(item, refs.imagePreviewRef);
     } else if (isVideoFile(item.name)) {
       await previewVideo(item, refs.videoPreviewRef);
     } else if (isTextFile(item.name)) {
-      await previewText(item, refs.textPreviewRef);
+      await previewText(item, refs.textPreviewRef, theme);
     } else {
       ElMessage.info("暂不支持预览此类型的文件。");
     }

@@ -169,6 +169,7 @@ import { useDataLoading } from "./hooks/useDataLoading";
 import { useSwipeNavigationBlocker } from "./hooks/useSwipeNavigationBlocker";
 import { useFileDirectLinks } from "./hooks/useFileDirectLinks";
 import { useFilePreview } from "./hooks/useFilePreview";
+import { useMonacoTheme } from "@/components/AzTextPreview/hooks/useMonacoTheme";
 
 // 子组件
 import FileToolbar from "./components/FileToolbar.vue";
@@ -232,6 +233,8 @@ const {
 );
 const uploaderActions: UploaderActions = { addResumableTaskFromFileItem };
 
+const { finalMonacoTheme } = useMonacoTheme(textPreviewRef);
+
 // 文件选择逻辑 (必须在依赖它的Hooks之前)
 const {
   selectedFiles,
@@ -263,13 +266,12 @@ const { isDownloading, onActionDownload, handleDownloadFolder } =
   });
 
 const { previewFile } = useFilePreview();
-
 const handlePreviewFile = (item: FileItem) => {
-  previewFile(item, {
-    imagePreviewRef,
-    videoPreviewRef,
-    textPreviewRef
-  });
+  previewFile(
+    item,
+    { imagePreviewRef, videoPreviewRef, textPreviewRef },
+    finalMonacoTheme.value
+  );
 };
 
 // 各种弹窗（移动、复制、详情）

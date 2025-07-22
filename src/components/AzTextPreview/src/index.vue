@@ -49,26 +49,17 @@ import { type FileItem, FileType } from "@/api/sys-file/type";
 import { fetchBlobFromUrl } from "@/api/sys-file/sys-file";
 import { ElMessage } from "element-plus";
 
-// 编辑器实例
 let editorInstance: monaco.editor.IStandaloneCodeEditor | null = null;
 const editorContainerRef = ref<HTMLElement | null>(null);
-
-// 组件状态
 const visible = ref(false);
 const isLoading = ref(false);
 const currentFile = ref<FileItem | null>(null);
-const currentTheme = ref<"vs" | "vs-dark">("vs-dark"); // 存储当前 Monaco 主题
+const currentTheme = ref<"vs" | "vs-dark">("vs-dark");
 
-// Hooks
 const { getFileIcon, getLanguageByExtension } = useFileIcons();
 
-/**
- * 计算文件图标
- */
 const fileIcon = computed(() => {
-  if (currentFile.value) {
-    return getFileIcon(currentFile.value);
-  }
+  if (currentFile.value) return getFileIcon(currentFile.value);
   const fallbackFile: FileItem = {
     id: "",
     name: "unknown",
@@ -86,12 +77,6 @@ const fileIcon = computed(() => {
   return getFileIcon(fallbackFile);
 });
 
-/**
- * 打开预览器的方法 (新增 theme 参数)
- * @param file - 完整的文件对象
- * @param url - 文件的带签名访问 URL
- * @param theme - 'light' 或 'dark', 默认为 'dark'
- */
 const open = async (
   file: FileItem,
   url: string,
@@ -106,12 +91,11 @@ const open = async (
     const blob = await fetchBlobFromUrl(url);
     const content = await blob.text();
     await nextTick();
-
     if (visible.value) {
       initEditor(content);
     }
   } catch (error) {
-    console.error("Failed to fetch and preview text content:", error);
+    console.error("Failed to fetch text content:", error);
     ElMessage.error("文件内容加载失败。");
     close();
   } finally {
@@ -119,23 +103,17 @@ const open = async (
   }
 };
 
-/**
- * 初始化 Monaco Editor
- * @param content - 要显示的文件内容字符串
- */
 const initEditor = (content: string) => {
   if (!editorContainerRef.value || !currentFile.value) return;
-
   const language = getLanguageByExtension(
     currentFile.value.name.split(".").pop() || ""
   );
-
   if (editorInstance) editorInstance.dispose();
 
   editorInstance = monaco.editor.create(editorContainerRef.value, {
     value: content,
     language: language,
-    theme: currentTheme.value, // 使用当前主题
+    theme: currentTheme.value,
     readOnly: true,
     automaticLayout: true,
     minimap: { enabled: true },
@@ -145,36 +123,25 @@ const initEditor = (content: string) => {
   });
 };
 
-/**
- * 动态设置主题的方法
- * @param theme - 'light' 或 'dark'
- */
 const setTheme = (theme: "light" | "dark") => {
   const newMonacoTheme = theme === "light" ? "vs" : "vs-dark";
   currentTheme.value = newMonacoTheme;
   if (editorInstance) {
-    // 使用 monaco 的全局 API 来切换已存在实例的主题
     monaco.editor.setTheme(newMonacoTheme);
   }
 };
 
-/**
- * 关闭预览器
- */
 const close = () => {
   visible.value = false;
 };
 
-/**
- * 切换全屏
- */
 const toggleFullScreen = () => {
   const modal = document.querySelector(".editor-modal");
   if (modal) {
     if (!document.fullscreenElement) {
       modal.requestFullscreen().catch(err => {
         console.error(
-          `Error attempting to enable full-screen mode: ${err.message} (${err.name})`
+          `Error enabling full-screen mode: ${err.message} (${err.name})`
         );
       });
     } else {
@@ -183,7 +150,6 @@ const toggleFullScreen = () => {
   }
 };
 
-// 监听 visible 状态，在关闭时清理资源
 watch(visible, newVal => {
   if (!newVal) {
     if (editorInstance) {
@@ -194,14 +160,10 @@ watch(visible, newVal => {
   }
 });
 
-// 组件卸载时确保销毁编辑器实例
 onUnmounted(() => {
-  if (editorInstance) {
-    editorInstance.dispose();
-  }
+  if (editorInstance) editorInstance.dispose();
 });
 
-// 暴露 open 和 setTheme 方法给父组件
 defineExpose({ open, setTheme });
 </script>
 
