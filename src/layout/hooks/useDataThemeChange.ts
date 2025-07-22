@@ -1,72 +1,38 @@
-import { ref } from "vue";
+import { ref, onBeforeMount, onUnmounted, readonly } from "vue";
 import { getConfig } from "@/config/base";
-import { useLayout } from "./useLayout";
 import { removeToken } from "@/utils/auth";
-import { routerArrays } from "@/layout/types";
+import { routerArrays, type LayoutType } from "@/layout/types";
 import { router, resetRouter } from "@/router";
-import type { themeColorsType } from "../types";
 import { useAppStoreHook } from "@/store/modules/app";
 import { useEpThemeStoreHook } from "@/store/modules/epTheme";
 import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 import { darken, lighten, useGlobal, storageLocal } from "@pureadmin/utils";
 
-export function useDataThemeChange() {
-  const { layoutTheme, layout } = useLayout();
-  const themeColors = ref<Array<themeColorsType>>([
-    /* 亮白色 */
-    { color: "#ffffff", themeColor: "light" },
-    /* 道奇蓝 */
-    { color: "#1b2a47", themeColor: "default" },
-    /* 深紫罗兰色 */
-    { color: "#722ed1", themeColor: "saucePurple" },
-    /* 深粉色 */
-    { color: "#eb2f96", themeColor: "pink" },
-    /* 猩红色 */
-    { color: "#f5222d", themeColor: "dusk" },
-    /* 橙红色 */
-    { color: "#fa541c", themeColor: "volcano" },
-    /* 绿宝石 */
-    { color: "#13c2c2", themeColor: "mingQing" },
-    /* 酸橙绿 */
-    { color: "#52c41a", themeColor: "auroraGreen" }
-  ]);
+// --- 单例状态 ---
+const dataTheme = ref<boolean | null>(null);
+const overallStyle = ref<string | null>(null);
+let isInitialized = false;
 
+export function useDataThemeChange() {
   const { $storage } = useGlobal<GlobalPropertiesApi>();
-  const dataTheme = ref<boolean>($storage?.layout?.darkMode);
-  const overallStyle = ref<string>($storage?.layout?.overallStyle);
   const body = document.documentElement as HTMLElement;
+
+  // 延迟初始化
+  if (!isInitialized) {
+    const config = getConfig();
+    const storageLayout = storageLocal().getItem<LayoutType>("layout");
+
+    dataTheme.value = storageLayout?.darkMode ?? config.DarkMode;
+    overallStyle.value = storageLayout?.overallStyle ?? config.Layout; // 'Layout' 可能是 'vertical', 'horizontal' 等，根据您的配置而定
+
+    isInitialized = true;
+  }
 
   function toggleClass(flag: boolean, clsName: string, target?: HTMLElement) {
     const targetEl = target || document.body;
     let { className } = targetEl;
     className = className.replace(clsName, "").trim();
     targetEl.className = flag ? `${className} ${clsName}` : className;
-  }
-
-  /** 设置导航主题色 */
-  function setLayoutThemeColor(
-    theme = getConfig().Theme ?? "light",
-    isClick = true
-  ) {
-    layoutTheme.value.theme = theme;
-    document.documentElement.setAttribute("data-theme", theme);
-    const storageThemeColor = $storage.layout.themeColor;
-    $storage.layout = {
-      layout: layout.value,
-      theme,
-      darkMode: dataTheme.value,
-      sidebarStatus: $storage.layout?.sidebarStatus,
-      epThemeColor: $storage.layout?.epThemeColor,
-      themeColor: isClick ? theme : storageThemeColor,
-      overallStyle: overallStyle.value
-    };
-
-    if (theme === "default" || theme === "light") {
-      setEpThemeColor(getConfig().EpThemeColor);
-    } else {
-      const colors = themeColors.value.find(v => v.themeColor === theme);
-      setEpThemeColor(colors.color);
-    }
   }
 
   function setPropertyPrimary(mode: string, i: number, color: string) {
@@ -76,60 +42,71 @@ export function useDataThemeChange() {
     );
   }
 
-  /** 设置 `element-plus` 主题色 */
   const setEpThemeColor = (color: string) => {
     useEpThemeStoreHook().setEpThemeColor(color);
     document.documentElement.style.setProperty("--el-color-primary", color);
-    for (let i = 1; i <= 2; i++) {
-      setPropertyPrimary("dark", i, color);
-    }
-    for (let i = 1; i <= 9; i++) {
-      setPropertyPrimary("light", i, color);
-    }
+    for (let i = 1; i <= 2; i++) setPropertyPrimary("dark", i, color);
+    for (let i = 1; i <= 9; i++) setPropertyPrimary("light", i, color);
   };
 
-  /** 浅色、深色整体风格切换 */
-  function dataThemeChange(overall?: string) {
-    if (!overall) return;
+  /**
+   * 核心的整体风格切换函数
+   */
+  function dataThemeChange(newOverallStyle?: "light" | "dark" | "system") {
+    if (!newOverallStyle) return;
 
-    // 1. 更新 overallStyle 状态
-    overallStyle.value = overall;
+    overallStyle.value = newOverallStyle;
 
-    // 2. 根据传入的 overall 参数，确定新的 dataTheme (boolean) 值
-    if (overall === "dark") {
-      dataTheme.value = true;
-    } else if (overall === "light") {
-      dataTheme.value = false;
-    } else if (overall === "system") {
-      // 如果是'system'，则根据当前系统设置来决定
-      dataTheme.value = window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      ).matches;
-    }
-
-    // 3. 根据【新】的 dataTheme.value 来应用所有副作用
-    if (useEpThemeStoreHook().epTheme === "light" && dataTheme.value) {
-      setLayoutThemeColor("default", false);
-    } else {
-      setLayoutThemeColor(useEpThemeStoreHook().epTheme, false);
-    }
+    let newIsDark = false;
+    if (newOverallStyle === "dark") newIsDark = true;
+    else if (newOverallStyle === "light") newIsDark = false;
+    else if (newOverallStyle === "system")
+      newIsDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    dataTheme.value = newIsDark;
 
     if (dataTheme.value) {
+      document.documentElement.classList.remove("light");
       document.documentElement.classList.add("dark");
-      setEpThemeColor("#dfa621"); // 默认深色主题色
+      document.documentElement.setAttribute("data-theme", "dark");
+      setEpThemeColor("#dfa621");
     } else {
-      if ($storage.layout.themeColor === "light") {
-        setLayoutThemeColor("light", false);
-      }
       document.documentElement.classList.remove("dark");
+      document.documentElement.classList.add("light");
+      document.documentElement.setAttribute("data-theme", "light");
+      setEpThemeColor(getConfig().EpThemeColor);
     }
+
+    // 更新本地存储
+    const layoutConfig = $storage.layout || {};
+    layoutConfig.darkMode = dataTheme.value;
+    layoutConfig.overallStyle = overallStyle.value;
+    // 不再需要更新 layoutTheme 和 themeColor 等多主题相关的配置
+    $storage.layout = layoutConfig;
   }
 
-  /** 清空缓存并返回登录页 */
+  // --- 系统主题监听逻辑 ---
+  const mediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
+  const updateSystemTheme = () => {
+    if (overallStyle.value === "system") dataThemeChange("system");
+  };
+  const removeMatchMedia = () =>
+    mediaQueryList.removeEventListener("change", updateSystemTheme);
+  const watchSystemThemeChange = () => {
+    removeMatchMedia();
+    mediaQueryList.addEventListener("change", updateSystemTheme);
+    updateSystemTheme();
+  };
+
+  onBeforeMount(() => {
+    if (overallStyle.value === "system") watchSystemThemeChange();
+  });
+  onUnmounted(() => removeMatchMedia());
+
   function onReset() {
     removeToken();
     storageLocal().clear();
     const { Grey, Weak, MultiTagsCache, EpThemeColor, Layout } = getConfig();
+    // 假设 useAppStoreHook().setLayout 仍然需要被调用
     useAppStoreHook().setLayout(Layout);
     setEpThemeColor(EpThemeColor);
     useMultiTagsStoreHook().multiTagsCacheChange(MultiTagsCache);
@@ -142,14 +119,12 @@ export function useDataThemeChange() {
 
   return {
     body,
-    dataTheme,
-    overallStyle,
-    layoutTheme,
-    themeColors,
+    dataTheme: readonly(dataTheme),
+    overallStyle: readonly(overallStyle),
     onReset,
     toggleClass,
     dataThemeChange,
     setEpThemeColor,
-    setLayoutThemeColor
+    watchSystemThemeChange
   };
 }

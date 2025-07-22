@@ -85,6 +85,16 @@ export type themeColorsType = {
   themeColor: string;
 };
 
+export type LayoutType = {
+  layout: string;
+  theme: string;
+  darkMode: boolean;
+  sidebarStatus: boolean;
+  epThemeColor: string;
+  themeColor: string;
+  overallStyle: string;
+};
+
 export interface scrollbarDomType extends HTMLElement {
   wrap?: {
     offsetWidth: number;
