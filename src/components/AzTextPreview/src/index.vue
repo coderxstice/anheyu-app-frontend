@@ -117,14 +117,14 @@ import { ElMessage } from "element-plus";
 import { Setting, Check } from "@element-plus/icons-vue";
 import { useMonacoTheme } from "../hooks/useMonacoTheme";
 
-// --- Monaco 相关 ---
+// Monaco 相关
 let monaco: typeof Monaco | null = null;
 let editorInstance: Monaco.editor.IStandaloneCodeEditor | null = null;
 const editorContainerRef = ref<HTMLElement | null>(null);
 const modalRef = ref<HTMLElement | null>(null);
 const isMonacoLoading = ref(false);
 
-// --- 组件状态 ---
+// 组件状态
 const visible = ref(false);
 const isLoading = ref(true);
 const isSaving = ref(false);
@@ -136,20 +136,20 @@ const onSaveCallback = ref<
   | null
 >(null);
 
-// --- 编辑器设置状态 ---
+// 编辑器设置状态
 const wordWrap = ref(true);
 const currentLanguage = ref("plaintext");
 const settingsMenuRef = ref(null);
 const isSettingsMenuVisible = ref(false);
 const settingsMenuPosition = ref({ x: 0, y: 0 });
 
-// --- 主题管理 ---
+// 主题管理
 const { monacoTheme } = useMonacoTheme();
 const currentTheme = computed<"vs" | "vs-dark">(() =>
   monacoTheme.value === "light" ? "vs" : "vs-dark"
 );
 
-// --- 静态数据 ---
+// 静态数据
 const supportedLanguages = ref([
   { id: "plaintext", label: "Plain Text" },
   { id: "python", label: "Python" },

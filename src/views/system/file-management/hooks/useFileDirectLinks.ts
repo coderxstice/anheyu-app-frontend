@@ -1,7 +1,6 @@
 // src/views/system/file-management/hooks/useFileDirectLinks.ts
 
 import { ref, h } from "vue";
-// +++ 引入 ElInput 用于动态创建 VNode +++
 import { ElMessage, ElMessageBox, ElInput } from "element-plus";
 import {
   createDirectLinksApi,
@@ -13,7 +12,7 @@ import type {
 } from "@/api/sys-file/type";
 
 interface UseFileDirectLinksOptions {
-  getSelectedItems: () => any[]; // 简化类型，因为我们只用到了 path 和 id
+  getSelectedItems: () => any[];
 }
 
 /**
@@ -47,19 +46,19 @@ export function useFileDirectLinks({
   const recursivelyFetchAllFileIds = async (
     initialUri: string
   ): Promise<string[]> => {
-    // --- 配置 ---
+    // 配置
     const MAX_CONCURRENT_REQUESTS = 5;
     const RATE_LIMIT_COUNT = 5;
     const RATE_LIMIT_WINDOW_MS = 50;
 
-    // --- 状态变量 ---
+    // 状态变量
     const allFileIds: string[] = [];
     // 使用逻辑路径启动任务队列
     const initialLogicalPath = extractLogicalPathFromUri(initialUri);
     const taskQueue: string[] = [initialLogicalPath];
     let activeRequests = 0;
 
-    // --- 频率控制状态 ---
+    // 频率控制状态
     let requestsInCurrentWindow = 0;
     let windowStartTime = Date.now();
 
@@ -69,7 +68,7 @@ export function useFileDirectLinks({
 
     return new Promise(resolve => {
       const processQueue = async () => {
-        // --- 日志 ---
+        // 日志
         console.log(
           `[SCANNER] processQueue | Queue size: ${taskQueue.length}, Active requests: ${activeRequests}`
         );
@@ -113,11 +112,11 @@ export function useFileDirectLinks({
             console.log(`[SCANNER] --> Worker started for path: "${path}"`);
             try {
               do {
-                // --- 日志 ---
+                // 日志
                 console.log(
                   `[SCANNER]      Fetching: "${path}", next_token: ${nextToken}`
                 );
-                // ** 使用逻辑路径调用API **
+                // 使用逻辑路径调用API
                 const res = await fetchFilesByPathApi(path, nextToken);
 
                 if (res.code === 200 && res.data) {
@@ -130,7 +129,7 @@ export function useFileDirectLinks({
                     if (item.type === 1) {
                       allFileIds.push(item.id);
                     } else if (item.type === 2) {
-                      // ** 将子文件夹的完整 URI 转换为逻辑路径再加入队列 **
+                      // 将子文件夹的完整 URI 转换为逻辑路径再加入队列
                       const childLogicalPath = extractLogicalPathFromUri(
                         item.path
                       );

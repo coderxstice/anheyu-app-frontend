@@ -1,7 +1,14 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-28 16:53:31
+ * @LastEditTime: 2025-07-23 10:57:45
+ * @LastEditors: 安知鱼
+ */
 import { ref } from "vue";
 import { ElMessage } from "element-plus";
 import { getFileDetailsApi } from "@/api/sys-file/sys-file";
-import type { FileItem } from "@/api/sys-file/type";
+import type { FileInfoResponse, FileItem } from "@/api/sys-file/type";
 
 interface UseFileModalsOptions {
   getSelectedItems: () => FileItem[];
@@ -17,7 +24,7 @@ export function useFileModals({
   const isDestinationModalVisible = ref(false);
   const itemsForAction = ref<FileItem[]>([]);
   const destinationModalMode = ref<"move" | "copy">("move");
-  const detailsPanelFile = ref<FileItem | null>(null);
+  const detailsPanelFile = ref<FileInfoResponse | null>(null);
 
   const onActionMove = () => {
     const selectedItems = getSelectedItems();

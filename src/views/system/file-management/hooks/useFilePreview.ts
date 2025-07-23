@@ -17,7 +17,7 @@ import { createFullScreenLoading } from "../utils/loadingService";
 export function useFilePreview() {
   const fileStore = useFileStore();
 
-  // --- 辅助函数，用于判断文件类型 ---
+  // 辅助函数，用于判断文件类型
   const isImageFile = (fileName: string): boolean => {
     const imageExtensions = /\.(jpg|jpeg|png|gif|bmp|webp|svg|avif)$/i;
     return imageExtensions.test(fileName);

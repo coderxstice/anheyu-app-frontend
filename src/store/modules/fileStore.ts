@@ -142,13 +142,11 @@ export const useFileStore = defineStore("file", {
           columns: plainColumns
         };
 
-        // +++ 新增调试日志 +++
         console.log(
           "%c[Sync View Config] Sending Request Body:",
           "color: green;",
           newViewConfig
         );
-        // +++++++++++++++++++++
 
         await updateFolderViewApi(this.currentFolderId, newViewConfig);
       } catch (error) {

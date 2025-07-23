@@ -153,7 +153,7 @@ export function useFileActions(
         try {
           const response = await renameFileApi(item.id, value);
           if (response.code === 200) {
-            // --- 3. 关键修改：执行乐观更新 ---
+            // 3. 关键修改：执行乐观更新
             fileStore.updateFileInState(item.id, {
               name: value,
               updated_at: new Date().toISOString()

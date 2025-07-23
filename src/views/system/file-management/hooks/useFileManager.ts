@@ -32,7 +32,7 @@ export function useFileManager() {
   const { sortedFiles, storagePolicy, path, ...storeState } =
     storeToRefs(fileStore);
 
-  // --- 视图与 Refs ---
+  // 视图与 Refs
   const imagePreviewRef = ref<any>(null);
   const videoPreviewRef = ref<any>(null);
   const textPreviewRef = ref<any>(null);
@@ -47,10 +47,10 @@ export function useFileManager() {
     fileStore.viewMode === "list" ? FileListView : FileGridView
   );
 
-  // --- 主题管理 ---
+  // 主题管理
   const { monacoTheme } = useMonacoTheme();
 
-  // --- 文件选择 ---
+  // 文件选择
   const selection = useFileSelection(sortedFiles);
   const hasSelection = computed(() => selection.selectedFiles.value.size > 0);
   const isSingleSelection = computed(
@@ -62,7 +62,7 @@ export function useFileManager() {
   const getSelectedFileItems = () =>
     sortedFiles.value.filter(f => selection.selectedFiles.value.has(f.id));
 
-  // --- 解决循环依赖的核心 ---
+  // 解决循环依赖的核心
   // 1. 先定义一个包含安全空函数的 uploaderActions 对象
   const uploaderActions: UploaderActions = {
     addResumableTaskFromFileItem: async () => {}

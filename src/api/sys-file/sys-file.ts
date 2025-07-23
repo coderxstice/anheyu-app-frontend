@@ -7,7 +7,6 @@ import {
   type FolderViewConfig,
   type UpdateFolderViewResponse,
   type ValidateUploadSessionResponse,
-  type FileItem,
   type FolderSizeResponse,
   type BaseResponse,
   type ColumnConfig,
@@ -15,14 +14,15 @@ import {
   type CreateDirectLinksResponse,
   type GetThumbnailCredentialResponse,
   type FilePreviewUrlsResponse,
-  type UpdateFileContentData
+  type UpdateFileContentData,
+  type FileInfoResponse
 } from "./type";
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
 import { buildFullUri } from "@/utils/fileUtils";
 import { ElMessage } from "element-plus";
 
-// --- 文件夹内容树 API 的类型定义 ---
+// 文件夹内容树 API 的类型定义
 export interface FolderTreeFile {
   url: string;
   relative_path: string;
@@ -41,7 +41,7 @@ export interface FolderTreeResponse {
 export interface FileDetailResponse {
   code: number;
   message: string;
-  data: FileItem & { url?: string };
+  data: FileInfoResponse & { url?: string };
 }
 
 /**
@@ -114,7 +114,7 @@ const triggerBrowserDownload = (blob: Blob, fileName: string) => {
   window.URL.revokeObjectURL(url);
 };
 
-// --- API 函数 ---
+// API 函数
 
 /**
  * @description 获取文件列表。排序规则由后端根据文件夹设置决定。

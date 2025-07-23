@@ -107,7 +107,7 @@ import {
   EditPen
 } from "@element-plus/icons-vue";
 
-// --- 1. 定义 Props 和 Emits ---
+// 1. 定义 Props 和 Emits
 const props = defineProps<{
   hasSelection: boolean;
   isSingleSelection: boolean;
@@ -138,7 +138,7 @@ const openSearchOverlay = (event: MouseEvent) => {
   emit("trigger-search", event);
 };
 
-// --- GSAP 动画钩子 ---
+// GSAP 动画钩子
 const onToolbarEnter = (el: HTMLElement, done: () => void) => {
   gsap.fromTo(
     el,

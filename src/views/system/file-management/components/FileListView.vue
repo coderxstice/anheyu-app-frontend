@@ -208,7 +208,7 @@ const columnTypeMap = {
   3: { key: "created_at", name: "创建日期" }
 } as const;
 
-// --- 虚拟滚动状态 ---
+// 虚拟滚动状态
 const scrollContainerRef = ref<HTMLElement | null>(null);
 const itemHeight = 40;
 const bufferSize = 5;
@@ -217,11 +217,11 @@ const viewportHeight = ref(0);
 const scrollTop = ref(0);
 const scrollLeft = ref(0);
 
-// --- 本地列状态 & 宽度计算 ---
+// 本地列状态 & 宽度计算
 const localColumns = ref<ColumnConfig[]>([]);
 const actualTotalWidth = ref(0); // 改为 ref，用于存储测量后的真实宽度
 
-// --- 虚拟滚动计算属性 ---
+// 虚拟滚动计算属性
 const totalHeight = computed(() => props.files.length * itemHeight);
 const visibleItemCount = computed(() => {
   if (viewportHeight.value === 0) return 0;
@@ -242,7 +242,7 @@ const contentOffset = computed(() => {
   return startIndex.value * itemHeight;
 });
 
-// --- 事件处理 ---
+// 事件处理
 const handleScroll = () => {
   if (!scrollContainerRef.value) return;
   const {
@@ -264,7 +264,7 @@ const handleScroll = () => {
   }
 };
 
-// --- 生命周期钩子 & 观察器 ---
+// 生命周期钩子 & 观察器
 let vScrollObserver: ResizeObserver | null = null;
 let headerObserver: ResizeObserver | null = null;
 

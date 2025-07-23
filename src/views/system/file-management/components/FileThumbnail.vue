@@ -97,7 +97,7 @@ const handleImageError = () => {
   isLoading.value = false;
 };
 
-// --- 生命周期与观察者 ---
+// 生命周期与观察者
 let observer: IntersectionObserver | null = null;
 
 onMounted(() => {

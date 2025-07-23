@@ -4,13 +4,13 @@ import type { StoragePolicy } from "@/api/sys-policy";
 import type { FormInstance, FormRules } from "element-plus";
 import { commonFormRules } from "./utils/rule";
 
-// --- 动态导入 ---
+// 动态导入
 import LocalForm from "./components/local/Form.vue";
 import { localRules } from "./components/local/config";
 import OneDriveForm from "./components/onedrive/Form.vue";
 import { oneDriveRules } from "./components/onedrive/config";
 
-// --- 注册动态组件和规则 ---
+// 注册动态组件和规则
 const providerForms = shallowRef({
   local: LocalForm,
   onedrive: OneDriveForm
@@ -33,7 +33,7 @@ const providerFormComponent = computed(() => {
   return providerForms.value[formData.value.type] || null;
 });
 
-// --- 单位换算逻辑 ---
+// 单位换算逻辑
 const units = [
   { label: "B", value: 1 },
   { label: "KB", value: 1024 },

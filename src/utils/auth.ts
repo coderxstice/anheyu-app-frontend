@@ -49,7 +49,7 @@ export function getToken(): LoginResultData | null {
 export function setToken(data: Partial<LoginResultData>) {
   const { isRemembered, loginDay } = useUserStoreHook();
 
-  // --- 准备要存储的数据，智能合并新旧数据 ---
+  // 准备要存储的数据，智能合并新旧数据
 
   // 1. 获取当前已存储的旧数据作为备用
   const oldTokenData = getToken();
@@ -63,7 +63,7 @@ export function setToken(data: Partial<LoginResultData>) {
   const newUserInfo = data.userInfo || oldTokenData?.userInfo || null;
   const newRoles = data.roles || oldTokenData?.roles || null;
 
-  // --- 执行存储操作 ---
+  // 执行存储操作
 
   // 3. 将 accessToken 和 expires 存入 Cookie
   // a. 计算 Cookie 的过期天数，使其与 accessToken 的有效期同步

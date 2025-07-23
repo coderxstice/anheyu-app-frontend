@@ -106,7 +106,7 @@
       :mode="destinationModalMode"
       @success="handleActionSuccess"
     />
-    <FileDetailsPanel :file="detailsPanelFile" @close="closeDetailsPanel" />
+    <FileDetailsPanel :fileInfo="detailsPanelFile" @close="closeDetailsPanel" />
     <SearchOverlay
       :visible="isSearchVisible"
       :origin="searchOrigin"
@@ -146,7 +146,7 @@ import { defineAsyncComponent } from "vue";
 import { UploadFilled } from "@element-plus/icons-vue";
 import { useFileManager } from "./hooks/useFileManager";
 
-// --- 子组件导入 ---
+// 子组件导入
 // 使用 defineAsyncComponent 可以在需要时再加载视图，轻微提升初始性能
 const FileListView = defineAsyncComponent(
   () => import("./components/FileListView.vue")

@@ -185,7 +185,7 @@ const emit = defineEmits<{
   (e: "global-command", command: string, value?: any): void;
 }>();
 
-// --- 新增本地状态 ---
+// 新增本地状态
 const isMoreActionsPopoverVisible = ref(false);
 /**
  * @description: 是否隐藏已完成（成功或取消）的任务
@@ -195,7 +195,7 @@ const hideCompleted = ref(false);
  * @description: 任务列表的排序顺序, 'asc' - 正序 (id小在前), 'desc' - 倒序 (id大在前)
  */
 const sortOrder = ref<"asc" | "desc">("asc");
-// ---
+//
 
 const activeUploadsCount = computed(
   () =>
@@ -248,7 +248,7 @@ const setSortOrder = (order: "asc" | "desc") => {
  * @description: 处理来自菜单的全局命令
  */
 const handleCommand = (command: string, value?: any) => {
-  // [修改] 为覆盖选项创建一个新的命令
+  // 为覆盖选项创建一个新的命令
   if (command === "toggle-overwrite-all") {
     emit("global-command", "set-overwrite-all", !props.isGlobalOverwrite);
   } else {

@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-07-22 18:12:23
+ * @LastEditTime: 2025-07-23 10:56:05
  * @LastEditors: 安知鱼
  */
 
@@ -98,13 +98,13 @@ export interface UploadItem {
   errorMessage?: string;
   retries?: number;
 
-  // --- 用于丰富 UI 显示和速度计算的字段 ---
+  // 用于丰富 UI 显示和速度计算的字段
   instantSpeed: number;
   averageSpeed: number;
   uploadedSize: number;
   isResuming?: boolean;
 
-  // --- 用于计算速度的内部状态字段 ---
+  // 用于计算速度的内部状态字段
   startTime?: number;
   lastSize?: number;
   lastTime?: number;
@@ -150,7 +150,7 @@ export interface UpdateFolderViewResponse {
   message: string;
 }
 
-// --- 1. 获取文件列表 (Endpoint: GET /file) ---
+// 1. 获取文件列表 (Endpoint: GET /file)
 
 /**
  * API 返回的分页信息结构
@@ -236,7 +236,7 @@ export interface FileListResponse {
   data: FileListData;
 }
 
-// --- 2. 创建上传会话 (Endpoint: PUT /file/upload) ---
+// 2. 创建上传会话 (Endpoint: PUT /file/upload)
 
 /**
  * 创建上传会话接口中 `data` 字段的结构
@@ -305,7 +305,7 @@ export interface ValidateUploadSessionResponse {
   message: string;
 }
 
-// --- 文件详情与文件夹树 (新增) ---
+// 文件详情与文件夹树 (新增)
 
 /**
  * 文件详情接口的响应体
@@ -417,4 +417,9 @@ export interface UpdateFileContentData {
   id: string;
   size: number;
   updated: string;
+}
+
+export interface FileInfoResponse {
+  file: FileItem;
+  storagePolicy: StoragePolicy | null;
 }

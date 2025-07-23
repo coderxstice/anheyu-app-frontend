@@ -173,7 +173,7 @@ import {
 } from "@/api/sys-file/type";
 import { extractLogicalPathFromUri, getParentPath } from "@/utils/fileUtils";
 
-// --- 类型定义 ---
+// 类型定义
 type ElTreeNode = NonNullable<
   ReturnType<InstanceType<typeof ElTree>["getNode"]>
 >;
@@ -205,7 +205,7 @@ type LoadMoreNodeData = Required<
 >;
 type UnifiedNodeData = TreeNodeData | LoadMoreNodeData;
 
-// --- Props & Emits ---
+// Props & Emits
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   itemsForAction: { type: Array as PropType<FileItem[]>, default: () => [] },
@@ -213,10 +213,10 @@ const props = defineProps({
 });
 const emit = defineEmits(["update:modelValue", "success"]);
 
-// --- Store 实例 ---
+// Store 实例
 const fileStore = useFileStore();
 
-// --- 基础状态和计算属性 ---
+// 基础状态和计算属性
 const modalTitle = computed(() =>
   props.mode === "move" ? "移动到" : "复制到"
 );
@@ -268,16 +268,16 @@ const disabledIdsForRightPanel = computed(() => {
   return new Set([...idsForActionSet.value, ...fileIdsInView]);
 });
 
-// --- 组件引用 ---
+// 组件引用
 const folderTreeRef = ref<InstanceType<typeof ElTree>>();
 
-// --- 状态管理 ---
+// 状态管理
 const isInitializing = ref(false);
 const listLoading = ref(false);
 const isMoreLoading = ref(false);
 const isSubmitting = ref(false);
 
-// --- 数据模型 ---
+// 数据模型
 const sharedDataSource = new Map<string, CachedApiData>();
 const currentPath = ref("/");
 const filesInModal = ref<FileItem[]>([]);
@@ -286,12 +286,12 @@ const currentTargetFolderInfo = ref<ParentInfo | null>(null);
 const defaultExpandedKeys = ref<string[]>([]);
 const treeData = ref<TreeNodeData[]>([]);
 
-// --- 视图状态 (从 Store 读取) ---
+// 视图状态 (从 Store 读取)
 const viewMode = computed(() => fileStore.viewMode);
 const sortKey = computed(() => fileStore.sortKey);
 const pageSize = computed(() => fileStore.pageSize);
 
-// --- 辅助函数 ---
+// 辅助函数
 const DUMMY_CHILD_NODE: TreeNodeData = {
   id: "dummy",
   path: "dummy",
@@ -346,7 +346,7 @@ const fileItemToTreeNode = (folder: FileItem): TreeNodeData => {
   };
 };
 
-// --- 初始化与监听逻辑 ---
+// 初始化与监听逻辑
 let stopStoreWatcher: WatchStopHandle | null = null;
 
 watch(localVisible, isVisible => {
@@ -464,7 +464,7 @@ const initializeComponent = async () => {
   console.log("[Init] ✅ 初始化完成！");
 };
 
-// --- 数据获取与处理 ---
+// 数据获取与处理
 const getDirectoryContents = async (
   path: string,
   forceRefresh = false
@@ -504,7 +504,7 @@ const processApiResponse = (data: CachedApiData, path: string) => {
   }
 };
 
-// --- Tree 交互逻辑 ---
+// Tree 交互逻辑
 const updateTreeNodeChildren = (node: TreeNodeData, data: CachedApiData) => {
   const subFolders = data.files
     .filter(item => item.type === FileType.Dir)
@@ -585,7 +585,7 @@ const handleLoadMoreInTree = async (node: ElTreeNode) => {
   }
 };
 
-// --- 主视图交互逻辑 ---
+// 主视图交互逻辑
 const navigateToPath = async (path: string) => {
   if (listLoading.value || currentPath.value === path) return;
   listLoading.value = true;
@@ -631,7 +631,7 @@ const loadMoreFiles = async () => {
   isMoreLoading.value = false;
 };
 
-// --- 其他函数与事件处理 ---
+// 其他函数与事件处理
 const handleModalRefresh = async () => {
   listLoading.value = true;
   const data = await getDirectoryContents(currentPath.value, true);

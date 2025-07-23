@@ -2,18 +2,18 @@
  * @Description: 管理页面级别的交互，如拖拽上传的UI状态、搜索和点击空白区域。
  * @Author: 安知鱼
  * @Date: 2025-06-25 14:26:59
- * @LastEditTime: 2025-07-22 15:25:59
+ * @LastEditTime: 2025-07-23 10:59:56
  * @LastEditors: 安知鱼
  */
 import { ref, type Ref } from "vue";
-import type { FileItem } from "@/api/sys-file/type";
+import type { FileInfoResponse } from "@/api/sys-file/type";
 
 /**
  * 定义 usePageInteractions hook 的选项参数类型
  */
 interface UsePageInteractionsOptions {
   onDrop: (event: DragEvent) => void;
-  detailsPanelFile: Ref<FileItem | null>;
+  detailsPanelFile: Ref<FileInfoResponse | null>;
   hasSelection: Ref<boolean>;
   clearSelection: () => void;
 }
@@ -28,14 +28,14 @@ export function usePageInteractions({
   hasSelection,
   clearSelection
 }: UsePageInteractionsOptions) {
-  // --- Refs ---
+  // Refs
   const isDragging = ref(false);
   const isSearchVisible = ref(false);
   const searchOrigin = ref({ x: 0, y: 0 });
 
   const containerRef = ref<HTMLElement | null>(null);
 
-  // --- 拖拽上传逻辑 ---
+  // 拖拽上传逻辑
   let dragCounter = 0;
 
   const dragHandlers = {

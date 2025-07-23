@@ -1,19 +1,21 @@
 <template>
   <el-drawer
-    :model-value="!!file"
+    :model-value="!!fileInfo?.file"
     :with-header="false"
     direction="rtl"
     :size="400"
     class="details-panel-drawer"
     @close="handleClose"
   >
-    <div v-if="file" class="details-panel-content">
+    <div v-if="fileInfo?.file" class="details-panel-content">
       <!-- 1. 头部区域 -->
       <div class="panel-header">
         <div class="file-icon-wrapper">
-          <component :is="getFileIcon(file)" class="file-icon" />
+          <component :is="getFileIcon(fileInfo?.file)" class="file-icon" />
         </div>
-        <span class="file-name" :title="file.name">{{ file.name }}</span>
+        <span class="file-name" :title="fileInfo?.file.name">{{
+          fileInfo?.file.name
+        }}</span>
         <el-button
           :icon="Close"
           text
@@ -29,17 +31,17 @@
           <div class="details-section">
             <el-descriptions title="基本信息" :column="1" border>
               <el-descriptions-item label="类型">{{
-                file.type === FileType.Dir ? "文件夹" : "文件"
+                fileInfo?.file.type === FileType.Dir ? "文件夹" : "文件"
               }}</el-descriptions-item>
               <el-descriptions-item label="所在目录">{{
-                getDirectory(file.path)
+                getDirectory(fileInfo?.file.path)
               }}</el-descriptions-item>
             </el-descriptions>
 
             <!-- 关键修改：根据文件类型显示不同的大小信息 -->
             <!-- a) 如果是文件夹 -->
             <el-descriptions
-              v-if="file.type === FileType.Dir"
+              v-if="fileInfo?.file.type === FileType.Dir"
               :column="1"
               border
               class="mt-4"
@@ -73,17 +75,17 @@
             <!-- b) 如果是文件 -->
             <el-descriptions v-else :column="1" border class="mt-4">
               <el-descriptions-item label="大小">{{
-                formatSize(file.size)
+                formatSize(fileInfo?.file.size)
               }}</el-descriptions-item>
               <el-descriptions-item label="占用空间">{{
-                formatSize(file.size)
+                formatSize(fileInfo?.file.size)
               }}</el-descriptions-item>
             </el-descriptions>
 
             <el-descriptions title="存储" :column="1" border class="mt-4">
-              <el-descriptions-item label="存储策略"
-                >本地存储</el-descriptions-item
-              >
+              <el-descriptions-item label="存储策略">
+                {{ fileInfo?.storagePolicy.name }}
+              </el-descriptions-item>
               <el-descriptions-item label="我的权限"
                 >读写文件</el-descriptions-item
               >
@@ -91,10 +93,10 @@
 
             <el-descriptions title="时间" :column="1" border class="mt-4">
               <el-descriptions-item label="创建于">{{
-                formatDateTime(file.created_at)
+                formatDateTime(fileInfo?.file.created_at)
               }}</el-descriptions-item>
               <el-descriptions-item label="修改于">{{
-                formatDateTime(file.updated_at)
+                formatDateTime(fileInfo?.file.updated_at)
               }}</el-descriptions-item>
             </el-descriptions>
           </div>
@@ -112,15 +114,19 @@ import { ref, watch } from "vue";
 import type { PropType } from "vue";
 import { useFileIcons } from "../hooks/useFileIcons";
 import { formatSize, formatDateTime } from "@/utils/format";
-import { FileItem, FileType, type FolderSizeData } from "@/api/sys-file/type";
+import {
+  FileInfoResponse,
+  FileType,
+  type FolderSizeData
+} from "@/api/sys-file/type";
 import { calculateFolderSize } from "@/api/sys-file/sys-file";
 import { Close } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import { extractLogicalPathFromUri } from "@/utils/fileUtils";
 
 const props = defineProps({
-  file: {
-    type: Object as PropType<FileItem | null>,
+  fileInfo: {
+    type: Object as PropType<FileInfoResponse | null>,
     default: null
   }
 });
@@ -130,11 +136,11 @@ const emit = defineEmits(["close"]);
 const { getFileIcon } = useFileIcons();
 const activeTab = ref("details");
 
-// --- 状态管理 ---
+// 状态管理
 const isCalculating = ref(false);
 const calculatedSize = ref<FolderSizeData | null>(null);
 
-// --- 事件处理 ---
+// 事件处理
 const handleClose = () => {
   emit("close");
 };
@@ -151,11 +157,11 @@ const resetFolderSizeState = () => {
  * 处理点击“计算”的事件
  */
 const handleCalculateSize = async () => {
-  if (!props.file || isCalculating.value) return;
+  if (!props.fileInfo || isCalculating.value) return;
 
   isCalculating.value = true;
   try {
-    const res = await calculateFolderSize(props.file.id);
+    const res = await calculateFolderSize(props.fileInfo.file.id);
     if (res.code === 200 && res.data) {
       calculatedSize.value = res.data;
     } else {
@@ -171,7 +177,7 @@ const handleCalculateSize = async () => {
   }
 };
 
-// --- 辅助函数 ---
+// 辅助函数
 const getDirectory = (uri: string | undefined | null): string => {
   if (!uri) return "未知";
   const logicalPath = extractLogicalPathFromUri(uri);
@@ -188,14 +194,16 @@ const getDirectory = (uri: string | undefined | null): string => {
   return logicalPath.substring(0, lastSlashIndex);
 };
 
-// --- 生命周期与侦听器 ---
+// 生命周期与侦听器
 // 侦听 file prop 的变化，以便在切换文件时重置状态
 watch(
-  () => props.file,
-  newFile => {
-    if (newFile) {
+  () => props.fileInfo,
+  newFileInfo => {
+    if (newFileInfo) {
       resetFolderSizeState();
       activeTab.value = "details"; // 每次打开新文件时，默认显示详情页
+
+      console.log("当前文件信息:", newFileInfo);
     }
   },
   { immediate: true } // 保证组件首次加载时也能执行

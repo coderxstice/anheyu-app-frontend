@@ -8,7 +8,7 @@ import { useEpThemeStoreHook } from "@/store/modules/epTheme";
 import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 import { darken, lighten, useGlobal, storageLocal } from "@pureadmin/utils";
 
-// --- 单例状态 ---
+// 单例状态
 const dataTheme = ref<boolean | null>(null);
 const overallStyle = ref<"light" | "dark" | "system" | null>(null);
 let isInitialized = false;
@@ -83,7 +83,7 @@ export function useDataThemeChange() {
     $storage.layout = layoutConfig;
   }
 
-  // --- 系统主题监听逻辑 ---
+  // 系统主题监听逻辑
   const mediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
   const updateSystemTheme = () => {
     if (overallStyle.value === "system") dataThemeChange("system");

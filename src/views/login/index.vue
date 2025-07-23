@@ -56,14 +56,14 @@ const step = ref<Step>("check-email");
 const loading = ref(false);
 const transitionName = ref("slide-next");
 
-// --- 为每个子组件创建 ref ---
+// 为每个子组件创建 ref
 const checkEmailFormRef = ref();
 const loginFormRef = ref();
 const registerFormRef = ref();
 const forgotPasswordFormRef = ref();
 const resetPasswordFormRef = ref();
 
-// --- 统一的表单状态和验证规则 ---
+// 统一的表单状态和验证规则
 const formRef = ref<FormInstance>();
 const form = reactive({
   email: "",
@@ -91,7 +91,7 @@ const rules = reactive<FormRules>({
   ]
 });
 
-// --- 流程控制 ---
+// 流程控制
 const handleFocus = () => {
   // 通过调用子组件暴露的 focus 方法来实现聚焦
   switch (step.value) {
@@ -123,7 +123,7 @@ const switchStep = (targetStep: Step, direction: "next" | "prev" = "next") => {
   nextTick(() => formRef.value?.clearValidate());
 };
 
-// --- 表单提交总处理器 ---
+// 表单提交总处理器
 const handleSubmit = async (
   validateFn: () => Promise<boolean | undefined>,
   submitFn: (...args: any[]) => Promise<void>
@@ -140,7 +140,7 @@ const handleSubmit = async (
   }
 };
 
-// --- 所有 API 调用逻辑 ---
+// 所有 API 调用逻辑
 const apiHandlers = {
   checkEmailExists: async (email: string) => {
     const res = await useUserStoreHook().checkEmailRegistered(email);
@@ -208,7 +208,7 @@ const apiHandlers = {
   }
 };
 
-// --- 事件处理器 ---
+// 事件处理器
 const eventHandlers = {
   onNextStep: () =>
     handleSubmit(
@@ -234,7 +234,7 @@ const eventHandlers = {
     )
 };
 
-// --- 键盘与生命周期 ---
+// 键盘与生命周期
 const onkeypress = ({ code }: KeyboardEvent) => {
   if (!["Enter", "NumpadEnter"].includes(code)) return;
   const handlerMap = {
