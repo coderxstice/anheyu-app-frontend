@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:36:57
- * @LastEditTime: 2025-06-23 13:15:50
+ * @LastEditTime: 2025-07-24 17:35:04
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -47,7 +47,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { PageSittingInfo } from "../index.vue";
+import type { PageSittingInfo } from "../type";
 
 const props = defineProps<{
   modelValue: PageSittingInfo;

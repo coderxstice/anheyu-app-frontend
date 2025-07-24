@@ -57,7 +57,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, nextTick } from "vue";
 import { useRoute } from "vue-router";
-import type { SiteInfo } from "../index.vue";
+import type { SiteInfo } from "../type";
 import type { ElInput, FormItemInstance } from "element-plus";
 // [NEW] 引入 store 和 ElMessageBox
 import { useSiteConfigStore } from "@/store/modules/siteConfig";

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:06:37
- * @LastEditTime: 2025-06-21 22:18:33
+ * @LastEditTime: 2025-07-24 17:34:59
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -99,7 +99,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { SiteInfo } from "../index.vue";
+import type { SiteInfo } from "../type";
 
 const props = defineProps<{
   modelValue: SiteInfo;

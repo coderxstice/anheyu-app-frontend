@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:42:04
- * @LastEditTime: 2025-07-16 18:17:19
+ * @LastEditTime: 2025-07-24 17:33:06
  * @LastEditors: 安知鱼
  */
 /**
@@ -61,11 +61,53 @@ const KeySmtpForceSSL: SettingKey = "SMTP_FORCE_SSL";
 const KeySiteAnnouncement: SettingKey = "SITE_ANNOUNCEMENT";
 const KeyFooterCode: SettingKey = "FOOTER_CODE";
 
+/**
+ * [NEW] 文件、上传及缩略图相关配置
+ */
+const KeyUploadAllowedExtensions: SettingKey = "UPLOAD_ALLOWED_EXTENSIONS";
+const KeyUploadDeniedExtensions: SettingKey = "UPLOAD_DENIED_EXTENSIONS";
+
+const KeyEnableVipsGenerator: SettingKey = "ENABLE_VIPS_GENERATOR";
+const KeyVipsPath: SettingKey = "VIPS_PATH";
+const KeyVipsMaxFileSize: SettingKey = "VIPS_MAX_FILE_SIZE";
+const KeyVipsSupportedExts: SettingKey = "VIPS_SUPPORTED_EXTS";
+
+const KeyEnableMusicCoverGenerator: SettingKey = "ENABLE_MUSIC_COVER_GENERATOR";
+const KeyMusicCoverMaxFileSize: SettingKey = "MUSIC_COVER_MAX_FILE_SIZE";
+const KeyMusicCoverSupportedExts: SettingKey = "MUSIC_COVER_SUPPORTED_EXTS";
+
+const KeyEnableFfmpegGenerator: SettingKey = "ENABLE_FFMPEG_GENERATOR";
+const KeyFfmpegPath: SettingKey = "FFMPEG_PATH";
+const KeyFfmpegMaxFileSize: SettingKey = "FFMPEG_MAX_FILE_SIZE";
+const KeyFfmpegSupportedExts: SettingKey = "FFMPEG_SUPPORTED_EXTS";
+const KeyFfmpegCaptureTime: SettingKey = "FFMPEG_CAPTURE_TIME";
+
+const KeyEnableBuiltinGenerator: SettingKey = "ENABLE_BUILTIN_GENERATOR";
+const KeyBuiltinMaxFileSize: SettingKey = "BUILTIN_MAX_FILE_SIZE";
+const KeyBuiltinDirectServeExts: SettingKey = "BUILTIN_DIRECT_SERVE_EXTS";
+
+const KeyQueueThumbConcurrency: SettingKey = "QUEUE_THUMB_CONCURRENCY";
+const KeyQueueThumbMaxExecTime: SettingKey = "QUEUE_THUMB_MAX_EXEC_TIME";
+const KeyQueueThumbBackoffFactor: SettingKey = "QUEUE_THUMB_BACKOFF_FACTOR";
+const KeyQueueThumbMaxBackoff: SettingKey = "QUEUE_THUMB_MAX_BACKOFF";
+const KeyQueueThumbMaxRetries: SettingKey = "QUEUE_THUMB_MAX_RETRIES";
+const KeyQueueThumbRetryDelay: SettingKey = "QUEUE_THUMB_RETRY_DELAY";
+
+const KeyEnableExifExtractor: SettingKey = "ENABLE_EXIF_EXTRACTOR";
+const KeyExifMaxSizeLocal: SettingKey = "EXIF_MAX_SIZE_LOCAL";
+const KeyExifMaxSizeRemote: SettingKey = "EXIF_MAX_SIZE_REMOTE";
+const KeyExifUseBruteForce: SettingKey = "EXIF_USE_BRUTE_FORCE";
+
+const KeyEnableMusicExtractor: SettingKey = "ENABLE_MUSIC_EXTRACTOR";
+const KeyMusicMaxSizeLocal: SettingKey = "MUSIC_MAX_SIZE_LOCAL";
+const KeyMusicMaxSizeRemote: SettingKey = "MUSIC_MAX_SIZE_REMOTE";
+
 const DEFAULT_CHUNK_SIZE = 50 * 1024 * 1024;
 /**
  * 将所有常量组合到一个对象中导出
  */
 export const constant = {
+  // Base
   KeyAppName,
   KeySiteURL,
   KeyAppVersion,
@@ -85,6 +127,7 @@ export const constant = {
   KeyDefaultBigParam,
   KeyGravatarURL,
   KeyThemeColor,
+  // Internal
   KeyJWTSecret,
   KeyResetPasswordSubject,
   KeyResetPasswordTemplate,
@@ -101,5 +144,37 @@ export const constant = {
   KeySmtpForceSSL,
   KeySiteAnnouncement,
   KeyFooterCode,
+  // File Settings
+  KeyUploadAllowedExtensions,
+  KeyUploadDeniedExtensions,
+  KeyEnableVipsGenerator,
+  KeyVipsPath,
+  KeyVipsMaxFileSize,
+  KeyVipsSupportedExts,
+  KeyEnableMusicCoverGenerator,
+  KeyMusicCoverMaxFileSize,
+  KeyMusicCoverSupportedExts,
+  KeyEnableFfmpegGenerator,
+  KeyFfmpegPath,
+  KeyFfmpegMaxFileSize,
+  KeyFfmpegSupportedExts,
+  KeyFfmpegCaptureTime,
+  KeyEnableBuiltinGenerator,
+  KeyBuiltinMaxFileSize,
+  KeyBuiltinDirectServeExts,
+  KeyQueueThumbConcurrency,
+  KeyQueueThumbMaxExecTime,
+  KeyQueueThumbBackoffFactor,
+  KeyQueueThumbMaxBackoff,
+  KeyQueueThumbMaxRetries,
+  KeyQueueThumbRetryDelay,
+  KeyEnableExifExtractor,
+  KeyExifMaxSizeLocal,
+  KeyExifMaxSizeRemote,
+  KeyExifUseBruteForce,
+  KeyEnableMusicExtractor,
+  KeyMusicMaxSizeLocal,
+  KeyMusicMaxSizeRemote,
+  // Others
   DEFAULT_CHUNK_SIZE
 };
