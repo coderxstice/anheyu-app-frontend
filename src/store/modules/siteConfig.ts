@@ -63,7 +63,7 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
         state.siteConfig?.app_name || // 来自系统设置
         state.siteConfig?.APP_NAME || // 来自公共配置
         getConfig().Title ||
-        "鱼鱼相册"
+        "猫鱼"
       );
     },
     getFixedHeader(state): boolean {

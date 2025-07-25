@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 14:44:11
- * @LastEditTime: 2025-06-22 23:46:22
+ * @LastEditTime: 2025-07-25 18:38:03
  * @LastEditors: 安知鱼
  */
 // src/api/wallpaper.ts
@@ -83,7 +83,7 @@ export const addWallpapert = (data: any) => {
 
 // 获取公共相册图片列表
 export const publicWallpapert = (params: any) => {
-  const requestUrl = getDynamicApiUrl("public/albums"); // 使用抽离的逻辑
+  const requestUrl = getDynamicApiUrl("public/albums");
 
   console.log(`请求公共相册图片列表: ${requestUrl}`, params);
   // 执行请求

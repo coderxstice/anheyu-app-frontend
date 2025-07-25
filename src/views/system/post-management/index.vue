@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, onMounted, toRefs } from "vue";
 import { useRouter } from "vue-router";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { ElMessage, ElMessageBox, ElDivider } from "element-plus";
 import { getArticleList, deleteArticle } from "@/api/post";
 import type { Article, GetArticleListParams } from "@/api/post/type";
 import {
@@ -40,6 +40,22 @@ const statusOptions = [
   { value: "DRAFT", label: "草稿", type: "warning", color: "#E6A23C" },
   { value: "ARCHIVED", label: "已归档", type: "info", color: "#909399" }
 ];
+
+/**
+ * 格式化 ISO 日期字符串为 'YYYY-MM-DD HH:mm'
+ * @param isoString ISO 格式的日期字符串
+ */
+const formatDate = (isoString: string) => {
+  if (!isoString) return "N/A";
+  const date = new Date(isoString);
+  const pad = (num: number) => num.toString().padStart(2, "0");
+  const yyyy = date.getFullYear();
+  const MM = pad(date.getMonth() + 1);
+  const dd = pad(date.getDate());
+  const hh = pad(date.getHours());
+  const mm = pad(date.getMinutes());
+  return `${yyyy}-${MM}-${dd} ${hh}:${mm}`;
+};
 
 const fetchData = async () => {
   state.loading = true;
@@ -171,32 +187,33 @@ onMounted(() => {
             :lg="6"
           >
             <el-card shadow="hover" class="article-card">
-              <div class="card-cover">
-                <el-image
-                  :src="article.cover_url"
-                  fit="cover"
-                  class="cover-image"
-                  lazy
-                >
-                  <template #error>
-                    <div class="image-slot">
-                      <span>暂无封面</span>
-                    </div>
-                  </template>
-                </el-image>
-                <div
-                  class="status-ribbon"
-                  :style="{
-                    backgroundColor: getStatusInfo(article.status)?.color
-                  }"
-                >
-                  {{ getStatusInfo(article.status)?.label }}
+              <a :href="`/p/${article.id}`" target="_blank" class="card-link">
+                <div class="card-cover">
+                  <el-image
+                    :src="article.cover_url"
+                    fit="cover"
+                    class="cover-image"
+                    lazy
+                  >
+                    <template #error>
+                      <div class="image-slot"><span>暂无封面</span></div>
+                    </template>
+                  </el-image>
+                  <div
+                    class="status-ribbon"
+                    :style="{
+                      backgroundColor: getStatusInfo(article.status)?.color
+                    }"
+                  >
+                    {{ getStatusInfo(article.status)?.label }}
+                  </div>
                 </div>
-              </div>
+              </a>
 
               <div class="card-body">
-                <h3 class="card-title">{{ article.title }}</h3>
-                <p class="card-summary">{{ article.summary }}</p>
+                <a :href="`/p/${article.id}`" target="_blank" class="card-link">
+                  <h3 class="card-title">{{ article.title }}</h3>
+                </a>
                 <div class="card-tags">
                   <el-tooltip
                     v-for="cat in article.post_categories"
@@ -222,32 +239,48 @@ onMounted(() => {
               </div>
 
               <div class="card-footer">
-                <div class="meta-info">
-                  <span
-                    ><IconifyIconOnline icon="ep:view" />
-                    {{ article.view_count }}</span
-                  >
-                  <el-divider direction="vertical" />
-                  <span
-                    ><IconifyIconOnline icon="ant-design:field-time-outlined" />
-                    {{ article.reading_time }} min</span
-                  >
+                <!-- 时间信息 -->
+                <div class="timestamps">
+                  <span>
+                    <IconifyIconOnline icon="ep:calendar" />
+                    {{ formatDate(article.created_at) }}
+                  </span>
+                  <span>
+                    <IconifyIconOnline icon="ep:edit-pen" />
+                    {{ formatDate(article.updated_at) }}
+                  </span>
                 </div>
-                <div class="actions">
-                  <el-button
-                    type="primary"
-                    link
-                    :icon="EditPen"
-                    @click="handleEdit(article)"
-                    >编辑</el-button
-                  >
-                  <el-button
-                    type="danger"
-                    link
-                    :icon="Delete"
-                    @click="handleDelete(article)"
-                    >删除</el-button
-                  >
+                <!-- 其他内容：左 stats，右按钮 -->
+                <div class="footer-extra">
+                  <div class="stats">
+                    <span>
+                      <IconifyIconOnline icon="ep:view" />
+                      {{ article.view_count }}
+                    </span>
+                    <el-divider direction="vertical" />
+                    <span>
+                      <IconifyIconOnline
+                        icon="ant-design:field-time-outlined"
+                      />
+                      {{ article.reading_time }} min
+                    </span>
+                  </div>
+                  <div class="actions">
+                    <el-button
+                      type="primary"
+                      link
+                      :icon="EditPen"
+                      @click="handleEdit(article)"
+                      >编辑</el-button
+                    >
+                    <el-button
+                      type="danger"
+                      link
+                      :icon="Delete"
+                      @click="handleDelete(article)"
+                      >删除</el-button
+                    >
+                  </div>
                 </div>
               </div>
             </el-card>
@@ -280,6 +313,12 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
+.card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
 .post-management-container {
   padding: 20px;
 }
@@ -345,7 +384,7 @@ onMounted(() => {
     font-size: 14px;
   }
 
-  &:hover .cover-image {
+  .card-link:hover & .cover-image {
     transform: scale(1.05);
   }
 }
@@ -365,28 +404,25 @@ onMounted(() => {
 .card-body {
   padding: 16px;
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 .card-title {
-  margin: 0 0 8px;
+  margin: 0 0 12px;
   font-size: 16px;
   font-weight: 600;
-  color: #303133;
+  color: var(--el-text-color-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.card-summary {
-  margin: 0 0 12px;
-  font-size: 13px;
-  color: #606266;
-  height: 40px;
-  line-height: 20px;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  line-clamp: 2;
+  transition: color 0.3s;
+
+  .card-link:hover & {
+    color: var(--el-color-primary);
+  }
 }
 .card-tags {
+  margin-top: auto;
   min-height: 24px;
   .tag-item {
     margin-right: 5px;
@@ -398,21 +434,59 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  border-top: 1px solid #e4e7ed;
-  background-color: #fcfcfc;
+  border-top: 1px solid var(--el-border-color-lighter);
+  background-color: var(--el-bg-color-overlay);
   flex-shrink: 0;
-  .meta-info {
+  flex-direction: column;
+
+  .timestamps {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     font-size: 12px;
-    color: #909399;
+    color: var(--el-text-color-secondary);
+    white-space: nowrap;
+    width: 100%;
+    justify-content: center;
     span {
       display: inline-flex;
       align-items: center;
       gap: 4px;
     }
   }
+
+  .footer-extra {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    justify-content: space-between;
+    width: 100%;
+
+    .stats {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--el-text-color-secondary);
+      span {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      .el-button {
+        padding: 0;
+        min-height: auto;
+      }
+    }
+  }
+}
+.actions {
+  display: flex;
 }
 .actions .el-button {
   padding: 0;

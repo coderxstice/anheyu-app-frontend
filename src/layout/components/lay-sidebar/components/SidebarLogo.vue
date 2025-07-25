@@ -17,7 +17,7 @@ defineProps({
 const siteConfigStore = useSiteConfigStore();
 
 const appName = computed(
-  () => siteConfigStore.getSiteConfig?.APP_NAME || "鱼鱼相册"
+  () => siteConfigStore.getSiteConfig?.APP_NAME || "猫鱼"
 );
 
 const appLogo = computed(

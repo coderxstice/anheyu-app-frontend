@@ -127,7 +127,7 @@ let finalHeight = ref("150px");
 const siteConfigStore = useSiteConfigStore();
 
 const siteName = computed(
-  () => siteConfigStore.getSiteConfig?.APP_NAME || "鱼鱼相册"
+  () => siteConfigStore.getSiteConfig?.APP_NAME || "猫鱼"
 );
 
 const formatFileSize = (size: number) => {
