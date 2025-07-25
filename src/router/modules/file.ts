@@ -14,7 +14,7 @@ export default {
   meta: {
     icon: "tabler:file-filled",
     title: "文件管理",
-    rank: 2
+    rank: 3
   },
   children: [
     {

@@ -97,7 +97,7 @@ export function resetRouter() {
 }
 
 /** 路由白名单 */
-const whiteList = ["/login", "/album", "/login/reset"];
+const whiteList = ["/", "/login", "/album", "/login/reset"];
 
 const { VITE_HIDE_HOME } = import.meta.env;
 
@@ -136,35 +136,33 @@ router.beforeEach((to: ToRouteType, _from, next) => {
     }
 
     // 3.2 开启隐藏首页后，手动输入 /welcome 则跳转到 404
-    if (VITE_HIDE_HOME === "true" && to.fullPath === "/welcome") {
+    if (VITE_HIDE_HOME === "true" && to.fullPath === "/dashboard/welcome") {
       next({ path: "/error/404" });
       return; // 结束当前导航守卫
     }
 
     // 已登录状态下访问登录页，直接重定向到第一个菜单页
     if (to.path === "/login") {
-      // 检查权限菜单是否已加载
+      // getTopMenu() 会自动计算出正确的路径 /dashboard/welcome，无需修改
       if (usePermissionStoreHook().wholeMenus.length === 0) {
-        // 如果未加载（例如刷新或直接访问/login），则先初始化路由
         initRouter()
           .then(() => {
-            // 初始化成功后，获取第一个菜单并重定向
             next({ path: getTopMenu(true).path, replace: true });
           })
           .catch(() => {
-            // 初始化失败（如token失效），则移除token并允许访问登录页
             removeToken();
             next();
           });
       } else {
-        // 如果权限菜单已加载，直接获取第一个菜单并重定向
         next({ path: getTopMenu(true).path, replace: true });
       }
       return; // 结束当前导航守卫
     }
 
-    // 3.3 **重要：已登录用户访问白名单页面（如 /album）直接放行**
-    if (whiteList.includes(to.fullPath)) {
+    // 3.3 已登录用户访问白名单页面（如 /album ）直接放行
+    console.log(to.path, to);
+
+    if (whiteList.includes(to.path)) {
       next();
       return; // 结束当前导航守卫
     }
@@ -235,9 +233,9 @@ router.beforeEach((to: ToRouteType, _from, next) => {
       if (whiteList.indexOf(to.path) !== -1) {
         next();
       } else {
-        // 未登录且非白名单页面，移除 token 并跳转到 /album
+        // 未登录且非白名单页面，移除 token 并跳转到 "/"
         removeToken();
-        next({ path: "/album" });
+        next({ path: "/" });
       }
     } else {
       // 访问登录页，直接放行

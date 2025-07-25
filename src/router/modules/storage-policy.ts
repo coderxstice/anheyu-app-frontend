@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-23 16:45:39
- * @LastEditTime: 2025-07-15 16:22:53
+ * @LastEditTime: 2025-07-25 19:12:10
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
@@ -14,7 +14,7 @@ export default {
   meta: {
     icon: "mingcute:storage-fill",
     title: "存储策略",
-    rank: 3
+    rank: 5
   },
   children: [
     {

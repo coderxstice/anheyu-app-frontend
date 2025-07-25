@@ -42,7 +42,7 @@ const getBreadcrumb = (): void => {
 
   // 获取每个父级路径对应的路由信息
   parentRoutes.forEach(path => {
-    if (path !== "/") matched.push(findRouteByPath(path, routes));
+    if (path !== "/dashboard") matched.push(findRouteByPath(path, routes));
   });
 
   matched.push(currentRoute);

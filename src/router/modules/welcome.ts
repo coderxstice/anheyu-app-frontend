@@ -2,24 +2,24 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-07-25 18:36:31
+ * @LastEditTime: 2025-07-25 19:15:08
  * @LastEditors: 安知鱼
  */
 const { VITE_HIDE_HOME } = import.meta.env;
 const Layout = () => import("@/layout/index.vue");
 
 export default {
-  path: "/",
+  path: "/dashboard",
   component: Layout,
-  redirect: "/welcome",
+  redirect: "/dashboard/welcome",
   meta: {
     icon: "ep:home-filled",
     title: "首页",
-    rank: 0
+    rank: 1
   },
   children: [
     {
-      path: "/welcome",
+      path: "/dashboard/welcome",
       name: "Welcome",
       component: () => import("@/views/system/welcome/index.vue"),
       meta: {

@@ -14,7 +14,7 @@ export default {
   meta: {
     icon: "ep:home-filled",
     title: "相册管理",
-    rank: 3
+    rank: 4
   },
   children: [
     {

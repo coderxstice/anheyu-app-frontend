@@ -252,7 +252,7 @@ function formatTwoStageRoutes(routesList: RouteRecordRaw[]) {
   if (routesList.length === 0) return routesList;
   const newRoutesList: RouteRecordRaw[] = [];
   routesList.forEach((v: RouteRecordRaw) => {
-    if (v.path === "/") {
+    if (v.path === "/dashboard") {
       newRoutesList.push({
         component: v.component,
         name: v.name,
@@ -390,6 +390,9 @@ function getTopMenu(tag = false): menuType {
     usePermissionStoreHook().wholeMenus[0]?.children[0]
   );
   tag && useMultiTagsStoreHook().handleTags("push", topMenu);
+
+  console.log(usePermissionStoreHook().wholeMenus);
+
   return topMenu;
 }
 

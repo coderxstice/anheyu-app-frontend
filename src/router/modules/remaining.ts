@@ -2,17 +2,45 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-04-08 17:29:06
- * @LastEditTime: 2025-07-25 18:39:22
+ * @LastEditTime: 2025-07-25 19:21:30
  * @LastEditors: 安知鱼
  */
-const Layout = () => import("@/layout/index.vue");
+const Layout = () => import("@/layout/index.vue"); // 后台布局
+const FrontendLayout = () => import("@/layout/frontend/index.vue");
 import { LOCAL_STORAGE_KEY } from "@/store/modules/siteConfig";
 
 const configLocal = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
-
 const appName = configLocal?.config?.APP_NAME || "猫鱼";
 
 export default [
+  {
+    path: "/",
+    component: FrontendLayout,
+    meta: {
+      title: "前台",
+      rank: 100
+    },
+    children: [
+      {
+        path: "",
+        name: "PostHome",
+        component: () => import("@/views/post/post-home/index.vue"),
+        meta: {
+          title: "首页",
+          showLink: false
+        }
+      },
+      {
+        path: "p/:id",
+        name: "PostDetail",
+        component: () => import("@/views/post/post-detail/index.vue"),
+        meta: {
+          title: "文章详情",
+          showLink: false
+        }
+      }
+    ]
+  },
   {
     path: "/login",
     name: "Login",
@@ -49,25 +77,5 @@ export default [
       showLink: false,
       rank: 103
     }
-  },
-  {
-    path: "/p/:id",
-    name: "PostDetail",
-    component: () => import("@/views/post/post-detail/index.vue"),
-    meta: {
-      title: "文章详情",
-      showLink: false,
-      rank: 104
-    }
   }
-  // {
-  //   path: "/PostHome",
-  //   name: "PostHome",
-  //   component: () => import("@/views/post/post-home/index.vue"),
-  //   meta: {
-  //     title: "首页",
-  //     showLink: false,
-  //     rank: 104
-  //   }
-  // }
 ] satisfies Array<RouteConfigsTable>;
