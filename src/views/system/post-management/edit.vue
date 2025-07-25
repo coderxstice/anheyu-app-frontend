@@ -1,7 +1,16 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted, computed, watch } from "vue";
+import {
+  ref,
+  reactive,
+  onMounted,
+  onUnmounted,
+  computed,
+  watch,
+  readonly
+} from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElNotification, ElTooltip } from "element-plus";
+import { useNav } from "@/layout/hooks/useNav";
 import type { FormInstance, FormRules } from "element-plus";
 import type * as Monaco from "monaco-editor";
 import type { editor } from "monaco-editor";
@@ -14,25 +23,65 @@ import {
   getTagList
 } from "@/api/post";
 import type { ArticleForm, PostCategory, PostTag } from "@/api/post/type";
-import { Document, UploadFilled } from "@element-plus/icons-vue";
+import { UploadFilled } from "@element-plus/icons-vue";
 
-// 假设这是您项目中用于主题切换的 Hook
-// import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
+/**
+ * 一个响应式的 Hook，用于获取并监听应用的全局主题 (light/dark)。
+ * 它通过监听 `<html>` 元素上的 'dark' 类名来实现。
+ */
+function useTheme() {
+  const theme = ref<"light" | "dark">(
+    document.documentElement.classList.contains("dark") ? "dark" : "light"
+  );
 
-defineOptions({
-  name: "PostEdit"
-});
+  const observer = new MutationObserver(mutations => {
+    for (const mutation of mutations) {
+      if (mutation.attributeName === "class") {
+        const newTheme = document.documentElement.classList.contains("dark")
+          ? "dark"
+          : "light";
+        if (theme.value !== newTheme) {
+          theme.value = newTheme;
+        }
+      }
+    }
+  });
+
+  onMounted(() => {
+    observer.observe(document.documentElement, { attributes: true });
+  });
+
+  onUnmounted(() => {
+    observer.disconnect();
+  });
+
+  return {
+    theme: readonly(theme)
+  };
+}
+
+defineOptions({ name: "PostEdit" });
 
 const route = useRoute();
 const router = useRouter();
 
-// 主题适配 (模拟)
-const dataTheme = ref("dark");
+// --- 侧边栏控制 ---
+const { device, pureApp, toggleSideBar } = useNav();
+let wasSidebarOpened = pureApp.getSidebarStatus;
+
+// --- 主题适配 ---
+const { theme } = useTheme();
 const monacoTheme = computed(() =>
-  dataTheme.value === "light" ? "vs" : "vs-dark"
+  theme.value === "light" ? "vs" : "vs-dark"
 );
 
-// Monaco Editor
+// --- 沉浸式全屏控制 ---
+const isImmersiveFullscreen = ref(false);
+const toggleImmersiveFullscreen = () => {
+  isImmersiveFullscreen.value = !isImmersiveFullscreen.value;
+};
+
+// --- Monaco Editor ---
 let monaco: typeof Monaco | null = null;
 let editorInstance: Monaco.editor.IStandaloneCodeEditor | null = null;
 const editorContainerRef = ref<HTMLElement | null>(null);
@@ -47,11 +96,14 @@ const monacoOptions = computed<editor.IStandaloneEditorConstructionOptions>(
     wordWrap: "on",
     fontSize: 15,
     scrollBeyondLastLine: false,
-    lineNumbers: "on"
+    lineNumbers: "on",
+    scrollbar: {
+      alwaysConsumeMouseWheel: false
+    }
   })
 );
 
-// 表单与页面状态
+// --- 表单与页面状态 ---
 const formRef = ref<FormInstance>();
 const loading = ref(true);
 const isSubmitting = ref(false);
@@ -79,11 +131,7 @@ const statusOptions = [
 const isEditMode = computed(() => !!articleId.value);
 const pageTitle = computed(() => (isEditMode.value ? "编辑文章" : "新增文章"));
 
-const rules = reactive<FormRules>({
-  title: [{ required: true, message: "请输入文章标题", trigger: "blur" }]
-});
-
-// 核心函数
+// --- 核心函数 ---
 const loadMonaco = async () => {
   if (monaco) return;
   isMonacoLoading.value = true;
@@ -130,7 +178,8 @@ const initPage = async () => {
       form.post_category_ids = data.post_categories.map(c => c.id);
       form.post_tag_ids = data.post_tags.map(t => t.id);
     } else {
-      form.content_md = `## ${pageTitle.value}\n\n在这里开始你的创作...`;
+      form.title = "";
+      form.content_md = `## 在这里开始你的创作...`;
     }
 
     await fetchOptionsPromise;
@@ -144,6 +193,15 @@ const initPage = async () => {
 };
 
 const handleSubmit = async (isPublish = false) => {
+  if (!form.title || form.title.trim() === "") {
+    ElNotification({
+      title: "提交错误",
+      message: "文章标题不能为空，请输入标题后再保存。",
+      type: "error",
+      duration: 30000
+    });
+    return;
+  }
   if (isPublish) {
     form.status = "PUBLISHED";
   }
@@ -172,13 +230,24 @@ const handleGoBack = () => {
   router.push({ name: "PostManagement" });
 };
 
-// 生命周期
+// --- 生命周期 ---
 onMounted(() => {
   initPage();
+  wasSidebarOpened = pureApp.getSidebarStatus;
+  if (device.value !== "mobile" && pureApp.getSidebarStatus) {
+    toggleSideBar();
+  }
 });
 
 onUnmounted(() => {
   if (editorInstance) editorInstance.dispose();
+  if (
+    device.value !== "mobile" &&
+    !pureApp.getSidebarStatus &&
+    wasSidebarOpened
+  ) {
+    toggleSideBar();
+  }
 });
 
 watch(monacoTheme, newTheme => {
@@ -196,16 +265,49 @@ watch(
 </script>
 
 <template>
-  <div v-loading="loading" class="post-edit-container">
-    <el-form ref="formRef" :model="form" :rules="rules" label-position="top">
+  <div
+    v-loading="loading"
+    class="post-edit-container"
+    :class="{ 'is-fullscreen-mode': isImmersiveFullscreen }"
+  >
+    <el-form ref="formRef" :model="form" label-position="top">
       <el-row :gutter="20">
         <!-- 左侧：沉浸式内容创作区 -->
-        <el-col :lg="18" :md="16">
+        <el-col :lg="18" :md="16" class="left-panel">
           <el-card shadow="never" class="content-card">
             <template #header>
-              <div class="card-header">
-                <IconifyIconOnline icon="fluent:code-text-20-regular" />
-                <span>内容创作 (Markdown)</span>
+              <div class="content-card-header">
+                <el-form-item prop="title" class="title-form-item">
+                  <el-input
+                    v-model="form.title"
+                    placeholder="请输入文章标题..."
+                    size="large"
+                    class="title-input"
+                  />
+                </el-form-item>
+                <div class="header-actions">
+                  <el-tooltip
+                    :content="
+                      isImmersiveFullscreen ? '退出沉浸模式' : '沉浸模式'
+                    "
+                    placement="bottom"
+                  >
+                    <el-button
+                      link
+                      class="action-btn"
+                      @click="toggleImmersiveFullscreen"
+                    >
+                      <IconifyIconOnline
+                        :icon="
+                          isImmersiveFullscreen
+                            ? 'ant-design:fullscreen-exit-outlined'
+                            : 'ant-design:fullscreen-outlined'
+                        "
+                      />
+                    </el-button>
+                  </el-tooltip>
+                  <span class="editor-type-label">Markdown</span>
+                </div>
               </div>
             </template>
             <div v-loading="isMonacoLoading" class="editor-wrapper">
@@ -215,7 +317,7 @@ watch(
         </el-col>
 
         <!-- 右侧：多功能配置栏 -->
-        <el-col :lg="6" :md="8">
+        <el-col :lg="6" :md="8" class="right-panel">
           <!-- 卡片一：发布操作栏 -->
           <el-card shadow="never" class="form-card action-card">
             <template #header>
@@ -244,20 +346,7 @@ watch(
             >
           </el-card>
 
-          <!-- 卡片二：基本信息 -->
-          <el-card shadow="never" class="form-card">
-            <template #header>
-              <div class="card-header">
-                <el-icon><Document /></el-icon>
-                <span>基本信息</span>
-              </div>
-            </template>
-            <el-form-item label="文章标题" prop="title">
-              <el-input v-model="form.title" placeholder="请输入文章标题" />
-            </el-form-item>
-          </el-card>
-
-          <!-- 卡片三：发布设置 -->
+          <!-- 卡片二：发布设置 -->
           <el-card shadow="never" class="form-card">
             <template #header>
               <div class="card-header">
@@ -270,7 +359,7 @@ watch(
                 <el-radio-button
                   v-for="item in statusOptions"
                   :key="item.value"
-                  :label="item.value"
+                  :value="item.value"
                   >{{ item.label }}</el-radio-button
                 >
               </el-radio-group>
@@ -315,7 +404,7 @@ watch(
             </el-form-item>
           </el-card>
 
-          <!-- 卡片四：媒体与摘要 -->
+          <!-- 卡片三：媒体与摘要 -->
           <el-card shadow="never" class="form-card">
             <template #header>
               <div class="card-header">
@@ -343,6 +432,7 @@ watch(
 
 <style lang="scss" scoped>
 .post-edit-container {
+  padding: 0px;
   background-color: var(--el-bg-color-page);
   min-height: calc(100vh - 88px);
   transition: background-color 0.3s;
@@ -353,10 +443,8 @@ watch(
   margin-bottom: 20px;
   border-radius: 8px;
   background-color: var(--el-bg-color-overlay);
-  border: 1px solid var(--el-border-color-lighter);
-  transition:
-    background-color 0.3s,
-    border-color 0.3s;
+  border: var(--style-border);
+  transition: all 0.3s ease-in-out;
 
   .card-header {
     display: flex;
@@ -378,24 +466,66 @@ watch(
   display: flex;
   flex-direction: column;
 
+  :deep(.el-card__header) {
+    padding: 10px 20px;
+    flex-shrink: 0;
+  }
+  .content-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .title-form-item {
+    flex-grow: 1;
+    margin-bottom: 0 !important;
+  }
+  .title-input {
+    :deep(.el-input__wrapper) {
+      box-shadow: none !important;
+      background-color: transparent;
+      padding: 0;
+    }
+    :deep(.el-input__inner) {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--el-text-color-primary);
+    }
+  }
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-left: 16px;
+  }
+  .action-btn {
+    font-size: 18px;
+    color: var(--el-text-color-secondary);
+    &:hover {
+      color: var(--el-text-color-primary);
+    }
+  }
+  .editor-type-label {
+    font-size: 14px;
+    color: var(--el-text-color-placeholder);
+    user-select: none;
+  }
+
   :deep(.el-card__body) {
     padding: 0;
     flex-grow: 1;
-    display: flex;
-    flex-direction: column;
+    min-height: 0; // 关键：让 flex 子项可以收缩
   }
 }
 
 .editor-wrapper {
   width: 100%;
-  flex-grow: 1;
+  height: 100%;
 }
-
 .editor-container {
   width: 100%;
   height: 100%;
 }
-
 .action-card {
   .actions {
     display: flex;
@@ -440,6 +570,34 @@ watch(
       color: var(--el-color-white);
       border-color: var(--el-color-primary);
     }
+  }
+}
+
+.post-edit-container.is-fullscreen-mode {
+  padding: 0;
+
+  .left-panel {
+    width: 100%;
+    padding: 0 !important;
+    flex: 1;
+    max-width: 100%;
+  }
+
+  .right-panel {
+    display: none;
+  }
+
+  .content-card {
+    margin: 0;
+    border-radius: 0;
+    border: none;
+    height: 100vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .content-card .editor-type-label {
+    display: none;
   }
 }
 </style>
