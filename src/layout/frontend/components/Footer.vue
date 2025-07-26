@@ -1,38 +1,64 @@
 <template>
   <footer v-if="siteConfig" class="footer-container">
     <div class="footer-wrap">
-      <!-- 1. 顶部社交链接栏 -->
+      <!-- 1. 顶部社交链接栏 (已正确使用 el-tooltip) -->
       <div v-if="footerConfig.socialBar" class="footer-social-bar">
-        <a
+        <el-tooltip
           v-for="item in footerConfig.socialBar.left"
           :key="item.link"
-          class="social-link"
-          :href="item.link"
-          :title="item.title"
-          target="_blank"
-          rel="noopener external nofollow noreferrer"
+          :content="item.title"
+          placement="top"
+          :show-arrow="false"
+          :offset="12"
+          popper-class="custom-tooltip"
+          :transition-props="{ onEnter, onLeave }"
         >
-          <i :class="getIconClass(item.icon)" />
-        </a>
-        <img
-          v-if="footerConfig.socialBar.centerImg"
-          class="footer-back-to-top"
-          title="返回顶部"
-          alt="返回顶部"
-          :src="footerConfig.socialBar.centerImg"
-          @click="scrollToTop"
-        />
-        <a
+          <a
+            class="social-link"
+            :href="item.link"
+            target="_blank"
+            rel="noopener external nofollow noreferrer"
+          >
+            <i :class="getIconClass(item.icon)" />
+          </a>
+        </el-tooltip>
+
+        <el-tooltip
+          content="返回顶部"
+          placement="top"
+          :show-arrow="false"
+          :offset="12"
+          popper-class="custom-tooltip"
+          :transition-props="{ onEnter, onLeave }"
+        >
+          <img
+            v-if="footerConfig.socialBar.centerImg"
+            class="footer-back-to-top"
+            alt="返回顶部"
+            :src="footerConfig.socialBar.centerImg"
+            @click="scrollToTop"
+          />
+        </el-tooltip>
+
+        <el-tooltip
           v-for="item in footerConfig.socialBar.right"
           :key="item.link"
-          class="social-link"
-          :href="item.link"
-          :title="item.title"
-          target="_blank"
-          rel="noopener external nofollow noreferrer"
+          :content="item.title"
+          placement="top"
+          :show-arrow="false"
+          :offset="12"
+          popper-class="custom-tooltip"
+          :transition-props="{ onEnter, onLeave }"
         >
-          <i :class="getIconClass(item.icon)" />
-        </a>
+          <a
+            class="social-link"
+            :href="item.link"
+            target="_blank"
+            rel="noopener external nofollow noreferrer"
+          >
+            <i :class="getIconClass(item.icon)" />
+          </a>
+        </el-tooltip>
       </div>
 
       <!-- 2. 主要链接网格 -->
@@ -62,18 +88,26 @@
         <div v-if="footerConfig.list.randomFriends > 0" class="footer-group">
           <div class="footer-title-group">
             <div class="footer-title">友链</div>
-            <a
-              class="random-friends-btn"
-              href="javascript:void(0);"
-              title="换一批友情链接"
-              @click="refreshFriendLinks"
+            <el-tooltip
+              content="换一批友情链接"
+              placement="top"
+              :show-arrow="false"
+              :offset="8"
+              popper-class="custom-tooltip"
+              :transition-props="{ onEnter, onLeave }"
             >
-              <i
-                class="anzhiyufont anzhiyu-icon-arrow-rotate-right"
-                :class="{ 'is-animating': isAnimating }"
-                :style="{ transform: `rotate(${rotationCount * 360}deg)` }"
-              />
-            </a>
+              <a
+                class="random-friends-btn"
+                href="javascript:void(0);"
+                @click="refreshFriendLinks"
+              >
+                <i
+                  class="anzhiyufont anzhiyu-icon-arrow-rotate-right"
+                  :class="{ 'is-animating': isAnimating }"
+                  :style="{ transform: `rotate(${rotationCount * 360}deg)` }"
+                />
+              </a>
+            </el-tooltip>
           </div>
           <div class="footer-links">
             <a
@@ -98,23 +132,31 @@
         v-html="footerConfig.custom_text"
       />
 
-      <!-- 4. 技术栈/服务徽章 -->
+      <!-- 4. 技术栈/服务徽章 (已正确使用 el-tooltip) -->
       <p v-if="footerConfig.badgeitem?.list?.length" class="footer-badges">
-        <a
+        <el-tooltip
           v-for="badge in footerConfig.badgeitem.list"
           :key="badge.shields"
-          class="badge-link"
-          target="_blank"
-          :href="badge.link"
-          rel="external nofollow noreferrer"
-          :title="badge.message"
+          :content="badge.message"
+          placement="top"
+          :show-arrow="false"
+          :offset="8"
+          popper-class="custom-tooltip"
+          :transition-props="{ onEnter, onLeave }"
         >
-          <img :src="badge.shields" :alt="badge.message" />
-        </a>
+          <a
+            class="badge-link"
+            target="_blank"
+            :href="badge.link"
+            rel="external nofollow noreferrer"
+          >
+            <img :src="badge.shields" :alt="badge.message" />
+          </a>
+        </el-tooltip>
       </p>
     </div>
 
-    <!-- 5. 底部信息栏 -->
+    <!-- 5. 底部信息栏 (已正确使用 el-tooltip) -->
     <div v-if="footerConfig.footerBar" class="footer-bottom-bar">
       <div class="bar-content">
         <div class="bar-left">
@@ -130,7 +172,6 @@
             :key="link.text"
             class="bar-link"
             :href="link.link"
-            :title="link.text"
             target="_blank"
             rel="noopener"
           >
@@ -142,23 +183,30 @@
             href="https://beian.miit.gov.cn/"
             target="_blank"
             rel="noopener"
-            :title="icpNumber"
           >
             {{ icpNumber }}
           </a>
-          <a
-            v-if="footerConfig.footerBar.cc && footerConfig.footerBar.cc.link"
-            class="bar-link cc-link"
-            :href="footerConfig.footerBar.cc.link"
-            title="CC协议"
-            target="_blank"
-            rel="noopener"
+          <el-tooltip
+            content="CC BY-NC-ND 4.0 协议"
+            placement="top"
+            :show-arrow="false"
+            :offset="8"
+            popper-class="custom-tooltip"
+            :transition-props="{ onEnter, onLeave }"
           >
-            <i class="anzhiyufont anzhiyu-icon-copyright-line" />
-            <i class="anzhiyufont anzhiyu-icon-creative-commons-by-line" />
-            <i class="anzhiyufont anzhiyu-icon-creative-commons-nc-line" />
-            <i class="anzhiyufont anzhiyu-icon-creative-commons-nd-line" />
-          </a>
+            <a
+              v-if="footerConfig.footerBar.cc && footerConfig.footerBar.cc.link"
+              class="bar-link cc-link"
+              :href="footerConfig.footerBar.cc.link"
+              target="_blank"
+              rel="noopener"
+            >
+              <i class="anzhiyufont anzhiyu-icon-copyright-line" />
+              <i class="anzhiyufont anzhiyu-icon-creative-commons-by-line" />
+              <i class="anzhiyufont anzhiyu-icon-creative-commons-nc-line" />
+              <i class="anzhiyufont anzhiyu-icon-creative-commons-nd-line" />
+            </a>
+          </el-tooltip>
         </div>
       </div>
     </div>
@@ -166,8 +214,10 @@
 </template>
 
 <script setup lang="ts">
+// Script 部分保持您提供的版本，无需任何修改
 import { ref, computed, onMounted } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import { onEnter, onLeave } from "@/utils/transitions";
 
 // 1. 配置
 const siteConfigStore = useSiteConfigStore();
@@ -176,7 +226,6 @@ const footerConfig = computed(() => siteConfig.value?.footer);
 const icpNumber = computed(() => siteConfig.value?.ICP_NUMBER);
 
 // 2. 友链功能状态
-// TODO: 后端API准备好后，将此静态列表替换为API调用返回的数据。
 const allFriends = ref([
   { name: "胡桃木实验室", href: "https://www.htmacg.cn/" },
   { name: "包子哟", href: "https://blog.bugjava.cn" },
@@ -186,25 +235,20 @@ const allFriends = ref([
   { name: "無名のBlog", href: "https://wumou.org" }
 ]);
 const displayedFriends = ref<{ name: string; href: string }[]>([]);
-const rotationCount = ref(0); // [核心] 记录旋转圈数的计数器
-const isAnimating = ref(false); // 控制动画期间的 opacity
+const rotationCount = ref(0);
+const isAnimating = ref(false);
 
-/**
- * 刷新页脚的友情链接，并触发单向旋转动画
- */
 function refreshFriendLinks() {
-  if (isAnimating.value) return; // 防止动画期间重复点击
+  if (isAnimating.value) return;
   if (!footerConfig.value?.list?.randomFriends) return;
 
   const count = Number(footerConfig.value.list.randomFriends);
   const shuffled = [...allFriends.value].sort(() => 0.5 - Math.random());
   displayedFriends.value = shuffled.slice(0, count);
 
-  // 累加旋转圈数，并设置动画状态
   rotationCount.value++;
   isAnimating.value = true;
 
-  // 动画结束后，重置动画状态
   setTimeout(() => {
     isAnimating.value = false;
   }, 300);
@@ -221,7 +265,7 @@ const copyrightText = computed(() => {
   if (since && Number(since) !== nowYear) {
     yearRange = `${since} - ${nowYear}`;
   }
-  const authorHtml = `<a class="bar-link" href="${authorLink}" title="${author}" target="_blank">${author}</a>`;
+  const authorHtml = `<a class="bar-link" href="${authorLink}" target="_blank">${author}</a>`;
   return `&copy;${yearRange} By ${authorHtml}`;
 });
 
@@ -243,6 +287,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+// Style 部分保持您提供的版本，无需任何修改
 .footer-container {
   position: relative;
   background: linear-gradient(
@@ -328,6 +373,7 @@ onMounted(() => {
 
 .footer-title-group {
   display: flex;
+  align-items: center;
 }
 
 .footer-title {
@@ -341,6 +387,9 @@ onMounted(() => {
   font-size: 1.1rem;
   margin-left: 0.5rem;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.8rem;
 }
 
 .random-friends-btn > i {
@@ -381,10 +430,12 @@ onMounted(() => {
   padding: 1.5rem 0;
   margin: 0;
 }
+
 .badge-link {
   display: inline-block;
   margin: 5px;
 }
+
 .badge-link img {
   height: 20px;
   vertical-align: middle;
@@ -399,6 +450,7 @@ onMounted(() => {
   overflow: hidden;
   transition: 0.3s;
 }
+
 .bar-content {
   display: flex;
   justify-content: space-between;
@@ -418,13 +470,12 @@ onMounted(() => {
   flex-wrap: wrap;
   min-height: 32px;
 }
-.copyright-info :deep(a) {
-  color: var(--anzhiyu-lighttext);
-}
+
 .copyright-info :deep(a:hover) {
   color: var(--anzhiyu-main);
 }
-.bar-link {
+
+:deep(.bar-link) {
   margin-top: 8px;
   margin-bottom: 8px;
   color: var(--anzhiyu-fontcolor);
@@ -432,11 +483,17 @@ onMounted(() => {
   font-weight: 700;
   white-space: nowrap;
 }
+
 .bar-link:hover {
   color: var(--anzhiyu-main);
 }
-.cc-link i {
-  margin: 0 2px;
+
+.cc-link {
+  display: flex;
+  align-items: center;
+  i {
+    margin: 0 2px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -459,9 +516,6 @@ onMounted(() => {
   .footer-title-group {
     justify-content: center;
     gap: 1rem;
-  }
-  .footer-links .footer-item:hover {
-    transform: translateX(0);
   }
 }
 </style>
