@@ -58,13 +58,7 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
       return null;
     },
     getTitle(state): string {
-      return (
-        state.siteConfig?.title ||
-        state.siteConfig?.app_name || // 来自系统设置
-        state.siteConfig?.APP_NAME || // 来自公共配置
-        getConfig().Title ||
-        "猫鱼"
-      );
+      return state.siteConfig?.APP_NAME || "猫鱼";
     },
     getFixedHeader(state): boolean {
       return typeof state.siteConfig?.fixedHeader === "boolean"
@@ -100,19 +94,10 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
       // 将新旧配置合并
       this.siteConfig = { ...this.siteConfig, ...newSettings };
 
-      // 在这里特殊处理了标题，确保其同步
-      if (newSettings.app_name) {
-        this.siteConfig.title = newSettings.app_name;
-      } else if (newSettings.APP_NAME) {
-        this.siteConfig.title = newSettings.APP_NAME;
-      }
-
       // 确保 API_URL 总是以斜杠结尾
       if (this.siteConfig.API_URL && !this.siteConfig.API_URL.endsWith("/")) {
         this.siteConfig.API_URL += "/";
       }
-
-      // console.log("合并后的站点配置:", this.siteConfig);
 
       // 传递 SiteAnnouncement 给公告函数
       if (this.siteConfig.SITE_ANNOUNCEMENT !== undefined) {
@@ -125,22 +110,18 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
         timestamp: Date.now()
       };
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToCache));
-      // console.log("站点配置已更新并缓存到 localStorage:", this.siteConfig);
     },
 
     // 异步获取并合并站点公共配置（用于应用初始化）
     async fetchSiteConfig() {
-      if (this.isLoaded) return; // 如果已加载，选择直接返回
+      if (this.isLoaded) return; // 如果已加载，直接返回
 
-      // 1. 先从前端获取默认配置
       const initialConfig = {
-        title: getConfig().Title,
         fixedHeader: getConfig().FixedHeader,
         hiddenSideBar: getConfig().HiddenSideBar
       };
       this.siteConfig = { ...initialConfig, ...this.siteConfig };
 
-      // 2. 尝试从 localStorage 读取缓存
       const cachedData = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (cachedData) {
         try {
@@ -148,19 +129,17 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
           if (Date.now() - timestamp < CACHE_EXPIRATION_TIME) {
             this._updateStateAndCache(cachedConfig);
             this.isLoaded = true;
-            // console.log("站点配置已从 localStorage 缓存中加载。");
             return;
           } else {
             localStorage.removeItem(LOCAL_STORAGE_KEY);
           }
         } catch (error) {
-          console.log("无效的缓存数据，清除缓存:", error);
+          console.log("缓存数据解析失败，清除缓存:", error);
 
           localStorage.removeItem(LOCAL_STORAGE_KEY);
         }
       }
 
-      // 3. 如果缓存无效，再发起网络请求获取公共配置
       try {
         const res = await getSiteConfigApi();
         if (res.code === 200 && res.data) {
@@ -193,20 +172,41 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
     },
 
     /**
-     * @description 用于保存系统设置到后端，并同步更新状态和缓存
-     * @param settingsToUpdate - 包含待更新键值对的对象
+     * @description 用于保存系统设置到后端，并智能更新缓存
      */
     async saveSystemSettings(settingsToUpdate: SettingsMap) {
       this.loading = true;
       try {
-        const res = await updateSettingsApi(settingsToUpdate);
-        if (res.code === 200) {
-          // 在后端更新成功后，立即更新本地状态和缓存
-          this._updateStateAndCache(settingsToUpdate);
-          message("设置已保存成功", { type: "success" });
-          return Promise.resolve();
-        } else {
-          return Promise.reject(new Error(res.message));
+        const updateRes = await updateSettingsApi(settingsToUpdate);
+        if (updateRes.code !== 200) {
+          return Promise.reject(new Error(updateRes.message));
+        }
+
+        // [核心修正] 保存成功后，不直接用扁平数据更新缓存，
+        // 而是立即调用公共配置API，获取最新的、完整的、结构化的配置
+        try {
+          const configRes = await getSiteConfigApi();
+          if (configRes.code === 200 && configRes.data) {
+            // 使用最新的完整配置来更新状态和缓存，确保数据结构正确
+            this._updateStateAndCache(configRes.data);
+            message("设置已保存成功", { type: "success" });
+            return Promise.resolve();
+          } else {
+            // 如果获取最新配置失败，降级为清除缓存，强制下次刷新时重新获取
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+            this.isLoaded = false;
+            return Promise.reject(
+              new Error("设置保存成功，但刷新缓存失败，请手动刷新页面。")
+            );
+          }
+        } catch (fetchError) {
+          // 如果网络请求失败，同样降级处理
+          localStorage.removeItem(LOCAL_STORAGE_KEY);
+          this.isLoaded = false;
+          console.error("刷新站点配置缓存时出错:", fetchError);
+          return Promise.reject(
+            new Error("设置保存成功，但刷新缓存时出错，请手动刷新页面。")
+          );
         }
       } catch (error) {
         return Promise.reject(error);
@@ -215,7 +215,7 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
       }
     },
 
-    // 保留了这个 action，用于在客户端修改如 fixedHeader 等不需持久化到后端的设置
+    // 用于在客户端修改如 fixedHeader 等不需持久化到后端的设置
     changeSetting(data: { key: keyof CombinedSiteSettings; value: any }) {
       const { key, value } = data;
       const changes: Partial<CombinedSiteSettings> = {};
