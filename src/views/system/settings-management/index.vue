@@ -19,6 +19,10 @@
           <FileSettings v-model="form.file" />
         </el-form>
       </el-tab-pane>
+
+      <el-tab-pane label="前台配置" name="frontDeskSetting">
+        <FrontDeskSettings v-model="form.frontDesk" />
+      </el-tab-pane>
     </el-tabs>
 
     <div class="save-button-container">
@@ -35,25 +39,35 @@ import { ElMessage } from "element-plus";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { constant } from "@/constant";
 
-// [MODIFIED] Import types from the new central location
 import type {
   SettingsForm,
   SiteInfo,
   PageSittingInfo,
-  FileSettingsInfo
+  FileSettingsInfo,
+  HomePageSettingsInfo
 } from "./type";
 
 import BaseInfoForm from "./components/BaseInfoForm.vue";
 import IconSettingsForm from "./components/IconSettingsForm.vue";
 import PageSittingForm from "./components/PageSittingForm.vue";
 import FileSettings from "./components/fileSetting/FileSettingsForm.vue";
-
-// [REMOVED] Interface definitions are now in ./type/index.ts
+import FrontDeskSettings from "./components/FrontDeskSettings.vue";
 
 let activeName = "siteConfig";
 const siteConfigStore = useSiteConfigStore();
 
-const form = reactive<SettingsForm>({
+// 定义一个更清晰的类型别名，用于表单和映射
+type HomePageFormInfo = Omit<HomePageSettingsInfo, "footerCustomText">;
+type FormType = Omit<SettingsForm, "frontDesk"> & {
+  frontDesk: { home: HomePageFormInfo };
+};
+type FormKeys =
+  | keyof SiteInfo
+  | keyof PageSittingInfo
+  | keyof FileSettingsInfo
+  | keyof HomePageFormInfo;
+
+const form = reactive<FormType>({
   site: {
     siteName: "",
     siteDescription: "",
@@ -66,11 +80,7 @@ const form = reactive<SettingsForm>({
     iconMedium: "",
     iconLarge: ""
   },
-  page: {
-    albumApiURL: "",
-    defaultThumbParam: "",
-    defaultBigParam: ""
-  },
+  page: { albumApiURL: "", defaultThumbParam: "", defaultBigParam: "" },
   file: {
     uploadAllowedExtensions: "",
     uploadDeniedExtensions: "",
@@ -102,13 +112,33 @@ const form = reactive<SettingsForm>({
     enableMusicExtractor: true,
     musicMaxSizeLocal: "0",
     musicMaxSizeRemote: "0"
+  },
+  frontDesk: {
+    home: {
+      siteOwnerName: "",
+      siteOwnerEmail: "",
+      footerOwnerName: "",
+      footerOwnerSince: "",
+      footerRuntimeEnable: false,
+      footerRuntimeLaunchTime: "",
+      footerRuntimeWorkImg: "",
+      footerRuntimeWorkDesc: "",
+      footerRuntimeOffDutyImg: "",
+      footerRuntimeOffDutyDesc: "",
+      footerSocialBarCenterImg: "",
+      footerListRandomFriends: "0",
+      footerBarAuthorLink: "",
+      footerBarCCLink: "",
+      footerBadgeJSON: "[]",
+      footerSocialBarLeftJSON: "[]",
+      footerSocialBarRightJSON: "[]",
+      footerListJSON: "[]",
+      footerBarLinkListJSON: "[]"
+    }
   }
 });
 
-const formToKeysMap: Record<
-  keyof SiteInfo | keyof PageSittingInfo | keyof FileSettingsInfo,
-  string
-> = {
+const formToKeysMap: Record<FormKeys, string> = {
   siteName: constant.KeyAppName,
   siteDescription: constant.KeySiteDescription,
   primaryUrl: constant.KeySiteURL,
@@ -122,41 +152,52 @@ const formToKeysMap: Record<
   favicon: constant.KeyIconURL,
   iconMedium: constant.KeyLogoURL192,
   iconLarge: constant.KeyLogoURL512,
-  // File Upload
+  siteOwnerName: constant.KeyFrontDeskSiteOwnerName,
+  siteOwnerEmail: constant.KeyFrontDeskSiteOwnerEmail,
+  footerOwnerName: constant.KeyFooterOwnerName,
+  footerOwnerSince: constant.KeyFooterOwnerSince,
+  footerRuntimeEnable: constant.KeyFooterRuntimeEnable,
+  footerRuntimeLaunchTime: constant.KeyFooterRuntimeLaunchTime,
+  footerRuntimeWorkImg: constant.KeyFooterRuntimeWorkImg,
+  footerRuntimeWorkDesc: constant.KeyFooterRuntimeWorkDesc,
+  footerRuntimeOffDutyImg: constant.KeyFooterRuntimeOffDutyImg,
+  footerRuntimeOffDutyDesc: constant.KeyFooterRuntimeOffDutyDesc,
+  footerSocialBarCenterImg: constant.KeyFooterSocialBarCenterImg,
+  footerListRandomFriends: constant.KeyFooterListRandomFriends,
+  footerBarAuthorLink: constant.KeyFooterBarAuthorLink,
+  footerBarCCLink: constant.KeyFooterBarCCLink,
+  footerBadgeJSON: constant.KeyFooterBadgeJSON,
+  footerSocialBarLeftJSON: constant.KeyFooterSocialBarLeftJSON,
+  footerSocialBarRightJSON: constant.KeyFooterSocialBarRightJSON,
+  footerListJSON: constant.KeyFooterListJSON,
+  footerBarLinkListJSON: constant.KeyFooterBarLinkListJSON,
   uploadAllowedExtensions: constant.KeyUploadAllowedExtensions,
   uploadDeniedExtensions: constant.KeyUploadDeniedExtensions,
-  // VIPS
   enableVipsGenerator: constant.KeyEnableVipsGenerator,
   vipsPath: constant.KeyVipsPath,
   vipsMaxFileSize: constant.KeyVipsMaxFileSize,
   vipsSupportedExts: constant.KeyVipsSupportedExts,
-  // Music Cover
   enableMusicCoverGenerator: constant.KeyEnableMusicCoverGenerator,
   musicCoverMaxFileSize: constant.KeyMusicCoverMaxFileSize,
   musicCoverSupportedExts: constant.KeyMusicCoverSupportedExts,
-  // FFmpeg
   enableFfmpegGenerator: constant.KeyEnableFfmpegGenerator,
   ffmpegPath: constant.KeyFfmpegPath,
   ffmpegMaxFileSize: constant.KeyFfmpegMaxFileSize,
   ffmpegSupportedExts: constant.KeyFfmpegSupportedExts,
   ffmpegCaptureTime: constant.KeyFfmpegCaptureTime,
-  // Built-in
   enableBuiltinGenerator: constant.KeyEnableBuiltinGenerator,
   builtinMaxFileSize: constant.KeyBuiltinMaxFileSize,
   builtinDirectServeExts: constant.KeyBuiltinDirectServeExts,
-  // Queue
   queueThumbConcurrency: constant.KeyQueueThumbConcurrency,
   queueThumbMaxExecTime: constant.KeyQueueThumbMaxExecTime,
   queueThumbBackoffFactor: constant.KeyQueueThumbBackoffFactor,
   queueThumbMaxBackoff: constant.KeyQueueThumbMaxBackoff,
   queueThumbMaxRetries: constant.KeyQueueThumbMaxRetries,
   queueThumbRetryDelay: constant.KeyQueueThumbRetryDelay,
-  // EXIF
   enableExifExtractor: constant.KeyEnableExifExtractor,
   exifMaxSizeLocal: constant.KeyExifMaxSizeLocal,
   exifMaxSizeRemote: constant.KeyExifMaxSizeRemote,
   exifUseBruteForce: constant.KeyExifUseBruteForce,
-  // Music Meta
   enableMusicExtractor: constant.KeyEnableMusicExtractor,
   musicMaxSizeLocal: constant.KeyMusicMaxSizeLocal,
   musicMaxSizeRemote: constant.KeyMusicMaxSizeRemote
@@ -164,103 +205,46 @@ const formToKeysMap: Record<
 
 const allKeys = Object.values(formToKeysMap);
 
-const toBoolean = (val: string | undefined) => val === "true";
+const toBoolean = (val: any) => val === "true" || val === true;
+
+const getNestedValue = (obj: any, path: string): any => {
+  if (!path || !obj) return undefined;
+  if (!path.includes(".")) return obj[path];
+  return path
+    .split(".")
+    .reduce(
+      (o, key) => (o && typeof o === "object" && key in o ? o[key] : undefined),
+      obj
+    );
+};
 
 watch(
   () => siteConfigStore.siteConfig,
   newSettings => {
-    if (!newSettings) return;
+    if (!newSettings || Object.keys(newSettings).length === 0) return;
 
-    // Site Info
-    form.site.siteName = newSettings[constant.KeyAppName] || "";
-    form.site.siteDescription = newSettings[constant.KeySiteDescription] || "";
-    form.site.primaryUrl = newSettings[constant.KeySiteURL] || "";
-    form.site.footerCode = newSettings[constant.KeyFooterCode] || "";
-    form.site.announcement = newSettings[constant.KeySiteAnnouncement] || "";
-    form.site.logoDay = newSettings[constant.KeyLogoHorizontalDay] || "";
-    form.site.logoNight = newSettings[constant.KeyLogoHorizontalNight] || "";
-    form.site.favicon = newSettings[constant.KeyIconURL] || "";
-    form.site.iconMedium = newSettings[constant.KeyLogoURL192] || "";
-    form.site.iconLarge = newSettings[constant.KeyLogoURL512] || "";
+    Object.keys(formToKeysMap).forEach(formKeyStr => {
+      const formKey = formKeyStr as FormKeys;
+      const backendKey = formToKeysMap[formKey];
+      const value = getNestedValue(newSettings, backendKey);
 
-    // Page Settings
-    form.page.albumApiURL = newSettings[constant.KeyApiURL] || "";
-    form.page.defaultThumbParam =
-      newSettings[constant.KeyDefaultThumbParam] || "";
-    form.page.defaultBigParam = newSettings[constant.KeyDefaultBigParam] || "";
+      let targetForm: any;
+      if (formKey in form.site) targetForm = form.site;
+      else if (formKey in form.page) targetForm = form.page;
+      else if (formKey in form.file) targetForm = form.file;
+      else if (formKey in form.frontDesk.home) targetForm = form.frontDesk.home;
 
-    // File Settings
-    form.file.uploadAllowedExtensions =
-      newSettings[constant.KeyUploadAllowedExtensions] || "";
-    form.file.uploadDeniedExtensions =
-      newSettings[constant.KeyUploadDeniedExtensions] || "";
-
-    form.file.enableVipsGenerator = toBoolean(
-      newSettings[constant.KeyEnableVipsGenerator]
-    );
-    form.file.vipsPath = newSettings[constant.KeyVipsPath] || "";
-    form.file.vipsMaxFileSize = newSettings[constant.KeyVipsMaxFileSize] || "";
-    form.file.vipsSupportedExts =
-      newSettings[constant.KeyVipsSupportedExts] || "";
-
-    form.file.enableMusicCoverGenerator = toBoolean(
-      newSettings[constant.KeyEnableMusicCoverGenerator]
-    );
-    form.file.musicCoverMaxFileSize =
-      newSettings[constant.KeyMusicCoverMaxFileSize] || "";
-    form.file.musicCoverSupportedExts =
-      newSettings[constant.KeyMusicCoverSupportedExts] || "";
-
-    form.file.enableFfmpegGenerator = toBoolean(
-      newSettings[constant.KeyEnableFfmpegGenerator]
-    );
-    form.file.ffmpegPath = newSettings[constant.KeyFfmpegPath] || "";
-    form.file.ffmpegMaxFileSize =
-      newSettings[constant.KeyFfmpegMaxFileSize] || "";
-    form.file.ffmpegSupportedExts =
-      newSettings[constant.KeyFfmpegSupportedExts] || "";
-    form.file.ffmpegCaptureTime =
-      newSettings[constant.KeyFfmpegCaptureTime] || "";
-
-    form.file.enableBuiltinGenerator = toBoolean(
-      newSettings[constant.KeyEnableBuiltinGenerator]
-    );
-    form.file.builtinMaxFileSize =
-      newSettings[constant.KeyBuiltinMaxFileSize] || "";
-    form.file.builtinDirectServeExts =
-      newSettings[constant.KeyBuiltinDirectServeExts] || "";
-
-    form.file.queueThumbConcurrency =
-      Number(newSettings[constant.KeyQueueThumbConcurrency]) || 15;
-    form.file.queueThumbMaxExecTime =
-      Number(newSettings[constant.KeyQueueThumbMaxExecTime]) || 300;
-    form.file.queueThumbBackoffFactor =
-      Number(newSettings[constant.KeyQueueThumbBackoffFactor]) || 2;
-    form.file.queueThumbMaxBackoff =
-      Number(newSettings[constant.KeyQueueThumbMaxBackoff]) || 60;
-    form.file.queueThumbMaxRetries =
-      Number(newSettings[constant.KeyQueueThumbMaxRetries]) || 3;
-    form.file.queueThumbRetryDelay =
-      Number(newSettings[constant.KeyQueueThumbRetryDelay]) || 5;
-
-    form.file.enableExifExtractor = toBoolean(
-      newSettings[constant.KeyEnableExifExtractor]
-    );
-    form.file.exifMaxSizeLocal =
-      newSettings[constant.KeyExifMaxSizeLocal] || "";
-    form.file.exifMaxSizeRemote =
-      newSettings[constant.KeyExifMaxSizeRemote] || "";
-    form.file.exifUseBruteForce = toBoolean(
-      newSettings[constant.KeyExifUseBruteForce]
-    );
-
-    form.file.enableMusicExtractor = toBoolean(
-      newSettings[constant.KeyEnableMusicExtractor]
-    );
-    form.file.musicMaxSizeLocal =
-      newSettings[constant.KeyMusicMaxSizeLocal] || "";
-    form.file.musicMaxSizeRemote =
-      newSettings[constant.KeyMusicMaxSizeRemote] || "";
+      if (targetForm && value !== undefined && value !== null) {
+        if (typeof targetForm[formKey] === "boolean") {
+          targetForm[formKey] = toBoolean(value);
+        } else if (formKey.toUpperCase().endsWith("JSON")) {
+          targetForm[formKey] =
+            typeof value === "string" ? value : JSON.stringify(value, null, 2);
+        } else {
+          targetForm[formKey] = String(value);
+        }
+      }
+    });
   },
   { deep: true, immediate: true }
 );
@@ -270,26 +254,68 @@ onMounted(() => {
 });
 
 const handleSave = async () => {
-  const settingsToUpdate: Record<string, string> = {};
-  const combinedForm = { ...form.site, ...form.page, ...form.file };
+  const originalSettings = siteConfigStore.siteConfig;
+  const settingsToUpdate: Record<string, any> = {};
+  const combinedForm = {
+    ...form.site,
+    ...form.page,
+    ...form.file,
+    ...form.frontDesk.home
+  };
 
-  (Object.keys(formToKeysMap) as Array<keyof typeof combinedForm>).forEach(
-    formKey => {
-      const backendKey = formToKeysMap[formKey];
-      if (backendKey === undefined) return;
+  (Object.keys(formToKeysMap) as FormKeys[]).forEach(formKey => {
+    const backendKey = formToKeysMap[formKey];
+    if (!backendKey) return;
 
-      const value = combinedForm[formKey];
+    const currentValue = combinedForm[formKey];
+    const originalValue = getNestedValue(originalSettings, backendKey);
 
-      // Backend expects all values as strings
-      settingsToUpdate[backendKey] = String(value ?? "");
+    // Normalize original value for comparison
+    const normalizedOriginalValue =
+      originalValue === null || originalValue === undefined
+        ? ""
+        : String(originalValue);
+
+    let currentStringValue = String(currentValue);
+    let originalStringValue = String(originalValue ?? "");
+
+    if (formKey.toUpperCase().endsWith("JSON")) {
+      try {
+        const parsedCurrent = JSON.stringify(
+          JSON.parse(currentStringValue || "[]")
+        );
+        const originalJsonString =
+          typeof originalValue === "object" && originalValue !== null
+            ? JSON.stringify(originalValue)
+            : originalValue || "[]";
+        const parsedOriginal = JSON.stringify(JSON.parse(originalJsonString));
+
+        if (parsedCurrent !== parsedOriginal) {
+          settingsToUpdate[backendKey] = currentStringValue;
+        }
+      } catch (e) {
+        if (currentStringValue !== originalStringValue) {
+          settingsToUpdate[backendKey] = currentStringValue;
+        }
+      }
+    } else if (typeof combinedForm[formKey] === "boolean") {
+      if (String(currentValue) !== String(toBoolean(originalValue))) {
+        settingsToUpdate[backendKey] = String(currentValue);
+      }
+    } else if (currentStringValue !== normalizedOriginalValue) {
+      settingsToUpdate[backendKey] = currentStringValue;
     }
-  );
+  });
+
+  if (Object.keys(settingsToUpdate).length === 0) {
+    ElMessage.info("没有检测到任何更改。");
+    return;
+  }
 
   try {
     await siteConfigStore.saveSystemSettings(settingsToUpdate);
-    // Success message is handled by the store
-  } catch (error) {
-    ElMessage.error(`保存失败: ${error}`);
+  } catch (error: any) {
+    ElMessage.error(`保存失败: ${error.message || String(error)}`);
   }
 };
 </script>

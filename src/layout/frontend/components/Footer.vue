@@ -21,7 +21,10 @@
             <i :class="getIconClass(item.icon)" />
           </a>
         </el-tooltip>
+
+        <!-- [已修正] 将 v-if 从 img 移到 el-tooltip 上 -->
         <el-tooltip
+          v-if="footerConfig.socialBar.centerImg"
           content="返回顶部"
           placement="top"
           :show-arrow="false"
@@ -31,13 +34,13 @@
           @click="scrollToTop"
         >
           <img
-            v-if="footerConfig.socialBar.centerImg"
             class="footer-back-to-top"
             alt="返回顶部"
             :src="footerConfig.socialBar.centerImg"
             @click="scrollToTop"
           />
         </el-tooltip>
+
         <el-tooltip
           v-for="item in footerConfig.socialBar.right"
           :key="item.link"
@@ -59,9 +62,9 @@
         </el-tooltip>
       </div>
 
-      <div v-if="footerConfig.list?.project?.length" class="footer-link-grid">
+      <div v-if="footerConfig.project?.list?.length" class="footer-link-grid">
         <div
-          v-for="group in footerConfig.list.project"
+          v-for="group in footerConfig.project.list"
           :key="group.title"
           class="footer-group"
         >
@@ -81,7 +84,7 @@
           </div>
         </div>
 
-        <div v-if="footerConfig.list.randomFriends > 0" class="footer-group">
+        <div v-if="footerConfig.list?.randomFriends > 0" class="footer-group">
           <div class="footer-title-group">
             <div class="footer-title">友链</div>
             <el-tooltip
@@ -130,9 +133,9 @@
         v-html="footerConfig.custom_text"
       />
 
-      <p v-if="footerConfig.badgeitem?.list?.length" class="footer-badges">
+      <p v-if="footerConfig.badge?.list?.length" class="footer-badges">
         <el-tooltip
-          v-for="badge in footerConfig.badgeitem.list"
+          v-for="badge in footerConfig.badge.list"
           :key="badge.shields"
           :content="badge.message"
           placement="top"
@@ -153,7 +156,7 @@
       </p>
     </div>
 
-    <div v-if="footerConfig.footerBar" class="footer-bottom-bar">
+    <div v-if="footerConfig.bar" class="footer-bottom-bar">
       <div class="bar-content">
         <div class="bar-left">
           <div
@@ -164,7 +167,7 @@
         </div>
         <div class="bar-right">
           <a
-            v-for="link in footerConfig.footerBar.linkList"
+            v-for="link in footerConfig.bar.linkList"
             :key="link.text"
             class="bar-link"
             :href="link.link"
@@ -182,7 +185,9 @@
           >
             {{ icpNumber }}
           </a>
+          <!-- [已修正] 将 v-if 从 a 移到 el-tooltip 上 -->
           <el-tooltip
+            v-if="footerConfig.bar.cc && footerConfig.bar.cc.link"
             content="CC BY-NC-ND 4.0 协议"
             placement="top"
             :show-arrow="false"
@@ -191,9 +196,8 @@
             :transition-props="{ onEnter, onLeave }"
           >
             <a
-              v-if="footerConfig.footerBar.cc && footerConfig.footerBar.cc.link"
               class="bar-link cc-link"
-              :href="footerConfig.footerBar.cc.link"
+              :href="footerConfig.bar.cc.link"
               target="_blank"
               rel="noopener"
             >
@@ -210,7 +214,6 @@
 </template>
 
 <script setup lang="ts">
-// Script 部分无需改动
 import { ref, computed, onMounted } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { onEnter, onLeave } from "@/utils/transitions";
@@ -249,7 +252,7 @@ const copyrightText = computed(() => {
   if (!footerConfig.value?.owner) return "";
   const since = footerConfig.value.owner.since;
   const author = footerConfig.value.owner.name;
-  const authorLink = footerConfig.value.footerBar?.authorLink || "/about";
+  const authorLink = footerConfig.value.bar?.authorLink || "/about";
   const nowYear = new Date().getFullYear();
   let yearRange = String(nowYear);
   if (since && Number(since) !== nowYear) yearRange = `${since} - ${nowYear}`;
@@ -260,11 +263,13 @@ const copyrightText = computed(() => {
 const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
+
 const getIconClass = (iconName: string) => {
   if (iconName?.startsWith("anzhiyu")) return ["anzhiyufont", iconName];
   if (iconName?.startsWith("fa")) return iconName.split(" ");
   return [iconName];
 };
+
 onMounted(() => {
   if (footerConfig.value) refreshFriendLinks();
 });
@@ -343,7 +348,6 @@ a {
 
 .footer-group {
   flex: 1 1;
-  min-width: 120px;
   text-align: left;
 }
 

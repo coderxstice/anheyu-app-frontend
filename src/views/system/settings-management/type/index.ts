@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-24 17:29:16
- * @LastEditTime: 2025-07-24 17:31:44
+ * @LastEditTime: 2025-07-26 15:34:28
  * @LastEditors: 安知鱼
  */
 // src/views/system/settings-management/type/index.ts
@@ -82,4 +82,32 @@ export interface SettingsForm {
   site: SiteInfo;
   page: PageSittingInfo;
   file: FileSettingsInfo;
+  frontDesk: FrontDeskSettings;
+}
+
+export interface HomePageSettingsInfo {
+  siteOwnerName: string;
+  siteOwnerEmail: string;
+  footerOwnerName: string;
+  footerOwnerSince: string;
+  footerRuntimeEnable: boolean;
+  footerRuntimeLaunchTime: string;
+  footerRuntimeWorkImg: string;
+  footerRuntimeWorkDesc: string;
+  footerRuntimeOffDutyImg: string;
+  footerRuntimeOffDutyDesc: string;
+  footerSocialBarCenterImg: string;
+  footerListRandomFriends: string;
+  footerBarAuthorLink: string;
+  footerBarCCLink: string;
+  footerBadgeJSON: string;
+  footerSocialBarLeftJSON: string;
+  footerSocialBarRightJSON: string;
+  footerListJSON: string;
+  footerBarLinkListJSON: string;
+}
+
+export interface FrontDeskSettings {
+  home: HomePageSettingsInfo;
+  // article: ArticlePageSettingsInfo;
 }
