@@ -1,7 +1,6 @@
 <template>
   <footer v-if="siteConfig" class="footer-container">
     <div class="footer-wrap">
-      <!-- 1. 顶部社交链接栏 (已正确使用 el-tooltip) -->
       <div v-if="footerConfig.socialBar" class="footer-social-bar">
         <el-tooltip
           v-for="item in footerConfig.socialBar.left"
@@ -22,7 +21,6 @@
             <i :class="getIconClass(item.icon)" />
           </a>
         </el-tooltip>
-
         <el-tooltip
           content="返回顶部"
           placement="top"
@@ -39,7 +37,6 @@
             @click="scrollToTop"
           />
         </el-tooltip>
-
         <el-tooltip
           v-for="item in footerConfig.socialBar.right"
           :key="item.link"
@@ -61,7 +58,6 @@
         </el-tooltip>
       </div>
 
-      <!-- 2. 主要链接网格 -->
       <div v-if="footerConfig.list?.project?.length" class="footer-link-grid">
         <div
           v-for="group in footerConfig.list.project"
@@ -84,7 +80,6 @@
           </div>
         </div>
 
-        <!-- 随机友链 -->
         <div v-if="footerConfig.list.randomFriends > 0" class="footer-group">
           <div class="footer-title-group">
             <div class="footer-title">友链</div>
@@ -115,12 +110,15 @@
               :key="friend.name"
               class="footer-item"
               :href="friend.href"
+              :title="friend.name"
               target="_blank"
               rel="noopener nofollow"
             >
               {{ friend.name }}
             </a>
-            <router-link to="/link/" class="footer-item">更多</router-link>
+            <router-link to="/link/" class="footer-item" title="更多友情链接"
+              >更多</router-link
+            >
           </div>
         </div>
       </div>
@@ -132,7 +130,7 @@
         v-html="footerConfig.custom_text"
       />
 
-      <!-- 4. 技术栈/服务徽章 (已正确使用 el-tooltip) -->
+      <!-- 4. 技术栈/服务徽章 (保持 el-tooltip) -->
       <p v-if="footerConfig.badgeitem?.list?.length" class="footer-badges">
         <el-tooltip
           v-for="badge in footerConfig.badgeitem.list"
@@ -156,7 +154,7 @@
       </p>
     </div>
 
-    <!-- 5. 底部信息栏 (已正确使用 el-tooltip) -->
+    <!-- 5. 底部信息栏 (保持 el-tooltip) -->
     <div v-if="footerConfig.footerBar" class="footer-bottom-bar">
       <div class="bar-content">
         <div class="bar-left">
@@ -214,18 +212,16 @@
 </template>
 
 <script setup lang="ts">
-// Script 部分保持您提供的版本，无需任何修改
+// Script 部分无需改动
 import { ref, computed, onMounted } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { onEnter, onLeave } from "@/utils/transitions";
 
-// 1. 配置
 const siteConfigStore = useSiteConfigStore();
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);
 const footerConfig = computed(() => siteConfig.value?.footer);
 const icpNumber = computed(() => siteConfig.value?.ICP_NUMBER);
 
-// 2. 友链功能状态
 const allFriends = ref([
   { name: "胡桃木实验室", href: "https://www.htmacg.cn/" },
   { name: "包子哟", href: "https://blog.bugjava.cn" },
@@ -241,20 +237,16 @@ const isAnimating = ref(false);
 function refreshFriendLinks() {
   if (isAnimating.value) return;
   if (!footerConfig.value?.list?.randomFriends) return;
-
   const count = Number(footerConfig.value.list.randomFriends);
   const shuffled = [...allFriends.value].sort(() => 0.5 - Math.random());
   displayedFriends.value = shuffled.slice(0, count);
-
   rotationCount.value++;
   isAnimating.value = true;
-
   setTimeout(() => {
     isAnimating.value = false;
   }, 300);
 }
 
-// 3. 其他方法和生命周期钩子
 const copyrightText = computed(() => {
   if (!footerConfig.value?.owner) return "";
   const since = footerConfig.value.owner.since;
@@ -262,9 +254,7 @@ const copyrightText = computed(() => {
   const authorLink = footerConfig.value.footerBar?.authorLink || "/about";
   const nowYear = new Date().getFullYear();
   let yearRange = String(nowYear);
-  if (since && Number(since) !== nowYear) {
-    yearRange = `${since} - ${nowYear}`;
-  }
+  if (since && Number(since) !== nowYear) yearRange = `${since} - ${nowYear}`;
   const authorHtml = `<a class="bar-link" href="${authorLink}" target="_blank">${author}</a>`;
   return `&copy;${yearRange} By ${authorHtml}`;
 });
@@ -272,22 +262,18 @@ const copyrightText = computed(() => {
 const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
-
 const getIconClass = (iconName: string) => {
   if (iconName?.startsWith("anzhiyu")) return ["anzhiyufont", iconName];
   if (iconName?.startsWith("fa")) return iconName.split(" ");
   return [iconName];
 };
-
 onMounted(() => {
-  if (footerConfig.value) {
-    refreshFriendLinks();
-  }
+  if (footerConfig.value) refreshFriendLinks();
 });
 </script>
 
 <style scoped lang="scss">
-// Style 部分保持您提供的版本，无需任何修改
+/* scoped 样式无需改动 */
 .footer-container {
   position: relative;
   background: linear-gradient(
@@ -298,22 +284,18 @@ onMounted(() => {
   color: var(--anzhiyu-fontcolor);
   margin-top: 1rem;
 }
-
 .footer-wrap {
   position: relative;
   max-width: 1200px;
   margin: 0 auto;
 }
-
-.footer-container a {
+a {
   color: var(--anzhiyu-fontcolor);
   text-decoration: none;
+  &:hover {
+    color: var(--anzhiyu-main);
+  }
 }
-
-.footer-container a:hover {
-  color: var(--anzhiyu-main);
-}
-
 .footer-social-bar {
   display: flex;
   justify-content: center;
@@ -321,28 +303,25 @@ onMounted(() => {
   flex-wrap: wrap;
   padding: 1rem 0;
   gap: 1rem;
+  .social-link {
+    font-size: 1.5rem;
+    display: flex;
+    margin: 1rem 27px;
+    color: var(--anzhiyu-card-bg);
+    border-radius: 3rem;
+    width: 32px;
+    height: 32px;
+    background: var(--anzhiyu-fontcolor);
+    justify-content: center;
+    align-items: center;
+    transition: 0.3s;
+    &:hover {
+      transform: scale(1.2);
+      color: var(--anzhiyu-white);
+      background: var(--anzhiyu-main);
+    }
+  }
 }
-
-.footer-social-bar .social-link {
-  font-size: 1.5rem;
-  display: flex;
-  margin: 1rem 27px;
-  color: var(--anzhiyu-card-bg);
-  border-radius: 3rem;
-  width: 32px;
-  height: 32px;
-  background: var(--anzhiyu-fontcolor);
-  justify-content: center;
-  align-items: center;
-  transition: 0.3s;
-}
-
-.footer-social-bar .social-link:hover {
-  transform: scale(1.2);
-  color: var(--anzhiyu-white);
-  background: var(--anzhiyu-main);
-}
-
 .footer-back-to-top {
   width: 50px;
   height: 50px;
@@ -351,12 +330,10 @@ onMounted(() => {
   margin: 0 1rem;
   cursor: pointer;
   transition: cubic-bezier(0, 0, 0, 1.29) 0.5s;
+  &:hover {
+    transform: rotate(360deg);
+  }
 }
-
-.footer-back-to-top:hover {
-  transform: rotate(360deg);
-}
-
 .footer-link-grid {
   display: flex;
   justify-content: space-between;
@@ -364,25 +341,21 @@ onMounted(() => {
   gap: 8rem;
   padding: 0 2rem;
 }
-
 .footer-group {
   flex: 1 1;
   min-width: 120px;
   text-align: left;
 }
-
 .footer-title-group {
   display: flex;
   align-items: center;
 }
-
 .footer-title {
   font-size: 1.1rem;
   font-weight: bold;
   margin-bottom: 0.8rem;
   color: var(--anzhiyu-secondtext);
 }
-
 .random-friends-btn {
   font-size: 1.1rem;
   margin-left: 0.5rem;
@@ -390,57 +363,44 @@ onMounted(() => {
   display: flex;
   align-items: center;
   margin-bottom: 0.8rem;
+  > i {
+    display: inline-block;
+    transition:
+      transform 0.3s ease-out,
+      opacity 0.3s ease-out;
+    &.is-animating {
+      opacity: 0.2;
+    }
+  }
 }
-
-.random-friends-btn > i {
-  display: inline-block;
-  transition:
-    transform 0.3s ease-out,
-    opacity 0.3s ease-out;
-}
-
-.random-friends-btn > i.is-animating {
-  opacity: 0.2;
-}
-
 .footer-links .footer-item {
   display: block;
   margin-bottom: 0.5rem;
   font-size: 0.95rem;
   overflow: hidden;
   white-space: nowrap;
-  -o-text-overflow: ellipsis;
   text-overflow: ellipsis;
   max-width: 120px;
 }
-
-.footer-links .footer-item:hover {
-  color: var(--anzhiyu-main);
-}
-
 .footer-custom-text {
   text-align: center;
   padding: 1rem 0;
   font-size: 0.9rem;
   color: var(--anzhiyu-gray);
 }
-
 .footer-badges {
   text-align: center;
   padding: 1.5rem 0;
   margin: 0;
 }
-
 .badge-link {
   display: inline-block;
   margin: 5px;
+  img {
+    height: 20px;
+    vertical-align: middle;
+  }
 }
-
-.badge-link img {
-  height: 20px;
-  vertical-align: middle;
-}
-
 .footer-bottom-bar {
   padding: 1rem;
   color: var(--anzhiyu-fontcolor);
@@ -450,7 +410,6 @@ onMounted(() => {
   overflow: hidden;
   transition: 0.3s;
 }
-
 .bar-content {
   display: flex;
   justify-content: space-between;
@@ -461,7 +420,6 @@ onMounted(() => {
   align-items: center;
   line-height: 1;
 }
-
 .bar-left,
 .bar-right {
   display: flex;
@@ -470,11 +428,9 @@ onMounted(() => {
   flex-wrap: wrap;
   min-height: 32px;
 }
-
 .copyright-info :deep(a:hover) {
   color: var(--anzhiyu-main);
 }
-
 :deep(.bar-link) {
   margin-top: 8px;
   margin-bottom: 8px;
@@ -483,11 +439,6 @@ onMounted(() => {
   font-weight: 700;
   white-space: nowrap;
 }
-
-.bar-link:hover {
-  color: var(--anzhiyu-main);
-}
-
 .cc-link {
   display: flex;
   align-items: center;
@@ -495,7 +446,6 @@ onMounted(() => {
     margin: 0 2px;
   }
 }
-
 @media (max-width: 768px) {
   .footer-link-grid {
     justify-content: flex-start;

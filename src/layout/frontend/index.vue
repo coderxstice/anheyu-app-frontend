@@ -2,7 +2,7 @@
  * @Description: 前台主布局
  * @Author: 安知鱼
  * @Date: 2025-07-25 18:52:39
- * @LastEditTime: 2025-07-26 02:15:12
+ * @LastEditTime: 2025-07-26 14:21:13
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -22,9 +22,17 @@
 </template>
 
 <script setup lang="ts">
-// 引入子组件
+import { onBeforeMount } from "vue";
+import { useGlobal } from "@pureadmin/utils";
+import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
+
 import Header from "./components/Header.vue";
 import Footer from "./components/Footer.vue";
+
+const { $storage } = useGlobal<GlobalPropertiesApi>();
+onBeforeMount(() => {
+  useDataThemeChange().dataThemeChange($storage.layout?.overallStyle);
+});
 </script>
 
 <style scoped lang="scss">
