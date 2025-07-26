@@ -8,7 +8,6 @@ import {
   computed
 } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
-import { useLayout } from "@/layout/hooks/useLayout";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 import { initRouter, getTopMenu } from "@/router/utils";
 import dayIcon from "@/assets/svg/day.svg?component";
@@ -32,16 +31,27 @@ defineOptions({ name: "Login" });
 const siteConfigStore = useSiteConfigStore();
 const router = useRouter();
 const route = useRoute();
-const { initStorage } = useLayout();
-initStorage();
-const { dataTheme, overallStyle, dataThemeChange } = useDataThemeChange();
-dataThemeChange(overallStyle.value);
+const { dataTheme, dataThemeChange } = useDataThemeChange();
 
-const siteIcon = computed(
-  () =>
-    siteConfigStore.getSiteConfig?.LOGO_HORIZONTAL_DAY ||
-    "/static/img/logo-horizontal-day.png"
-);
+// 让 siteIcon 依赖于 dataTheme，实现日间/夜间 Logo 自动切换
+const siteIcon = computed(() => {
+  const config = siteConfigStore.getSiteConfig;
+  if (!config) return "/static/img/logo-horizontal-day.png"; // 默认 Logo
+
+  // dataTheme.value 为 true 表示暗色模式
+  return dataTheme.value
+    ? config.LOGO_HORIZONTAL_NIGHT || "/static/img/logo-horizontal-night.png"
+    : config.LOGO_HORIZONTAL_DAY || "/static/img/logo-horizontal-day.png";
+});
+
+/**
+ * 处理 el-switch 的切换事件
+ * @param isDark el-switch 传来的新值，true 代表暗色，false 代表浅色
+ */
+const handleThemeSwitch = (isDark: boolean) => {
+  // 调用核心切换函数，传入正确的主题名称
+  dataThemeChange(isDark ? "dark" : "light");
+};
 
 type Step =
   | "check-email"
@@ -90,6 +100,8 @@ const rules = reactive<FormRules>({
     }
   ]
 });
+
+// --- 以下是您的业务逻辑，无需改动 ---
 
 // 流程控制
 const handleFocus = () => {
@@ -162,13 +174,10 @@ const apiHandlers = {
       repeat_password: form.confirmPassword
     });
     if (res.code === 200) {
-      // 检查后端返回是否需要激活
       if (res.data?.activation_required) {
-        // 如果需要激活，切换到提示页面
         switchStep("activate-prompt", "next");
         message("注册成功，请查收激活邮件", { type: "success" });
       } else {
-        // 如果不需要激活，按原流程走
         switchStep("login-password", "prev");
         message("注册成功，请登录", { type: "success" });
       }
@@ -265,15 +274,15 @@ onBeforeUnmount(() =>
 <template>
   <div class="flex items-center justify-center w-full min-h-screen">
     <div
-      class="w-full max-w-sm p-8 space-y-6 bg-[--anzhiyu-card-bg] border border-gray-200 rounded-xl shadow-sm mx-4"
+      class="w-full max-w-sm p-8 space-y-6 bg-[--anzhiyu-card-bg] border border-[var(--anzhiyu-border-color)] rounded-xl shadow-sm mx-4"
     >
       <div class="flex-c absolute right-5 top-3">
         <el-switch
           v-model="dataTheme"
           inline-prompt
-          :active-icon="dayIcon"
-          :inactive-icon="darkIcon"
-          @change="dataThemeChange"
+          :active-icon="darkIcon"
+          :inactive-icon="dayIcon"
+          @change="handleThemeSwitch"
         />
       </div>
       <div class="flex justify-center h-10 mx-auto">

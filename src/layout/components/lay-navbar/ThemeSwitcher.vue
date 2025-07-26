@@ -1,3 +1,10 @@
+<!--
+ * @Description: 主题切换器，已更新为依赖单一、可靠的数据源。
+ * @Author: 安知鱼
+ * @Date: 2025-07-22 10:33:03
+ * @LastEditTime: 2025-07-26 (AI Refactored)
+ * @LastEditors: 安知鱼 & AI
+-->
 <template>
   <el-dropdown trigger="click" popper-class="anzhiyu-dropdown-menu">
     <span
@@ -29,9 +36,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
-// useSystemThemeChange 不再需要，可以删除
-// import { useSystemThemeChange } from "@/layout/hooks/useSystemThemeChange";
-import { useDark } from "@pureadmin/utils";
 
 import DayIcon from "@/assets/svg/day.svg?component";
 import DarkIcon from "@/assets/svg/dark.svg?component";
@@ -39,39 +43,24 @@ import SystemIcon from "@/assets/svg/system.svg?component";
 
 defineOptions({ name: "ThemeSwitcher" });
 
-const { isDark } = useDark();
+const { overallStyle, dataTheme, dataThemeChange } = useDataThemeChange();
 
-// 1. 从统一的 Hook 中获取所有需要的状态和方法
-const { overallStyle, dataTheme, dataThemeChange, watchSystemThemeChange } =
-  useDataThemeChange();
-
-// 2. themeIcon 的计算逻辑保持不变，它依赖于从 Hook 获取的响应式状态
 const themeIcon = computed(() => {
-  if (overallStyle.value === "light") return DayIcon;
-  if (overallStyle.value === "dark") return DarkIcon;
-  // 当为 'system' 时，dataTheme.value 会被 Hook 自动更新
   return dataTheme.value ? DarkIcon : DayIcon;
 });
 
-// 3. iconColor 的逻辑保持不变
 const iconColor = computed(() => {
-  return isDark.value ? "white" : "black";
+  return dataTheme.value ? "white" : "black";
 });
 
-// 4. themeOptions 定义保持不变
 const themeOptions = [
   { label: "浅色", theme: "light", icon: DayIcon },
   { label: "黑暗", theme: "dark", icon: DarkIcon },
   { label: "系统", theme: "system", icon: SystemIcon }
 ] as const;
 
-// 5. handleThemeChange 逻辑保持不变，它调用从 Hook 中获取的方法
 const handleThemeChange = (theme: "light" | "dark" | "system") => {
   dataThemeChange(theme);
-  // 如果用户选择了 'system'，手动触发一次监听（Hook 内部会处理重复监听的问题）
-  if (theme === "system") {
-    watchSystemThemeChange();
-  }
 };
 </script>
 

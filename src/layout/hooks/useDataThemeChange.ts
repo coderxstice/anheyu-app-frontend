@@ -1,129 +1,151 @@
-import { ref, onBeforeMount, onUnmounted, readonly } from "vue";
-import { getConfig } from "@/config/base";
-import { removeToken } from "@/utils/auth";
-import { routerArrays, type LayoutType } from "@/layout/types";
-import { router, resetRouter } from "@/router";
-import { useAppStoreHook } from "@/store/modules/app";
-import { useEpThemeStoreHook } from "@/store/modules/epTheme";
-import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
-import { darken, lighten, useGlobal, storageLocal } from "@pureadmin/utils";
+import { ref, readonly, onMounted, onUnmounted } from "vue";
+import { getConfig, responsiveStorageNameSpace } from "@/config/base";
+import { darken, lighten, storageLocal } from "@pureadmin/utils";
 
-// 单例状态
-const dataTheme = ref<boolean | null>(null);
-const overallStyle = ref<"light" | "dark" | "system" | null>(null);
+// --- 单例状态定义 ---
 let isInitialized = false;
+const dataTheme = ref<boolean>(false);
+const overallStyle = ref<"light" | "dark" | "system">("light");
+
+const mediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
 
 export function useDataThemeChange() {
-  const { $storage } = useGlobal<GlobalPropertiesApi>();
-  const body = document.documentElement as HTMLElement;
+  const nameSpace = responsiveStorageNameSpace();
+  const storageKey = `${nameSpace}layout`;
 
-  // 延迟初始化
+  // --- 辅助函数：设置 Element Plus 颜色 ---
+  const setEpThemeColor = (newColor: string) => {
+    document.documentElement.style.setProperty("--el-color-primary", newColor);
+    for (let i = 1; i <= 2; i++) {
+      document.documentElement.style.setProperty(
+        `--el-color-primary-dark-${i}`,
+        darken(newColor, i / 10)
+      );
+    }
+    for (let i = 1; i <= 9; i++) {
+      document.documentElement.style.setProperty(
+        `--el-color-primary-light-${i}`,
+        lighten(newColor, i / 10)
+      );
+    }
+  };
+
+  // --- 首次初始化逻辑 ---
   if (!isInitialized) {
     const config = getConfig();
-    const storageLayout = storageLocal().getItem<LayoutType>("layout");
+    const storageLayout = storageLocal().getItem<StorageConfigs>(storageKey);
 
-    dataTheme.value = storageLayout?.darkMode ?? config.DarkMode;
-    overallStyle.value = storageLayout?.overallStyle ?? config.Layout;
+    const initialDarkMode = storageLayout?.darkMode ?? config.DarkMode ?? false;
+    const initialOverallStyle =
+      storageLayout?.overallStyle ?? config.OverallStyle ?? "light";
+
+    if (initialOverallStyle === "system") {
+      overallStyle.value = "system";
+      dataTheme.value = mediaQueryList.matches;
+    } else {
+      overallStyle.value = initialDarkMode ? "dark" : "light";
+      dataTheme.value = initialDarkMode;
+    }
+
+    const body = document.documentElement as HTMLElement;
+    if (dataTheme.value) {
+      body.classList.remove("light");
+      body.classList.add("dark");
+      body.setAttribute("data-theme", "dark");
+      setEpThemeColor(storageLayout?.epThemeColor || "#dfa621");
+    } else {
+      body.classList.remove("dark");
+      body.classList.add("light");
+      body.setAttribute("data-theme", "light");
+      setEpThemeColor(storageLayout?.epThemeColor || config.EpThemeColor);
+    }
 
     isInitialized = true;
   }
 
-  function toggleClass(flag: boolean, clsName: string, target?: HTMLElement) {
-    const targetEl = target || document.body;
-    let { className } = targetEl;
-    className = className.replace(clsName, "").trim();
-    targetEl.className = flag ? `${className} ${clsName}` : className;
-  }
+  // --- 系统主题更新回调 ---
+  const updateSystemTheme = () => {
+    if (overallStyle.value === "system") {
+      const isDark = mediaQueryList.matches;
+      dataTheme.value = isDark;
 
-  function setPropertyPrimary(mode: string, i: number, color: string) {
-    document.documentElement.style.setProperty(
-      `--el-color-primary-${mode}-${i}`,
-      dataTheme.value ? darken(color, i / 10) : lighten(color, i / 10)
-    );
-  }
+      const body = document.documentElement as HTMLElement;
+      if (isDark) {
+        body.classList.remove("light");
+        body.classList.add("dark");
+        body.setAttribute("data-theme", "dark");
+        setEpThemeColor("#dfa621");
+      } else {
+        body.classList.remove("dark");
+        body.classList.add("light");
+        body.setAttribute("data-theme", "light");
+        setEpThemeColor(getConfig().EpThemeColor);
+      }
 
-  const setEpThemeColor = (color: string) => {
-    useEpThemeStoreHook().setEpThemeColor(color);
-    document.documentElement.style.setProperty("--el-color-primary", color);
-    for (let i = 1; i <= 2; i++) setPropertyPrimary("dark", i, color);
-    for (let i = 1; i <= 9; i++) setPropertyPrimary("light", i, color);
+      // 更新 localStorage
+      const layoutConfig =
+        storageLocal().getItem<StorageConfigs>(storageKey) || {};
+      layoutConfig.darkMode = isDark;
+      storageLocal().setItem(storageKey, layoutConfig);
+    }
   };
 
   /**
-   * 核心的整体风格切换函数
+   * 核心的主题切换函数。
    */
   function dataThemeChange(newOverallStyle?: "light" | "dark" | "system") {
     if (!newOverallStyle) return;
 
     overallStyle.value = newOverallStyle;
+    let newEpThemeColor = getConfig().EpThemeColor;
 
-    let newIsDark = false;
-    if (newOverallStyle === "dark") newIsDark = true;
-    else if (newOverallStyle === "light") newIsDark = false;
-    else if (newOverallStyle === "system")
-      newIsDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    dataTheme.value = newIsDark;
-
-    if (dataTheme.value) {
-      document.documentElement.classList.remove("light");
-      document.documentElement.classList.add("dark");
-      document.documentElement.setAttribute("data-theme", "dark");
-      setEpThemeColor("#dfa621");
+    if (newOverallStyle === "system") {
+      mediaQueryList.addEventListener("change", updateSystemTheme);
+      updateSystemTheme();
+      return;
     } else {
-      document.documentElement.classList.remove("dark");
-      document.documentElement.classList.add("light");
-      document.documentElement.setAttribute("data-theme", "light");
-      setEpThemeColor(getConfig().EpThemeColor);
+      mediaQueryList.removeEventListener("change", updateSystemTheme);
+      dataTheme.value = newOverallStyle === "dark";
     }
 
-    // 更新本地存储
-    const layoutConfig = $storage.layout || {};
+    const body = document.documentElement as HTMLElement;
+    if (dataTheme.value) {
+      body.classList.remove("light");
+      body.classList.add("dark");
+      body.setAttribute("data-theme", "dark");
+      newEpThemeColor = "#dfa621";
+    } else {
+      body.classList.remove("dark");
+      body.classList.add("light");
+      body.setAttribute("data-theme", "light");
+      newEpThemeColor = getConfig().EpThemeColor;
+    }
+
+    // 应用新的品牌色
+    setEpThemeColor(newEpThemeColor);
+
+    // 将所有更新写入 localStorage
+    const layoutConfig =
+      storageLocal().getItem<StorageConfigs>(storageKey) || {};
     layoutConfig.darkMode = dataTheme.value;
     layoutConfig.overallStyle = overallStyle.value;
-    $storage.layout = layoutConfig;
+    layoutConfig.epThemeColor = newEpThemeColor;
+    storageLocal().setItem(storageKey, layoutConfig);
   }
 
-  // 系统主题监听逻辑
-  const mediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
-  const updateSystemTheme = () => {
-    if (overallStyle.value === "system") dataThemeChange("system");
-  };
-  const removeMatchMedia = () =>
-    mediaQueryList.removeEventListener("change", updateSystemTheme);
-  const watchSystemThemeChange = () => {
-    removeMatchMedia();
-    mediaQueryList.addEventListener("change", updateSystemTheme);
-    updateSystemTheme();
-  };
-
-  onBeforeMount(() => {
-    if (overallStyle.value === "system") watchSystemThemeChange();
+  onMounted(() => {
+    if (overallStyle.value === "system") {
+      mediaQueryList.addEventListener("change", updateSystemTheme);
+    }
   });
-  onUnmounted(() => removeMatchMedia());
 
-  function onReset() {
-    removeToken();
-    storageLocal().clear();
-    const { Grey, Weak, MultiTagsCache, EpThemeColor, Layout } = getConfig();
-    // 假设 useAppStoreHook().setLayout 仍然需要被调用
-    useAppStoreHook().setLayout(Layout);
-    setEpThemeColor(EpThemeColor);
-    useMultiTagsStoreHook().multiTagsCacheChange(MultiTagsCache);
-    toggleClass(Grey, "html-grey", document.querySelector("html"));
-    toggleClass(Weak, "html-weakness", document.querySelector("html"));
-    router.push("/login");
-    useMultiTagsStoreHook().handleTags("equal", [...routerArrays]);
-    resetRouter();
-  }
+  onUnmounted(() => {
+    mediaQueryList.removeEventListener("change", updateSystemTheme);
+  });
 
   return {
-    body,
     dataTheme: readonly(dataTheme),
     overallStyle: readonly(overallStyle),
-    onReset,
-    toggleClass,
-    dataThemeChange,
-    setEpThemeColor,
-    watchSystemThemeChange
+    dataThemeChange
   };
 }

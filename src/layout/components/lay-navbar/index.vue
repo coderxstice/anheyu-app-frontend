@@ -70,7 +70,6 @@ const {
 </template>
 
 <style lang="scss" scoped>
-/* 样式保持不变 */
 .navbar {
   width: 100%;
   height: 48px;

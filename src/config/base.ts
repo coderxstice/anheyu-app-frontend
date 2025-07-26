@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-07-22 11:24:13
+ * @LastEditTime: 2025-07-26 14:03:42
+ * @LastEditors: 安知鱼
+ */
 let config: Record<string, any> = {};
 
 export const setConfig = (cfg?: object): void => {
@@ -23,5 +30,5 @@ export const getConfig = (key?: string): any => {
 };
 
 export const responsiveStorageNameSpace = (): string => {
-  return getConfig()?.ResponsiveStorageNameSpace ?? "responsive-";
+  return getConfig()?.ResponsiveStorageNameSpace ?? "yuyu-responsive-";
 };

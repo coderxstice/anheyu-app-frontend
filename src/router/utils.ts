@@ -391,8 +391,6 @@ function getTopMenu(tag = false): menuType {
   );
   tag && useMultiTagsStoreHook().handleTags("push", topMenu);
 
-  console.log(usePermissionStoreHook().wholeMenus);
-
   return topMenu;
 }
 

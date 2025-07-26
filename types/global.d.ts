@@ -92,7 +92,7 @@ declare global {
     Layout?: string;
     Theme?: string;
     DarkMode?: boolean;
-    OverallStyle?: string;
+    OverallStyle?: "light" | "dark" | "system";
     Grey?: boolean;
     Weak?: boolean;
     HideTabs?: boolean;
