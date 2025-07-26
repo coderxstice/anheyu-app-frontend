@@ -28,6 +28,7 @@
           :offset="12"
           popper-class="custom-tooltip"
           :transition-props="{ onEnter, onLeave }"
+          @click="scrollToTop"
         >
           <img
             v-if="footerConfig.socialBar.centerImg"
@@ -123,14 +124,12 @@
         </div>
       </div>
 
-      <!-- 3. 自定义文本 -->
       <div
         v-if="footerConfig.custom_text"
         class="footer-custom-text"
         v-html="footerConfig.custom_text"
       />
 
-      <!-- 4. 技术栈/服务徽章 (保持 el-tooltip) -->
       <p v-if="footerConfig.badgeitem?.list?.length" class="footer-badges">
         <el-tooltip
           v-for="badge in footerConfig.badgeitem.list"
@@ -154,7 +153,6 @@
       </p>
     </div>
 
-    <!-- 5. 底部信息栏 (保持 el-tooltip) -->
     <div v-if="footerConfig.footerBar" class="footer-bottom-bar">
       <div class="bar-content">
         <div class="bar-left">
@@ -273,7 +271,6 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-/* scoped 样式无需改动 */
 .footer-container {
   position: relative;
   background: linear-gradient(
@@ -322,6 +319,7 @@ a {
     }
   }
 }
+
 .footer-back-to-top {
   width: 50px;
   height: 50px;
@@ -334,6 +332,7 @@ a {
     transform: rotate(360deg);
   }
 }
+
 .footer-link-grid {
   display: flex;
   justify-content: space-between;
@@ -341,21 +340,26 @@ a {
   gap: 8rem;
   padding: 0 2rem;
 }
+
 .footer-group {
   flex: 1 1;
   min-width: 120px;
   text-align: left;
 }
+
 .footer-title-group {
   display: flex;
   align-items: center;
 }
+
 .footer-title {
   font-size: 1.1rem;
   font-weight: bold;
   margin-bottom: 0.8rem;
   color: var(--anzhiyu-secondtext);
+  margin-left: 4px;
 }
+
 .random-friends-btn {
   font-size: 1.1rem;
   margin-left: 0.5rem;
@@ -373,6 +377,7 @@ a {
     }
   }
 }
+
 .footer-links .footer-item {
   display: block;
   margin-bottom: 0.5rem;
@@ -381,18 +386,29 @@ a {
   white-space: nowrap;
   text-overflow: ellipsis;
   max-width: 120px;
+  width: fit-content;
+  padding: 0px 4px;
+  margin-right: 10px;
+  border-radius: 7px;
+  &:hover {
+    color: white;
+    background: var(--anzhiyu-theme);
+  }
 }
+
 .footer-custom-text {
   text-align: center;
   padding: 1rem 0;
   font-size: 0.9rem;
   color: var(--anzhiyu-gray);
 }
+
 .footer-badges {
   text-align: center;
   padding: 1.5rem 0;
   margin: 0;
 }
+
 .badge-link {
   display: inline-block;
   margin: 5px;
@@ -401,6 +417,7 @@ a {
     vertical-align: middle;
   }
 }
+
 .footer-bottom-bar {
   padding: 1rem;
   color: var(--anzhiyu-fontcolor);
@@ -410,6 +427,7 @@ a {
   overflow: hidden;
   transition: 0.3s;
 }
+
 .bar-content {
   display: flex;
   justify-content: space-between;
@@ -420,6 +438,7 @@ a {
   align-items: center;
   line-height: 1;
 }
+
 .bar-left,
 .bar-right {
   display: flex;
@@ -428,9 +447,11 @@ a {
   flex-wrap: wrap;
   min-height: 32px;
 }
+
 .copyright-info :deep(a:hover) {
   color: var(--anzhiyu-main);
 }
+
 :deep(.bar-link) {
   margin-top: 8px;
   margin-bottom: 8px;
@@ -439,6 +460,7 @@ a {
   font-weight: 700;
   white-space: nowrap;
 }
+
 .cc-link {
   display: flex;
   align-items: center;
@@ -446,6 +468,7 @@ a {
     margin: 0 2px;
   }
 }
+
 @media (max-width: 768px) {
   .footer-link-grid {
     justify-content: flex-start;
@@ -458,6 +481,7 @@ a {
     gap: 0.5rem;
   }
 }
+
 @media (max-width: 480px) {
   .footer-group {
     flex-basis: 100%;

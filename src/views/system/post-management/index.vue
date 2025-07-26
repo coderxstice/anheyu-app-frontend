@@ -319,9 +319,6 @@ onMounted(() => {
   display: block;
 }
 
-.post-management-container {
-  padding: 20px;
-}
 .control-panel {
   margin-bottom: 20px;
   .search-form {
