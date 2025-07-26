@@ -1,10 +1,8 @@
 <template>
-  <!-- 确保 siteConfig 加载完成后才渲染整个页脚，防止因数据未加载而报错 -->
   <footer v-if="siteConfig" class="footer-container">
     <div class="footer-wrap">
       <!-- 1. 顶部社交链接栏 -->
       <div v-if="footerConfig.socialBar" class="footer-social-bar">
-        <!-- 左侧链接 -->
         <a
           v-for="item in footerConfig.socialBar.left"
           :key="item.link"
@@ -16,8 +14,6 @@
         >
           <i :class="getIconClass(item.icon)" />
         </a>
-
-        <!-- 中间返回顶部图片 -->
         <img
           v-if="footerConfig.socialBar.centerImg"
           class="footer-back-to-top"
@@ -26,8 +22,6 @@
           :src="footerConfig.socialBar.centerImg"
           @click="scrollToTop"
         />
-
-        <!-- 右侧链接 -->
         <a
           v-for="item in footerConfig.socialBar.right"
           :key="item.link"
@@ -43,7 +37,6 @@
 
       <!-- 2. 主要链接网格 -->
       <div v-if="footerConfig.list?.project?.length" class="footer-link-grid">
-        <!-- 遍历链接分组 -->
         <div
           v-for="group in footerConfig.list.project"
           :key="group.title"
@@ -77,12 +70,12 @@
             >
               <i
                 class="anzhiyufont anzhiyu-icon-arrow-rotate-right"
-                :class="{ rotating: isRotating }"
+                :class="{ 'is-animating': isAnimating }"
+                :style="{ transform: `rotate(${rotationCount * 360}deg)` }"
               />
             </a>
           </div>
           <div class="footer-links">
-            <!-- 实际显示的友链 -->
             <a
               v-for="friend in displayedFriends"
               :key="friend.name"
@@ -93,7 +86,6 @@
             >
               {{ friend.name }}
             </a>
-            <!-- "更多" 链接 -->
             <router-link to="/link/" class="footer-item">更多</router-link>
           </div>
         </div>
@@ -125,7 +117,6 @@
     <!-- 5. 底部信息栏 -->
     <div v-if="footerConfig.footerBar" class="footer-bottom-bar">
       <div class="bar-content">
-        <!-- 左侧版权信息 -->
         <div class="bar-left">
           <div
             v-if="footerConfig.owner"
@@ -133,9 +124,7 @@
             v-html="copyrightText"
           />
         </div>
-        <!-- 右侧链接 -->
         <div class="bar-right">
-          <!-- 循环遍历 linkList -->
           <a
             v-for="link in footerConfig.footerBar.linkList"
             :key="link.text"
@@ -147,7 +136,6 @@
           >
             {{ link.text }}
           </a>
-          <!-- 单独添加备案号 -->
           <a
             v-if="icpNumber"
             class="bar-link"
@@ -158,7 +146,6 @@
           >
             {{ icpNumber }}
           </a>
-          <!-- CC 协议图标，判断 link 是否存在且不为空 -->
           <a
             v-if="footerConfig.footerBar.cc && footerConfig.footerBar.cc.link"
             class="bar-link cc-link"
@@ -170,7 +157,7 @@
             <i class="anzhiyufont anzhiyu-icon-copyright-line" />
             <i class="anzhiyufont anzhiyu-icon-creative-commons-by-line" />
             <i class="anzhiyufont anzhiyu-icon-creative-commons-nc-line" />
-            <i class="anzhiyufont anzhiyu-icon-creative-commons-sa-line" />
+            <i class="anzhiyufont anzhiyu-icon-creative-commons-nd-line" />
           </a>
         </div>
       </div>
@@ -182,13 +169,48 @@
 import { ref, computed, onMounted } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
-// --- 1. 从 Pinia Store 获取配置 ---
+// 1. 配置
 const siteConfigStore = useSiteConfigStore();
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);
 const footerConfig = computed(() => siteConfig.value?.footer);
 const icpNumber = computed(() => siteConfig.value?.ICP_NUMBER);
 
-// --- 2. 计算属性，处理动态文本 ---
+// 2. 友链功能状态
+// TODO: 后端API准备好后，将此静态列表替换为API调用返回的数据。
+const allFriends = ref([
+  { name: "胡桃木实验室", href: "https://www.htmacg.cn/" },
+  { name: "包子哟", href: "https://blog.bugjava.cn" },
+  { name: "道宣的窝", href: "https://daoxuan.cc/" },
+  { name: "张洪Heo", href: "https://blog.zhheo.com/" },
+  { name: "Leonus", href: "https://blog.leonus.cn/" },
+  { name: "無名のBlog", href: "https://wumou.org" }
+]);
+const displayedFriends = ref<{ name: string; href: string }[]>([]);
+const rotationCount = ref(0); // [核心] 记录旋转圈数的计数器
+const isAnimating = ref(false); // 控制动画期间的 opacity
+
+/**
+ * 刷新页脚的友情链接，并触发单向旋转动画
+ */
+function refreshFriendLinks() {
+  if (isAnimating.value) return; // 防止动画期间重复点击
+  if (!footerConfig.value?.list?.randomFriends) return;
+
+  const count = Number(footerConfig.value.list.randomFriends);
+  const shuffled = [...allFriends.value].sort(() => 0.5 - Math.random());
+  displayedFriends.value = shuffled.slice(0, count);
+
+  // 累加旋转圈数，并设置动画状态
+  rotationCount.value++;
+  isAnimating.value = true;
+
+  // 动画结束后，重置动画状态
+  setTimeout(() => {
+    isAnimating.value = false;
+  }, 300);
+}
+
+// 3. 其他方法和生命周期钩子
 const copyrightText = computed(() => {
   if (!footerConfig.value?.owner) return "";
   const since = footerConfig.value.owner.since;
@@ -203,68 +225,25 @@ const copyrightText = computed(() => {
   return `&copy;${yearRange} By ${authorHtml}`;
 });
 
-// --- 3. 方法 ---
 const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
 const getIconClass = (iconName: string) => {
-  if (iconName?.startsWith("anzhiyu")) {
-    return ["anzhiyufont", iconName];
-  }
-  if (iconName?.startsWith("fa")) {
-    return iconName.split(" ");
-  }
+  if (iconName?.startsWith("anzhiyu")) return ["anzhiyufont", iconName];
+  if (iconName?.startsWith("fa")) return iconName.split(" ");
   return [iconName];
 };
 
-// --- 4. 友链功能 (当前为静态数据，未来将替换为 API 调用) ---
-// TODO: 后端API准备好后，将此静态列表替换为API调用返回的数据。
-const allFriends = ref([
-  { name: "胡桃木实验室", href: "https://www.htmacg.cn/" },
-  { name: "包子哟", href: "https://blog.bugjava.cn" },
-  { name: "道宣的窝", href: "https://daoxuan.cc/" },
-  { name: "张洪Heo", href: "https://blog.zhheo.com/" },
-  { name: "Leonus", href: "https://blog.leonus.cn/" },
-  { name: "無名のBlog", href: "https://wumou.org" }
-]);
-const displayedFriends = ref<{ name: string; href: string }[]>([]);
-const isRotating = ref(false);
-
-const refreshFriendLinks = () => {
-  if (!footerConfig.value?.list?.randomFriends) return;
-
-  const count = Number(footerConfig.value.list.randomFriends);
-  // 从 allFriends 数组中随机抽取指定数量的友链来显示
-  const shuffled = [...allFriends.value].sort(() => 0.5 - Math.random());
-  displayedFriends.value = shuffled.slice(0, count);
-
-  // 触发刷新按钮的旋转动画
-  isRotating.value = true;
-  setTimeout(() => {
-    isRotating.value = false;
-  }, 500);
-};
-
-// --- 5. 生命周期钩子 ---
 onMounted(() => {
-  // 组件挂载后，如果配置已加载，则初始化友链
   if (footerConfig.value) {
     refreshFriendLinks();
   }
 });
 </script>
 
-<style scoped>
-/* 样式无需修改，保持原样 */
+<style scoped lang="scss">
 .footer-container {
-  --anzhiyu-card-bg: rgba(255, 255, 255, 0.6);
-  --anzhiyu-card-bg-none: rgba(255, 255, 255, 0);
-  --anzhiyu-fontcolor: #4c4948;
-  --anzhiyu-gray: #8a8a8a;
-  --anzhiyu-main: #49b1f5;
-  --anzhiyu-lighttext: #a9a9b3;
-
   position: relative;
   background: linear-gradient(
     180deg,
@@ -272,7 +251,6 @@ onMounted(() => {
     var(--anzhiyu-card-bg) 25%
   );
   color: var(--anzhiyu-fontcolor);
-  padding: 2rem 1rem 0;
   margin-top: 1rem;
 }
 
@@ -285,15 +263,12 @@ onMounted(() => {
 .footer-container a {
   color: var(--anzhiyu-fontcolor);
   text-decoration: none;
-  transition:
-    color 0.3s,
-    transform 0.3s;
 }
+
 .footer-container a:hover {
   color: var(--anzhiyu-main);
 }
 
-/* 顶部社交链接栏 */
 .footer-social-bar {
   display: flex;
   justify-content: center;
@@ -303,70 +278,97 @@ onMounted(() => {
   gap: 1rem;
 }
 
-.social-link {
+.footer-social-bar .social-link {
   font-size: 1.5rem;
+  display: flex;
+  margin: 1rem 27px;
+  color: var(--anzhiyu-card-bg);
+  border-radius: 3rem;
+  width: 32px;
+  height: 32px;
+  background: var(--anzhiyu-fontcolor);
+  justify-content: center;
+  align-items: center;
+  transition: 0.3s;
 }
-.social-link:hover {
+
+.footer-social-bar .social-link:hover {
   transform: scale(1.2);
+  color: var(--anzhiyu-white);
+  background: var(--anzhiyu-main);
 }
 
 .footer-back-to-top {
   width: 50px;
   height: 50px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin: 0 1rem;
   cursor: pointer;
-  transition: transform 0.3s ease-in-out;
+  transition: cubic-bezier(0, 0, 0, 1.29) 0.5s;
 }
+
 .footer-back-to-top:hover {
   transform: rotate(360deg);
 }
 
-/* 主要链接网格 */
 .footer-link-grid {
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
-  padding: 1.5rem 0;
-  gap: 1rem;
+  gap: 8rem;
+  padding: 0 2rem;
 }
 
 .footer-group {
-  flex: 1 1 180px;
-  min-width: 150px;
+  flex: 1 1;
+  min-width: 120px;
   text-align: left;
 }
 
 .footer-title-group {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
 }
 
 .footer-title {
   font-size: 1.1rem;
   font-weight: bold;
   margin-bottom: 0.8rem;
+  color: var(--anzhiyu-secondtext);
 }
 
 .random-friends-btn {
-  font-size: 1.2rem;
-  transition: transform 0.5s ease-in-out;
+  font-size: 1.1rem;
+  margin-left: 0.5rem;
+  cursor: pointer;
 }
-.random-friends-btn .rotating {
-  transform: rotate(360deg);
+
+.random-friends-btn > i {
+  display: inline-block;
+  transition:
+    transform 0.3s ease-out,
+    opacity 0.3s ease-out;
+}
+
+.random-friends-btn > i.is-animating {
+  opacity: 0.2;
 }
 
 .footer-links .footer-item {
   display: block;
   margin-bottom: 0.5rem;
   font-size: 0.95rem;
-  color: var(--anzhiyu-gray);
-}
-.footer-links .footer-item:hover {
-  color: var(--anzhiyu-main);
-  transform: translateX(3px);
+  overflow: hidden;
+  white-space: nowrap;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  max-width: 120px;
 }
 
-/* 自定义文本 */
+.footer-links .footer-item:hover {
+  color: var(--anzhiyu-main);
+}
+
 .footer-custom-text {
   text-align: center;
   padding: 1rem 0;
@@ -374,7 +376,6 @@ onMounted(() => {
   color: var(--anzhiyu-gray);
 }
 
-/* 技术栈/服务徽章 */
 .footer-badges {
   text-align: center;
   padding: 1.5rem 0;
@@ -389,25 +390,33 @@ onMounted(() => {
   vertical-align: middle;
 }
 
-/* 底部信息栏 */
 .footer-bottom-bar {
-  border-top: 1px solid #e3e8f7;
-  padding: 1rem 0;
-  font-size: 0.85rem;
-  color: var(--anzhiyu-lighttext);
+  padding: 1rem;
+  color: var(--anzhiyu-fontcolor);
+  margin-top: 1rem;
+  background: var(--anzhiyu-secondbg);
+  display: flex;
+  overflow: hidden;
+  transition: 0.3s;
 }
 .bar-content {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
   flex-wrap: wrap;
+  align-items: center;
+  line-height: 1;
 }
+
 .bar-left,
 .bar-right {
   display: flex;
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
+  min-height: 32px;
 }
 .copyright-info :deep(a) {
   color: var(--anzhiyu-lighttext);
@@ -416,7 +425,12 @@ onMounted(() => {
   color: var(--anzhiyu-main);
 }
 .bar-link {
-  color: var(--anzhiyu-lighttext);
+  margin-top: 8px;
+  margin-bottom: 8px;
+  color: var(--anzhiyu-fontcolor);
+  font-size: 1rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
 .bar-link:hover {
   color: var(--anzhiyu-main);
@@ -425,7 +439,6 @@ onMounted(() => {
   margin: 0 2px;
 }
 
-/* 响应式设计 */
 @media (max-width: 768px) {
   .footer-link-grid {
     justify-content: flex-start;

@@ -29,7 +29,7 @@ body {
   width: 100%;
   height: 100%;
   margin: 0;
-  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
+  font-family: "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica,
     "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
   line-height: inherit;
   -moz-osx-font-smoothing: grayscale;
@@ -367,9 +367,10 @@ input,
 select,
 textarea {
   color: var(--anzhiyu-fontcolor) !important;
-  font-family: "Source Sans Pro", Helvetica, sans-serif;
-  font-size: 15pt;
-  font-weight: 300;
+  font-family: "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica,
+    "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+  font-size: 12pt;
+  font-weight: 400;
   letter-spacing: 0.025em;
   line-height: 1.65;
 }

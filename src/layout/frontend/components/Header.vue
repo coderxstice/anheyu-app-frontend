@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-26 02:11:44
- * @LastEditTime: 2025-07-26 02:11:52
+ * @LastEditTime: 2025-07-26 12:30:39
  * @LastEditors: 安知鱼
 -->
 <!-- src/layout/frontend/components/Header.vue -->
@@ -38,7 +38,7 @@
 
 .header-content {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
