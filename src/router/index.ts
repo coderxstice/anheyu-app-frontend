@@ -160,8 +160,6 @@ router.beforeEach((to: ToRouteType, _from, next) => {
     }
 
     // 3.3 已登录用户访问白名单页面（如 /album ）直接放行
-    console.log(to.path, to);
-
     if (whiteList.includes(to.path)) {
       next();
       return; // 结束当前导航守卫

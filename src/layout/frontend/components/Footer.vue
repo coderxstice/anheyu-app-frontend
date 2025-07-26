@@ -1,62 +1,72 @@
 <template>
-  <footer class="footer-container">
+  <!-- 确保 siteConfig 加载完成后才渲染整个页脚，防止因数据未加载而报错 -->
+  <footer v-if="siteConfig" class="footer-container">
     <div class="footer-wrap">
-      <!-- 顶部社交媒体图标 & 返回顶部 -->
-      <div class="footer-social-bar">
+      <!-- 1. 顶部社交链接栏 -->
+      <div v-if="footerConfig.socialBar" class="footer-social-bar">
+        <!-- 左侧链接 -->
         <a
-          v-for="link in socialLinks.slice(0, 4)"
-          :key="link.title"
+          v-for="item in footerConfig.socialBar.left"
+          :key="item.link"
           class="social-link"
-          :href="link.href"
-          :title="link.title"
+          :href="item.link"
+          :title="item.title"
           target="_blank"
           rel="noopener external nofollow noreferrer"
         >
-          <i :class="['anzhiyufont', link.icon]" />
+          <i :class="getIconClass(item.icon)" />
         </a>
+
+        <!-- 中间返回顶部图片 -->
         <img
+          v-if="footerConfig.socialBar.centerImg"
           class="footer-back-to-top"
           title="返回顶部"
           alt="返回顶部"
-          src="https://img02.anheyu.com/adminuploads/1/2023/05/09/645a3ff0dc540.gif"
+          :src="footerConfig.socialBar.centerImg"
           @click="scrollToTop"
         />
+
+        <!-- 右侧链接 -->
         <a
-          v-for="link in socialLinks.slice(4)"
-          :key="link.title"
+          v-for="item in footerConfig.socialBar.right"
+          :key="item.link"
           class="social-link"
-          :href="link.href"
-          :title="link.title"
+          :href="item.link"
+          :title="item.title"
           target="_blank"
           rel="noopener external nofollow noreferrer"
         >
-          <i :class="['anzhiyufont', link.icon]" />
+          <i :class="getIconClass(item.icon)" />
         </a>
       </div>
 
-      <!-- 主要页脚链接网格 -->
-      <div class="footer-link-grid">
+      <!-- 2. 主要链接网格 -->
+      <div v-if="footerConfig.list?.project?.length" class="footer-link-grid">
+        <!-- 遍历链接分组 -->
         <div
-          v-for="group in footerLinkGroups"
+          v-for="group in footerConfig.list.project"
           :key="group.title"
           class="footer-group"
         >
           <div class="footer-title">{{ group.title }}</div>
           <div class="footer-links">
-            <router-link
+            <a
               v-for="link in group.links"
-              :key="link.name"
+              :key="link.link"
               class="footer-item"
-              :to="link.path"
-              :title="link.name"
+              :href="link.link"
+              :title="link.title"
+              target="_blank"
+              rel="noopener"
             >
-              {{ link.name }}
-            </router-link>
+              {{ link.title }}
+            </a>
           </div>
         </div>
 
-        <!-- 动态友链组 -->
-        <div class="footer-group">
+        <!-- 随机友链 -->
+        <div v-if="footerConfig.list.randomFriends > 0" class="footer-group">
           <div class="footer-title-group">
             <div class="footer-title">友链</div>
             <a
@@ -72,6 +82,7 @@
             </a>
           </div>
           <div class="footer-links">
+            <!-- 实际显示的友链 -->
             <a
               v-for="friend in displayedFriends"
               :key="friend.name"
@@ -82,61 +93,85 @@
             >
               {{ friend.name }}
             </a>
+            <!-- "更多" 链接 -->
             <router-link to="/link/" class="footer-item">更多</router-link>
           </div>
         </div>
       </div>
 
-      <!-- 技术栈/服务徽章 -->
-      <p class="footer-badges">
+      <!-- 3. 自定义文本 -->
+      <div
+        v-if="footerConfig.custom_text"
+        class="footer-custom-text"
+        v-html="footerConfig.custom_text"
+      />
+
+      <!-- 4. 技术栈/服务徽章 -->
+      <p v-if="footerConfig.badgeitem?.list?.length" class="footer-badges">
         <a
-          v-for="badge in badges"
-          :key="badge.title"
+          v-for="badge in footerConfig.badgeitem.list"
+          :key="badge.shields"
           class="badge-link"
           target="_blank"
-          :href="badge.href"
+          :href="badge.link"
           rel="external nofollow noreferrer"
-          :title="badge.title"
+          :title="badge.message"
         >
-          <img :src="badge.imgSrc" :alt="badge.title" />
+          <img :src="badge.shields" :alt="badge.message" />
         </a>
       </p>
     </div>
 
-    <!-- 底部备案信息栏 -->
-    <div class="footer-bottom-bar">
+    <!-- 5. 底部信息栏 -->
+    <div v-if="footerConfig.footerBar" class="footer-bottom-bar">
       <div class="bar-content">
+        <!-- 左侧版权信息 -->
         <div class="bar-left">
-          <div class="copyright-info">
-            ©2020 - {{ new Date().getFullYear() }} By
-            <router-link to="/about" class="bar-link" title="安知鱼"
-              >安知鱼</router-link
-            >
-          </div>
+          <div
+            v-if="footerConfig.owner"
+            class="copyright-info"
+            v-html="copyrightText"
+          />
         </div>
+        <!-- 右侧链接 -->
         <div class="bar-right">
+          <!-- 循环遍历 linkList -->
           <a
+            v-for="link in footerConfig.footerBar.linkList"
+            :key="link.text"
             class="bar-link"
+            :href="link.link"
+            :title="link.text"
             target="_blank"
-            rel="noopener external nofollow noreferrer"
-            href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu"
-            title="主题"
-            >主题</a
+            rel="noopener"
           >
+            {{ link.text }}
+          </a>
+          <!-- 单独添加备案号 -->
           <a
+            v-if="icpNumber"
             class="bar-link"
-            target="_blank"
-            rel="noopener external nofollow noreferrer"
             href="https://beian.miit.gov.cn/"
-            title="粤ICP备2021157833号"
-            >粤ICP备2021157833号</a
+            target="_blank"
+            rel="noopener"
+            :title="icpNumber"
           >
-          <router-link to="/copyright" class="bar-link cc-link" title="cc协议">
+            {{ icpNumber }}
+          </a>
+          <!-- CC 协议图标，判断 link 是否存在且不为空 -->
+          <a
+            v-if="footerConfig.footerBar.cc && footerConfig.footerBar.cc.link"
+            class="bar-link cc-link"
+            :href="footerConfig.footerBar.cc.link"
+            title="CC协议"
+            target="_blank"
+            rel="noopener"
+          >
             <i class="anzhiyufont anzhiyu-icon-copyright-line" />
             <i class="anzhiyufont anzhiyu-icon-creative-commons-by-line" />
             <i class="anzhiyufont anzhiyu-icon-creative-commons-nc-line" />
             <i class="anzhiyufont anzhiyu-icon-creative-commons-sa-line" />
-          </router-link>
+          </a>
         </div>
       </div>
     </div>
@@ -144,119 +179,47 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
-// --- 数据部分 (与之前版本相同，无需修改) ---
+// --- 1. 从 Pinia Store 获取配置 ---
+const siteConfigStore = useSiteConfigStore();
+const siteConfig = computed(() => siteConfigStore.getSiteConfig);
+const footerConfig = computed(() => siteConfig.value?.footer);
+const icpNumber = computed(() => siteConfig.value?.ICP_NUMBER);
 
-const socialLinks = ref([
-  {
-    href: "mailto:anzhiyu-c@qq.com",
-    title: "email",
-    icon: "anzhiyu-icon-envelope"
-  },
-  {
-    href: "https://weibo.com/u/6378063631",
-    title: "微博",
-    icon: "anzhiyu-icon-weibo"
-  },
-  {
-    href: "https://www.facebook.com/profile.php?id=100092208016287",
-    title: "facebook",
-    icon: "anzhiyu-icon-facebook1"
-  },
-  { href: "/atom.xml", title: "RSS", icon: "anzhiyu-icon-rss" },
-  {
-    href: "https://github.com/anzhiyu-c",
-    title: "Github",
-    icon: "anzhiyu-icon-github"
-  },
-  {
-    href: "https://space.bilibili.com/372204786",
-    title: "Bilibili",
-    icon: "anzhiyu-icon-bilibili"
-  },
-  {
-    href: "https://v.douyin.com/DwCpMEy/",
-    title: "抖音",
-    icon: "anzhiyu-icon-tiktok"
-  },
-  { href: "/copyright", title: "CC", icon: "anzhiyu-icon-copyright-line" }
-]);
-
-const footerLinkGroups = ref([
-  {
-    title: "服务",
-    links: [
-      { name: "51la统计", path: "https://v6.51.la/" },
-      { name: "十年之约", path: "https://foreverblog.cn/go.html" },
-      { name: "开往", path: "https://github.com/travellings-link/travellings" }
-    ]
-  },
-  {
-    title: "主题",
-    links: [
-      { name: "文档", path: "https://docs.anheyu.com" },
-      { name: "源码", path: "https://github.com/anzhiyu-c/hexo-theme-anzhiyu" },
-      { name: "更新日志", path: "/update/" }
-    ]
-  },
-  {
-    title: "导航",
-    links: [
-      { name: "即刻短文", path: "/essay/" },
-      { name: "友链文章", path: "/fcircle/" },
-      { name: "留言板", path: "/comments/" }
-    ]
-  },
-  {
-    title: "协议",
-    links: [
-      { name: "隐私协议", path: "/privacy/" },
-      { name: "Cookies", path: "/cookies/" },
-      { name: "版权协议", path: "/copyright/" }
-    ]
+// --- 2. 计算属性，处理动态文本 ---
+const copyrightText = computed(() => {
+  if (!footerConfig.value?.owner) return "";
+  const since = footerConfig.value.owner.since;
+  const author = footerConfig.value.owner.name;
+  const authorLink = footerConfig.value.footerBar?.authorLink || "/about";
+  const nowYear = new Date().getFullYear();
+  let yearRange = String(nowYear);
+  if (since && Number(since) !== nowYear) {
+    yearRange = `${since} - ${nowYear}`;
   }
-]);
+  const authorHtml = `<a class="bar-link" href="${authorLink}" title="${author}" target="_blank">${author}</a>`;
+  return `&copy;${yearRange} By ${authorHtml}`;
+});
 
-const badges = ref([
-  {
-    href: "https://hexo.io/",
-    title: "博客框架为Hexo",
-    imgSrc:
-      "https://npm.elemecdn.com/anzhiyu-blog@2.1.5/img/badge/Frame-Hexo.svg"
-  },
-  {
-    href: "https://www.dogecloud.com/",
-    title: "本站使用多吉云为静态资源提供CDN加速",
-    imgSrc:
-      "https://npm.elemecdn.com/anzhiyu-blog@2.2.0/img/badge/CDN-多吉云-3693F3.svg"
-  },
-  {
-    href: "https://blog.anheyu.com/",
-    title: "本站使用AnZhiYu主题",
-    imgSrc:
-      "https://npm.elemecdn.com/anzhiyu-theme-static@1.0.9/img/Theme-AnZhiYu-2E67D3.svg"
-  },
-  {
-    href: "https://beian.miit.gov.cn/",
-    title: "粤ICP备2021157833号",
-    imgSrc: "https://img.shields.io/badge/粤ICP备-2021157833号-blue"
-  },
-  {
-    href: "https://github.com/",
-    title: "本站项目由Github托管",
-    imgSrc:
-      "https://npm.elemecdn.com/anzhiyu-blog@2.1.5/img/badge/Source-Github.svg"
-  },
-  {
-    href: "http://creativecommons.org/licenses/by-nc-sa/4.0/",
-    title:
-      "本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可",
-    imgSrc:
-      "https://npm.elemecdn.com/anzhiyu-blog@2.2.0/img/badge/Copyright-BY-NC-SA.svg"
+// --- 3. 方法 ---
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+const getIconClass = (iconName: string) => {
+  if (iconName?.startsWith("anzhiyu")) {
+    return ["anzhiyufont", iconName];
   }
-]);
+  if (iconName?.startsWith("fa")) {
+    return iconName.split(" ");
+  }
+  return [iconName];
+};
 
+// --- 4. 友链功能 (当前为静态数据，未来将替换为 API 调用) ---
+// TODO: 后端API准备好后，将此静态列表替换为API调用返回的数据。
 const allFriends = ref([
   { name: "胡桃木实验室", href: "https://www.htmacg.cn/" },
   { name: "包子哟", href: "https://blog.bugjava.cn" },
@@ -268,29 +231,32 @@ const allFriends = ref([
 const displayedFriends = ref<{ name: string; href: string }[]>([]);
 const isRotating = ref(false);
 
-const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
-};
-
 const refreshFriendLinks = () => {
+  if (!footerConfig.value?.list?.randomFriends) return;
+
+  const count = Number(footerConfig.value.list.randomFriends);
+  // 从 allFriends 数组中随机抽取指定数量的友链来显示
   const shuffled = [...allFriends.value].sort(() => 0.5 - Math.random());
-  displayedFriends.value = shuffled.slice(0, 3);
+  displayedFriends.value = shuffled.slice(0, count);
+
+  // 触发刷新按钮的旋转动画
   isRotating.value = true;
   setTimeout(() => {
     isRotating.value = false;
   }, 500);
 };
 
+// --- 5. 生命周期钩子 ---
 onMounted(() => {
-  refreshFriendLinks();
+  // 组件挂载后，如果配置已加载，则初始化友链
+  if (footerConfig.value) {
+    refreshFriendLinks();
+  }
 });
 </script>
 
 <style scoped>
-/* 确保在 public/index.html 中引入了 anzhizu-font 的 CSS */
-/* <link rel="stylesheet" href="https://npm.elemecdn.com/anzhiyu-theme-static@1.1.4/dist/font/anzhiyu-font.css"> */
-
-/* --- 变量和全局页脚样式 --- */
+/* 样式无需修改，保持原样 */
 .footer-container {
   --anzhiyu-card-bg: rgba(255, 255, 255, 0.6);
   --anzhiyu-card-bg-none: rgba(255, 255, 255, 0);
@@ -327,7 +293,7 @@ onMounted(() => {
   color: var(--anzhiyu-main);
 }
 
-/* --- 顶部社交媒体图标 & 返回顶部 --- */
+/* 顶部社交链接栏 */
 .footer-social-bar {
   display: flex;
   justify-content: center;
@@ -354,7 +320,7 @@ onMounted(() => {
   transform: rotate(360deg);
 }
 
-/* --- 主要页脚链接网格 --- */
+/* 主要链接网格 */
 .footer-link-grid {
   display: flex;
   justify-content: space-between;
@@ -400,7 +366,15 @@ onMounted(() => {
   transform: translateX(3px);
 }
 
-/* --- 技术栈/服务徽章 --- */
+/* 自定义文本 */
+.footer-custom-text {
+  text-align: center;
+  padding: 1rem 0;
+  font-size: 0.9rem;
+  color: var(--anzhiyu-gray);
+}
+
+/* 技术栈/服务徽章 */
 .footer-badges {
   text-align: center;
   padding: 1.5rem 0;
@@ -415,7 +389,7 @@ onMounted(() => {
   vertical-align: middle;
 }
 
-/* --- 底部备案信息栏 --- */
+/* 底部信息栏 */
 .footer-bottom-bar {
   border-top: 1px solid #e3e8f7;
   padding: 1rem 0;
@@ -435,6 +409,12 @@ onMounted(() => {
   gap: 1rem;
   flex-wrap: wrap;
 }
+.copyright-info :deep(a) {
+  color: var(--anzhiyu-lighttext);
+}
+.copyright-info :deep(a:hover) {
+  color: var(--anzhiyu-main);
+}
 .bar-link {
   color: var(--anzhiyu-lighttext);
 }
@@ -445,7 +425,7 @@ onMounted(() => {
   margin: 0 2px;
 }
 
-/* --- 响应式设计 --- */
+/* 响应式设计 */
 @media (max-width: 768px) {
   .footer-link-grid {
     justify-content: flex-start;
@@ -458,7 +438,6 @@ onMounted(() => {
     gap: 0.5rem;
   }
 }
-
 @media (max-width: 480px) {
   .footer-group {
     flex-basis: 100%;
