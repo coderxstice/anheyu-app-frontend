@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-11 11:59:32
- * @LastEditTime: 2025-07-22 10:30:51
+ * @LastEditTime: 2025-07-29 16:39:39
  * @LastEditors: 安知鱼
  */
 import { cdn } from "./cdn";
@@ -16,7 +16,6 @@ import removeNoMatch from "vite-plugin-router-warn";
 import { visualizer } from "rollup-plugin-visualizer";
 import removeConsole from "vite-plugin-remove-console";
 import { codeInspectorPlugin } from "code-inspector-plugin";
-// import { vitePluginFakeServer } from "vite-plugin-fake-server";
 import { VitePWA } from "vite-plugin-pwa";
 import monacoEditorPlugin from "vite-plugin-monaco-editor";
 
@@ -53,8 +52,10 @@ export function getPluginsList(
       workbox: {
         maximumFileSizeToCacheInBytes: 10000000,
         navigateFallbackDenylist: [/^\/api\/(.+)/, /^\/f\/(.+)/],
-        globIgnores: ["**/monacoeditorwork/*.js"],
-
+        globIgnores: [
+          "**/monacoeditorwork/*.js", // 明确排除 monaco 的 worker
+          "**/vendor-monaco-editor.*.js"
+        ],
         runtimeCaching: [
           {
             // 匹配 /static/img/ 目录下的所有图片文件

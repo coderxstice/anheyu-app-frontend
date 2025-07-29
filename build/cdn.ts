@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-06-27 10:30:37
+ * @LastEditTime: 2025-07-29 16:54:41
  * @LastEditors: 安知鱼
  */
 import { Plugin as importToCDN } from "vite-plugin-cdn-import";
@@ -65,12 +65,6 @@ export const cdn = importToCDN({
       name: "gsap",
       var: "gsap",
       path: "dist/gsap.min.js",
-      prodUrl: "https://cdn.cbd.int/{name}@{version}/{path}"
-    },
-    {
-      name: "vite-plugin-monaco-editor",
-      var: "vite-plugin-monaco-editor",
-      path: "dist/index.js",
       prodUrl: "https://cdn.cbd.int/{name}@{version}/{path}"
     }
   ]
