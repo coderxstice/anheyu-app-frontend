@@ -65,7 +65,7 @@ export const initializeConfigs = async (app: App): Promise<void> => {
     // 6. 使用最终的配置来动态更新页面元信息（标题、Favicon等）
     const finalConfig = getConfig();
     if (finalConfig) {
-      document.title = finalConfig.APP_NAME || finalConfig.title || "猫鱼";
+      document.title = finalConfig.APP_NAME || finalConfig.title || "安和鱼";
 
       // 更新 Favicon
       let faviconLink = document.querySelector(

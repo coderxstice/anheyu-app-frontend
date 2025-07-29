@@ -58,7 +58,7 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
       return null;
     },
     getTitle(state): string {
-      return state.siteConfig?.APP_NAME || "猫鱼";
+      return state.siteConfig?.APP_NAME || "安和鱼";
     },
     getFixedHeader(state): boolean {
       return typeof state.siteConfig?.fixedHeader === "boolean"

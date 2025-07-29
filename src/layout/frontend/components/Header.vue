@@ -9,7 +9,7 @@
 <template>
   <header class="frontend-header">
     <div class="header-content">
-      <a href="/" class="logo">猫鱼的小站</a>
+      <a href="/" class="logo">安和鱼的小站</a>
       <nav>
         <router-link to="/">首页</router-link>
         <router-link to="/album">相册</router-link>

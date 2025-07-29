@@ -10,7 +10,7 @@ const FrontendLayout = () => import("@/layout/frontend/index.vue");
 import { LOCAL_STORAGE_KEY } from "@/store/modules/siteConfig";
 
 const configLocal = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
-const appName = configLocal?.config?.APP_NAME || "猫鱼";
+const appName = configLocal?.config?.APP_NAME || "安和鱼";
 
 export default [
   {

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-04-08 17:29:06
- * @LastEditTime: 2025-07-22 11:57:00
+ * @LastEditTime: 2025-07-29 16:30:30
  * @LastEditors: 安知鱼
  */
 import type { Plugin } from "vite";
@@ -14,7 +14,7 @@ import boxen, { type Options as BoxenOptions } from "boxen";
 dayjs.extend(duration);
 
 const welcomeMessage = gradient(["cyan", "magenta"]).multiline(
-  `您好! 欢迎使用 MAO-YU`
+  `您好! 欢迎使用 ANHEYU`
 );
 
 const boxenOptions: BoxenOptions = {

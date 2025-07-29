@@ -18,7 +18,7 @@ const { sortOrder } = storeToRefs(albumStore);
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);
 
 // 动态获取网站名称
-const siteName = computed(() => siteConfig.value?.APP_NAME || "猫鱼");
+const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
 
 // 动态获取关于链接
 const aboutLink = computed(() => siteConfig.value?.ABOUT_LINK || "#");
