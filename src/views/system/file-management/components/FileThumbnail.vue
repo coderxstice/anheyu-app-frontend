@@ -1,16 +1,18 @@
 <template>
   <div ref="thumbnailRef" class="thumbnail-container">
+    <img
+      v-if="imageUrl"
+      :src="imageUrl"
+      class="thumbnail-image"
+      :style="{ opacity: isLoading ? 0 : 1 }"
+      loading="lazy"
+      @load="handleImageLoad"
+      @error="handleImageError"
+    />
     <div v-if="isLoading" class="thumbnail-placeholder is-loading">
       <el-icon><Loading /></el-icon>
     </div>
-    <img
-      v-else-if="imageUrl"
-      :src="imageUrl"
-      class="thumbnail-image"
-      loading="lazy"
-      @error="handleImageError"
-    />
-    <div v-else class="thumbnail-placeholder">
+    <div v-else-if="!imageUrl" class="thumbnail-placeholder">
       <component :is="getFileIcon(file)" class="file-icon-fallback" />
     </div>
   </div>
@@ -73,7 +75,6 @@ const fetchPreview = async () => {
 
     if (res.code === 200 && res.data?.sign) {
       imageUrl.value = `${baseUrlApi("t")}/${res.data.sign}`;
-      isLoading.value = false;
       if (timeoutId) clearTimeout(timeoutId);
     } else if (res.code === 202 && res.data?.status === "processing") {
       isLoading.value = true;
@@ -90,6 +91,10 @@ const fetchPreview = async () => {
     );
     handleImageError();
   }
+};
+
+const handleImageLoad = () => {
+  isLoading.value = false;
 };
 
 const handleImageError = () => {
@@ -129,16 +134,20 @@ watch(
   () => props.file.id,
   (newId, oldId) => {
     if (newId === oldId) return;
+    // 重置状态
     imageUrl.value = null;
     isLoading.value = false;
     if (timeoutId) clearTimeout(timeoutId);
+
+    // 重新观察
     if (observer && thumbnailRef.value) {
       observer.unobserve(thumbnailRef.value);
       if (isPreviewSupported()) {
         observer.observe(thumbnailRef.value);
       }
     }
-  }
+  },
+  { flush: "post" }
 );
 </script>
 
@@ -151,15 +160,16 @@ watch(
   align-items: center;
   border-radius: 6px;
   overflow: hidden;
-  :has(.is-loading) {
-    background-color: var(--el-fill-color-light);
-  }
+  background-color: var(--el-fill-color-light);
+  position: relative;
 }
 .thumbnail-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.2s ease-in-out;
+  transition:
+    transform 0.2s ease-in-out,
+    opacity 0.3s ease-in-out; /* 新增 opacity 过渡效果 */
 }
 .thumbnail-image:hover {
   transform: scale(1.1);
@@ -170,6 +180,14 @@ watch(
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.thumbnail-placeholder.is-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  background-color: var(--el-fill-color-light);
 }
 .thumbnail-placeholder.is-loading .el-icon {
   font-size: 32px;
