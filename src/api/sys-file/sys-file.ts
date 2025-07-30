@@ -366,8 +366,25 @@ export const updateFileContentByPublicIdApi = (
     {
       params: { uri }, // uri 作为查询参数
       data: content,
-      // 根据文档，发送原始字节流
       headers: { "Content-Type": "application/octet-stream" }
     }
+  );
+};
+
+/**
+ * @description 批量重新生成一个目录下所有文件的缩略图（异步任务）
+ * @param {string} directoryId 要重新生成缩略图的目标目录的公共ID
+ * @returns {Promise<BaseResponse<{ filesToProcess: number }>>}
+ */
+export const regenerateDirectoryThumbnailsApi = (
+  directoryId: string
+): Promise<BaseResponse<{ filesToProcess: number }>> => {
+  // 定义请求体的类型，用于泛型 P
+  type RequestPayload = { directoryId: string };
+
+  // 严格按照 http.post<T, P>(url, data) 的签名进行调用
+  return http.post<BaseResponse<{ filesToProcess: number }>, RequestPayload>(
+    baseUrlApi("thumbnail/regenerate/directory"),
+    { directoryId }
   );
 };

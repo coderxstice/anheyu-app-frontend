@@ -1,7 +1,6 @@
 <template>
   <div class="file-toolbar rounded-2xl overflow-hidden bg-white ml-2 mb-2">
     <div class="right-actions">
-      <!-- 刷新按钮 -->
       <el-tooltip content="刷新" placement="bottom">
         <el-button
           circle
@@ -11,7 +10,19 @@
         />
       </el-tooltip>
 
-      <!-- 选择操作 -->
+      <el-tooltip
+        v-if="viewMode === 'grid'"
+        content="重新生成缩略图"
+        placement="bottom"
+      >
+        <el-button
+          circle
+          :icon="MagicStick"
+          class="!text-[var(--anzhiyu-white)] !border-none !bg-[#F5A623]"
+          @click="emit('regenerate-thumbnails')"
+        />
+      </el-tooltip>
+
       <el-tooltip v-if="!isSimplified" content="选择操作" placement="bottom">
         <div>
           <el-dropdown trigger="click" placement="bottom-end">
@@ -40,7 +51,6 @@
         </div>
       </el-tooltip>
 
-      <!-- 视图设置 (定向展开动画) -->
       <el-tooltip
         content="视图设置"
         placement="bottom"
@@ -116,7 +126,6 @@
         </div>
       </el-tooltip>
 
-      <!-- 排序 -->
       <el-tooltip content="排序" placement="bottom">
         <div>
           <el-dropdown
@@ -276,7 +285,8 @@ import {
   Plus,
   Top,
   Bottom,
-  Close
+  Close,
+  MagicStick
 } from "@element-plus/icons-vue";
 import RefreshSvg from "@/assets/icons/refresh.svg?component";
 
@@ -312,6 +322,7 @@ const emit = defineEmits<{
   (e: "set-page-size", size: number): void;
   (e: "set-sort-key", key: SortKey): void;
   (e: "set-columns", columns: ColumnConfig[]): void;
+  (e: "regenerate-thumbnails"): void;
 }>();
 
 const localPageSize = ref(props.pageSize);

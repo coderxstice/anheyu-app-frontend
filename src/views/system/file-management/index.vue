@@ -9,7 +9,6 @@
     @contextmenu.prevent="handleContextMenuTrigger($event)"
     @click="handleContainerClick"
   >
-    <!-- 头部操作区 -->
     <FileHeard
       class="mb-2"
       :has-selection="hasSelection"
@@ -26,7 +25,6 @@
       @move="onActionMove"
     />
 
-    <!-- 路径和工具栏 -->
     <div class="flex w-full">
       <FileBreadcrumb
         class="flex-1 mb-2"
@@ -54,10 +52,10 @@
         @set-page-size="handleSetPageSize"
         @set-sort-key="handleSetSortKey"
         @set-columns="handleSetColumns"
+        @regenerate-thumbnails="onActionRegenerateDirectoryThumbnails"
       />
     </div>
 
-    <!-- 主内容区 -->
     <div class="file-management-main rounded-2xl overflow-hidden">
       <transition name="loading-fade">
         <div v-if="loading && !sortedFiles.length" class="loading-overlay">
@@ -90,7 +88,6 @@
       </div>
     </div>
 
-    <!-- 拖拽上传遮罩 -->
     <div v-if="isDragging" class="drag-overlay">
       <div class="drag-content">
         <el-icon><UploadFilled /></el-icon>
@@ -99,7 +96,6 @@
       </div>
     </div>
 
-    <!-- 弹窗和侧边栏 -->
     <MoveModal
       v-model="isDestinationModalVisible"
       :items-for-action="itemsForAction"
@@ -134,7 +130,6 @@
       @add-files="() => handleUploadFile()"
     />
 
-    <!-- 预览组件 -->
     <AzImagePreview ref="imagePreviewRef" page="sys-file" />
     <AzVideoPreview ref="videoPreviewRef" />
     <AzTextPreview ref="textPreviewRef" />
@@ -247,7 +242,8 @@ const {
   retryItem,
   removeItem,
   resolveConflict,
-  handleUploadGlobalCommand
+  handleUploadGlobalCommand,
+  onActionRegenerateDirectoryThumbnails
 } = useFileManager();
 </script>
 

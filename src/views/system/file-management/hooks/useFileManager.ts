@@ -4,9 +4,10 @@ import { useFileStore, type UploaderActions } from "@/store/modules/fileStore";
 import type { FileItem, ColumnConfig } from "@/api/sys-file/type";
 import {
   updateFileContentByPublicIdApi,
-  regenerateThumbnailApi
+  regenerateThumbnailApi,
+  regenerateDirectoryThumbnailsApi
 } from "@/api/sys-file/sys-file";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 // 导入所有需要的子 Hooks
 import { useFileUploader } from "@/composables/useFileUploader";
@@ -29,7 +30,7 @@ import { useMonacoTheme } from "@/components/AzTextPreview/hooks/useMonacoTheme"
  */
 export function useFileManager() {
   const fileStore = useFileStore();
-  const { sortedFiles, storagePolicy, path, ...storeState } =
+  const { sortedFiles, storagePolicy, path, parentInfo, ...storeState } =
     storeToRefs(fileStore);
 
   // 视图与 Refs
@@ -202,6 +203,44 @@ export function useFileManager() {
       ElMessage.error("操作失败。");
     }
   };
+
+  /**
+   * @description 批量重新生成当前目录下所有文件的缩略图
+   */
+  const onActionRegenerateDirectoryThumbnails = async () => {
+    const currentDirectoryId = parentInfo.value?.id;
+    if (!currentDirectoryId) {
+      ElMessage.warning("无法确定当前目录，无法执行该操作。");
+      return;
+    }
+
+    try {
+      await ElMessageBox.confirm(
+        "此操作将为当前目录下的所有文件重新派发缩略图生成任务。这是一个后台异步操作，请稍后刷新查看结果。是否继续？",
+        "确认操作",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }
+      );
+
+      const res = await regenerateDirectoryThumbnailsApi(currentDirectoryId);
+      console.log(res);
+
+      if (res.code === 202 && res.data) {
+        ElMessage.success(res.message || "后台任务已启动，请稍后刷新。");
+      } else {
+        ElMessage.error(res.message || "请求失败");
+      }
+    } catch (error: any) {
+      if (error !== "cancel") {
+        ElMessage.error("操作失败或已取消。");
+        console.error("Error regenerating directory thumbnails:", error);
+      }
+    }
+  };
+
   const onActionRename = () => {
     if (isSingleSelection.value)
       fileActions.handleRename(getSelectedFileItems()[0]);
@@ -261,6 +300,7 @@ export function useFileManager() {
     path,
     ...storeState,
     sortedFiles,
+    parentInfo,
 
     // Selection
     ...selection,
@@ -299,6 +339,7 @@ export function useFileManager() {
     onActionDelete,
     onActionShare,
     onActionCopy: modals.onActionCopy,
-    onActionMove: modals.onActionMove
+    onActionMove: modals.onActionMove,
+    onActionRegenerateDirectoryThumbnails
   };
 }
