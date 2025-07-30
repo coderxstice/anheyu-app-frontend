@@ -18,7 +18,7 @@
         <el-button
           circle
           :icon="MagicStick"
-          class="!text-[var(--anzhiyu-white)] !border-none !bg-[#F5A623]"
+          class="!text-[var(--anzhiyu-white)] !border-none !bg-[#F5A623] !ml-0"
           @click="emit('regenerate-thumbnails')"
         />
       </el-tooltip>
