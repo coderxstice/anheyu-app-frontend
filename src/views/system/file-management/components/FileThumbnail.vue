@@ -160,7 +160,6 @@ watch(
   align-items: center;
   border-radius: 6px;
   overflow: hidden;
-  background-color: var(--el-fill-color-light);
   position: relative;
 }
 .thumbnail-image {
@@ -169,7 +168,7 @@ watch(
   object-fit: cover;
   transition:
     transform 0.2s ease-in-out,
-    opacity 0.3s ease-in-out; /* 新增 opacity 过渡效果 */
+    opacity 0.3s ease-in-out;
 }
 .thumbnail-image:hover {
   transform: scale(1.1);
