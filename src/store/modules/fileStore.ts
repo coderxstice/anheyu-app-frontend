@@ -121,12 +121,6 @@ export const useFileStore = defineStore("file", {
      * @description 仅负责将当前 store 的视图配置同步到后端。不执行任何其他操作。
      */
     async _syncViewConfigToBackend() {
-      console.log(
-        "%c[Sync View Config] Triggered!",
-        "color: blue; font-weight: bold;"
-      );
-      console.trace("Call stack for _syncViewConfigToBackend");
-
       if (!this.currentFolderId) {
         console.warn("无法更新视图配置：currentFolderId 为空。");
         return;
