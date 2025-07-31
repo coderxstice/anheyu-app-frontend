@@ -4,6 +4,7 @@
 @use "sidebar";
 @use "dark";
 @use "base";
+@use "snackbar";
 /* 自定义全局 CssVar */
 :root {
   --el-color-primary: var(--anzhiyu-theme) !important;

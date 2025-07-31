@@ -26,7 +26,7 @@ import { onBeforeMount } from "vue";
 import { useGlobal } from "@pureadmin/utils";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 
-import Header from "./components/Header.vue";
+import Header from "./components/hearder/index.vue";
 import Footer from "./components/Footer.vue";
 
 const { $storage } = useGlobal<GlobalPropertiesApi>();

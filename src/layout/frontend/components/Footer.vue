@@ -22,7 +22,6 @@
           </a>
         </el-tooltip>
 
-        <!-- [已修正] 将 v-if 从 img 移到 el-tooltip 上 -->
         <el-tooltip
           v-if="footerConfig.socialBar.centerImg"
           content="返回顶部"
@@ -217,6 +216,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { onEnter, onLeave } from "@/utils/transitions";
+import { getIconClass } from "@/utils/icon";
 
 const siteConfigStore = useSiteConfigStore();
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);
@@ -262,12 +262,6 @@ const copyrightText = computed(() => {
 
 const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
-};
-
-const getIconClass = (iconName: string) => {
-  if (iconName?.startsWith("anzhiyu")) return ["anzhiyufont", iconName];
-  if (iconName?.startsWith("fa")) return iconName.split(" ");
-  return [iconName];
 };
 
 onMounted(() => {

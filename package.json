@@ -63,6 +63,7 @@
     "localforage": "^1.10.0",
     "mitt": "^3.0.1",
     "monaco-editor": "^0.52.2",
+    "node-snackbar": "^0.1.16",
     "nprogress": "^0.2.0",
     "path-browserify": "^1.0.1",
     "pinia": "^2.3.0",

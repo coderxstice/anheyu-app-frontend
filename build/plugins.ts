@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-11 11:59:32
- * @LastEditTime: 2025-07-29 16:39:39
+ * @LastEditTime: 2025-07-31 09:52:23
  * @LastEditors: 安知鱼
  */
 import { cdn } from "./cdn";
@@ -53,7 +53,7 @@ export function getPluginsList(
         maximumFileSizeToCacheInBytes: 10000000,
         navigateFallbackDenylist: [/^\/api\/(.+)/, /^\/f\/(.+)/],
         globIgnores: [
-          "**/monacoeditorwork/*.js", // 明确排除 monaco 的 worker
+          "**/monacoeditorwork/*.js",
           "**/vendor-monaco-editor.*.js"
         ],
         runtimeCaching: [
