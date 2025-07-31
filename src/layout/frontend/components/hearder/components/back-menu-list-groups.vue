@@ -19,7 +19,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div v-if="navConfig?.enable" class="back-home-button">
+  <div v-if="navConfig?.menu.length > 0" class="back-home-button">
     <i class="anzhiyufont anzhiyu-icon-grip-vertical" />
     <div class="back-menu-list-groups">
       <div

@@ -2,14 +2,13 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-26 15:01:42
- * @LastEditTime: 2025-07-26 15:45:08
+ * @LastEditTime: 2025-07-31 16:43:53
  * @LastEditors: 安知鱼
 -->
 <template>
   <el-tabs v-model="activeSubTab">
     <el-tab-pane label="首页配置" name="homePage">
       <el-form :model="model" label-position="top" class="setting-form">
-        <!-- 直接将 model.home 传递给下级组件 -->
         <HomePageForm v-model="model.home" />
       </el-form>
     </el-tab-pane>

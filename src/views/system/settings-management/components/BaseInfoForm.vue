@@ -80,13 +80,10 @@ const route = useRoute();
 const primaryUrlInputRef = ref<InstanceType<typeof ElInput>>();
 const primaryUrlFormItemRef = ref<FormItemInstance>();
 
-// [NEW] 将所有相关逻辑都内聚到此组件
 function checkAndFocusUrl() {
   const siteConfigStore = useSiteConfigStore();
   const backendSiteUrl = siteConfigStore.getSiteUrl;
   const currentOrigin = window.location.origin;
-
-  console.log(backendSiteUrl);
 
   // 定义一个聚焦和高亮的辅助函数
   const focusAndHighlight = () => {

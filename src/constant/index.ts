@@ -2,7 +2,7 @@
  * @Description: 系统配置相关的常量，与后端 Go 定义和 API 响应保持同步。
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:42:04
- * @LastEditTime: 2025-07-31 16:35:29
+ * @LastEditTime: 2025-07-31 18:18:13
  * @LastEditors: 安知鱼
  */
 
@@ -37,8 +37,13 @@ const KeyFooterCode: SettingKey = "FOOTER_CODE";
 const KeyUploadAllowedExtensions: SettingKey = "UPLOAD_ALLOWED_EXTENSIONS";
 const KeyUploadDeniedExtensions: SettingKey = "UPLOAD_DENIED_EXTENSIONS";
 
+// --- Header/Nav 配置 ---
+const KeyHeaderMenu: SettingKey = "header.menu";
+const KeyHeaderNavTravel: SettingKey = "header.nav.travelling";
+const KeyHeaderNavClock: SettingKey = "header.nav.clock";
+const KeyHeaderNavMenu: SettingKey = "header.nav.menu";
+
 // --- 前台及页脚配置 ---
-// [FIXED] 更新了所有嵌套键以匹配后端响应
 const KeyFrontDeskSiteOwnerName: SettingKey = "frontDesk.siteOwner.name";
 const KeyFrontDeskSiteOwnerEmail: SettingKey = "frontDesk.siteOwner.email";
 const KeyFooterOwnerName: SettingKey = "footer.owner.name";
@@ -166,6 +171,11 @@ export const constant = {
   KeyFooterSocialBarRightJSON,
   KeyFooterListJSON,
   KeyFooterBarLinkListJSON,
+
+  KeyHeaderMenu,
+  KeyHeaderNavTravel,
+  KeyHeaderNavClock,
+  KeyHeaderNavMenu,
 
   // --- 文件生成及处理配置 ---
   KeyEnableVipsGenerator,

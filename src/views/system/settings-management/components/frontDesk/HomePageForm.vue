@@ -1,5 +1,46 @@
 <template>
-  <!-- 基础信息 -->
+  <el-divider content-position="left">页眉配置</el-divider>
+  <el-row :gutter="20">
+    <el-col :span="8">
+      <el-form-item label="启用开往模块">
+        <el-switch v-model="model.navTravel" />
+      </el-form-item>
+    </el-col>
+    <el-col :span="8">
+      <el-form-item label="启用轻提醒模块弹窗">
+        <el-switch v-model="model.navClock" />
+      </el-form-item>
+    </el-col>
+  </el-row>
+
+  <JsonEditorTable
+    v-model="model.menuJSON"
+    title="导航菜单列表"
+    :columns="menuColumns"
+    :new-item-template="{ title: '', items: [] }"
+  >
+    <template #col-items="{ scope }">
+      <el-button @click="openSubMenuEditor(scope.row)">
+        编辑子菜单 ({{ scope.row.items?.length || 0 }} 项)
+      </el-button>
+    </template>
+  </JsonEditorTable>
+
+  <JsonEditorTable
+    v-model="model.navMenuItemsJSON"
+    title="页眉下拉菜单列表"
+    :columns="navMenuItemsColumns"
+    :new-item-template="{ title: '', items: [] }"
+  >
+    <template #col-items="{ scope }">
+      <el-button @click="openNavMenuItemsEditor(scope.row)">
+        编辑链接 ({{ scope.row.items?.length || 0 }} 项)
+      </el-button>
+    </template>
+  </JsonEditorTable>
+
+  <el-divider content-position="left">页脚配置</el-divider>
+
   <el-form-item label="网站拥有者名称">
     <el-input
       v-model="model.siteOwnerName"
@@ -29,7 +70,6 @@
     />
   </el-form-item>
 
-  <!-- 网站运行时间 -->
   <el-divider content-position="left">网站运行时间</el-divider>
   <el-form-item label="启用模块">
     <el-switch v-model="model.footerRuntimeEnable" />
@@ -45,7 +85,6 @@
     />
   </el-form-item>
 
-  <!-- 链接配置 -->
   <el-divider content-position="left">链接配置</el-divider>
   <el-form-item label="页脚列表随机友链数量">
     <el-input
@@ -69,7 +108,6 @@
     />
   </el-form-item>
 
-  <!-- 图片配置 -->
   <el-divider content-position="left">图片配置</el-divider>
   <el-form-item label="社交链接栏中间图片 URL">
     <el-input
@@ -79,7 +117,6 @@
     />
   </el-form-item>
 
-  <!-- 使用 JsonEditorTable 的部分 -->
   <JsonEditorTable
     v-model="model.footerBadgeJSON"
     title="徽标列表"
@@ -87,7 +124,6 @@
     :new-item-template="{ link: '', shields: '', message: '' }"
   />
 
-  <!-- 社交链接栏同步逻辑 -->
   <JsonEditorTable
     v-model="model.footerSocialBarLeftJSON"
     title="社交链接栏左侧列表"
@@ -104,7 +140,6 @@
     @item-deleted="syncDeleteLeft"
   />
 
-  <!-- 专用于同步添加的按钮 -->
   <el-button
     style="width: 100%; margin-top: -12px; margin-bottom: 24px"
     type="primary"
@@ -122,44 +157,95 @@
     :new-item-template="{ text: '', link: '' }"
   />
 
-  <!-- 使用新的页脚链接列表编辑器 -->
   <el-divider content-position="left">页脚多栏链接列表</el-divider>
   <FooterLinkListEditor v-model="model.footerListJSON" />
+
+  <SubMenuEditor
+    v-if="currentEditingMainMenu"
+    v-model:visible="isSubMenuEditorVisible"
+    v-model:items="currentEditingMainMenu.items"
+  />
+  <NavMenuItemsEditor
+    v-if="currentEditingNavMenuGroup"
+    v-model:visible="isNavMenuEditorVisible"
+    v-model:items="currentEditingNavMenuGroup.items"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
 import { ElMessage } from "element-plus";
 import { Plus } from "@element-plus/icons-vue";
-import type { HomePageSettingsInfo } from "../../type";
+import type {
+  HomePageSettingsInfo,
+  JsonEditorTableColumn,
+  SubMenuItem,
+  NavMenuItem
+} from "../../type";
 import JsonEditorTable from "./JsonEditorTable.vue";
 import FooterLinkListEditor from "./FooterLinkListEditor.vue";
+import SubMenuEditor from "./SubMenuEditor.vue";
+import NavMenuItemsEditor from "./NavMenuItemsEditor.vue";
 
 const model = defineModel<Omit<HomePageSettingsInfo, "footerCustomText">>({
   required: true
 });
 
-// 定义不同 JSON 结构的列
-const badgeColumns = ref([
+// for Header Menu
+const menuColumns = ref<JsonEditorTableColumn[]>([
+  { prop: "title", label: "主菜单标题" },
+  { prop: "items", label: "子菜单项", slot: "col-items", width: "200px" }
+]);
+
+// for Header Nav Dropdown Menu
+const navMenuItemsColumns = ref<JsonEditorTableColumn[]>([
+  { prop: "title", label: "分组标题" },
+  { prop: "items", label: "链接列表", slot: "col-items", width: "200px" }
+]);
+
+// for Footer Sections
+const badgeColumns = ref<JsonEditorTableColumn[]>([
   { prop: "link", label: "链接" },
   { prop: "shields", label: "徽标图片URL" },
   { prop: "message", label: "悬浮提示" }
 ]);
 
-const socialLinkColumns = ref([
+const socialLinkColumns = ref<JsonEditorTableColumn[]>([
   { prop: "title", label: "标题" },
   { prop: "link", label: "链接" },
   { prop: "icon", label: "图标类名" }
 ]);
 
-const footerBarLinkColumns = ref([
+const footerBarLinkColumns = ref<JsonEditorTableColumn[]>([
   { prop: "text", label: "显示文本" },
   { prop: "link", label: "链接" }
 ]);
 
-// --- 社交链接栏同步逻辑 ---
+// --- Editor for header.menu (SubMenuEditor) ---
+const isSubMenuEditorVisible = ref(false);
+interface MainMenuRow {
+  title: string;
+  items: SubMenuItem[];
+}
+const currentEditingMainMenu = ref<MainMenuRow | null>(null);
+const openSubMenuEditor = (row: MainMenuRow) => {
+  currentEditingMainMenu.value = row;
+  isSubMenuEditorVisible.value = true;
+};
 
-// 检查指定列表的最后一行是否未填写完整
+// --- Editor for header.nav.menu (NavMenuItemsEditor) ---
+const isNavMenuEditorVisible = ref(false);
+interface NavMenuGroupRow {
+  title: string;
+  items: NavMenuItem[];
+}
+const currentEditingNavMenuGroup = ref<NavMenuGroupRow | null>(null);
+const openNavMenuItemsEditor = (row: NavMenuGroupRow) => {
+  currentEditingNavMenuGroup.value = row;
+  isNavMenuEditorVisible.value = true;
+};
+
+// --- Social Links Sync Logic ---
 const isListIncomplete = (jsonString: string): boolean => {
   if (!jsonString) return false;
   try {
@@ -174,9 +260,7 @@ const isListIncomplete = (jsonString: string): boolean => {
   }
 };
 
-// 添加左右社交链接对的方法
 const addSocialLinkPair = () => {
-  // 检查左侧和右侧列表是否允许添加新项
   if (isListIncomplete(model.value.footerSocialBarLeftJSON)) {
     ElMessage.warning("请先填写完左侧列表的当前项！");
     return;
@@ -202,7 +286,6 @@ const addSocialLinkPair = () => {
   }
 };
 
-// 当左侧列表删除时，同步删除右侧对应项
 const syncDeleteRight = (index: number) => {
   try {
     const rightList = JSON.parse(model.value.footerSocialBarRightJSON || "[]");
@@ -215,7 +298,6 @@ const syncDeleteRight = (index: number) => {
   }
 };
 
-// 当右侧列表删除时，同步删除左侧对应项
 const syncDeleteLeft = (index: number) => {
   try {
     const leftList = JSON.parse(model.value.footerSocialBarLeftJSON || "[]");

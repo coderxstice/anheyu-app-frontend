@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-24 17:29:16
- * @LastEditTime: 2025-07-26 15:34:28
+ * @LastEditTime: 2025-07-31 18:18:36
  * @LastEditors: 安知鱼
  */
 // src/views/system/settings-management/type/index.ts
@@ -106,9 +106,43 @@ export interface HomePageSettingsInfo {
   footerSocialBarRightJSON: string;
   footerListJSON: string;
   footerBarLinkListJSON: string;
+
+  menuJSON: string;
+  navTravel: boolean;
+  navClock: boolean;
+  navMenuItemsJSON: string;
 }
 
 export interface FrontDeskSettings {
   home: HomePageSettingsInfo;
   // article: ArticlePageSettingsInfo;
+}
+
+/**
+ * @description: 用于 JsonEditorTable 组件的列定义
+ */
+export interface JsonEditorTableColumn {
+  prop: string;
+  label: string;
+  slot?: string;
+  width?: string;
+}
+
+/**
+ * @description: 导航栏的子菜单项类型
+ */
+export interface SubMenuItem {
+  title: string;
+  path: string;
+  icon: string;
+  isExternal: boolean; // 对应“是否新页面打开”
+}
+
+/**
+ * @description: 页眉下拉菜单的链接项类型
+ */
+export interface NavMenuItem {
+  name: string;
+  link: string;
+  icon: string;
 }

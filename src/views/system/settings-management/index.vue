@@ -56,7 +56,6 @@ import FrontDeskSettings from "./components/FrontDeskSettings.vue";
 let activeName = "siteConfig";
 const siteConfigStore = useSiteConfigStore();
 
-// 定义一个更清晰的类型别名，用于表单和映射
 type HomePageFormInfo = Omit<HomePageSettingsInfo, "footerCustomText">;
 type FormType = Omit<SettingsForm, "frontDesk"> & {
   frontDesk: { home: HomePageFormInfo };
@@ -134,7 +133,11 @@ const form = reactive<FormType>({
       footerSocialBarLeftJSON: "[]",
       footerSocialBarRightJSON: "[]",
       footerListJSON: "[]",
-      footerBarLinkListJSON: "[]"
+      footerBarLinkListJSON: "[]",
+      menuJSON: "[]",
+      navTravel: false,
+      navClock: false,
+      navMenuItemsJSON: "[]"
     }
   }
 });
@@ -173,6 +176,10 @@ const formToKeysMap: Record<FormKeys, string> = {
   footerSocialBarRightJSON: constant.KeyFooterSocialBarRightJSON,
   footerListJSON: constant.KeyFooterListJSON,
   footerBarLinkListJSON: constant.KeyFooterBarLinkListJSON,
+  menuJSON: constant.KeyHeaderMenu,
+  navTravel: constant.KeyHeaderNavTravel,
+  navClock: constant.KeyHeaderNavClock,
+  navMenuItemsJSON: constant.KeyHeaderNavMenu,
   uploadAllowedExtensions: constant.KeyUploadAllowedExtensions,
   uploadDeniedExtensions: constant.KeyUploadDeniedExtensions,
   enableVipsGenerator: constant.KeyEnableVipsGenerator,
@@ -242,6 +249,16 @@ watch(
         } else if (formKey.toUpperCase().endsWith("JSON")) {
           targetForm[formKey] =
             typeof value === "string" ? value : JSON.stringify(value, null, 2);
+        } else if (
+          formKey === "queueThumbConcurrency" ||
+          formKey === "queueThumbMaxExecTime" ||
+          formKey === "queueThumbBackoffFactor" ||
+          formKey === "queueThumbMaxBackoff" ||
+          formKey === "queueThumbMaxRetries" ||
+          formKey === "queueThumbRetryDelay"
+        ) {
+          // 转换成数字类型
+          targetForm[formKey] = Number(value);
         } else {
           targetForm[formKey] = String(value);
         }
