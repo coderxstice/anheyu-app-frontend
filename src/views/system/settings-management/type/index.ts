@@ -12,6 +12,7 @@
  */
 export interface SiteInfo {
   siteName: string;
+  subTitle: string;
   siteDescription: string;
   primaryUrl: string;
   footerCode: string;

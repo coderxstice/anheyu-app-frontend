@@ -6,6 +6,11 @@
     <div class="form-item-help">站点的名称。</div>
   </el-form-item>
 
+  <el-form-item label="站点副标题">
+    <el-input v-model="formData.subTitle" placeholder="请输入站点副标题" />
+    <div class="form-item-help">站点的名称。</div>
+  </el-form-item>
+
   <el-form-item label="站点描述">
     <el-input
       v-model="formData.siteDescription"

@@ -70,6 +70,7 @@ type FormKeys =
 const form = reactive<FormType>({
   site: {
     siteName: "",
+    subTitle: "",
     siteDescription: "",
     primaryUrl: "",
     footerCode: "",
@@ -140,6 +141,7 @@ const form = reactive<FormType>({
 
 const formToKeysMap: Record<FormKeys, string> = {
   siteName: constant.KeyAppName,
+  subTitle: constant.KeySubTitle,
   siteDescription: constant.KeySiteDescription,
   primaryUrl: constant.KeySiteURL,
   albumApiURL: constant.KeyApiURL,

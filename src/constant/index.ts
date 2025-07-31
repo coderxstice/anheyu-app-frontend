@@ -2,7 +2,7 @@
  * @Description: 系统配置相关的常量，与后端 Go 定义和 API 响应保持同步。
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:42:04
- * @LastEditTime: 2025-07-26 17:20:41
+ * @LastEditTime: 2025-07-31 16:35:29
  * @LastEditors: 安知鱼
  */
 
@@ -14,6 +14,7 @@ export type SettingKey = string;
 // --- 站点基础配置 (可暴露给前端) ---
 const KeyAppName: SettingKey = "APP_NAME";
 const KeySiteURL: SettingKey = "SITE_URL";
+const KeySubTitle: SettingKey = "SUB_TITLE";
 const KeyAppVersion: SettingKey = "APP_VERSION";
 const KeyApiURL: SettingKey = "API_URL";
 const KeyAboutLink: SettingKey = "ABOUT_LINK";
@@ -120,6 +121,7 @@ const DEFAULT_CHUNK_SIZE = 50 * 1024 * 1024;
 export const constant = {
   // --- 站点基础配置 ---
   KeyAppName,
+  KeySubTitle,
   KeySiteURL,
   KeyAppVersion,
   KeyApiURL,
