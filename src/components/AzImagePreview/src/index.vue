@@ -57,6 +57,7 @@
             <div class="tag-info">
               <span class="tag-categorys">
                 <div
+                  v-if="props.downloadBtn"
                   class="link"
                   @click="downImage(previewSrcList[currentIndex])"
                 >
@@ -103,6 +104,10 @@ const props = defineProps({
   page: {
     type: String,
     default: "album"
+  },
+  downloadBtn: {
+    type: Boolean,
+    default: false
   }
 });
 

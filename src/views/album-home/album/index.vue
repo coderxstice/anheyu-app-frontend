@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-04-09 12:31:32
- * @LastEditTime: 2025-07-02 14:46:17
+ * @LastEditTime: 2025-07-31 18:26:53
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -141,7 +141,7 @@ onMounted(() => {
         />
       </div>
 
-      <AzImagePreview ref="previewRef" page="album" />
+      <AzImagePreview ref="previewRef" page="album" :download-btn="true" />
     </div>
   </div>
 </template>
