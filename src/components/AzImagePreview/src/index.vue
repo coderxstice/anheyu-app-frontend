@@ -129,6 +129,11 @@ let currentImgSize = { width: 0, height: 0 };
 let finalWidth = ref("150px");
 let finalHeight = ref("150px");
 
+const loadedImageIndexes = ref(new Set<number>());
+const imageDimensionsCache = ref(
+  new Map<string, { width: number; height: number }>()
+);
+
 const siteConfigStore = useSiteConfigStore();
 
 const siteName = computed(
@@ -164,11 +169,21 @@ const downImage = (imageInfo: any) => {
     progressRef.value.downloadImageWithProgress(finalDownloadUrl, fileName);
   }
 };
+
+// 优化 getImageSize 函数，增加缓存逻辑
 const getImageSize = (url: string) => {
+  // 如果缓存中已有尺寸，直接返回
+  if (imageDimensionsCache.value.has(url)) {
+    return Promise.resolve(imageDimensionsCache.value.get(url)!);
+  }
+  // 否则，正常加载并存入缓存
   return new Promise<{ width: number; height: number }>((resolve, reject) => {
     const img = new Image();
-    img.onload = () =>
-      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    img.onload = () => {
+      const dimensions = { width: img.naturalWidth, height: img.naturalHeight };
+      imageDimensionsCache.value.set(url, dimensions); // 存入缓存
+      resolve(dimensions);
+    };
     img.onerror = reject;
     img.src = url;
   });
@@ -226,18 +241,18 @@ onUnmounted(() => {
 });
 
 const open = async (list: Array<any>, index = 0, next = false) => {
-  // 这使得动画可以被随时打断
   if (popupRef.value) {
     gsap.killTweensOf(popupRef.value);
   }
   gsap.killTweensOf([".az-preview-image", ".caption"]);
+
+  // const isCached = loadedImageIndexes.value.has(index);
 
   imageKey.value = `${index}-${Date.now()}`;
   visible.value = true;
   loading.value = true;
   containerVisible.value = false;
 
-  // 只有在“全新打开”时才隐藏按钮，翻页切换时保持显示
   if (!next) {
     showControls.value = false;
   }
@@ -262,16 +277,12 @@ const open = async (list: Array<any>, index = 0, next = false) => {
       });
   }
 
-  await nextTick();
+  // await nextTick();
 
-  // 阶段一：显示初始加载框
   if (popupRef.value) {
-    // 如果是图片切换，则不播放初始的“从无到有”的动画，因为弹窗已经是打开状态
     if (next) {
-      // 对于切换，我们直接让 containerVisible 为 true，以便立即加载下一张图片
       containerVisible.value = true;
     } else {
-      // 对于全新打开，播放初始加载框动画
       gsap.fromTo(
         popupRef.value,
         {
@@ -285,17 +296,16 @@ const open = async (list: Array<any>, index = 0, next = false) => {
         {
           scale: 1,
           opacity: 1,
-          duration: 0.3,
+          duration: 0.2,
           ease: "power2.out",
           onComplete: () => {
-            containerVisible.value = true; // 加载框出现后，才开始加载图片
+            containerVisible.value = true;
           }
         }
       );
     }
   }
 
-  // 后台获取图片最终尺寸
   const imgUrl = list[index].bigParam
     ? list[index].imageUrl + `?${list[index].bigParam}`
     : list[index].imageUrl;
@@ -309,7 +319,9 @@ const open = async (list: Array<any>, index = 0, next = false) => {
 };
 
 function imgLoad() {
-  // 阶段二：图片加载完成，执行“放大 -> 切换内容 -> 淡入内容”的动画序列
+  // 图片成功加载后，将其索引添加到记录中
+  loadedImageIndexes.value.add(currentIndex.value);
+
   const isMobile = window.innerWidth < 600;
   if (isMobile) {
     finalWidth.value = "100vw";
@@ -332,32 +344,28 @@ function imgLoad() {
     }
   });
 
-  // 动画1：放大弹窗
   if (popupRef.value) {
     tl.to(popupRef.value, {
       width: finalWidth.value,
       height: finalHeight.value,
-      duration: 0.5,
+      duration: 0.3,
       ease: "power3.inOut"
     });
   }
 
-  // 动画2：在放大动画完成后，切换内容
   tl.add(() => {
     loading.value = false;
     gsap.set([".az-preview-image", ".caption"], { opacity: 0 });
   });
 
-  // 动画3：平滑淡入图片和文字
   tl.to([".az-preview-image", ".caption"], {
     opacity: 1,
-    duration: 0.4,
+    duration: 0.2,
     stagger: 0.1
   });
 }
 const close = () => {
   if (popupRef.value) {
-    // 动画1：让操作按钮平滑淡出
     gsap.to(
       ".poptrox-popup .closer, .poptrox-popup .nav-previous, .poptrox-popup .nav-next",
       {
@@ -367,7 +375,6 @@ const close = () => {
       }
     );
 
-    // 动画2：让主弹窗缩小并淡出
     gsap.to(popupRef.value, {
       opacity: 0,
       scale: 0.7,
@@ -376,7 +383,6 @@ const close = () => {
       x: "-50%",
       y: "-50%",
       onComplete: () => {
-        // 动画结束后，更新状态并重置所有相关样式
         visible.value = false;
         containerVisible.value = false;
         showControls.value = false;
