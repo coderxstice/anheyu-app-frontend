@@ -129,15 +129,28 @@ const form = reactive<FormType>({
       footerListRandomFriends: "0",
       footerBarAuthorLink: "",
       footerBarCCLink: "",
-      footerBadgeJSON: "[]",
-      footerSocialBarLeftJSON: "[]",
-      footerSocialBarRightJSON: "[]",
-      footerListJSON: "[]",
-      footerBarLinkListJSON: "[]",
-      menuJSON: "[]",
+      homeTop: {
+        title: "",
+        subTitle: "",
+        siteText: "",
+        banner: {
+          title: "",
+          tips: "",
+          image: "",
+          link: "",
+          isExternal: false
+        },
+        category: []
+      },
+      footerBadges: [],
+      footerSocialBarLeft: [],
+      footerSocialBarRight: [],
+      footerList: [],
+      footerBarLinkList: [],
+      menu: [],
       navTravel: false,
       navClock: false,
-      navMenuItemsJSON: "[]"
+      navMenuItems: []
     }
   }
 });
@@ -171,15 +184,11 @@ const formToKeysMap: Record<FormKeys, string> = {
   footerListRandomFriends: constant.KeyFooterListRandomFriends,
   footerBarAuthorLink: constant.KeyFooterBarAuthorLink,
   footerBarCCLink: constant.KeyFooterBarCCLink,
-  footerBadgeJSON: constant.KeyFooterBadgeJSON,
-  footerSocialBarLeftJSON: constant.KeyFooterSocialBarLeftJSON,
-  footerSocialBarRightJSON: constant.KeyFooterSocialBarRightJSON,
-  footerListJSON: constant.KeyFooterListJSON,
-  footerBarLinkListJSON: constant.KeyFooterBarLinkListJSON,
-  menuJSON: constant.KeyHeaderMenu,
+  homeTop: constant.KeyHomeTop,
+  menu: constant.KeyHeaderMenu,
   navTravel: constant.KeyHeaderNavTravel,
   navClock: constant.KeyHeaderNavClock,
-  navMenuItemsJSON: constant.KeyHeaderNavMenu,
+  navMenuItems: constant.KeyHeaderNavMenu,
   uploadAllowedExtensions: constant.KeyUploadAllowedExtensions,
   uploadDeniedExtensions: constant.KeyUploadDeniedExtensions,
   enableVipsGenerator: constant.KeyEnableVipsGenerator,
@@ -209,12 +218,27 @@ const formToKeysMap: Record<FormKeys, string> = {
   exifUseBruteForce: constant.KeyExifUseBruteForce,
   enableMusicExtractor: constant.KeyEnableMusicExtractor,
   musicMaxSizeLocal: constant.KeyMusicMaxSizeLocal,
-  musicMaxSizeRemote: constant.KeyMusicMaxSizeRemote
+  musicMaxSizeRemote: constant.KeyMusicMaxSizeRemote,
+  footerBadges: constant.KeyFooterBadge,
+  footerSocialBarLeft: constant.KeyFooterSocialBarLeft,
+  footerSocialBarRight: constant.KeyFooterSocialBarRight,
+  footerList: constant.KeyFooterList,
+  footerBarLinkList: constant.KeyFooterBarLinkList
 };
 
 const allKeys = Object.values(formToKeysMap);
 
 const toBoolean = (val: any) => val === "true" || val === true;
+
+// 辅助函数：判断一个值是否可能是JSON字符串
+const isJsonString = (str: any): boolean => {
+  if (typeof str !== "string") return false;
+  const s = str.trim();
+  return (
+    (s.startsWith("{") && s.endsWith("}")) ||
+    (s.startsWith("[") && s.endsWith("]"))
+  );
+};
 
 const getNestedValue = (obj: any, path: string): any => {
   if (!path || !obj) return undefined;
@@ -244,20 +268,33 @@ watch(
       else if (formKey in form.frontDesk.home) targetForm = form.frontDesk.home;
 
       if (targetForm && value !== undefined && value !== null) {
-        if (typeof targetForm[formKey] === "boolean") {
+        const targetValue = targetForm[formKey];
+        const targetType = typeof targetValue;
+
+        if (targetType === "boolean") {
           targetForm[formKey] = toBoolean(value);
-        } else if (formKey.toUpperCase().endsWith("JSON")) {
-          targetForm[formKey] =
-            typeof value === "string" ? value : JSON.stringify(value, null, 2);
-        } else if (
-          formKey === "queueThumbConcurrency" ||
-          formKey === "queueThumbMaxExecTime" ||
-          formKey === "queueThumbBackoffFactor" ||
-          formKey === "queueThumbMaxBackoff" ||
-          formKey === "queueThumbMaxRetries" ||
-          formKey === "queueThumbRetryDelay"
-        ) {
-          // 转换成数字类型
+        } else if (targetType === "object" && targetValue !== null) {
+          let incomingObject;
+          if (isJsonString(value)) {
+            try {
+              incomingObject = JSON.parse(value);
+            } catch {
+              incomingObject = null;
+            }
+          } else {
+            incomingObject = value;
+          }
+
+          if (typeof incomingObject === "object" && incomingObject !== null) {
+            if (Array.isArray(targetValue)) {
+              // 对于数组，直接替换是安全的
+              targetForm[formKey] = incomingObject;
+            } else {
+              // 对于普通对象，使用 Object.assign 合并属性以保留引用
+              Object.assign(targetValue, incomingObject);
+            }
+          }
+        } else if (targetType === "number") {
           targetForm[formKey] = Number(value);
         } else {
           targetForm[formKey] = String(value);
@@ -289,40 +326,30 @@ const handleSave = async () => {
     const currentValue = combinedForm[formKey];
     const originalValue = getNestedValue(originalSettings, backendKey);
 
-    // Normalize original value for comparison
-    const normalizedOriginalValue =
-      originalValue === null || originalValue === undefined
-        ? ""
-        : String(originalValue);
+    let valueToSave: string;
+    let originalCompareValue: string;
 
-    let currentStringValue = String(currentValue);
-    let originalStringValue = String(originalValue ?? "");
+    // 统一转换为字符串进行比较和保存
+    if (typeof currentValue === "boolean") {
+      valueToSave = String(currentValue);
+      originalCompareValue = String(toBoolean(originalValue));
+    } else if (
+      Array.isArray(currentValue) ||
+      (typeof currentValue === "object" && currentValue !== null)
+    ) {
+      valueToSave = JSON.stringify(currentValue);
+      // 后端可能返回JSON字符串或对象，统一成标准化的字符串再比较
+      const originalObject = isJsonString(originalValue)
+        ? JSON.parse(originalValue)
+        : originalValue || (Array.isArray(currentValue) ? [] : {});
+      originalCompareValue = JSON.stringify(originalObject);
+    } else {
+      valueToSave = String(currentValue ?? "");
+      originalCompareValue = String(originalValue ?? "");
+    }
 
-    if (formKey.toUpperCase().endsWith("JSON")) {
-      try {
-        const parsedCurrent = JSON.stringify(
-          JSON.parse(currentStringValue || "[]")
-        );
-        const originalJsonString =
-          typeof originalValue === "object" && originalValue !== null
-            ? JSON.stringify(originalValue)
-            : originalValue || "[]";
-        const parsedOriginal = JSON.stringify(JSON.parse(originalJsonString));
-
-        if (parsedCurrent !== parsedOriginal) {
-          settingsToUpdate[backendKey] = currentStringValue;
-        }
-      } catch (e) {
-        if (currentStringValue !== originalStringValue) {
-          settingsToUpdate[backendKey] = currentStringValue;
-        }
-      }
-    } else if (typeof combinedForm[formKey] === "boolean") {
-      if (String(currentValue) !== String(toBoolean(originalValue))) {
-        settingsToUpdate[backendKey] = String(currentValue);
-      }
-    } else if (currentStringValue !== normalizedOriginalValue) {
-      settingsToUpdate[backendKey] = currentStringValue;
+    if (valueToSave !== originalCompareValue) {
+      settingsToUpdate[backendKey] = valueToSave;
     }
   });
 
@@ -333,6 +360,7 @@ const handleSave = async () => {
 
   try {
     await siteConfigStore.saveSystemSettings(settingsToUpdate);
+    ElMessage.success("设置保存成功！");
   } catch (error: any) {
     ElMessage.error(`保存失败: ${error.message || String(error)}`);
   }

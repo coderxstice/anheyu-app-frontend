@@ -1,4 +1,98 @@
 <template>
+  <div v-if="model.homeTop">
+    <el-divider content-position="left">首页顶部配置</el-divider>
+    <el-row :gutter="20">
+      <el-col :span="12">
+        <el-form-item label="主标题">
+          <el-input
+            v-model="model.homeTop.title"
+            placeholder="例如：生活明朗"
+          />
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item label="副标题">
+          <el-input
+            v-model="model.homeTop.subTitle"
+            placeholder="例如：万物可爱。"
+          />
+        </el-form-item>
+      </el-col>
+    </el-row>
+    <el-form-item label="站点标语">
+      <el-input
+        v-model="model.homeTop.siteText"
+        placeholder="例如：ANHEYU.COM"
+      />
+    </el-form-item>
+
+    <el-divider content-position="left" style="margin-top: 20px"
+      >横幅设置</el-divider
+    >
+    <div v-if="model.homeTop.banner">
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <el-form-item label="横幅标题">
+            <el-input v-model="model.homeTop.banner.title" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="横幅提示">
+            <el-input v-model="model.homeTop.banner.tips" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <el-form-item label="横幅图片 URL">
+            <el-input v-model="model.homeTop.banner.image" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="横幅链接">
+            <el-input v-model="model.homeTop.banner.link" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-form-item label="新窗口打开横幅链接">
+        <el-switch v-model="model.homeTop.banner.isExternal" />
+      </el-form-item>
+    </div>
+
+    <el-divider content-position="left" style="margin-top: 20px"
+      >分类设置 (必须为3项)</el-divider
+    >
+    <el-table
+      v-if="model.homeTop.category"
+      :data="model.homeTop.category"
+      border
+      style="width: 100%"
+    >
+      <el-table-column label="名称" prop="name">
+        <template #default="{ row }">
+          <el-input v-model="row.name" placeholder="分类名称" />
+        </template>
+      </el-table-column>
+      <el-table-column label="路径" prop="path">
+        <template #default="{ row }">
+          <el-input v-model="row.path" placeholder="例如：/categories/前端/" />
+        </template>
+      </el-table-column>
+      <el-table-column label="图标" prop="icon">
+        <template #default="{ row }">
+          <el-input v-model="row.icon" placeholder="例如：anzhiyu-icon-dove" />
+        </template>
+      </el-table-column>
+      <el-table-column label="背景" prop="background">
+        <template #default="{ row }">
+          <el-input
+            v-model="row.background"
+            placeholder="例如：linear-gradient(...)"
+          />
+        </template>
+      </el-table-column>
+    </el-table>
+  </div>
   <el-divider content-position="left">页眉配置</el-divider>
   <el-row :gutter="20">
     <el-col :span="8">
@@ -14,10 +108,11 @@
   </el-row>
 
   <JsonEditorTable
-    v-model="model.menuJSON"
+    :model-value="JSON.stringify(model.menu)"
     title="导航菜单列表"
     :columns="menuColumns"
     :new-item-template="{ title: '', items: [] }"
+    @update:model-value="model.menu = JSON.parse($event || '[]')"
   >
     <template #col-items="{ scope }">
       <el-button @click="openSubMenuEditor(scope.row)">
@@ -27,10 +122,11 @@
   </JsonEditorTable>
 
   <JsonEditorTable
-    v-model="model.navMenuItemsJSON"
+    :model-value="JSON.stringify(model.navMenuItems)"
     title="页眉下拉菜单列表"
     :columns="navMenuItemsColumns"
     :new-item-template="{ title: '', items: [] }"
+    @update:model-value="model.navMenuItems = JSON.parse($event || '[]')"
   >
     <template #col-items="{ scope }">
       <el-button @click="openNavMenuItemsEditor(scope.row)">
@@ -118,25 +214,30 @@
   </el-form-item>
 
   <JsonEditorTable
-    v-model="model.footerBadgeJSON"
+    :model-value="JSON.stringify(model.footerBadges)"
     title="徽标列表"
     :columns="badgeColumns"
     :new-item-template="{ link: '', shields: '', message: '' }"
+    @update:model-value="model.footerBadges = JSON.parse($event || '[]')"
   />
 
   <JsonEditorTable
-    v-model="model.footerSocialBarLeftJSON"
+    :model-value="JSON.stringify(model.footerSocialBarLeft)"
     title="社交链接栏左侧列表"
     :columns="socialLinkColumns"
     :new-item-template="{ title: '', link: '', icon: '' }"
+    @update:model-value="model.footerSocialBarLeft = JSON.parse($event || '[]')"
     @item-deleted="syncDeleteRight"
   />
 
   <JsonEditorTable
-    v-model="model.footerSocialBarRightJSON"
+    :model-value="JSON.stringify(model.footerSocialBarRight)"
     title="社交链接栏右侧列表"
     :columns="socialLinkColumns"
     :new-item-template="{ title: '', link: '', icon: '' }"
+    @update:model-value="
+      model.footerSocialBarRight = JSON.parse($event || '[]')
+    "
     @item-deleted="syncDeleteLeft"
   />
 
@@ -151,14 +252,18 @@
   </el-button>
 
   <JsonEditorTable
-    v-model="model.footerBarLinkListJSON"
+    :model-value="JSON.stringify(model.footerBarLinkList)"
     title="底部栏链接列表"
     :columns="footerBarLinkColumns"
     :new-item-template="{ text: '', link: '' }"
+    @update:model-value="model.footerBarLinkList = JSON.parse($event || '[]')"
   />
 
   <el-divider content-position="left">页脚多栏链接列表</el-divider>
-  <FooterLinkListEditor v-model="model.footerListJSON" />
+  <FooterLinkListEditor
+    :model-value="JSON.stringify(model.footerList)"
+    @update:model-value="model.footerList = JSON.parse($event || '[]')"
+  />
 
   <SubMenuEditor
     v-if="currentEditingMainMenu"
@@ -173,7 +278,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import { Plus } from "@element-plus/icons-vue";
 import type {
@@ -190,6 +295,34 @@ import NavMenuItemsEditor from "./NavMenuItemsEditor.vue";
 const model = defineModel<Omit<HomePageSettingsInfo, "footerCustomText">>({
   required: true
 });
+
+watch(
+  () => model.value.homeTop?.category,
+  (newCategory, oldCategory) => {
+    // 仅当 newCategory 存在且长度不为3时执行
+    if (newCategory && newCategory.length !== 3) {
+      const categoryTemplate = {
+        name: "",
+        path: "",
+        icon: "",
+        background: "",
+        isExternal: false
+      };
+
+      if (newCategory.length > 3) {
+        // 如果数组过长，截断为3
+        model.value.homeTop.category = newCategory.slice(0, 3);
+      } else {
+        // 如果数组过短，用模板填充至3
+        const needed = 3 - newCategory.length;
+        for (let i = 0; i < needed; i++) {
+          model.value.homeTop.category.push({ ...categoryTemplate });
+        }
+      }
+    }
+  },
+  { deep: true, immediate: true } // immediate: true 确保组件加载时立即检查一次
+);
 
 // for Header Menu
 const menuColumns = ref<JsonEditorTableColumn[]>([
@@ -245,68 +378,41 @@ const openNavMenuItemsEditor = (row: NavMenuGroupRow) => {
   isNavMenuEditorVisible.value = true;
 };
 
-// --- Social Links Sync Logic ---
-const isListIncomplete = (jsonString: string): boolean => {
-  if (!jsonString) return false;
-  try {
-    const list = JSON.parse(jsonString);
-    if (list.length === 0) return false;
-    const lastItem = list[list.length - 1];
-    return Object.values(lastItem).some(
-      v => v === "" || v === null || v === undefined
-    );
-  } catch {
+// --- Social Links Sync Logic (Simplified) ---
+const isListIncomplete = (list: any[]): boolean => {
+  if (list.length === 0) {
     return false;
   }
+  const lastItem = list[list.length - 1];
+  return Object.values(lastItem).some(
+    v => v === "" || v === null || v === undefined
+  );
 };
 
 const addSocialLinkPair = () => {
-  if (isListIncomplete(model.value.footerSocialBarLeftJSON)) {
+  if (isListIncomplete(model.value.footerSocialBarLeft)) {
     ElMessage.warning("请先填写完左侧列表的当前项！");
     return;
   }
-  if (isListIncomplete(model.value.footerSocialBarRightJSON)) {
+  if (isListIncomplete(model.value.footerSocialBarRight)) {
     ElMessage.warning("请先填写完右侧列表的当前项！");
     return;
   }
 
-  try {
-    const leftList = JSON.parse(model.value.footerSocialBarLeftJSON || "[]");
-    const rightList = JSON.parse(model.value.footerSocialBarRightJSON || "[]");
-
-    const newItem = { title: "", link: "", icon: "" };
-    leftList.push({ ...newItem });
-    rightList.push({ ...newItem });
-
-    model.value.footerSocialBarLeftJSON = JSON.stringify(leftList, null, 2);
-    model.value.footerSocialBarRightJSON = JSON.stringify(rightList, null, 2);
-  } catch (e) {
-    ElMessage.error("添加社交链接失败，请检查JSON格式是否正确。");
-    console.error(e);
-  }
+  const newItem = { title: "", link: "", icon: "" };
+  model.value.footerSocialBarLeft.push({ ...newItem });
+  model.value.footerSocialBarRight.push({ ...newItem });
 };
 
 const syncDeleteRight = (index: number) => {
-  try {
-    const rightList = JSON.parse(model.value.footerSocialBarRightJSON || "[]");
-    if (index < rightList.length) {
-      rightList.splice(index, 1);
-      model.value.footerSocialBarRightJSON = JSON.stringify(rightList, null, 2);
-    }
-  } catch (e) {
-    ElMessage.error("同步删除右侧链接失败。");
+  if (index < model.value.footerSocialBarRight.length) {
+    model.value.footerSocialBarRight.splice(index, 1);
   }
 };
 
 const syncDeleteLeft = (index: number) => {
-  try {
-    const leftList = JSON.parse(model.value.footerSocialBarLeftJSON || "[]");
-    if (index < leftList.length) {
-      leftList.splice(index, 1);
-      model.value.footerSocialBarLeftJSON = JSON.stringify(leftList, null, 2);
-    }
-  } catch (e) {
-    ElMessage.error("同步删除左侧链接失败。");
+  if (index < model.value.footerSocialBarLeft.length) {
+    model.value.footerSocialBarLeft.splice(index, 1);
   }
 };
 </script>

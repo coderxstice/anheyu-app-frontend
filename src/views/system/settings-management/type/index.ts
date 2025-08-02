@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-24 17:29:16
- * @LastEditTime: 2025-07-31 18:18:36
+ * @LastEditTime: 2025-08-02 10:54:57
  * @LastEditors: 安知鱼
  */
 // src/views/system/settings-management/type/index.ts
@@ -86,6 +86,97 @@ export interface SettingsForm {
   frontDesk: FrontDeskSettings;
 }
 
+/**
+ * @description: 徽标项类型
+ */
+export interface BadgeItem {
+  link: string;
+  shields: string;
+  message: string;
+}
+
+/**
+ * @description: 社交链接项类型
+ */
+export interface SocialLinkItem {
+  title: string;
+  link: string;
+  icon: string;
+}
+
+/**
+ * @description: 底部栏链接项类型
+ */
+export interface FooterBarLinkItem {
+  text: string;
+  link: string;
+}
+
+/**
+ * @description: 页脚多栏链接中的单个链接类型
+ */
+export interface FooterLink {
+  title: string;
+  link: string;
+}
+
+/**
+ * @description: 页脚多栏链接中的单栏类型
+ */
+export interface FooterLinkColumn {
+  title: string;
+  links: FooterLink[];
+}
+
+/**
+ * @description: 导航菜单项（包含子菜单）
+ */
+export interface MainMenuItem {
+  title: string;
+  items: SubMenuItem[];
+}
+
+/**
+ * @description: 页眉下拉菜单分组
+ */
+export interface NavMenuGroup {
+  title: string;
+  items: NavMenuItem[];
+}
+
+/**
+ * @description: 首页顶部横幅的类型定义
+ */
+export interface HomeTopBanner {
+  image: string;
+  isExternal: boolean;
+  link: string;
+  tips: string;
+  title: string;
+}
+
+/**
+ * @description: 首页顶部每个分类项的类型定义
+ */
+export interface HomeTopCategoryItem {
+  background: string;
+  icon: string;
+  isExternal: boolean;
+  name: string;
+  path: string;
+}
+
+/**
+ * @description: 首页顶部配置的完整类型定义
+ */
+export interface HomeTopInfo {
+  banner: HomeTopBanner;
+  category: HomeTopCategoryItem[];
+  siteText: string;
+  subTitle: string;
+  title: string;
+}
+
 export interface HomePageSettingsInfo {
   siteOwnerName: string;
   siteOwnerEmail: string;
@@ -101,16 +192,18 @@ export interface HomePageSettingsInfo {
   footerListRandomFriends: string;
   footerBarAuthorLink: string;
   footerBarCCLink: string;
-  footerBadgeJSON: string;
-  footerSocialBarLeftJSON: string;
-  footerSocialBarRightJSON: string;
-  footerListJSON: string;
-  footerBarLinkListJSON: string;
 
-  menuJSON: string;
   navTravel: boolean;
   navClock: boolean;
-  navMenuItemsJSON: string;
+  homeTop: HomeTopInfo;
+
+  footerBadges: BadgeItem[];
+  footerSocialBarLeft: SocialLinkItem[];
+  footerSocialBarRight: SocialLinkItem[];
+  footerList: FooterLinkColumn[];
+  footerBarLinkList: FooterBarLinkItem[];
+  menu: MainMenuItem[];
+  navMenuItems: NavMenuGroup[];
 }
 
 export interface FrontDeskSettings {

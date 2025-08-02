@@ -2,7 +2,7 @@
  * @Description: 系统配置相关的常量，与后端 Go 定义和 API 响应保持同步。
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:42:04
- * @LastEditTime: 2025-07-31 18:18:13
+ * @LastEditTime: 2025-08-02 10:22:14
  * @LastEditors: 安知鱼
  */
 
@@ -43,6 +43,8 @@ const KeyHeaderNavTravel: SettingKey = "header.nav.travelling";
 const KeyHeaderNavClock: SettingKey = "header.nav.clock";
 const KeyHeaderNavMenu: SettingKey = "header.nav.menu";
 
+const KeyHomeTop: SettingKey = "HOME_TOP";
+
 // --- 前台及页脚配置 ---
 const KeyFrontDeskSiteOwnerName: SettingKey = "frontDesk.siteOwner.name";
 const KeyFrontDeskSiteOwnerEmail: SettingKey = "frontDesk.siteOwner.email";
@@ -60,11 +62,11 @@ const KeyFooterSocialBarCenterImg: SettingKey = "footer.socialBar.centerImg";
 const KeyFooterListRandomFriends: SettingKey = "footer.list.randomFriends";
 const KeyFooterBarAuthorLink: SettingKey = "footer.bar.authorLink";
 const KeyFooterBarCCLink: SettingKey = "footer.bar.cc.link";
-const KeyFooterBadgeJSON: SettingKey = "footer.badge.list";
-const KeyFooterSocialBarLeftJSON: SettingKey = "footer.socialBar.left";
-const KeyFooterSocialBarRightJSON: SettingKey = "footer.socialBar.right";
-const KeyFooterListJSON: SettingKey = "footer.project.list";
-const KeyFooterBarLinkListJSON: SettingKey = "footer.bar.linkList";
+const KeyFooterBadge: SettingKey = "footer.badge.list";
+const KeyFooterSocialBarLeft: SettingKey = "footer.socialBar.left";
+const KeyFooterSocialBarRight: SettingKey = "footer.socialBar.right";
+const KeyFooterList: SettingKey = "footer.project.list";
+const KeyFooterBarLinkList: SettingKey = "footer.bar.linkList";
 
 // --- 文件生成及处理配置 ---
 const KeyEnableVipsGenerator: SettingKey = "ENABLE_VIPS_GENERATOR";
@@ -166,16 +168,18 @@ export const constant = {
   KeyFooterListRandomFriends,
   KeyFooterBarAuthorLink,
   KeyFooterBarCCLink,
-  KeyFooterBadgeJSON,
-  KeyFooterSocialBarLeftJSON,
-  KeyFooterSocialBarRightJSON,
-  KeyFooterListJSON,
-  KeyFooterBarLinkListJSON,
+  KeyFooterBadge,
+  KeyFooterSocialBarLeft,
+  KeyFooterSocialBarRight,
+  KeyFooterList,
+  KeyFooterBarLinkList,
 
   KeyHeaderMenu,
   KeyHeaderNavTravel,
   KeyHeaderNavClock,
   KeyHeaderNavMenu,
+
+  KeyHomeTop,
 
   // --- 文件生成及处理配置 ---
   KeyEnableVipsGenerator,
