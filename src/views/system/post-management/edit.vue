@@ -9,9 +9,9 @@ import {
   readonly
 } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { ElMessage, ElNotification, ElTooltip } from "element-plus";
+import { ElMessage, ElNotification } from "element-plus";
 import { useNav } from "@/layout/hooks/useNav";
-import type { FormInstance, FormRules } from "element-plus";
+import type { FormInstance } from "element-plus";
 import type * as Monaco from "monaco-editor";
 import type { editor } from "monaco-editor";
 
@@ -20,7 +20,9 @@ import {
   createArticle,
   updateArticle,
   getCategoryList,
-  getTagList
+  getTagList,
+  createCategory,
+  createTag
 } from "@/api/post";
 import type { ArticleForm, PostCategory, PostTag } from "@/api/post/type";
 import { UploadFilled } from "@element-plus/icons-vue";
@@ -131,6 +133,10 @@ const statusOptions = [
 const isEditMode = computed(() => !!articleId.value);
 const pageTitle = computed(() => (isEditMode.value ? "编辑文章" : "新增文章"));
 
+// 新增：用于强制刷新 el-select 的 key
+const categorySelectKey = ref(0);
+const tagSelectKey = ref(0);
+
 // --- 核心函数 ---
 const loadMonaco = async () => {
   if (monaco) return;
@@ -192,29 +198,87 @@ const initPage = async () => {
   }
 };
 
+/**
+ * 处理用户可能创建的新分类和标签。
+ * 遍历 v-model 数组，如果发现不是 ID 的项（新创建的），
+ * 则调用 API 创建它，并用返回的 ID 替换数组中的原始名称。
+ */
+const processTagsAndCategories = async () => {
+  // 检查 form.post_category_ids 是否存在且为数组
+  if (Array.isArray(form.post_category_ids)) {
+    const categoryPromises = form.post_category_ids.map(async item => {
+      // 如果 item 已经存在于 options 中，则它是一个有效的 ID，无需处理
+      if (categoryOptions.value.some(opt => opt.id === item)) {
+        return item;
+      }
+      // 否则，item 是一个新创建的分类名称（字符串）
+      try {
+        const res = await createCategory({ name: item });
+        const newCategory = res.data;
+        // 更新 options 列表，以便 UI 保持同步
+        categoryOptions.value.push(newCategory);
+        // 返回新的 ID
+        return newCategory.id;
+      } catch (error) {
+        ElMessage.error(`创建分类 "${item}" 失败`);
+        throw error; // 抛出错误以中止提交过程
+      }
+    });
+    // 等待所有创建操作完成，并更新表单数据
+    form.post_category_ids = await Promise.all(categoryPromises);
+  }
+
+  // 检查 form.post_tag_ids 是否存在且为数组
+  if (Array.isArray(form.post_tag_ids)) {
+    const tagPromises = form.post_tag_ids.map(async item => {
+      if (tagOptions.value.some(opt => opt.id === item)) {
+        return item;
+      }
+      try {
+        const res = await createTag({ name: item });
+        const newTag = res.data;
+        tagOptions.value.push(newTag);
+        return newTag.id;
+      } catch (error) {
+        ElMessage.error(`创建标签 "${item}" 失败`);
+        throw error;
+      }
+    });
+    form.post_tag_ids = await Promise.all(tagPromises);
+  }
+};
+
 const handleSubmit = async (isPublish = false) => {
   if (!form.title || form.title.trim() === "") {
     ElNotification({
       title: "提交错误",
       message: "文章标题不能为空，请输入标题后再保存。",
       type: "error",
-      duration: 30000
+      duration: 3000
     });
     return;
   }
-  if (isPublish) {
-    form.status = "PUBLISHED";
-  }
+
   await formRef.value.validate(async valid => {
     if (valid) {
       isSubmitting.value = true;
       try {
+        // 在提交前，先处理新创建的标签和分类
+        await processTagsAndCategories();
+
+        if (isPublish) {
+          form.status = "PUBLISHED";
+        }
+
         if (isEditMode.value) {
           await updateArticle(articleId.value, form);
           ElMessage.success("更新成功");
         } else {
-          await createArticle(form);
+          const { data } = await createArticle(form);
           ElMessage.success("创建成功");
+          // 新建成功后跳转到编辑页，而不是列表页
+          router.replace({ name: "PostEdit", params: { id: data.id } });
+          return; // 提前返回，避免重复跳转
         }
         router.push({ name: "PostManagement" });
       } catch (error) {
@@ -228,6 +292,30 @@ const handleSubmit = async (isPublish = false) => {
 
 const handleGoBack = () => {
   router.push({ name: "PostManagement" });
+};
+
+// 新增：分类选择器 change 事件处理
+const handleCategoryChange = (currentValues: string[]) => {
+  // 检查是否有值不是有效的、已存在的ID
+  const isNewItemAdded = currentValues.some(
+    val => !categoryOptions.value.some(opt => opt.id === val)
+  );
+
+  if (isNewItemAdded) {
+    // 如果有新创建的条目，增加 key 的值以强制重新渲染 select 组件
+    categorySelectKey.value++;
+  }
+};
+
+// 新增：标签选择器 change 事件处理
+const handleTagChange = (currentValues: string[]) => {
+  const isNewItemAdded = currentValues.some(
+    val => !tagOptions.value.some(opt => opt.id === val)
+  );
+
+  if (isNewItemAdded) {
+    tagSelectKey.value++;
+  }
 };
 
 // --- 生命周期 ---
@@ -272,7 +360,6 @@ watch(
   >
     <el-form ref="formRef" :model="form" label-position="top">
       <el-row :gutter="20">
-        <!-- 左侧：沉浸式内容创作区 -->
         <el-col :lg="18" :md="16" class="left-panel">
           <el-card shadow="never" class="content-card">
             <template #header>
@@ -316,9 +403,7 @@ watch(
           </el-card>
         </el-col>
 
-        <!-- 右侧：多功能配置栏 -->
         <el-col :lg="6" :md="8" class="right-panel">
-          <!-- 卡片一：发布操作栏 -->
           <el-card shadow="never" class="form-card action-card">
             <template #header>
               <div class="card-header">
@@ -327,7 +412,9 @@ watch(
               </div>
             </template>
             <div class="actions">
-              <el-button @click="handleSubmit(false)">保存草稿</el-button>
+              <el-button :loading="isSubmitting" @click="handleSubmit(false)"
+                >保存草稿</el-button
+              >
               <el-button
                 type="primary"
                 :loading="isSubmitting"
@@ -346,7 +433,6 @@ watch(
             >
           </el-card>
 
-          <!-- 卡片二：发布设置 -->
           <el-card shadow="never" class="form-card">
             <template #header>
               <div class="card-header">
@@ -366,11 +452,16 @@ watch(
             </el-form-item>
             <el-form-item label="分类" prop="post_category_ids">
               <el-select
+                :key="categorySelectKey"
                 v-model="form.post_category_ids"
                 multiple
                 filterable
-                placeholder="选择分类"
+                allow-create
+                default-first-option
+                placeholder="选择或创建分类"
                 style="width: 100%"
+                no-data-text="输入名称后按回车键创建"
+                @change="handleCategoryChange"
               >
                 <el-option
                   v-for="item in categoryOptions"
@@ -382,11 +473,16 @@ watch(
             </el-form-item>
             <el-form-item label="标签" prop="post_tag_ids">
               <el-select
+                :key="tagSelectKey"
                 v-model="form.post_tag_ids"
                 multiple
                 filterable
-                placeholder="选择标签"
+                allow-create
+                default-first-option
+                placeholder="选择或创建标签"
                 style="width: 100%"
+                no-data-text="输入名称后按回车键创建"
+                @change="handleTagChange"
               >
                 <el-option
                   v-for="item in tagOptions"
@@ -404,7 +500,6 @@ watch(
             </el-form-item>
           </el-card>
 
-          <!-- 卡片三：媒体与摘要 -->
           <el-card shadow="never" class="form-card">
             <template #header>
               <div class="card-header">
@@ -443,7 +538,7 @@ watch(
   margin-bottom: 20px;
   border-radius: 8px;
   background-color: var(--el-bg-color-overlay);
-  border: var(--style-border);
+  border: 1px solid var(--el-border-color-light);
   transition: all 0.3s ease-in-out;
 
   .card-header {
@@ -514,7 +609,7 @@ watch(
   :deep(.el-card__body) {
     padding: 0;
     flex-grow: 1;
-    min-height: 0; // 关键：让 flex 子项可以收缩
+    min-height: 0;
   }
 }
 
