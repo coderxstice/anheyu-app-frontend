@@ -1,16 +1,59 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import { useArticleStore } from "@/store/modules/articleStore";
+import { getHomeArticles } from "@/api/post";
+import type { Article } from "@/api/post/type";
 
 defineOptions({
   name: "HomeTop"
 });
 
 const siteConfigStore = useSiteConfigStore();
-const siteConfig = computed(() => siteConfigStore.getSiteConfig);
+const articleStore = useArticleStore();
 
+const siteConfig = computed(() => siteConfigStore.getSiteConfig);
 const homeTopConfig = computed(() => siteConfig.value?.HOME_TOP);
 const creativityConfig = computed(() => siteConfig.value?.CREATIVITY);
+
+const recommendedArticles = ref<Article[]>([]);
+const isTopGroupExpanded = ref(false);
+const hasRecommendedArticles = computed(
+  () => recommendedArticles.value && recommendedArticles.value.length > 0
+);
+
+const handleMoreClick = (event: MouseEvent) => {
+  if (hasRecommendedArticles.value) {
+    event.preventDefault();
+    event.stopPropagation();
+    expandTopGroup();
+  }
+};
+
+const expandTopGroup = () => {
+  isTopGroupExpanded.value = true;
+};
+const collapseTopGroup = () => {
+  isTopGroupExpanded.value = false;
+};
+
+const fetchRecommendedArticles = async () => {
+  try {
+    const res = await getHomeArticles();
+    if (res.code === 200 && res.data) {
+      recommendedArticles.value = res.data;
+    } else {
+      recommendedArticles.value = [];
+    }
+  } catch (error) {
+    console.error("获取首页推荐文章失败:", error);
+    recommendedArticles.value = [];
+  }
+};
+
+onMounted(() => {
+  fetchRecommendedArticles();
+});
 
 const creativityList = computed(() => {
   if (!creativityConfig.value?.creativity_list) return [];
@@ -71,8 +114,17 @@ const creativityPairs = computed(() => {
           </div>
         </div>
 
-        <a id="random-hover" rel="external nofollow noreferrer">
-          <i class="anzhiyufont anzhiyu-icon-paper-plane" />
+        <a
+          id="random-hover"
+          rel="external nofollow noreferrer"
+          :class="{ 'is-loading': articleStore.isRandomArticleLoading }"
+          @click.prevent="articleStore.navigateToRandomArticle()"
+        >
+          <i
+            v-if="!articleStore.isRandomArticleLoading"
+            class="anzhiyufont anzhiyu-icon-paper-plane"
+          />
+          <i v-else class="anzhiyufont anzhiyu-icon-loading anzhiyu-rotate" />
           <div class="bannerText">
             随便逛逛
             <i class="anzhiyufont anzhiyu-icon-arrow-right" />
@@ -99,34 +151,79 @@ const creativityPairs = computed(() => {
     </div>
 
     <div class="right-section">
-      <a
-        v-if="homeTopConfig.banner"
-        id="today-card"
-        :href="homeTopConfig.banner.link"
-        target="_blank"
-        rel="noopener external nofollow noreferrer"
+      <div
+        class="topGroup"
+        @mouseleave="hasRecommendedArticles ? collapseTopGroup() : null"
       >
-        <div class="today-card-info">
-          <div class="today-card-tips">{{ homeTopConfig.banner.tips }}</div>
-          <div class="today-card-title">{{ homeTopConfig.banner.title }}</div>
-        </div>
-        <img
-          class="today-card-cover"
-          :src="homeTopConfig.banner.image"
-          alt="封面"
-        />
-        <div class="banner-button-group">
-          <div class="banner-button">
-            <i class="anzhiyufont anzhiyu-icon-arrow-circle-right" />
-            <span class="banner-button-text">更多推荐</span>
+        <a
+          v-for="article in recommendedArticles"
+          :key="article.id"
+          class="recent-post-item"
+          :href="`/p/${article.id}`"
+          :title="article.title"
+        >
+          <div class="post_cover">
+            <span class="recent-post-top-text">荐</span>
+            <img
+              class="post_bg"
+              :src="article.cover_url"
+              :alt="article.title"
+            />
           </div>
-        </div>
-      </a>
+          <div class="recent-post-info">
+            <div class="article-title">{{ article.title }}</div>
+          </div>
+        </a>
+
+        <a
+          v-if="homeTopConfig.banner"
+          id="todayCard"
+          class="todayCard"
+          :class="{ hide: isTopGroupExpanded }"
+          :href="homeTopConfig.banner.link"
+          target="_blank"
+          rel="noopener external nofollow noreferrer"
+        >
+          <div class="todayCard-info">
+            <div class="todayCard-tips">{{ homeTopConfig.banner.tips }}</div>
+            <div class="todayCard-title">{{ homeTopConfig.banner.title }}</div>
+          </div>
+          <img
+            class="todayCard-cover"
+            :src="homeTopConfig.banner.image"
+            alt="封面"
+          />
+          <div class="banner-button-group">
+            <div class="banner-button" @click="handleMoreClick">
+              <i class="anzhiyufont anzhiyu-icon-arrow-circle-right" />
+              <span class="banner-button-text">更多推荐</span>
+            </div>
+          </div>
+        </a>
+      </div>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
+/* 增加旋转动画和加载中样式 */
+@keyframes rotating {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.anzhiyu-rotate {
+  animation: rotating 2s linear infinite;
+}
+#random-hover.is-loading {
+  pointer-events: none; /* 加载中禁止点击 */
+  cursor: wait;
+}
+
+/* 左侧区域样式 */
 .home-top-container {
   display: flex;
   gap: 1rem;
@@ -159,7 +256,6 @@ const creativityPairs = computed(() => {
   transition: 0.3s;
   will-change: transform;
 }
-
 #random-banner:hover #random-hover {
   opacity: 1;
   padding-left: 2rem;
@@ -167,7 +263,6 @@ const creativityPairs = computed(() => {
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
 }
-
 #random-banner .banners-title {
   position: absolute;
   top: 2.9rem;
@@ -176,7 +271,6 @@ const creativityPairs = computed(() => {
   animation: slide-in 0.6s 0.3s backwards;
   margin-bottom: 0.5rem;
 }
-
 #random-banner .banners-title .banners-title-big {
   font-size: 2.25rem;
   line-height: 1;
@@ -211,7 +305,6 @@ const creativityPairs = computed(() => {
   margin-left: 1rem;
   flex-shrink: 0;
 }
-
 #skills-tags-group-all .tags-group-icon {
   display: flex;
   align-items: center;
@@ -224,7 +317,6 @@ const creativityPairs = computed(() => {
   height: 120px;
   border-radius: 30px;
 }
-
 #skills-tags-group-all .tags-group-icon img {
   width: 60px;
   height: 60px;
@@ -287,7 +379,6 @@ const creativityPairs = computed(() => {
     }
   }
 }
-
 .category-group .category-item .category-button {
   display: flex;
   align-items: center;
@@ -299,7 +390,6 @@ const creativityPairs = computed(() => {
   transition: all 0.3s;
   background-size: 200% !important;
 }
-
 .category-group .category-item .category-button .category-button-text {
   font-size: 1.2rem;
   font-weight: bold;
@@ -315,78 +405,86 @@ const creativityPairs = computed(() => {
   filter: blur(2px);
   transform: scale(1) rotate(15deg);
 }
-#today-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 100%;
-  height: 100%;
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
-  color: white;
-  background: black;
-  transition: all 0.3s;
-  text-decoration: none;
-  &::after {
-    position: absolute;
-    content: "";
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    box-shadow: 0 -109px 133px -9px #000 inset;
-    z-index: 2;
-  }
+
+/* 右侧区域交互样式 */
+.todayCard-title,
+.todayCard-tips,
+.topGroup .banner-button {
+  color: #ffffff;
 }
 
-#today-card .today-card-cover {
+.topGroup {
+  height: 340px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  position: relative;
+  align-content: space-between;
+  gap: 0.5rem;
+}
+
+.topGroup .todayCard {
   position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 1;
-  transition: transform 0.3s;
+  background: var(--anzhiyu-card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: opacity 0.3s ease-in-out;
+  display: flex;
+  cursor: pointer;
+  pointer-events: all;
 }
 
-#today-card .today-card-info {
-  z-index: 3;
-  text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+.topGroup .todayCard .todayCard-info {
   position: absolute;
   bottom: 2rem;
   left: 2rem;
+  z-index: 2;
   color: var(--anzhiyu-white);
   max-width: 60%;
   transition: 0.3s;
 }
 
-#today-card .today-card-info .today-card-tips {
+.topGroup .todayCard .todayCard-info .todayCard-tips {
   opacity: 0.8;
-  font-size: 0.75rem;
+  font-size: 12px;
 }
 
-#today-card .today-card-info .today-card-title {
-  font-size: 1.8rem;
+.topGroup .todayCard .todayCard-info .todayCard-title {
+  font-size: 28px;
   font-weight: bold;
+  line-height: 36px;
 }
 
-#today-card .banner-button-group {
-  z-index: 3;
+.topGroup .todayCard .todayCard-cover {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  object-fit: cover;
+  z-index: -1;
+  transition: transform 0.3s ease-in-out;
+}
+
+.topGroup .banner-button-group {
   position: absolute;
   right: 2rem;
   bottom: 2rem;
   display: flex;
   transition: 0.3s;
-  i {
-    font-size: 1.375rem;
-  }
+  z-index: 5;
 }
 
-#today-card .banner-button-group .banner-button {
-  gap: 0.5rem;
-  cursor: pointer;
+.topGroup .todayCard.hide .todayCard-cover {
+  transform: scale(1.2);
+}
+
+.topGroup .banner-button {
   background: var(--anzhiyu-white-op);
   border-radius: 20px;
   color: var(--anzhiyu-white);
@@ -400,21 +498,132 @@ const creativityPairs = computed(() => {
   height: 40px;
   width: 125px;
   justify-content: center;
-  &:hover {
-    background: var(--anzhiyu-theme);
-    color: var(--anzhiyu-white);
-  }
+}
+
+.topGroup .banner-button:hover {
+  background: var(--anzhiyu-theme);
+  color: var(--anzhiyu-white);
+}
+
+.topGroup .banner-button-group .banner-button .banner-button-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.topGroup .banner-button i,
+.topGroup .banner-button svg {
+  margin-right: 8px;
+  font-size: 22px;
+}
+.topGroup .todayCard::after {
+  position: absolute;
+  content: "";
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  box-shadow: 0 -109px 133px -9px #000000 inset;
+  z-index: 1;
+}
+
+.topGroup .todayCard.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.topGroup .recent-post-item {
+  width: calc(33.333% - 0.5rem * 2 / 3);
+  flex-direction: column;
+  align-items: flex-start;
+  background: var(--anzhiyu-card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  height: calc(50% - 0.25rem);
+  border: var(--style-border-always);
+  transition: 0.3s;
+  position: relative;
+  box-shadow: var(--anzhiyu-shadow-border);
+  cursor: pointer;
+  display: flex;
+  text-decoration: none;
+  color: var(--anzhiyu-fontcolor);
+}
+
+.topGroup .recent-post-item:hover .recent-post-info .article-title {
+  color: var(--anzhiyu-main);
+}
+.topGroup .recent-post-item .post_cover {
+  width: 100%;
+  height: 60%;
+  position: relative;
+  overflow: hidden;
+}
+
+.topGroup span.recent-post-top-text {
+  position: absolute;
+  top: 0;
+  left: -40px;
+  display: flex;
+  z-index: 2;
+  background: var(--anzhiyu-theme);
+  color: var(--anzhiyu-white);
+  padding: 2px 8px;
+  font-size: 12px;
+  border-radius: 0 0 12px 0;
+  transition: left 0.3s;
+  cursor: pointer;
+}
+
+.topGroup .recent-post-item:hover .recent-post-top-text {
+  left: 0;
+}
+
+.topGroup .recent-post-item .post_cover .post_bg {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  background: var(--anzhiyu-secondbg);
+  border-radius: 0;
+}
+
+.topGroup .recent-post-item .recent-post-info {
+  padding: 0.5rem 0.8rem;
+  transition: 0.3s;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.topGroup .recent-post-item .recent-post-info .article-title {
+  line-clamp: 2;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
+  font-weight: bold;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 992px) {
   .home-top-container {
     flex-direction: column;
   }
-  #today-card {
-    height: 200px;
+  .right-section,
+  .topGroup {
+    height: auto;
   }
-  .category-group .category-item .category-button {
-    padding: 1rem;
+  .topGroup {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .topGroup .recent-post-item {
+    width: 100%;
+    height: 220px;
+  }
+  .topGroup .todayCard {
+    display: none;
   }
 }
 </style>

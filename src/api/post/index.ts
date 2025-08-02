@@ -2,7 +2,7 @@
  * @Description: 文章管理模块 API 统一出口 (文章、标签、分类)
  * @Author: 安知鱼
  * @Date: 2025-07-25 18:05:00
- * @LastEditTime: 2025-07-25 14:24:00
+ * @LastEditTime: 2025-08-02 18:31:28
  * @LastEditors: 安知鱼
  */
 
@@ -16,6 +16,7 @@ import type {
   ArticleResponse,
   GetArticleListParams,
   ArticleForm,
+  Article,
   // 标签
   TagListResponse,
   PostTagResponse,
@@ -167,5 +168,21 @@ export const deleteCategory = (id: string): Promise<BaseResponse<null>> => {
   return http.request<BaseResponse<null>>(
     "delete",
     baseUrlApi(`post-categories/${id}`)
+  );
+};
+
+/** @description [公开]获取首页推荐文章 */
+export const getHomeArticles = (): Promise<BaseResponse<Article[]>> => {
+  return http.request<BaseResponse<Article[]>>(
+    "get",
+    baseUrlApi("public/articles/home")
+  );
+};
+
+/** @description [公开]获取一篇随机文章 */
+export const getRandomArticle = (): Promise<BaseResponse<ArticleResponse>> => {
+  return http.request<BaseResponse<ArticleResponse>>(
+    "get",
+    baseUrlApi("public/articles/random")
   );
 };
