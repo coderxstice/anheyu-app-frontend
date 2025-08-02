@@ -2,7 +2,7 @@
  * @Description: 系统配置相关的常量，与后端 Go 定义和 API 响应保持同步。
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:42:04
- * @LastEditTime: 2025-08-02 10:22:14
+ * @LastEditTime: 2025-08-02 18:08:11
  * @LastEditors: 安知鱼
  */
 
@@ -119,6 +119,8 @@ const KeySmtpSenderName: SettingKey = "SMTP_SENDER_NAME";
 const KeySmtpSenderEmail: SettingKey = "SMTP_SENDER_EMAIL";
 const KeySmtpReplyToEmail: SettingKey = "SMTP_REPLY_TO_EMAIL";
 const KeySmtpForceSSL: SettingKey = "SMTP_FORCE_SSL";
+const KeyIPAPI: SettingKey = "IP_API";
+const KeyIPAPIToKen: SettingKey = "IP_API_TOKEN";
 
 const DEFAULT_CHUNK_SIZE = 50 * 1024 * 1024;
 
@@ -230,6 +232,8 @@ export const constant = {
   KeySmtpSenderEmail,
   KeySmtpReplyToEmail,
   KeySmtpForceSSL,
+  KeyIPAPI,
+  KeyIPAPIToKen,
 
   // --- 其他 ---
   DEFAULT_CHUNK_SIZE

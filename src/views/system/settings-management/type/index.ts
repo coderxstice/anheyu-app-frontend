@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-24 17:29:16
- * @LastEditTime: 2025-08-02 10:54:57
+ * @LastEditTime: 2025-08-02 18:06:32
  * @LastEditors: 安知鱼
  */
 // src/views/system/settings-management/type/index.ts
@@ -84,6 +84,7 @@ export interface SettingsForm {
   page: PageSittingInfo;
   file: FileSettingsInfo;
   frontDesk: FrontDeskSettings;
+  post: PostSettingsInfo;
 }
 
 /**
@@ -209,6 +210,14 @@ export interface HomePageSettingsInfo {
 export interface FrontDeskSettings {
   home: HomePageSettingsInfo;
   // article: ArticlePageSettingsInfo;
+}
+
+/**
+ * @description: 文章配置表单接口
+ */
+export interface PostSettingsInfo {
+  ipApi: string;
+  ipApiToken: string;
 }
 
 /**

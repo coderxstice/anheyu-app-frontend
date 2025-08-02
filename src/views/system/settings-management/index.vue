@@ -20,6 +20,12 @@
         </el-form>
       </el-tab-pane>
 
+      <el-tab-pane label="文章配置" name="postSetting">
+        <el-form :model="form" label-position="top" class="setting-form">
+          <PostSettings v-model="form.post" />
+        </el-form>
+      </el-tab-pane>
+
       <el-tab-pane label="前台配置" name="frontDeskSetting">
         <FrontDeskSettings v-model="form.frontDesk" />
       </el-tab-pane>
@@ -44,6 +50,7 @@ import type {
   SiteInfo,
   PageSittingInfo,
   FileSettingsInfo,
+  PostSettingsInfo,
   HomePageSettingsInfo
 } from "./type";
 
@@ -51,6 +58,7 @@ import BaseInfoForm from "./components/BaseInfoForm.vue";
 import IconSettingsForm from "./components/IconSettingsForm.vue";
 import PageSittingForm from "./components/PageSittingForm.vue";
 import FileSettings from "./components/fileSetting/FileSettingsForm.vue";
+import PostSettings from "./components/postSettings/index.vue";
 import FrontDeskSettings from "./components/FrontDeskSettings.vue";
 
 let activeName = "siteConfig";
@@ -64,6 +72,7 @@ type FormKeys =
   | keyof SiteInfo
   | keyof PageSittingInfo
   | keyof FileSettingsInfo
+  | keyof PostSettingsInfo
   | keyof HomePageFormInfo;
 
 const form = reactive<FormType>({
@@ -112,6 +121,10 @@ const form = reactive<FormType>({
     enableMusicExtractor: true,
     musicMaxSizeLocal: "0",
     musicMaxSizeRemote: "0"
+  },
+  post: {
+    ipApi: "",
+    ipApiToken: ""
   },
   frontDesk: {
     home: {
@@ -163,6 +176,8 @@ const formToKeysMap: Record<FormKeys, string> = {
   albumApiURL: constant.KeyApiURL,
   defaultThumbParam: constant.KeyDefaultThumbParam,
   defaultBigParam: constant.KeyDefaultBigParam,
+  ipApi: constant.KeyIPAPI,
+  ipApiToken: constant.KeyIPAPIToKen,
   footerCode: constant.KeyFooterCode,
   announcement: constant.KeySiteAnnouncement,
   logoDay: constant.KeyLogoHorizontalDay,
@@ -265,6 +280,7 @@ watch(
       if (formKey in form.site) targetForm = form.site;
       else if (formKey in form.page) targetForm = form.page;
       else if (formKey in form.file) targetForm = form.file;
+      else if (formKey in form.post) targetForm = form.post;
       else if (formKey in form.frontDesk.home) targetForm = form.frontDesk.home;
 
       if (targetForm && value !== undefined && value !== null) {
@@ -316,6 +332,7 @@ const handleSave = async () => {
     ...form.site,
     ...form.page,
     ...form.file,
+    ...form.post,
     ...form.frontDesk.home
   };
 
