@@ -5,6 +5,8 @@
 @use "dark";
 @use "base";
 @use "snackbar";
+@use "animation";
+
 /* 自定义全局 CssVar */
 :root {
   --el-color-primary: var(--anzhiyu-theme) !important;

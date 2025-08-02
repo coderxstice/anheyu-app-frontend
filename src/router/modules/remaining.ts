@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-04-08 17:29:06
- * @LastEditTime: 2025-07-25 19:21:30
+ * @LastEditTime: 2025-08-02 11:23:13
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue"); // 后台布局
@@ -22,7 +22,7 @@ export default [
     },
     children: [
       {
-        path: "",
+        path: "/",
         name: "PostHome",
         component: () => import("@/views/post/post-home/index.vue"),
         meta: {

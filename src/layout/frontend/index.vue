@@ -2,7 +2,7 @@
  * @Description: 前台主布局
  * @Author: 安知鱼
  * @Date: 2025-07-25 18:52:39
- * @LastEditTime: 2025-07-26 14:21:13
+ * @LastEditTime: 2025-08-02 11:24:07
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -27,7 +27,7 @@ import { useGlobal } from "@pureadmin/utils";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 
 import Header from "./components/hearder/index.vue";
-import Footer from "./components/Footer.vue";
+import Footer from "./components/footer/index.vue";
 
 const { $storage } = useGlobal<GlobalPropertiesApi>();
 onBeforeMount(() => {
