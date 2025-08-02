@@ -1,8 +1,8 @@
 /*
- * @Description: 文章、标签、分类模块的所有类型定义 (最终版)
+ * @Description: 文章、标签、分类模块的所有类型定义
  * @Author: 安知鱼
  * @Date: 2025-07-23 11:07:00
- * @LastEditTime: 2025-07-25 16:25:14
+ * @LastEditTime: 2025-08-02 16:57:53
  * @LastEditors: 安知鱼
  */
 
@@ -23,7 +23,7 @@ export type ArticleStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 // ===================================
 
 export interface PostTag {
-  id: string; // 统一为 id
+  id: string;
   created_at: string;
   updated_at: string;
   name: string;
@@ -41,7 +41,7 @@ export type TagListResponse = PostTagResponse[];
 // ===================================
 
 export interface PostCategory {
-  id: string; // 统一为 id
+  id: string;
   created_at: string;
   updated_at: string;
   name: string;
@@ -60,39 +60,55 @@ export type CategoryListResponse = PostCategoryResponse[];
 //          文章 (Article)
 // ===================================
 
+/**
+ * @description 文章对象完整结构 (与后端最新接口一致)
+ */
 export interface Article {
-  id: string; // 统一为 id
+  id: string;
   created_at: string;
   updated_at: string;
   title: string;
   content_md?: string;
-  summary: string; // [RE-ADDED]
-  cover_url: string; // [RE-ADDED]
+  cover_url: string;
   status: ArticleStatus;
-  view_count: number; // [ADDED]
-  word_count: number; // [ADDED]
-  reading_time: number; // [ADDED]
+  view_count: number;
+  word_count: number;
+  reading_time: number;
   ip_location?: string;
   post_tags: PostTag[];
   post_categories: PostCategory[];
+  home_sort: number;
+  pin_sort: number;
+  top_img_url: string;
+  summaries: string[];
 }
 
+/**
+ * @description 获取文章列表的查询参数
+ */
 export interface GetArticleListParams {
   page?: number;
   pageSize?: number;
-  query?: string;
+  query?: string; // 只搜索标题
   status?: ArticleStatus | "";
 }
 
+/**
+
+ * @description 创建/更新文章时发送的表单数据类型
+ */
 export interface ArticleForm {
   title?: string;
   content_md?: string;
-  summary?: string; // [RE-ADDED]
-  cover_url?: string; // [RE-ADDED]
+  cover_url?: string;
   status?: ArticleStatus;
   post_tag_ids?: string[];
   post_category_ids?: string[];
   ip_location?: string;
+  home_sort?: number;
+  pin_sort?: number;
+  top_img_url?: string;
+  summaries?: string[];
 }
 
 export type ArticleResponse = Article;

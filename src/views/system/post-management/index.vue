@@ -133,13 +133,12 @@ onMounted(() => {
 
 <template>
   <div class="post-management-container">
-    <!-- 顶部控制面板 -->
     <el-card shadow="never" class="control-panel">
       <el-form :model="searchParams" :inline="true" class="search-form">
         <el-form-item label="关键词">
           <el-input
             v-model="searchParams.query"
-            placeholder="搜索标题或摘要"
+            placeholder="搜索文章标题"
             clearable
             @keyup.enter="handleSearch"
           />
@@ -172,7 +171,6 @@ onMounted(() => {
       </div>
     </el-card>
 
-    <!-- 内容区 -->
     <div class="content-area">
       <div v-if="loading" v-loading="loading" class="loading-placeholder" />
 
@@ -239,7 +237,6 @@ onMounted(() => {
               </div>
 
               <div class="card-footer">
-                <!-- 时间信息 -->
                 <div class="timestamps">
                   <span>
                     <IconifyIconOnline icon="ep:calendar" />
@@ -250,12 +247,16 @@ onMounted(() => {
                     {{ formatDate(article.updated_at) }}
                   </span>
                 </div>
-                <!-- 其他内容：左 stats，右按钮 -->
                 <div class="footer-extra">
                   <div class="stats">
                     <span>
                       <IconifyIconOnline icon="ep:view" />
                       {{ article.view_count }}
+                    </span>
+                    <el-divider direction="vertical" />
+                    <span>
+                      <IconifyIconOnline icon="icon-park-outline:text" />
+                      {{ article.word_count }}
                     </span>
                     <el-divider direction="vertical" />
                     <span>
@@ -428,13 +429,12 @@ onMounted(() => {
 }
 .card-footer {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 8px;
   padding: 12px 16px;
   border-top: 1px solid var(--el-border-color-lighter);
   background-color: var(--el-bg-color-overlay);
   flex-shrink: 0;
-  flex-direction: column;
 
   .timestamps {
     display: flex;
@@ -444,7 +444,7 @@ onMounted(() => {
     color: var(--el-text-color-secondary);
     white-space: nowrap;
     width: 100%;
-    justify-content: center;
+    justify-content: space-between;
     span {
       display: inline-flex;
       align-items: center;
@@ -455,7 +455,6 @@ onMounted(() => {
   .footer-extra {
     display: flex;
     align-items: center;
-    gap: 24px;
     justify-content: space-between;
     width: 100%;
 

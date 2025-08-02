@@ -25,11 +25,11 @@ import {
   createTag
 } from "@/api/post";
 import type { ArticleForm, PostCategory, PostTag } from "@/api/post/type";
-import { UploadFilled } from "@element-plus/icons-vue";
+// 修改：导入新增/删除图标
+import { UploadFilled, Plus, Remove } from "@element-plus/icons-vue";
 
 /**
  * 一个响应式的 Hook，用于获取并监听应用的全局主题 (light/dark)。
- * 它通过监听 `<html>` 元素上的 'dark' 类名来实现。
  */
 function useTheme() {
   const theme = ref<"light" | "dark">(
@@ -67,23 +67,19 @@ defineOptions({ name: "PostEdit" });
 const route = useRoute();
 const router = useRouter();
 
-// --- 侧边栏控制 ---
 const { device, pureApp, toggleSideBar } = useNav();
 let wasSidebarOpened = pureApp.getSidebarStatus;
 
-// --- 主题适配 ---
 const { theme } = useTheme();
 const monacoTheme = computed(() =>
   theme.value === "light" ? "vs" : "vs-dark"
 );
 
-// --- 沉浸式全屏控制 ---
 const isImmersiveFullscreen = ref(false);
 const toggleImmersiveFullscreen = () => {
   isImmersiveFullscreen.value = !isImmersiveFullscreen.value;
 };
 
-// --- Monaco Editor ---
 let monaco: typeof Monaco | null = null;
 let editorInstance: Monaco.editor.IStandaloneCodeEditor | null = null;
 const editorContainerRef = ref<HTMLElement | null>(null);
@@ -105,7 +101,6 @@ const monacoOptions = computed<editor.IStandaloneEditorConstructionOptions>(
   })
 );
 
-// --- 表单与页面状态 ---
 const formRef = ref<FormInstance>();
 const loading = ref(true);
 const isSubmitting = ref(false);
@@ -114,13 +109,18 @@ const articleId = ref<string | null>(null);
 const form = reactive<ArticleForm>({
   title: "",
   content_md: "",
-  summary: "",
   cover_url: "",
   ip_location: "",
   status: "DRAFT",
   post_tag_ids: [],
-  post_category_ids: []
+  post_category_ids: [],
+  home_sort: 0,
+  pin_sort: 0,
+  top_img_url: "",
+  summaries: []
 });
+
+// 移除 summariesText 计算属性，不再需要
 
 const categoryOptions = ref<PostCategory[]>([]);
 const tagOptions = ref<PostTag[]>([]);
@@ -133,11 +133,19 @@ const statusOptions = [
 const isEditMode = computed(() => !!articleId.value);
 const pageTitle = computed(() => (isEditMode.value ? "编辑文章" : "新增文章"));
 
-// 新增：用于强制刷新 el-select 的 key
 const categorySelectKey = ref(0);
 const tagSelectKey = ref(0);
 
-// --- 核心函数 ---
+// 新增：动态摘要的UI交互函数
+const addSummaryInput = () => {
+  if (form.summaries.length < 3) {
+    form.summaries.push("");
+  }
+};
+const removeSummaryInput = (index: number) => {
+  form.summaries.splice(index, 1);
+};
+
 const loadMonaco = async () => {
   if (monaco) return;
   isMonacoLoading.value = true;
@@ -183,9 +191,23 @@ const initPage = async () => {
       Object.assign(form, data);
       form.post_category_ids = data.post_categories.map(c => c.id);
       form.post_tag_ids = data.post_tags.map(t => t.id);
+      if (!Array.isArray(form.summaries)) {
+        form.summaries = [];
+      }
     } else {
-      form.title = "";
-      form.content_md = `## 在这里开始你的创作...`;
+      Object.assign(form, {
+        title: "",
+        content_md: `## 在这里开始你的创作...`,
+        cover_url: "",
+        ip_location: "",
+        status: "DRAFT",
+        post_tag_ids: [],
+        post_category_ids: [],
+        home_sort: 0,
+        pin_sort: 0,
+        top_img_url: "",
+        summaries: []
+      });
     }
 
     await fetchOptionsPromise;
@@ -198,37 +220,25 @@ const initPage = async () => {
   }
 };
 
-/**
- * 处理用户可能创建的新分类和标签。
- * 遍历 v-model 数组，如果发现不是 ID 的项（新创建的），
- * 则调用 API 创建它，并用返回的 ID 替换数组中的原始名称。
- */
 const processTagsAndCategories = async () => {
-  // 检查 form.post_category_ids 是否存在且为数组
   if (Array.isArray(form.post_category_ids)) {
     const categoryPromises = form.post_category_ids.map(async item => {
-      // 如果 item 已经存在于 options 中，则它是一个有效的 ID，无需处理
       if (categoryOptions.value.some(opt => opt.id === item)) {
         return item;
       }
-      // 否则，item 是一个新创建的分类名称（字符串）
       try {
         const res = await createCategory({ name: item });
         const newCategory = res.data;
-        // 更新 options 列表，以便 UI 保持同步
         categoryOptions.value.push(newCategory);
-        // 返回新的 ID
         return newCategory.id;
       } catch (error) {
         ElMessage.error(`创建分类 "${item}" 失败`);
-        throw error; // 抛出错误以中止提交过程
+        throw error;
       }
     });
-    // 等待所有创建操作完成，并更新表单数据
     form.post_category_ids = await Promise.all(categoryPromises);
   }
 
-  // 检查 form.post_tag_ids 是否存在且为数组
   if (Array.isArray(form.post_tag_ids)) {
     const tagPromises = form.post_tag_ids.map(async item => {
       if (tagOptions.value.some(opt => opt.id === item)) {
@@ -263,22 +273,26 @@ const handleSubmit = async (isPublish = false) => {
     if (valid) {
       isSubmitting.value = true;
       try {
-        // 在提交前，先处理新创建的标签和分类
         await processTagsAndCategories();
 
         if (isPublish) {
           form.status = "PUBLISHED";
         }
 
+        // 过滤掉空的摘要项
+        const dataToSubmit = {
+          ...form,
+          summaries: form.summaries.filter(s => s.trim() !== "")
+        };
+
         if (isEditMode.value) {
-          await updateArticle(articleId.value, form);
+          await updateArticle(articleId.value, dataToSubmit);
           ElMessage.success("更新成功");
         } else {
-          const { data } = await createArticle(form);
+          const { data } = await createArticle(dataToSubmit);
           ElMessage.success("创建成功");
-          // 新建成功后跳转到编辑页，而不是列表页
           router.replace({ name: "PostEdit", params: { id: data.id } });
-          return; // 提前返回，避免重复跳转
+          return;
         }
         router.push({ name: "PostManagement" });
       } catch (error) {
@@ -294,31 +308,24 @@ const handleGoBack = () => {
   router.push({ name: "PostManagement" });
 };
 
-// 新增：分类选择器 change 事件处理
 const handleCategoryChange = (currentValues: string[]) => {
-  // 检查是否有值不是有效的、已存在的ID
   const isNewItemAdded = currentValues.some(
     val => !categoryOptions.value.some(opt => opt.id === val)
   );
-
   if (isNewItemAdded) {
-    // 如果有新创建的条目，增加 key 的值以强制重新渲染 select 组件
     categorySelectKey.value++;
   }
 };
 
-// 新增：标签选择器 change 事件处理
 const handleTagChange = (currentValues: string[]) => {
   const isNewItemAdded = currentValues.some(
     val => !tagOptions.value.some(opt => opt.id === val)
   );
-
   if (isNewItemAdded) {
     tagSelectKey.value++;
   }
 };
 
-// --- 生命周期 ---
 onMounted(() => {
   initPage();
   wasSidebarOpened = pureApp.getSidebarStatus;
@@ -492,6 +499,30 @@ watch(
                 />
               </el-select>
             </el-form-item>
+            <el-form-item label="首页推荐排序">
+              <el-input-number
+                v-model="form.home_sort"
+                :min="0"
+                controls-position="right"
+                style="width: 100%"
+                placeholder="0"
+              />
+              <div class="form-item-help">
+                0则不推荐, >0则推荐, 值越小越靠前
+              </div>
+            </el-form-item>
+            <el-form-item label="文章置顶排序">
+              <el-input-number
+                v-model="form.pin_sort"
+                :min="0"
+                controls-position="right"
+                style="width: 100%"
+                placeholder="0"
+              />
+              <div class="form-item-help">
+                0则不置顶, >0则置顶, 值越小越靠前
+              </div>
+            </el-form-item>
             <el-form-item label="IP 属地 (可选)" prop="ip_location">
               <el-input
                 v-model="form.ip_location"
@@ -510,13 +541,40 @@ watch(
             <el-form-item label="封面图 URL" prop="cover_url">
               <el-input v-model="form.cover_url" placeholder="https://..." />
             </el-form-item>
-            <el-form-item label="摘要" prop="summary">
-              <el-input
-                v-model="form.summary"
-                type="textarea"
-                :rows="5"
-                placeholder="文章摘要..."
-              />
+            <el-form-item label="顶部大图 URL (可选)" prop="top_img_url">
+              <el-input v-model="form.top_img_url" placeholder="https://..." />
+              <div class="form-item-help">
+                若不填, 保存时将自动使用上方封面图的URL
+              </div>
+            </el-form-item>
+            <el-form-item label="摘要" prop="summaries">
+              <div
+                v-for="(summary, index) in form.summaries"
+                :key="index"
+                class="summary-item"
+              >
+                <el-input
+                  v-model="form.summaries[index]"
+                  placeholder="请输入单行摘要..."
+                />
+                <el-button
+                  :icon="Remove"
+                  type="danger"
+                  circle
+                  plain
+                  @click="removeSummaryInput(index)"
+                />
+              </div>
+              <el-button
+                v-if="form.summaries.length < 3"
+                :icon="Plus"
+                type="primary"
+                plain
+                style="width: 100%"
+                @click="addSummaryInput"
+              >
+                新增摘要 ({{ form.summaries.length }}/3)
+              </el-button>
             </el-form-item>
           </el-card>
         </el-col>
@@ -553,6 +611,25 @@ watch(
   :deep(.el-form-item__label) {
     color: var(--el-text-color-regular);
     margin-bottom: 4px !important;
+  }
+}
+
+.form-item-help {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 8px;
+
+  .el-input {
+    flex-grow: 1;
   }
 }
 
