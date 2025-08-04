@@ -11,6 +11,9 @@ import {
   EditPen,
   Delete
 } from "@element-plus/icons-vue";
+import { useArticleStore } from "@/store/modules/articleStore";
+
+const articleStore = useArticleStore();
 
 defineOptions({
   name: "PostManagement"
@@ -188,13 +191,25 @@ onMounted(() => {
               <a :href="`/p/${article.id}`" target="_blank" class="card-link">
                 <div class="card-cover">
                   <el-image
+                    v-if="article.cover_url"
                     :src="article.cover_url"
                     fit="cover"
                     class="cover-image"
                     lazy
                   >
                     <template #error>
-                      <div class="image-slot"><span>暂无封面</span></div>
+                      <div class="image-slot"><span>封面加载失败...</span></div>
+                    </template>
+                  </el-image>
+                  <el-image
+                    v-else
+                    :src="articleStore.defaultCover"
+                    fit="cover"
+                    class="cover-image"
+                    lazy
+                  >
+                    <template #error>
+                      <div class="image-slot"><span>封面加载失败...</span></div>
                     </template>
                   </el-image>
                   <div

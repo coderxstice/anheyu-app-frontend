@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-02 18:31:47
- * @LastEditTime: 2025-08-02 18:31:53
+ * @LastEditTime: 2025-08-04 11:33:42
  * @LastEditors: 安知鱼
  */
 import { defineStore } from "pinia";
@@ -10,6 +10,7 @@ import { ref } from "vue";
 import { ElMessage } from "element-plus";
 import { router } from "@/router"; // 导入Vue Router实例
 import { getRandomArticle } from "@/api/post";
+import defaultCover from "@/assets/img/post/default_cover.jpg";
 
 export const useArticleStore = defineStore("article", () => {
   // state
@@ -43,6 +44,7 @@ export const useArticleStore = defineStore("article", () => {
 
   return {
     isRandomArticleLoading,
-    navigateToRandomArticle
+    navigateToRandomArticle,
+    defaultCover
   };
 });

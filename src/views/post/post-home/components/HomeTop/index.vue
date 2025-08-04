@@ -165,8 +165,15 @@ const creativityPairs = computed(() => {
           <div class="post_cover">
             <span class="recent-post-top-text">荐</span>
             <img
+              v-if="article.cover_url"
               class="post_bg"
               :src="article.cover_url"
+              :alt="article.title"
+            />
+            <img
+              v-else
+              class="post_bg"
+              :src="articleStore.defaultCover"
               :alt="article.title"
             />
           </div>
