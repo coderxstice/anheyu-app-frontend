@@ -313,6 +313,12 @@ const postDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyDoubleColumn,
     defaultValue: false,
     type: "boolean"
+  },
+  {
+    frontendPath: "post.default.pageSize",
+    backendKey: constant.KeyPostDefaultPageSize,
+    defaultValue: 12,
+    type: "number"
   }
 ];
 

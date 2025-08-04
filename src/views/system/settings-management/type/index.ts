@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-24 17:29:16
- * @LastEditTime: 2025-08-04 14:08:25
+ * @LastEditTime: 2025-08-04 15:43:28
  * @LastEditors: 安知鱼
  */
 // src/views/system/settings-management/type/index.ts
@@ -85,6 +85,7 @@ export interface PostSettingsInfo {
   default: {
     defaultCover: string;
     doubleColumn: boolean;
+    pageSize: number;
   };
 }
 

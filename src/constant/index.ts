@@ -42,7 +42,6 @@ const KeyHeaderMenu: SettingKey = "header.menu";
 const KeyHeaderNavTravel: SettingKey = "header.nav.travelling";
 const KeyHeaderNavClock: SettingKey = "header.nav.clock";
 const KeyHeaderNavMenu: SettingKey = "header.nav.menu";
-
 const KeyHomeTop: SettingKey = "HOME_TOP";
 
 // --- 前台及页脚配置 ---
@@ -69,6 +68,7 @@ const KeyFooterList: SettingKey = "footer.project.list";
 const KeyFooterBarLinkList: SettingKey = "footer.bar.linkList";
 const KeyDefaultCover: SettingKey = "post.default.cover";
 const KeyDoubleColumn: SettingKey = "post.default.double_column";
+const KeyPostDefaultPageSize: SettingKey = "post.default.page_size";
 
 // --- 文件生成及处理配置 ---
 const KeyEnableVipsGenerator: SettingKey = "ENABLE_VIPS_GENERATOR";
@@ -179,12 +179,11 @@ export const constant = {
   KeyFooterBarLinkList,
   KeyDefaultCover,
   KeyDoubleColumn,
-
+  KeyPostDefaultPageSize,
   KeyHeaderMenu,
   KeyHeaderNavTravel,
   KeyHeaderNavClock,
   KeyHeaderNavMenu,
-
   KeyHomeTop,
 
   // --- 文件生成及处理配置 ---

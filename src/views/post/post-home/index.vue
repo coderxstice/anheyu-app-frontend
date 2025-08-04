@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-25 18:13:11
- * @LastEditTime: 2025-08-04 15:04:21
+ * @LastEditTime: 2025-08-04 15:47:28
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -28,7 +28,7 @@ const articles = ref<Article[]>([]);
 const loading = ref(true);
 const pagination = reactive({
   page: 1,
-  pageSize: 10,
+  pageSize: siteConfigStore.getSiteConfig?.post?.default.page_size || 12,
   total: 0
 });
 const currentCategoryId = ref<string | null>(null);

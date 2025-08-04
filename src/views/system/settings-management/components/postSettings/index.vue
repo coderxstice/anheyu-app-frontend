@@ -18,7 +18,17 @@
       v-model="formData.default.doubleColumn"
       placeholder="例如：true"
     />
-    <div class="form-item-help">用于默认文章列表是否双栏样式。</div>
+  </el-form-item>
+
+  <el-form-item label="文章列表分页大小">
+    <el-input-number
+      v-model="formData.default.pageSize"
+      :min="1"
+      controls-position="right"
+      style="width: 100%"
+      placeholder="例如: 10"
+      :style="{ width: '100px' }"
+    />
   </el-form-item>
 
   <el-form-item label="IP属地查询 API 地址">

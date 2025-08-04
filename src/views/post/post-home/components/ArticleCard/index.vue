@@ -121,13 +121,15 @@ const goPost = (id: string) => {
       </div>
       <div class="article-meta-wrap">
         <span class="article-meta tags">
-          <a
+          <span
             v-for="tag in article.post_tags"
             :key="tag.id"
             class="article-meta__tags"
           >
-            <span># {{ tag.name }}</span>
-          </a>
+            <span>
+              <i class="anzhiyufont anzhiyu-icon-hashtag" />{{ tag.name }}
+            </span>
+          </span>
         </span>
         <span class="post-meta-date">
           <time :datetime="article.created_at">{{
@@ -169,6 +171,9 @@ const goPost = (id: string) => {
       filter: brightness(0.82);
       transform: scale(1.03);
     }
+    .recent-post-info .article-title {
+      color: var(--anzhiyu-main);
+    }
   }
 
   .post_cover {
@@ -187,6 +192,11 @@ const goPost = (id: string) => {
     .post_bg {
       transition: all 0.6s ease;
     }
+  }
+
+  .anzhiyu-icon-hashtag {
+    opacity: 0.6;
+    font-size: 13px;
   }
 
   .recent-post-info {
@@ -307,8 +317,18 @@ const goPost = (id: string) => {
 
   .tags .article-meta__tags {
     display: inline;
-    margin-right: 0.5rem;
     color: var(--anzhiyu-secondtext);
+    border-radius: 4px;
+    padding: 0 4px;
+    overflow: hidden;
+    transition: all 0.2s;
+    &:hover {
+      color: var(--anzhiyu-white);
+      background-color: var(--anzhiyu-main);
+      .anzhiyu-icon-hashtag {
+        opacity: 1;
+      }
+    }
   }
 
   .post-meta-date {
