@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-04-08 17:29:06
- * @LastEditTime: 2025-08-02 18:36:48
+ * @LastEditTime: 2025-08-04 16:28:15
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
@@ -37,6 +37,15 @@ export default [
         component: () => import("@/views/post/post-detail/index.vue"),
         meta: {
           title: `${appName} - 文章详情`,
+          showLink: false
+        }
+      },
+      {
+        path: "page/:id",
+        name: "PostPage",
+        component: () => import("@/views/post/post-home/index.vue"),
+        meta: {
+          title: `${appName} - ${subTitle}`,
           showLink: false
         }
       }

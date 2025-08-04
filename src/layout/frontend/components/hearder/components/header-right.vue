@@ -17,9 +17,12 @@
       :show-arrow="false"
       :offset="8"
     >
-      <a class="nav-button">
+      <div
+        class="nav-button"
+        @click.prevent="articleStore.navigateToRandomArticle()"
+      >
         <i class="anzhiyufont anzhiyu-icon-dice" />
-      </a>
+      </div>
     </el-tooltip>
     <el-tooltip content="搜索" placement="top" :show-arrow="false" :offset="8">
       <a class="nav-button">
@@ -34,6 +37,7 @@
 <script setup lang="ts">
 import type { PropType } from "vue";
 import { useSnackbar } from "@/composables/useSnackbar";
+import { useArticleStore } from "@/store/modules/articleStore";
 
 defineOptions({
   name: "HeaderRight"
@@ -45,6 +49,8 @@ defineProps({
     required: false
   }
 });
+
+const articleStore = useArticleStore();
 
 const { showSnackbar } = useSnackbar();
 
