@@ -1,18 +1,14 @@
 <script setup lang="ts">
-import type { PropType } from "vue";
+import { ref, onMounted, type PropType } from "vue";
 import type { Article } from "@/api/post/type";
 import { useArticleStore } from "@/store/modules/articleStore";
 import { formatRelativeTime } from "@/utils/format";
 import { useRouter } from "vue-router";
 
 const articleStore = useArticleStore();
-
 const router = useRouter();
-const goPost = (id: string) => {
-  router.push({ path: `/p/${id}` });
-};
 
-defineProps({
+const props = defineProps({
   article: {
     type: Object as PropType<Article>,
     required: true
@@ -22,6 +18,48 @@ defineProps({
     default: false
   }
 });
+
+// --- 新增代码开始 ---
+
+// 用于存储已读文章ID的localStorage键名
+const READ_ARTICLES_KEY = "read_articles";
+
+// 创建一个响应式变量来跟踪文章的已读状态
+const isRead = ref(false);
+
+// 在组件挂载时，检查当前文章是否已被标记为已读
+onMounted(() => {
+  const readArticlesStr = localStorage.getItem(READ_ARTICLES_KEY);
+  if (readArticlesStr) {
+    const readArticles: string[] = JSON.parse(readArticlesStr);
+    // 如果localStorage中存在当前文章ID，则标记为已读
+    if (readArticles.includes(props.article.id)) {
+      isRead.value = true;
+    }
+  }
+});
+
+const goPost = (id: string) => {
+  // 导航前，将当前文章ID标记为已读
+  const readArticlesStr = localStorage.getItem(READ_ARTICLES_KEY);
+  let readArticles: string[] = [];
+  if (readArticlesStr) {
+    readArticles = JSON.parse(readArticlesStr);
+  }
+
+  // 如果ID尚未在列表中，则添加并更新localStorage
+  if (!readArticles.includes(id)) {
+    readArticles.push(id);
+    localStorage.setItem(READ_ARTICLES_KEY, JSON.stringify(readArticles));
+    // 同时更新当前组件的状态
+    isRead.value = true;
+  }
+
+  // 执行页面跳转
+  router.push({ path: `/p/${id}` });
+};
+
+// --- 新增代码结束 ---
 </script>
 
 <template>
@@ -60,6 +98,10 @@ defineProps({
             class="category-tip"
           >
             {{ category.name }}
+          </span>
+
+          <span v-if="!isRead" class="unvisited-post" :title="article.title">
+            未读
           </span>
         </div>
         <h2 class="article-title" :title="article.title">
@@ -100,6 +142,13 @@ defineProps({
   margin-bottom: 1rem;
   transition: all 0.3s;
   cursor: pointer;
+  .unvisited-post {
+    display: inline;
+    color: var(--anzhiyu-secondtext);
+    font-size: 0.75rem;
+    position: relative;
+    margin-right: 8px;
+  }
 
   &:hover {
     border: var(--style-border-hover);
@@ -160,7 +209,6 @@ defineProps({
   }
 }
 
-/* 双栏布局下的样式 */
 .recent-post-item.double-column-item {
   width: calc(50% - 0.5rem);
   flex-direction: column;
@@ -203,6 +251,9 @@ defineProps({
   color: var(--anzhiyu-secondtext);
   font-size: 0.75rem;
   height: 20px;
+  &:has(.sticky-warp) {
+    transform: translateX(-4px);
+  }
 
   .sticky-warp {
     display: inline-flex;
@@ -254,7 +305,6 @@ defineProps({
   }
 }
 
-/* 响应式调整 */
 @media (max-width: 768px) {
   .recent-post-item,
   .recent-post-item.double-column-item {

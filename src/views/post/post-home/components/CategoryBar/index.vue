@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted, nextTick } from "vue";
 import { getCategoryList } from "@/api/post";
 import type { PostCategory } from "@/api/post/type";
 
@@ -8,14 +8,17 @@ const emit = defineEmits(["category-change"]);
 const categories = ref<PostCategory[]>([]);
 const selectedId = ref<string | null>(null);
 
-// 1. 创建模板引用和状态
 const catalogBarRef = ref<HTMLElement | null>(null);
 const isScrolledToEnd = ref(false);
+
+const showScrollButton = ref(false);
 
 const fetchCategories = async () => {
   try {
     const { data } = await getCategoryList();
     categories.value = data;
+    await nextTick();
+    updateScrollVisibility();
   } catch (error) {
     console.error("获取分类列表失败:", error);
   }
@@ -26,35 +29,42 @@ const handleSelect = (id: string | null) => {
   emit("category-change", id);
 };
 
-// 2. 检查滚动位置的函数
 const checkScrollPosition = () => {
   const el = catalogBarRef.value;
   if (!el) return;
-
-  // 判断是否滚动到底部（允许1px的误差）
   const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
   isScrolledToEnd.value = atEnd;
 };
 
-// 3. 点击滚动按钮的事件处理函数
+const updateScrollVisibility = () => {
+  const el = catalogBarRef.value;
+  if (!el) return;
+  // 如果滚动宽度大于可见宽度，则显示按钮
+  showScrollButton.value = el.scrollWidth > el.clientWidth;
+  // 同时，也检查一下滚动位置
+  checkScrollPosition();
+};
+
 const handleScrollNext = () => {
   const el = catalogBarRef.value;
   if (!el) return;
 
   if (isScrolledToEnd.value) {
-    // 如果已经在末尾，则滚动回起点
     el.scrollTo({ left: 0, behavior: "smooth" });
   } else {
-    // 否则，向右滚动一个可视区域的宽度
     el.scrollBy({ left: el.clientWidth, behavior: "smooth" });
   }
 };
 
 onMounted(() => {
   fetchCategories();
-  // 组件挂载后，也检查一下初始滚动状态
-  // 使用 setTimeout 确保在 DOM 渲染后执行
-  setTimeout(checkScrollPosition, 100);
+  // 监听窗口大小变化，以便动态调整按钮的显示
+  window.addEventListener("resize", updateScrollVisibility);
+});
+
+// 在组件卸载时，移除事件监听，防止内存泄漏
+onUnmounted(() => {
+  window.removeEventListener("resize", updateScrollVisibility);
 });
 </script>
 
@@ -85,7 +95,11 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      <div class="category-bar-next" @click="handleScrollNext">
+      <div
+        v-if="showScrollButton"
+        class="category-bar-next"
+        @click="handleScrollNext"
+      >
         <i
           class="anzhiyufont anzhiyu-icon-angle-double-right"
           :class="{ 'is-rotated': isScrolledToEnd }"
@@ -136,6 +150,7 @@ onMounted(() => {
 
 .catalog-list-item {
   cursor: pointer;
+  font-weight: 600;
   a {
     padding: 2px 12px;
     border-radius: 8px;
@@ -164,10 +179,9 @@ onMounted(() => {
   padding: 4px;
   background: var(--anzhiyu-card-bg);
   transition: all 0.3s ease-in-out;
-  flex-shrink: 0; /* 防止被挤压 */
+  flex-shrink: 0;
 
   i {
-    /* 7. 为图标添加过渡效果 */
     transition: transform 0.3s ease-in-out;
   }
 
