@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, type PropType } from "vue";
+// 从 vue 中导入 computed
+import { ref, onMounted, computed, type PropType } from "vue";
 import type { Article } from "@/api/post/type";
 import { useArticleStore } from "@/store/modules/articleStore";
 import { formatRelativeTime } from "@/utils/format";
@@ -19,7 +20,18 @@ const props = defineProps({
   }
 });
 
-// --- 新增代码开始 ---
+// 计算属性，用于判断文章是否为“最新”
+const isNewPost = computed(() => {
+  // 定义“最新”文章的时间阈值（这里设置为24小时）
+  const NEW_POST_THRESHOLD_HOURS = 24;
+  const threshold = NEW_POST_THRESHOLD_HOURS * 60 * 60 * 1000;
+
+  const postDate = new Date(props.article.created_at).getTime();
+  const now = new Date().getTime();
+
+  // 如果文章发布时间在阈值内，则返回 true
+  return now - postDate < threshold;
+});
 
 // 用于存储已读文章ID的localStorage键名
 const READ_ARTICLES_KEY = "read_articles";
@@ -58,8 +70,6 @@ const goPost = (id: string) => {
   // 执行页面跳转
   router.push({ path: `/p/${id}` });
 };
-
-// --- 新增代码结束 ---
 </script>
 
 <template>
@@ -100,9 +110,10 @@ const goPost = (id: string) => {
             {{ category.name }}
           </span>
 
-          <span v-if="!isRead" class="unvisited-post" :title="article.title">
-            未读
-          </span>
+          <span v-if="!isRead" class="unvisited-post" :title="article.title"
+            >未读</span
+          >
+          <span v-if="isNewPost" class="newPost">最新</span>
         </div>
         <h2 class="article-title" :title="article.title">
           {{ article.title }}
@@ -142,12 +153,13 @@ const goPost = (id: string) => {
   margin-bottom: 1rem;
   transition: all 0.3s;
   cursor: pointer;
-  .unvisited-post {
+  .unvisited-post,
+  .newPost {
     display: inline;
     color: var(--anzhiyu-secondtext);
     font-size: 0.75rem;
     position: relative;
-    margin-right: 8px;
+    margin-right: 4px;
   }
 
   &:hover {
@@ -268,7 +280,7 @@ const goPost = (id: string) => {
   }
 
   .category-tip {
-    margin-right: 8px;
+    margin-right: 4px;
     display: inline;
     color: var(--anzhiyu-secondtext);
     font-size: 0.75rem;
