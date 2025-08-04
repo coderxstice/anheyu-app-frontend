@@ -291,7 +291,7 @@ const handleSubmit = async (isPublish = false) => {
         } else {
           const { data } = await createArticle(dataToSubmit);
           ElMessage.success("创建成功");
-          router.replace({ name: "PostEdit", params: { id: data.id } });
+          router.push({ name: "PostManagement" });
           return;
         }
         router.push({ name: "PostManagement" });
@@ -465,9 +465,10 @@ watch(
                 filterable
                 allow-create
                 default-first-option
-                placeholder="选择或创建分类"
+                placeholder="选择或创建分类 (最多3个)"
                 style="width: 100%"
                 no-data-text="输入名称后按回车键创建"
+                :multiple-limit="3"
                 @change="handleCategoryChange"
               >
                 <el-option

@@ -2,8 +2,15 @@
 import type { PropType } from "vue";
 import type { Article } from "@/api/post/type";
 import { useArticleStore } from "@/store/modules/articleStore";
+import { formatRelativeTime } from "@/utils/format";
+import { useRouter } from "vue-router";
 
 const articleStore = useArticleStore();
+
+const router = useRouter();
+const goPost = (id: string) => {
+  router.push({ path: `/p/${id}` });
+};
 
 defineProps({
   article: {
@@ -15,20 +22,16 @@ defineProps({
     default: false
   }
 });
-
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-};
 </script>
 
 <template>
   <div
     class="recent-post-item"
     :class="{ 'double-column-item': isDoubleColumn }"
+    @click="goPost(article.id)"
   >
     <div class="post_cover">
-      <a :href="`/p/${article.id}`" :title="article.title">
+      <div :title="article.title">
         <img
           v-if="article.cover_url"
           class="post_bg"
@@ -41,25 +44,27 @@ const formatDate = (dateString: string) => {
           :src="articleStore.defaultCover"
           :alt="article.title"
         />
-      </a>
+      </div>
     </div>
     <div class="recent-post-info">
       <div class="recent-post-info-top">
         <div class="recent-post-info-top-tips">
+          <span v-if="article.pin_sort > 0" class="article-meta sticky-warp">
+            <i class="anzhiyufont anzhiyu-icon-thumbtack sticky" />
+            <span class="sticky">置顶</span>
+          </span>
+
           <span
-            v-if="article.post_categories && article.post_categories.length > 0"
+            v-for="category in article.post_categories"
+            :key="category.id"
             class="category-tip"
           >
-            {{ article.post_categories[0].name }}
+            {{ category.name }}
           </span>
         </div>
-        <a
-          class="article-title"
-          :href="`/p/${article.id}`"
-          :title="article.title"
-        >
+        <h2 class="article-title" :title="article.title">
           {{ article.title }}
-        </a>
+        </h2>
       </div>
       <div class="article-meta-wrap">
         <span class="article-meta tags">
@@ -73,7 +78,7 @@ const formatDate = (dateString: string) => {
         </span>
         <span class="post-meta-date">
           <time :datetime="article.created_at">{{
-            formatDate(article.created_at)
+            formatRelativeTime(article.created_at)
           }}</time>
         </span>
       </div>
@@ -82,7 +87,6 @@ const formatDate = (dateString: string) => {
 </template>
 
 <style lang="scss" scoped>
-/* 默认单栏样式 */
 .recent-post-item {
   display: flex;
   flex-direction: row;
@@ -95,6 +99,7 @@ const formatDate = (dateString: string) => {
   border: var(--style-border);
   margin-bottom: 1rem;
   transition: all 0.3s;
+  cursor: pointer;
 
   &:hover {
     border: var(--style-border-hover);
@@ -133,6 +138,9 @@ const formatDate = (dateString: string) => {
 
     .article-title {
       font-size: 1.5rem;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      -webkit-line-clamp: 2;
       line-clamp: 2;
       font-weight: 700;
       color: var(--anzhiyu-fontcolor);
@@ -167,20 +175,14 @@ const formatDate = (dateString: string) => {
 
   .recent-post-info {
     width: 100%;
-    padding: 1rem;
+    padding: 18px 32px;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
 
     .recent-post-info-top {
-      .category-tip {
-        color: #f06999;
-        font-size: 0.8rem;
-        font-weight: bold;
-      }
       .article-title {
         font-size: 1.3rem;
-        line-clamp: 2;
         margin-top: 0.5rem;
       }
     }
@@ -191,6 +193,37 @@ const formatDate = (dateString: string) => {
   }
 }
 
+.recent-post-info-top-tips {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+  color: var(--anzhiyu-secondtext);
+  font-size: 0.75rem;
+  height: 20px;
+
+  .sticky-warp {
+    display: inline-flex;
+    align-items: center;
+    color: #ff5722;
+    margin-right: 8px;
+
+    .sticky {
+      margin-left: 4px;
+      font-size: 0.75rem;
+    }
+  }
+
+  .category-tip {
+    margin-right: 8px;
+    display: inline;
+    color: var(--anzhiyu-secondtext);
+    font-size: 0.75rem;
+  }
+}
+
 .article-meta-wrap {
   display: flex;
   justify-content: space-between;
@@ -198,14 +231,11 @@ const formatDate = (dateString: string) => {
   width: 100%;
   font-size: 0.8rem;
   color: var(--anzhiyu-secondtext);
-  gap: 1rem; /* 在标签和日期之间增加间距 */
+  gap: 1rem;
 
   .tags {
-    /* 1. 允许此flex子项收缩，这是省略号生效的关键 */
     flex-shrink: 1;
     min-width: 0;
-
-    /* 2. 自身设为块级，并应用省略号三件套 */
     display: block;
     white-space: nowrap;
     overflow: hidden;
@@ -213,15 +243,14 @@ const formatDate = (dateString: string) => {
   }
 
   .tags .article-meta__tags {
-    /* 3. 内部的 a 标签设为行内元素，像文字一样排列 */
     display: inline;
-    margin-right: 0.5rem; /* 用 margin 代替 gap */
+    margin-right: 0.5rem;
     color: var(--anzhiyu-secondtext);
   }
 
   .post-meta-date {
     white-space: nowrap;
-    flex-shrink: 0; /* 4. 不允许日期收缩 */
+    flex-shrink: 0;
   }
 }
 

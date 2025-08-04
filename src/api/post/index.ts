@@ -2,7 +2,7 @@
  * @Description: 文章管理模块 API 统一出口 (文章、标签、分类)
  * @Author: 安知鱼
  * @Date: 2025-07-25 18:05:00
- * @LastEditTime: 2025-08-02 18:31:28
+ * @LastEditTime: 2025-08-04 15:04:53
  * @LastEditors: 安知鱼
  */
 
@@ -184,5 +184,16 @@ export const getRandomArticle = (): Promise<BaseResponse<ArticleResponse>> => {
   return http.request<BaseResponse<ArticleResponse>>(
     "get",
     baseUrlApi("public/articles/random")
+  );
+};
+
+/** @description [公开]获取文章列表 */
+export const getPublicArticles = (
+  params: GetArticleListParams
+): Promise<BaseResponse<ArticleListResponse>> => {
+  return http.request<BaseResponse<ArticleListResponse>>(
+    "get",
+    baseUrlApi("public/articles"),
+    { params }
   );
 };

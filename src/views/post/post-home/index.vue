@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-25 18:13:11
- * @LastEditTime: 2025-08-04 11:41:14
+ * @LastEditTime: 2025-08-04 15:04:21
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -12,7 +12,7 @@ import CategoryBar from "./components/CategoryBar/index.vue";
 import ArticleCard from "./components/ArticleCard/index.vue";
 import Pagination from "./components/Pagination/index.vue";
 import Sidebar from "./components/Sidebar/index.vue";
-import { getArticleList } from "@/api/post";
+import { getPublicArticles } from "@/api/post";
 import type { Article, GetArticleListParams } from "@/api/post/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
@@ -40,7 +40,7 @@ const fetchData = async () => {
       page: pagination.page,
       pageSize: pagination.pageSize
     };
-    const { data } = await getArticleList(params);
+    const { data } = await getPublicArticles(params);
     articles.value = data.list;
     pagination.total = data.total;
   } catch (error) {
