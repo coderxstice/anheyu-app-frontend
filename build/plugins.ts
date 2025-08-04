@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-11 11:59:32
- * @LastEditTime: 2025-07-31 09:52:23
+ * @LastEditTime: 2025-08-04 13:35:30
  * @LastEditors: 安知鱼
  */
 import { cdn } from "./cdn";
@@ -15,7 +15,7 @@ import { configCompressPlugin } from "./compress";
 import removeNoMatch from "vite-plugin-router-warn";
 import { visualizer } from "rollup-plugin-visualizer";
 import removeConsole from "vite-plugin-remove-console";
-import { codeInspectorPlugin } from "code-inspector-plugin";
+// import { codeInspectorPlugin } from "code-inspector-plugin";
 import { VitePWA } from "vite-plugin-pwa";
 import monacoEditorPlugin from "vite-plugin-monaco-editor";
 
@@ -30,10 +30,10 @@ export function getPluginsList(
   return [
     vue(),
     vueJsx(),
-    codeInspectorPlugin({
-      bundler: "vite",
-      hideConsole: true
-    }),
+    // codeInspectorPlugin({
+    //   bundler: "vite",
+    //   hideConsole: true
+    // }),
     viteBuildInfo(),
     removeNoMatch(),
     // vitePluginFakeServer({ ... }),

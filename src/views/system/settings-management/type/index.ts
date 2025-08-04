@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-24 17:29:16
- * @LastEditTime: 2025-08-02 18:06:32
+ * @LastEditTime: 2025-08-04 14:08:25
  * @LastEditors: 安知鱼
  */
 // src/views/system/settings-management/type/index.ts
@@ -74,6 +74,18 @@ export interface FileSettingsInfo {
   enableMusicExtractor: boolean;
   musicMaxSizeLocal: string;
   musicMaxSizeRemote: string;
+}
+
+/**
+ * @description: 文章配置表单接口
+ */
+export interface PostSettingsInfo {
+  ipApi: string;
+  ipApiToken: string;
+  default: {
+    defaultCover: string;
+    doubleColumn: boolean;
+  };
 }
 
 /**
@@ -210,14 +222,6 @@ export interface HomePageSettingsInfo {
 export interface FrontDeskSettings {
   home: HomePageSettingsInfo;
   // article: ArticlePageSettingsInfo;
-}
-
-/**
- * @description: 文章配置表单接口
- */
-export interface PostSettingsInfo {
-  ipApi: string;
-  ipApiToken: string;
 }
 
 /**

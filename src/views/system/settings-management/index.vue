@@ -68,11 +68,13 @@ type HomePageFormInfo = Omit<HomePageSettingsInfo, "footerCustomText">;
 type FormType = Omit<SettingsForm, "frontDesk"> & {
   frontDesk: { home: HomePageFormInfo };
 };
+
 type FormKeys =
   | keyof SiteInfo
   | keyof PageSittingInfo
   | keyof FileSettingsInfo
-  | keyof PostSettingsInfo
+  | keyof Omit<PostSettingsInfo, "default">
+  | keyof PostSettingsInfo["default"]
   | keyof HomePageFormInfo;
 
 const form = reactive<FormType>({
@@ -124,7 +126,11 @@ const form = reactive<FormType>({
   },
   post: {
     ipApi: "",
-    ipApiToken: ""
+    ipApiToken: "",
+    default: {
+      defaultCover: "",
+      doubleColumn: false
+    }
   },
   frontDesk: {
     home: {
@@ -168,6 +174,7 @@ const form = reactive<FormType>({
   }
 });
 
+// 修改点: 添加新字段的映射
 const formToKeysMap: Record<FormKeys, string> = {
   siteName: constant.KeyAppName,
   subTitle: constant.KeySubTitle,
@@ -238,14 +245,15 @@ const formToKeysMap: Record<FormKeys, string> = {
   footerSocialBarLeft: constant.KeyFooterSocialBarLeft,
   footerSocialBarRight: constant.KeyFooterSocialBarRight,
   footerList: constant.KeyFooterList,
-  footerBarLinkList: constant.KeyFooterBarLinkList
+  footerBarLinkList: constant.KeyFooterBarLinkList,
+  defaultCover: constant.KeyDefaultCover,
+  doubleColumn: constant.KeyDoubleColumn
 };
 
 const allKeys = Object.values(formToKeysMap);
 
 const toBoolean = (val: any) => val === "true" || val === true;
 
-// 辅助函数：判断一个值是否可能是JSON字符串
 const isJsonString = (str: any): boolean => {
   if (typeof str !== "string") return false;
   const s = str.trim();
@@ -280,6 +288,8 @@ watch(
       if (formKey in form.site) targetForm = form.site;
       else if (formKey in form.page) targetForm = form.page;
       else if (formKey in form.file) targetForm = form.file;
+      else if (formKey in form.post.default)
+        targetForm = form.post.default; // 先检查嵌套的对象
       else if (formKey in form.post) targetForm = form.post;
       else if (formKey in form.frontDesk.home) targetForm = form.frontDesk.home;
 
@@ -303,10 +313,8 @@ watch(
 
           if (typeof incomingObject === "object" && incomingObject !== null) {
             if (Array.isArray(targetValue)) {
-              // 对于数组，直接替换是安全的
               targetForm[formKey] = incomingObject;
             } else {
-              // 对于普通对象，使用 Object.assign 合并属性以保留引用
               Object.assign(targetValue, incomingObject);
             }
           }
@@ -328,11 +336,14 @@ onMounted(() => {
 const handleSave = async () => {
   const originalSettings = siteConfigStore.siteConfig;
   const settingsToUpdate: Record<string, any> = {};
+
+  // 修改点: 合并表单数据时，展开 form.post.default
   const combinedForm = {
     ...form.site,
     ...form.page,
     ...form.file,
     ...form.post,
+    ...form.post.default, // 确保嵌套属性被扁平化处理
     ...form.frontDesk.home
   };
 
@@ -346,7 +357,6 @@ const handleSave = async () => {
     let valueToSave: string;
     let originalCompareValue: string;
 
-    // 统一转换为字符串进行比较和保存
     if (typeof currentValue === "boolean") {
       valueToSave = String(currentValue);
       originalCompareValue = String(toBoolean(originalValue));
@@ -355,7 +365,6 @@ const handleSave = async () => {
       (typeof currentValue === "object" && currentValue !== null)
     ) {
       valueToSave = JSON.stringify(currentValue);
-      // 后端可能返回JSON字符串或对象，统一成标准化的字符串再比较
       const originalObject = isJsonString(originalValue)
         ? JSON.parse(originalValue)
         : originalValue || (Array.isArray(currentValue) ? [] : {});

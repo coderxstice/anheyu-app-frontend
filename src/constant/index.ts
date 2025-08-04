@@ -67,6 +67,8 @@ const KeyFooterSocialBarLeft: SettingKey = "footer.socialBar.left";
 const KeyFooterSocialBarRight: SettingKey = "footer.socialBar.right";
 const KeyFooterList: SettingKey = "footer.project.list";
 const KeyFooterBarLinkList: SettingKey = "footer.bar.linkList";
+const KeyDefaultCover: SettingKey = "post.default.cover";
+const KeyDoubleColumn: SettingKey = "post.default.double_column";
 
 // --- 文件生成及处理配置 ---
 const KeyEnableVipsGenerator: SettingKey = "ENABLE_VIPS_GENERATOR";
@@ -175,6 +177,8 @@ export const constant = {
   KeyFooterSocialBarRight,
   KeyFooterList,
   KeyFooterBarLinkList,
+  KeyDefaultCover,
+  KeyDoubleColumn,
 
   KeyHeaderMenu,
   KeyHeaderNavTravel,

@@ -45,6 +45,14 @@ const formatDate = (dateString: string) => {
     </div>
     <div class="recent-post-info">
       <div class="recent-post-info-top">
+        <div class="recent-post-info-top-tips">
+          <span
+            v-if="article.post_categories && article.post_categories.length > 0"
+            class="category-tip"
+          >
+            {{ article.post_categories[0].name }}
+          </span>
+        </div>
         <a
           class="article-title"
           :href="`/p/${article.id}`"
@@ -54,33 +62,27 @@ const formatDate = (dateString: string) => {
         </a>
       </div>
       <div class="article-meta-wrap">
-        <span class="post-meta-date">
-          <i class="anzhiyufont anzhiyu-icon-calendar-days" />
-          <span class="article-meta-label">发表于</span>
-          <time :datetime="article.created_at">{{
-            formatDate(article.created_at)
-          }}</time>
-        </span>
         <span class="article-meta tags">
           <a
             v-for="tag in article.post_tags"
             :key="tag.id"
             class="article-meta__tags"
           >
-            <span>
-              <i class="anzhiyufont anzhiyu-icon-hashtag" /> {{ tag.name }}
-            </span>
+            <span># {{ tag.name }}</span>
           </a>
         </span>
-      </div>
-      <div class="content">
-        {{ article.summaries[0] }}
+        <span class="post-meta-date">
+          <time :datetime="article.created_at">{{
+            formatDate(article.created_at)
+          }}</time>
+        </span>
       </div>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
+/* 默认单栏样式 */
 .recent-post-item {
   display: flex;
   flex-direction: row;
@@ -105,22 +107,29 @@ const formatDate = (dateString: string) => {
 
   .post_cover {
     overflow: hidden;
-    width: 45%; // 单栏时图片宽度
+    width: 45%;
     height: 100%;
+    flex-shrink: 0;
 
-    .post_bg {
-      height: 100%;
+    a,
+    img {
       width: 100%;
-      transition: all 0.6s ease;
+      height: 100%;
+      display: block;
       object-fit: cover;
+    }
+    .post_bg {
+      transition: all 0.6s ease;
     }
   }
 
   .recent-post-info {
-    width: 55%; // 单栏时信息区域宽度
+    flex-grow: 1;
+    width: 55%;
     padding: 2rem;
     display: flex;
     flex-direction: column;
+    min-width: 0;
 
     .article-title {
       font-size: 1.5rem;
@@ -138,52 +147,85 @@ const formatDate = (dateString: string) => {
     }
 
     .article-meta-wrap {
-      margin: 1rem 0;
-      color: var(--anzhiyu-secondtext);
-      font-size: 0.875rem;
-    }
-
-    .content {
-      transition: all 0.3s ease;
-      display: -webkit-box;
-      overflow: hidden;
-      -webkit-box-orient: vertical;
-      line-clamp: 2;
-      line-height: 1.6;
-      color: var(--anzhiyu-secondtext);
-      font-size: 0.9rem;
+      margin-top: auto;
     }
   }
 }
 
-// 双栏布局下的样式覆盖
+/* 双栏布局下的样式 */
 .recent-post-item.double-column-item {
   width: calc(50% - 0.5rem);
   flex-direction: column;
   height: auto;
+  align-items: flex-start;
 
   .post_cover {
     width: 100%;
     height: 225px;
+    border-radius: 8px 8px 0 0;
   }
 
   .recent-post-info {
     width: 100%;
     padding: 1rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 
-    .article-title {
-      font-size: 1.1rem;
+    .recent-post-info-top {
+      .category-tip {
+        color: #f06999;
+        font-size: 0.8rem;
+        font-weight: bold;
+      }
+      .article-title {
+        font-size: 1.3rem;
+        line-clamp: 2;
+        margin-top: 0.5rem;
+      }
     }
+
     .article-meta-wrap {
-      margin: 0.5rem 0;
-    }
-    .content {
-      display: none;
+      margin-top: auto;
     }
   }
 }
 
-// 响应式调整
+.article-meta-wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  font-size: 0.8rem;
+  color: var(--anzhiyu-secondtext);
+  gap: 1rem; /* 在标签和日期之间增加间距 */
+
+  .tags {
+    /* 1. 允许此flex子项收缩，这是省略号生效的关键 */
+    flex-shrink: 1;
+    min-width: 0;
+
+    /* 2. 自身设为块级，并应用省略号三件套 */
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tags .article-meta__tags {
+    /* 3. 内部的 a 标签设为行内元素，像文字一样排列 */
+    display: inline;
+    margin-right: 0.5rem; /* 用 margin 代替 gap */
+    color: var(--anzhiyu-secondtext);
+  }
+
+  .post-meta-date {
+    white-space: nowrap;
+    flex-shrink: 0; /* 4. 不允许日期收缩 */
+  }
+}
+
+/* 响应式调整 */
 @media (max-width: 768px) {
   .recent-post-item,
   .recent-post-item.double-column-item {
@@ -200,8 +242,11 @@ const formatDate = (dateString: string) => {
       height: 200px;
     }
 
-    .recent-post-info .content {
-      display: -webkit-box;
+    .recent-post-info {
+      padding: 1rem;
+      .article-title {
+        font-size: 1.2rem;
+      }
     }
   }
 }

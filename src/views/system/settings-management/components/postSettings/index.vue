@@ -1,14 +1,25 @@
-<!--
- * @Description:
- * @Author: 安知鱼
- * @Date: 2025-08-02 18:04:48
- * @LastEditTime: 2025-08-02 18:06:16
- * @LastEditors: 安知鱼
--->
 <template>
   <el-divider content-position="left">
     <h3>文章配置</h3>
   </el-divider>
+
+  <el-form-item label="默认cover图片">
+    <el-input
+      v-model="formData.default.defaultCover"
+      placeholder="请输入默认cover图片地址"
+    />
+    <div class="form-item-help">
+      用于文章未填写cover或者cover图片加载失败时的默认图片。
+    </div>
+  </el-form-item>
+
+  <el-form-item label="默认双栏样式">
+    <el-switch
+      v-model="formData.default.doubleColumn"
+      placeholder="例如：true"
+    />
+    <div class="form-item-help">用于默认文章列表是否双栏样式。</div>
+  </el-form-item>
 
   <el-form-item label="IP属地查询 API 地址">
     <el-input
