@@ -182,8 +182,6 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
           return Promise.reject(new Error(updateRes.message));
         }
 
-        // [核心修正] 保存成功后，不直接用扁平数据更新缓存，
-        // 而是立即调用公共配置API，获取最新的、完整的、结构化的配置
         try {
           const configRes = await getSiteConfigApi();
           if (configRes.code === 200 && configRes.data) {

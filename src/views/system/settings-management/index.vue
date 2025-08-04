@@ -43,17 +43,18 @@
 import { reactive, onMounted, watch } from "vue";
 import { ElMessage } from "element-plus";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
-import { constant } from "@/constant";
+import { get, set, isEqual } from "lodash-es";
 
-import type {
-  SettingsForm,
-  SiteInfo,
-  PageSittingInfo,
-  FileSettingsInfo,
-  PostSettingsInfo,
-  HomePageSettingsInfo
-} from "./type";
+// 引入描述符和新的工具函数
+import { allSettingDescriptors } from "./settings.descriptor";
+import {
+  createInitialFormState,
+  createDescriptorMap,
+  parseBackendValue,
+  formatValueForSave
+} from "./utils";
 
+// 引入所有子组件
 import BaseInfoForm from "./components/BaseInfoForm.vue";
 import IconSettingsForm from "./components/IconSettingsForm.vue";
 import PageSittingForm from "./components/PageSittingForm.vue";
@@ -61,268 +62,29 @@ import FileSettings from "./components/fileSetting/FileSettingsForm.vue";
 import PostSettings from "./components/postSettings/index.vue";
 import FrontDeskSettings from "./components/FrontDeskSettings.vue";
 
-let activeName = "siteConfig";
+const activeName = "siteConfig";
 const siteConfigStore = useSiteConfigStore();
 
-type HomePageFormInfo = Omit<HomePageSettingsInfo, "footerCustomText">;
-type FormType = Omit<SettingsForm, "frontDesk"> & {
-  frontDesk: { home: HomePageFormInfo };
-};
-
-type FormKeys =
-  | keyof SiteInfo
-  | keyof PageSittingInfo
-  | keyof FileSettingsInfo
-  | keyof Omit<PostSettingsInfo, "default">
-  | keyof PostSettingsInfo["default"]
-  | keyof HomePageFormInfo;
-
-const form = reactive<FormType>({
-  site: {
-    siteName: "",
-    subTitle: "",
-    siteDescription: "",
-    primaryUrl: "",
-    footerCode: "",
-    announcement: "",
-    logoDay: "",
-    logoNight: "",
-    favicon: "",
-    iconMedium: "",
-    iconLarge: ""
-  },
-  page: { albumApiURL: "", defaultThumbParam: "", defaultBigParam: "" },
-  file: {
-    uploadAllowedExtensions: "",
-    uploadDeniedExtensions: "",
-    enableVipsGenerator: false,
-    vipsPath: "vips",
-    vipsMaxFileSize: "0",
-    vipsSupportedExts: "",
-    enableMusicCoverGenerator: true,
-    musicCoverMaxFileSize: "0",
-    musicCoverSupportedExts: "mp3,m4a,ogg,flac",
-    enableFfmpegGenerator: false,
-    ffmpegPath: "ffmpeg",
-    ffmpegMaxFileSize: "0",
-    ffmpegSupportedExts: "",
-    ffmpegCaptureTime: "00:00:01.00",
-    enableBuiltinGenerator: true,
-    builtinMaxFileSize: "0",
-    builtinDirectServeExts: "avif,webp",
-    queueThumbConcurrency: 15,
-    queueThumbMaxExecTime: 300,
-    queueThumbBackoffFactor: 2,
-    queueThumbMaxBackoff: 60,
-    queueThumbMaxRetries: 3,
-    queueThumbRetryDelay: 5,
-    enableExifExtractor: true,
-    exifMaxSizeLocal: "0",
-    exifMaxSizeRemote: "0",
-    exifUseBruteForce: false,
-    enableMusicExtractor: true,
-    musicMaxSizeLocal: "0",
-    musicMaxSizeRemote: "0"
-  },
-  post: {
-    ipApi: "",
-    ipApiToken: "",
-    default: {
-      defaultCover: "",
-      doubleColumn: false
-    }
-  },
-  frontDesk: {
-    home: {
-      siteOwnerName: "",
-      siteOwnerEmail: "",
-      footerOwnerName: "",
-      footerOwnerSince: "",
-      footerRuntimeEnable: false,
-      footerRuntimeLaunchTime: "",
-      footerRuntimeWorkImg: "",
-      footerRuntimeWorkDesc: "",
-      footerRuntimeOffDutyImg: "",
-      footerRuntimeOffDutyDesc: "",
-      footerSocialBarCenterImg: "",
-      footerListRandomFriends: "0",
-      footerBarAuthorLink: "",
-      footerBarCCLink: "",
-      homeTop: {
-        title: "",
-        subTitle: "",
-        siteText: "",
-        banner: {
-          title: "",
-          tips: "",
-          image: "",
-          link: "",
-          isExternal: false
-        },
-        category: []
-      },
-      footerBadges: [],
-      footerSocialBarLeft: [],
-      footerSocialBarRight: [],
-      footerList: [],
-      footerBarLinkList: [],
-      menu: [],
-      navTravel: false,
-      navClock: false,
-      navMenuItems: []
-    }
-  }
-});
-
-// 修改点: 添加新字段的映射
-const formToKeysMap: Record<FormKeys, string> = {
-  siteName: constant.KeyAppName,
-  subTitle: constant.KeySubTitle,
-  siteDescription: constant.KeySiteDescription,
-  primaryUrl: constant.KeySiteURL,
-  albumApiURL: constant.KeyApiURL,
-  defaultThumbParam: constant.KeyDefaultThumbParam,
-  defaultBigParam: constant.KeyDefaultBigParam,
-  ipApi: constant.KeyIPAPI,
-  ipApiToken: constant.KeyIPAPIToKen,
-  footerCode: constant.KeyFooterCode,
-  announcement: constant.KeySiteAnnouncement,
-  logoDay: constant.KeyLogoHorizontalDay,
-  logoNight: constant.KeyLogoHorizontalNight,
-  favicon: constant.KeyIconURL,
-  iconMedium: constant.KeyLogoURL192,
-  iconLarge: constant.KeyLogoURL512,
-  siteOwnerName: constant.KeyFrontDeskSiteOwnerName,
-  siteOwnerEmail: constant.KeyFrontDeskSiteOwnerEmail,
-  footerOwnerName: constant.KeyFooterOwnerName,
-  footerOwnerSince: constant.KeyFooterOwnerSince,
-  footerRuntimeEnable: constant.KeyFooterRuntimeEnable,
-  footerRuntimeLaunchTime: constant.KeyFooterRuntimeLaunchTime,
-  footerRuntimeWorkImg: constant.KeyFooterRuntimeWorkImg,
-  footerRuntimeWorkDesc: constant.KeyFooterRuntimeWorkDesc,
-  footerRuntimeOffDutyImg: constant.KeyFooterRuntimeOffDutyImg,
-  footerRuntimeOffDutyDesc: constant.KeyFooterRuntimeOffDutyDesc,
-  footerSocialBarCenterImg: constant.KeyFooterSocialBarCenterImg,
-  footerListRandomFriends: constant.KeyFooterListRandomFriends,
-  footerBarAuthorLink: constant.KeyFooterBarAuthorLink,
-  footerBarCCLink: constant.KeyFooterBarCCLink,
-  homeTop: constant.KeyHomeTop,
-  menu: constant.KeyHeaderMenu,
-  navTravel: constant.KeyHeaderNavTravel,
-  navClock: constant.KeyHeaderNavClock,
-  navMenuItems: constant.KeyHeaderNavMenu,
-  uploadAllowedExtensions: constant.KeyUploadAllowedExtensions,
-  uploadDeniedExtensions: constant.KeyUploadDeniedExtensions,
-  enableVipsGenerator: constant.KeyEnableVipsGenerator,
-  vipsPath: constant.KeyVipsPath,
-  vipsMaxFileSize: constant.KeyVipsMaxFileSize,
-  vipsSupportedExts: constant.KeyVipsSupportedExts,
-  enableMusicCoverGenerator: constant.KeyEnableMusicCoverGenerator,
-  musicCoverMaxFileSize: constant.KeyMusicCoverMaxFileSize,
-  musicCoverSupportedExts: constant.KeyMusicCoverSupportedExts,
-  enableFfmpegGenerator: constant.KeyEnableFfmpegGenerator,
-  ffmpegPath: constant.KeyFfmpegPath,
-  ffmpegMaxFileSize: constant.KeyFfmpegMaxFileSize,
-  ffmpegSupportedExts: constant.KeyFfmpegSupportedExts,
-  ffmpegCaptureTime: constant.KeyFfmpegCaptureTime,
-  enableBuiltinGenerator: constant.KeyEnableBuiltinGenerator,
-  builtinMaxFileSize: constant.KeyBuiltinMaxFileSize,
-  builtinDirectServeExts: constant.KeyBuiltinDirectServeExts,
-  queueThumbConcurrency: constant.KeyQueueThumbConcurrency,
-  queueThumbMaxExecTime: constant.KeyQueueThumbMaxExecTime,
-  queueThumbBackoffFactor: constant.KeyQueueThumbBackoffFactor,
-  queueThumbMaxBackoff: constant.KeyQueueThumbMaxBackoff,
-  queueThumbMaxRetries: constant.KeyQueueThumbMaxRetries,
-  queueThumbRetryDelay: constant.KeyQueueThumbRetryDelay,
-  enableExifExtractor: constant.KeyEnableExifExtractor,
-  exifMaxSizeLocal: constant.KeyExifMaxSizeLocal,
-  exifMaxSizeRemote: constant.KeyExifMaxSizeRemote,
-  exifUseBruteForce: constant.KeyExifUseBruteForce,
-  enableMusicExtractor: constant.KeyEnableMusicExtractor,
-  musicMaxSizeLocal: constant.KeyMusicMaxSizeLocal,
-  musicMaxSizeRemote: constant.KeyMusicMaxSizeRemote,
-  footerBadges: constant.KeyFooterBadge,
-  footerSocialBarLeft: constant.KeyFooterSocialBarLeft,
-  footerSocialBarRight: constant.KeyFooterSocialBarRight,
-  footerList: constant.KeyFooterList,
-  footerBarLinkList: constant.KeyFooterBarLinkList,
-  defaultCover: constant.KeyDefaultCover,
-  doubleColumn: constant.KeyDoubleColumn
-};
-
-const allKeys = Object.values(formToKeysMap);
-
-const toBoolean = (val: any) => val === "true" || val === true;
-
-const isJsonString = (str: any): boolean => {
-  if (typeof str !== "string") return false;
-  const s = str.trim();
-  return (
-    (s.startsWith("{") && s.endsWith("}")) ||
-    (s.startsWith("[") && s.endsWith("]"))
-  );
-};
-
-const getNestedValue = (obj: any, path: string): any => {
-  if (!path || !obj) return undefined;
-  if (!path.includes(".")) return obj[path];
-  return path
-    .split(".")
-    .reduce(
-      (o, key) => (o && typeof o === "object" && key in o ? o[key] : undefined),
-      obj
-    );
-};
+// --- 优雅的自动化 ---
+// 1. 根据描述符创建 Map，方便查找
+const descriptorMap = createDescriptorMap(allSettingDescriptors);
+// 2. 根据描述符获取所有需要从后端请求的键
+const allBackendKeys = allSettingDescriptors.map(d => d.backendKey);
+// 3. 根据描述符自动生成包含所有默认值的、具有正确嵌套结构的 form 对象
+const form = reactive(createInitialFormState(allSettingDescriptors));
+// --- 告别手动维护巨大、易错的 form 和 key map ---
 
 watch(
   () => siteConfigStore.siteConfig,
   newSettings => {
     if (!newSettings || Object.keys(newSettings).length === 0) return;
 
-    Object.keys(formToKeysMap).forEach(formKeyStr => {
-      const formKey = formKeyStr as FormKeys;
-      const backendKey = formToKeysMap[formKey];
-      const value = getNestedValue(newSettings, backendKey);
-
-      let targetForm: any;
-      if (formKey in form.site) targetForm = form.site;
-      else if (formKey in form.page) targetForm = form.page;
-      else if (formKey in form.file) targetForm = form.file;
-      else if (formKey in form.post.default)
-        targetForm = form.post.default; // 先检查嵌套的对象
-      else if (formKey in form.post) targetForm = form.post;
-      else if (formKey in form.frontDesk.home) targetForm = form.frontDesk.home;
-
-      if (targetForm && value !== undefined && value !== null) {
-        const targetValue = targetForm[formKey];
-        const targetType = typeof targetValue;
-
-        if (targetType === "boolean") {
-          targetForm[formKey] = toBoolean(value);
-        } else if (targetType === "object" && targetValue !== null) {
-          let incomingObject;
-          if (isJsonString(value)) {
-            try {
-              incomingObject = JSON.parse(value);
-            } catch {
-              incomingObject = null;
-            }
-          } else {
-            incomingObject = value;
-          }
-
-          if (typeof incomingObject === "object" && incomingObject !== null) {
-            if (Array.isArray(targetValue)) {
-              targetForm[formKey] = incomingObject;
-            } else {
-              Object.assign(targetValue, incomingObject);
-            }
-          }
-        } else if (targetType === "number") {
-          targetForm[formKey] = Number(value);
-        } else {
-          targetForm[formKey] = String(value);
-        }
+    // 通用逻辑：遍历描述符，自动填充表单
+    descriptorMap.forEach((desc, frontendPath) => {
+      const backendValue = get(newSettings, desc.backendKey);
+      if (backendValue !== undefined) {
+        const parsedValue = parseBackendValue(backendValue, desc.type);
+        set(form, frontendPath, parsedValue);
       }
     });
   },
@@ -330,52 +92,26 @@ watch(
 );
 
 onMounted(() => {
-  siteConfigStore.fetchSystemSettings(allKeys);
+  siteConfigStore.fetchSystemSettings(allBackendKeys);
 });
 
 const handleSave = async () => {
-  const originalSettings = siteConfigStore.siteConfig;
   const settingsToUpdate: Record<string, any> = {};
+  const originalSettings = siteConfigStore.siteConfig;
 
-  // 修改点: 合并表单数据时，展开 form.post.default
-  const combinedForm = {
-    ...form.site,
-    ...form.page,
-    ...form.file,
-    ...form.post,
-    ...form.post.default, // 确保嵌套属性被扁平化处理
-    ...form.frontDesk.home
-  };
+  // 通用逻辑：遍历描述符，自动比较差异
+  descriptorMap.forEach((desc, frontendPath) => {
+    const currentValue = get(form, frontendPath);
+    const originalValueRaw = get(originalSettings, desc.backendKey);
+    // 同样需要解析原始值，以确保同类型比较
+    const originalValueParsed = parseBackendValue(originalValueRaw, desc.type);
 
-  (Object.keys(formToKeysMap) as FormKeys[]).forEach(formKey => {
-    const backendKey = formToKeysMap[formKey];
-    if (!backendKey) return;
-
-    const currentValue = combinedForm[formKey];
-    const originalValue = getNestedValue(originalSettings, backendKey);
-
-    let valueToSave: string;
-    let originalCompareValue: string;
-
-    if (typeof currentValue === "boolean") {
-      valueToSave = String(currentValue);
-      originalCompareValue = String(toBoolean(originalValue));
-    } else if (
-      Array.isArray(currentValue) ||
-      (typeof currentValue === "object" && currentValue !== null)
-    ) {
-      valueToSave = JSON.stringify(currentValue);
-      const originalObject = isJsonString(originalValue)
-        ? JSON.parse(originalValue)
-        : originalValue || (Array.isArray(currentValue) ? [] : {});
-      originalCompareValue = JSON.stringify(originalObject);
-    } else {
-      valueToSave = String(currentValue ?? "");
-      originalCompareValue = String(originalValue ?? "");
-    }
-
-    if (valueToSave !== originalCompareValue) {
-      settingsToUpdate[backendKey] = valueToSave;
+    // 使用 lodash.isEqual 进行深度比较，完美处理对象和数组
+    if (!isEqual(currentValue, originalValueParsed)) {
+      settingsToUpdate[desc.backendKey] = formatValueForSave(
+        currentValue,
+        desc.type
+      );
     }
   });
 
@@ -386,7 +122,6 @@ const handleSave = async () => {
 
   try {
     await siteConfigStore.saveSystemSettings(settingsToUpdate);
-    ElMessage.success("设置保存成功！");
   } catch (error: any) {
     ElMessage.error(`保存失败: ${error.message || String(error)}`);
   }
