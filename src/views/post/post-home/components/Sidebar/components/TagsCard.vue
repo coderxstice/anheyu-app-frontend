@@ -1,20 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { getTagList } from "@/api/post";
+import { PostTag } from "@/api/post/type";
 
 defineOptions({
   name: "TagsCard"
 });
 
-// 根据你的 API 响应结构定义类型
-interface Tag {
-  id: string;
-  name: string;
-  // 理想情况下，API应该返回count
-  // count?: number;
-}
-
-const tagList = ref<Tag[]>([]);
+const tagList = ref<PostTag[]>([]);
 const loading = ref(true);
 
 // 获取标签数据
@@ -22,9 +15,7 @@ const fetchTags = async () => {
   loading.value = true;
   try {
     const res = await getTagList();
-    // 请根据你实际的 BaseResponse 结构调整
     if (res.code === 200 && res.data) {
-      // 假设 data 就是标签数组，如果 data 是 { list: [...] } 结构，则用 res.data.list
       tagList.value = res.data;
     }
   } catch (error) {
@@ -34,22 +25,6 @@ const fetchTags = async () => {
   }
 };
 
-// 为标签生成一个随机的字体大小，模拟标签云效果
-// 理想情况下，这个大小应该基于 tag.count
-const getTagStyle = () => {
-  const minSize = 14; // 最小字体大小 (px)
-  const maxSize = 28; // 最大字体大小 (px)
-  const randomSize = Math.random() * (maxSize - minSize) + minSize;
-
-  // 也可以根据大小随机生成一个颜色，增加层次感
-  const randomOpacity = Math.random() * 0.5 + 0.5; // 透明度在 0.5 和 1.0 之间
-
-  return {
-    fontSize: `${randomSize.toFixed(1)}px`,
-    opacity: randomOpacity
-  };
-};
-
 onMounted(() => {
   fetchTags();
 });
@@ -57,10 +32,6 @@ onMounted(() => {
 
 <template>
   <div class="card-widget card-tags">
-    <div class="card-header">
-      <i class="anzhiyufont anzhiyu-icon-tags card-title-icon" />
-      <span class="card-title">标签</span>
-    </div>
     <div class="card-content">
       <div v-if="loading" class="loading-tip">标签云加载中...</div>
       <div v-else-if="tagList.length > 0" class="card-tag-cloud">
@@ -68,9 +39,9 @@ onMounted(() => {
           v-for="tag in tagList"
           :key="tag.id"
           :to="`/tags/${tag.name}`"
-          :style="getTagStyle()"
         >
           {{ tag.name }}
+          <sup>{{ tag.count }}</sup>
         </router-link>
       </div>
       <div v-else class="empty-tip">暂无标签</div>
@@ -88,38 +59,30 @@ onMounted(() => {
   padding: 1rem 1.2rem;
 }
 
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1.1rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-  color: var(--anzhiyu-fontcolor);
-  .card-title-icon {
-    font-size: 1.2rem;
-  }
-}
-
 .card-content {
   min-height: 100px;
 }
 
 .card-tag-cloud {
+  max-height: 360px;
+  overflow: hidden;
+  position: relative;
   display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
+  gap: 4px;
   a {
-    display: inline-block;
     color: var(--anzhiyu-fontcolor);
-    text-decoration: none;
-    transition: all 0.3s ease;
-    line-height: 1;
+    padding: 0 0.375rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
 
     &:hover {
-      color: var(--anzhiyu-theme);
-      transform: scale(1.1);
+      background: var(--anzhiyu-lighttext);
+      color: var(--anzhiyu-card-bg);
+      box-shadow: var(--anzhiyu-shadow-theme);
+      border-radius: 4px;
     }
 
     sup {
@@ -127,6 +90,20 @@ onMounted(() => {
       margin-left: 4px;
       font-size: 0.7em;
     }
+  }
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 150px;
+    background-image: linear-gradient(
+      to top,
+      var(--anzhiyu-card-bg),
+      transparent
+    );
+    pointer-events: none;
   }
 }
 

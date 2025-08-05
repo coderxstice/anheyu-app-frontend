@@ -42,7 +42,7 @@ defineProps({
   background: #57bd6a;
   display: flex;
   justify-content: center;
-  align-content: center;
+  align-items: center;
   padding: 0;
   cursor: pointer;
   height: 110px;

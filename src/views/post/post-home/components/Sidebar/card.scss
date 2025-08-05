@@ -1,12 +1,13 @@
 .card-widget {
+  box-shadow: var(--anzhiyu-shadow-border);
   background: var(--anzhiyu-card-bg);
-  box-shadow: var(--anzhiyu-shadow-black);
-  border-radius: 12px;
-  overflow: hidden;
   border: var(--style-border);
+  border-radius: 12px;
   transition: 0.3s;
   position: relative;
-  &:hover {
-    box-shadow: var(--anzhiyu-shadow-main);
-  }
+  overflow: hidden;
+  padding: 1rem;
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
 }

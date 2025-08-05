@@ -152,7 +152,6 @@ const goPost = (id: string) => {
   border-radius: 12px;
   background: var(--anzhiyu-card-bg);
   border: var(--style-border);
-  margin-bottom: 1rem;
   transition: all 0.3s;
   cursor: pointer;
   .unvisited-post,
@@ -232,7 +231,7 @@ const goPost = (id: string) => {
 }
 
 .recent-post-item.double-column-item {
-  width: calc(50% - 0.5rem);
+  width: calc(50% - 0.3125rem);
   flex-direction: column;
   height: auto;
   align-items: flex-start;

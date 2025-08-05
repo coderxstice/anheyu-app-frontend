@@ -2,7 +2,7 @@
  * @Description: 文章管理模块 API 统一出口 (文章、标签、分类)
  * @Author: 安知鱼
  * @Date: 2025-07-25 18:05:00
- * @LastEditTime: 2025-08-04 15:04:53
+ * @LastEditTime: 2025-08-05 11:29:39
  * @LastEditors: 安知鱼
  */
 
@@ -88,10 +88,17 @@ export const deleteArticle = (id: string): Promise<BaseResponse<null>> => {
 // ===================================
 
 /** @description 获取标签列表 */
-export const getTagList = (): Promise<BaseResponse<TagListResponse>> => {
+export const getTagList = (
+  sort: "count" | "name" = "count"
+): Promise<BaseResponse<TagListResponse>> => {
   return http.request<BaseResponse<TagListResponse>>(
     "get",
-    baseUrlApi("post-tags")
+    baseUrlApi("post-tags"),
+    {
+      params: {
+        sort: sort
+      }
+    }
   );
 };
 
@@ -129,7 +136,6 @@ export const deleteTag = (id: string): Promise<BaseResponse<null>> => {
 // ===================================
 //          文章分类 (PostCategory)
 // ===================================
-
 /** @description 获取分类列表 */
 export const getCategoryList = (): Promise<
   BaseResponse<CategoryListResponse>

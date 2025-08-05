@@ -163,6 +163,7 @@ watch([() => pagination.page, currentCategoryId], fetchData, {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
+    gap: 0.625rem;
   }
 }
 
