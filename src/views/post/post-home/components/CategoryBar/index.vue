@@ -114,7 +114,7 @@ onUnmounted(() => {
 .category-bar-container {
   width: 100%;
   display: flex;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .category-bar {
@@ -130,6 +130,7 @@ onUnmounted(() => {
   border-radius: 12px;
   transition: all 0.3s ease 0s;
   animation: slide-in 0.6s 0.3s backwards;
+  transform: translateX(-1px);
 }
 
 .catalog-bar {

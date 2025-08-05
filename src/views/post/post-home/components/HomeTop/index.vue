@@ -233,7 +233,7 @@ const creativityPairs = computed(() => {
 /* 左侧区域样式 */
 .home-top-container {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
   width: 100%;
   margin: 1rem auto 0;
 }

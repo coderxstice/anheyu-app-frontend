@@ -139,7 +139,7 @@ watch([() => pagination.page, currentCategoryId], fetchData, {
 }
 
 .layout {
-  padding: 1rem 1.5rem;
+  padding: 0.5rem 1.5rem 1rem;
   max-width: 1400px;
   margin: 0 auto;
   display: flex;
@@ -152,7 +152,7 @@ watch([() => pagination.page, currentCategoryId], fetchData, {
 }
 
 .aside-content {
-  width: 320px;
+  width: 280px;
   transition: all 0.3s;
 }
 
