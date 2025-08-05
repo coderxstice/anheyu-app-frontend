@@ -226,7 +226,7 @@ const creativityPairs = computed(() => {
   animation: rotating 2s linear infinite;
 }
 #random-hover.is-loading {
-  pointer-events: none; /* 加载中禁止点击 */
+  pointer-events: none;
   cursor: wait;
 }
 

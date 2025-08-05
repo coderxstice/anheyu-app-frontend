@@ -27,6 +27,7 @@ export interface PostTag {
   created_at: string;
   updated_at: string;
   name: string;
+  count: number;
 }
 
 export interface PostTagForm {
