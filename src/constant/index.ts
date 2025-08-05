@@ -2,7 +2,7 @@
  * @Description: 系统配置相关的常量，与后端 Go 定义和 API 响应保持同步。
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:42:04
- * @LastEditTime: 2025-08-02 18:08:11
+ * @LastEditTime: 2025-08-05 15:26:13
  * @LastEditors: 安知鱼
  */
 
@@ -43,6 +43,25 @@ const KeyHeaderNavTravel: SettingKey = "header.nav.travelling";
 const KeyHeaderNavClock: SettingKey = "header.nav.clock";
 const KeyHeaderNavMenu: SettingKey = "header.nav.menu";
 const KeyHomeTop: SettingKey = "HOME_TOP";
+
+// --- Sidebar 配置 ---
+const KeySidebarAuthorEnable: SettingKey = "sidebar.author.enable";
+const KeySidebarAuthorDescription: SettingKey = "sidebar.author.description";
+const KeySidebarAuthorStatusImg: SettingKey = "sidebar.author.statusImg";
+const KeySidebarAuthorSkills: SettingKey = "sidebar.author.skills";
+const KeySidebarAuthorSocial: SettingKey = "sidebar.author.social";
+const KeySidebarWechatEnable: SettingKey = "sidebar.wechat.enable";
+const KeySidebarWechatFace: SettingKey = "sidebar.wechat.face";
+const KeySidebarWechatBackFace: SettingKey = "sidebar.wechat.backFace";
+const KeySidebarTagsEnable: SettingKey = "sidebar.tags.enable";
+const KeySidebarTagsHighlight: SettingKey = "sidebar.tags.highlight";
+const KeySidebarCategoriesEnable: SettingKey = "sidebar.categories.enable";
+const KeySidebarSiteInfoPostCountEnable: SettingKey =
+  "sidebar.siteinfo.postCountEnable";
+const KeySidebarSiteInfoRuntimeEnable: SettingKey =
+  "sidebar.siteinfo.runtimeEnable";
+const KeySidebarSiteInfoWordCountEnable: SettingKey =
+  "sidebar.siteinfo.wordCountEnable";
 
 // --- 前台及页脚配置 ---
 const KeyFrontDeskSiteOwnerName: SettingKey = "frontDesk.siteOwner.name";
@@ -156,6 +175,29 @@ export const constant = {
   KeyUploadAllowedExtensions,
   KeyUploadDeniedExtensions,
 
+  // --- Header/Nav 配置 ---
+  KeyHeaderMenu,
+  KeyHeaderNavTravel,
+  KeyHeaderNavClock,
+  KeyHeaderNavMenu,
+  KeyHomeTop,
+
+  // --- Sidebar 配置 ---
+  KeySidebarAuthorEnable,
+  KeySidebarAuthorDescription,
+  KeySidebarAuthorStatusImg,
+  KeySidebarAuthorSkills,
+  KeySidebarAuthorSocial,
+  KeySidebarWechatEnable,
+  KeySidebarWechatFace,
+  KeySidebarWechatBackFace,
+  KeySidebarTagsEnable,
+  KeySidebarTagsHighlight,
+  KeySidebarCategoriesEnable,
+  KeySidebarSiteInfoPostCountEnable,
+  KeySidebarSiteInfoRuntimeEnable,
+  KeySidebarSiteInfoWordCountEnable,
+
   // --- 前台及页脚配置 ---
   KeyFrontDeskSiteOwnerName,
   KeyFrontDeskSiteOwnerEmail,
@@ -180,11 +222,6 @@ export const constant = {
   KeyDefaultCover,
   KeyDoubleColumn,
   KeyPostDefaultPageSize,
-  KeyHeaderMenu,
-  KeyHeaderNavTravel,
-  KeyHeaderNavClock,
-  KeyHeaderNavMenu,
-  KeyHomeTop,
 
   // --- 文件生成及处理配置 ---
   KeyEnableVipsGenerator,

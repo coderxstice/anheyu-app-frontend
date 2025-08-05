@@ -1,28 +1,39 @@
 <template>
   <el-dialog
     v-model="isDialogVisible"
-    title="编辑页眉下拉菜单链接"
+    title="编辑子菜单项"
     width="800"
     append-to-body
     :close-on-click-modal="false"
     destroy-on-close
   >
     <el-table :data="localItems" border height="400px">
-      <el-table-column label="名称" prop="name" width="180">
+      <el-table-column label="标题" prop="title" width="150">
         <template #default="{ row }">
-          <el-input v-model="row.name" placeholder="链接名称" />
+          <el-input v-model="row.title" placeholder="菜单标题" />
         </template>
       </el-table-column>
 
-      <el-table-column label="链接" prop="link" min-width="220">
+      <el-table-column label="路径" prop="path" min-width="180">
         <template #default="{ row }">
-          <el-input v-model="row.link" placeholder="https://example.com" />
+          <el-input v-model="row.path" placeholder="/posts/或 https://" />
         </template>
       </el-table-column>
 
-      <el-table-column label="图标 URL" prop="icon" min-width="220">
+      <el-table-column label="图标" prop="icon" width="160">
         <template #default="{ row }">
-          <el-input v-model="row.icon" placeholder="https://.../icon.png" />
+          <el-input v-model="row.icon" placeholder="例如：anzhiyu-icon-tag" />
+        </template>
+      </el-table-column>
+
+      <el-table-column
+        label="新窗口打开"
+        prop="isExternal"
+        width="110"
+        align="center"
+      >
+        <template #default="{ row }">
+          <el-switch v-model="row.isExternal" />
         </template>
       </el-table-column>
 
@@ -46,13 +57,13 @@
         @click="handleAddItem"
       >
         <el-icon><Plus /></el-icon>
-        添加链接项
+        添加子菜单项
       </el-button>
       <div v-if="isLastItemIncomplete" class="validation-error">
-        请先填写完当前项的“名称”和“链接”再添加新项。
+        请先填写完当前项的“标题”、“路径”和“图标”再添加新项。
       </div>
       <div v-else-if="isMaxItemsReached" class="validation-error">
-        最多只能添加 5 个链接项。
+        最多只能添加 5 个子菜单项。
       </div>
     </div>
 
@@ -69,10 +80,10 @@
 import { ref, watch, computed } from "vue";
 import { Delete, Plus } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
-import type { NavMenuItem } from "../../type";
+import type { SubMenuItem } from "../../../type";
 
 const props = defineProps<{
-  items: NavMenuItem[];
+  items: SubMenuItem[];
   visible: boolean;
 }>();
 
@@ -83,33 +94,50 @@ const isDialogVisible = computed({
   set: val => emit("update:visible", val)
 });
 
-const localItems = ref<NavMenuItem[]>([]);
+const localItems = ref<SubMenuItem[]>([]);
 
 watch(
   () => props.items,
   newItems => {
     localItems.value = JSON.parse(JSON.stringify(newItems || []));
   },
-  { immediate: true, deep: true }
+  {
+    immediate: true,
+    deep: true
+  }
 );
 
+// [新增] 计算属性：判断是否达到最大数量
 const isMaxItemsReached = computed(() => localItems.value.length >= 5);
+
+// [新增] 计算属性：判断最后一条是否未填写完整
 const isLastItemIncomplete = computed(() => {
-  if (localItems.value.length === 0) return false;
+  if (localItems.value.length === 0) {
+    return false; // 如果没有条目，则允许添加第一条
+  }
   const lastItem = localItems.value[localItems.value.length - 1];
-  return !lastItem.name || !lastItem.link;
+  // 检查关键字段是否为空
+  return !lastItem.title || !lastItem.path || !lastItem.icon;
 });
 
+// [修改] 增强 handleAddItem 函数
 const handleAddItem = () => {
+  // 添加函数内部的保护校验
   if (isMaxItemsReached.value) {
-    ElMessage.warning("最多只能添加 5 个链接项。");
+    ElMessage.warning("最多只能添加 5 个子菜单项。");
     return;
   }
   if (isLastItemIncomplete.value) {
-    ElMessage.warning("请先填写完当前项的“名称”和“链接”。");
+    ElMessage.warning("请先填写完当前项再添加新项。");
     return;
   }
-  localItems.value.push({ name: "", link: "", icon: "" });
+
+  localItems.value.push({
+    title: "",
+    path: "",
+    icon: "",
+    isExternal: false
+  });
 };
 
 const handleDeleteItem = (index: number) => {
@@ -130,6 +158,7 @@ const handleCancel = () => {
 .mt-4 {
   margin-top: 1rem;
 }
+
 .add-button-container {
   position: relative;
   padding-bottom: 20px;

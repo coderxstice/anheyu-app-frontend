@@ -32,13 +32,20 @@ const wechatConfig = computed(() => {
     backFace: siteConfig.value.sidebar.wechat.backFace
   };
 });
+
+const tagsConfig = computed(() => {
+  if (!siteConfig.value?.sidebar?.tags?.enable) return null;
+  return {
+    highlight: siteConfig.value.sidebar.tags.highlight || []
+  };
+});
 </script>
 
 <template>
   <aside class="sidebar-wrapper">
     <AuthorInfoCard v-if="authorInfoConfig" :config="authorInfoConfig" />
     <CardWechat v-if="wechatConfig" :config="wechatConfig" />
-    <TagsCard />
+    <TagsCard v-if="tagsConfig" :config="tagsConfig" />
   </aside>
 </template>
 

@@ -49,7 +49,7 @@
 import { ref, watch, toRaw, computed } from "vue";
 import { Delete } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
-import type { JsonEditorTableColumn } from "../../type";
+import type { JsonEditorTableColumn } from "../../../type";
 
 const props = defineProps<{
   modelValue: string;

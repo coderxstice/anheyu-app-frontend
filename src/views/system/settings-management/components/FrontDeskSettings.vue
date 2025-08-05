@@ -1,10 +1,3 @@
-<!--
- * @Description:
- * @Author: 安知鱼
- * @Date: 2025-07-26 15:01:42
- * @LastEditTime: 2025-07-31 16:43:53
- * @LastEditors: 安知鱼
--->
 <template>
   <el-tabs v-model="activeSubTab">
     <el-tab-pane label="首页配置" name="homePage">
@@ -12,8 +5,10 @@
         <HomePageForm v-model="model.home" />
       </el-form>
     </el-tab-pane>
-    <el-tab-pane label="文章页配置" name="articlePage">
-      <p>文章页相关配置待开发...</p>
+    <el-tab-pane label="侧边栏配置" name="sidebarPage">
+      <el-form :model="model" label-position="top" class="setting-form">
+        <SidebarPageForm v-model="model.sidebar" />
+      </el-form>
     </el-tab-pane>
   </el-tabs>
 </template>
@@ -21,7 +16,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import type { FrontDeskSettings } from "../type";
-import HomePageForm from "./frontDesk/HomePageForm.vue";
+import HomePageForm from "./frontDesk/HomePageForm/index.vue";
+import SidebarPageForm from "./frontDesk/SidebarPageForm/index.vue";
 
 const activeSubTab = ref("homePage");
 

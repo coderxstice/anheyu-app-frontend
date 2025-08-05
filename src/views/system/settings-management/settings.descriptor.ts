@@ -469,11 +469,99 @@ const frontDeskDescriptors: SettingDescriptor[] = [
   }
 ];
 
+const sidebarDescriptors: SettingDescriptor[] = [
+  {
+    frontendPath: "frontDesk.sidebar.authorEnable",
+    backendKey: constant.KeySidebarAuthorEnable,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.sidebar.authorDescription",
+    backendKey: constant.KeySidebarAuthorDescription,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.sidebar.authorStatusImg",
+    backendKey: constant.KeySidebarAuthorStatusImg,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.sidebar.authorSkills",
+    backendKey: constant.KeySidebarAuthorSkills,
+    defaultValue: [], // 默认值是空数组
+    type: "json"
+  },
+  {
+    frontendPath: "frontDesk.sidebar.authorSocial",
+    backendKey: constant.KeySidebarAuthorSocial,
+    defaultValue: {}, // 默认值是空对象
+    type: "json"
+  },
+  {
+    frontendPath: "frontDesk.sidebar.wechatEnable",
+    backendKey: constant.KeySidebarWechatEnable,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.sidebar.wechatFace",
+    backendKey: constant.KeySidebarWechatFace,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.sidebar.wechatBackFace",
+    backendKey: constant.KeySidebarWechatBackFace,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.sidebar.tagsEnable",
+    backendKey: constant.KeySidebarTagsEnable,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.sidebar.tagsHighlight",
+    backendKey: constant.KeySidebarTagsHighlight,
+    defaultValue: [],
+    type: "json"
+  },
+  {
+    frontendPath: "frontDesk.sidebar.categoriesEnable",
+    backendKey: constant.KeySidebarCategoriesEnable,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.sidebar.siteInfoPostCountEnable",
+    backendKey: constant.KeySidebarSiteInfoPostCountEnable,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.sidebar.siteInfoRuntimeEnable",
+    backendKey: constant.KeySidebarSiteInfoRuntimeEnable,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.sidebar.siteInfoWordCountEnable",
+    backendKey: constant.KeySidebarSiteInfoWordCountEnable,
+    defaultValue: true,
+    type: "boolean"
+  }
+];
+
 // 导出合并后的所有描述符
 export const allSettingDescriptors = [
   ...siteDescriptors,
   ...pageDescriptors,
   ...fileDescriptors,
   ...postDescriptors,
-  ...frontDeskDescriptors
+  ...frontDeskDescriptors,
+  ...sidebarDescriptors
 ];

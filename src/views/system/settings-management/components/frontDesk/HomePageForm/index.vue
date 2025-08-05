@@ -286,8 +286,8 @@ import type {
   JsonEditorTableColumn,
   SubMenuItem,
   NavMenuItem
-} from "../../type";
-import JsonEditorTable from "./JsonEditorTable.vue";
+} from "../../../type";
+import JsonEditorTable from "../components/JsonEditorTable.vue";
 import FooterLinkListEditor from "./FooterLinkListEditor.vue";
 import SubMenuEditor from "./SubMenuEditor.vue";
 import NavMenuItemsEditor from "./NavMenuItemsEditor.vue";

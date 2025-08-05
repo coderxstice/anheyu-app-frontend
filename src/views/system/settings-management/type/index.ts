@@ -1,11 +1,11 @@
+// src/views/system/settings-management/type/index.ts
 /*
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-24 17:29:16
- * @LastEditTime: 2025-08-04 15:43:28
+ * @LastEditTime: 2025-08-05 15:37:46
  * @LastEditors: 安知鱼
  */
-// src/views/system/settings-management/type/index.ts
 
 /**
  * @description: 站点信息表单接口
@@ -220,9 +220,29 @@ export interface HomePageSettingsInfo {
   navMenuItems: NavMenuGroup[];
 }
 
+/**
+ * @description: 侧边栏配置表单接口
+ */
+export interface SidebarPageSettingsInfo {
+  authorEnable: boolean;
+  authorDescription: string;
+  authorStatusImg: string;
+  authorSkills: string[];
+  authorSocial: Record<string, { icon: string; link: string }>;
+  wechatEnable: boolean;
+  wechatFace: string;
+  wechatBackFace: string;
+  tagsEnable: boolean;
+  tagsHighlight: string[];
+  categoriesEnable: boolean;
+  siteInfoPostCountEnable: boolean;
+  siteInfoRuntimeEnable: boolean;
+  siteInfoWordCountEnable: boolean;
+}
+
 export interface FrontDeskSettings {
   home: HomePageSettingsInfo;
-  // article: ArticlePageSettingsInfo;
+  sidebar: SidebarPageSettingsInfo;
 }
 
 /**

@@ -7,6 +7,13 @@ defineOptions({
   name: "TagsCard"
 });
 
+const props = defineProps({
+  config: {
+    type: Object,
+    default: () => ({ highlight: [] })
+  }
+});
+
 const tagList = ref<PostTag[]>([]);
 const loading = ref(true);
 const tagCloudRef = ref<HTMLElement | null>(null);
@@ -64,9 +71,9 @@ onUnmounted(() => {
           v-for="tag in tagList"
           :key="tag.id"
           :to="`/tags/${tag.name}`"
+          :class="{ 'is-highlight': config.highlight.includes(tag.id) }"
         >
-          {{ tag.name }}
-          <sup>{{ tag.count }}</sup>
+          {{ tag.name }}<sup>{{ tag.count }}</sup>
         </router-link>
       </div>
       <div v-else class="empty-tip">暂无标签</div>
@@ -99,6 +106,11 @@ onUnmounted(() => {
     border-radius: 8px;
     cursor: pointer;
 
+    &.is-highlight {
+      color: var(--anzhiyu-theme);
+      font-weight: bold;
+    }
+
     &:hover {
       background: var(--anzhiyu-lighttext);
       color: var(--anzhiyu-card-bg);
@@ -108,7 +120,7 @@ onUnmounted(() => {
 
     sup {
       opacity: 0.6;
-      margin-left: 4px;
+      margin-left: 2px;
       font-size: 0.7em;
     }
   }
