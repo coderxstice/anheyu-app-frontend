@@ -2,7 +2,7 @@
  * @Description: 主入口文件
  * @Author: 安知鱼
  * @Date: 2025-06-11 11:59:32
- * @LastEditTime: 2025-07-26 12:43:03
+ * @LastEditTime: 2025-08-05 17:33:05
  * @LastEditors: 安知鱼
  */
 import App from "./App.vue";
@@ -24,8 +24,6 @@ import "./style/index.scss";
 import "./style/tailwind.css";
 import "element-plus/dist/index.css";
 // 导入字体图标
-import "./assets/iconfont/iconfont.js";
-import "./assets/iconfont/iconfont.css";
 import "./assets/iconfont-anzhiyu/ali_iconfont_css.css";
 
 const app = createApp(App);

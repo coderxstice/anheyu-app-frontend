@@ -42,15 +42,34 @@ const tagsConfig = computed(() => {
 </script>
 
 <template>
-  <aside class="sidebar-wrapper">
+  <aside class="aside-content">
     <AuthorInfoCard v-if="authorInfoConfig" :config="authorInfoConfig" />
     <CardWechat v-if="wechatConfig" :config="wechatConfig" />
-    <TagsCard v-if="tagsConfig" :config="tagsConfig" />
+
+    <div class="sticky-container">
+      <TagsCard v-if="tagsConfig" :config="tagsConfig" />
+    </div>
   </aside>
 </template>
 
 <style lang="scss" scoped>
-.sidebar-wrapper {
+.aside-content {
+  width: 280px;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+@media (max-width: 992px) {
+  .aside-content {
+    display: none;
+  }
+}
+
+.sticky-container {
+  position: sticky;
+  top: calc(60px + 0.625rem);
   display: flex;
   flex-direction: column;
   gap: 1rem;

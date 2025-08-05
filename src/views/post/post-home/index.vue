@@ -120,9 +120,7 @@ watch([() => pagination.page, currentCategoryId], fetchData, {
         />
       </main>
 
-      <aside id="aside-content" class="aside-content">
-        <Sidebar />
-      </aside>
+      <Sidebar />
     </div>
   </div>
 </template>
@@ -143,17 +141,12 @@ watch([() => pagination.page, currentCategoryId], fetchData, {
   max-width: 1400px;
   margin: 0 auto;
   display: flex;
-  gap: 1rem;
+  gap: 0.625rem;
 }
 
 .main-content {
   flex: 1;
   min-width: 0;
-}
-
-.aside-content {
-  width: 280px;
-  transition: all 0.3s;
 }
 
 .recent-posts {
@@ -164,12 +157,6 @@ watch([() => pagination.page, currentCategoryId], fetchData, {
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 0.625rem;
-  }
-}
-
-@media (max-width: 992px) {
-  .aside-content {
-    display: none;
   }
 }
 </style>

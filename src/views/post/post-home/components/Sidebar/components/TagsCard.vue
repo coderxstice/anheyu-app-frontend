@@ -150,10 +150,7 @@ onUnmounted(() => {
 }
 
 .card-footer {
-  margin-top: 1rem;
   text-align: center;
-  border-top: 1px dashed var(--anzhiyu-gray-op);
-  padding-top: 1rem;
 
   .view-all-button {
     width: 100%;

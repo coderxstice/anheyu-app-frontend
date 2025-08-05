@@ -172,7 +172,7 @@ const goToPage = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 1rem 0;
+  margin: 1rem 0 0;
   height: 2.5rem;
   gap: 0.5rem;
   position: relative;
