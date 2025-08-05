@@ -134,8 +134,8 @@ const updateSocials = (jsonString: string) => {
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="启用分类">
-          <el-switch v-model="model.categoriesEnable" />
+        <el-form-item label="启用归档">
+          <el-switch v-model="model.archivesEnable" />
         </el-form-item>
       </el-col>
     </el-row>

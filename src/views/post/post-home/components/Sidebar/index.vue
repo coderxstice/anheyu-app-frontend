@@ -4,6 +4,7 @@ import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import AuthorInfoCard from "./components/AuthorInfoCard.vue";
 import CardWechat from "./components/CardWechat.vue";
 import TagsCard from "./components/TagsCard.vue";
+import Archives from "./components/Archives.vue";
 
 defineOptions({
   name: "Sidebar"
@@ -39,6 +40,14 @@ const tagsConfig = computed(() => {
     highlight: siteConfig.value.sidebar.tags.highlight || []
   };
 });
+
+const archivesConfig = computed(() => {
+  if (siteConfig.value?.sidebar?.archives?.enable) {
+    return true;
+  } else {
+    return false;
+  }
+});
 </script>
 
 <template>
@@ -48,6 +57,7 @@ const tagsConfig = computed(() => {
 
     <div class="sticky-container">
       <TagsCard v-if="tagsConfig" :config="tagsConfig" />
+      <Archives v-if="archivesConfig" />
     </div>
   </aside>
 </template>

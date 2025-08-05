@@ -491,13 +491,13 @@ const sidebarDescriptors: SettingDescriptor[] = [
   {
     frontendPath: "frontDesk.sidebar.authorSkills",
     backendKey: constant.KeySidebarAuthorSkills,
-    defaultValue: [], // 默认值是空数组
+    defaultValue: [],
     type: "json"
   },
   {
     frontendPath: "frontDesk.sidebar.authorSocial",
     backendKey: constant.KeySidebarAuthorSocial,
-    defaultValue: {}, // 默认值是空对象
+    defaultValue: {},
     type: "json"
   },
   {
@@ -531,8 +531,8 @@ const sidebarDescriptors: SettingDescriptor[] = [
     type: "json"
   },
   {
-    frontendPath: "frontDesk.sidebar.categoriesEnable",
-    backendKey: constant.KeySidebarCategoriesEnable,
+    frontendPath: "frontDesk.sidebar.archivesEnable",
+    backendKey: constant.KeySidebarArchivesEnable,
     defaultValue: true,
     type: "boolean"
   },
