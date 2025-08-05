@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { getTagList } from "@/api/post";
 import { PostTag } from "@/api/post/type";
 
@@ -9,8 +9,16 @@ defineOptions({
 
 const tagList = ref<PostTag[]>([]);
 const loading = ref(true);
+const tagCloudRef = ref<HTMLElement | null>(null);
+const isOverflow = ref(false);
 
-// 获取标签数据
+const checkOverflow = () => {
+  if (tagCloudRef.value) {
+    isOverflow.value =
+      tagCloudRef.value.scrollHeight > tagCloudRef.value.clientHeight;
+  }
+};
+
 const fetchTags = async () => {
   loading.value = true;
   try {
@@ -25,8 +33,20 @@ const fetchTags = async () => {
   }
 };
 
+watch(tagList, async () => {
+  if (tagList.value.length > 0) {
+    await nextTick();
+    checkOverflow();
+  }
+});
+
 onMounted(() => {
   fetchTags();
+  window.addEventListener("resize", checkOverflow);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", checkOverflow);
 });
 </script>
 
@@ -34,7 +54,12 @@ onMounted(() => {
   <div class="card-widget card-tags">
     <div class="card-content">
       <div v-if="loading" class="loading-tip">标签云加载中...</div>
-      <div v-else-if="tagList.length > 0" class="card-tag-cloud">
+      <div
+        v-else-if="tagList.length > 0"
+        ref="tagCloudRef"
+        class="card-tag-cloud"
+        :class="{ 'is-overflow': isOverflow }"
+      >
         <router-link
           v-for="tag in tagList"
           :key="tag.id"
@@ -46,7 +71,7 @@ onMounted(() => {
       </div>
       <div v-else class="empty-tip">暂无标签</div>
     </div>
-    <div class="card-footer">
+    <div v-if="isOverflow" class="card-footer">
       <router-link to="/tags" class="view-all-button"> 查看全部 </router-link>
     </div>
   </div>
@@ -57,10 +82,6 @@ onMounted(() => {
 
 .card-tags {
   padding: 1rem 1.2rem;
-}
-
-.card-content {
-  min-height: 100px;
 }
 
 .card-tag-cloud {
@@ -91,7 +112,8 @@ onMounted(() => {
       font-size: 0.7em;
     }
   }
-  &::after {
+
+  &.is-overflow::after {
     content: "";
     position: absolute;
     bottom: 0;
@@ -122,15 +144,18 @@ onMounted(() => {
   padding-top: 1rem;
 
   .view-all-button {
-    display: inline-block;
     width: 100%;
-    padding: 8px 0;
+    text-align: center;
+    background: var(--anzhiyu-secondbg);
+    color: var(--anzhiyu-fontcolor);
     border-radius: 8px;
-    color: var(--anzhiyu-secondtext);
-    background-color: var(--anzhiyu-card-bg);
-    border: 1px solid var(--anzhiyu-gray-op);
-    text-decoration: none;
-    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    font-size: 14px;
+    user-select: none;
+    padding: 4px 0;
+    border: var(--style-border-always);
+    box-shadow: var(--anzhiyu-shadow-border);
 
     &:hover {
       background-color: var(--anzhiyu-theme);
