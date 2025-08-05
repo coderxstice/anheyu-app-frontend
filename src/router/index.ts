@@ -103,8 +103,10 @@ const whiteList = [
   "/album/",
   "/login/reset",
   "/p/",
+  "/tags",
   "/tags/",
   "/page/",
+  "/categories",
   "/categories/"
 ];
 
@@ -166,7 +168,16 @@ router.beforeEach((to: ToRouteType, _from, next) => {
     }
 
     // 3.3 已登录用户访问白名单页面（如 /album ）直接放行
-    if (whiteList.includes(to.path)) {
+    const isInWhiteList = whiteList.some(whitePath => {
+      // 如果白名单项是根路径 "/"，则必须完全匹配
+      if (whitePath === "/") {
+        return to.path === "/";
+      }
+      // 对于其他白名单项，使用前缀匹配
+      return to.path.startsWith(whitePath);
+    });
+
+    if (isInWhiteList) {
       next();
       return;
     }
@@ -225,13 +236,24 @@ router.beforeEach((to: ToRouteType, _from, next) => {
   } else {
     // 未登录用户逻辑
     if (to.path !== "/login") {
-      const isInWhiteList = whiteList.some(path => to.path.startsWith(path));
+      // 检查当前路由是否是 404 页面
+      const isNotFound = to.matched.some(record => record.name === "NotFound");
 
-      console.log(isInWhiteList);
+      // 检查路径是否在白名单中
+      const isInWhiteList = whiteList.some(whitePath => {
+        if (whitePath === "/") {
+          return to.path === "/";
+        }
+        return to.path.startsWith(whitePath);
+      });
 
-      if (isInWhiteList) {
+      console.log(isInWhiteList, isNotFound, router.getRoutes());
+
+      // 如果是白名单页面，或者是 404 页面，则直接放行
+      if (isInWhiteList || isNotFound) {
         next();
       } else {
+        // 否则，重定向到首页
         removeToken();
         next({ path: "/" });
       }

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-04-08 17:29:06
- * @LastEditTime: 2025-08-05 12:06:26
+ * @LastEditTime: 2025-08-05 14:25:46
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
@@ -23,7 +23,7 @@ export default [
     },
     children: [
       {
-        path: "/",
+        path: "",
         name: "PostHome",
         component: () => import("@/views/post/post-home/index.vue"),
         meta: {
@@ -50,8 +50,17 @@ export default [
         }
       },
       {
+        path: "tags",
+        name: "PostTagsAll",
+        component: () => import("@/views/post/tags/index.vue"),
+        meta: {
+          title: `${appName} - 全部标签`,
+          showLink: false
+        }
+      },
+      {
         path: "tags/:id",
-        name: "PostTags",
+        name: "PostTagsDetail",
         component: () => import("@/views/post/tags/index.vue"),
         meta: {
           title: `${appName} - 标签`,
@@ -59,8 +68,17 @@ export default [
         }
       },
       {
+        path: "categories",
+        name: "PostCategoriesAll",
+        component: () => import("@/views/post/categories/index.vue"),
+        meta: {
+          title: `${appName} - 全部分类`,
+          showLink: false
+        }
+      },
+      {
         path: "categories/:id",
-        name: "PostCategories",
+        name: "PostCategoriesDetail", // Recommended: Use a unique name
         component: () => import("@/views/post/categories/index.vue"),
         meta: {
           title: `${appName} - 分类`,
@@ -104,6 +122,15 @@ export default [
       title: `${appName} - 相册`,
       showLink: false,
       rank: 103
+    }
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    name: "NotFound",
+    component: () => import("@/views/error/no-page.vue"),
+    meta: {
+      title: `404 - 页面不存在`,
+      showLink: false
     }
   }
 ] satisfies Array<RouteConfigsTable>;

@@ -2,15 +2,13 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-06-19 13:50:23
+ * @LastEditTime: 2025-08-05 14:09:51
  * @LastEditors: 安知鱼
  */
-const Layout = () => import("@/layout/index.vue");
 
 export default {
   path: "/system",
   redirect: "/settings-management/index",
-  component: Layout,
   meta: {
     icon: "ep:setting",
     title: "系统设置",
