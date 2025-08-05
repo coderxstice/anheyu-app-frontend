@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-15 11:31:00
+ * @LastEditTime: 2025-08-05 11:52:59
+ * @LastEditors: 安知鱼
+ */
 /**
  * 此文件作用于 `vite.config.ts` 的 `optimizeDeps.include` 依赖预构建配置项
  * 依赖预构建，`vite` 启动时会将下面 include 里的模块，编译成 esm 格式并缓存到 node_modules/.vite 文件夹，页面加载到对应模块时如果浏览器有缓存就读取浏览器缓存，如果没有会读取本地缓存并按需加载
@@ -11,7 +18,6 @@ const include = [
   "axios",
   "pinia",
   "vue-types",
-  "js-cookie",
   "vue-tippy",
   "pinyin-pro",
   "sortablejs",

@@ -298,9 +298,19 @@ const model = defineModel<Omit<HomePageSettingsInfo, "footerCustomText">>({
 
 watch(
   () => model.value.homeTop?.category,
-  (newCategory, oldCategory) => {
-    // 仅当 newCategory 存在且长度不为3时执行
-    if (newCategory && newCategory.length !== 3) {
+  newCategory => {
+    if (!newCategory) return;
+
+    // 遍历数组，去除每个 path 属性末尾的斜杠
+    newCategory.forEach(item => {
+      if (typeof item.path === "string" && item.path.endsWith("/")) {
+        // 使用正则表达式替换一个或多个尾随斜杠
+        item.path = item.path.replace(/\/+$/, "");
+      }
+    });
+
+    // 保持原有的数组长度必须为3的逻辑
+    if (newCategory.length !== 3) {
       const categoryTemplate = {
         name: "",
         path: "",
@@ -310,10 +320,8 @@ watch(
       };
 
       if (newCategory.length > 3) {
-        // 如果数组过长，截断为3
         model.value.homeTop.category = newCategory.slice(0, 3);
       } else {
-        // 如果数组过短，用模板填充至3
         const needed = 3 - newCategory.length;
         for (let i = 0; i < needed; i++) {
           model.value.homeTop.category.push({ ...categoryTemplate });
@@ -321,7 +329,7 @@ watch(
       }
     }
   },
-  { deep: true, immediate: true } // immediate: true 确保组件加载时立即检查一次
+  { deep: true, immediate: true }
 );
 
 // for Header Menu
@@ -366,7 +374,6 @@ const openSubMenuEditor = (row: MainMenuRow) => {
   isSubMenuEditorVisible.value = true;
 };
 
-// --- Editor for header.nav.menu (NavMenuItemsEditor) ---
 const isNavMenuEditorVisible = ref(false);
 interface NavMenuGroupRow {
   title: string;

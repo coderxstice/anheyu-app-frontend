@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:36:57
- * @LastEditTime: 2025-07-24 17:35:04
+ * @LastEditTime: 2025-08-05 12:08:09
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -62,7 +62,6 @@ const formData = computed({
 </script>
 
 <style scoped lang="scss">
-// 样式与 BaseInfoForm 和 IconSettingsForm 相同
 .el-form-item {
   margin-bottom: 24px;
 }

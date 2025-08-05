@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-04-08 17:29:06
- * @LastEditTime: 2025-08-04 16:28:15
+ * @LastEditTime: 2025-08-05 12:06:26
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
@@ -46,6 +46,24 @@ export default [
         component: () => import("@/views/post/post-home/index.vue"),
         meta: {
           title: `${appName} - ${subTitle}`,
+          showLink: false
+        }
+      },
+      {
+        path: "tags/:id",
+        name: "PostTags",
+        component: () => import("@/views/post/tags/index.vue"),
+        meta: {
+          title: `${appName} - 标签`,
+          showLink: false
+        }
+      },
+      {
+        path: "categories/:id",
+        name: "PostCategories",
+        component: () => import("@/views/post/categories/index.vue"),
+        meta: {
+          title: `${appName} - 分类`,
           showLink: false
         }
       }
