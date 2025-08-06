@@ -3,7 +3,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-24 17:29:16
- * @LastEditTime: 2025-08-06 10:49:02
+ * @LastEditTime: 2025-08-06 13:43:32
  * @LastEditors: 安知鱼
  */
 
@@ -232,6 +232,7 @@ export interface SidebarPageSettingsInfo {
   wechatEnable: boolean;
   wechatFace: string;
   wechatBackFace: string;
+  wechatBlurredBackground: string;
   tagsEnable: boolean;
   tagsHighlight: string[];
   siteInfoTotalPostCount: number;

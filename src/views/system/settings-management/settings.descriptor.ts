@@ -519,6 +519,12 @@ const sidebarDescriptors: SettingDescriptor[] = [
     type: "string"
   },
   {
+    frontendPath: "frontDesk.sidebar.wechatBlurredBackground",
+    backendKey: constant.KeySidebarWechatBlurredBackground,
+    defaultValue: "",
+    type: "string"
+  },
+  {
     frontendPath: "frontDesk.sidebar.tagsEnable",
     backendKey: constant.KeySidebarTagsEnable,
     defaultValue: true,

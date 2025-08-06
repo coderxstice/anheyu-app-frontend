@@ -2,7 +2,7 @@
  * @Description: 系统配置相关的常量，与后端 Go 定义和 API 响应保持同步。
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:42:04
- * @LastEditTime: 2025-08-06 10:48:39
+ * @LastEditTime: 2025-08-06 13:44:00
  * @LastEditors: 安知鱼
  */
 
@@ -53,6 +53,8 @@ const KeySidebarAuthorSocial: SettingKey = "sidebar.author.social";
 const KeySidebarWechatEnable: SettingKey = "sidebar.wechat.enable";
 const KeySidebarWechatFace: SettingKey = "sidebar.wechat.face";
 const KeySidebarWechatBackFace: SettingKey = "sidebar.wechat.backFace";
+const KeySidebarWechatBlurredBackground: SettingKey =
+  "sidebar.wechat.blurBackground";
 const KeySidebarTagsEnable: SettingKey = "sidebar.tags.enable";
 const KeySidebarTagsHighlight: SettingKey = "sidebar.tags.highlight";
 const KeySidebarSiteInfoTotalPostCount: SettingKey =
@@ -190,6 +192,7 @@ export const constant = {
   KeySidebarWechatEnable,
   KeySidebarWechatFace,
   KeySidebarWechatBackFace,
+  KeySidebarWechatBlurredBackground,
   KeySidebarTagsEnable,
   KeySidebarTagsHighlight,
   KeySidebarSiteInfoTotalPostCount,

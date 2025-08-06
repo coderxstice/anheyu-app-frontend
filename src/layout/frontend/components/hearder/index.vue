@@ -7,10 +7,10 @@
 
           <router-link to="/" class="site-name-link" accesskey="h">
             <el-tooltip content="返回主页" placement="bottom">
-              <anzhiyu>
+              <div>
                 <span class="site-title">{{ siteName }}</span>
                 <i class="anzhiyufont anzhiyu-icon-house-chimney" />
-              </anzhiyu>
+              </div>
             </el-tooltip>
           </router-link>
         </div>

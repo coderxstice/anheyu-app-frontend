@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-05 18:31:42
- * @LastEditTime: 2025-08-06 10:55:38
+ * @LastEditTime: 2025-08-06 15:06:28
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -29,13 +29,6 @@ const webInfoConfig = computed(() => {
     props.config?.sidebar?.siteinfo || {};
 
   const launch_time = props.config?.footer?.runtime?.launch_time || null;
-
-  console.log("WebInfo Config:", {
-    totalPostCount,
-    runtimeEnable,
-    totalWordCount,
-    launch_time
-  });
 
   return { totalPostCount, runtimeEnable, totalWordCount, launch_time };
 });

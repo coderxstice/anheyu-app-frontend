@@ -176,6 +176,11 @@ const updateSocials = (jsonString: string) => {
             <el-input v-model="model.wechatBackFace" clearable />
           </el-form-item>
         </el-col>
+        <el-col :span="12">
+          <el-form-item label="微信模糊背景图片 URL">
+            <el-input v-model="model.wechatBlurredBackground" clearable />
+          </el-form-item>
+        </el-col>
       </el-row>
     </template>
 

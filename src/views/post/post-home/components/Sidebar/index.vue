@@ -1,3 +1,10 @@
+<!--
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-08-04 10:11:57
+ * @LastEditTime: 2025-08-06 15:07:48
+ * @LastEditors: 安知鱼
+-->
 <script setup lang="ts">
 import { computed } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
@@ -29,7 +36,8 @@ const wechatConfig = computed(() => {
   if (!siteConfig.value?.sidebar?.wechat?.enable) return null;
   return {
     face: siteConfig.value.sidebar.wechat.face,
-    backFace: siteConfig.value.sidebar.wechat.backFace
+    backFace: siteConfig.value.sidebar.wechat.backFace,
+    blurBackground: siteConfig.value.sidebar.wechat.blurBackground
   };
 });
 </script>
