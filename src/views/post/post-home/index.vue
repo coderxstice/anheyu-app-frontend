@@ -3,6 +3,7 @@ import { ref, reactive, watch, computed } from "vue";
 import { useRoute } from "vue-router";
 import HomeTop from "./components/HomeTop/index.vue";
 import CategoryBar from "./components/CategoryBar/index.vue";
+import TagBar from "./components/TagBar/index.vue";
 import ArticleCard from "./components/ArticleCard/index.vue";
 import Pagination from "./components/Pagination/index.vue";
 import Sidebar from "./components/Sidebar/index.vue";
@@ -17,6 +18,21 @@ defineOptions({
 const route = useRoute();
 const siteConfigStore = useSiteConfigStore();
 
+// 2. 计算当前页面类型
+const pageType = computed(() => {
+  if (route.path.startsWith("/tags/")) return "tag";
+  if (route.path.startsWith("/categories/")) return "category";
+  return "home";
+});
+
+const showHomeTop = computed(() => {
+  return pageType.value === "home" && pagination.page === 1;
+});
+
+const isDoubleColumn = computed(() => {
+  return siteConfigStore.getSiteConfig?.post?.default.double_column || true;
+});
+
 const articles = ref<Article[]>([]);
 const loading = ref(true);
 const pagination = reactive({
@@ -24,17 +40,12 @@ const pagination = reactive({
   pageSize: siteConfigStore.getSiteConfig?.post?.default.page_size || 12,
   total: 0
 });
+
+// 3. 同时维护分类名和标签名
 const currentCategoryName = ref<string | null>(null);
+const currentTagName = ref<string | null>(null);
 
-const showHomeTop = computed(() => {
-  // 仅在首页（非分类、非分页）时显示顶部
-  return !currentCategoryName.value && pagination.page === 1;
-});
-
-const isDoubleColumn = computed(() => {
-  return siteConfigStore.getSiteConfig?.post?.default.double_column || true;
-});
-
+// 4. 修改 fetchData，使其能处理标签和分类两种情况
 const fetchData = async () => {
   loading.value = true;
   try {
@@ -42,10 +53,12 @@ const fetchData = async () => {
       page: pagination.page,
       pageSize: pagination.pageSize
     };
-    // 如果 URL 中有分类名，则加入请求参数
-    if (currentCategoryName.value) {
+    if (pageType.value === "category" && currentCategoryName.value) {
       params.category = currentCategoryName.value;
+    } else if (pageType.value === "tag" && currentTagName.value) {
+      params.tag = currentTagName.value;
     }
+
     const { data } = await getPublicArticles(params);
     articles.value = data.list;
     pagination.total = data.total;
@@ -57,27 +70,31 @@ const fetchData = async () => {
 };
 
 const handlePageChange = (newPage: number) => {
-  // 分页组件已经处理了路由跳转，这里只需更新页码并滚动
   pagination.page = newPage;
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
-// 监听路由参数变化，统一处理分类和分页
+// 5. 监听路由，更新分类/标签名和页码
 watch(
   () => route.params,
   newParams => {
-    // 从路由中获取分类名称 (:name)
-    currentCategoryName.value = (newParams.name as string) || null;
-    // 从路由中获取页码 (:id)
+    if (pageType.value === "category") {
+      currentCategoryName.value = (newParams.name as string) || null;
+      currentTagName.value = null;
+    } else if (pageType.value === "tag") {
+      currentTagName.value = (newParams.name as string) || null;
+      currentCategoryName.value = null;
+    } else {
+      currentCategoryName.value = null;
+      currentTagName.value = null;
+    }
     pagination.page = newParams.id ? Number(newParams.id) : 1;
   },
-  {
-    immediate: true
-  }
+  { immediate: true, deep: true }
 );
 
-// 监听页码和分类名的变化，自动获取数据
-watch([() => pagination.page, currentCategoryName], fetchData, {
+// 6. 监听所有可能影响数据获取的变量
+watch([() => pagination.page, currentCategoryName, currentTagName], fetchData, {
   immediate: true
 });
 </script>
@@ -90,7 +107,9 @@ watch([() => pagination.page, currentCategoryName], fetchData, {
 
     <div id="content-inner" class="layout">
       <main class="main-content">
-        <CategoryBar />
+        <CategoryBar v-if="pageType === 'home' || pageType === 'category'" />
+        <TagBar v-else-if="pageType === 'tag'" />
+
         <div
           id="recent-posts"
           v-loading="loading"
@@ -128,7 +147,6 @@ watch([() => pagination.page, currentCategoryName], fetchData, {
 </template>
 
 <style lang="scss" scoped>
-/* 样式部分无需改动 */
 .post-home-top-container {
   margin: 0 auto;
   padding: 0 1.5rem;

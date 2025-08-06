@@ -59,14 +59,21 @@ const showEndEllipsis = computed(
 
 // 修改 getPageUrl 函数，使其能够处理分类路径
 const getPageUrl = (p: number) => {
-  const categoryName = route.params.name as string;
+  const name = route.params.name as string;
+  const path = route.path;
 
-  if (categoryName) {
-    // 当前在分类页面下
-    if (p === 1) return `/categories/${categoryName}`;
-    return `/categories/${categoryName}/page/${p}`;
-  } else {
-    // 当前在首页
+  // 检查是否在分类页
+  if (path.startsWith("/categories/")) {
+    if (p === 1) return `/categories/${name}`;
+    return `/categories/${name}/page/${p}`;
+  }
+  // 检查是否在标签页
+  else if (path.startsWith("/tags/")) {
+    if (p === 1) return `/tags/${name}`;
+    return `/tags/${name}/page/${p}`;
+  }
+  // 否则就是首页
+  else {
     if (p === 1) return "/";
     return `/page/${p}`;
   }

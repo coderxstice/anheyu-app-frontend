@@ -2,7 +2,7 @@
  * @Description: 路由配置
  * @Author: 安知鱼
  * @Date: 2025-04-08 17:29:06
- * @LastEditTime: 2025-08-06 17:07:47
+ * @LastEditTime: 2025-08-06 18:45:44
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
@@ -54,14 +54,23 @@ export default [
         name: "PostTagsAll",
         component: () => import("@/views/post/tags/index.vue"),
         meta: {
-          title: `${appName} - 全部标签`,
+          title: `${appName} - 标签`,
           showLink: false
         }
       },
       {
-        path: "tags/:id",
+        path: "tags/:name",
         name: "PostTagsDetail",
-        component: () => import("@/views/post/tags/index.vue"),
+        component: () => import("@/views/post/post-home/index.vue"),
+        meta: {
+          title: `${appName} - 标签`,
+          showLink: false
+        }
+      },
+      {
+        path: "tags/:name/page/:id",
+        name: "PostTagsDetailPaginated",
+        component: () => import("@/views/post/post-home/index.vue"),
         meta: {
           title: `${appName} - 标签`,
           showLink: false
