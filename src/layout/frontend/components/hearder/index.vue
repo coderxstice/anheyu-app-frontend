@@ -6,8 +6,12 @@
           <BackMenuListGroups :navConfig="navConfig" />
 
           <router-link to="/" class="site-name-link" accesskey="h">
-            <span class="site-title">{{ siteName }}</span>
-            <i class="anzhiyufont anzhiyu-icon-house-chimney" />
+            <el-tooltip content="返回主页" placement="bottom">
+              <anzhiyu>
+                <span class="site-title">{{ siteName }}</span>
+                <i class="anzhiyufont anzhiyu-icon-house-chimney" />
+              </anzhiyu>
+            </el-tooltip>
           </router-link>
         </div>
 
@@ -129,6 +133,8 @@ const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
             transition: 0.3s;
             opacity: 0;
             font-weight: 700;
+            left: 50%;
+            transform: translateX(-50%);
           }
           &:hover {
             color: var(--anzhiyu-white);
