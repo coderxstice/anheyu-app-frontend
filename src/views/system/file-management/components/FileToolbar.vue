@@ -1,265 +1,267 @@
 <template>
-  <div class="file-toolbar rounded-2xl overflow-hidden bg-white ml-2 mb-2">
-    <div class="right-actions">
-      <el-tooltip content="刷新" placement="bottom">
-        <el-button
-          circle
-          :icon="RefreshSvg"
-          class="!text-[var(--anzhiyu-white)] !border-none !bg-[var(--anzhiyu-theme)]"
-          @click="emit('refresh')"
-        />
-      </el-tooltip>
+  <div>
+    <div class="file-toolbar rounded-2xl overflow-hidden bg-white h-full">
+      <div class="right-actions">
+        <el-tooltip content="刷新" placement="bottom">
+          <el-button
+            circle
+            :icon="RefreshSvg"
+            class="!text-[var(--anzhiyu-white)] !border-none !bg-[var(--anzhiyu-theme)]"
+            @click="emit('refresh')"
+          />
+        </el-tooltip>
 
-      <el-tooltip
-        v-if="viewMode === 'grid'"
-        content="重新生成缩略图"
-        placement="bottom"
-      >
-        <el-button
-          circle
-          :icon="MagicStick"
-          class="!text-[var(--anzhiyu-white)] !border-none !bg-[#F5A623] !ml-0"
-          @click="emit('regenerate-thumbnails')"
-        />
-      </el-tooltip>
+        <el-tooltip
+          v-if="viewMode === 'grid'"
+          content="重新生成缩略图"
+          placement="bottom"
+        >
+          <el-button
+            circle
+            :icon="MagicStick"
+            class="!text-[var(--anzhiyu-white)] !border-none !bg-[#F5A623] !ml-0"
+            @click="emit('regenerate-thumbnails')"
+          />
+        </el-tooltip>
 
-      <el-tooltip v-if="!isSimplified" content="选择操作" placement="bottom">
-        <div>
-          <el-dropdown trigger="click" placement="bottom-end">
-            <el-button
-              circle
-              :icon="FullScreen"
-              class="!text-[var(--anzhiyu-white)] !border-none !bg-[#8468F3]"
-            />
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item @click="emit('select-all')">
-                  全选
-                </el-dropdown-item>
-                <el-dropdown-item
-                  :disabled="!hasSelection"
-                  @click="emit('clear-selection')"
-                >
-                  取消选择
-                </el-dropdown-item>
-                <el-dropdown-item @click="emit('invert-selection')">
-                  反选
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </div>
-      </el-tooltip>
-
-      <el-tooltip
-        content="视图设置"
-        placement="bottom"
-        :disabled="isSettingsPopoverVisible"
-        :hide-after="0"
-      >
-        <div>
-          <el-popover
-            ref="settingsPopoverRef"
-            placement="bottom-end"
-            :width="250"
-            :visible="isSettingsPopoverVisible"
-            popper-class="directional-reveal-popover"
-            :show-arrow="false"
-            transition="none"
-          >
-            <template #reference>
+        <el-tooltip v-if="!isSimplified" content="选择操作" placement="bottom">
+          <div>
+            <el-dropdown trigger="click" placement="bottom-end">
               <el-button
-                ref="settingsButtonRef"
                 circle
-                :icon="Setting"
-                class="!text-[var(--anzhiyu-white)] !border-none !bg-[#73A6F5]"
-                @click="toggleSettingsPopover"
+                :icon="FullScreen"
+                class="!text-[var(--anzhiyu-white)] !border-none !bg-[#8468F3]"
               />
-            </template>
-            <div class="popover-content">
-              <div class="popover-section">
-                <h1 class="popover-title">布局</h1>
-                <el-button-group class="view-switcher">
-                  <el-button
-                    :type="viewMode === 'grid' ? 'primary' : 'default'"
-                    :icon="Grid"
-                    @click="handleViewChange('grid')"
-                    >网格</el-button
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="emit('select-all')">
+                    全选
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    :disabled="!hasSelection"
+                    @click="emit('clear-selection')"
                   >
-                  <el-button
-                    :type="viewMode === 'list' ? 'primary' : 'default'"
-                    :icon="Tickets"
-                    @click="handleViewChange('list')"
-                    >列表</el-button
-                  >
-                </el-button-group>
-              </div>
-              <el-divider />
-              <div v-if="viewMode === 'list'" class="popover-section">
-                <h1 class="popover-title">列设置</h1>
+                    取消选择
+                  </el-dropdown-item>
+                  <el-dropdown-item @click="emit('invert-selection')">
+                    反选
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
+        </el-tooltip>
+
+        <el-tooltip
+          content="视图设置"
+          placement="bottom"
+          :disabled="isSettingsPopoverVisible"
+          :hide-after="0"
+        >
+          <div>
+            <el-popover
+              ref="settingsPopoverRef"
+              placement="bottom-end"
+              :width="250"
+              :visible="isSettingsPopoverVisible"
+              popper-class="directional-reveal-popover"
+              :show-arrow="false"
+              transition="none"
+            >
+              <template #reference>
                 <el-button
-                  class="w-full"
-                  :icon="Operation"
-                  @click="handleOpenDialog"
-                >
-                  自定义列表列
-                </el-button>
-              </div>
-              <el-divider v-if="viewMode === 'list'" />
-              <div class="popover-section">
-                <h1 class="popover-title">分页大小</h1>
-                <div class="slider-wrapper">
-                  <el-slider
-                    :model-value="localPageSize"
-                    :min="10"
-                    :max="200"
-                    :step="10"
-                    size="small"
-                    @input="onPageSizeInput"
-                    @change="onPageSizeChange"
-                  />
-                  <span class="slider-value">{{ localPageSize }}</span>
+                  ref="settingsButtonRef"
+                  circle
+                  :icon="Setting"
+                  class="!text-[var(--anzhiyu-white)] !border-none !bg-[#73A6F5]"
+                  @click="toggleSettingsPopover"
+                />
+              </template>
+              <div class="popover-content">
+                <div class="popover-section">
+                  <h1 class="popover-title">布局</h1>
+                  <el-button-group class="view-switcher">
+                    <el-button
+                      :type="viewMode === 'grid' ? 'primary' : 'default'"
+                      :icon="Grid"
+                      @click="handleViewChange('grid')"
+                      >网格</el-button
+                    >
+                    <el-button
+                      :type="viewMode === 'list' ? 'primary' : 'default'"
+                      :icon="Tickets"
+                      @click="handleViewChange('list')"
+                      >列表</el-button
+                    >
+                  </el-button-group>
+                </div>
+                <el-divider />
+                <div v-if="viewMode === 'list'" class="popover-section">
+                  <h1 class="popover-title">列设置</h1>
+                  <el-button
+                    class="w-full"
+                    :icon="Operation"
+                    @click="handleOpenDialog"
+                  >
+                    自定义列表列
+                  </el-button>
+                </div>
+                <el-divider v-if="viewMode === 'list'" />
+                <div class="popover-section">
+                  <h1 class="popover-title">分页大小</h1>
+                  <div class="slider-wrapper">
+                    <el-slider
+                      :model-value="localPageSize"
+                      :min="10"
+                      :max="200"
+                      :step="10"
+                      size="small"
+                      @input="onPageSizeInput"
+                      @change="onPageSizeChange"
+                    />
+                    <span class="slider-value">{{ localPageSize }}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </el-popover>
-        </div>
-      </el-tooltip>
+            </el-popover>
+          </div>
+        </el-tooltip>
 
-      <el-tooltip content="排序" placement="bottom">
-        <div>
-          <el-dropdown
-            trigger="click"
-            placement="bottom-end"
-            class="sort-dropdown"
-            @command="(key: SortKey) => emit('set-sort-key', key)"
+        <el-tooltip content="排序" placement="bottom">
+          <div>
+            <el-dropdown
+              trigger="click"
+              placement="bottom-end"
+              class="sort-dropdown"
+              @command="(key: SortKey) => emit('set-sort-key', key)"
+            >
+              <el-button
+                circle
+                :icon="Sort"
+                class="!text-[var(--anzhiyu-white)] !border-none !bg-[#6EB65E]"
+              />
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item
+                    command="name_asc"
+                    :class="{ active: sortKey === 'name_asc' }"
+                    >A-Z</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    command="name_desc"
+                    :class="{ active: sortKey === 'name_desc' }"
+                    >Z-A</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    divided
+                    command="size_asc"
+                    :class="{ active: sortKey === 'size_asc' }"
+                    >最小</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    command="size_desc"
+                    :class="{ active: sortKey === 'size_desc' }"
+                    >最大</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    divided
+                    command="updated_at_desc"
+                    :class="{ active: sortKey === 'updated_at_desc' }"
+                    >最新修改</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    command="updated_at_asc"
+                    :class="{ active: sortKey === 'updated_at_asc' }"
+                    >最早修改</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    divided
+                    command="created_at_desc"
+                    :class="{ active: sortKey === 'created_at_desc' }"
+                    >最新上传</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    command="created_at_asc"
+                    :class="{ active: sortKey === 'created_at_asc' }"
+                    >最早上传</el-dropdown-item
+                  >
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
+        </el-tooltip>
+      </div>
+    </div>
+
+    <el-dialog
+      v-model="dialogVisible"
+      title="列设置"
+      width="500"
+      class="rounded-2xl"
+      append-to-body
+      :close-on-click-modal="false"
+    >
+      <div class="column-settings-body">
+        <div class="column-settings-header">
+          <span>列</span>
+          <span>操作</span>
+        </div>
+        <transition-group name="list-anim" tag="div" class="column-list">
+          <div
+            v-for="(col, index) in editableColumns"
+            :key="col.type"
+            class="column-item"
           >
-            <el-button
-              circle
-              :icon="Sort"
-              class="!text-[var(--anzhiyu-white)] !border-none !bg-[#6EB65E]"
-            />
+            <span class="column-name">{{
+              columnTypeMap.get(col.type)?.name
+            }}</span>
+            <div class="column-actions">
+              <el-icon
+                v-if="index > 0"
+                class="action-icon"
+                @click="moveColumn(index, -1)"
+                ><Top
+              /></el-icon>
+              <el-icon
+                v-if="index < editableColumns.length - 1"
+                class="action-icon"
+                @click="moveColumn(index, 1)"
+                ><Bottom
+              /></el-icon>
+              <el-icon class="action-icon danger" @click="removeColumn(index)"
+                ><Close
+              /></el-icon>
+            </div>
+          </div>
+        </transition-group>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-dropdown trigger="click" placement="top-start">
+            <el-button type="primary" plain :icon="Plus">添加列</el-button>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item
-                  command="name_asc"
-                  :class="{ active: sortKey === 'name_asc' }"
-                  >A-Z</el-dropdown-item
+                  v-for="colType in availableColumnsToAdd"
+                  :key="colType"
+                  @click="addColumn(colType)"
                 >
-                <el-dropdown-item
-                  command="name_desc"
-                  :class="{ active: sortKey === 'name_desc' }"
-                  >Z-A</el-dropdown-item
-                >
-                <el-dropdown-item
-                  divided
-                  command="size_asc"
-                  :class="{ active: sortKey === 'size_asc' }"
-                  >最小</el-dropdown-item
-                >
-                <el-dropdown-item
-                  command="size_desc"
-                  :class="{ active: sortKey === 'size_desc' }"
-                  >最大</el-dropdown-item
-                >
-                <el-dropdown-item
-                  divided
-                  command="updated_at_desc"
-                  :class="{ active: sortKey === 'updated_at_desc' }"
-                  >最新修改</el-dropdown-item
-                >
-                <el-dropdown-item
-                  command="updated_at_asc"
-                  :class="{ active: sortKey === 'updated_at_asc' }"
-                  >最早修改</el-dropdown-item
-                >
-                <el-dropdown-item
-                  divided
-                  command="created_at_desc"
-                  :class="{ active: sortKey === 'created_at_desc' }"
-                  >最新上传</el-dropdown-item
-                >
-                <el-dropdown-item
-                  command="created_at_asc"
-                  :class="{ active: sortKey === 'created_at_asc' }"
-                  >最早上传</el-dropdown-item
-                >
+                  {{ columnTypeMap.get(colType)?.name }}
+                </el-dropdown-item>
+                <el-dropdown-item v-if="!availableColumnsToAdd.length" disabled>
+                  已添加所有列
+                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
-        </div>
-      </el-tooltip>
-    </div>
-  </div>
-
-  <el-dialog
-    v-model="dialogVisible"
-    title="列设置"
-    width="500"
-    class="rounded-2xl"
-    append-to-body
-    :close-on-click-modal="false"
-  >
-    <div class="column-settings-body">
-      <div class="column-settings-header">
-        <span>列</span>
-        <span>操作</span>
-      </div>
-      <transition-group name="list-anim" tag="div" class="column-list">
-        <div
-          v-for="(col, index) in editableColumns"
-          :key="col.type"
-          class="column-item"
-        >
-          <span class="column-name">{{
-            columnTypeMap.get(col.type)?.name
-          }}</span>
-          <div class="column-actions">
-            <el-icon
-              v-if="index > 0"
-              class="action-icon"
-              @click="moveColumn(index, -1)"
-              ><Top
-            /></el-icon>
-            <el-icon
-              v-if="index < editableColumns.length - 1"
-              class="action-icon"
-              @click="moveColumn(index, 1)"
-              ><Bottom
-            /></el-icon>
-            <el-icon class="action-icon danger" @click="removeColumn(index)"
-              ><Close
-            /></el-icon>
+          <div>
+            <el-button @click="dialogVisible = false">取消</el-button>
+            <el-button type="primary" @click="handleConfirm">确定</el-button>
           </div>
         </div>
-      </transition-group>
-    </div>
-    <template #footer>
-      <div class="dialog-footer">
-        <el-dropdown trigger="click" placement="top-start">
-          <el-button type="primary" plain :icon="Plus">添加列</el-button>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item
-                v-for="colType in availableColumnsToAdd"
-                :key="colType"
-                @click="addColumn(colType)"
-              >
-                {{ columnTypeMap.get(colType)?.name }}
-              </el-dropdown-item>
-              <el-dropdown-item v-if="!availableColumnsToAdd.length" disabled>
-                已添加所有列
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-        <div>
-          <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleConfirm">确定</el-button>
-        </div>
-      </div>
-    </template>
-  </el-dialog>
+      </template>
+    </el-dialog>
+  </div>
 </template>
 
 <script setup lang="ts">
