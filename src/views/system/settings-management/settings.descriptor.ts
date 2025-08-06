@@ -531,16 +531,10 @@ const sidebarDescriptors: SettingDescriptor[] = [
     type: "json"
   },
   {
-    frontendPath: "frontDesk.sidebar.archivesEnable",
-    backendKey: constant.KeySidebarArchivesEnable,
+    frontendPath: "frontDesk.sidebar.siteInfoTotalPostCount",
+    backendKey: constant.KeySidebarSiteInfoTotalPostCount,
     defaultValue: true,
-    type: "boolean"
-  },
-  {
-    frontendPath: "frontDesk.sidebar.siteInfoPostCountEnable",
-    backendKey: constant.KeySidebarSiteInfoPostCountEnable,
-    defaultValue: true,
-    type: "boolean"
+    type: "number"
   },
   {
     frontendPath: "frontDesk.sidebar.siteInfoRuntimeEnable",
@@ -549,10 +543,10 @@ const sidebarDescriptors: SettingDescriptor[] = [
     type: "boolean"
   },
   {
-    frontendPath: "frontDesk.sidebar.siteInfoWordCountEnable",
-    backendKey: constant.KeySidebarSiteInfoWordCountEnable,
+    frontendPath: "frontDesk.sidebar.siteInfoTotalWordCount",
+    backendKey: constant.KeySidebarSiteInfoTotalWordCount,
     defaultValue: true,
-    type: "boolean"
+    type: "number"
   }
 ];
 

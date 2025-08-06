@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import type {
   SidebarPageSettingsInfo,
   JsonEditorTableColumn
@@ -12,6 +12,59 @@ defineOptions({
 });
 
 const model = defineModel<SidebarPageSettingsInfo>({ required: true });
+
+// 1. 创建 ref 用于“记忆”关闭开关前的数值
+const lastValidPostCount = ref(0);
+const lastValidWordCount = ref(0);
+
+// 2. 使用 watch 监听 model 的初始加载，并存储初始有效值
+watch(
+  () => model.value,
+  newModel => {
+    // 如果初始值不是 -1，就将其存入我们的“记忆”变量中
+    if (newModel.siteInfoTotalPostCount !== -1) {
+      lastValidPostCount.value = newModel.siteInfoTotalPostCount;
+    }
+    if (newModel.siteInfoTotalWordCount !== -1) {
+      lastValidWordCount.value = newModel.siteInfoTotalWordCount;
+    }
+  },
+  { immediate: true }
+);
+
+const isTotalPostCountEnabled = computed({
+  get() {
+    return model.value.siteInfoTotalPostCount !== -1;
+  },
+  set(newValue: boolean) {
+    if (newValue) {
+      // 当开关打开时，恢复之前记住的数值
+      model.value.siteInfoTotalPostCount = lastValidPostCount.value;
+    } else {
+      // 当开关关闭时，先记住当前的有效值，再设置为 -1
+      if (model.value.siteInfoTotalPostCount !== -1) {
+        lastValidPostCount.value = model.value.siteInfoTotalPostCount;
+      }
+      model.value.siteInfoTotalPostCount = -1;
+    }
+  }
+});
+
+const isTotalWordCountEnabled = computed({
+  get() {
+    return model.value.siteInfoTotalWordCount !== -1;
+  },
+  set(newValue: boolean) {
+    if (newValue) {
+      model.value.siteInfoTotalWordCount = lastValidWordCount.value;
+    } else {
+      if (model.value.siteInfoTotalWordCount !== -1) {
+        lastValidWordCount.value = model.value.siteInfoTotalWordCount;
+      }
+      model.value.siteInfoTotalWordCount = -1;
+    }
+  }
+});
 
 const skillColumns = ref<JsonEditorTableColumn[]>([
   { prop: "name", label: "技能描述" }
@@ -126,16 +179,11 @@ const updateSocials = (jsonString: string) => {
       </el-row>
     </template>
 
-    <el-divider content-position="left">标签与分类</el-divider>
+    <el-divider content-position="left">标签</el-divider>
     <el-row :gutter="20">
       <el-col :span="12">
         <el-form-item label="启用标签云">
           <el-switch v-model="model.tagsEnable" />
-        </el-form-item>
-      </el-col>
-      <el-col :span="12">
-        <el-form-item label="启用归档">
-          <el-switch v-model="model.archivesEnable" />
         </el-form-item>
       </el-col>
     </el-row>
@@ -148,7 +196,7 @@ const updateSocials = (jsonString: string) => {
     <el-row :gutter="20">
       <el-col :span="8">
         <el-form-item label="启用文章总数">
-          <el-switch v-model="model.siteInfoPostCountEnable" />
+          <el-switch v-model="isTotalPostCountEnabled" />
         </el-form-item>
       </el-col>
       <el-col :span="8">
@@ -158,7 +206,7 @@ const updateSocials = (jsonString: string) => {
       </el-col>
       <el-col :span="8">
         <el-form-item label="启用总字数">
-          <el-switch v-model="model.siteInfoWordCountEnable" />
+          <el-switch v-model="isTotalWordCountEnabled" />
         </el-form-item>
       </el-col>
     </el-row>

@@ -9,6 +9,7 @@ import {
   type SettingsMap
 } from "@/api/sys-settings";
 import { message } from "@/utils/message";
+import { merge, set } from "lodash-es"; // 引入 lodash.set 用于深度设置属性
 
 // 引入公告相关的函数
 import { checkAndShowAnnouncementByConfig } from "@/components/AnNouncement";
@@ -24,7 +25,7 @@ interface CombinedSiteSettings extends Partial<SiteConfig> {
   title?: string;
   fixedHeader?: boolean;
   hiddenSideBar?: boolean;
-  SiteAnnouncement?: string; // 添加公告内容的键名
+  SiteAnnouncement?: string;
   [key: string]: any;
 }
 
@@ -87,7 +88,7 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
 
   actions: {
     /**
-     * @description 一个内部方法，用于更新状态并同步到 localStorage，避免代码重复
+     * @description (保留) 用于合并已经嵌套好的对象或顶层属性。
      * @param newSettings - 需要合并到 state 的新配置
      */
     _updateStateAndCache(newSettings: Partial<CombinedSiteSettings>) {
@@ -112,9 +113,30 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToCache));
     },
 
-    // 异步获取并合并站点公共配置（用于应用初始化）
+    /**
+     * @description 根据点分路径键的扁平对象，精确更新嵌套的 siteConfig 状态和缓存
+     * @param flatSettings - 一个扁平的对象, e.g., { "sidebar.siteinfo.totalPostCount": 70 }
+     */
+    updateSettingsByDotKeys(flatSettings: Record<string, any>) {
+      const nestedUpdate = {};
+
+      for (const dotKey in flatSettings) {
+        if (Object.prototype.hasOwnProperty.call(flatSettings, dotKey)) {
+          set(nestedUpdate, dotKey, flatSettings[dotKey]);
+        }
+      }
+
+      merge(this.siteConfig, nestedUpdate);
+
+      const dataToCache = {
+        config: this.siteConfig,
+        timestamp: Date.now()
+      };
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToCache));
+    },
+
     async fetchSiteConfig() {
-      if (this.isLoaded) return; // 如果已加载，直接返回
+      if (this.isLoaded) return;
 
       const initialConfig = {
         fixedHeader: getConfig().FixedHeader,
@@ -153,14 +175,14 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
 
     /**
      * @description 专门用于从后台管理页面获取详细的系统设置
-     * @param keys - 需要获取的设置项的键名数组
+     * @param keys - 需要获取的设置项的键名数组 (应为点分路径格式)
      */
     async fetchSystemSettings(keys: string[]) {
       this.loading = true;
       try {
         const res = await getSettingsApi(keys);
         if (res.code === 200 && res.data) {
-          this._updateStateAndCache(res.data);
+          this.updateSettingsByDotKeys(res.data);
         } else {
           return Promise.reject(new Error(res.message));
         }
@@ -185,7 +207,6 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
         try {
           const configRes = await getSiteConfigApi();
           if (configRes.code === 200 && configRes.data) {
-            // 使用最新的完整配置来更新状态和缓存，确保数据结构正确
             this._updateStateAndCache(configRes.data);
             message("设置已保存成功", { type: "success" });
             return Promise.resolve();

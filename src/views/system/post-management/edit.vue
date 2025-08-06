@@ -25,8 +25,9 @@ import {
   createTag
 } from "@/api/post";
 import type { ArticleForm, PostCategory, PostTag } from "@/api/post/type";
-// 修改：导入新增/删除图标
 import { UploadFilled, Plus, Remove } from "@element-plus/icons-vue";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import { constant } from "@/constant";
 
 /**
  * 一个响应式的 Hook，用于获取并监听应用的全局主题 (light/dark)。
@@ -66,6 +67,7 @@ defineOptions({ name: "PostEdit" });
 
 const route = useRoute();
 const router = useRouter();
+const siteConfigStore = useSiteConfigStore();
 
 const { device, pureApp, toggleSideBar } = useNav();
 let wasSidebarOpened = pureApp.getSidebarStatus;
@@ -120,8 +122,6 @@ const form = reactive<ArticleForm>({
   summaries: []
 });
 
-// 移除 summariesText 计算属性，不再需要
-
 const categoryOptions = ref<PostCategory[]>([]);
 const tagOptions = ref<PostTag[]>([]);
 const statusOptions = [
@@ -136,7 +136,6 @@ const pageTitle = computed(() => (isEditMode.value ? "编辑文章" : "新增文
 const categorySelectKey = ref(0);
 const tagSelectKey = ref(0);
 
-// 新增：动态摘要的UI交互函数
 const addSummaryInput = () => {
   if (form.summaries.length < 3) {
     form.summaries.push("");
@@ -291,9 +290,18 @@ const handleSubmit = async (isPublish = false) => {
         } else {
           const { data } = await createArticle(dataToSubmit);
           ElMessage.success("创建成功");
-          router.push({ name: "PostManagement" });
-          return;
         }
+
+        // 定义需要从后端重新获取的配置项的键名
+        const keysToRefetch = [
+          constant.KeySidebarSiteInfoTotalPostCount,
+          constant.KeySidebarSiteInfoTotalWordCount
+        ];
+
+        // 调用 store action，从后端获取最新的值并更新缓存
+        await siteConfigStore.fetchSystemSettings(keysToRefetch);
+        console.log("站点统计信息已从后端同步。");
+
         router.push({ name: "PostManagement" });
       } catch (error) {
         ElMessage.error(isEditMode.value ? "更新失败" : "创建失败");

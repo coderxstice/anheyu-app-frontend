@@ -2,13 +2,12 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-05 18:31:42
- * @LastEditTime: 2025-08-06 09:46:34
+ * @LastEditTime: 2025-08-06 10:55:38
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
 import { computed } from "vue";
 import TagsCard from "./TagsCard.vue";
-import Archives from "./Archives.vue";
 import CardWebInfo from "./CardWebInfo.vue";
 
 const props = defineProps({
@@ -26,16 +25,19 @@ const tagsConfig = computed(() => {
 });
 
 const webInfoConfig = computed(() => {
-  const { postCountEnable, runtimeEnable, wordCountEnable } =
+  const { totalPostCount, runtimeEnable, totalWordCount } =
     props.config?.sidebar?.siteinfo || {};
 
   const launch_time = props.config?.footer?.runtime?.launch_time || null;
 
-  if (!postCountEnable || !runtimeEnable || !wordCountEnable || !launch_time) {
-    return null;
-  }
+  console.log("WebInfo Config:", {
+    totalPostCount,
+    runtimeEnable,
+    totalWordCount,
+    launch_time
+  });
 
-  return { postCountEnable, runtimeEnable, wordCountEnable, launch_time };
+  return { totalPostCount, runtimeEnable, totalWordCount, launch_time };
 });
 
 defineOptions({
@@ -47,7 +49,9 @@ defineOptions({
   <div class="sticky-container">
     <div class="card-widget">
       <TagsCard v-if="tagsConfig" :config="tagsConfig" />
-      <hr />
+
+      <hr v-if="tagsConfig && webInfoConfig" />
+
       <CardWebInfo v-if="webInfoConfig" :config="webInfoConfig" />
     </div>
   </div>

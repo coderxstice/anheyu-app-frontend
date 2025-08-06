@@ -3,7 +3,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-24 17:29:16
- * @LastEditTime: 2025-08-05 18:18:46
+ * @LastEditTime: 2025-08-06 10:49:02
  * @LastEditors: 安知鱼
  */
 
@@ -234,10 +234,9 @@ export interface SidebarPageSettingsInfo {
   wechatBackFace: string;
   tagsEnable: boolean;
   tagsHighlight: string[];
-  archivesEnable: boolean;
-  siteInfoPostCountEnable: boolean;
+  siteInfoTotalPostCount: number;
   siteInfoRuntimeEnable: boolean;
-  siteInfoWordCountEnable: boolean;
+  siteInfoTotalWordCount: number;
 }
 
 export interface FrontDeskSettings {

@@ -1,42 +1,42 @@
+<!--
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-08-05 18:27:55
+ * @LastEditTime: 2025-08-06 10:55:31
+ * @LastEditors: 安知鱼
+-->
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { computed } from "vue";
 
 defineOptions({
   name: "CardWebInfo"
 });
 
-// 1. 更新 props 定义，添加 launch_time
+// 1. 更新 props 定义以匹配新的参数名和默认值
 const props = defineProps({
   config: {
     type: Object,
     required: true,
     default: () => ({
-      postCountEnable: false,
+      // -1 代表不开启
+      totalPostCount: -1,
       runtimeEnable: false,
-      wordCountEnable: false,
+      // -1 代表不开启
+      totalWordCount: -1,
       launch_time: null
     })
   }
 });
 
-// 网站的静态具体数据
-const webInfo = ref({
-  posts: 70,
-  words: "218.3k"
-});
-
-// 2. 添加 computed 属性来动态计算建站天数
+// 动态计算建站天数的逻辑保持不变
 const runningDays = computed(() => {
   if (!props.config.launch_time) {
     return 0;
   }
   try {
-    // 解析 "MM/DD/YYYY HH:mm:ss" 格式的日期
     const launchDate = new Date(props.config.launch_time);
     const currentDate = new Date();
-    // 计算两个日期之间的毫秒差
     const differenceInTime = currentDate.getTime() - launchDate.getTime();
-    // 将毫秒差转换为天数并向下取整
     const differenceInDays = differenceInTime / (1000 * 3600 * 24);
     return Math.floor(differenceInDays);
   } catch (error) {
@@ -44,18 +44,20 @@ const runningDays = computed(() => {
     return 0;
   }
 });
+
+// 2. 移除不再需要的静态 webInfo 数据
 </script>
 
 <template>
   <div class="card-webinfo">
     <div class="card-content">
       <div class="webinfo">
-        <div v-if="config.postCountEnable" class="webinfo-item">
+        <div v-if="config.totalPostCount !== -1" class="webinfo-item">
           <div class="webinfo-item-title">
             <i class="anzhiyufont anzhiyu-icon-file-lines" />
             <div class="item-name">文章总数 :</div>
           </div>
-          <div class="item-count">{{ webInfo.posts }}</div>
+          <div class="item-count">{{ config.totalPostCount }}</div>
         </div>
 
         <div v-if="config.runtimeEnable" class="webinfo-item">
@@ -63,16 +65,15 @@ const runningDays = computed(() => {
             <i class="anzhiyufont anzhiyu-icon-stopwatch" />
             <div class="item-name">建站天数 :</div>
           </div>
-          <!-- 3. 使用计算出的 runningDays -->
           <div class="item-count">{{ runningDays }} 天</div>
         </div>
 
-        <div v-if="config.wordCountEnable" class="webinfo-item">
+        <div v-if="config.totalWordCount !== -1" class="webinfo-item">
           <div class="webinfo-item-title">
             <i class="anzhiyufont anzhiyu-icon-font" />
             <div class="item-name">全站字数 :</div>
           </div>
-          <div class="item-count">{{ webInfo.words }}</div>
+          <div class="item-count">{{ config.totalWordCount }}</div>
         </div>
       </div>
     </div>

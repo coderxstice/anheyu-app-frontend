@@ -2,7 +2,7 @@
  * @Description: 系统配置相关的常量，与后端 Go 定义和 API 响应保持同步。
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:42:04
- * @LastEditTime: 2025-08-05 18:18:12
+ * @LastEditTime: 2025-08-06 10:48:39
  * @LastEditors: 安知鱼
  */
 
@@ -55,13 +55,12 @@ const KeySidebarWechatFace: SettingKey = "sidebar.wechat.face";
 const KeySidebarWechatBackFace: SettingKey = "sidebar.wechat.backFace";
 const KeySidebarTagsEnable: SettingKey = "sidebar.tags.enable";
 const KeySidebarTagsHighlight: SettingKey = "sidebar.tags.highlight";
-const KeySidebarArchivesEnable: SettingKey = "sidebar.archives.enable";
-const KeySidebarSiteInfoPostCountEnable: SettingKey =
-  "sidebar.siteinfo.postCountEnable";
+const KeySidebarSiteInfoTotalPostCount: SettingKey =
+  "sidebar.siteinfo.totalPostCount";
 const KeySidebarSiteInfoRuntimeEnable: SettingKey =
   "sidebar.siteinfo.runtimeEnable";
-const KeySidebarSiteInfoWordCountEnable: SettingKey =
-  "sidebar.siteinfo.wordCountEnable";
+const KeySidebarSiteInfoTotalWordCount: SettingKey =
+  "sidebar.siteinfo.totalWordCount";
 
 // --- 前台及页脚配置 ---
 const KeyFrontDeskSiteOwnerName: SettingKey = "frontDesk.siteOwner.name";
@@ -193,10 +192,9 @@ export const constant = {
   KeySidebarWechatBackFace,
   KeySidebarTagsEnable,
   KeySidebarTagsHighlight,
-  KeySidebarArchivesEnable,
-  KeySidebarSiteInfoPostCountEnable,
+  KeySidebarSiteInfoTotalPostCount,
   KeySidebarSiteInfoRuntimeEnable,
-  KeySidebarSiteInfoWordCountEnable,
+  KeySidebarSiteInfoTotalWordCount,
 
   // --- 前台及页脚配置 ---
   KeyFrontDeskSiteOwnerName,
