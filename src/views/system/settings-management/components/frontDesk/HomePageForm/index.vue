@@ -167,10 +167,10 @@
   </el-form-item>
 
   <el-divider content-position="left">网站运行时间</el-divider>
-  <el-form-item label="启用模块">
+  <el-form-item label="启用页脚运行时间模块">
     <el-switch v-model="model.footerRuntimeEnable" />
   </el-form-item>
-  <el-form-item label="网站上线时间">
+  <el-form-item label="网站上线时间(控制侧边栏建站天数以及页脚运行时间)">
     <el-date-picker
       v-model="model.footerRuntimeLaunchTime"
       type="datetime"

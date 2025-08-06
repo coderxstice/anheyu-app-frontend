@@ -58,7 +58,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="card-widget card-tags">
+  <div class="card-tags">
     <div class="card-content">
       <div v-if="loading" class="loading-tip">标签云加载中...</div>
       <div
@@ -85,12 +85,6 @@ onUnmounted(() => {
 </template>
 
 <style lang="scss" scoped>
-@use "../card.scss";
-
-.card-tags {
-  padding: 1rem 1.2rem;
-}
-
 .card-tag-cloud {
   max-height: 360px;
   overflow: hidden;

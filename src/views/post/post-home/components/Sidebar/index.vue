@@ -3,8 +3,7 @@ import { computed } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import AuthorInfoCard from "./components/AuthorInfoCard.vue";
 import CardWechat from "./components/CardWechat.vue";
-import TagsCard from "./components/TagsCard.vue";
-import Archives from "./components/Archives.vue";
+import Sticky from "./components/Sticky.vue";
 
 defineOptions({
   name: "Sidebar"
@@ -33,21 +32,6 @@ const wechatConfig = computed(() => {
     backFace: siteConfig.value.sidebar.wechat.backFace
   };
 });
-
-const tagsConfig = computed(() => {
-  if (!siteConfig.value?.sidebar?.tags?.enable) return null;
-  return {
-    highlight: siteConfig.value.sidebar.tags.highlight || []
-  };
-});
-
-const archivesConfig = computed(() => {
-  if (siteConfig.value?.sidebar?.archives?.enable) {
-    return true;
-  } else {
-    return false;
-  }
-});
 </script>
 
 <template>
@@ -55,10 +39,7 @@ const archivesConfig = computed(() => {
     <AuthorInfoCard v-if="authorInfoConfig" :config="authorInfoConfig" />
     <CardWechat v-if="wechatConfig" :config="wechatConfig" />
 
-    <div class="sticky-container">
-      <TagsCard v-if="tagsConfig" :config="tagsConfig" />
-      <Archives v-if="archivesConfig" />
-    </div>
+    <Sticky :config="siteConfig" />
   </aside>
 </template>
 
@@ -75,13 +56,5 @@ const archivesConfig = computed(() => {
   .aside-content {
     display: none;
   }
-}
-
-.sticky-container {
-  position: sticky;
-  top: calc(60px + 0.625rem);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
 }
 </style>

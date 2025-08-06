@@ -2,3 +2,10 @@ a {
   transition: all 0.2s ease 0s;
   overflow-wrap: break-word;
 }
+
+hr {
+  display: flex;
+  position: relative;
+  margin: 1rem 0;
+  border: 1px dashed var(--anzhiyu-theme-op);
+}
