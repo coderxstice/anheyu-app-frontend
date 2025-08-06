@@ -1,8 +1,8 @@
 /*
- * @Description:
+ * @Description: 路由配置
  * @Author: 安知鱼
  * @Date: 2025-04-08 17:29:06
- * @LastEditTime: 2025-08-05 14:25:46
+ * @LastEditTime: 2025-08-06 17:07:47
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
@@ -77,9 +77,18 @@ export default [
         }
       },
       {
-        path: "categories/:id",
-        name: "PostCategoriesDetail", // Recommended: Use a unique name
-        component: () => import("@/views/post/categories/index.vue"),
+        path: "categories/:name",
+        name: "PostHomeByCategory",
+        component: () => import("@/views/post/post-home/index.vue"),
+        meta: {
+          title: `${appName} - 分类`,
+          showLink: false
+        }
+      },
+      {
+        path: "categories/:name/page/:id",
+        name: "PostHomeByCategoryPaginated",
+        component: () => import("@/views/post/post-home/index.vue"),
         meta: {
           title: `${appName} - 分类`,
           showLink: false

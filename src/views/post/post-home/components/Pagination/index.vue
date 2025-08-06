@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router"; // 引入 useRoute
 
 const props = defineProps({
   page: { type: Number, required: true },
@@ -11,18 +11,16 @@ const props = defineProps({
 const emit = defineEmits(["current-change"]);
 
 const router = useRouter();
+const route = useRoute(); // 初始化 route
 const totalPages = computed(() => Math.ceil(props.total / props.pageSize));
 const jumpPage = ref("");
 
 const pageNumbers = computed(() => {
   const page = props.page;
   const total = totalPages.value;
-  // 定义要展示的页码数量，建议为奇数，以保证当前页在中间
   const showCount = 5;
   const arr = [];
 
-  // 如果总页数太少，不足以需要省略号逻辑，我们只生成中间部分的页码
-  // 这是关键的修复：循环从 2 开始，到 total - 1 结束，确保不包含已在模板中硬编码的第一页和最后一页
   if (total <= showCount + 2) {
     for (let i = 2; i < total; i++) {
       arr.push(i);
@@ -30,23 +28,19 @@ const pageNumbers = computed(() => {
     return arr;
   }
 
-  // 当总页数很多时，计算中间页码的起始和结束
   let start = Math.max(2, page - Math.floor((showCount - 3) / 2));
   let end = Math.min(total - 1, start + showCount - 3);
 
-  // 边界情况处理：靠近首页时
   if (page < showCount - 1) {
     start = 2;
     end = start + showCount - 3;
   }
 
-  // 边界情况处理：靠近末页时
   if (page > total - (showCount - 2)) {
     end = total - 1;
     start = end - showCount + 3;
   }
 
-  // 生成页码数组
   for (let i = start; i <= end; i++) {
     arr.push(i);
   }
@@ -54,8 +48,6 @@ const pageNumbers = computed(() => {
   return arr;
 });
 
-// 优化省略号显示逻辑：增加 pageNumbers.value.length > 0 的判断
-// 避免在 pageNumbers 为空数组时（例如 totalPages 为 2 或 3）访问 undefined 而报错
 const showStartEllipsis = computed(
   () => pageNumbers.value.length > 0 && pageNumbers.value[0] > 2
 );
@@ -65,9 +57,19 @@ const showEndEllipsis = computed(
     pageNumbers.value[pageNumbers.value.length - 1] < totalPages.value - 1
 );
 
+// 修改 getPageUrl 函数，使其能够处理分类路径
 const getPageUrl = (p: number) => {
-  if (p === 1) return "/";
-  return `/page/${p}`;
+  const categoryName = route.params.name as string;
+
+  if (categoryName) {
+    // 当前在分类页面下
+    if (p === 1) return `/categories/${categoryName}`;
+    return `/categories/${categoryName}/page/${p}`;
+  } else {
+    // 当前在首页
+    if (p === 1) return "/";
+    return `/page/${p}`;
+  }
 };
 
 const handlePageChange = (newPage: number) => {
@@ -88,7 +90,6 @@ const goToPage = () => {
 
 <template>
   <nav v-if="totalPages > 1" id="pagination">
-    <!-- 上一页 -->
     <div
       v-if="page > 1"
       class="extend prev"
@@ -99,7 +100,6 @@ const goToPage = () => {
     </div>
 
     <div class="pagination">
-      <!-- 第一页 -->
       <div
         class="page-number"
         :class="{ current: 1 === page }"
@@ -108,10 +108,8 @@ const goToPage = () => {
         1
       </div>
 
-      <!-- 前置省略号 -->
       <span v-if="showStartEllipsis" class="space">…</span>
 
-      <!-- 中间页码 -->
       <div
         v-for="p in pageNumbers"
         :key="p"
@@ -122,10 +120,8 @@ const goToPage = () => {
         {{ p }}
       </div>
 
-      <!-- 后置省略号 -->
       <span v-if="showEndEllipsis" class="space">…</span>
 
-      <!-- 最后一页 (仅当总页数大于1时显示) -->
       <div
         v-if="totalPages > 1"
         class="page-number"
@@ -135,7 +131,6 @@ const goToPage = () => {
         {{ totalPages }}
       </div>
 
-      <!-- 跳转页面 -->
       <div class="toPageGroup">
         <div class="extend">
           <i class="anzhiyufont anzhiyu-icon-angles-right" />
@@ -155,7 +150,6 @@ const goToPage = () => {
       </div>
     </div>
 
-    <!-- 下一页 -->
     <div
       v-if="page < totalPages"
       class="extend next"
@@ -168,6 +162,7 @@ const goToPage = () => {
 </template>
 
 <style lang="scss" scoped>
+/* 样式部分无需改动 */
 #pagination {
   display: flex;
   justify-content: center;

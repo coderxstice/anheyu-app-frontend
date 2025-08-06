@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from "vue";
+import { ref, onMounted, onUnmounted, nextTick, watchEffect } from "vue";
+import { useRouter, useRoute } from "vue-router"; // 引入 useRoute
 import { getCategoryList } from "@/api/post";
 import type { PostCategory } from "@/api/post/type";
 
-const emit = defineEmits(["category-change"]);
+const router = useRouter();
+const route = useRoute(); // 获取当前路由信息
 
 const categories = ref<PostCategory[]>([]);
 const selectedId = ref<string | null>(null);
 
 const catalogBarRef = ref<HTMLElement | null>(null);
 const isScrolledToEnd = ref(false);
-
 const showScrollButton = ref(false);
 
 const fetchCategories = async () => {
@@ -24,10 +25,34 @@ const fetchCategories = async () => {
   }
 };
 
-const handleSelect = (id: string | null) => {
-  selectedId.value = id;
-  emit("category-change", id);
+const handleSelect = (category: PostCategory | null) => {
+  if (category) {
+    router.push(`/categories/${category.name}`);
+  } else {
+    router.push("/");
+  }
 };
+
+// --- 新增代码：使用 watchEffect 自动同步 URL 和高亮状态 ---
+watchEffect(() => {
+  // 这个函数会在组件加载和 URL 变化时自动运行
+  const currentCategoryName = route.params.name as string;
+
+  if (currentCategoryName) {
+    // 根据 URL 中的分类名，查找对应的分类对象
+    const selectedCategory = categories.value.find(
+      c => c.name === currentCategoryName
+    );
+    // 如果找到了，就设置它的 ID 为选中 ID
+    if (selectedCategory) {
+      selectedId.value = selectedCategory.id;
+    }
+  } else {
+    // 如果 URL 中没有分类名 (即首页)，则取消所有选中
+    selectedId.value = null;
+  }
+});
+// --- 新增代码结束 ---
 
 const checkScrollPosition = () => {
   const el = catalogBarRef.value;
@@ -39,9 +64,7 @@ const checkScrollPosition = () => {
 const updateScrollVisibility = () => {
   const el = catalogBarRef.value;
   if (!el) return;
-  // 如果滚动宽度大于可见宽度，则显示按钮
   showScrollButton.value = el.scrollWidth > el.clientWidth;
-  // 同时，也检查一下滚动位置
   checkScrollPosition();
 };
 
@@ -58,11 +81,9 @@ const handleScrollNext = () => {
 
 onMounted(() => {
   fetchCategories();
-  // 监听窗口大小变化，以便动态调整按钮的显示
   window.addEventListener("resize", updateScrollVisibility);
 });
 
-// 在组件卸载时，移除事件监听，防止内存泄漏
 onUnmounted(() => {
   window.removeEventListener("resize", updateScrollVisibility);
 });
@@ -89,7 +110,7 @@ onUnmounted(() => {
             :key="category.id"
             class="catalog-list-item"
             :class="{ select: selectedId === category.id }"
-            @click="handleSelect(category.id)"
+            @click="handleSelect(category)"
           >
             <a>{{ category.name }}</a>
           </div>
