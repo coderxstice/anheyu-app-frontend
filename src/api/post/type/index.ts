@@ -2,7 +2,7 @@
  * @Description: 文章、标签、分类模块的所有类型定义
  * @Author: 安知鱼
  * @Date: 2025-07-23 11:07:00
- * @LastEditTime: 2025-08-02 16:57:53
+ * @LastEditTime: 2025-08-06 17:01:52
  * @LastEditors: 安知鱼
  */
 
@@ -92,6 +92,8 @@ export interface GetArticleListParams {
   pageSize?: number;
   query?: string; // 只搜索标题
   status?: ArticleStatus | "";
+  category?: string;
+  tag?: string;
 }
 
 /**

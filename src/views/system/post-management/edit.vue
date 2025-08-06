@@ -219,11 +219,34 @@ const initPage = async () => {
   }
 };
 
+/**
+ * 校验分类或标签名
+ * @param name 名称
+ * @param type 类型 "分类" 或 "标签"
+ * @returns boolean 是否校验通过
+ */
+const validateName = (name: string, type: "分类" | "标签"): boolean => {
+  const pattern = /^[\u4e00-\u9fa5a-zA-Z0-9_-]{1,30}$/;
+  if (!pattern.test(name)) {
+    ElMessage.error({
+      message: `${type}名 "${name}" 格式不正确。只能包含中英文、数字、下划线或连字符，长度为1-30个字符。`,
+      duration: 4000
+    });
+    return false;
+  }
+  return true;
+};
+
 const processTagsAndCategories = async () => {
   if (Array.isArray(form.post_category_ids)) {
     const categoryPromises = form.post_category_ids.map(async item => {
+      // 如果是已存在的ID，直接返回
       if (categoryOptions.value.some(opt => opt.id === item)) {
         return item;
+      }
+      // 如果是新创建的名称（string类型），先校验
+      if (!validateName(item, "分类")) {
+        throw new Error(`分类名 "${item}" 校验失败`);
       }
       try {
         const res = await createCategory({ name: item });
@@ -240,8 +263,13 @@ const processTagsAndCategories = async () => {
 
   if (Array.isArray(form.post_tag_ids)) {
     const tagPromises = form.post_tag_ids.map(async item => {
+      // 如果是已存在的ID，直接返回
       if (tagOptions.value.some(opt => opt.id === item)) {
         return item;
+      }
+      // 如果是新创建的名称（string类型），先校验
+      if (!validateName(item, "标签")) {
+        throw new Error(`标签名 "${item}" 校验失败`);
       }
       try {
         const res = await createTag({ name: item });
@@ -272,6 +300,7 @@ const handleSubmit = async (isPublish = false) => {
     if (valid) {
       isSubmitting.value = true;
       try {
+        // 先处理和校验分类与标签
         await processTagsAndCategories();
 
         if (isPublish) {
@@ -304,7 +333,11 @@ const handleSubmit = async (isPublish = false) => {
 
         router.push({ name: "PostManagement" });
       } catch (error) {
-        ElMessage.error(isEditMode.value ? "更新失败" : "创建失败");
+        // 如果是校验失败的Error，processTagsAndCategories会抛出，这里捕获
+        // validateName函数已经显示了具体的错误信息，这里只显示通用失败信息
+        if (!(error instanceof Error && error.message.includes("校验失败"))) {
+          ElMessage.error(isEditMode.value ? "更新失败" : "创建失败");
+        }
       } finally {
         isSubmitting.value = false;
       }

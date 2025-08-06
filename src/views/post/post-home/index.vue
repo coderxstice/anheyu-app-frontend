@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, watch, computed } from "vue";
-import { useRoute } from "vue-router"; // 1. 引入 useRoute
+import { useRoute } from "vue-router";
 import HomeTop from "./components/HomeTop/index.vue";
 import CategoryBar from "./components/CategoryBar/index.vue";
 import ArticleCard from "./components/ArticleCard/index.vue";
@@ -14,12 +14,10 @@ defineOptions({
   name: "PostHome"
 });
 
-const route = useRoute(); // 2. 获取路由实例
+const route = useRoute();
 const siteConfigStore = useSiteConfigStore();
 
-// 3. 计算属性，判断是否显示 HomeTop 组件
 const showHomeTop = computed(() => {
-  // 当页码为 1 时显示，否则隐藏
   return pagination.page === 1;
 });
 
@@ -29,7 +27,7 @@ const isDoubleColumn = computed(() => {
 const articles = ref<Article[]>([]);
 const loading = ref(true);
 const pagination = reactive({
-  page: 1, // 默认页码为 1
+  page: 1,
   pageSize: siteConfigStore.getSiteConfig?.post?.default.page_size || 12,
   total: 0
 });
@@ -62,8 +60,6 @@ const handlePageChange = (newPage: number) => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
-// 4. 监听路由参数变化，以更新当前页码
-//    这能确保用户通过浏览器前进/后退或直接访问 /page/2 这样的链接时，组件状态正确
 watch(
   () => route.params.id,
   newId => {
@@ -74,7 +70,6 @@ watch(
   }
 );
 
-// 监听页码和分类ID的变化，自动获取文章数据
 watch([() => pagination.page, currentCategoryId], fetchData, {
   immediate: true
 });
