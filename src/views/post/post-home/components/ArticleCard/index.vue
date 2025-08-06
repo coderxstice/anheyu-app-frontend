@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// 从 vue 中导入 computed
 import { ref, onMounted, computed, type PropType } from "vue";
 import type { Article } from "@/api/post/type";
 import { useArticleStore } from "@/store/modules/articleStore";
@@ -20,31 +19,21 @@ const props = defineProps({
   }
 });
 
-// 计算属性，用于判断文章是否为“最新”
 const isNewPost = computed(() => {
-  // 定义“最新”文章的时间阈值（这里设置为24小时）
   const NEW_POST_THRESHOLD_HOURS = 24;
   const threshold = NEW_POST_THRESHOLD_HOURS * 60 * 60 * 1000;
-
   const postDate = new Date(props.article.created_at).getTime();
   const now = new Date().getTime();
-
-  // 如果文章发布时间在阈值内，则返回 true
   return now - postDate < threshold;
 });
 
-// 用于存储已读文章ID的localStorage键名
 const READ_ARTICLES_KEY = "read_articles";
-
-// 创建一个响应式变量来跟踪文章的已读状态
 const isRead = ref(false);
 
-// 在组件挂载时，检查当前文章是否已被标记为已读
 onMounted(() => {
   const readArticlesStr = localStorage.getItem(READ_ARTICLES_KEY);
   if (readArticlesStr) {
     const readArticles: string[] = JSON.parse(readArticlesStr);
-    // 如果localStorage中存在当前文章ID，则标记为已读
     if (readArticles.includes(props.article.id)) {
       isRead.value = true;
     }
@@ -52,24 +41,30 @@ onMounted(() => {
 });
 
 const goPost = (id: string) => {
-  // 导航前，将当前文章ID标记为已读
   const readArticlesStr = localStorage.getItem(READ_ARTICLES_KEY);
   let readArticles: string[] = [];
   if (readArticlesStr) {
     readArticles = JSON.parse(readArticlesStr);
   }
-
-  // 如果ID尚未在列表中，则添加并更新localStorage
   if (!readArticles.includes(id)) {
     readArticles.push(id);
     localStorage.setItem(READ_ARTICLES_KEY, JSON.stringify(readArticles));
-    // 同时更新当前组件的状态
     isRead.value = true;
   }
-
-  // 执行页面跳转
   router.push({ path: `/p/${id}` });
 };
+
+// --- 新增代码 ---
+// 跳转到分类页面的方法
+const goToCategoryPage = (categoryName: string) => {
+  router.push(`/categories/${categoryName}`);
+};
+
+// 跳转到标签页面的方法
+const goToTagPage = (tagName: string) => {
+  router.push(`/tags/${tagName}`);
+};
+// --- 新增代码结束 ---
 </script>
 
 <template>
@@ -106,10 +101,10 @@ const goPost = (id: string) => {
             v-for="category in article.post_categories"
             :key="category.id"
             class="category-tip"
+            @click.stop="goToCategoryPage(category.name)"
           >
             {{ category.name }}
           </span>
-
           <span v-if="!isRead" class="unvisited-post" :title="article.title"
             >未读</span
           >
@@ -125,6 +120,7 @@ const goPost = (id: string) => {
             v-for="tag in article.post_tags"
             :key="tag.id"
             class="article-meta__tags"
+            @click.stop="goToTagPage(tag.name)"
           >
             <span>
               <i class="anzhiyufont anzhiyu-icon-hashtag" />{{ tag.name }}
@@ -293,6 +289,11 @@ const goPost = (id: string) => {
     display: inline;
     color: var(--anzhiyu-secondtext);
     font-size: 0.75rem;
+    transition: color 0.3s; /* --- 新增样式 --- */
+
+    &:hover {
+      color: var(--anzhiyu-main); /* --- 新增样式 --- */
+    }
   }
 }
 
@@ -312,13 +313,14 @@ const goPost = (id: string) => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    padding: 4px 0;
   }
 
   .tags .article-meta__tags {
     display: inline;
     color: var(--anzhiyu-secondtext);
     border-radius: 4px;
-    padding: 0 4px;
+    padding: 3px 4px;
     overflow: hidden;
     transition: all 0.2s;
     &:hover {
