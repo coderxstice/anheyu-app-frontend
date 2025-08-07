@@ -2,7 +2,7 @@
  * @Description: 路由配置
  * @Author: 安知鱼
  * @Date: 2025-04-08 17:29:06
- * @LastEditTime: 2025-08-06 18:45:44
+ * @LastEditTime: 2025-08-07 10:01:04
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
@@ -50,6 +50,24 @@ export default [
         }
       },
       {
+        path: "archives",
+        name: "PostArchives",
+        component: () => import("@/views/post/post-home/index.vue"),
+        meta: {
+          title: `${appName} - 归档`,
+          showLink: false
+        }
+      },
+      {
+        path: "archives/page/:id",
+        name: "PostArchivesDetailPaginated",
+        component: () => import("@/views/post/post-home/index.vue"),
+        meta: {
+          title: `${appName} - 归档`,
+          showLink: false
+        }
+      },
+      {
         path: "tags",
         name: "PostTagsAll",
         component: () => import("@/views/post/tags/index.vue"),
@@ -81,7 +99,7 @@ export default [
         name: "PostCategoriesAll",
         component: () => import("@/views/post/categories/index.vue"),
         meta: {
-          title: `${appName} - 全部分类`,
+          title: `${appName} - 分类`,
           showLink: false
         }
       },

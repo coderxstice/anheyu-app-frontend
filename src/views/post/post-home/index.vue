@@ -5,6 +5,7 @@ import HomeTop from "./components/HomeTop/index.vue";
 import CategoryBar from "./components/CategoryBar/index.vue";
 import TagBar from "./components/TagBar/index.vue";
 import ArticleCard from "./components/ArticleCard/index.vue";
+import Archives from "./components/Archives/index.vue";
 import Pagination from "./components/Pagination/index.vue";
 import Sidebar from "./components/Sidebar/index.vue";
 import { getPublicArticles } from "@/api/post";
@@ -18,10 +19,10 @@ defineOptions({
 const route = useRoute();
 const siteConfigStore = useSiteConfigStore();
 
-// 2. 计算当前页面类型
 const pageType = computed(() => {
   if (route.path.startsWith("/tags/")) return "tag";
   if (route.path.startsWith("/categories/")) return "category";
+  if (route.path.startsWith("/archives")) return "archive";
   return "home";
 });
 
@@ -41,11 +42,9 @@ const pagination = reactive({
   total: 0
 });
 
-// 3. 同时维护分类名和标签名
 const currentCategoryName = ref<string | null>(null);
 const currentTagName = ref<string | null>(null);
 
-// 4. 修改 fetchData，使其能处理标签和分类两种情况
 const fetchData = async () => {
   loading.value = true;
   try {
@@ -74,7 +73,6 @@ const handlePageChange = (newPage: number) => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
-// 5. 监听路由，更新分类/标签名和页码
 watch(
   () => route.params,
   newParams => {
@@ -93,7 +91,6 @@ watch(
   { immediate: true, deep: true }
 );
 
-// 6. 监听所有可能影响数据获取的变量
 watch([() => pagination.page, currentCategoryName, currentTagName], fetchData, {
   immediate: true
 });
@@ -120,18 +117,26 @@ watch([() => pagination.page, currentCategoryName, currentTagName], fetchData, {
           }"
         >
           <template v-if="!loading && articles.length > 0">
-            <ArticleCard
-              v-for="article in articles"
-              :key="article.id"
-              :article="article"
-              :is-double-column="isDoubleColumn"
+            <Archives
+              v-if="pageType === 'archive'"
+              :articles="articles"
+              :total="pagination.total"
             />
+            <template v-else>
+              <ArticleCard
+                v-for="article in articles"
+                :key="article.id"
+                :article="article"
+                :is-double-column="isDoubleColumn"
+              />
+            </template>
           </template>
           <el-empty
             v-if="!loading && articles.length === 0"
             description="暂无文章"
           />
         </div>
+
         <Pagination
           v-if="!loading && pagination.total > pagination.pageSize"
           :page="pagination.page"

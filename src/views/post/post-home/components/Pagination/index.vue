@@ -57,7 +57,6 @@ const showEndEllipsis = computed(
     pageNumbers.value[pageNumbers.value.length - 1] < totalPages.value - 1
 );
 
-// 修改 getPageUrl 函数，使其能够处理分类路径
 const getPageUrl = (p: number) => {
   const name = route.params.name as string;
   const path = route.path;
@@ -71,6 +70,11 @@ const getPageUrl = (p: number) => {
   else if (path.startsWith("/tags/")) {
     if (p === 1) return `/tags/${name}`;
     return `/tags/${name}/page/${p}`;
+  }
+  // 检查是否在归档页
+  else if (path.startsWith("/archives")) {
+    if (p === 1) return "/archives";
+    return `/archives/page/${p}`;
   }
   // 否则就是首页
   else {
