@@ -7,7 +7,7 @@ import TagBar from "./components/TagBar/index.vue";
 import ArticleCard from "./components/ArticleCard/index.vue";
 import Archives from "./components/Archives/index.vue";
 import Pagination from "./components/Pagination/index.vue";
-import Sidebar from "./components/Sidebar/index.vue";
+import Sidebar from "../components/Sidebar/index.vue";
 import { getPublicArticles } from "@/api/post";
 import type { Article, GetArticleListParams } from "@/api/post/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
