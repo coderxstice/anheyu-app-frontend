@@ -3,7 +3,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-24 17:29:16
- * @LastEditTime: 2025-08-06 13:43:32
+ * @LastEditTime: 2025-08-07 14:57:41
  * @LastEditors: 安知鱼
  */
 
@@ -86,6 +86,10 @@ export interface PostSettingsInfo {
     defaultCover: string;
     doubleColumn: boolean;
     pageSize: number;
+  };
+  theme: {
+    primaryColorApiUrl: string;
+    primaryColorApiToken: string;
   };
 }
 

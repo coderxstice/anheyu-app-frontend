@@ -319,6 +319,18 @@ const postDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyPostDefaultPageSize,
     defaultValue: 12,
     type: "number"
+  },
+  {
+    frontendPath: "post.theme.primaryColorApiUrl",
+    backendKey: constant.KeyPostThemePrimaryColorAPIURL,
+    defaultValue: 12,
+    type: "string"
+  },
+  {
+    frontendPath: "post.theme.primaryColorApiToken",
+    backendKey: constant.KeyPostThemePrimaryColorAPIToken,
+    defaultValue: 12,
+    type: "string"
   }
 ];
 

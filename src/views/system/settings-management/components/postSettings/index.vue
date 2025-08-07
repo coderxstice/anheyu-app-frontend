@@ -1,3 +1,10 @@
+<!--
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-08-02 18:04:48
+ * @LastEditTime: 2025-08-07 14:58:16
+ * @LastEditors: 安知鱼
+-->
 <template>
   <el-divider content-position="left">
     <h3>文章配置</h3>
@@ -44,7 +51,7 @@
   <el-form-item label="IP属地查询 API Token">
     <el-input
       v-model="formData.ipApiToken"
-      placeholder="例如：Kq1pRjB3WyDja7rhKcWV9f5QU8"
+      placeholder="请输入IP属地查询 API Token"
       show-password
     />
     <div class="form-item-help">
@@ -53,6 +60,32 @@
       <strong
         >注意：当 API 地址和 Token 均被配置时，发布和更新文章才会调用此 API
         来获取城市信息。</strong
+      >
+    </div>
+  </el-form-item>
+
+  <el-form-item label="文章主色调 API 地址">
+    <el-input
+      v-model="formData.theme.primaryColorApiUrl"
+      placeholder="例如：https://api.nsmao.net/api/img2color/query"
+    />
+    <div class="form-item-help">
+      用于在发布/更新文章时获取主色调信息的 API 地址。
+    </div>
+  </el-form-item>
+
+  <el-form-item label="文章主色调 API Token">
+    <el-input
+      v-model="formData.theme.primaryColorApiToken"
+      placeholder="请输入文章主色调 API Token"
+      show-password
+    />
+    <div class="form-item-help">
+      配合文章主色调 API 使用的 Token (如有)。
+      <br />
+      <strong
+        >注意：当 API 地址和 Token 均被配置时，发布和更新文章才会调用此 API
+        来获取主色调信息。</strong
       >
     </div>
   </el-form-item>

@@ -2,7 +2,7 @@
  * @Description: 系统配置相关的常量，与后端 Go 定义和 API 响应保持同步。
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:42:04
- * @LastEditTime: 2025-08-06 13:44:00
+ * @LastEditTime: 2025-08-07 14:53:47
  * @LastEditors: 安知鱼
  */
 
@@ -89,6 +89,10 @@ const KeyFooterBarLinkList: SettingKey = "footer.bar.linkList";
 const KeyDefaultCover: SettingKey = "post.default.cover";
 const KeyDoubleColumn: SettingKey = "post.default.double_column";
 const KeyPostDefaultPageSize: SettingKey = "post.default.page_size";
+const KeyPostThemePrimaryColorAPIURL: SettingKey =
+  "post.theme.primary_color_api_url";
+const KeyPostThemePrimaryColorAPIToken: SettingKey =
+  "post.theme.primary_color_api_token";
 
 // --- 文件生成及处理配置 ---
 const KeyEnableVipsGenerator: SettingKey = "ENABLE_VIPS_GENERATOR";
@@ -223,6 +227,8 @@ export const constant = {
   KeyDefaultCover,
   KeyDoubleColumn,
   KeyPostDefaultPageSize,
+  KeyPostThemePrimaryColorAPIURL,
+  KeyPostThemePrimaryColorAPIToken,
 
   // --- 文件生成及处理配置 ---
   KeyEnableVipsGenerator,
