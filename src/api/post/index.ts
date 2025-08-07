@@ -2,7 +2,7 @@
  * @Description: 文章管理模块 API 统一出口 (文章、标签、分类)
  * @Author: 安知鱼
  * @Date: 2025-07-25 18:05:00
- * @LastEditTime: 2025-08-05 11:29:39
+ * @LastEditTime: 2025-08-07 13:38:07
  * @LastEditors: 安知鱼
  */
 
@@ -201,5 +201,15 @@ export const getPublicArticles = (
     "get",
     baseUrlApi("public/articles"),
     { params }
+  );
+};
+
+/** @description [公开]获取单篇文章 */
+export const getPublicArticle = (
+  id: string
+): Promise<BaseResponse<ArticleResponse>> => {
+  return http.request<BaseResponse<ArticleResponse>>(
+    "get",
+    baseUrlApi(`public/articles/${id}`)
   );
 };
