@@ -145,7 +145,11 @@ onMounted(() => {
   &:hover {
     background: var(--anzhiyu-card-bg);
     color: var(--anzhiyu-fontcolor);
-    transform: scale(1.1);
+    transform: scale(1.15);
+  }
+  &:active {
+    transform: scale(0.8);
+    opacity: 0.8;
   }
 }
 .author-info-avatar {
