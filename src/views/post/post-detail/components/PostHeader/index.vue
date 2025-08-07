@@ -40,7 +40,12 @@ const goToTag = (tagName: string) => {
 </script>
 
 <template>
-  <div class="post-header-container">
+  <div
+    class="post-header-container"
+    :style="{
+      '--primary-color': article.primary_color || 'var(--anzhiyu-main)'
+    }"
+  >
     <div id="post-info">
       <div id="post-firstinfo">
         <div class="meta-firstline-top">
@@ -132,10 +137,34 @@ const goToTag = (tagName: string) => {
         class="nolazyload"
       />
     </div>
+    <section class="main-hero-waves-area waves-area">
+      <svg
+        class="waves-svg"
+        xmlns="http://www.w3.org/2000/svg"
+        xlink="http://www.w3.org/1999/xlink"
+        viewBox="0 24 150 28"
+        preserveAspectRatio="none"
+        shape-rendering="auto"
+      >
+        <defs>
+          <path
+            id="gentle-wave"
+            d="M-160 44c30 0 58-18 88-18s58 18 88 18 58-18 88-18 58 18 88 18v44h-352Z"
+          />
+        </defs>
+        <g class="parallax">
+          <use href="#gentle-wave" x="48" y="0" />
+          <use href="#gentle-wave" x="48" y="3" />
+          <use href="#gentle-wave" x="48" y="5" />
+          <use href="#gentle-wave" x="48" y="7" />
+        </g>
+      </svg>
+    </section>
   </div>
 </template>
 
 <style lang="scss" scoped>
+/* 原有样式 */
 .post-header-container {
   position: relative;
   width: 100%;
@@ -147,9 +176,8 @@ const goToTag = (tagName: string) => {
   justify-content: center;
   &::before {
     transition: 0s;
-    opacity: 0.93;
     height: 100%;
-    background-color: var(--anzhiyu-main);
+    background-color: var(--primary-color);
     opacity: 1;
     position: absolute;
     top: 0;
@@ -311,5 +339,75 @@ const goToTag = (tagName: string) => {
 .post-meta-commentcount {
   display: inline-flex;
   align-items: center;
+}
+
+/* 新增：波浪效果样式 */
+.main-hero-waves-area {
+  width: 100%;
+  position: absolute;
+  left: 0;
+  bottom: -11px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.waves-area .waves-svg {
+  width: 100%;
+  height: 3.75rem;
+}
+
+.parallax > use {
+  animation: move-forever 25s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
+  will-change: transform;
+}
+
+.parallax > use:nth-child(1) {
+  animation-delay: -2s;
+  animation-duration: 7s;
+  fill: #f7f9febd;
+}
+
+.parallax > use:nth-child(2) {
+  animation-delay: -3s;
+  animation-duration: 10s;
+  fill: #f7f9fe82;
+}
+
+.parallax > use:nth-child(3) {
+  animation-delay: -4s;
+  animation-duration: 13s;
+  fill: #f7f9fe36;
+}
+
+.parallax > use:nth-child(4) {
+  animation-delay: -5s;
+  animation-duration: 20s;
+  fill: #f7f9fe;
+}
+
+// 补全动画定义
+@keyframes move-forever {
+  0% {
+    transform: translate3d(-90px, 0, 0);
+  }
+  100% {
+    transform: translate3d(85px, 0, 0);
+  }
+}
+
+// 黑色模式背景
+[data-theme="dark"] .parallax {
+  & > use:nth-child(1) {
+    fill: #18171dc8;
+  }
+  & > use:nth-child(2) {
+    fill: #18171d80;
+  }
+  & > use:nth-child(3) {
+    fill: #18171d3e;
+  }
+  & > use:nth-child(4) {
+    fill: rgb(0 0 0 / 39%);
+  }
 }
 </style>

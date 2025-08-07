@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-05 18:27:55
- * @LastEditTime: 2025-08-06 10:55:31
+ * @LastEditTime: 2025-08-07 16:08:47
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -44,8 +44,6 @@ const runningDays = computed(() => {
     return 0;
   }
 });
-
-// 2. 移除不再需要的静态 webInfo 数据
 </script>
 
 <template>
@@ -83,6 +81,7 @@ const runningDays = computed(() => {
 <style lang="scss" scoped>
 .webinfo {
   padding: 0.2rem 0;
+  min-height: 5.4rem;
 }
 
 .webinfo-item {

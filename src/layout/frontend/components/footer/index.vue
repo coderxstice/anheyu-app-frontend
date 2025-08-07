@@ -279,11 +279,13 @@ onMounted(() => {
   );
   color: var(--anzhiyu-fontcolor);
   margin-top: 1rem;
+  min-height: 26.875rem;
 }
 .footer-wrap {
   position: relative;
   max-width: 1200px;
   margin: 0 auto;
+  min-height: 20.875rem;
 }
 a {
   color: var(--anzhiyu-fontcolor);

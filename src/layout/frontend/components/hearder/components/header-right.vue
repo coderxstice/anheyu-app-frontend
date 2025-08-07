@@ -112,7 +112,6 @@ const handleTravelClick = () => {
 
     &:hover {
       color: var(--anzhiyu-white);
-      box-shadow: var(--anzhiyu-shadow-main);
       background: var(--anzhiyu-lighttext);
     }
   }

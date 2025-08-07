@@ -1,6 +1,12 @@
 <template>
   <header v-if="headerConfig" class="frontend-header">
-    <div class="header-wrapper">
+    <div
+      class="header-wrapper"
+      :class="{
+        'is-transparent': isHeaderTransparent,
+        'text-is-white': isHeaderTransparent && isPostDetailPage
+      }"
+    >
       <div class="header-content">
         <div class="header-left">
           <BackMenuListGroups :navConfig="navConfig" />
@@ -61,12 +67,19 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { useRoute } from "vue-router";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import { useHeader } from "./hooks/useHeader";
 import BackMenuListGroups from "./components/back-menu-list-groups.vue";
 import HeaderRight from "./components/header-right.vue";
 
 const siteConfigStore = useSiteConfigStore();
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);
+const route = useRoute();
+
+const { isHeaderTransparent } = useHeader();
+
+const isPostDetailPage = computed(() => route.name === "PostDetail");
 
 const headerConfig = computed(() => siteConfig.value?.header);
 const navConfig = computed(() => headerConfig.value?.nav);
@@ -97,10 +110,13 @@ const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
     width: 100%;
     top: 0;
     z-index: 1000;
-    transition: background-color 0.3s;
     outline: 1px solid var(--anzhiyu-card-border);
     position: fixed;
     background-color: var(--anzhiyu-card-bg);
+    transition:
+      background-color 0.3s,
+      outline-color 0.3s;
+
     .header-content {
       max-width: 1400px;
       width: 100%;
@@ -108,6 +124,7 @@ const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
       position: relative;
       padding: 0 1.5rem;
       align-items: center;
+
       .header-left {
         display: flex;
         align-items: center;
@@ -119,7 +136,6 @@ const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
           border-radius: 50px;
           white-space: nowrap;
           overflow: hidden;
-
           padding: 0 2px;
           height: 35px;
           line-height: 35px;
@@ -139,14 +155,11 @@ const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
           &:hover {
             color: var(--anzhiyu-white);
             background: var(--anzhiyu-main);
-            box-shadow: var(--anzhiyu-shadow-main);
-
             i {
               opacity: 1;
               color: var(--anzhiyu-white);
               filter: none;
             }
-
             .site-title {
               opacity: 0;
             }
@@ -253,10 +266,10 @@ const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
               padding: 0 0.8em 0 1em;
               height: 35px;
               line-height: 35px;
-              transition: color 0s !important;
               font-size: 1rem;
               cursor: pointer;
               border-radius: 50px;
+              transition: all 0.3s;
             }
 
             .menus-item-child {
@@ -310,7 +323,6 @@ const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
                 &:hover {
                   background: var(--anzhiyu-lighttext);
                   color: var(--anzhiyu-card-bg);
-                  box-shadow: var(--anzhiyu-shadow-main);
                   margin: 0 auto;
                   transform: scale(1);
                   padding: 0.3rem 1rem;
@@ -327,11 +339,9 @@ const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
               .menu-title {
                 color: var(--anzhiyu-white) !important;
                 background: var(--anzhiyu-main);
-                box-shadow: var(--anzhiyu-shadow-main);
               }
               .menus-item-child {
                 border: var(--style-border-hover);
-                box-shadow: var(--anzhiyu-shadow-main);
                 opacity: 1;
                 filter: none;
                 pointer-events: all;
@@ -340,6 +350,47 @@ const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
             }
           }
         }
+      }
+    }
+
+    &.is-transparent {
+      background-color: transparent;
+      outline-color: transparent;
+    }
+
+    &.text-is-white {
+      a,
+      :deep(.header-right a),
+      :deep(.back-menu-button),
+      :deep(.nav-button) {
+        color: var(--anzhiyu-white);
+        &:hover {
+          color: var(--anzhiyu-white);
+          background: var(--anzhiyu-white-op);
+        }
+      }
+      .header-content .header-left .site-name-link:hover {
+        background: var(--anzhiyu-white-op);
+        color: var(--anzhiyu-white);
+      }
+      .back-home-button {
+        color: var(--anzhiyu-white);
+        &:hover {
+          background: var(--anzhiyu-white-op);
+        }
+      }
+
+      .main-nav .menus-items .menus-item .menu-title {
+        color: var(--anzhiyu-white);
+        &:hover {
+          color: var(--anzhiyu-white);
+        }
+      }
+      .header-content .main-nav .menus-items .menus-item:hover .menu-title {
+        background: var(--anzhiyu-white-op);
+      }
+      .main-nav .menus-items .menus-item:hover .menu-title {
+        color: var(--anzhiyu-white) !important;
       }
     }
   }

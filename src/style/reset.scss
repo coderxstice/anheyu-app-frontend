@@ -35,6 +35,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   // -webkit-font-smoothing: antialiased;
   text-rendering: optimizelegibility;
+  min-height: 100vh;
 }
 
 body:has(#wrapper),
