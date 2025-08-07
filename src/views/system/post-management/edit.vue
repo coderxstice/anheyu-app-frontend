@@ -119,7 +119,8 @@ const form = reactive<ArticleForm>({
   home_sort: 0,
   pin_sort: 0,
   top_img_url: "",
-  summaries: []
+  summaries: [],
+  primary_color: ""
 });
 
 const categoryOptions = ref<PostCategory[]>([]);
@@ -137,6 +138,9 @@ const categorySelectKey = ref(0);
 const tagSelectKey = ref(0);
 
 const addSummaryInput = () => {
+  if (!form.summaries) {
+    form.summaries = [];
+  }
   if (form.summaries.length < 3) {
     form.summaries.push("");
   }
@@ -205,7 +209,8 @@ const initPage = async () => {
         home_sort: 0,
         pin_sort: 0,
         top_img_url: "",
-        summaries: []
+        summaries: [],
+        primary_color: ""
       });
     }
 
@@ -240,11 +245,9 @@ const validateName = (name: string, type: "分类" | "标签"): boolean => {
 const processTagsAndCategories = async () => {
   if (Array.isArray(form.post_category_ids)) {
     const categoryPromises = form.post_category_ids.map(async item => {
-      // 如果是已存在的ID，直接返回
       if (categoryOptions.value.some(opt => opt.id === item)) {
         return item;
       }
-      // 如果是新创建的名称（string类型），先校验
       if (!validateName(item, "分类")) {
         throw new Error(`分类名 "${item}" 校验失败`);
       }
@@ -263,11 +266,9 @@ const processTagsAndCategories = async () => {
 
   if (Array.isArray(form.post_tag_ids)) {
     const tagPromises = form.post_tag_ids.map(async item => {
-      // 如果是已存在的ID，直接返回
       if (tagOptions.value.some(opt => opt.id === item)) {
         return item;
       }
-      // 如果是新创建的名称（string类型），先校验
       if (!validateName(item, "标签")) {
         throw new Error(`标签名 "${item}" 校验失败`);
       }
@@ -300,41 +301,35 @@ const handleSubmit = async (isPublish = false) => {
     if (valid) {
       isSubmitting.value = true;
       try {
-        // 先处理和校验分类与标签
         await processTagsAndCategories();
 
         if (isPublish) {
           form.status = "PUBLISHED";
         }
 
-        // 过滤掉空的摘要项
         const dataToSubmit = {
           ...form,
-          summaries: form.summaries.filter(s => s.trim() !== "")
+          summaries: form.summaries?.filter(s => s && s.trim() !== "")
         };
 
         if (isEditMode.value) {
           await updateArticle(articleId.value, dataToSubmit);
           ElMessage.success("更新成功");
         } else {
-          const { data } = await createArticle(dataToSubmit);
+          await createArticle(dataToSubmit);
           ElMessage.success("创建成功");
         }
 
-        // 定义需要从后端重新获取的配置项的键名
         const keysToRefetch = [
           constant.KeySidebarSiteInfoTotalPostCount,
           constant.KeySidebarSiteInfoTotalWordCount
         ];
 
-        // 调用 store action，从后端获取最新的值并更新缓存
         await siteConfigStore.fetchSystemSettings(keysToRefetch);
         console.log("站点统计信息已从后端同步。");
 
         router.push({ name: "PostManagement" });
       } catch (error) {
-        // 如果是校验失败的Error，processTagsAndCategories会抛出，这里捕获
-        // validateName函数已经显示了具体的错误信息，这里只显示通用失败信息
         if (!(error instanceof Error && error.message.includes("校验失败"))) {
           ElMessage.error(isEditMode.value ? "更新失败" : "创建失败");
         }
@@ -580,6 +575,21 @@ watch(
                 <span>媒体与摘要</span>
               </div>
             </template>
+            <el-form-item
+              v-if="form.primary_color"
+              label="文章主色调 (自动获取)"
+            >
+              <div class="primary-color-display">
+                <span
+                  class="color-swatch"
+                  :style="{ backgroundColor: form.primary_color }"
+                />
+                <el-input v-model="form.primary_color" readonly />
+              </div>
+              <div class="form-item-help">
+                该色值由封面图自动提取，用于前台显示，无需修改。
+              </div>
+            </el-form-item>
             <el-form-item label="封面图 URL" prop="cover_url">
               <el-input v-model="form.cover_url" placeholder="https://..." />
             </el-form-item>
@@ -608,14 +618,14 @@ watch(
                 />
               </div>
               <el-button
-                v-if="form.summaries.length < 3"
+                v-if="!form.summaries || form.summaries.length < 3"
                 :icon="Plus"
                 type="primary"
                 plain
                 style="width: 100%"
                 @click="addSummaryInput"
               >
-                新增摘要 ({{ form.summaries.length }}/3)
+                新增摘要 ({{ form.summaries?.length || 0 }}/3)
               </el-button>
             </el-form-item>
           </el-card>
@@ -627,7 +637,7 @@ watch(
 
 <style lang="scss" scoped>
 .post-edit-container {
-  padding: 0px;
+  padding: 20px;
   background-color: var(--el-bg-color-page);
   min-height: calc(100vh - 88px);
   transition: background-color 0.3s;
@@ -661,6 +671,21 @@ watch(
   color: var(--el-text-color-secondary);
   line-height: 1.5;
   margin-top: 4px;
+}
+
+.primary-color-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.color-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid var(--el-border-color);
+  flex-shrink: 0;
 }
 
 .summary-item {
@@ -806,6 +831,37 @@ watch(
     border-radius: 0;
     border: none;
     height: 100vh;
+  }
+}
+
+@media (max-width: 992px) {
+  .post-edit-container {
+    padding: 0;
+  }
+  .left-panel,
+  .right-panel {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 !important;
+  }
+  .content-card {
+    height: auto;
+    margin-bottom: 0;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  .editor-wrapper {
+    height: 500px;
+  }
+  .form-card {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    margin-bottom: 10px;
+  }
+  .form-card:first-of-type {
+    margin-top: 10px;
   }
 }
 

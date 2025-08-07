@@ -2,7 +2,7 @@
  * @Description: 文章、标签、分类模块的所有类型定义
  * @Author: 安知鱼
  * @Date: 2025-07-23 11:07:00
- * @LastEditTime: 2025-08-06 17:01:52
+ * @LastEditTime: 2025-08-07 15:05:21
  * @LastEditors: 安知鱼
  */
 
@@ -82,6 +82,7 @@ export interface Article {
   pin_sort: number;
   top_img_url: string;
   summaries: string[];
+  primary_color?: string;
 }
 
 /**
@@ -112,6 +113,7 @@ export interface ArticleForm {
   pin_sort?: number;
   top_img_url?: string;
   summaries?: string[];
+  primary_color?: string;
 }
 
 export type ArticleResponse = Article;
