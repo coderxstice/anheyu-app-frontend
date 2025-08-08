@@ -33,7 +33,6 @@ const handleSelect = (category: PostCategory | null) => {
   }
 };
 
-// --- 新增代码：使用 watchEffect 自动同步 URL 和高亮状态 ---
 watchEffect(() => {
   // 这个函数会在组件加载和 URL 变化时自动运行
   const currentCategoryName = route.params.name as string;
@@ -52,7 +51,6 @@ watchEffect(() => {
     selectedId.value = null;
   }
 });
-// --- 新增代码结束 ---
 
 const checkScrollPosition = () => {
   const el = catalogBarRef.value;

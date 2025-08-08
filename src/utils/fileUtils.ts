@@ -2,7 +2,7 @@
  * @Description: 文件处理相关的工具函数
  * @Author: 安知鱼
  * @Date: 2025-06-26 18:32:39
- * @LastEditTime: 2025-07-19 09:59:38
+ * @LastEditTime: 2025-08-08 15:06:42
  * @LastEditors: 安知鱼
  */
 
@@ -89,7 +89,6 @@ export interface UploadRecord {
   totalChunks: number;
   uploadedChunks: number[]; // localStorage 不支持 Set，所以使用数组
   uploadPath: string; // 上传的目标完整逻辑路径
-  // 新增元数据，用于恢复任务时在 UI 上显示
   name: string;
   size: number;
   lastModified: number;

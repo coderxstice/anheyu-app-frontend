@@ -54,7 +54,6 @@ const goPost = (id: string) => {
   router.push({ path: `/posts/${id}` });
 };
 
-// --- 新增代码 ---
 // 跳转到分类页面的方法
 const goToCategoryPage = (categoryName: string) => {
   router.push(`/categories/${categoryName}`);
@@ -64,7 +63,6 @@ const goToCategoryPage = (categoryName: string) => {
 const goToTagPage = (tagName: string) => {
   router.push(`/tags/${tagName}`);
 };
-// --- 新增代码结束 ---
 </script>
 
 <template>
@@ -289,10 +287,10 @@ const goToTagPage = (tagName: string) => {
     display: inline;
     color: var(--anzhiyu-secondtext);
     font-size: 0.75rem;
-    transition: color 0.3s; /* --- 新增样式 --- */
+    transition: color 0.3s;
 
     &:hover {
-      color: var(--anzhiyu-main); /* --- 新增样式 --- */
+      color: var(--anzhiyu-main);
     }
   }
 }

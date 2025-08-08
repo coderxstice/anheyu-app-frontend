@@ -107,10 +107,8 @@ watch(
   }
 );
 
-// [新增] 计算属性：判断是否达到最大数量
 const isMaxItemsReached = computed(() => localItems.value.length >= 5);
 
-// [新增] 计算属性：判断最后一条是否未填写完整
 const isLastItemIncomplete = computed(() => {
   if (localItems.value.length === 0) {
     return false; // 如果没有条目，则允许添加第一条

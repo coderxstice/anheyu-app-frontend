@@ -185,7 +185,6 @@ const emit = defineEmits<{
   (e: "global-command", command: string, value?: any): void;
 }>();
 
-// 新增本地状态
 const isMoreActionsPopoverVisible = ref(false);
 /**
  * @description: 是否隐藏已完成（成功或取消）的任务

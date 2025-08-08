@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-07-23 10:56:05
+ * @LastEditTime: 2025-08-08 15:06:39
  * @LastEditors: 安知鱼
  */
 
@@ -304,8 +304,6 @@ export interface ValidateUploadSessionResponse {
   data: UploadSessionStatus | InvalidUploadSessionStatus;
   message: string;
 }
-
-// 文件详情与文件夹树 (新增)
 
 /**
  * 文件详情接口的响应体

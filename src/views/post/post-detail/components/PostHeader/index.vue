@@ -3,6 +3,7 @@ import { type PropType, computed, onMounted, onUnmounted } from "vue";
 import type { Article } from "@/api/post/type";
 import { useRouter } from "vue-router";
 import { useArticleStore } from "@/store/modules/articleStore";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -17,11 +18,22 @@ const props = defineProps({
 
 const router = useRouter();
 const articleStore = useArticleStore();
+const siteConfigStore = useSiteConfigStore();
 let ctx: gsap.Context;
+
+const articleType = computed(() => {
+  const siteOwnerName = siteConfigStore.siteConfig?.frontDesk?.siteOwner?.name;
+  if (
+    props.article.copyright_author &&
+    props.article.copyright_author !== siteOwnerName
+  ) {
+    return "转载";
+  }
+  return "原创";
+});
 
 onMounted(() => {
   ctx = gsap.context(() => {
-    // 创建一个时间线实例，并为其配置一个共享的 ScrollTrigger
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: ".post-header-container",
@@ -31,20 +43,17 @@ onMounted(() => {
       }
     });
 
-    // 将 .post-info 的动画添加到时间线
     tl.to(".post-info", {
       scale: 0.5,
       ease: "none"
-    })
-      // 将 .post-top-cover 的动画也添加到时间线，并与上一个动画同步开始
-      .to(
-        ".post-top-cover",
-        {
-          scale: 0.5, // 注意：.post-top-cover 的初始 scale 是 2，GSAP 会从 2 动画到 0.5
-          ease: "none"
-        },
-        "<"
-      );
+    }).to(
+      ".post-top-cover",
+      {
+        scale: 0.5,
+        ease: "none"
+      },
+      "<"
+    );
   });
 });
 
@@ -85,7 +94,7 @@ const goToTag = (tagName: string) => {
     <div class="post-info">
       <div class="post-firstinfo">
         <div class="meta-firstline-top">
-          <a class="post-meta-original">原创</a>
+          <a class="post-meta-original">{{ articleType }}</a>
           <span
             v-if="article.post_categories.length > 0"
             class="post-meta-categories"

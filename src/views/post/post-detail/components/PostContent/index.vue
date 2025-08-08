@@ -1,3 +1,10 @@
+<!--
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-08-07 10:15:13
+ * @LastEditTime: 2025-08-08 13:36:43
+ * @LastEditors: 安知鱼
+-->
 <script setup lang="ts">
 // 这里可以引入 markdown-it 或其他解析库来处理 markdown
 // 或者，如果 API 直接返回 HTML，就直接使用 v-html
@@ -8,8 +15,6 @@ defineProps({
     default: ""
   }
 });
-
-// 示例：这里假设 content prop 是已经解析好的 HTML
 </script>
 
 <template>

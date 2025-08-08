@@ -1,5 +1,20 @@
 <template>
   <div v-if="model.homeTop">
+    <el-form-item label="网站拥有者名称">
+      <el-input
+        v-model="model.siteOwnerName"
+        placeholder="例如：安知鱼"
+        clearable
+      />
+    </el-form-item>
+    <el-form-item label="网站拥有者邮箱">
+      <el-input
+        v-model="model.siteOwnerEmail"
+        placeholder="例如：anzhiyu-c@qq.com"
+        clearable
+      />
+    </el-form-item>
+
     <el-divider content-position="left">首页顶部配置</el-divider>
     <el-row :gutter="20">
       <el-col :span="12">
@@ -137,20 +152,6 @@
 
   <el-divider content-position="left">页脚配置</el-divider>
 
-  <el-form-item label="网站拥有者名称">
-    <el-input
-      v-model="model.siteOwnerName"
-      placeholder="例如：安知鱼"
-      clearable
-    />
-  </el-form-item>
-  <el-form-item label="网站拥有者邮箱">
-    <el-input
-      v-model="model.siteOwnerEmail"
-      placeholder="例如：anzhiyu-c@qq.com"
-      clearable
-    />
-  </el-form-item>
   <el-form-item label="页脚版权所有者">
     <el-input
       v-model="model.footerOwnerName"

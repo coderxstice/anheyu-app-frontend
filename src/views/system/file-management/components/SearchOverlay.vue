@@ -60,7 +60,7 @@ const close = () => {
 };
 
 /**
- * [!新增] 处理遮罩层背景点击事件
+ * 处理遮罩层背景点击事件
  */
 const handleOverlayClick = (event: MouseEvent) => {
   // 如果点击的目标就是事件绑定的目标本身（即背景），则关闭

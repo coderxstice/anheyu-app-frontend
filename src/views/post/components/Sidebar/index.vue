@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-04 10:11:57
- * @LastEditTime: 2025-08-06 15:07:48
+ * @LastEditTime: 2025-08-08 13:38:29
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -27,7 +27,7 @@ const authorInfoConfig = computed(() => {
     skills: siteConfig.value.sidebar.author.skills,
     social: siteConfig.value.sidebar.author.social,
     userAvatar: siteConfig.value.USER_AVATAR,
-    ownerName: siteConfig.value.footer.owner.name,
+    ownerName: siteConfig.value.frontDesk.siteOwner.name,
     subTitle: siteConfig.value.SUB_TITLE
   };
 });

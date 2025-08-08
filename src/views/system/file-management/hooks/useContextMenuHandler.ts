@@ -2,7 +2,7 @@
  * @Description: 处理右键菜单所有逻辑的组合式函数 (Hook)
  * @Author: 安知鱼
  * @Date: 2025-06-25 14:18:45
- * @LastEditTime: 2025-07-21 15:39:53
+ * @LastEditTime: 2025-08-08 15:07:17
  * @LastEditors: 安知鱼
  */
 import { ref, type Ref } from "vue";
@@ -113,7 +113,7 @@ export function useContextMenuHandler(options: UseContextMenuHandlerOptions) {
       move: actions.onMove,
       share: actions.onShare,
       info: actions.onInfo,
-      "regenerate-thumbnail": actions.onRegenerateThumbnail // 新增：处理重新生成缩略图的动作
+      "regenerate-thumbnail": actions.onRegenerateThumbnail
     };
 
     const handler = actionMap[action];
