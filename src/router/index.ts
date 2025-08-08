@@ -153,7 +153,7 @@ router.beforeEach((to: ToRouteType, _from, next) => {
     }
 
     // 3.2 开启隐藏首页后，手动输入 /welcome 则跳转到 404
-    if (VITE_HIDE_HOME === "true" && to.fullPath === "/dashboard/welcome") {
+    if (VITE_HIDE_HOME === "true" && to.fullPath === "/admin/dashboard") {
       next({ path: "/error/404" });
       return;
     }

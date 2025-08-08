@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-25 00:41:04
- * @LastEditTime: 2025-07-25 19:12:07
+ * @LastEditTime: 2025-08-08 18:35:36
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
@@ -10,7 +10,7 @@ const Layout = () => import("@/layout/index.vue");
 export default {
   path: "/post-management",
   component: Layout,
-  redirect: "/post-management/index",
+  redirect: "/admin/post-management",
   meta: {
     icon: "material-symbols:post-add",
     title: "文章管理",
@@ -18,7 +18,7 @@ export default {
   },
   children: [
     {
-      path: "/post-management/index",
+      path: "/admin/post-management",
       name: "PostManagement",
       component: () => import("@/views/system/post-management/index.vue"),
       meta: {
@@ -27,7 +27,7 @@ export default {
       }
     },
     {
-      path: "/post-management/edit/:id",
+      path: "/admin/post-management/edit/:id",
       name: "PostEdit",
       component: () => import("@/views/system/post-management/edit.vue"),
       meta: {

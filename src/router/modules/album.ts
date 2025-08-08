@@ -2,14 +2,14 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-07-24 18:32:28
+ * @LastEditTime: 2025-08-08 18:36:13
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
 
 export default {
   path: "/album-management",
-  redirect: "/album-management/index",
+  redirect: "/admin/album-management",
   component: Layout,
   meta: {
     icon: "ep:home-filled",
@@ -18,7 +18,7 @@ export default {
   },
   children: [
     {
-      path: "/album-management/index",
+      path: "/admin/album-management",
       name: "AlbumManagement",
       component: () => import("@/views/system/album-management/index.vue"),
       meta: {

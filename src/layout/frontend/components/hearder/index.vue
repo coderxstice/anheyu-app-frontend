@@ -12,7 +12,11 @@
           <BackMenuListGroups :navConfig="navConfig" />
 
           <router-link to="/" class="site-name-link" accesskey="h">
-            <el-tooltip content="返回主页" placement="bottom">
+            <el-tooltip
+              content="返回主页"
+              placement="bottom"
+              :showArrow="false"
+            >
               <div>
                 <span class="site-title">{{ siteName }}</span>
                 <i class="anzhiyufont anzhiyu-icon-house-chimney" />

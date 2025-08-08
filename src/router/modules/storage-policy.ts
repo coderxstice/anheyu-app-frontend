@@ -10,7 +10,7 @@ const Layout = () => import("@/layout/index.vue");
 export default {
   path: "/storage-policy",
   component: Layout,
-  redirect: "/storage-policy/index",
+  redirect: "/admin/storage-policy",
   meta: {
     icon: "mingcute:storage-fill",
     title: "存储策略",
@@ -18,7 +18,7 @@ export default {
   },
   children: [
     {
-      path: "/storage-policy/index",
+      path: "/admin/storage-policy",
       name: "StoragePolicyManagement",
       component: () =>
         import("@/views/system/storage-policy-management/index.vue"),
@@ -28,7 +28,7 @@ export default {
       }
     },
     {
-      path: "/storage-policy/edit/:id",
+      path: "/admin/storage-policy/edit/:id",
       name: "StoragePolicyEdit",
       component: () =>
         import("@/views/system/storage-policy-management/edit.vue"),
@@ -40,7 +40,7 @@ export default {
       }
     },
     {
-      path: "/storage-policy/oauth",
+      path: "/admin/storage-policy/oauth",
       name: "StoragePolicyOAuth",
       component: () =>
         import("@/views/system/storage-policy-management/oauth.vue"),

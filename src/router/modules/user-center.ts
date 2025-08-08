@@ -2,14 +2,14 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-06-19 23:11:01
+ * @LastEditTime: 2025-08-08 18:43:59
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
 
 export default {
   path: "/user-center",
-  redirect: "/user-center/index",
+  redirect: "/admin/user-center",
   component: Layout,
   meta: {
     icon: "ep:user",
@@ -17,7 +17,7 @@ export default {
   },
   children: [
     {
-      path: "/user-center/index",
+      path: "/admin/user-center",
       name: "UserCenter",
       component: () => import("@/views/system/user-center/index.vue"),
       meta: {

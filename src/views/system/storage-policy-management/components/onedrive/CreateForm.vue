@@ -2,12 +2,16 @@
 import { ref, reactive, onMounted, computed } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
 import { type StoragePolicy } from "@/api/sys-policy";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
 const myInput = ref(null);
 
 const emit = defineEmits<{
   (e: "submit", payload: Partial<StoragePolicy>): void;
 }>();
+
+const siteConfigStore = useSiteConfigStore();
+const SiteUrl = siteConfigStore.getSiteUrl;
 
 const formRef = ref<FormInstance>();
 const formData = ref<Partial<StoragePolicy>>({
@@ -130,7 +134,16 @@ defineExpose({ submitForm });
         <el-link type="primary" :href="dynamicPortalLink" target="_blank"
           >Microsoft Entra ID 控制台</el-link
         >
-        并登录，进行应用注册。
+        并登录，登录后进入<code>Microsoft Entra ID</code>
+        管理面板，这里登录使用的账号和最终存储使用的 OneDrive 所属账号可以不同。
+        进入左侧 <code>应用注册</code> 菜单，并点击 <code>新注册</code>
+        按钮。填写应用注册表单。其中，名称可任取；受支持的帐户类型 选择为
+        <code
+          >任何组织目录(任何 Azure AD 目录 - 多租户)中的帐户和个人 Microsoft
+          帐户(例如，Skype、Xbox)</code
+        >；重定向 URI (可选) 请选择 Web，并填写
+        <code>{{ SiteUrl + "/admin/policy/oauth" }}</code
+        >； 其他保持默认即可。
       </p>
     </div>
 
