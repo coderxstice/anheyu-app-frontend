@@ -62,7 +62,7 @@ import FileSettings from "./components/fileSetting/FileSettingsForm.vue";
 import PostSettings from "./components/postSettings/index.vue";
 import FrontDeskSettings from "./components/FrontDeskSettings.vue";
 
-const activeName = "siteConfig";
+let activeName = "siteConfig";
 const siteConfigStore = useSiteConfigStore();
 
 // --- 优雅的自动化 ---

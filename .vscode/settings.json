@@ -19,7 +19,8 @@
     "strings": true
   },
   "files.associations": {
-    "editor.snippetSuggestions": "top"
+    "editor.snippetSuggestions": "top",
+    "**/assets/index.html": "gohtml"
   },
   "[css]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -27,9 +28,7 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "iconify.excludes": [
-    "el"
-  ],
+  "iconify.excludes": ["el"],
   "vscodeCustomCodeColor.highlightValue": [
     "v-loading",
     "v-auth",
@@ -39,5 +38,5 @@
     "v-perms",
     "v-ripple"
   ],
-  "vscodeCustomCodeColor.highlightValueColor": "#b392f0",
+  "vscodeCustomCodeColor.highlightValueColor": "#b392f0"
 }

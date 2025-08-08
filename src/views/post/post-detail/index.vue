@@ -26,12 +26,17 @@ const originalMainColor = ref<string | null>(null);
 const originalMainOpDeepColor = ref<string | null>(null);
 
 const fetchArticleData = async (id: string) => {
-  loading.value = true;
-  article.value = null; // 在开始获取新文章时，清空旧数据，避免短暂显示旧内容
+  // 仅在非水合（客户端导航）时显示加载状态并清空旧数据
+  if (!article.value) {
+    loading.value = true;
+  }
   try {
     const { data } = await getPublicArticle(id);
     article.value = data;
-    document.title = data.title;
+    // 仅在客户端导航时更新 document.title，SSR 时标题已由后端渲染
+    if (document) {
+      document.title = data.title;
+    }
   } catch (error) {
     console.error("获取文章详情失败:", error);
   } finally {
@@ -43,43 +48,61 @@ const fetchArticleData = async (id: string) => {
   }
 };
 
+const hydrate = () => {
+  if (window && window.__INITIAL_DATA__) {
+    article.value = window.__INITIAL_DATA__;
+    loading.value = false;
+    nextTick(() => {
+      loadingStore.stopLoading();
+    });
+    // 使用后立即删除，避免影响后续的客户端导航
+    delete window.__INITIAL_DATA__;
+    return true; // 表示已水合
+  }
+  return false; // 表示未水合
+};
+
 // 监听 article 数据的变化，动态修改主题色
-watch(article, newArticle => {
-  const rootStyle = document.documentElement.style;
-  const rootComputedStyle = getComputedStyle(document.documentElement);
+watch(
+  article,
+  newArticle => {
+    const rootStyle = document.documentElement.style;
+    const rootComputedStyle = getComputedStyle(document.documentElement);
 
-  // 首次进入时，保存原始颜色
-  if (originalMainColor.value === null) {
-    originalMainColor.value = rootComputedStyle
-      .getPropertyValue("--anzhiyu-main")
-      .trim();
-    originalMainOpDeepColor.value = rootComputedStyle
-      .getPropertyValue("--anzhiyu-main-op-deep")
-      .trim();
-  }
+    // 首次进入时，保存原始颜色
+    if (originalMainColor.value === null) {
+      originalMainColor.value = rootComputedStyle
+        .getPropertyValue("--anzhiyu-main")
+        .trim();
+      originalMainOpDeepColor.value = rootComputedStyle
+        .getPropertyValue("--anzhiyu-main-op-deep")
+        .trim();
+    }
 
-  // 如果新文章存在且有主色调
-  if (newArticle && newArticle.primary_color) {
-    const newColor = newArticle.primary_color;
-    rootStyle.setProperty("--anzhiyu-main", newColor);
-    if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(newColor)) {
-      rootStyle.setProperty("--anzhiyu-main-op-deep", `${newColor}dd`);
+    // 如果新文章存在且有主色调
+    if (newArticle && newArticle.primary_color) {
+      const newColor = newArticle.primary_color;
+      rootStyle.setProperty("--anzhiyu-main", newColor);
+      if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(newColor)) {
+        rootStyle.setProperty("--anzhiyu-main-op-deep", `${newColor}dd`);
+      } else {
+        rootStyle.setProperty("--anzhiyu-main-op-deep", newColor);
+      }
     } else {
-      rootStyle.setProperty("--anzhiyu-main-op-deep", newColor);
+      // 如果文章没有主色调，则恢复原始颜色
+      if (originalMainColor.value) {
+        rootStyle.setProperty("--anzhiyu-main", originalMainColor.value);
+      }
+      if (originalMainOpDeepColor.value) {
+        rootStyle.setProperty(
+          "--anzhiyu-main-op-deep",
+          originalMainOpDeepColor.value
+        );
+      }
     }
-  } else {
-    // 如果文章没有主色调，则恢复原始颜色
-    if (originalMainColor.value) {
-      rootStyle.setProperty("--anzhiyu-main", originalMainColor.value);
-    }
-    if (originalMainOpDeepColor.value) {
-      rootStyle.setProperty(
-        "--anzhiyu-main-op-deep",
-        originalMainOpDeepColor.value
-      );
-    }
-  }
-});
+  },
+  { immediate: true }
+);
 
 // 在组件卸载（离开页面）时，确保恢复原始主题色
 onUnmounted(() => {
@@ -99,6 +122,11 @@ onUnmounted(() => {
 watch(
   () => route.params.id,
   newId => {
+    // 首次进入时，先尝试水合
+    if (hydrate()) {
+      return; // 如果水合成功，则不执行 fetch
+    }
+    // 如果没有水合数据（说明是客户端路由跳转），则发起 API 请求
     if (newId) {
       fetchArticleData(newId as string);
     }
@@ -109,12 +137,10 @@ watch(
 
 <template>
   <div class="post-detail-container">
-    <!-- 使用本地 loading 状态控制骨架屏的显示 -->
     <div v-if="loading" class="post-header-placeholder" />
     <PostHeader v-else-if="article" :article="article" />
 
     <div class="layout">
-      <!-- 使用本地 loading 状态给用户一个明确的加载反馈 -->
       <main id="content-inner" v-loading="loading">
         <div v-if="article" id="post">
           <PostContent :content="article.content_md" />
