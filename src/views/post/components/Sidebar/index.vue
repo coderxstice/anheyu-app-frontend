@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-04 10:11:57
- * @LastEditTime: 2025-08-08 13:38:29
+ * @LastEditTime: 2025-08-08 18:16:13
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -53,7 +53,7 @@ const wechatConfig = computed(() => {
 
 <style lang="scss" scoped>
 .aside-content {
-  width: 280px;
+  width: 300px;
   transition: all 0.3s;
   display: flex;
   flex-direction: column;

@@ -19,8 +19,7 @@
     "strings": true
   },
   "files.associations": {
-    "editor.snippetSuggestions": "top",
-    "**/assets/index.html": "gohtml"
+    "editor.snippetSuggestions": "top"
   },
   "[css]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"

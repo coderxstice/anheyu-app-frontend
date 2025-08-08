@@ -184,7 +184,7 @@
           >
             {{ icpNumber }}
           </a>
-          <!-- [已修正] 将 v-if 从 a 移到 el-tooltip 上 -->
+
           <el-tooltip
             v-if="footerConfig.bar.cc && footerConfig.bar.cc.link"
             content="CC BY-NC-ND 4.0 协议"

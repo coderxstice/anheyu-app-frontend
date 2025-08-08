@@ -5,11 +5,17 @@ import { getPublicArticle } from "@/api/post";
 import type { Article } from "@/api/post/type";
 import { useLoadingStore } from "@/store/modules/loadingStore";
 
-// 引入子组件和侧边栏
+// 引入所有子组件
 import PostHeader from "./components/PostHeader/index.vue";
+import PostOutdateNotice from "./components/PostOutdateNotice/index.vue";
+import AiSummary from "./components/AiSummary/index.vue";
 import PostContent from "./components/PostContent/index.vue";
 import PostCopyright from "./components/PostCopyright/index.vue";
+import PostTools from "./components/PostTools/index.vue";
 import PostPagination from "./components/PostPagination/index.vue";
+import RelatedPosts from "./components/RelatedPosts/index.vue";
+import PostComment from "./components/PostComment/index.vue";
+import CommentBarrage from "./components/CommentBarrage/index.vue";
 import Sidebar from "../components/Sidebar/index.vue";
 
 defineOptions({
@@ -18,22 +24,19 @@ defineOptions({
 
 const route = useRoute();
 const article = ref<Article | null>(null);
-const loading = ref(true); // 本地加载状态，用于控制骨架屏和 v-loading
-const loadingStore = useLoadingStore(); // 全局加载状态
+const loading = ref(true);
+const loadingStore = useLoadingStore();
 
-// 分别存储两个颜色变量的原始值
 const originalMainColor = ref<string | null>(null);
 const originalMainOpDeepColor = ref<string | null>(null);
 
 const fetchArticleData = async (id: string) => {
-  // 仅在非水合（客户端导航）时显示加载状态并清空旧数据
   if (!article.value) {
     loading.value = true;
   }
   try {
     const { data } = await getPublicArticle(id);
     article.value = data;
-    // 仅在客户端导航时更新 document.title，SSR 时标题已由后端渲染
     if (document) {
       document.title = data.title;
     }
@@ -41,7 +44,6 @@ const fetchArticleData = async (id: string) => {
     console.error("获取文章详情失败:", error);
   } finally {
     loading.value = false;
-    // 确保 DOM 更新（骨架屏消失，文章内容渲染）完成后，再结束全局加载动画
     nextTick(() => {
       loadingStore.stopLoading();
     });
@@ -55,21 +57,18 @@ const hydrate = () => {
     nextTick(() => {
       loadingStore.stopLoading();
     });
-    // 使用后立即删除，避免影响后续的客户端导航
     delete window.__INITIAL_DATA__;
-    return true; // 表示已水合
+    return true;
   }
-  return false; // 表示未水合
+  return false;
 };
 
-// 监听 article 数据的变化，动态修改主题色
 watch(
   article,
   newArticle => {
     const rootStyle = document.documentElement.style;
     const rootComputedStyle = getComputedStyle(document.documentElement);
 
-    // 首次进入时，保存原始颜色
     if (originalMainColor.value === null) {
       originalMainColor.value = rootComputedStyle
         .getPropertyValue("--anzhiyu-main")
@@ -79,7 +78,6 @@ watch(
         .trim();
     }
 
-    // 如果新文章存在且有主色调
     if (newArticle && newArticle.primary_color) {
       const newColor = newArticle.primary_color;
       rootStyle.setProperty("--anzhiyu-main", newColor);
@@ -89,7 +87,6 @@ watch(
         rootStyle.setProperty("--anzhiyu-main-op-deep", newColor);
       }
     } else {
-      // 如果文章没有主色调，则恢复原始颜色
       if (originalMainColor.value) {
         rootStyle.setProperty("--anzhiyu-main", originalMainColor.value);
       }
@@ -104,7 +101,6 @@ watch(
   { immediate: true }
 );
 
-// 在组件卸载（离开页面）时，确保恢复原始主题色
 onUnmounted(() => {
   const rootStyle = document.documentElement.style;
   if (originalMainColor.value) {
@@ -118,15 +114,12 @@ onUnmounted(() => {
   }
 });
 
-// 监听路由参数变化，以便在文章间跳转时重新加载数据
 watch(
   () => route.params.id,
   newId => {
-    // 首次进入时，先尝试水合
     if (hydrate()) {
-      return; // 如果水合成功，则不执行 fetch
+      return;
     }
-    // 如果没有水合数据（说明是客户端路由跳转），则发起 API 请求
     if (newId) {
       fetchArticleData(newId as string);
     }
@@ -138,19 +131,28 @@ watch(
 <template>
   <div class="post-detail-container">
     <div v-if="loading" class="post-header-placeholder" />
+
     <PostHeader v-else-if="article" :article="article" />
 
     <div class="layout">
-      <main id="content-inner" v-loading="loading">
-        <div v-if="article" id="post">
+      <main v-loading="loading" class="post-content-inner">
+        <div v-if="article" class="post-detail-content">
+          <AiSummary
+            v-if="article.summaries.length > 0"
+            :summary="article.summaries"
+          />
+          <PostOutdateNotice :update-date="article.updated_at" />
           <PostContent :content="article.content_html" />
           <PostCopyright :article="article" />
-          <PostPagination />
+          <PostTools :article="article" />
+          <PostPagination :current-id="article.id" />
+          <RelatedPosts :tags="article.post_tags" :current-id="article.id" />
+          <PostComment :article-id="article.id" />
         </div>
       </main>
-
       <Sidebar />
     </div>
+    <CommentBarrage v-if="article" :article-id="article.id" />
   </div>
 </template>
 
@@ -159,10 +161,31 @@ watch(
   width: 100%;
   height: 30rem;
   min-height: 300px;
-  background-color: #f2f3f5;
   [data-theme="dark"] & {
     background-color: #18171d;
   }
+}
+.post-content-inner {
+  width: calc(100% - 300px);
+  &::selection {
+    background-color: var(--anzhiyu-main);
+    color: var(--anzhiyu-white);
+  }
+}
+.post-detail-content {
+  box-shadow: var(--anzhiyu-shadow-border);
+  padding: 1.25rem 2.5rem;
+  border-radius: 12px;
+  background: var(--anzhiyu-card-bg);
+  border: var(--style-border);
+  width: 100%;
+  align-self: flex-start;
+  animation: slide-in 0.6s 0.1s backwards;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  transition: all 0.3s ease 0s;
 }
 
 .layout {

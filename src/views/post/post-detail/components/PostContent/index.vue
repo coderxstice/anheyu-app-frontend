@@ -2,17 +2,14 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-07 10:15:13
- * @LastEditTime: 2025-08-08 13:36:43
+ * @LastEditTime: 2025-08-08 17:20:26
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
-// 这里可以引入 markdown-it 或其他解析库来处理 markdown
-// 或者，如果 API 直接返回 HTML，就直接使用 v-html
-
 defineProps({
   content: {
     type: String,
-    default: ""
+    default: "PostContent"
   }
 });
 </script>

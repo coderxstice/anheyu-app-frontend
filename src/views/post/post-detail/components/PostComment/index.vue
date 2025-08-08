@@ -1,18 +1,18 @@
 <!--
  * @Description:
  * @Author: 安知鱼
- * @Date: 2025-08-08 17:26:26
- * @LastEditTime: 2025-08-08 17:26:31
+ * @Date: 2025-08-08 17:05:57
+ * @LastEditTime: 2025-08-08 17:20:12
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
 defineOptions({
-  name: "PostPagination"
+  name: "PostComment"
 });
 </script>
 
 <template>
-  <div>PostPagination</div>
+  <div>PostComment</div>
 </template>
 
 <style lang="scss" scoped></style>

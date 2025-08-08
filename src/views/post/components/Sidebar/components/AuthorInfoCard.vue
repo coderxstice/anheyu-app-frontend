@@ -97,6 +97,7 @@ onMounted(() => {
 }
 .card-info {
   padding: 0;
+  border: none;
   &:before {
     background: linear-gradient(
       -25deg,
@@ -167,6 +168,7 @@ onMounted(() => {
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
+    border: var(--style-border-avatar);
   }
   .author-status {
     position: absolute;

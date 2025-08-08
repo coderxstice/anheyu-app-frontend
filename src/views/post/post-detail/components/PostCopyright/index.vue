@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-07 10:15:19
- * @LastEditTime: 2025-08-07 10:16:05
+ * @LastEditTime: 2025-08-08 17:01:33
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -26,7 +26,6 @@ defineProps({
 </template>
 
 <style lang="scss" scoped>
-/* 在这里添加版权组件的样式 */
 .post-copyright {
   margin-top: 2rem;
   padding: 1rem;
