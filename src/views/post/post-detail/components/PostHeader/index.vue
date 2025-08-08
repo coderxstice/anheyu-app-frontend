@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { type PropType, computed } from "vue";
+import { type PropType, computed, onMounted, onUnmounted } from "vue";
 import type { Article } from "@/api/post/type";
 import { useRouter } from "vue-router";
 import { useArticleStore } from "@/store/modules/articleStore";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const props = defineProps({
   article: {
@@ -13,12 +17,51 @@ const props = defineProps({
 
 const router = useRouter();
 const articleStore = useArticleStore();
+let ctx: gsap.Context;
+
+onMounted(() => {
+  ctx = gsap.context(() => {
+    // 创建一个时间线实例，并为其配置一个共享的 ScrollTrigger
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: ".post-header-container",
+        start: "top top",
+        end: "bottom top",
+        scrub: true
+      }
+    });
+
+    // 将 .post-info 的动画添加到时间线
+    tl.to(".post-info", {
+      scale: 0.5,
+      ease: "none"
+    })
+      // 将 .post-top-cover 的动画也添加到时间线，并与上一个动画同步开始
+      .to(
+        ".post-top-cover",
+        {
+          scale: 0.5, // 注意：.post-top-cover 的初始 scale 是 2，GSAP 会从 2 动画到 0.5
+          ease: "none"
+        },
+        "<"
+      );
+  });
+});
+
+onUnmounted(() => {
+  ctx.revert();
+});
 
 const topCoverUrl = computed(() => {
   return props.article.top_img_url || articleStore.defaultCover;
 });
 
-// 格式化日期为 YYYY-MM-DD
+const dynamicStyles = computed(() => {
+  return {
+    "--primary-color": props.article.primary_color || "var(--anzhiyu-main)"
+  };
+});
+
 const formatDate = (dateString: string) => {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -28,26 +71,19 @@ const formatDate = (dateString: string) => {
   return `${year}-${month}-${day}`;
 };
 
-// 跳转到分类页
 const goToCategory = (categoryName: string) => {
   router.push(`/categories/${categoryName}`);
 };
 
-// 跳转到标签页
 const goToTag = (tagName: string) => {
   router.push(`/tags/${tagName}`);
 };
 </script>
 
 <template>
-  <div
-    class="post-header-container"
-    :style="{
-      '--primary-color': article.primary_color || 'var(--anzhiyu-main)'
-    }"
-  >
-    <div id="post-info">
-      <div id="post-firstinfo">
+  <div class="post-header-container" :style="dynamicStyles">
+    <div class="post-info">
+      <div class="post-firstinfo">
         <div class="meta-firstline-top">
           <a class="post-meta-original">原创</a>
           <span
@@ -77,10 +113,8 @@ const goToTag = (tagName: string) => {
           </div>
         </div>
       </div>
-
       <h1 class="post-title">{{ article.title }}</h1>
-
-      <div id="post-meta">
+      <div class="post-meta">
         <div class="meta-firstline">
           <span class="post-meta-date">
             <i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon" />
@@ -129,13 +163,8 @@ const goToTag = (tagName: string) => {
         </div>
       </div>
     </div>
-    <div id="post-top-cover">
-      <img
-        id="post-top-bg"
-        :src="topCoverUrl"
-        :alt="article.title"
-        class="nolazyload"
-      />
+    <div class="post-top-cover">
+      <img class="post-top-bg" :src="topCoverUrl" :alt="article.title" />
     </div>
     <section class="main-hero-waves-area waves-area">
       <svg
@@ -164,7 +193,7 @@ const goToTag = (tagName: string) => {
 </template>
 
 <style lang="scss" scoped>
-/* 原有样式 */
+/* 样式无需任何改动 */
 .post-header-container {
   position: relative;
   width: 100%;
@@ -188,29 +217,7 @@ const goToTag = (tagName: string) => {
   }
 }
 
-#post-top-cover {
-  transform: rotate(10deg) translateY(30%) scale(2) translateZ(0);
-  filter: blur(30px);
-  opacity: 0.5;
-  width: 70%;
-  height: 100%;
-  position: relative;
-  margin: 0 -20% 0 auto;
-  overflow: hidden;
-  margin-bottom: 0;
-
-  #post-top-bg {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    min-width: 50vw;
-    min-height: 25rem;
-    opacity: 0.8;
-    transition: 0s;
-  }
-}
-
-#post-info {
+.post-info {
   height: 100%;
   width: 100%;
   text-align: center;
@@ -229,9 +236,32 @@ const goToTag = (tagName: string) => {
   align-items: flex-start;
   justify-content: center;
   animation: slide-in 0.6s 0s backwards;
+  transform-origin: top left;
 }
 
-#post-firstinfo .meta-firstline-top {
+.post-top-cover {
+  transform: rotate(10deg) translateY(30%) scale(2) translateZ(0);
+  filter: blur(30px);
+  opacity: 0.5;
+  width: 70%;
+  height: 100%;
+  position: relative;
+  margin: 0 -20% 0 auto;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+.post-top-cover .post-top-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  min-width: 50vw;
+  min-height: 25rem;
+  opacity: 0.8;
+  transition: 0s;
+}
+
+.post-firstinfo .meta-firstline-top {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -262,16 +292,18 @@ const goToTag = (tagName: string) => {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  i.anzhiyu-icon-hashtag {
-    opacity: 0.6;
-    font-size: 17px;
-  }
-  .tags-name {
-    margin-left: 4px;
-    color: var(--anzhiyu-white);
-    font-size: 1rem;
-    transition: color 0.3s;
-  }
+}
+
+.tag_share .post-meta__tag-list i.anzhiyu-icon-hashtag {
+  opacity: 0.6;
+  font-size: 17px;
+}
+
+.tag_share .post-meta__tag-list .tags-name {
+  margin-left: 4px;
+  color: var(--anzhiyu-white);
+  font-size: 1rem;
+  transition: color 0.3s;
 }
 
 .post-meta__tags {
@@ -299,7 +331,7 @@ const goToTag = (tagName: string) => {
   line-height: 1.2;
 }
 
-#post-meta {
+.post-meta {
   margin-top: 1.5rem;
   font-size: 1rem;
   opacity: 0.9;
@@ -309,8 +341,8 @@ const goToTag = (tagName: string) => {
   gap: 0.75rem;
 }
 
-#post-meta .meta-firstline,
-#post-meta .meta-secondline {
+.post-meta .meta-firstline,
+.post-meta .meta-secondline {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -341,7 +373,6 @@ const goToTag = (tagName: string) => {
   align-items: center;
 }
 
-/* 新增：波浪效果样式 */
 .main-hero-waves-area {
   width: 100%;
   position: absolute;
@@ -385,7 +416,6 @@ const goToTag = (tagName: string) => {
   fill: #f7f9fe;
 }
 
-// 补全动画定义
 @keyframes move-forever {
   0% {
     transform: translate3d(-90px, 0, 0);
@@ -395,7 +425,6 @@ const goToTag = (tagName: string) => {
   }
 }
 
-// 黑色模式背景
 [data-theme="dark"] .parallax {
   & > use:nth-child(1) {
     fill: #18171dc8;

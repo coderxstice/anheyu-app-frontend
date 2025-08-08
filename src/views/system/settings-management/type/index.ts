@@ -229,6 +229,7 @@ export interface HomePageSettingsInfo {
  */
 export interface SidebarPageSettingsInfo {
   authorEnable: boolean;
+  userAvatar: string;
   authorDescription: string;
   authorStatusImg: string;
   authorSkills: string[];

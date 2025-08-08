@@ -126,6 +126,13 @@ const updateSocials = (jsonString: string) => {
     <el-form-item label="启用作者信息卡">
       <el-switch v-model="model.authorEnable" />
     </el-form-item>
+    <el-form-item label="用户头像">
+      <el-input
+        v-model="model.userAvatar"
+        placeholder="输入用户头像 URL"
+        clearable
+      />
+    </el-form-item>
     <template v-if="model.authorEnable">
       <el-form-item label="状态图片 URL">
         <el-input

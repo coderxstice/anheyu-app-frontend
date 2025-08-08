@@ -9,13 +9,12 @@ import {
   type SettingsMap
 } from "@/api/sys-settings";
 import { message } from "@/utils/message";
-import { merge, set } from "lodash-es"; // 引入 lodash.set 用于深度设置属性
+import { merge, set } from "lodash-es";
+import { LOCAL_STORAGE_KEY } from "@/constant/index";
 
 // 引入公告相关的函数
 import { checkAndShowAnnouncementByConfig } from "@/components/AnNouncement";
 
-// 定义了 localStorage 存储的键名
-export const LOCAL_STORAGE_KEY = "site_config_cache";
 // 定义了缓存的有效期（24小时）
 const CACHE_EXPIRATION_TIME = 24 * 60 * 60 * 1000;
 

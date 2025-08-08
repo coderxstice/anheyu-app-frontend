@@ -120,11 +120,7 @@ const creativityPairs = computed(() => {
           :class="{ 'is-loading': articleStore.isRandomArticleLoading }"
           @click.prevent="articleStore.navigateToRandomArticle()"
         >
-          <i
-            v-if="!articleStore.isRandomArticleLoading"
-            class="anzhiyufont anzhiyu-icon-paper-plane"
-          />
-          <i v-else class="anzhiyufont anzhiyu-icon-loading anzhiyu-rotate" />
+          <i class="anzhiyufont anzhiyu-icon-paper-plane" />
           <div class="bannerText">
             随便逛逛
             <i class="anzhiyufont anzhiyu-icon-arrow-right" />
@@ -159,7 +155,7 @@ const creativityPairs = computed(() => {
           v-for="article in recommendedArticles"
           :key="article.id"
           class="recent-post-item"
-          :href="`/p/${article.id}`"
+          :href="`/posts/${article.id}`"
           :title="article.title"
         >
           <div class="post_cover">

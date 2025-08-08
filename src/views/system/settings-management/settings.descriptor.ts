@@ -489,6 +489,12 @@ const sidebarDescriptors: SettingDescriptor[] = [
     type: "boolean"
   },
   {
+    frontendPath: "frontDesk.sidebar.userAvatar",
+    backendKey: constant.KeyUserAvatar,
+    defaultValue: "/static/img/avatar.jpg",
+    type: "string"
+  },
+  {
     frontendPath: "frontDesk.sidebar.authorDescription",
     backendKey: constant.KeySidebarAuthorDescription,
     defaultValue: "",

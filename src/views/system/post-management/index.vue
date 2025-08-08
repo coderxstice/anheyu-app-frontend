@@ -188,7 +188,11 @@ onMounted(() => {
             :lg="6"
           >
             <el-card shadow="hover" class="article-card">
-              <a :href="`/p/${article.id}`" target="_blank" class="card-link">
+              <a
+                :href="`/posts/${article.id}`"
+                target="_blank"
+                class="card-link"
+              >
                 <div class="card-cover">
                   <el-image
                     v-if="article.cover_url"
@@ -224,7 +228,11 @@ onMounted(() => {
               </a>
 
               <div class="card-body">
-                <a :href="`/p/${article.id}`" target="_blank" class="card-link">
+                <a
+                  :href="`/posts/${article.id}`"
+                  target="_blank"
+                  class="card-link"
+                >
                   <h3 class="card-title">{{ article.title }}</h3>
                 </a>
                 <div class="card-tags">

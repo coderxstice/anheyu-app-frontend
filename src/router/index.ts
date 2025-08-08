@@ -26,6 +26,7 @@ import {
 import type { LoginResultData } from "@/api/user";
 // 从 auth.ts 导入的函数中，multipleTabsKey 已经包含在内
 import { userKey, removeToken, multipleTabsKey } from "@/utils/auth";
+import { useLoadingStore } from "@/store/modules/loadingStore";
 
 /** 自动导入全部静态路由，无需再手动引入！匹配 src/router/modules 目录（任何嵌套级别）中具有 .ts 扩展名的所有文件，除了 remaining.ts 文件
  * 如何匹配所有文件请看：https://github.com/mrmlnc/fast-glob#basic-syntax
@@ -105,7 +106,7 @@ const whiteList = [
   "/login/",
   "/album/",
   "/login/reset",
-  "/p/",
+  "/posts/",
   "/tags",
   "/tags/",
   "/page/",
@@ -117,6 +118,9 @@ const whiteList = [
 const { VITE_HIDE_HOME } = import.meta.env;
 
 router.beforeEach((to: ToRouteType, _from, next) => {
+  const loadingStore = useLoadingStore();
+  loadingStore.startLoading();
+
   // 1. 处理 keepAlive 逻辑
   if (to.meta?.keepAlive) {
     handleAliveRoute(to, "add");
@@ -265,6 +269,16 @@ router.beforeEach((to: ToRouteType, _from, next) => {
       next();
     }
   }
+});
+
+router.afterEach(to => {
+  const loadingStore = useLoadingStore();
+
+  // 如果目标路由的 name 不是 'PostDetail'，则立即关闭加载动画
+  if (to.name !== "PostDetail") {
+    loadingStore.stopLoading();
+  }
+  // 如果是 'PostDetail'，则什么也不做，等待 Axios 拦截器来关闭
 });
 
 export default router;

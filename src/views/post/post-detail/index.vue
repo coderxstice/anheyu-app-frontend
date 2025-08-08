@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from "vue";
+import { ref, watch, onUnmounted, nextTick } from "vue";
 import { useRoute } from "vue-router";
 import { getPublicArticle } from "@/api/post";
 import type { Article } from "@/api/post/type";
+import { useLoadingStore } from "@/store/modules/loadingStore";
 
 // 引入子组件和侧边栏
 import PostHeader from "./components/PostHeader/index.vue";
@@ -17,7 +18,8 @@ defineOptions({
 
 const route = useRoute();
 const article = ref<Article | null>(null);
-const loading = ref(true);
+const loading = ref(true); // 本地加载状态，用于控制骨架屏和 v-loading
+const loadingStore = useLoadingStore(); // 全局加载状态
 
 // 分别存储两个颜色变量的原始值
 const originalMainColor = ref<string | null>(null);
@@ -25,6 +27,7 @@ const originalMainOpDeepColor = ref<string | null>(null);
 
 const fetchArticleData = async (id: string) => {
   loading.value = true;
+  article.value = null; // 在开始获取新文章时，清空旧数据，避免短暂显示旧内容
   try {
     const { data } = await getPublicArticle(id);
     article.value = data;
@@ -33,6 +36,10 @@ const fetchArticleData = async (id: string) => {
     console.error("获取文章详情失败:", error);
   } finally {
     loading.value = false;
+    // 确保 DOM 更新（骨架屏消失，文章内容渲染）完成后，再结束全局加载动画
+    nextTick(() => {
+      loadingStore.stopLoading();
+    });
   }
 };
 
@@ -54,20 +61,14 @@ watch(article, newArticle => {
   // 如果新文章存在且有主色调
   if (newArticle && newArticle.primary_color) {
     const newColor = newArticle.primary_color;
-
-    // 1. 设置 --anzhiyu-main
     rootStyle.setProperty("--anzhiyu-main", newColor);
-
-    // 2. 设置 --anzhiyu-main-op-deep
-    // 校验是否为 3 位或 6 位十六进制颜色
     if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(newColor)) {
       rootStyle.setProperty("--anzhiyu-main-op-deep", `${newColor}dd`);
     } else {
-      // 如果不是标准 Hex 格式，无法添加透明度，则直接使用原色
       rootStyle.setProperty("--anzhiyu-main-op-deep", newColor);
     }
   } else {
-    // 如果文章没有主色调，或者正在离开页面，则恢复原始颜色
+    // 如果文章没有主色调，则恢复原始颜色
     if (originalMainColor.value) {
       rootStyle.setProperty("--anzhiyu-main", originalMainColor.value);
     }
@@ -108,9 +109,12 @@ watch(
 
 <template>
   <div class="post-detail-container">
-    <PostHeader v-if="article" :article="article" />
+    <!-- 使用本地 loading 状态控制骨架屏的显示 -->
+    <div v-if="loading" class="post-header-placeholder" />
+    <PostHeader v-else-if="article" :article="article" />
 
     <div class="layout">
+      <!-- 使用本地 loading 状态给用户一个明确的加载反馈 -->
       <main id="content-inner" v-loading="loading">
         <div v-if="article" id="post">
           <PostContent :content="article.content_md" />
@@ -125,13 +129,22 @@ watch(
 </template>
 
 <style lang="scss" scoped>
+.post-header-placeholder {
+  width: 100%;
+  height: 30rem;
+  min-height: 300px;
+  background-color: #f2f3f5;
+  [data-theme="dark"] & {
+    background-color: #18171d;
+  }
+}
+
 .layout {
   padding: 1rem 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
   display: flex;
   gap: 0.625rem;
-  // 文章页通常主内容区更宽
   #content-inner {
     width: 75%;
     flex: 1;

@@ -2,12 +2,12 @@
  * @Description: 路由配置
  * @Author: 安知鱼
  * @Date: 2025-04-08 17:29:06
- * @LastEditTime: 2025-08-07 10:01:04
+ * @LastEditTime: 2025-08-08 09:35:43
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
 const FrontendLayout = () => import("@/layout/frontend/index.vue");
-import { LOCAL_STORAGE_KEY } from "@/store/modules/siteConfig";
+import { LOCAL_STORAGE_KEY } from "@/constant/index";
 
 const configLocal = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
 const appName = configLocal?.config?.APP_NAME || "安和鱼";
@@ -32,7 +32,7 @@ export default [
         }
       },
       {
-        path: "p/:id",
+        path: "posts/:id",
         name: "PostDetail",
         component: () => import("@/views/post/post-detail/index.vue"),
         meta: {

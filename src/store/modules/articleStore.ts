@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-02 18:31:47
- * @LastEditTime: 2025-08-04 11:33:42
+ * @LastEditTime: 2025-08-08 09:34:56
  * @LastEditors: 安知鱼
  */
 import { defineStore } from "pinia";
@@ -29,7 +29,7 @@ export const useArticleStore = defineStore("article", () => {
       if (res.code === 200 && res.data) {
         const articleId = res.data.id;
         // 使用 router 实例进行跳转
-        router.push({ path: `/p/${articleId}` });
+        router.push({ path: `/posts/${articleId}` });
       } else {
         // 处理文章不存在的情况
         ElMessage.warning(res.message || "暂时没有可供浏览的文章");

@@ -51,7 +51,7 @@ const goPost = (id: string) => {
     localStorage.setItem(READ_ARTICLES_KEY, JSON.stringify(readArticles));
     isRead.value = true;
   }
-  router.push({ path: `/p/${id}` });
+  router.push({ path: `/posts/${id}` });
 };
 
 // --- 新增代码 ---

@@ -47,7 +47,7 @@ const formatDate = (dateString: string) => {
 
 // 跳转到文章详情
 const goToPost = (id: string) => {
-  router.push(`/p/${id}`);
+  router.push(`/posts/${id}`);
 };
 
 // 跳转到标签页

@@ -2,9 +2,12 @@
  * @Description: 系统配置相关的常量，与后端 Go 定义和 API 响应保持同步。
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:42:04
- * @LastEditTime: 2025-08-07 14:53:47
+ * @LastEditTime: 2025-08-07 18:51:11
  * @LastEditors: 安知鱼
  */
+
+// 定义了 localStorage 存储的键名
+export const LOCAL_STORAGE_KEY = "site_config_cache";
 
 /**
  * 定义配置键的类型，增强类型安全
