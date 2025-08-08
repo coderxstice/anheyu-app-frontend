@@ -80,7 +80,7 @@ export const router: Router = createRouter({
     }
 
     // 3. 对于所有其他情况，都平滑滚动到页面顶部
-    return { top: 0, behavior: "smooth" };
+    return { top: 0 };
   }
 });
 
@@ -274,11 +274,9 @@ router.beforeEach((to: ToRouteType, _from, next) => {
 router.afterEach(to => {
   const loadingStore = useLoadingStore();
 
-  // 如果目标路由的 name 不是 'PostDetail'，则立即关闭加载动画
   if (to.name !== "PostDetail") {
     loadingStore.stopLoading();
   }
-  // 如果是 'PostDetail'，则什么也不做，等待 Axios 拦截器来关闭
 });
 
 export default router;
