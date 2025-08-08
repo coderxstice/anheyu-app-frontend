@@ -143,7 +143,7 @@ watch(
     <div class="layout">
       <main id="content-inner" v-loading="loading">
         <div v-if="article" id="post">
-          <PostContent :content="article.content_md" />
+          <PostContent :content="article.content_html" />
           <PostCopyright :article="article" />
           <PostPagination />
         </div>

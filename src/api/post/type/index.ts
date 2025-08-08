@@ -2,7 +2,7 @@
  * @Description: 文章、标签、分类模块的所有类型定义
  * @Author: 安知鱼
  * @Date: 2025-07-23 11:07:00
- * @LastEditTime: 2025-08-08 10:51:11
+ * @LastEditTime: 2025-08-08 16:15:10
  * @LastEditors: 安知鱼
  */
 
@@ -70,6 +70,7 @@ export interface Article {
   updated_at: string;
   title: string;
   content_md?: string;
+  content_html?: string;
   cover_url: string;
   status: ArticleStatus;
   view_count: number;
