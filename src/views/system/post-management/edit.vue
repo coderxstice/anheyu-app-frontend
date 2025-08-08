@@ -108,6 +108,7 @@ const loading = ref(true);
 const isSubmitting = ref(false);
 const articleId = ref<string | null>(null);
 
+// ▼▼▼ 修改开始 ▼▼▼
 const form = reactive<ArticleForm>({
   title: "",
   content_md: "",
@@ -120,8 +121,15 @@ const form = reactive<ArticleForm>({
   pin_sort: 0,
   top_img_url: "",
   summaries: [],
-  primary_color: ""
+  primary_color: "",
+  is_primary_color_manual: false,
+  abbrlink: "",
+  copyright: true,
+  copyright_author: "",
+  copyright_author_href: "",
+  copyright_url: ""
 });
+// ▲▲▲ 修改结束 ▲▲▲
 
 const categoryOptions = ref<PostCategory[]>([]);
 const tagOptions = ref<PostTag[]>([]);
@@ -198,6 +206,7 @@ const initPage = async () => {
         form.summaries = [];
       }
     } else {
+      // ▼▼▼ 修改开始 ▼▼▼
       Object.assign(form, {
         title: "",
         content_md: `## 在这里开始你的创作...`,
@@ -210,8 +219,15 @@ const initPage = async () => {
         pin_sort: 0,
         top_img_url: "",
         summaries: [],
-        primary_color: ""
+        primary_color: "",
+        is_primary_color_manual: false,
+        abbrlink: "",
+        copyright: true,
+        copyright_author: "",
+        copyright_author_href: "",
+        copyright_url: ""
       });
+      // ▲▲▲ 修改结束 ▲▲▲
     }
 
     await fetchOptionsPromise;
@@ -571,13 +587,81 @@ watch(
           <el-card shadow="never" class="form-card">
             <template #header>
               <div class="card-header">
+                <IconifyIconOnline icon="ep:postcard" />
+                <span>高级设置</span>
+              </div>
+            </template>
+            <el-form-item label="自定义永久链接 (可选)" prop="abbrlink">
+              <el-input
+                v-model="form.abbrlink"
+                placeholder="例如: my-awesome-post"
+              />
+              <div class="form-item-help">
+                必须唯一，用于生成更友好的URL。留空则自动生成。
+              </div>
+            </el-form-item>
+            <el-form-item label="显示文章版权">
+              <el-switch v-model="form.copyright" />
+            </el-form-item>
+            <div v-if="form.copyright">
+              <el-form-item label="版权作者 (可选)" prop="copyright_author">
+                <el-input
+                  v-model="form.copyright_author"
+                  placeholder="留空则使用站点默认作者"
+                />
+                <div class="form-item-help">
+                  如果此值与【系统设置】-> 【前台设置】 -> 【首页配置】->
+                  【页脚配置】->
+                  【网站拥有者名称】不同，则在文章页内会显示为【转载】文章。
+                </div>
+              </el-form-item>
+              <el-form-item
+                label="版权作者链接 (可选)"
+                prop="copyright_author_href"
+              >
+                <el-input
+                  v-model="form.copyright_author_href"
+                  placeholder="https://..."
+                />
+              </el-form-item>
+              <el-form-item label="版权来源链接 (可选)" prop="copyright_url">
+                <el-input
+                  v-model="form.copyright_url"
+                  placeholder="转载文章的原始链接"
+                />
+              </el-form-item>
+            </div>
+          </el-card>
+          <el-card shadow="never" class="form-card">
+            <template #header>
+              <div class="card-header">
                 <IconifyIconOnline icon="clarity:image-gallery-line" />
                 <span>媒体与摘要</span>
               </div>
             </template>
+            <el-form-item label="手动指定主色调">
+              <el-switch v-model="form.is_primary_color_manual" />
+            </el-form-item>
             <el-form-item
-              v-if="form.primary_color"
-              label="文章主色调 (自动获取)"
+              v-if="form.is_primary_color_manual"
+              label="主色调"
+              prop="primary_color"
+            >
+              <div class="primary-color-display">
+                <span
+                  v-if="form.primary_color"
+                  class="color-swatch"
+                  :style="{ backgroundColor: form.primary_color }"
+                />
+                <el-input
+                  v-model="form.primary_color"
+                  placeholder="请输入十六进制色值, 如 #ff6600"
+                />
+              </div>
+            </el-form-item>
+            <el-form-item
+              v-else-if="!form.is_primary_color_manual && form.primary_color"
+              label="主色调 (自动获取)"
             >
               <div class="primary-color-display">
                 <span
@@ -587,7 +671,7 @@ watch(
                 <el-input v-model="form.primary_color" readonly />
               </div>
               <div class="form-item-help">
-                该色值由封面图自动提取，用于前台显示，无需修改。
+                由封面图自动提取，保存文章后更新。
               </div>
             </el-form-item>
             <el-form-item label="封面图 URL" prop="cover_url">

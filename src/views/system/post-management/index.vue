@@ -276,12 +276,12 @@ onMounted(() => {
                       <IconifyIconOnline icon="ep:view" />
                       {{ article.view_count }}
                     </span>
-                    <el-divider direction="vertical" />
+                    <el-divider direction="vertical" style="margin: 0" />
                     <span>
                       <IconifyIconOnline icon="icon-park-outline:text" />
                       {{ article.word_count }}
                     </span>
-                    <el-divider direction="vertical" />
+                    <el-divider direction="vertical" style="margin: 0" />
                     <span>
                       <IconifyIconOnline
                         icon="ant-design:field-time-outlined"

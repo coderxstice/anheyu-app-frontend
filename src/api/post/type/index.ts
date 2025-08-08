@@ -2,7 +2,7 @@
  * @Description: 文章、标签、分类模块的所有类型定义
  * @Author: 安知鱼
  * @Date: 2025-07-23 11:07:00
- * @LastEditTime: 2025-08-07 15:05:21
+ * @LastEditTime: 2025-08-08 10:51:11
  * @LastEditors: 安知鱼
  */
 
@@ -83,6 +83,12 @@ export interface Article {
   top_img_url: string;
   summaries: string[];
   primary_color?: string;
+  is_primary_color_manual: boolean;
+  abbrlink?: string;
+  copyright?: boolean;
+  copyright_author?: string;
+  copyright_author_href?: string;
+  copyright_url?: string;
 }
 
 /**
@@ -114,6 +120,12 @@ export interface ArticleForm {
   top_img_url?: string;
   summaries?: string[];
   primary_color?: string;
+  is_primary_color_manual?: boolean;
+  abbrlink?: string;
+  copyright?: boolean;
+  copyright_author?: string;
+  copyright_author_href?: string;
+  copyright_url?: string;
 }
 
 export type ArticleResponse = Article;
