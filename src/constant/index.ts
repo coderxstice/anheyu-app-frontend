@@ -90,6 +90,7 @@ const KeyFooterSocialBarRight: SettingKey = "footer.socialBar.right";
 const KeyFooterList: SettingKey = "footer.project.list";
 const KeyFooterBarLinkList: SettingKey = "footer.bar.linkList";
 const KeyDefaultCover: SettingKey = "post.default.cover";
+const KeyPostExpirationTime: SettingKey = "post.expiration_time";
 const KeyDoubleColumn: SettingKey = "post.default.double_column";
 const KeyPostDefaultPageSize: SettingKey = "post.default.page_size";
 const KeyPostThemePrimaryColorAPIURL: SettingKey =
@@ -232,6 +233,7 @@ export const constant = {
   KeyPostDefaultPageSize,
   KeyPostThemePrimaryColorAPIURL,
   KeyPostThemePrimaryColorAPIToken,
+  KeyPostExpirationTime,
 
   // --- 文件生成及处理配置 ---
   KeyEnableVipsGenerator,

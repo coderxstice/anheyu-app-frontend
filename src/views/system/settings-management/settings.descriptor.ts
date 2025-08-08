@@ -303,6 +303,12 @@ const postDescriptors: SettingDescriptor[] = [
     type: "string"
   },
   {
+    frontendPath: "post.expirationTime",
+    backendKey: constant.KeyPostExpirationTime,
+    defaultValue: "",
+    type: "number"
+  },
+  {
     frontendPath: "post.default.defaultCover",
     backendKey: constant.KeyDefaultCover,
     defaultValue: "",

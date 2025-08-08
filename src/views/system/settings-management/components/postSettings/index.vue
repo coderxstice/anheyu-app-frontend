@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-02 18:04:48
- * @LastEditTime: 2025-08-07 14:58:16
+ * @LastEditTime: 2025-08-08 18:29:55
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -25,6 +25,21 @@
       v-model="formData.default.doubleColumn"
       placeholder="例如：true"
     />
+  </el-form-item>
+
+  <el-form-item label="文章过期时间">
+    <el-input-number
+      v-model="formData.expirationTime"
+      :min="1"
+      controls-position="right"
+      style="width: 100%"
+      placeholder="例如: 365"
+      :style="{ width: '100px' }"
+    />
+    <div class="form-item-help">
+      文章过期时间，单位为天。<br />
+      <strong>不填则没有过期时间组件展示。</strong>
+    </div>
   </el-form-item>
 
   <el-form-item label="文章列表分页大小">

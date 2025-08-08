@@ -87,6 +87,7 @@ export interface PostSettingsInfo {
     doubleColumn: boolean;
     pageSize: number;
   };
+  expirationTime: number;
   theme: {
     primaryColorApiUrl: string;
     primaryColorApiToken: string;
