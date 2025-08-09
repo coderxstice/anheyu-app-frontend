@@ -20,6 +20,23 @@ const articleContentHtml =
 const tocItems = ref<TocItem[]>([]);
 const activeTocId = ref<string | null>(null);
 
+const scrollToHeading = (event: MouseEvent, id: string) => {
+  event.preventDefault();
+  activeTocId.value = id;
+  history.replaceState(null, "", `#${id}`);
+
+  const headingElement = document.getElementById(id);
+  if (headingElement) {
+    const rect = headingElement.getBoundingClientRect();
+    const absoluteTop = rect.top + window.scrollY;
+    const top = absoluteTop - 80;
+    window.scrollTo({
+      top: top,
+      behavior: "smooth"
+    });
+  }
+};
+
 const parseHeadings = () => {
   if (!articleContentHtml?.value || typeof document === "undefined") {
     tocItems.value = [];
@@ -41,21 +58,40 @@ const parseHeadings = () => {
   tocItems.value = newTocItems;
 };
 
+// 最终版本的 onScroll 函数
 const onScroll = () => {
   if (typeof window === "undefined") return;
-  const scrollOffset = window.scrollY + 80;
-  let currentActiveId: string | null = null;
+
+  const fixedHeaderHeight = 80;
+  let newActiveId: string | null = null;
+
   for (let i = tocItems.value.length - 1; i >= 0; i--) {
     const item = tocItems.value[i];
     const headingElement = document.getElementById(item.id);
     if (headingElement) {
-      if ((headingElement as HTMLElement).offsetTop <= scrollOffset) {
-        currentActiveId = item.id;
+      if (headingElement.getBoundingClientRect().top <= fixedHeaderHeight) {
+        newActiveId = item.id;
         break;
       }
     }
   }
-  activeTocId.value = currentActiveId;
+
+  // ✨ 核心改动：仅当 activeId 变化时才更新状态和 URL
+  if (activeTocId.value !== newActiveId) {
+    activeTocId.value = newActiveId;
+
+    // 根据新的 activeId 更新 URL hash
+    if (newActiveId) {
+      history.replaceState(null, "", `#${newActiveId}`);
+    } else {
+      // 如果没有活动的ID (例如滚动到页面顶部)，则清除 URL 中的 hash
+      history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search
+      );
+    }
+  }
 };
 
 const updateIndicator = () => {
@@ -80,7 +116,8 @@ watch(
   { immediate: true }
 );
 
-watch([activeTocId, tocItems], () => {
+watch(activeTocId, () => {
+  // 注意：这里只监听 activeTocId 即可，因为 tocItems 不会影响指示器位置
   nextTick(updateIndicator);
 });
 
@@ -112,6 +149,7 @@ onUnmounted(() => {
             :href="`#${item.id}`"
             class="toc-link"
             :class="{ active: activeTocId === item.id }"
+            @click="scrollToHeading($event, item.id)"
           >
             <span class="toc-text">{{ item.text }}</span>
           </a>
@@ -204,7 +242,6 @@ onUnmounted(() => {
     opacity 0.2s ease-in-out;
 }
 
-// Loop for indentation and font size
 @for $i from 2 through 6 {
   .toc-level-#{$i} {
     .toc-link {
