@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { ref, watch, onUnmounted, nextTick, provide, computed } from "vue";
 import { useRoute } from "vue-router";
-import { getPublicArticle } from "@/api/post";
+import { getPublicArticle, getPublicArticles } from "@/api/post";
 import type { Article } from "@/api/post/type";
 import { useLoadingStore } from "@/store/modules/loadingStore";
-import { useArticleStore } from "@/store/modules/articleStore";
 
-// 引入所有子组件
 import PostHeader from "./components/PostHeader/index.vue";
 import PostOutdateNotice from "./components/PostOutdateNotice/index.vue";
 import AiSummary from "./components/AiSummary/index.vue";
@@ -25,38 +23,37 @@ defineOptions({
 
 const route = useRoute();
 const article = ref<Article | null>(null);
+const recentArticles = ref<Article[]>([]);
 const loading = ref(true);
 const loadingStore = useLoadingStore();
-const articleStore = useArticleStore();
 
 const originalMainColor = ref<string | null>(null);
 const originalMainOpDeepColor = ref<string | null>(null);
-const originalMainOpLightColor = ref<string | null>(null); // 已存在，现在使用它
+const originalMainOpLightColor = ref<string | null>(null);
+
+provide("recentArticles", recentArticles);
 
 provide(
   "articleContentHtml",
   computed(() => article.value?.content_html)
 );
 
-// 改造数据获取函数，使其同时获取文章详情和最近文章列表
 const fetchRequiredData = async (id: string) => {
   if (!article.value) {
     loading.value = true;
   }
   try {
-    // 使用 Promise.all 并行发起请求，提升加载速度
-    await Promise.all([
-      // 请求一：获取当前文章的详细信息
-      getPublicArticle(id).then(res => {
-        article.value = res.data;
-        if (document) {
-          document.title = res.data.title;
-        }
-      }),
-      // 请求二：调用 store 的 action 获取最近文章列表
-      // 数据获取后会自动存储在 pinia 中
-      articleStore.fetchArticles({ page: 1, pageSize: 6 })
+    const [articleResponse, recentArticlesResponse] = await Promise.all([
+      getPublicArticle(id),
+      getPublicArticles({ page: 1, pageSize: 6 })
     ]);
+
+    article.value = articleResponse.data;
+    if (document) {
+      document.title = articleResponse.data.title;
+    }
+
+    recentArticles.value = recentArticlesResponse.data.list;
   } catch (error) {
     console.error("获取页面数据失败:", error);
   } finally {
@@ -74,8 +71,10 @@ const hydrate = () => {
     nextTick(() => {
       loadingStore.stopLoading();
     });
-    // 服务端渲染后，客户端依然需要获取最近文章列表
-    articleStore.fetchArticles({ page: 1, pageSize: 5 });
+    // 服务端渲染后，客户端依然需要自己获取最近文章列表
+    getPublicArticles({ page: 1, pageSize: 5 }).then(res => {
+      recentArticles.value = res.data.list;
+    });
     delete window.__INITIAL_DATA__;
     return true;
   }
@@ -88,7 +87,6 @@ watch(
     const rootStyle = document.documentElement.style;
     const rootComputedStyle = getComputedStyle(document.documentElement);
 
-    // 首次加载时，保存原始颜色值
     if (originalMainColor.value === null) {
       originalMainColor.value = rootComputedStyle
         .getPropertyValue("--anzhiyu-main")
@@ -101,22 +99,18 @@ watch(
         .trim();
     }
 
-    // 如果文章有自定义主色，则应用新颜色
     if (newArticle && newArticle.primary_color) {
       const newColor = newArticle.primary_color;
       rootStyle.setProperty("--anzhiyu-main", newColor);
 
-      // 如果是合法的 HEX 颜色，则通过添加两位十六进制数来设置透明度
       if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(newColor)) {
         rootStyle.setProperty("--anzhiyu-main-op-deep", `${newColor}dd`);
         rootStyle.setProperty("--anzhiyu-main-op-light", `${newColor}0d`);
       } else {
-        // 如果不是 HEX (可能是 rgba 等)，则直接赋值
         rootStyle.setProperty("--anzhiyu-main-op-deep", newColor);
         rootStyle.setProperty("--anzhiyu-main-op-light", newColor);
       }
     } else {
-      // 如果文章没有自定义主色，则恢复为网站的原始颜色
       if (originalMainColor.value) {
         rootStyle.setProperty("--anzhiyu-main", originalMainColor.value);
       }
@@ -137,7 +131,6 @@ watch(
   { immediate: true }
 );
 
-// 组件卸载时，确保所有颜色都恢复原状
 onUnmounted(() => {
   const rootStyle = document.documentElement.style;
   if (originalMainColor.value) {
@@ -157,7 +150,6 @@ onUnmounted(() => {
   }
 });
 
-// 侦听器调用改造后的函数
 watch(
   () => route.params.id,
   newId => {

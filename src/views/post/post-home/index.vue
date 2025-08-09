@@ -1,11 +1,6 @@
 <script setup lang="ts">
-import { watch, computed } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { useArticleStore } from "@/store/modules/articleStore";
-import { useSiteConfigStore } from "@/store/modules/siteConfig";
-import { storeToRefs } from "pinia";
-import type { GetArticleListParams } from "@/api/post/type";
-
+import { ref, reactive, watch, computed } from "vue";
+import { useRoute } from "vue-router";
 import HomeTop from "./components/HomeTop/index.vue";
 import CategoryBar from "./components/CategoryBar/index.vue";
 import TagBar from "./components/TagBar/index.vue";
@@ -13,19 +8,16 @@ import ArticleCard from "./components/ArticleCard/index.vue";
 import Archives from "./components/Archives/index.vue";
 import Pagination from "./components/Pagination/index.vue";
 import Sidebar from "../components/Sidebar/index.vue";
+import { getPublicArticles } from "@/api/post";
+import type { Article, GetArticleListParams } from "@/api/post/type";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
 defineOptions({
   name: "PostHome"
 });
 
 const route = useRoute();
-const router = useRouter();
-
-const articleStore = useArticleStore();
 const siteConfigStore = useSiteConfigStore();
-
-const { articles, loading, pagination } = storeToRefs(articleStore);
-const { fetchArticles } = articleStore;
 
 const pageType = computed(() => {
   if (route.path.startsWith("/tags/")) return "tag";
@@ -35,44 +27,73 @@ const pageType = computed(() => {
 });
 
 const showHomeTop = computed(() => {
-  return pageType.value === "home" && pagination.value.page === 1;
+  return pageType.value === "home" && pagination.page === 1;
 });
 
 const isDoubleColumn = computed(() => {
-  return siteConfigStore.getSiteConfig?.post?.default.double_column ?? true;
+  return siteConfigStore.getSiteConfig?.post?.default.double_column || true;
 });
 
-// --- 事件处理方法 ---
+const articles = ref<Article[]>([]);
+const loading = ref(true);
+const pagination = reactive({
+  page: 1,
+  pageSize: siteConfigStore.getSiteConfig?.post?.default.page_size || 12,
+  total: 0
+});
+
+const currentCategoryName = ref<string | null>(null);
+const currentTagName = ref<string | null>(null);
+
+const fetchData = async () => {
+  loading.value = true;
+  try {
+    const params: GetArticleListParams = {
+      page: pagination.page,
+      pageSize: pagination.pageSize
+    };
+    if (pageType.value === "category" && currentCategoryName.value) {
+      params.category = currentCategoryName.value;
+    } else if (pageType.value === "tag" && currentTagName.value) {
+      params.tag = currentTagName.value;
+    }
+
+    const { data } = await getPublicArticles(params);
+    articles.value = data.list;
+    pagination.total = data.total;
+  } catch (error) {
+    console.error("获取文章列表失败:", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
 const handlePageChange = (newPage: number) => {
-  // 推荐通过更新URL来触发数据加载，而不是直接修改状态
-  // 这样能保证URL和页面内容的一致性
-  const newPath = route.path.replace(/\/page\/\d+$/, "") + `/page/${newPage}`;
-  router.push(newPath);
+  pagination.page = newPage;
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
-// --- 侦听器 ---
-// 侦听路由的完整路径，当 URL 变化时，调用 store 的 action 来获取新数据
 watch(
-  () => route.fullPath,
-  () => {
-    // 准备API请求参数
-    const params: GetArticleListParams = {
-      page: Number(route.params.page) || 1,
-      pageSize: pagination.value.pageSize
-    };
-
+  () => route.params,
+  newParams => {
     if (pageType.value === "category") {
-      params.category = route.params.name as string;
+      currentCategoryName.value = (newParams.name as string) || null;
+      currentTagName.value = null;
     } else if (pageType.value === "tag") {
-      params.tag = route.params.name as string;
+      currentTagName.value = (newParams.name as string) || null;
+      currentCategoryName.value = null;
+    } else {
+      currentCategoryName.value = null;
+      currentTagName.value = null;
     }
-
-    // 调用 store 中的 action 来获取数据
-    fetchArticles(params);
+    pagination.page = newParams.id ? Number(newParams.id) : 1;
   },
-  { immediate: true } // 立即执行一次，以保证组件初次加载时有数据
+  { immediate: true, deep: true }
 );
+
+watch([() => pagination.page, currentCategoryName, currentTagName], fetchData, {
+  immediate: true
+});
 </script>
 
 <template>
@@ -131,7 +152,6 @@ watch(
 </template>
 
 <style lang="scss" scoped>
-/* 样式部分保持不变 */
 .post-home-top-container {
   margin: 0 auto;
   padding: 0 1.5rem;

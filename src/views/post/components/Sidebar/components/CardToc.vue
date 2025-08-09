@@ -26,7 +26,8 @@ let scrollTimer: number | null = null;
 const scrollToHeading = (event: MouseEvent, id: string) => {
   event.preventDefault();
   activeTocId.value = id;
-  history.replaceState(null, "", `#${id}`);
+
+  history.replaceState(history.state, "", `#${id}`);
 
   isClickScrolling.value = true;
 
@@ -85,10 +86,12 @@ const onScroll = () => {
   if (activeTocId.value !== newActiveId) {
     activeTocId.value = newActiveId;
     if (newActiveId) {
-      history.replaceState(null, "", `#${newActiveId}`);
+      // 2. 同样，恢复使用 history.replaceState 并传入 history.state
+      history.replaceState(history.state, "", `#${newActiveId}`);
     } else {
+      // 3. 移除 hash 时也一样
       history.replaceState(
-        null,
+        history.state,
         "",
         window.location.pathname + window.location.search
       );
@@ -122,6 +125,8 @@ watch(activeTocId, () => {
   nextTick(updateIndicator);
 });
 
+let scrollEndHandler: () => void;
+
 onMounted(() => {
   const handleInitialHash = () => {
     const hash = window.location.hash;
@@ -130,23 +135,17 @@ onMounted(() => {
       const headingElement = document.getElementById(id);
       if (headingElement) {
         activeTocId.value = id;
-
-        // 使用我们的精确滚动逻辑
         const rect = headingElement.getBoundingClientRect();
         const absoluteTop = rect.top + window.scrollY;
         const top = absoluteTop - 80;
-
-        window.scrollTo({
-          top: top,
-          behavior: "smooth"
-        });
+        window.scrollTo({ top: top, behavior: "smooth" });
       }
     }
   };
 
   setTimeout(handleInitialHash, 300);
 
-  const scrollEndHandler = () => {
+  scrollEndHandler = () => {
     if (scrollTimer) {
       clearTimeout(scrollTimer);
     }
@@ -162,11 +161,12 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  // onUnmounted 也需要移除所有监听器
   window.removeEventListener("scroll", onScroll);
+  if (scrollEndHandler) {
+    window.removeEventListener("scroll", scrollEndHandler);
+  }
 });
 </script>
-
 <template>
   <div v-if="tocItems.length > 0" id="card-toc" class="card-widget">
     <div class="item-headline">

@@ -1,56 +1,24 @@
-import { defineStore, storeToRefs } from "pinia";
-import { ref, reactive } from "vue";
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-08-02 18:31:47
+ * @LastEditTime: 2025-08-09 15:23:07
+ * @LastEditors: 安知鱼
+ */
+import { defineStore } from "pinia";
+import { ref } from "vue";
 import { ElMessage } from "element-plus";
 import { router } from "@/router";
-import { getRandomArticle, getPublicArticles } from "@/api/post";
-import type { Article, GetArticleListParams } from "@/api/post/type";
-import { useSiteConfigStore } from "./siteConfig";
+import { getRandomArticle } from "@/api/post";
 import defaultCover from "@/assets/img/post/default_cover.jpg";
 
 export const useArticleStore = defineStore("article", () => {
-  // === State (状态) ===
+  // state
   const isRandomArticleLoading = ref(false);
 
-  // 文章列表相关的状态
-  const articles = ref<Article[]>([]);
-  const loading = ref(true);
-  const siteConfigStore = useSiteConfigStore();
-  const { getSiteConfig } = storeToRefs(siteConfigStore);
-
-  const pagination = reactive({
-    page: 1,
-    pageSize: getSiteConfig.value?.post?.default.page_size || 12,
-    total: 0
-  });
-
-  // === Actions (方法) ===
-
+  // actions
   /**
-   * @description 根据查询参数，从后端获取文章列表
-   * @param params - 文章列表的查询参数
-   */
-  async function fetchArticles(params: GetArticleListParams) {
-    loading.value = true;
-    try {
-      // 如果没有传入页大小，则使用配置中的默认值
-      const finalParams = {
-        pageSize: pagination.pageSize,
-        ...params
-      };
-      const { data } = await getPublicArticles(finalParams);
-      articles.value = data.list;
-      pagination.total = data.total;
-      pagination.page = finalParams.page || 1; // 更新当前页码
-    } catch (error) {
-      console.error("获取文章列表失败:", error);
-      ElMessage.error("获取文章列表失败，请稍后重试");
-    } finally {
-      loading.value = false;
-    }
-  }
-
-  /**
-   * @description 跳转到一个随机文章的详情页
+   * @description 跳转到一篇随机文章的详情页
    */
   async function navigateToRandomArticle() {
     if (isRandomArticleLoading.value) return; // 防止重复点击
@@ -59,8 +27,11 @@ export const useArticleStore = defineStore("article", () => {
     try {
       const res = await getRandomArticle();
       if (res.code === 200 && res.data) {
-        router.push({ path: `/posts/${res.data.id}` });
+        const articleId = res.data.id;
+        // 使用 router 实例进行跳转
+        router.push({ path: `/posts/${articleId}` });
       } else {
+        // 处理文章不存在的情况
         ElMessage.warning(res.message || "暂时没有可供浏览的文章");
       }
     } catch (error) {
@@ -71,14 +42,9 @@ export const useArticleStore = defineStore("article", () => {
     }
   }
 
-  // 返回 state 和 actions
   return {
-    articles,
-    loading,
-    pagination,
     isRandomArticleLoading,
-    defaultCover,
-    fetchArticles,
-    navigateToRandomArticle
+    navigateToRandomArticle,
+    defaultCover
   };
 });

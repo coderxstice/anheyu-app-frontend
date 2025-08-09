@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, inject, ref } from "vue";
+import type { Ref } from "vue";
+import type { Article } from "@/api/post/type";
 import { useArticleStore } from "@/store/modules/articleStore";
-import { storeToRefs } from "pinia";
 
 defineOptions({
   name: "CardRecentPost"
 });
 
 const articleStore = useArticleStore();
-
 const defaultCover = articleStore.defaultCover;
 
-const { articles } = storeToRefs(articleStore);
+const articles = inject<Ref<Article[]>>("recentArticles", ref([]));
 
 const displayPosts = computed(() => articles.value.slice(0, 5));
 
@@ -24,7 +24,6 @@ const formatDate = (dateString: string) => {
   return `${year}-${month}-${day}`;
 };
 </script>
-
 <template>
   <div v-if="displayPosts.length > 0" class="card-widget card-recent-post">
     <div class="item-headline">
