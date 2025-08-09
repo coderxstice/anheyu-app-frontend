@@ -21,15 +21,12 @@ defineOptions({
 const route = useRoute();
 const router = useRouter();
 
-// --- 步骤 1: 引入并使用 Pinia Store ---
 const articleStore = useArticleStore();
 const siteConfigStore = useSiteConfigStore();
 
-// --- 步骤 2: 从 Store 中解构出响应式的状态和方法 ---
 const { articles, loading, pagination } = storeToRefs(articleStore);
 const { fetchArticles } = articleStore;
 
-// --- 计算属性 ---
 const pageType = computed(() => {
   if (route.path.startsWith("/tags/")) return "tag";
   if (route.path.startsWith("/categories/")) return "category";

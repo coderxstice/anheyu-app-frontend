@@ -20,10 +20,15 @@ const articleContentHtml =
 const tocItems = ref<TocItem[]>([]);
 const activeTocId = ref<string | null>(null);
 
+const isClickScrolling = ref(false);
+let scrollTimer: number | null = null;
+
 const scrollToHeading = (event: MouseEvent, id: string) => {
   event.preventDefault();
   activeTocId.value = id;
   history.replaceState(null, "", `#${id}`);
+
+  isClickScrolling.value = true;
 
   const headingElement = document.getElementById(id);
   if (headingElement) {
@@ -58,9 +63,10 @@ const parseHeadings = () => {
   tocItems.value = newTocItems;
 };
 
-// 最终版本的 onScroll 函数
 const onScroll = () => {
-  if (typeof window === "undefined") return;
+  if (isClickScrolling.value) {
+    return;
+  }
 
   const fixedHeaderHeight = 80;
   let newActiveId: string | null = null;
@@ -76,15 +82,11 @@ const onScroll = () => {
     }
   }
 
-  // ✨ 核心改动：仅当 activeId 变化时才更新状态和 URL
   if (activeTocId.value !== newActiveId) {
     activeTocId.value = newActiveId;
-
-    // 根据新的 activeId 更新 URL hash
     if (newActiveId) {
       history.replaceState(null, "", `#${newActiveId}`);
     } else {
-      // 如果没有活动的ID (例如滚动到页面顶部)，则清除 URL 中的 hash
       history.replaceState(
         null,
         "",
@@ -107,26 +109,60 @@ const updateIndicator = () => {
 };
 
 watch(
-  articleContentHtml || ref(""),
+  articleContentHtml,
   () => {
     nextTick(() => {
       parseHeadings();
     });
   },
-  { immediate: true }
+  { immediate: true, deep: true }
 );
 
 watch(activeTocId, () => {
-  // 注意：这里只监听 activeTocId 即可，因为 tocItems 不会影响指示器位置
   nextTick(updateIndicator);
 });
 
 onMounted(() => {
+  const handleInitialHash = () => {
+    const hash = window.location.hash;
+    if (hash) {
+      const id = decodeURIComponent(hash.slice(1));
+      const headingElement = document.getElementById(id);
+      if (headingElement) {
+        activeTocId.value = id;
+
+        // 使用我们的精确滚动逻辑
+        const rect = headingElement.getBoundingClientRect();
+        const absoluteTop = rect.top + window.scrollY;
+        const top = absoluteTop - 80;
+
+        window.scrollTo({
+          top: top,
+          behavior: "smooth"
+        });
+      }
+    }
+  };
+
+  setTimeout(handleInitialHash, 300);
+
+  const scrollEndHandler = () => {
+    if (scrollTimer) {
+      clearTimeout(scrollTimer);
+    }
+    scrollTimer = window.setTimeout(() => {
+      isClickScrolling.value = false;
+    }, 150);
+  };
+
   window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("scroll", scrollEndHandler);
+
   nextTick(updateIndicator);
 });
 
 onUnmounted(() => {
+  // onUnmounted 也需要移除所有监听器
   window.removeEventListener("scroll", onScroll);
 });
 </script>
@@ -206,7 +242,8 @@ onUnmounted(() => {
   line-height: 1.5;
   transition:
     color 0.2s ease-out,
-    background-color 0.2s ease-out;
+    background-color 0.2s ease-out,
+    font-size 0.2s ease-out;
   text-overflow: ellipsis;
   white-space: nowrap;
 
@@ -242,11 +279,14 @@ onUnmounted(() => {
     opacity 0.2s ease-in-out;
 }
 
-@for $i from 2 through 6 {
+@for $i from 1 through 6 {
   .toc-level-#{$i} {
     .toc-link {
-      padding-left: ($i - 1) * 1.25rem;
-      font-size: #{0.95 - ($i - 2) * 0.05}rem;
+      padding-left: ($i) * 0.8rem;
+      font-size: #{0.95 - ($i - 1) * 0.05}rem;
+      &.active {
+        font-size: #{1.1 - ($i - 1) * 0.05}rem;
+      }
     }
   }
 }

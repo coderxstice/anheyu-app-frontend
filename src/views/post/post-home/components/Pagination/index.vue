@@ -85,6 +85,8 @@ const getPageUrl = (p: number) => {
 
 const handlePageChange = (newPage: number) => {
   if (newPage > 0 && newPage <= totalPages.value && newPage !== props.page) {
+    console.log(getPageUrl(newPage));
+
     router.push(getPageUrl(newPage));
     emit("current-change", newPage);
   }
