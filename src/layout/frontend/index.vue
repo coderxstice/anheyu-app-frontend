@@ -2,14 +2,14 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-25 18:52:39
- * @LastEditTime: 2025-08-07 13:32:29
+ * @LastEditTime: 2025-08-09 09:36:03
  * @LastEditors: 安知鱼
 -->
 <template>
-  <div class="frontend-layout">
+  <div :class="{ frontendLayout: true, [mainContentClass]: true }">
     <Header />
 
-    <main class="frontend-main" :class="mainContentClass">
+    <main class="frontend-main">
       <router-view />
     </main>
 
@@ -44,9 +44,5 @@ onBeforeMount(() => {
   flex-direction: column;
   min-height: 100vh;
   justify-content: space-between;
-}
-
-.frontend-main.is-post-detail {
-  transform: translateY(-60px);
 }
 </style>

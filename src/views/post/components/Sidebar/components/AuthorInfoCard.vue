@@ -83,7 +83,6 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
-@use "../card.scss";
 @keyframes gradient {
   0% {
     background-position: 0% 50%;

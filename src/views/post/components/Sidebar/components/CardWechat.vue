@@ -47,8 +47,6 @@ const props = defineProps({
 </template>
 
 <style lang="scss" scoped>
-@use "../card.scss";
-
 .card-wechat {
   background: #57bd6a;
   display: flex;

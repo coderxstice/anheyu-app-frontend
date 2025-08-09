@@ -41,6 +41,7 @@
   --anzhiyu-main: var(--anzhiyu-theme);
   --anzhiyu-main-op: var(--anzhiyu-theme-op);
   --anzhiyu-main-op-deep: var(--anzhiyu-theme-op-deep);
+  --anzhiyu-main-op-light: var(--anzhiyu-theme-op-light);
   --anzhiyu-main-none: var(--anzhiyu-theme-none);
   --anzhiyu-shadow-theme: 0 8px 12px -3px var(--anzhiyu-theme-op);
   --anzhiyu-shadow-blackdeep: 0 2px 16px -3px rgba(0, 0, 0, 0.15);
@@ -56,6 +57,7 @@
   --anzhiyu-theme: #163bf2;
   --anzhiyu-theme-op: #4259ef23;
   --anzhiyu-theme-op-deep: #4259efdd;
+  --anzhiyu-theme-op-light: #4259ef0d;
   --anzhiyu-theme-none: #4259ef01;
   --anzhiyu-blue: #3e86f6;
   --anzhiyu-red: #f04a63;
@@ -108,4 +110,18 @@
 /* 色弱模式 */
 .html-weakness {
   filter: invert(80%);
+}
+
+.card-widget {
+  box-shadow: var(--anzhiyu-shadow-border);
+  background: var(--anzhiyu-card-bg);
+  border: var(--style-border);
+  border-radius: 12px;
+  transition: 0.3s;
+  position: relative;
+  overflow: hidden;
+  padding: 1rem;
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
 }

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-02 18:04:48
- * @LastEditTime: 2025-08-08 18:29:55
+ * @LastEditTime: 2025-08-09 09:52:24
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -45,7 +45,7 @@
   <el-form-item label="文章列表分页大小">
     <el-input-number
       v-model="formData.default.pageSize"
-      :min="1"
+      :min="6"
       controls-position="right"
       style="width: 100%"
       placeholder="例如: 10"

@@ -92,6 +92,12 @@ const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
 </script>
 
 <style scoped lang="scss">
+.is-post-detail {
+  .frontend-header {
+    position: fixed;
+    z-index: 99;
+  }
+}
 .frontend-header {
   height: 60px;
   width: 100%;
