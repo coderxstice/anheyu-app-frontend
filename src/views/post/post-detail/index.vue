@@ -185,7 +185,7 @@ watch(
             :prev-article="article.prev_article"
             :next-article="article.next_article"
           />
-          <RelatedPosts :tags="article.post_tags" :current-id="article.id" />
+          <RelatedPosts :posts="article.related_articles" />
           <PostComment :article-id="article.id" />
         </div>
       </main>
