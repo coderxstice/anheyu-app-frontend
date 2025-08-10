@@ -69,7 +69,7 @@ const formatDate = (dateString: string) => {
   padding-left: 0.25rem;
   color: var(--anzhiyu-fontcolor);
   i {
-    font-size: 1.2rem;
+    font-size: 1rem;
     margin-right: 0.5rem;
   }
 }

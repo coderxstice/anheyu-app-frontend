@@ -337,6 +337,24 @@ const postDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyPostThemePrimaryColorAPIToken,
     defaultValue: 12,
     type: "string"
+  },
+  {
+    frontendPath: "post.reward.enable",
+    backendKey: constant.KeyPostRewardEnable,
+    defaultValue: 12,
+    type: "boolean"
+  },
+  {
+    frontendPath: "post.reward.weChat",
+    backendKey: constant.KeyPostRewardWeChatQR,
+    defaultValue: 12,
+    type: "string"
+  },
+  {
+    frontendPath: "post.reward.aliPay",
+    backendKey: constant.KeyPostRewardAlipayQR,
+    defaultValue: 12,
+    type: "string"
   }
 ];
 
@@ -580,7 +598,6 @@ const sidebarDescriptors: SettingDescriptor[] = [
   }
 ];
 
-// 导出合并后的所有描述符
 export const allSettingDescriptors = [
   ...siteDescriptors,
   ...pageDescriptors,

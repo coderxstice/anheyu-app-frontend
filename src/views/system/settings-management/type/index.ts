@@ -92,6 +92,11 @@ export interface PostSettingsInfo {
     primaryColorApiUrl: string;
     primaryColorApiToken: string;
   };
+  reward: {
+    enable: boolean;
+    weChat: string;
+    aliPay: string;
+  };
 }
 
 /**

@@ -97,6 +97,9 @@ const KeyPostThemePrimaryColorAPIURL: SettingKey =
   "post.theme.primary_color_api_url";
 const KeyPostThemePrimaryColorAPIToken: SettingKey =
   "post.theme.primary_color_api_token";
+const KeyPostRewardEnable: SettingKey = "post.reward.enable";
+const KeyPostRewardWeChatQR: SettingKey = "post.reward.wechat_qr";
+const KeyPostRewardAlipayQR: SettingKey = "post.reward.alipay_qr";
 
 // --- 文件生成及处理配置 ---
 const KeyEnableVipsGenerator: SettingKey = "ENABLE_VIPS_GENERATOR";
@@ -233,6 +236,9 @@ export const constant = {
   KeyPostDefaultPageSize,
   KeyPostThemePrimaryColorAPIURL,
   KeyPostThemePrimaryColorAPIToken,
+  KeyPostRewardEnable,
+  KeyPostRewardWeChatQR,
+  KeyPostRewardAlipayQR,
   KeyPostExpirationTime,
 
   // --- 文件生成及处理配置 ---

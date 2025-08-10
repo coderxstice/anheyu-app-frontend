@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-02 18:04:48
- * @LastEditTime: 2025-08-09 09:52:24
+ * @LastEditTime: 2025-08-10 20:42:10
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -103,6 +103,24 @@
         来获取主色调信息。</strong
       >
     </div>
+  </el-form-item>
+
+  <el-form-item label="是否开启文章打赏功能">
+    <el-switch v-model="formData.reward.enable" placeholder="例如：true" />
+  </el-form-item>
+
+  <el-form-item label="文章打赏微信二维码图片">
+    <el-input
+      v-model="formData.reward.weChat"
+      placeholder="请输入文章打赏微信二维码图片链接地址"
+    />
+  </el-form-item>
+
+  <el-form-item label="文章打赏支付宝二维码图片">
+    <el-input
+      v-model="formData.reward.aliPay"
+      placeholder="请输入文章打赏支付宝二维码图片链接地址"
+    />
   </el-form-item>
 </template>
 
