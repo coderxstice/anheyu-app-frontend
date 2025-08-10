@@ -6,6 +6,7 @@ import { useArticleStore } from "@/store/modules/articleStore";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useDark } from "@pureadmin/utils";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -61,14 +62,25 @@ onUnmounted(() => {
   ctx.revert();
 });
 
+const { isDark } = useDark();
+
 const topCoverUrl = computed(() => {
   return props.article.top_img_url || articleStore.defaultCover;
 });
 
 const dynamicStyles = computed(() => {
-  return {
-    "--primary-color": props.article.primary_color || "var(--anzhiyu-main)"
-  };
+  console.log(isDark);
+
+  if (isDark.value) {
+    return {
+      "--primary-color":
+        props.article.primary_color + "dd" || "var(--anzhiyu-main-op-deep)"
+    };
+  } else {
+    return {
+      "--primary-color": props.article.primary_color || "var(--anzhiyu-main)"
+    };
+  }
 });
 
 const formatDate = (dateString: string) => {
@@ -202,7 +214,6 @@ const goToTag = (tagName: string) => {
 </template>
 
 <style lang="scss" scoped>
-/* 样式无需任何改动 */
 .post-header-container {
   position: relative;
   width: 100%;
@@ -268,6 +279,15 @@ const goToTag = (tagName: string) => {
   min-height: 25rem;
   opacity: 0.8;
   transition: 0s;
+  &::after {
+    position: absolute;
+    content: "";
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    box-shadow: 110px -130px 300px 60px var(--anzhiyu-bar-background) inset;
+  }
 }
 
 .post-firstinfo .meta-firstline-top {

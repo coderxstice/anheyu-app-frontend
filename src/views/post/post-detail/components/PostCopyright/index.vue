@@ -357,4 +357,10 @@ const goRewardPage = () => {
     }
   }
 }
+[data-theme="dark"] .reward .reward-button,
+[data-theme="dark"] .button-group .subscribe-button {
+  opacity: 0.5;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+  filter: alpha(opacity=50);
+}
 </style>
