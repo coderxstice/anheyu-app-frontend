@@ -69,8 +69,6 @@ const topCoverUrl = computed(() => {
 });
 
 const dynamicStyles = computed(() => {
-  console.log(isDark);
-
   if (isDark.value) {
     return {
       "--primary-color":

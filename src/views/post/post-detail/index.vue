@@ -181,7 +181,10 @@ watch(
           <PostContent :content="article.content_html" />
           <PostCopyright :article="article" />
           <PostTools :article="article" />
-          <PostPagination :current-id="article.id" />
+          <PostPagination
+            :prev-article="article.prev_article"
+            :next-article="article.next_article"
+          />
           <RelatedPosts :tags="article.post_tags" :current-id="article.id" />
           <PostComment :article-id="article.id" />
         </div>

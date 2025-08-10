@@ -2,7 +2,7 @@
  * @Description: 文章、标签、分类模块的所有类型定义
  * @Author: 安知鱼
  * @Date: 2025-07-23 11:07:00
- * @LastEditTime: 2025-08-08 16:15:10
+ * @LastEditTime: 2025-08-10 18:43:40
  * @LastEditors: 安知鱼
  */
 
@@ -57,6 +57,17 @@ export interface PostCategoryForm {
 export type PostCategoryResponse = PostCategory;
 export type CategoryListResponse = PostCategoryResponse[];
 
+/**
+ * @description 用于上一篇、下一篇、相关文章等链接跳转的基础文章信息
+ */
+export interface ArticleLink {
+  id: string;
+  title: string;
+  cover_url: string;
+  abbrlink: string;
+  created_at: string;
+}
+
 // ===================================
 //          文章 (Article)
 // ===================================
@@ -90,6 +101,9 @@ export interface Article {
   copyright_author?: string;
   copyright_author_href?: string;
   copyright_url?: string;
+  prev_article: ArticleLink | null;
+  next_article: ArticleLink | null;
+  related_articles: ArticleLink[];
 }
 
 /**
