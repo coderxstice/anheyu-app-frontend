@@ -1,6 +1,7 @@
 a {
   transition: all 0.2s ease 0s;
   overflow-wrap: break-word;
+  -webkit-user-drag: none;
 }
 
 hr {
