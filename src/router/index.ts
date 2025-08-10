@@ -271,10 +271,11 @@ router.beforeEach((to: ToRouteType, _from, next) => {
   }
 });
 
-router.afterEach(to => {
+router.afterEach((to, from) => {
   const loadingStore = useLoadingStore();
+  const isReloadingSamePost = to.name === "PostDetail" && to.path === from.path;
 
-  if (to.name !== "PostDetail") {
+  if (to.name !== "PostDetail" || isReloadingSamePost) {
     loadingStore.stopLoading();
   }
 });

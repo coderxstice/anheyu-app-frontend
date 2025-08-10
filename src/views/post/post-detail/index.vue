@@ -58,9 +58,6 @@ const fetchRequiredData = async (id: string) => {
     console.error("获取页面数据失败:", error);
   } finally {
     loading.value = false;
-    nextTick(() => {
-      loadingStore.stopLoading();
-    });
   }
 };
 
@@ -68,10 +65,6 @@ const hydrate = () => {
   if (window && window.__INITIAL_DATA__) {
     article.value = window.__INITIAL_DATA__;
     loading.value = false;
-    nextTick(() => {
-      loadingStore.stopLoading();
-    });
-    // 服务端渲染后，客户端依然需要自己获取最近文章列表
     getPublicArticles({ page: 1, pageSize: 5 }).then(res => {
       recentArticles.value = res.data.list;
     });
@@ -126,6 +119,12 @@ watch(
           originalMainOpLightColor.value
         );
       }
+    }
+
+    if (newArticle) {
+      nextTick(() => {
+        loadingStore.stopLoading();
+      });
     }
   },
   { immediate: true }
