@@ -246,6 +246,12 @@ onUnmounted(() => {
     font-size 0.2s ease-out;
   text-overflow: ellipsis;
   white-space: nowrap;
+  &:not(.active) {
+    opacity: 0.6;
+    cursor: pointer;
+    filter: blur(1px);
+    width: 100%;
+  }
 
   .toc-text {
     transition: transform 0.2s ease-out;

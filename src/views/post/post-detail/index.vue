@@ -13,7 +13,7 @@ import PostCopyright from "./components/PostCopyright/index.vue";
 import PostTools from "./components/PostTools/index.vue";
 import PostPagination from "./components/PostPagination/index.vue";
 import RelatedPosts from "./components/RelatedPosts/index.vue";
-import PostComment from "./components/PostComment/index.vue";
+import PostComment from "../components/PostComment/index.vue";
 import CommentBarrage from "./components/CommentBarrage/index.vue";
 import Sidebar from "../components/Sidebar/index.vue";
 
