@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-08-10 22:21:49
+ * @LastEditTime: 2025-08-11 18:15:10
+ * @LastEditors: 安知鱼
+ */
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
 import type { BaseResponse } from "@/api/post/type";
@@ -39,4 +46,22 @@ export const createPublicComment = (
       data
     }
   );
+};
+
+/**
+ * @description: 为指定ID的评论点赞
+ * @param {string} id 评论的公共ID
+ * @returns {Promise<any>} 返回最新的总点赞数
+ */
+export const likePublicComment = (id: string) => {
+  return http.request<any>("post", baseUrlApi(`public/comments/${id}/like`));
+};
+
+/**
+ * @description: 为指定ID的评论取消点赞
+ * @param {string} id 评论的公共ID
+ * @returns {Promise<any>} 返回最新的总点赞数
+ */
+export const unlikePublicComment = (id: string) => {
+  return http.request<any>("post", baseUrlApi(`public/comments/${id}/unlike`));
 };

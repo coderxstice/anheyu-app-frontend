@@ -2,54 +2,73 @@
 
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
-import { getPublicComments, createPublicComment } from "@/api/comment";
+import {
+  getPublicComments,
+  createPublicComment,
+  likePublicComment,
+  unlikePublicComment
+} from "@/api/comment";
 import type { Comment, CreateCommentPayload } from "@/api/comment/type";
 
+const LIKED_COMMENTS_KEY = "liked_comment_ids";
+
 export const useCommentStore = defineStore("comment", () => {
-  // --- State ---
+  // --- State and Getters ---
   const comments = ref<Comment[]>([]);
   const totalComments = ref(0);
   const currentPage = ref(1);
   const pageSize = ref(10);
   const currentArticleId = ref<string | null>(null);
-
   const isLoading = ref(false);
   const isLoadingMore = ref(false);
+  const likedCommentIds = ref<Set<string>>(new Set());
 
-  // --- Getters ---
   const hasMore = computed(() => comments.value.length < totalComments.value);
 
   // --- Actions ---
+  function loadLikedIdsFromStorage() {
+    try {
+      const liked = JSON.parse(
+        localStorage.getItem(LIKED_COMMENTS_KEY) || "[]"
+      );
+      likedCommentIds.value = new Set(liked);
+    } catch (e) {
+      console.error("Failed to parse liked comments from localStorage", e);
+      likedCommentIds.value = new Set();
+    }
+  }
 
-  /**
-   * 初始化并获取评论
-   * @param articleId 文章ID
-   * @param pSize 每页数量
-   */
+  function findAndUpdateComment(
+    commentList: Comment[],
+    commentId: string,
+    updateFn: (comment: Comment) => void
+  ): boolean {
+    for (const comment of commentList) {
+      if (comment.id === commentId) {
+        updateFn(comment);
+        return true;
+      }
+      if (comment.children && comment.children.length > 0) {
+        if (findAndUpdateComment(comment.children, commentId, updateFn))
+          return true;
+      }
+    }
+    return false;
+  }
+
   async function initComments(articleId: string, pSize = 10) {
-    // 如果是同一篇文章，则不重复初始化，防止重复请求
+    loadLikedIdsFromStorage();
     if (currentArticleId.value === articleId && comments.value.length > 0)
       return;
-
-    resetStore(); // 初始化前先重置状态
+    resetStore(true);
     currentArticleId.value = articleId;
     pageSize.value = pSize;
     await fetchComments(1);
   }
 
-  /**
-   * 获取评论的核心逻辑
-   * @param page 页码
-   */
   async function fetchComments(page = 1) {
     if (!currentArticleId.value) return;
-
-    if (page === 1) {
-      isLoading.value = true;
-    } else {
-      isLoadingMore.value = true;
-    }
-
+    page === 1 ? (isLoading.value = true) : (isLoadingMore.value = true);
     try {
       const res = await getPublicComments({
         article_id: currentArticleId.value,
@@ -58,11 +77,8 @@ export const useCommentStore = defineStore("comment", () => {
       });
       const data = res.data;
       if (data && data.list) {
-        if (page === 1) {
-          comments.value = data.list;
-        } else {
-          comments.value.push(...data.list);
-        }
+        if (page === 1) comments.value = data.list;
+        else comments.value.push(...data.list);
         totalComments.value = data.total;
         currentPage.value = data.page;
       }
@@ -74,46 +90,66 @@ export const useCommentStore = defineStore("comment", () => {
     }
   }
 
-  /**
-   * 加载更多评论
-   */
   async function loadMore() {
     if (hasMore.value && !isLoadingMore.value) {
       await fetchComments(currentPage.value + 1);
     }
   }
 
-  /**
-   * 提交新评论
-   * @param payload 评论内容
-   */
   async function postComment(payload: CreateCommentPayload) {
     try {
       await createPublicComment(payload);
-      // 成功后，重新获取第一页数据以显示最新评论
       await fetchComments(1);
     } catch (error) {
       console.error("评论发布失败:", error);
-      // 抛出错误，以便组件层可以捕获并进行提示
       throw error;
     }
   }
 
-  /**
-   * 重置/清空 Store 状态
-   * 在用户离开文章页时调用，防止数据污染
-   */
-  function resetStore() {
+  async function toggleLikeComment(commentId: string) {
+    const isCurrentlyLiked = likedCommentIds.value.has(commentId);
+
+    try {
+      const apiCall = isCurrentlyLiked
+        ? unlikePublicComment(commentId) // 如果已点赞，调用取消点赞接口
+        : likePublicComment(commentId); // 如果未点赞，调用点赞接口
+
+      const res = await apiCall;
+      const newLikeCount = res.data;
+
+      // 更新 store 中对应评论的点赞数
+      findAndUpdateComment(comments.value, commentId, comment => {
+        comment.like_count = newLikeCount;
+      });
+
+      // 更新本地的点赞记录和 localStorage
+      if (isCurrentlyLiked) {
+        likedCommentIds.value.delete(commentId);
+      } else {
+        likedCommentIds.value.add(commentId);
+      }
+      localStorage.setItem(
+        LIKED_COMMENTS_KEY,
+        JSON.stringify(Array.from(likedCommentIds.value))
+      );
+    } catch (error) {
+      console.error("操作失败:", error);
+    }
+  }
+
+  function resetStore(soft = false) {
     comments.value = [];
     totalComments.value = 0;
     currentPage.value = 1;
     currentArticleId.value = null;
     isLoading.value = false;
     isLoadingMore.value = false;
+    if (!soft) {
+      likedCommentIds.value.clear();
+    }
   }
 
   return {
-    // State
     comments,
     totalComments,
     currentPage,
@@ -121,12 +157,12 @@ export const useCommentStore = defineStore("comment", () => {
     isLoading,
     isLoadingMore,
     currentArticleId,
-    // Getters
+    likedCommentIds,
     hasMore,
-    // Actions
     initComments,
     loadMore,
     postComment,
+    toggleLikeComment,
     resetStore
   };
 });

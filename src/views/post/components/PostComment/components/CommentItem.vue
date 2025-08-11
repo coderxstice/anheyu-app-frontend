@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, watch, nextTick } from "vue";
+import { useCommentStore } from "@/store/modules/commentStore";
 import type { Comment } from "@/api/comment/type";
 import { UAParser } from "ua-parser-js";
 import md5 from "blueimp-md5";
@@ -18,11 +19,27 @@ const props = defineProps({
 
 const emit = defineEmits(["comment-submitted"]);
 
-const MAX_HEIGHT_THRESHOLD = 280; // (px) 子评论区域最大高度阈值
-const childrenContainerRef = ref<HTMLElement | null>(null); // 子评论容器的DOM引用
-const isExpanded = ref(false); // 用户是否已点击展开
-const isOverflowing = ref(false); // 内容是否超出阈值
+const commentStore = useCommentStore();
 
+const isLiked = computed(() =>
+  commentStore.likedCommentIds.has(props.comment.id)
+);
+const handleLike = () => {
+  commentStore.toggleLikeComment(props.comment.id);
+};
+
+const isBlogger = computed(() => {
+  if (!props.comment.email_md5 || !props.config.blogger_email) {
+    return false;
+  }
+  const bloggerEmailHash = md5(props.config.blogger_email.trim().toLowerCase());
+  return props.comment.email_md5.toLowerCase() === bloggerEmailHash;
+});
+
+const MAX_HEIGHT_THRESHOLD = 280;
+const childrenContainerRef = ref<HTMLElement | null>(null);
+const isExpanded = ref(false);
+const isOverflowing = ref(false);
 const isReplyFormVisible = ref(false);
 
 const gravatarSrc = computed(() => {
@@ -43,8 +60,6 @@ const avatarSrc = computed(() => {
   }
   return gravatarSrc.value;
 });
-
-const isBlogger = computed(() => !!props.comment.is_admin_comment);
 
 const formattedDate = computed(() => {
   const now = new Date();
@@ -91,13 +106,10 @@ const handleCancelReply = () => {
   isReplyFormVisible.value = false;
 };
 
-// --- 新功能：高度检测逻辑 ---
 const checkHeight = () => {
-  // 使用 nextTick 确保DOM更新完毕
   nextTick(() => {
     const container = childrenContainerRef.value;
     if (container) {
-      // 检查内容的真实高度是否超过阈值
       if (container.scrollHeight > MAX_HEIGHT_THRESHOLD) {
         isOverflowing.value = true;
       } else {
@@ -107,14 +119,11 @@ const checkHeight = () => {
   });
 };
 
-// 组件挂载后，执行一次高度检查
 onMounted(checkHeight);
 
-// 监听子评论数量的变化，重新检查高度
 watch(
   () => props.comment.children?.length,
   () => {
-    // 重置展开状态，然后重新检查
     isExpanded.value = false;
     checkHeight();
   }
@@ -155,7 +164,17 @@ watch(
             <span class="timestamp">{{ formattedDate }}</span>
           </div>
           <div class="comment-actions">
-            <button class="action-btn" title="点赞"><IconLike /></button>
+            <button
+              class="action-btn"
+              :class="{ 'is-liked': isLiked }"
+              title="点赞"
+              @click="handleLike"
+            >
+              <IconLike />
+              <span v-if="comment.like_count > 0" class="like-count">{{
+                comment.like_count
+              }}</span>
+            </button>
             <button class="action-btn" title="回复" @click="handleReplyClick">
               <IconReply />
             </button>
@@ -225,6 +244,7 @@ watch(
 </template>
 
 <style lang="scss" scoped>
+/* 样式部分无需改动 */
 .comment-item {
   display: flex;
   gap: 1rem;
@@ -281,10 +301,24 @@ watch(
   color: #8a919f;
   padding: 4px;
   display: flex;
+  align-items: center;
   border-radius: 4px;
+  transition:
+    color 0.3s,
+    background-color 0.3s;
   &:hover {
     color: #333;
     background-color: #f1f3f4;
+  }
+  &.is-liked {
+    color: var(--el-color-primary);
+  }
+  &.is-liked:hover {
+    background-color: #f1f3f4;
+  }
+  .like-count {
+    margin-left: 6px;
+    font-size: 0.8rem;
   }
 }
 .comment-content {
@@ -318,15 +352,12 @@ watch(
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  // 增加过渡效果
   transition: max-height 0.5s ease-in-out;
 
-  // 折叠状态的样式
   &.is-collapsed {
-    max-height: 280px; // 与 JS 中的阈值保持一致
+    max-height: 280px;
     overflow: hidden;
     position: relative;
-    // 渐变蒙版，美化截断效果
     &::after {
       content: "";
       position: absolute;
@@ -335,6 +366,13 @@ watch(
       right: 0;
       height: 60px;
       background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff 80%);
+      [data-theme="dark"] & {
+        background: linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0),
+          var(--anzhiyu-card-bg) 80%
+        );
+      }
     }
   }
 }
@@ -343,7 +381,6 @@ watch(
   margin-left: 56px;
 }
 
-// 新的按钮样式
 .toggle-wrapper {
   margin-left: 56px;
   margin-top: 1rem;

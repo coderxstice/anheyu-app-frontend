@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import { useCommentStore } from "@/store/modules/commentStore";
 import type { Comment } from "@/api/comment/type";
 import { UAParser } from "ua-parser-js";
 import md5 from "blueimp-md5";
@@ -16,6 +17,16 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["comment-submitted"]);
+
+const commentStore = useCommentStore();
+
+// --- 点赞功能 ---
+const isLiked = computed(() =>
+  commentStore.likedCommentIds.has(props.comment.id)
+);
+const handleLike = () => {
+  commentStore.toggleLikeComment(props.comment.id);
+};
 
 const isReplyFormVisible = ref(false);
 
@@ -95,7 +106,7 @@ const scrollToParent = () => {
     parentElement.classList.add("comment--highlight");
     setTimeout(() => {
       parentElement.classList.remove("comment--highlight");
-    }, 2000); // 高亮持续2秒
+    }, 2000);
   }
 };
 </script>
@@ -136,7 +147,17 @@ const scrollToParent = () => {
             <span class="timestamp">{{ formattedDate }}</span>
           </div>
           <div class="comment-actions">
-            <button class="action-btn" title="点赞"><IconLike /></button>
+            <button
+              class="action-btn"
+              :class="{ 'is-liked': isLiked }"
+              title="点赞"
+              @click="handleLike"
+            >
+              <IconLike />
+              <span v-if="comment.like_count > 0" class="like-count">{{
+                comment.like_count
+              }}</span>
+            </button>
             <button class="action-btn" title="回复" @click="handleReplyClick">
               <IconReply />
             </button>
@@ -249,10 +270,24 @@ const scrollToParent = () => {
   color: #8a919f;
   padding: 4px;
   display: flex;
+  align-items: center;
   border-radius: 4px;
+  transition:
+    color 0.3s,
+    background-color 0.3s;
   &:hover {
     color: #333;
     background-color: #f1f3f4;
+  }
+  &.is-liked {
+    color: var(--el-color-primary);
+  }
+  &.is-liked:hover {
+    background-color: #f1f3f4;
+  }
+  .like-count {
+    margin-left: 6px;
+    font-size: 0.8rem;
   }
 }
 .reply-to-block {

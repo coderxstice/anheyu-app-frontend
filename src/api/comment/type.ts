@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-10 22:21:27
- * @LastEditTime: 2025-08-11 16:37:20
+ * @LastEditTime: 2025-08-11 18:05:34
  * @LastEditors: 安知鱼
  */
 /**
@@ -35,6 +35,7 @@ export interface Comment {
   parent_id: string | null;
   children: Comment[];
   reply_to_nick: string | null;
+  like_count: number;
 }
 
 /**
