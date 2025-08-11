@@ -14,7 +14,6 @@ const props = defineProps({
     type: Object as () => Comment,
     required: true
   },
-  // 接收父组件传递的整个配置对象
   config: {
     type: Object,
     required: true
@@ -23,25 +22,20 @@ const props = defineProps({
 
 const emit = defineEmits(["reply"]);
 
-// QQ号校验：5-11位数字，且首位不为 0
 const isQQNumber = (val: string) => /^[1-9]\d{4,10}$/.test((val || "").trim());
 
-// 从昵称中提取 QQ 号（如果是合法 QQ 号）
 const qqNumber = computed(() => {
   const nick = props.comment.nickname?.trim() || "";
   return isQQNumber(nick) ? nick : null;
 });
 
-// 通过 md5 比对判断邮箱是否为该 QQ 的 qq 邮箱
 const useQQAvatar = computed(() => {
   if (!qqNumber.value || !props.comment.email_md5) return false;
   const qqEmailMd5 = md5(`${qqNumber.value}@qq.com`).toLowerCase();
   return props.comment.email_md5.toLowerCase() === qqEmailMd5;
 });
 
-// 头像地址：优先 QQ 头像，失败回退 Gravatar
 const gravatarSrc = computed(() => {
-  // url的尾随/处理
   const url = new URL(props.config.gravatar_url);
   url.pathname += `avatar/${props.comment.email_md5}`;
   url.searchParams.set("d", props.config.default_gravatar_type);
@@ -60,22 +54,18 @@ const onAvatarError = (e: Event) => {
   (e.target as HTMLImageElement).src = gravatarSrc.value;
 };
 
-const isBlogger = computed(() => {
-  return !!props.comment.is_admin_comment;
-});
+const isBlogger = computed(() => !!props.comment.is_admin_comment);
 
 const formattedDate = computed(() => {
   const now = new Date();
   const past = new Date(props.comment.created_at);
   const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
-
   const minutes = Math.floor(diffInSeconds / 60);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
   const weeks = Math.floor(days / 7);
   const months = Math.floor(days / 30);
   const years = Math.floor(days / 365);
-
   if (years > 0) return `${years} 年前`;
   if (months > 0) return `${months} 个月前`;
   if (weeks > 0) return `${weeks} 周前`;
@@ -155,37 +145,31 @@ const handleReplyClick = () => {
   display: flex;
   gap: 1rem;
 }
-
 .comment-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   border: 1px solid #eee;
 }
-
 .comment-main {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
-
 .comment-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.5rem;
-
   .user-info {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     flex-wrap: wrap;
-
     .nickname {
       font-weight: 600;
       color: #333;
     }
-
     .master-tag {
       background-color: var(--el-color-primary);
       color: #fff;
@@ -194,17 +178,14 @@ const handleReplyClick = () => {
       border-radius: 4px;
       font-weight: bold;
     }
-
     .timestamp {
       font-size: 0.8rem;
       color: #999;
     }
   }
-
   .comment-actions {
     display: flex;
     gap: 0.5rem;
-
     .action-btn {
       background: none;
       border: none;
@@ -213,7 +194,6 @@ const handleReplyClick = () => {
       padding: 4px;
       display: flex;
       border-radius: 4px;
-
       &:hover {
         color: #333;
         background-color: #f1f3f4;
@@ -221,12 +201,10 @@ const handleReplyClick = () => {
     }
   }
 }
-
 .comment-content {
   color: #373a47;
   line-height: 1.6;
   font-size: 0.95rem;
-
   :deep(p) {
     margin: 0;
   }
@@ -238,7 +216,6 @@ const handleReplyClick = () => {
     }
   }
 }
-
 .comment-meta {
   display: flex;
   align-items: center;
@@ -247,12 +224,10 @@ const handleReplyClick = () => {
   font-size: 0.8rem;
   color: #999;
   flex-wrap: wrap;
-
   .meta-item {
     display: flex;
     align-items: center;
     gap: 0.3rem;
-
     :deep(svg) {
       width: 14px;
       height: 14px;
