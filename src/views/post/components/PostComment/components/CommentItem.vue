@@ -347,34 +347,23 @@ watch(
 .toggle-wrapper {
   margin-left: 56px;
   margin-top: 1rem;
-  .expand-button {
-    width: 100%;
-    text-align: center;
-    padding: 0.75rem;
-    font-size: 0.9rem;
-    color: #fff;
-    background-color: #425aef;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    &:hover {
-      background-color: #3a52d9;
-    }
-  }
+  .expand-button,
   .collapse-button {
+    border: var(--style-border);
+    box-shadow: 0 8px 16px -4px rgba(44, 45, 48, 0.047);
+    border-radius: 50px;
+    letter-spacing: 5px;
+    background-color: var(--anzhiyu-card-bg);
     width: 100%;
-    text-align: center;
-    padding: 0.75rem;
-    font-size: 0.9rem;
-    color: #555;
-    background-color: #f0f2f5;
-    border: none;
-    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    padding: 0.75rem;
+    text-align: center;
+    transition: all 0.5s;
+    font-size: 0.75rem;
     &:hover {
-      background-color: #e0e2e5;
+      color: var(--anzhiyu-white);
+      background-color: var(--anzhiyu-main);
+      border: var(--style-border-none);
     }
   }
 }

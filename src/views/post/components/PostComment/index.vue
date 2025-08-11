@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch, nextTick } from "vue";
 import { getPublicComments } from "@/api/comment";
 import type { Comment } from "@/api/comment/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
@@ -12,6 +12,8 @@ defineOptions({ name: "PostComment" });
 const props = defineProps({
   articleId: { type: String, required: true }
 });
+
+const emit = defineEmits(["comment-ids-loaded"]);
 
 const siteConfigStore = useSiteConfigStore();
 
@@ -74,6 +76,52 @@ onMounted(() => {
   pageSize.value = commentInfoConfig.value.page_size || 10;
   fetchComments(1);
 });
+
+watch(
+  comments,
+  newComments => {
+    if (newComments && newComments.length > 0) {
+      nextTick(() => {
+        const commentIds: string[] = [];
+        const collectIds = (commentList: Comment[]) => {
+          for (const comment of commentList) {
+            // 为 ID 添加前缀以避免与TOC的ID冲突
+            commentIds.push(`comment-${comment.id}`);
+            if (comment.children && comment.children.length > 0) {
+              collectIds(comment.children);
+            }
+          }
+        };
+        collectIds(newComments);
+        emit("comment-ids-loaded", commentIds);
+      });
+    }
+  },
+  { deep: true }
+);
+
+const scrollToComment = (id: string) => {
+  const commentElement = document.getElementById(id);
+  if (commentElement) {
+    // 为目标评论添加高亮效果
+    commentElement.classList.add("comment--highlight");
+    setTimeout(() => {
+      commentElement.classList.remove("comment--highlight");
+    }, 2000); // 2秒后移除高亮
+
+    const rect = commentElement.getBoundingClientRect();
+    const absoluteTop = rect.top + window.scrollY;
+    const top = absoluteTop - 80; // 减去顶部导航栏高度
+    window.scrollTo({
+      top: top,
+      behavior: "smooth"
+    });
+  }
+};
+
+defineExpose({
+  scrollToComment
+});
 </script>
 
 <template>
@@ -107,17 +155,14 @@ onMounted(() => {
         >
           <hr />
           <CommentItem
+            :id="`comment-${comment.id}`"
             :comment="comment"
             :config="commentInfoConfig"
             @comment-submitted="handleCommentSubmitted"
           />
         </div>
         <div v-if="hasMore" class="load-more-container">
-          <el-button
-            type="primary"
-            plain
-            :loading="isLoadingMore"
-            @click="loadMoreComments"
+          <el-button :loading="isLoadingMore" @click="loadMoreComments"
             >加载更多</el-button
           >
         </div>
@@ -127,7 +172,6 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
-/* 定义高亮效果的动画 */
 @keyframes comment-highlight-animation {
   0% {
     background-color: rgba(0, 123, 255, 0.15);
@@ -141,7 +185,6 @@ onMounted(() => {
   border-radius: 8px;
   margin-bottom: 3rem;
 
-  // 定义高亮样式，应用在 comment-thread-item 上
   :deep(.comment--highlight) {
     animation: comment-highlight-animation 2s ease-out;
     border-radius: 8px;
@@ -182,7 +225,31 @@ onMounted(() => {
   }
   .load-more-container {
     text-align: center;
-    margin-top: 2rem;
+    width: 70%;
+    cursor: pointer;
+    padding: 0.55rem;
+    text-align: center;
+    transition: all 0.5s;
+    font-size: 0.75rem;
+    box-shadow: 0 8px 16px -4px rgba(44, 45, 48, 0.047);
+    border-radius: 50px;
+    letter-spacing: 5px;
+    background-color: var(--anzhiyu-card-bg);
+    border: var(--style-border);
+    margin: 2rem auto 0;
+    button {
+      border: none;
+      box-shadow: none;
+      background: transparent;
+    }
+    &:hover {
+      color: var(--anzhiyu-white);
+      background-color: var(--anzhiyu-main);
+      border: var(--style-border-none);
+      button {
+        color: var(--anzhiyu-white);
+      }
+    }
   }
 }
 </style>

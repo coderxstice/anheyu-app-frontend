@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { ref, watch, onUnmounted, nextTick, provide, computed } from "vue";
+import {
+  ref,
+  watch,
+  onMounted,
+  onUnmounted,
+  nextTick,
+  provide,
+  computed
+} from "vue";
 import { useRoute } from "vue-router";
 import { getPublicArticle, getPublicArticles } from "@/api/post";
 import type { Article } from "@/api/post/type";
@@ -37,6 +45,25 @@ provide(
   "articleContentHtml",
   computed(() => article.value?.content_html)
 );
+
+// --- 滚动监听相关的逻辑 ---
+const headingTocItems = ref<{ id: string }[]>([]);
+const commentIds = ref<string[]>([]);
+const allSpyIds = computed(() => {
+  const headingIds = headingTocItems.value.map(item => item.id);
+  return [...headingIds, ...commentIds.value];
+});
+provide("allSpyIds", allSpyIds);
+
+provide("updateHeadingTocItems", (items: { id: string }[]) => {
+  headingTocItems.value = items;
+});
+const handleCommentIdsLoaded = (ids: string[]) => {
+  commentIds.value = ids;
+};
+
+const commentRef = ref<InstanceType<typeof PostComment> | null>(null);
+// -----------------------
 
 const fetchRequiredData = async (id: string) => {
   if (!article.value) {
@@ -149,6 +176,32 @@ onUnmounted(() => {
   }
 });
 
+onMounted(() => {
+  const handleInitialHash = () => {
+    const hash = window.location.hash;
+    if (!hash) return;
+
+    const id = decodeURIComponent(hash.slice(1));
+    const targetElement = document.getElementById(id);
+
+    if (targetElement) {
+      if (id.startsWith("comment-")) {
+        // 如果是评论ID，调用评论组件的滚动和高亮方法
+        commentRef.value?.scrollToComment(id);
+      } else {
+        // 否则，执行TOC的滚动逻辑
+        const rect = targetElement.getBoundingClientRect();
+        const absoluteTop = rect.top + window.scrollY;
+        const top = absoluteTop - 80;
+        window.scrollTo({ top: top, behavior: "smooth" });
+      }
+    }
+  };
+
+  // 延迟执行，确保评论和文章都已渲染
+  setTimeout(handleInitialHash, 800);
+});
+
 watch(
   () => route.params.id,
   newId => {
@@ -185,7 +238,11 @@ watch(
             :next-article="article.next_article"
           />
           <RelatedPosts :posts="article.related_articles" />
-          <PostComment :article-id="article.id" />
+          <PostComment
+            ref="commentRef"
+            :article-id="article.id"
+            @comment-ids-loaded="handleCommentIdsLoaded"
+          />
         </div>
       </main>
       <Sidebar />

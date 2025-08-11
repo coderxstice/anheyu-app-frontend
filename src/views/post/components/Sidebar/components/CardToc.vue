@@ -12,6 +12,11 @@ defineOptions({
   name: "CardToc"
 });
 
+const allSpyIds = inject<Ref<string[]>>("allSpyIds", ref([]));
+const updateHeadingTocItems = inject<(items: TocItem[]) => void>(
+  "updateHeadingTocItems"
+);
+
 const tocRef = ref<HTMLElement | null>(null);
 const indicatorRef = ref<HTMLElement | null>(null);
 
@@ -62,6 +67,9 @@ const parseHeadings = () => {
     }
   });
   tocItems.value = newTocItems;
+  if (updateHeadingTocItems) {
+    updateHeadingTocItems(newTocItems);
+  }
 };
 
 const onScroll = () => {
@@ -72,12 +80,12 @@ const onScroll = () => {
   const fixedHeaderHeight = 80;
   let newActiveId: string | null = null;
 
-  for (let i = tocItems.value.length - 1; i >= 0; i--) {
-    const item = tocItems.value[i];
-    const headingElement = document.getElementById(item.id);
-    if (headingElement) {
-      if (headingElement.getBoundingClientRect().top <= fixedHeaderHeight) {
-        newActiveId = item.id;
+  for (let i = allSpyIds.value.length - 1; i >= 0; i--) {
+    const id = allSpyIds.value[i];
+    const element = document.getElementById(id);
+    if (element) {
+      if (element.getBoundingClientRect().top <= fixedHeaderHeight) {
+        newActiveId = id;
         break;
       }
     }
@@ -86,10 +94,8 @@ const onScroll = () => {
   if (activeTocId.value !== newActiveId) {
     activeTocId.value = newActiveId;
     if (newActiveId) {
-      // 2. 同样，恢复使用 history.replaceState 并传入 history.state
       history.replaceState(history.state, "", `#${newActiveId}`);
     } else {
-      // 3. 移除 hash 时也一样
       history.replaceState(
         history.state,
         "",
@@ -128,23 +134,6 @@ watch(activeTocId, () => {
 let scrollEndHandler: () => void;
 
 onMounted(() => {
-  const handleInitialHash = () => {
-    const hash = window.location.hash;
-    if (hash) {
-      const id = decodeURIComponent(hash.slice(1));
-      const headingElement = document.getElementById(id);
-      if (headingElement) {
-        activeTocId.value = id;
-        const rect = headingElement.getBoundingClientRect();
-        const absoluteTop = rect.top + window.scrollY;
-        const top = absoluteTop - 80;
-        window.scrollTo({ top: top, behavior: "smooth" });
-      }
-    }
-  };
-
-  setTimeout(handleInitialHash, 300);
-
   scrollEndHandler = () => {
     if (scrollTimer) {
       clearTimeout(scrollTimer);
@@ -166,7 +155,12 @@ onUnmounted(() => {
     window.removeEventListener("scroll", scrollEndHandler);
   }
 });
+
+defineExpose({
+  scrollToHeading
+});
 </script>
+
 <template>
   <div v-if="tocItems.length > 0" id="card-toc" class="card-widget">
     <div class="item-headline">
