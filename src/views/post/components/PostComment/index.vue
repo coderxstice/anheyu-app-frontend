@@ -721,6 +721,61 @@ const initialize = () => {
       grid-template-columns: repeat(3, 1fr);
       gap: 1rem;
 
+      .el-form-item {
+        &:nth-child(1) .el-input-group--prepend {
+          &:before {
+            content: "输入QQ号会自动获取昵称和头像";
+          }
+          &::after {
+            content: "";
+          }
+        }
+        &:nth-child(2) .el-input-group--prepend {
+          &:before {
+            content: "收到回复将会发送到你的邮箱";
+          }
+          &::after {
+            content: "";
+          }
+        }
+      }
+
+      :deep(.el-input-group--prepend) {
+        &::before {
+          display: none;
+          position: absolute;
+          top: -50px;
+          white-space: nowrap;
+          border-radius: 10px;
+          left: 50%;
+          transform: translate(-50%);
+          padding: 4px 18px;
+          background: var(--anzhiyu-main-op-deep);
+          color: var(--anzhiyu-white);
+          z-index: 100;
+          backdrop-filter: blur(10px);
+        }
+
+        &:focus-within::before {
+          display: block;
+          animation: commonTipsIn 0.3s;
+          z-index: 2;
+        }
+
+        &::after {
+          display: none;
+          position: absolute;
+          border: 8px solid transparent;
+          border-top-color: var(--anzhiyu-main-op-deep);
+          left: 50%;
+          transform: translate(-50%, -10px);
+        }
+        &:focus-within::after {
+          display: block;
+          animation: commonTriangleIn 0.3s;
+        }
+      }
+
       :deep(.el-input-group__prepend) {
         background-color: var(--anzhiyu-secondbg);
         color: var(--anzhiyu-fontcolor);
