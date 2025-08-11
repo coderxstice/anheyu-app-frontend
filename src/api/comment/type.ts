@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-08-10 22:21:27
+ * @LastEditTime: 2025-08-11 10:57:57
+ * @LastEditors: 安知鱼
+ */
 /**
  * @description 创建新评论时，发送到后端的数据结构
  */

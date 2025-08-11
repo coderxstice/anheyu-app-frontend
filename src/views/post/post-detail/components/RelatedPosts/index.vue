@@ -134,6 +134,7 @@ const defaultCover = articleStore.defaultCover;
     transition: all 0.6s ease 0s;
     object-fit: cover;
     max-width: 45%;
+    border-radius: 0;
   }
 
   .content {

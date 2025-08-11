@@ -30,3 +30,31 @@
     transform: translateX(-50%);
   }
 }
+
+@keyframes donate_effcet {
+  0% {
+    opacity: 0;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+    filter: alpha(opacity=0);
+    transform: translateY(-20px);
+  }
+
+  100% {
+    opacity: 1;
+    -ms-filter: none;
+    filter: none;
+    filter: none;
+    transform: translateY(0);
+  }
+}
+
+@keyframes owoIn {
+  from {
+    opacity: 0;
+    transform: translateY(0) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-10px) scale(1);
+  }
+}

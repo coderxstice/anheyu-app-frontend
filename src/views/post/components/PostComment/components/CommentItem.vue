@@ -13,6 +13,11 @@ const props = defineProps({
   comment: {
     type: Object as () => Comment,
     required: true
+  },
+  // 接收父组件传递的整个配置对象
+  config: {
+    type: Object,
+    required: true
   }
 });
 
@@ -20,6 +25,12 @@ const emit = defineEmits(["reply"]);
 
 const avatarSrc = computed(() => {
   return `https://cravatar.cn/avatar/${props.comment.email_md5}?d=mp`;
+});
+
+const isBlogger = computed(() => {
+  // 最佳实践：这个'is_admin_comment'字段应该由后端在返回评论数据时提供。
+  // 后端通过比较评论邮箱和站点配置的博主邮箱来决定此字段的值。
+  return !!props.comment.is_admin_comment;
 });
 
 const formattedDate = computed(() => {
@@ -67,6 +78,9 @@ const handleReplyClick = () => {
       <div class="comment-header">
         <div class="user-info">
           <span class="nickname">{{ comment.nickname }}</span>
+          <span v-if="isBlogger" class="master-tag">{{
+            config.master_tag
+          }}</span>
           <span class="timestamp">{{ formattedDate }}</span>
         </div>
         <div class="comment-actions">
@@ -78,18 +92,23 @@ const handleReplyClick = () => {
       </div>
       <div class="comment-content" v-html="comment.content_html" />
       <div class="comment-meta">
-        <span v-if="comment.ip_location" class="meta-item">
+        <span
+          v-if="config.show_region && comment.ip_location"
+          class="meta-item"
+        >
           <IconLocation />
           {{ comment.ip_location }}
         </span>
-        <span v-if="deviceInfo.os" class="meta-item">
-          <IconOS />
-          {{ deviceInfo.os }}
-        </span>
-        <span v-if="deviceInfo.browser" class="meta-item">
-          <IconBrowser />
-          {{ deviceInfo.browser }}
-        </span>
+        <template v-if="config.show_ua">
+          <span v-if="deviceInfo.os" class="meta-item">
+            <IconOS />
+            {{ deviceInfo.os }}
+          </span>
+          <span v-if="deviceInfo.browser" class="meta-item">
+            <IconBrowser />
+            {{ deviceInfo.browser }}
+          </span>
+        </template>
       </div>
     </div>
   </div>
@@ -124,10 +143,20 @@ const handleReplyClick = () => {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    flex-wrap: wrap;
 
     .nickname {
       font-weight: 600;
       color: #333;
+    }
+
+    .master-tag {
+      background-color: var(--el-color-primary);
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
     }
 
     .timestamp {
@@ -181,6 +210,7 @@ const handleReplyClick = () => {
   margin-top: 0.75rem;
   font-size: 0.8rem;
   color: #999;
+  flex-wrap: wrap;
 
   .meta-item {
     display: flex;
