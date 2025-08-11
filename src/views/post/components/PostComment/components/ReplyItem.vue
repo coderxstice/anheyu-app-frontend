@@ -9,7 +9,6 @@ import IconLocation from "../icon/IconLocation.vue";
 import IconOS from "../icon/IconOS.vue";
 import IconBrowser from "../icon/IconBrowser.vue";
 import CommentForm from "./CommentForm.vue";
-import ReplyItem from "./ReplyItem.vue";
 
 const props = defineProps({
   comment: { type: Object as () => Comment, required: true },
@@ -85,10 +84,24 @@ const handleReplySubmitted = () => {
 const handleCancelReply = () => {
   isReplyFormVisible.value = false;
 };
+
+const scrollToParent = () => {
+  if (!props.comment.parent_id) return;
+  const parentElement = document.querySelector(
+    `#comment-${props.comment.parent_id}`
+  );
+  if (parentElement) {
+    parentElement.scrollIntoView({ behavior: "smooth", block: "center" });
+    parentElement.classList.add("comment--highlight");
+    setTimeout(() => {
+      parentElement.classList.remove("comment--highlight");
+    }, 2000); // 高亮持续2秒
+  }
+};
 </script>
 
 <template>
-  <div :id="`comment-${comment.id}`" class="comment-item-container">
+  <div :id="`comment-${comment.id}`" class="reply-item-container">
     <div class="comment-item">
       <a
         v-if="comment.website"
@@ -114,7 +127,9 @@ const handleCancelReply = () => {
       <div class="comment-main">
         <div class="comment-header">
           <div class="user-info">
-            <span class="nickname">{{ comment.nickname }}</span>
+            <a href="#" class="nickname" @click.prevent="scrollToParent">{{
+              comment.nickname
+            }}</a>
             <span v-if="isBlogger" class="master-tag">{{
               config.master_tag
             }}</span>
@@ -127,7 +142,13 @@ const handleCancelReply = () => {
             </button>
           </div>
         </div>
+
+        <div v-if="comment.reply_to_nick" class="reply-to-block">
+          回复 <a href="#">{{ "@" + comment.reply_to_nick }}</a> :
+        </div>
+
         <div class="comment-content" v-html="comment.content_html" />
+
         <div class="comment-meta">
           <span
             v-if="config.show_region && comment.ip_location"
@@ -157,19 +178,6 @@ const handleCancelReply = () => {
         @cancel="handleCancelReply"
       />
     </div>
-
-    <div
-      v-if="comment.children && comment.children.length > 0"
-      class="comment-children"
-    >
-      <ReplyItem
-        v-for="child in comment.children"
-        :key="child.id"
-        :comment="child"
-        :config="config"
-        @comment-submitted="$emit('comment-submitted')"
-      />
-    </div>
   </div>
 </template>
 
@@ -179,8 +187,8 @@ const handleCancelReply = () => {
   gap: 1rem;
 }
 .comment-avatar {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 1px solid #eee;
   transition: transform 0.3s;
@@ -190,6 +198,8 @@ const handleCancelReply = () => {
 }
 .comment-main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 .comment-header {
   display: flex;
@@ -205,11 +215,12 @@ const handleCancelReply = () => {
 }
 .nickname {
   font-weight: 600;
+  font-size: 0.9rem;
   color: #333;
-}
-.timestamp {
-  font-size: 0.8rem;
-  color: #999;
+  text-decoration: none;
+  &:hover {
+    color: var(--el-color-primary);
+  }
 }
 .master-tag {
   background-color: var(--el-color-primary);
@@ -218,6 +229,10 @@ const handleCancelReply = () => {
   padding: 2px 6px;
   border-radius: 4px;
   font-weight: bold;
+}
+.timestamp {
+  font-size: 0.8rem;
+  color: #999;
 }
 .comment-actions {
   display: flex;
@@ -236,10 +251,28 @@ const handleCancelReply = () => {
     background-color: #f1f3f4;
   }
 }
+.reply-to-block {
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--anzhiyu-secondtext);
+  a {
+    font-weight: 500;
+    padding: 0 0.2em;
+    text-decoration: none;
+    &:hover {
+      color: var(--anzhiyu-white);
+      background-color: var(--anzhiyu-theme);
+      border-radius: 4px;
+    }
+  }
+}
 .comment-content {
   color: #373a47;
   line-height: 1.6;
   font-size: 0.95rem;
+}
+:deep(.comment-content p) {
+  margin: 0;
 }
 .comment-meta {
   display: flex;
@@ -248,6 +281,7 @@ const handleCancelReply = () => {
   margin-top: 0.75rem;
   font-size: 0.8rem;
   color: #999;
+  flex-wrap: wrap;
 }
 .meta-item {
   display: flex;
@@ -258,21 +292,11 @@ const handleCancelReply = () => {
   width: 14px;
   height: 14px;
 }
-.comment-children {
-  margin-left: 56px;
-  padding-top: 1rem;
-  margin-top: 1rem;
-  border-top: 1px solid #f0f0f0;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
 .reply-form-wrapper {
   margin-top: 1rem;
-  margin-left: 56px;
+  margin-left: 48px;
 }
 @media (max-width: 768px) {
-  .comment-children,
   .reply-form-wrapper {
     margin-left: 0;
   }

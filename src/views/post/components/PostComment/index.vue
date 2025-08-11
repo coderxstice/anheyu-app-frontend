@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { getPublicComments } from "@/api/comment";
 import type { Comment } from "@/api/comment/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
@@ -36,7 +36,6 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 const totalComments = ref(0);
 const hasMore = computed(() => comments.value.length < totalComments.value);
-const activeReplyId = ref<string | null>(null);
 
 const fetchComments = async (page = 1) => {
   page === 1 ? (isLoading.value = true) : (isLoadingMore.value = true);
@@ -67,25 +66,14 @@ const loadMoreComments = () => {
   }
 };
 
-const handleReply = (comment: Comment) => {
-  activeReplyId.value = activeReplyId.value === comment.id ? null : comment.id;
-};
-
-const cancelReply = () => {
-  activeReplyId.value = null;
-};
-
 const handleCommentSubmitted = () => {
   fetchComments(1);
-  cancelReply();
 };
 
-const initialize = () => {
+onMounted(() => {
   pageSize.value = commentInfoConfig.value.page_size || 10;
   fetchComments(1);
-};
-
-onMounted(initialize);
+});
 </script>
 
 <template>
@@ -94,7 +82,7 @@ onMounted(initialize);
       <h3 class="form-title">
         <i class="anzhiyufont anzhiyu-icon-comments" />
         评论
-        <span v-if="!isLoading && comments.length > 0">
+        <span v-if="!isLoading && totalComments > 0">
           {{ `(${totalComments})` }}
         </span>
       </h3>
@@ -121,19 +109,8 @@ onMounted(initialize);
           <CommentItem
             :comment="comment"
             :config="commentInfoConfig"
-            @reply="handleReply(comment)"
+            @comment-submitted="handleCommentSubmitted"
           />
-
-          <div v-if="activeReplyId === comment.id" class="reply-form-wrapper">
-            <CommentForm
-              :article-id="props.articleId"
-              :parent-id="comment.id"
-              :placeholder="`回复 @${comment.nickname}`"
-              show-cancel-button
-              @submitted="handleCommentSubmitted"
-              @cancel="cancelReply"
-            />
-          </div>
         </div>
         <div v-if="hasMore" class="load-more-container">
           <el-button
@@ -150,9 +127,25 @@ onMounted(initialize);
 </template>
 
 <style lang="scss" scoped>
+/* 定义高亮效果的动画 */
+@keyframes comment-highlight-animation {
+  0% {
+    background-color: rgba(0, 123, 255, 0.15);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
 #post-comment {
   border-radius: 8px;
   margin-bottom: 3rem;
+
+  // 定义高亮样式，应用在 comment-thread-item 上
+  :deep(.comment--highlight) {
+    animation: comment-highlight-animation 2s ease-out;
+    border-radius: 8px;
+  }
 }
 .main-comment-form-container {
   .form-title {
@@ -160,6 +153,9 @@ onMounted(initialize);
     font-weight: 600;
     margin-bottom: 1.5rem;
     color: #333;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     i {
       font-size: 1.5rem;
     }
@@ -170,22 +166,23 @@ onMounted(initialize);
   .comments-wrapper {
     display: flex;
     flex-direction: column;
-    .comment-thread-item:first-child {
-      hr {
+    .comment-thread-item {
+      & + .comment-thread-item {
+        margin-top: 1.5rem;
+      }
+      &:first-child hr {
         display: none;
+      }
+      hr {
+        margin-bottom: 1.5rem;
+        border: none;
+        border-top: 1px solid #eef2f8;
       }
     }
   }
   .load-more-container {
     text-align: center;
     margin-top: 2rem;
-  }
-}
-.reply-form-wrapper {
-  margin-top: 1rem;
-  margin-left: 56px;
-  @media (max-width: 768px) {
-    margin-left: 0;
   }
 }
 </style>
