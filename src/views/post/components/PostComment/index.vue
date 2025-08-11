@@ -117,8 +117,16 @@ const form = reactive<Omit<CreateCommentPayload, "article_id" | "parent_id">>({
   content: ""
 });
 
+const isEmailValid = ref(true);
+
 const formRules = reactive<FormRules>({
-  email: [{ type: "email", message: "请输入有效的邮箱地址", trigger: "blur" }],
+  email: [
+    {
+      type: "email",
+      message: "请输入有效的邮箱地址",
+      trigger: ["blur", "change"]
+    }
+  ],
   website: [{ type: "url", message: "请输入有效的网址", trigger: "blur" }]
 });
 
@@ -126,7 +134,13 @@ const isSubmitDisabled = computed(() => {
   if (commentInfoConfig.value.login_required) {
     return !form.content.trim();
   }
-  return !form.nickname.trim() || !form.content.trim() || !form.email.trim();
+  // 增加对 isEmailValid 的判断
+  return (
+    !form.nickname.trim() ||
+    !form.content.trim() ||
+    !form.email.trim() ||
+    !isEmailValid.value
+  );
 });
 
 const replyTo = ref<Comment | null>(null);
@@ -191,6 +205,12 @@ watch(showEmojiPicker, isShown => {
 onUnmounted(() => {
   document.removeEventListener("click", handleClickOutside);
 });
+
+const handleValidate = (prop: string, isValid: boolean) => {
+  if (prop === "email") {
+    isEmailValid.value = isValid;
+  }
+};
 
 const handleEmojiEnter = async (event: MouseEvent, emoji: { icon: string }) => {
   const target = event.currentTarget as HTMLElement;
@@ -299,13 +319,21 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async valid => {
     if (valid) {
-      const payload: CreateCommentPayload = {
-        ...form,
+      const { nickname, email, content, website } = form;
+
+      const payload: Partial<CreateCommentPayload> = {
+        nickname,
+        email,
+        content,
         article_id: props.articleId,
         parent_id: replyTo.value ? replyTo.value.id : null
       };
+      if (website && website.trim() !== "") {
+        payload.website = website;
+      }
+
       try {
-        await createPublicComment(payload);
+        await createPublicComment(payload as CreateCommentPayload);
         form.content = "";
         replyTo.value = null;
         await fetchComments(1);
@@ -335,7 +363,12 @@ const initialize = () => {
   <div id="post-comment">
     <div id="comment-form" class="comment-form-container">
       <h2 class="form-title">评论</h2>
-      <el-form ref="formRef" :model="form" :rules="formRules">
+      <el-form
+        ref="formRef"
+        :model="form"
+        :rules="formRules"
+        @validate="handleValidate"
+      >
         <el-alert
           v-if="replyTo"
           :title="`正在回复 @${replyTo.nickname}`"
