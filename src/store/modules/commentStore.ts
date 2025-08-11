@@ -13,7 +13,7 @@ import type { Comment, CreateCommentPayload } from "@/api/comment/type";
 const LIKED_COMMENTS_KEY = "liked_comment_ids";
 
 export const useCommentStore = defineStore("comment", () => {
-  // --- State and Getters ---
+  // --- State and Getters 保持不变 ---
   const comments = ref<Comment[]>([]);
   const totalComments = ref(0);
   const currentPage = ref(1);
@@ -25,7 +25,6 @@ export const useCommentStore = defineStore("comment", () => {
 
   const hasMore = computed(() => comments.value.length < totalComments.value);
 
-  // --- Actions ---
   function loadLikedIdsFromStorage() {
     try {
       const liked = JSON.parse(
@@ -49,8 +48,9 @@ export const useCommentStore = defineStore("comment", () => {
         return true;
       }
       if (comment.children && comment.children.length > 0) {
-        if (findAndUpdateComment(comment.children, commentId, updateFn))
+        if (findAndUpdateComment(comment.children, commentId, updateFn)) {
           return true;
+        }
       }
     }
     return false;
@@ -66,9 +66,23 @@ export const useCommentStore = defineStore("comment", () => {
     await fetchComments(1);
   }
 
-  async function fetchComments(page = 1) {
+  /**
+   * 1. 为 fetchComments 添加 isSilent 参数
+   * @param page 页码
+   * @param isSilent 是否静默刷新，默认为 false
+   */
+  async function fetchComments(page = 1, isSilent = false) {
     if (!currentArticleId.value) return;
-    page === 1 ? (isLoading.value = true) : (isLoadingMore.value = true);
+
+    // 只有在非静默模式下才显示加载状态
+    if (!isSilent) {
+      if (page === 1) {
+        isLoading.value = true;
+      } else {
+        isLoadingMore.value = true;
+      }
+    }
+
     try {
       const res = await getPublicComments({
         article_id: currentArticleId.value,
@@ -77,16 +91,22 @@ export const useCommentStore = defineStore("comment", () => {
       });
       const data = res.data;
       if (data && data.list) {
-        if (page === 1) comments.value = data.list;
-        else comments.value.push(...data.list);
+        if (page === 1) {
+          comments.value = data.list;
+        } else {
+          comments.value.push(...data.list);
+        }
         totalComments.value = data.total;
         currentPage.value = data.page;
       }
     } catch (error) {
       console.error("获取评论失败:", error);
     } finally {
-      isLoading.value = false;
-      isLoadingMore.value = false;
+      // 只有在非静默模式下才隐藏加载状态
+      if (!isSilent) {
+        isLoading.value = false;
+        isLoadingMore.value = false;
+      }
     }
   }
 
@@ -96,10 +116,14 @@ export const useCommentStore = defineStore("comment", () => {
     }
   }
 
+  /**
+   * 2. 在 postComment 中调用 fetchComments 时，传入 isSilent = true
+   */
   async function postComment(payload: CreateCommentPayload) {
     try {
       await createPublicComment(payload);
-      await fetchComments(1);
+      // 以静默模式重新获取第一页数据
+      await fetchComments(1, true);
     } catch (error) {
       console.error("评论发布失败:", error);
       throw error;
@@ -108,21 +132,15 @@ export const useCommentStore = defineStore("comment", () => {
 
   async function toggleLikeComment(commentId: string) {
     const isCurrentlyLiked = likedCommentIds.value.has(commentId);
-
     try {
       const apiCall = isCurrentlyLiked
-        ? unlikePublicComment(commentId) // 如果已点赞，调用取消点赞接口
-        : likePublicComment(commentId); // 如果未点赞，调用点赞接口
-
+        ? unlikePublicComment(commentId)
+        : likePublicComment(commentId);
       const res = await apiCall;
       const newLikeCount = res.data;
-
-      // 更新 store 中对应评论的点赞数
       findAndUpdateComment(comments.value, commentId, comment => {
         comment.like_count = newLikeCount;
       });
-
-      // 更新本地的点赞记录和 localStorage
       if (isCurrentlyLiked) {
         likedCommentIds.value.delete(commentId);
       } else {

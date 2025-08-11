@@ -166,6 +166,8 @@ defineExpose({
 }
 .comment-list-container {
   margin-top: 3rem;
+  overflow: hidden;
+  width: 100%;
   .comments-wrapper {
     display: flex;
     flex-direction: column;
@@ -187,7 +189,6 @@ defineExpose({
     text-align: center;
     width: 70%;
     cursor: pointer;
-    padding: 0.55rem;
     text-align: center;
     transition: all 0.5s;
     font-size: 0.75rem;
@@ -198,9 +199,12 @@ defineExpose({
     border: var(--style-border);
     margin: 2rem auto 0;
     button {
+      height: 100%;
+      width: 100%;
       border: none;
       box-shadow: none;
       background: transparent;
+      padding: 15px;
     }
     &:hover {
       color: var(--anzhiyu-white);
