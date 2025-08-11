@@ -144,7 +144,11 @@ const scrollToParent = () => {
         </div>
 
         <div v-if="comment.reply_to_nick" class="reply-to-block">
-          回复 <a href="#">{{ "@" + comment.reply_to_nick }}</a> :
+          回复
+          <a href="#" @click.prevent="scrollToParent">{{
+            "@" + comment.reply_to_nick
+          }}</a>
+          :
         </div>
 
         <div class="comment-content" v-html="comment.content_html" />
