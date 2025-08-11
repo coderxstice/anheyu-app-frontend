@@ -25,7 +25,6 @@ import type { FormInstance, FormRules } from "element-plus";
 
 import IconEmoji from "./icon/IconEmoji.vue";
 import IconImage from "./icon/IconImage.vue";
-import IconRefresh from "./icon/IconRefresh.vue";
 
 // 引入 GSAP
 import { gsap } from "gsap";
@@ -75,7 +74,6 @@ const props = defineProps({
 const siteConfigStore = useSiteConfigStore();
 
 onMounted(async () => {
-  await siteConfigStore.fetchSiteConfig();
   initialize();
 });
 
@@ -84,6 +82,9 @@ const owoContainerRef = ref<HTMLElement | null>(null);
 const emojiPreviewRef = ref<HTMLElement | null>(null);
 const isPreviewVisible = ref(false);
 const previewEmojiUrl = ref("");
+
+// QQ号校验：5-11位数字，且首位不为 0
+const isQQNumber = (val: string) => /^[1-9]\d{4,10}$/.test((val || "").trim());
 
 const commentInfoConfig = computed(() => {
   const config = siteConfigStore.getSiteConfig.comment;
@@ -96,7 +97,9 @@ const commentInfoConfig = computed(() => {
     page_size: config.page_size,
     placeholder: config.placeholder,
     show_region: config.show_region,
-    show_ua: config.show_ua
+    show_ua: config.show_ua,
+    gravatar_url: siteConfigStore.getSiteConfig.GRAVATAR_URL,
+    default_gravatar_type: siteConfigStore.getSiteConfig.DEFAULT_GRAVATAR_TYPE
   };
 });
 
@@ -134,7 +137,6 @@ const isSubmitDisabled = computed(() => {
   if (commentInfoConfig.value.login_required) {
     return !form.content.trim();
   }
-  // 增加对 isEmailValid 的判断
   return (
     !form.nickname.trim() ||
     !form.content.trim() ||
@@ -357,12 +359,31 @@ const initialize = () => {
     form.website = website;
   }
 };
+
+// 监听昵称：如果是 QQ 号则自动设置邮箱为 qq 邮箱
+watch(
+  () => form.nickname,
+  val => {
+    const v = (val || "").trim();
+    if (isQQNumber(v)) {
+      form.email = `${v}@qq.com`;
+      nextTick(() => formRef.value?.validateField("email"));
+    }
+  }
+);
 </script>
 
 <template>
   <div id="post-comment">
     <div id="comment-form" class="comment-form-container">
-      <h2 class="form-title">评论</h2>
+      <h3 class="form-title">
+        <i class="anzhiyufont anzhiyu-icon-comments" />
+        评论
+        <span v-if="!isLoading && comments.length > 0">
+          {{ `(${totalComments})` }}
+        </span>
+      </h3>
+
       <el-form
         ref="formRef"
         :model="form"
@@ -496,15 +517,6 @@ const initialize = () => {
     </div>
 
     <div class="comment-list-container">
-      <div v-if="!isLoading && comments.length > 0" class="list-header">
-        <h3 class="list-title">{{ totalComments }} 条评论</h3>
-        <div class="list-tools">
-          <button class="tool-icon" @click="fetchComments(1)">
-            <IconRefresh />
-          </button>
-        </div>
-      </div>
-
       <el-skeleton v-if="isLoading" :rows="8" animated />
       <el-empty
         v-else-if="comments.length === 0"
@@ -580,6 +592,9 @@ const initialize = () => {
     font-weight: 600;
     margin-bottom: 1.5rem;
     color: #333;
+    i {
+      font-size: 1.5rem;
+    }
   }
 
   .reply-indicator {
@@ -587,7 +602,10 @@ const initialize = () => {
     border-radius: 6px;
   }
   .textarea-container {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
+    & > .el-form-item {
+      margin-bottom: 0;
+    }
   }
 
   .textarea-wrapper {
@@ -835,43 +853,6 @@ const initialize = () => {
 
 .comment-list-container {
   margin-top: 3rem;
-
-  .list-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #f0f0f0;
-    margin-bottom: 1.5rem;
-
-    .list-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .list-tools {
-      display: flex;
-      gap: 0.5rem;
-
-      .tool-icon {
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: #8a919f;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 4px;
-        border-radius: 4px;
-
-        &:hover {
-          color: #333;
-          background-color: #f1f3f4;
-        }
-      }
-    }
-  }
 
   .comments-wrapper {
     display: flex;

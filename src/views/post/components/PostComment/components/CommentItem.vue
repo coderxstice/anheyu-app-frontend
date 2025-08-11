@@ -2,12 +2,12 @@
 import { computed } from "vue";
 import type { Comment } from "@/api/comment/type";
 import { UAParser } from "ua-parser-js";
-// Icon components
 import IconLike from "../icon/IconLike.vue";
 import IconReply from "../icon/IconReply.vue";
 import IconLocation from "../icon/IconLocation.vue";
 import IconOS from "../icon/IconOS.vue";
 import IconBrowser from "../icon/IconBrowser.vue";
+import md5 from "blueimp-md5";
 
 const props = defineProps({
   comment: {
@@ -23,13 +23,44 @@ const props = defineProps({
 
 const emit = defineEmits(["reply"]);
 
-const avatarSrc = computed(() => {
-  return `https://cravatar.cn/avatar/${props.comment.email_md5}?d=mp`;
+// QQ号校验：5-11位数字，且首位不为 0
+const isQQNumber = (val: string) => /^[1-9]\d{4,10}$/.test((val || "").trim());
+
+// 从昵称中提取 QQ 号（如果是合法 QQ 号）
+const qqNumber = computed(() => {
+  const nick = props.comment.nickname?.trim() || "";
+  return isQQNumber(nick) ? nick : null;
 });
 
+// 通过 md5 比对判断邮箱是否为该 QQ 的 qq 邮箱
+const useQQAvatar = computed(() => {
+  if (!qqNumber.value || !props.comment.email_md5) return false;
+  const qqEmailMd5 = md5(`${qqNumber.value}@qq.com`).toLowerCase();
+  return props.comment.email_md5.toLowerCase() === qqEmailMd5;
+});
+
+// 头像地址：优先 QQ 头像，失败回退 Gravatar
+const gravatarSrc = computed(() => {
+  // url的尾随/处理
+  const url = new URL(props.config.gravatar_url);
+  url.pathname += `avatar/${props.comment.email_md5}`;
+  url.searchParams.set("d", props.config.default_gravatar_type);
+  url.searchParams.set("s", "140");
+  return url.toString();
+});
+
+const avatarSrc = computed(() => {
+  if (useQQAvatar.value) {
+    return `https://thirdqq.qlogo.cn/g?b=sdk&nk=${qqNumber.value}&s=140`;
+  }
+  return gravatarSrc.value;
+});
+
+const onAvatarError = (e: Event) => {
+  (e.target as HTMLImageElement).src = gravatarSrc.value;
+};
+
 const isBlogger = computed(() => {
-  // 最佳实践：这个'is_admin_comment'字段应该由后端在返回评论数据时提供。
-  // 后端通过比较评论邮箱和站点配置的博主邮箱来决定此字段的值。
   return !!props.comment.is_admin_comment;
 });
 
@@ -73,7 +104,12 @@ const handleReplyClick = () => {
 
 <template>
   <div class="comment-item">
-    <img :src="avatarSrc" alt="avatar" class="comment-avatar" />
+    <img
+      :src="avatarSrc"
+      alt="avatar"
+      class="comment-avatar"
+      @error="onAvatarError"
+    />
     <div class="comment-main">
       <div class="comment-header">
         <div class="user-info">
