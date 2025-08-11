@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, onMounted, watch, nextTick } from "vue";
 import type { Comment } from "@/api/comment/type";
 import { UAParser } from "ua-parser-js";
 import md5 from "blueimp-md5";
@@ -17,6 +17,11 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["comment-submitted"]);
+
+const MAX_HEIGHT_THRESHOLD = 280; // (px) 子评论区域最大高度阈值
+const childrenContainerRef = ref<HTMLElement | null>(null); // 子评论容器的DOM引用
+const isExpanded = ref(false); // 用户是否已点击展开
+const isOverflowing = ref(false); // 内容是否超出阈值
 
 const isReplyFormVisible = ref(false);
 
@@ -85,6 +90,35 @@ const handleReplySubmitted = () => {
 const handleCancelReply = () => {
   isReplyFormVisible.value = false;
 };
+
+// --- 新功能：高度检测逻辑 ---
+const checkHeight = () => {
+  // 使用 nextTick 确保DOM更新完毕
+  nextTick(() => {
+    const container = childrenContainerRef.value;
+    if (container) {
+      // 检查内容的真实高度是否超过阈值
+      if (container.scrollHeight > MAX_HEIGHT_THRESHOLD) {
+        isOverflowing.value = true;
+      } else {
+        isOverflowing.value = false;
+      }
+    }
+  });
+};
+
+// 组件挂载后，执行一次高度检查
+onMounted(checkHeight);
+
+// 监听子评论数量的变化，重新检查高度
+watch(
+  () => props.comment.children?.length,
+  () => {
+    // 重置展开状态，然后重新检查
+    isExpanded.value = false;
+    checkHeight();
+  }
+);
 </script>
 
 <template>
@@ -160,7 +194,11 @@ const handleCancelReply = () => {
 
     <div
       v-if="comment.children && comment.children.length > 0"
-      class="comment-children"
+      :ref="el => (childrenContainerRef = el as HTMLElement)"
+      :class="[
+        'comment-children',
+        { 'is-collapsed': isOverflowing && !isExpanded }
+      ]"
     >
       <ReplyItem
         v-for="child in comment.children"
@@ -169,6 +207,19 @@ const handleCancelReply = () => {
         :config="config"
         @comment-submitted="$emit('comment-submitted')"
       />
+    </div>
+
+    <div v-if="isOverflowing" class="toggle-wrapper">
+      <button
+        v-if="!isExpanded"
+        class="expand-button"
+        @click="isExpanded = true"
+      >
+        展开
+      </button>
+      <button v-else class="collapse-button" @click="isExpanded = false">
+        收起
+      </button>
     </div>
   </div>
 </template>
@@ -254,6 +305,7 @@ const handleCancelReply = () => {
   align-items: center;
   gap: 0.3rem;
 }
+
 :deep(.meta-item svg) {
   width: 14px;
   height: 14px;
@@ -266,14 +318,70 @@ const handleCancelReply = () => {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  // 增加过渡效果
+  transition: max-height 0.5s ease-in-out;
+
+  // 折叠状态的样式
+  &.is-collapsed {
+    max-height: 280px; // 与 JS 中的阈值保持一致
+    overflow: hidden;
+    position: relative;
+    // 渐变蒙版，美化截断效果
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff 80%);
+    }
+  }
 }
 .reply-form-wrapper {
   margin-top: 1rem;
   margin-left: 56px;
 }
+
+// 新的按钮样式
+.toggle-wrapper {
+  margin-left: 56px;
+  margin-top: 1rem;
+  .expand-button {
+    width: 100%;
+    text-align: center;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    color: #fff;
+    background-color: #425aef;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    &:hover {
+      background-color: #3a52d9;
+    }
+  }
+  .collapse-button {
+    width: 100%;
+    text-align: center;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    color: #555;
+    background-color: #f0f2f5;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    &:hover {
+      background-color: #e0e2e5;
+    }
+  }
+}
 @media (max-width: 768px) {
   .comment-children,
-  .reply-form-wrapper {
+  .reply-form-wrapper,
+  .toggle-wrapper {
     margin-left: 0;
   }
 }
