@@ -8,7 +8,7 @@ import {
   watch,
   onUnmounted
 } from "vue";
-import { createPublicComment } from "@/api/comment";
+import { useCommentStore } from "@/store/modules/commentStore";
 import type { CreateCommentPayload } from "@/api/comment/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { ElForm, ElFormItem, ElInput, ElButton, ElAlert } from "element-plus";
@@ -57,8 +57,9 @@ const props = defineProps({
 const emit = defineEmits(["submitted", "cancel"]);
 
 const siteConfigStore = useSiteConfigStore();
+const commentStore = useCommentStore();
 const formRef = ref<FormInstance>();
-const textareaRef = ref(); // Ref for ElInput to get textarea element
+const textareaRef = ref();
 const owoContainerRef = ref<HTMLElement | null>(null);
 const emojiPreviewRef = ref<HTMLElement | null>(null);
 
@@ -119,7 +120,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async valid => {
     if (valid) {
       const { nickname, email, content, website } = form;
-      const payload: Partial<CreateCommentPayload> = {
+      const payload: CreateCommentPayload = {
         nickname,
         email,
         content,
@@ -129,7 +130,8 @@ const submitForm = async (formEl: FormInstance | undefined) => {
       if (website && website.trim() !== "") payload.website = website;
 
       try {
-        await createPublicComment(payload as CreateCommentPayload);
+        await commentStore.postComment(payload);
+
         localStorage.setItem(
           "comment-user-info",
           JSON.stringify({ nickname, email, website })

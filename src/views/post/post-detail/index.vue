@@ -12,6 +12,7 @@ import { useRoute } from "vue-router";
 import { getPublicArticle, getPublicArticles } from "@/api/post";
 import type { Article } from "@/api/post/type";
 import { useLoadingStore } from "@/store/modules/loadingStore";
+import { useCommentStore } from "@/store/modules/commentStore";
 
 import PostHeader from "./components/PostHeader/index.vue";
 import PostOutdateNotice from "./components/PostOutdateNotice/index.vue";
@@ -34,6 +35,7 @@ const article = ref<Article | null>(null);
 const recentArticles = ref<Article[]>([]);
 const loading = ref(true);
 const loadingStore = useLoadingStore();
+const commentStore = useCommentStore();
 
 const originalMainColor = ref<string | null>(null);
 const originalMainOpDeepColor = ref<string | null>(null);
@@ -46,7 +48,6 @@ provide(
   computed(() => article.value?.content_html)
 );
 
-// --- 滚动监听相关的逻辑 ---
 const headingTocItems = ref<{ id: string }[]>([]);
 const commentIds = ref<string[]>([]);
 const allSpyIds = computed(() => {
@@ -63,7 +64,14 @@ const handleCommentIdsLoaded = (ids: string[]) => {
 };
 
 const commentRef = ref<InstanceType<typeof PostComment> | null>(null);
-// -----------------------
+
+const articleWithCommentCount = computed(() => {
+  if (!article.value) return null;
+  return {
+    ...article.value,
+    comment_count: commentStore.totalComments
+  };
+});
 
 const fetchRequiredData = async (id: string) => {
   if (!article.value) {
@@ -158,6 +166,8 @@ watch(
 );
 
 onUnmounted(() => {
+  commentStore.resetStore();
+
   const rootStyle = document.documentElement.style;
   if (originalMainColor.value) {
     rootStyle.setProperty("--anzhiyu-main", originalMainColor.value);
@@ -186,10 +196,8 @@ onMounted(() => {
 
     if (targetElement) {
       if (id.startsWith("comment-")) {
-        // 如果是评论ID，调用评论组件的滚动和高亮方法
         commentRef.value?.scrollToComment(id);
       } else {
-        // 否则，执行TOC的滚动逻辑
         const rect = targetElement.getBoundingClientRect();
         const absoluteTop = rect.top + window.scrollY;
         const top = absoluteTop - 80;
@@ -198,7 +206,6 @@ onMounted(() => {
     }
   };
 
-  // 延迟执行，确保评论和文章都已渲染
   setTimeout(handleInitialHash, 800);
 });
 
@@ -220,7 +227,10 @@ watch(
   <div class="post-detail-container">
     <div v-if="loading" class="post-header-placeholder" />
 
-    <PostHeader v-else-if="article" :article="article" />
+    <PostHeader
+      v-else-if="articleWithCommentCount"
+      :article="articleWithCommentCount"
+    />
 
     <div class="layout">
       <main v-loading="loading" class="post-content-inner">

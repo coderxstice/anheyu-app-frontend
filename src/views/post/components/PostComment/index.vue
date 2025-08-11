@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch, nextTick } from "vue";
-import { getPublicComments } from "@/api/comment";
+import { onMounted, computed, watch, nextTick } from "vue";
 import type { Comment } from "@/api/comment/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import { useCommentStore } from "@/store/modules/commentStore";
+import { storeToRefs } from "pinia";
 import { ElSkeleton, ElEmpty, ElButton } from "element-plus";
 import CommentItem from "./components/CommentItem.vue";
 import CommentForm from "./components/CommentForm.vue";
@@ -16,6 +17,9 @@ const props = defineProps({
 const emit = defineEmits(["comment-ids-loaded"]);
 
 const siteConfigStore = useSiteConfigStore();
+const commentStore = useCommentStore();
+const { comments, totalComments, isLoading, isLoadingMore, hasMore } =
+  storeToRefs(commentStore);
 
 const commentInfoConfig = computed(() => {
   const config = siteConfigStore.getSiteConfig.comment;
@@ -31,50 +35,9 @@ const commentInfoConfig = computed(() => {
   };
 });
 
-const comments = ref<Comment[]>([]);
-const isLoading = ref(true);
-const isLoadingMore = ref(false);
-const currentPage = ref(1);
-const pageSize = ref(10);
-const totalComments = ref(0);
-const hasMore = computed(() => comments.value.length < totalComments.value);
-
-const fetchComments = async (page = 1) => {
-  page === 1 ? (isLoading.value = true) : (isLoadingMore.value = true);
-  try {
-    const res = await getPublicComments({
-      article_id: props.articleId,
-      page: page,
-      pageSize: pageSize.value
-    });
-    const data = res.data;
-    if (data && data.list) {
-      comments.value =
-        page === 1 ? data.list : [...comments.value, ...data.list];
-      totalComments.value = data.total;
-      currentPage.value = data.page;
-    }
-  } catch (error) {
-    console.error("获取评论失败:", error);
-  } finally {
-    isLoading.value = false;
-    isLoadingMore.value = false;
-  }
-};
-
-const loadMoreComments = () => {
-  if (hasMore.value && !isLoadingMore.value) {
-    fetchComments(currentPage.value + 1);
-  }
-};
-
-const handleCommentSubmitted = () => {
-  fetchComments(1);
-};
-
 onMounted(() => {
-  pageSize.value = commentInfoConfig.value.page_size || 10;
-  fetchComments(1);
+  const pageSize = commentInfoConfig.value.page_size || 10;
+  commentStore.initComments(props.articleId, pageSize);
 });
 
 watch(
@@ -85,7 +48,6 @@ watch(
         const commentIds: string[] = [];
         const collectIds = (commentList: Comment[]) => {
           for (const comment of commentList) {
-            // 为 ID 添加前缀以避免与TOC的ID冲突
             commentIds.push(`comment-${comment.id}`);
             if (comment.children && comment.children.length > 0) {
               collectIds(comment.children);
@@ -103,15 +65,14 @@ watch(
 const scrollToComment = (id: string) => {
   const commentElement = document.getElementById(id);
   if (commentElement) {
-    // 为目标评论添加高亮效果
     commentElement.classList.add("comment--highlight");
     setTimeout(() => {
       commentElement.classList.remove("comment--highlight");
-    }, 2000); // 2秒后移除高亮
+    }, 2000);
 
     const rect = commentElement.getBoundingClientRect();
     const absoluteTop = rect.top + window.scrollY;
-    const top = absoluteTop - 80; // 减去顶部导航栏高度
+    const top = absoluteTop - 80;
     window.scrollTo({
       top: top,
       behavior: "smooth"
@@ -119,6 +80,7 @@ const scrollToComment = (id: string) => {
   }
 };
 
+// 暴露方法给父组件使用
 defineExpose({
   scrollToComment
 });
@@ -137,7 +99,6 @@ defineExpose({
       <CommentForm
         :article-id="props.articleId"
         :placeholder="commentInfoConfig.placeholder"
-        @submitted="handleCommentSubmitted"
       />
     </div>
 
@@ -158,11 +119,10 @@ defineExpose({
             :id="`comment-${comment.id}`"
             :comment="comment"
             :config="commentInfoConfig"
-            @comment-submitted="handleCommentSubmitted"
           />
         </div>
         <div v-if="hasMore" class="load-more-container">
-          <el-button :loading="isLoadingMore" @click="loadMoreComments"
+          <el-button :loading="isLoadingMore" @click="commentStore.loadMore"
             >加载更多</el-button
           >
         </div>

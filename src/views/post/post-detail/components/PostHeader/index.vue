@@ -12,7 +12,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const props = defineProps({
   article: {
-    type: Object as PropType<Article>,
+    type: Object as PropType<Article & { comment_count?: number }>,
     required: true
   }
 });
@@ -177,7 +177,7 @@ const goToTag = (tagName: string) => {
           <span class="post-meta-commentcount">
             <i class="anzhiyufont anzhiyu-icon-comments post-meta-icon" />
             <span class="post-meta-label">评论数:</span>
-            <a href="#post-comment">0</a>
+            <a href="#post-comment">{{ article.comment_count || 0 }}</a>
           </span>
         </div>
       </div>
