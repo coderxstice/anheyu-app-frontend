@@ -28,13 +28,9 @@ const handleLike = () => {
   commentStore.toggleLikeComment(props.comment.id);
 };
 
-const isBlogger = computed(() => {
-  if (!props.comment.email_md5 || !props.config.blogger_email) {
-    return false;
-  }
-  const bloggerEmailHash = md5(props.config.blogger_email.trim().toLowerCase());
-  return props.comment.email_md5.toLowerCase() === bloggerEmailHash;
-});
+// --- 博主标签逻辑修改 ---
+// 直接根据后端返回的 is_admin_comment 字段进行判断
+const isBlogger = computed(() => !!props.comment.is_admin_comment);
 
 const MAX_HEIGHT_THRESHOLD = 280;
 const childrenContainerRef = ref<HTMLElement | null>(null);

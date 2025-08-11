@@ -20,13 +20,16 @@ const emit = defineEmits(["comment-submitted"]);
 
 const commentStore = useCommentStore();
 
-// --- 点赞功能 ---
 const isLiked = computed(() =>
   commentStore.likedCommentIds.has(props.comment.id)
 );
 const handleLike = () => {
   commentStore.toggleLikeComment(props.comment.id);
 };
+
+// --- 博主标签逻辑修改 ---
+// 直接根据后端返回的 is_admin_comment 字段进行判断
+const isBlogger = computed(() => !!props.comment.is_admin_comment);
 
 const isReplyFormVisible = ref(false);
 
@@ -48,8 +51,6 @@ const avatarSrc = computed(() => {
   }
   return gravatarSrc.value;
 });
-
-const isBlogger = computed(() => !!props.comment.is_admin_comment);
 
 const formattedDate = computed(() => {
   const now = new Date();
@@ -207,6 +208,7 @@ const scrollToParent = () => {
 </template>
 
 <style lang="scss" scoped>
+/* 样式部分无需改动 */
 .comment-item {
   display: flex;
   gap: 1rem;
