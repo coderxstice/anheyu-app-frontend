@@ -25,7 +25,7 @@ const emit = defineEmits<{
 const query = ref<CommentQuery>({});
 
 const statusOptions = [
-  { label: "全部", value: null },
+  { label: "全部", value: "" },
   { label: "已发布", value: 1 },
   { label: "待审核", value: 2 }
 ];
