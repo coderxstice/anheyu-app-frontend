@@ -2,7 +2,7 @@
  * @Description: 封装文件和文件夹的创建、重命名和删除等操作
  * @Author: 安知鱼
  * @Date: 2025-06-25 14:26:59
- * @LastEditTime: 2025-07-09 14:06:53
+ * @LastEditTime: 2025-08-12 18:03:39
  * @LastEditors: 安知鱼
  */
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -15,6 +15,8 @@ import {
 } from "@/api/sys-file/sys-file";
 import { FileType } from "@/api/sys-file/type";
 import { useFileStore } from "@/store/modules/fileStore";
+// 新增：导入路径处理工具函数
+import { extractLogicalPathFromUri } from "@/utils/fileUtils";
 
 /**
  * @description: useFileActions 的回调函数接口
@@ -47,7 +49,7 @@ export function useFileActions(
   currentPath: Ref<string>,
   callbacks: FileActionCallbacks
 ) {
-  const fileStore = useFileStore(); // 2. 获取 store 实例
+  const fileStore = useFileStore();
 
   const _triggerUpload = (isDir: boolean) => {
     const input = document.createElement("input");
@@ -134,10 +136,6 @@ export function useFileActions(
   const handleCreateFolder = () =>
     _handleCreate("folder", "文件夹", `新建文件夹`);
 
-  /**
-   * @description: 处理重命名操作
-   * @param {FileItem} item - 要重命名的文件项
-   */
   const handleRename = (item: FileItem) => {
     ElMessageBox.prompt("请输入新名称", "重命名", {
       confirmButtonText: "确定",
@@ -153,15 +151,11 @@ export function useFileActions(
         try {
           const response = await renameFileApi(item.id, value);
           if (response.code === 200) {
-            // 3. 关键修改：执行乐观更新
             fileStore.updateFileInState(item.id, {
               name: value,
               updated_at: new Date().toISOString()
             });
             ElMessage.success("重命名成功");
-
-            // 旧的刷新逻辑，现在被乐观更新取代
-            // callbacks.onSuccess();
           } else {
             ElMessage.error(response.message || "重命名失败");
           }
@@ -169,9 +163,7 @@ export function useFileActions(
           ElMessage.error(error.message || "重命名时发生错误");
         }
       })
-      .catch(() => {
-        // ElMessage.info("已取消重命名操作"); // 取消时一般不需要提示
-      });
+      .catch(() => {});
 
     nextTick(() => {
       const inputElement = document.querySelector(
@@ -192,6 +184,18 @@ export function useFileActions(
       ElMessage.warning("请先选择要删除的项目。");
       return false;
     }
+
+    const isDeletingProtectedCommentFolder = files.some(
+      file =>
+        file.type === FileType.Dir &&
+        extractLogicalPathFromUri(file.path) === "/comment"
+    );
+
+    if (isDeletingProtectedCommentFolder) {
+      ElMessage.error("此文件夹为评论数据文件夹，不允许删除。");
+      return false;
+    }
+
     const names = files.map(f => `'${f.name}'`).join("、");
     try {
       await ElMessageBox.confirm(
