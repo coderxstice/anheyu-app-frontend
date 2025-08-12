@@ -2,7 +2,7 @@
   <div>
     <div class="file-toolbar rounded-2xl overflow-hidden bg-white h-full">
       <div class="right-actions">
-        <el-tooltip content="刷新" placement="bottom">
+        <el-tooltip content="刷新" placement="bottom" :show-arrow="false">
           <el-button
             circle
             :icon="RefreshSvg"
@@ -15,6 +15,7 @@
           v-if="viewMode === 'grid'"
           content="重新生成缩略图"
           placement="bottom"
+          :show-arrow="false"
         >
           <el-button
             circle
@@ -24,7 +25,12 @@
           />
         </el-tooltip>
 
-        <el-tooltip v-if="!isSimplified" content="选择操作" placement="bottom">
+        <el-tooltip
+          v-if="!isSimplified"
+          content="选择操作"
+          placement="bottom"
+          :show-arrow="false"
+        >
           <div>
             <el-dropdown trigger="click" placement="bottom-end">
               <el-button
@@ -57,6 +63,7 @@
           placement="bottom"
           :disabled="isSettingsPopoverVisible"
           :hide-after="0"
+          :show-arrow="false"
         >
           <div>
             <el-popover
@@ -127,7 +134,7 @@
           </div>
         </el-tooltip>
 
-        <el-tooltip content="排序" placement="bottom">
+        <el-tooltip content="排序" placement="bottom" :show-arrow="false">
           <div>
             <el-dropdown
               trigger="click"
