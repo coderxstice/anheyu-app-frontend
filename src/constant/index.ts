@@ -2,7 +2,7 @@
  * @Description: 系统配置相关的常量，与后端 Go 定义和 API 响应保持同步。
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:42:04
- * @LastEditTime: 2025-08-07 18:51:11
+ * @LastEditTime: 2025-08-12 10:00:57
  * @LastEditors: 安知鱼
  */
 
@@ -89,6 +89,8 @@ const KeyFooterSocialBarLeft: SettingKey = "footer.socialBar.left";
 const KeyFooterSocialBarRight: SettingKey = "footer.socialBar.right";
 const KeyFooterList: SettingKey = "footer.project.list";
 const KeyFooterBarLinkList: SettingKey = "footer.bar.linkList";
+
+// --- 文章配置 ---
 const KeyDefaultCover: SettingKey = "post.default.cover";
 const KeyPostExpirationTime: SettingKey = "post.expiration_time";
 const KeyDoubleColumn: SettingKey = "post.default.double_column";
@@ -100,6 +102,24 @@ const KeyPostThemePrimaryColorAPIToken: SettingKey =
 const KeyPostRewardEnable: SettingKey = "post.reward.enable";
 const KeyPostRewardWeChatQR: SettingKey = "post.reward.wechat_qr";
 const KeyPostRewardAlipayQR: SettingKey = "post.reward.alipay_qr";
+
+// --- 评论配置 ---
+const KeyCommentLoginRequired: SettingKey = "comment.login_required";
+const KeyCommentPageSize: SettingKey = "comment.page_size";
+const KeyCommentMasterTag: SettingKey = "comment.master_tag";
+const KeyCommentPlaceholder: SettingKey = "comment.placeholder";
+const KeyCommentEmojiCDN: SettingKey = "comment.emoji_cdn";
+const KeyCommentBloggerEmail: SettingKey = "comment.blogger_email";
+const KeyCommentShowUA: SettingKey = "comment.show_ua";
+const KeyCommentShowRegion: SettingKey = "comment.show_region";
+const KeyCommentLimitPerMinute: SettingKey = "comment.limit_per_minute";
+const KeyCommentLimitLength: SettingKey = "comment.limit_length";
+const KeyCommentForbiddenWords: SettingKey = "comment.forbidden_words";
+const KeyCommentNotifySpam: SettingKey = "comment.notify_spam";
+const KeyCommentMailSubject: SettingKey = "comment.mail_subject";
+const KeyCommentMailTemplate: SettingKey = "comment.mail_template";
+const KeyCommentMailSubjectAdmin: SettingKey = "comment.mail_subject_admin";
+const KeyCommentMailTemplateAdmin: SettingKey = "comment.mail_template_admin";
 
 // --- 文件生成及处理配置 ---
 const KeyEnableVipsGenerator: SettingKey = "ENABLE_VIPS_GENERATOR";
@@ -231,6 +251,8 @@ export const constant = {
   KeyFooterSocialBarRight,
   KeyFooterList,
   KeyFooterBarLinkList,
+
+  // --- 文章配置 ---
   KeyDefaultCover,
   KeyDoubleColumn,
   KeyPostDefaultPageSize,
@@ -240,6 +262,24 @@ export const constant = {
   KeyPostRewardWeChatQR,
   KeyPostRewardAlipayQR,
   KeyPostExpirationTime,
+
+  // --- 评论配置 ---
+  KeyCommentLoginRequired,
+  KeyCommentPageSize,
+  KeyCommentMasterTag,
+  KeyCommentPlaceholder,
+  KeyCommentEmojiCDN,
+  KeyCommentBloggerEmail,
+  KeyCommentShowUA,
+  KeyCommentShowRegion,
+  KeyCommentLimitPerMinute,
+  KeyCommentLimitLength,
+  KeyCommentForbiddenWords,
+  KeyCommentNotifySpam,
+  KeyCommentMailSubject,
+  KeyCommentMailTemplate,
+  KeyCommentMailSubjectAdmin,
+  KeyCommentMailTemplateAdmin,
 
   // --- 文件生成及处理配置 ---
   KeyEnableVipsGenerator,

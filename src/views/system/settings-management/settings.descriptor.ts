@@ -598,11 +598,196 @@ const sidebarDescriptors: SettingDescriptor[] = [
   }
 ];
 
+const commentDescriptors: SettingDescriptor[] = [
+  {
+    frontendPath: "frontDesk.comment.loginRequired",
+    backendKey: constant.KeyCommentLoginRequired,
+    defaultValue: false,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.comment.pageSize",
+    backendKey: constant.KeyCommentPageSize,
+    defaultValue: 10,
+    type: "number"
+  },
+  {
+    frontendPath: "frontDesk.comment.masterTag",
+    backendKey: constant.KeyCommentMasterTag,
+    defaultValue: "博主",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.comment.placeholder",
+    backendKey: constant.KeyCommentPlaceholder,
+    defaultValue: "欢迎留下宝贵的建议啦～",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.comment.emojiCDN",
+    backendKey: constant.KeyCommentEmojiCDN,
+    defaultValue:
+      "https://npm.elemecdn.com/anzhiyu-theme-static@1.1.3/twikoo/twikoo.json",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.comment.bloggerEmail",
+    backendKey: constant.KeyCommentBloggerEmail,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.comment.showUA",
+    backendKey: constant.KeyCommentShowUA,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.comment.showRegion",
+    backendKey: constant.KeyCommentShowRegion,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.comment.limitPerMinute",
+    backendKey: constant.KeyCommentLimitPerMinute,
+    defaultValue: 5,
+    type: "number"
+  },
+  {
+    frontendPath: "frontDesk.comment.limitLength",
+    backendKey: constant.KeyCommentLimitLength,
+    defaultValue: 10000,
+    type: "number"
+  },
+  {
+    frontendPath: "frontDesk.comment.forbiddenWords",
+    backendKey: constant.KeyCommentForbiddenWords,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.comment.notifySpam",
+    backendKey: constant.KeyCommentNotifySpam,
+    defaultValue: false,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.comment.mailSubject",
+    backendKey: constant.KeyCommentMailSubject,
+    defaultValue: "您在 [${SITE_NAME}] 上的评论收到了回复",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.comment.mailSubjectAdmin",
+    backendKey: constant.KeyCommentMailSubjectAdmin,
+    defaultValue: "[${SITE_NAME}] 上有新评论了",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.comment.mailTemplate",
+    backendKey: constant.KeyCommentMailTemplate,
+    defaultValue:
+      "您在文章《${POST_TITLE}》下的评论收到了来自 ${NICK} 的回复：<br/>${COMMENT}<br/>点击查看：${POST_URL}",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.comment.mailTemplateAdmin",
+    backendKey: constant.KeyCommentMailTemplateAdmin,
+    defaultValue:
+      "文章《${POST_TITLE}》下有来自 ${NICK} 的新评论：<br/>${COMMENT}<br/>点击管理：${MANAGE_URL}",
+    type: "string"
+  }
+];
+
+const emailDescriptors: SettingDescriptor[] = [
+  {
+    frontendPath: "frontDesk.email.resetPasswordSubject",
+    backendKey: constant.KeyResetPasswordSubject,
+    defaultValue: "【{{.AppName}}】重置您的账户密码",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.email.resetPasswordTemplate",
+    backendKey: constant.KeyResetPasswordTemplate,
+    defaultValue: `<!DOCTYPE html><html><head><title>重置密码</title></head><body><p>您好, {{.Nickname}}！</p><p>您正在请求重置您在 <strong>{{.AppName}}</strong> 的账户密码。</p><p>请点击以下链接以完成重置（此链接24小时内有效）：</p><p><a href="{{.ResetLink}}">重置我的密码</a></p><p>如果链接无法点击，请将其复制到浏览器地址栏中打开。</p><p>如果您没有请求重置密码，请忽略此邮件。</p><br/><p>感谢, <br/>{{.AppName}} 团队</p></body></html>`,
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.email.activateAccountSubject",
+    backendKey: constant.KeyActivateAccountSubject,
+    defaultValue: "【{{.AppName}}】激活您的账户",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.email.activateAccountTemplate",
+    backendKey: constant.KeyActivateAccountTemplate,
+    defaultValue: `<!DOCTYPE html><html><head><title>激活您的账户</title></head><body><p>您好, {{.Nickname}}！</p><p>欢迎注册 <strong>{{.AppName}}</strong>！</p><p>请点击以下链接以激活您的账户（此链接24小时内有效）：</p><p><a href="{{.ActivateLink}}">激活我的账户</a></p><p>如果链接无法点击，请将其复制到浏览器地址栏中打开。</p><p>如果您并未注册，请忽略此邮件。</p><br/><p>感谢, <br/>{{.AppName}} 团队</p></body></html>`,
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.email.enableUserActivation",
+    backendKey: constant.KeyEnableUserActivation,
+    defaultValue: false,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.email.smtpHost",
+    backendKey: constant.KeySmtpHost,
+    defaultValue: "smtp.example.com",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.email.smtpPort",
+    backendKey: constant.KeySmtpPort,
+    defaultValue: 587,
+    type: "number"
+  },
+  {
+    frontendPath: "frontDesk.email.smtpUsername",
+    backendKey: constant.KeySmtpUsername,
+    defaultValue: "user@example.com",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.email.smtpPassword",
+    backendKey: constant.KeySmtpPassword,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.email.smtpSenderName",
+    backendKey: constant.KeySmtpSenderName,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.email.smtpSenderEmail",
+    backendKey: constant.KeySmtpSenderEmail,
+    defaultValue: "noreply@example.com",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.email.smtpReplyToEmail",
+    backendKey: constant.KeySmtpReplyToEmail,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.email.smtpForceSSL",
+    backendKey: constant.KeySmtpForceSSL,
+    defaultValue: false,
+    type: "boolean"
+  }
+];
+
 export const allSettingDescriptors = [
   ...siteDescriptors,
   ...pageDescriptors,
   ...fileDescriptors,
   ...postDescriptors,
   ...frontDeskDescriptors,
-  ...sidebarDescriptors
+  ...sidebarDescriptors,
+  ...commentDescriptors,
+  ...emailDescriptors
 ];

@@ -1,3 +1,10 @@
+<!--
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-07-26 15:01:42
+ * @LastEditTime: 2025-08-12 09:58:05
+ * @LastEditors: 安知鱼
+-->
 <template>
   <el-tabs v-model="activeSubTab">
     <el-tab-pane label="首页配置" name="homePage">
@@ -10,6 +17,16 @@
         <SidebarPageForm v-model="model.sidebar" />
       </el-form>
     </el-tab-pane>
+    <el-tab-pane label="评论配置" name="commentPage">
+      <el-form :model="model" label-position="top" class="setting-form">
+        <CommentSettingsForm v-model="model.comment" />
+      </el-form>
+    </el-tab-pane>
+    <el-tab-pane label="邮件配置" name="emailPage">
+      <el-form :model="model" label-position="top" class="setting-form">
+        <EmailSettingsForm v-model="model.email" />
+      </el-form>
+    </el-tab-pane>
   </el-tabs>
 </template>
 
@@ -18,6 +35,8 @@ import { ref } from "vue";
 import type { FrontDeskSettings } from "../type";
 import HomePageForm from "./frontDesk/HomePageForm/index.vue";
 import SidebarPageForm from "./frontDesk/SidebarPageForm/index.vue";
+import CommentSettingsForm from "./frontDesk/CommentSettingsForm/index.vue";
+import EmailSettingsForm from "./frontDesk/EmailSettingsForm/index.vue";
 
 const activeSubTab = ref("homePage");
 

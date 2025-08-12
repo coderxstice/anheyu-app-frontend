@@ -3,9 +3,11 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-24 17:29:16
- * @LastEditTime: 2025-08-07 14:57:41
+ * @LastEditTime: 2025-08-12 09:58:16
  * @LastEditors: 安知鱼
  */
+
+// ... (其他接口 SiteInfo, PageSittingInfo, etc. 保持不变) ...
 
 /**
  * @description: 站点信息表单接口
@@ -251,9 +253,52 @@ export interface SidebarPageSettingsInfo {
   siteInfoTotalWordCount: number;
 }
 
+/**
+ * @description: 评论配置表单接口
+ */
+export interface CommentSettingsInfo {
+  loginRequired: boolean;
+  pageSize: number;
+  masterTag: string;
+  placeholder: string;
+  emojiCDN: string;
+  bloggerEmail: string;
+  showUA: boolean;
+  showRegion: boolean;
+  limitPerMinute: number;
+  limitLength: number;
+  forbiddenWords: string;
+  notifySpam: boolean;
+  mailSubject: string;
+  mailSubjectAdmin: string;
+  mailTemplate: string;
+  mailTemplateAdmin: string;
+}
+
+/**
+ * @description: 邮件服务配置表单接口
+ */
+export interface EmailSettingsInfo {
+  resetPasswordSubject: string;
+  resetPasswordTemplate: string;
+  activateAccountSubject: string;
+  activateAccountTemplate: string;
+  enableUserActivation: boolean;
+  smtpHost: string;
+  smtpPort: number;
+  smtpUsername: string;
+  smtpPassword: string;
+  smtpSenderName: string;
+  smtpSenderEmail: string;
+  smtpReplyToEmail: string;
+  smtpForceSSL: boolean;
+}
+
 export interface FrontDeskSettings {
   home: HomePageSettingsInfo;
   sidebar: SidebarPageSettingsInfo;
+  comment: CommentSettingsInfo;
+  email: EmailSettingsInfo;
 }
 
 /**
