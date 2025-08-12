@@ -1,3 +1,10 @@
+<!--
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-07-24 17:55:10
+ * @LastEditTime: 2025-08-12 14:32:39
+ * @LastEditors: 安知鱼
+-->
 <!-- src/components/file-settings/FileSizeInput.vue -->
 <template>
   <el-input v-model="size.value" :placeholder="placeholder">
@@ -56,5 +63,16 @@ const size = computed({
 <style scoped>
 :deep(.el-input-group__append .el-select .el-input__wrapper) {
   box-shadow: none !important;
+}
+h2 {
+  font-size: 1.2em;
+  font-weight: 600;
+  margin-top: 40px;
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  &:first-child {
+    margin-top: 10px;
+  }
 }
 </style>

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-10 22:21:27
- * @LastEditTime: 2025-08-11 18:05:34
+ * @LastEditTime: 2025-08-12 14:16:12
  * @LastEditors: 安知鱼
  */
 /**
@@ -46,4 +46,27 @@ export interface CommentListResponse {
   total: number;
   page: number;
   pageSize: number;
+}
+
+// 用于后台管理的评论对象类型
+export interface AdminComment extends Comment {
+  email: string;
+  ip_address: string;
+  content: string;
+  status: number;
+  article_slug: string;
+  pinned_at: string | null;
+}
+
+// 后台查询评论的参数类型
+export interface CommentQuery {
+  page?: number;
+  pageSize?: number;
+  nickname?: string;
+  email?: string;
+  website?: string;
+  ip_address?: string;
+  content?: string;
+  article_slug?: string;
+  status?: number;
 }

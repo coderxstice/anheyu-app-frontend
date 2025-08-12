@@ -184,7 +184,6 @@ router.beforeEach((to: ToRouteType, _from, next) => {
       // 对于其他白名单项，使用前缀匹配
       return to.path.startsWith(whitePath);
     });
-
     if (isInWhiteList) {
       next();
       return;

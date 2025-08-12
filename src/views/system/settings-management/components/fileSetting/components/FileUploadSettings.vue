@@ -42,3 +42,17 @@ const formData = computed({
   set: value => emit("update:modelValue", value)
 });
 </script>
+
+<style scoped lang="scss">
+h2 {
+  font-size: 1.2em;
+  font-weight: 600;
+  margin-top: 40px;
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  &:first-child {
+    margin-top: 10px;
+  }
+}
+</style>

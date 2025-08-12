@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-10 22:21:49
- * @LastEditTime: 2025-08-11 18:15:10
+ * @LastEditTime: 2025-08-12 14:36:31
  * @LastEditors: 安知鱼
  */
 import { http } from "@/utils/http";
@@ -11,7 +11,9 @@ import type { BaseResponse } from "@/api/post/type";
 import type {
   CreateCommentPayload,
   Comment,
-  CommentListResponse
+  CommentListResponse,
+  AdminComment,
+  CommentQuery
 } from "./type";
 
 /**
@@ -64,4 +66,50 @@ export const likePublicComment = (id: string) => {
  */
 export const unlikePublicComment = (id: string) => {
   return http.request<any>("post", baseUrlApi(`public/comments/${id}/unlike`));
+};
+
+/**
+ * @description: [管理员] 查询评论列表
+ */
+export const getAdminComments = (params: CommentQuery) => {
+  return http.request<BaseResponse<{ list: AdminComment[]; total: number }>>(
+    "get",
+    baseUrlApi("comments"),
+    { params }
+  );
+};
+
+/**
+ * @description: [管理员] 置顶/取消置顶评论
+ */
+export const pinAdminComment = (id: string, pinned: boolean) => {
+  return http.request<BaseResponse<AdminComment>>(
+    "put",
+    baseUrlApi(`comments/${id}/pin`),
+    {
+      data: { pinned }
+    }
+  );
+};
+
+/**
+ * @description: [管理员] 更新评论状态
+ */
+export const updateAdminCommentStatus = (id: string, status: number) => {
+  return http.request<BaseResponse<AdminComment>>(
+    "put",
+    baseUrlApi(`comments/${id}/status`),
+    {
+      data: { status }
+    }
+  );
+};
+
+/**
+ * @description: [管理员] 批量删除评论
+ */
+export const deleteAdminComments = (ids: string[]) => {
+  return http.request<BaseResponse<number>>("delete", baseUrlApi("comments"), {
+    data: { ids }
+  });
 };

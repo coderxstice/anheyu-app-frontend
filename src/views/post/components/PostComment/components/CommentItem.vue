@@ -289,6 +289,7 @@ watch(
 .comment-actions {
   display: flex;
   gap: 0.5rem;
+  height: 30px;
 }
 .action-btn {
   background: none;
