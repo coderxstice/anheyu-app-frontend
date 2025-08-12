@@ -11,12 +11,20 @@ import {
 import { useCommentStore } from "@/store/modules/commentStore";
 import type { CreateCommentPayload } from "@/api/comment/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
-import { ElForm, ElFormItem, ElInput, ElButton, ElAlert } from "element-plus";
+import {
+  ElForm,
+  ElFormItem,
+  ElInput,
+  ElButton,
+  ElAlert,
+  ElMessage
+} from "element-plus";
 import type { FormInstance, FormRules } from "element-plus";
 
 import IconEmoji from "../icon/IconEmoji.vue";
 import IconImage from "../icon/IconImage.vue";
 import { gsap } from "gsap";
+import { uploadCommentImage } from "@/api/comment";
 
 interface EmojiPackage {
   name: string;
@@ -62,6 +70,8 @@ const formRef = ref<FormInstance>();
 const textareaRef = ref();
 const owoContainerRef = ref<HTMLElement | null>(null);
 const emojiPreviewRef = ref<HTMLElement | null>(null);
+const fileInputRef = ref<HTMLInputElement | null>(null);
+const isUploading = ref(false);
 
 const showEmojiPicker = ref(false);
 const isPreviewVisible = ref(false);
@@ -140,7 +150,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         form.content = "";
       } catch (error) {
         console.error("评论发布失败:", error);
-        alert("评论发布失败，请稍后再试。");
+        ElMessage.error("评论发布失败，请稍后再试。");
       }
     }
   });
@@ -171,19 +181,72 @@ const fetchEmojis = async () => {
   }
 };
 
-const addEmoji = (emojiText: string) => {
-  const newText = ` ${emojiText} `;
+const insertTextAtCursor = (text: string) => {
   const textarea = textareaRef.value?.textarea as HTMLTextAreaElement;
   if (textarea) {
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
+    const oldContent = form.content;
     form.content =
-      form.content.substring(0, start) + newText + form.content.substring(end);
-    const newPos = start + newText.length;
+      oldContent.substring(0, start) + text + oldContent.substring(end);
+    const newPos = start + text.length;
     textarea.focus();
     nextTick(() => textarea.setSelectionRange(newPos, newPos));
   } else {
-    form.content += newText;
+    form.content += text;
+  }
+};
+
+const addEmoji = (emojiText: string) => {
+  const newText = ` ${emojiText} `;
+  insertTextAtCursor(newText);
+};
+
+const handleImageUploadClick = () => {
+  if (isUploading.value) return;
+  fileInputRef.value?.click();
+};
+
+// --- 【核心修改】更新图片上传处理逻辑 ---
+const handleFileChange = async (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+
+  if (!file) {
+    return;
+  }
+  if (!file.type.startsWith("image/")) {
+    ElMessage.error("请选择有效的图片文件");
+    target.value = "";
+    return;
+  }
+
+  isUploading.value = true;
+  try {
+    // 1. 调用上传接口
+    const res = await uploadCommentImage(file);
+
+    // 2. 从响应中安全地获取文件ID
+    const fileId = res?.data?.id;
+
+    // 3. 校验ID是否存在
+    if (!fileId) {
+      throw new Error("服务器未返回有效的文件ID");
+    }
+
+    // 4. 构建内部URI和完整的Markdown标签
+    const internalURI = `anzhiyu://file/${fileId}`;
+    const markdownImage = `![${file.name}](${internalURI})`;
+
+    // 5. 将Markdown标签插入到文本框
+    insertTextAtCursor(markdownImage);
+    ElMessage.success("图片已添加，提交后即可显示");
+  } catch (error: any) {
+    console.error("图片上传失败:", error);
+    ElMessage.error(error.message || "图片上传失败，请稍后再试。");
+  } finally {
+    isUploading.value = false;
+    target.value = "";
   }
 };
 
@@ -272,7 +335,6 @@ onMounted(() => {
 
 onUnmounted(() => document.removeEventListener("click", handleClickOutside));
 </script>
-
 <template>
   <div class="comment-form">
     <el-form
@@ -343,7 +405,24 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
                   </div>
                 </transition>
               </div>
-              <button class="action-icon" type="button"><IconImage /></button>
+              <!-- 6. 修改图片上传按钮 -->
+              <button
+                class="action-icon"
+                type="button"
+                :disabled="isUploading"
+                :title="isUploading ? '上传中...' : '上传图片'"
+                @click="handleImageUploadClick"
+              >
+                <IconImage />
+              </button>
+              <!-- 7. 添加隐藏的文件输入框 -->
+              <input
+                ref="fileInputRef"
+                type="file"
+                style="display: none"
+                accept="image/*"
+                @change="handleFileChange"
+              />
             </div>
           </div>
         </el-form-item>
@@ -562,6 +641,11 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
       user-select: none;
       &:hover {
         background-color: var(--anzhiyu-post-blockquote-bg);
+      }
+      // 8. 添加禁用状态样式
+      &[disabled] {
+        cursor: not-allowed;
+        opacity: 0.5;
       }
     }
   }

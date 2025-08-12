@@ -15,7 +15,7 @@ import {
   type GetThumbnailCredentialResponse,
   type FilePreviewUrlsResponse,
   type UpdateFileContentData,
-  type FileInfoResponse
+  type FileItem
 } from "./type";
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
@@ -41,7 +41,7 @@ export interface FolderTreeResponse {
 export interface FileDetailResponse {
   code: number;
   message: string;
-  data: FileInfoResponse & { url?: string };
+  data: FileItem & { url?: string };
 }
 
 /**

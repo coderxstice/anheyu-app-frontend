@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-10 22:21:27
- * @LastEditTime: 2025-08-12 14:16:12
+ * @LastEditTime: 2025-08-12 19:16:13
  * @LastEditors: 安知鱼
  */
 /**
@@ -14,7 +14,7 @@ export interface CreateCommentPayload {
   nickname: string;
   email?: string;
   website?: string;
-  content: string;
+  content: string; // 内容现在可能包含 anzhiyu://file/{ID} 格式的图片URI
   allow_notification?: boolean;
 }
 
@@ -27,7 +27,7 @@ export interface Comment {
   nickname: string;
   email_md5: string;
   website: string | null;
-  content_html: string;
+  content_html: string; // 后端已将内部URI渲染为带签名的临时URL
   is_admin_comment: boolean;
   ip_location: string;
   user_agent: string;
@@ -48,7 +48,7 @@ export interface CommentListResponse {
   pageSize: number;
 }
 
-// 用于后台管理的评论对象类型
+// --- 后台管理相关类型 (保持不变) ---
 export interface AdminComment extends Comment {
   email: string;
   ip_address: string;
@@ -58,7 +58,6 @@ export interface AdminComment extends Comment {
   pinned_at: string | null;
 }
 
-// 后台查询评论的参数类型
 export interface CommentQuery {
   page?: number;
   pageSize?: number;
@@ -69,4 +68,20 @@ export interface CommentQuery {
   content?: string;
   article_slug?: string;
   status?: number;
+}
+
+/**
+ * @description 上传图片成功后，响应体中 data 字段的类型
+ */
+export interface UploadImageResponseData {
+  id: string; // 只包含文件的公共ID
+}
+
+/**
+ * @description 图片上传接口的成功响应体
+ */
+export interface SuccessResponseUploadImage {
+  code: number;
+  message: string;
+  data: UploadImageResponseData;
 }

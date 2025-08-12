@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-10 22:21:49
- * @LastEditTime: 2025-08-12 14:36:31
+ * @LastEditTime: 2025-08-12 19:17:52
  * @LastEditors: 安知鱼
  */
 import { http } from "@/utils/http";
@@ -13,7 +13,8 @@ import type {
   Comment,
   CommentListResponse,
   AdminComment,
-  CommentQuery
+  CommentQuery,
+  SuccessResponseUploadImage
 } from "./type";
 
 /**
@@ -66,6 +67,28 @@ export const likePublicComment = (id: string) => {
  */
 export const unlikePublicComment = (id: string) => {
   return http.request<any>("post", baseUrlApi(`public/comments/${id}/unlike`));
+};
+
+/**
+ * @description: 为评论上传图片 (适配新流程)
+ * @param {File} file 图片文件
+ * @returns {Promise<SuccessResponseUploadImage>} 返回包含文件公共ID的响应
+ */
+export const uploadCommentImage = (file: File) => {
+  const formData = new FormData();
+  // 根据接口文档，字段名必须是 'file'
+  formData.append("file", file);
+
+  return http.request<SuccessResponseUploadImage>(
+    "post",
+    baseUrlApi("public/comments/upload"),
+    {
+      data: formData,
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    }
+  );
 };
 
 /**
