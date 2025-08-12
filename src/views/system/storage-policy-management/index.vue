@@ -136,14 +136,16 @@ const typeIconMap = {
 
           <div class="card-overlay">
             <div class="card-actions">
-              <el-tooltip content="修改">
+              <el-tooltip content="修改" :show-arrow="false">
                 <el-button
                   :icon="useRenderIcon(EditPen)"
                   circle
                   @click="handleEdit(item)"
                 />
               </el-tooltip>
+
               <el-popconfirm
+                v-if="item.type !== 'local' || item.virtual_path !== '/'"
                 :title="`确认删除存储策略 ${item.name} 吗?`"
                 @confirm="handleDelete(item)"
               >
