@@ -27,6 +27,7 @@ const model = defineModel<EmailSettingsInfo>({ required: true });
             :min="1"
             :max="65535"
             placeholder="例如: 587"
+            controls-position="right"
           />
         </el-form-item>
       </el-col>
@@ -94,8 +95,22 @@ const model = defineModel<EmailSettingsInfo>({ required: true });
         type="textarea"
         :rows="6"
       />
-      <div class="template-hint">
-        可用变量: \{\{.Nickname}}, \{\{.AppName}}, \{\{.ActivateLink}}
+      <div v-pre class="template-hint">
+        <b>可用占位符:</b>
+        <ul>
+          <li>
+            <code>{{.Nickname}}</code
+            >: 用户的昵称
+          </li>
+          <li>
+            <code>{{.AppName}}</code
+            >: 您的网站名称
+          </li>
+          <li>
+            <code>{{.ActivateLink}}</code
+            >: 用于激活账户的唯一链接
+          </li>
+        </ul>
       </div>
     </el-form-item>
     <el-form-item label="重置密码邮件主题">
@@ -107,8 +122,22 @@ const model = defineModel<EmailSettingsInfo>({ required: true });
         type="textarea"
         :rows="6"
       />
-      <div class="template-hint">
-        可用变量: \{\{.Nickname}}, \{\{.AppName}}, \{\{.ResetLink}}
+      <div v-pre class="template-hint">
+        <b>可用占位符:</b>
+        <ul>
+          <li>
+            <code>{{.Nickname}}</code
+            >: 用户的昵称
+          </li>
+          <li>
+            <code>{{.AppName}}</code
+            >: 您的网站名称
+          </li>
+          <li>
+            <code>{{.ResetLink}}</code
+            >: 用于重置密码的唯一链接
+          </li>
+        </ul>
       </div>
     </el-form-item>
   </div>
@@ -116,9 +145,31 @@ const model = defineModel<EmailSettingsInfo>({ required: true });
 
 <style scoped>
 .template-hint {
+  font-size: 13px;
+  color: #606266;
+  line-height: 1.6;
+  margin-top: 6px;
+  background-color: #f5f7fa;
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+.template-hint b {
+  font-weight: 600;
+}
+.template-hint ul {
+  padding-left: 18px;
+  margin: 6px 0 0 0;
+  list-style-type: disc;
+}
+.template-hint li {
+  margin-bottom: 5px;
+}
+.template-hint code {
+  background-color: #e9e9eb;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-family: "Courier New", Courier, monospace;
   font-size: 12px;
-  color: #999;
-  line-height: 1.5;
-  margin-top: 4px;
+  margin-right: 8px;
 }
 </style>

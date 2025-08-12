@@ -4,6 +4,7 @@ import type { CommentSettingsInfo } from "../../../type";
 defineOptions({
   name: "CommentSettingsForm"
 });
+
 const model = defineModel<CommentSettingsInfo>({ required: true });
 </script>
 
@@ -80,26 +81,106 @@ const model = defineModel<CommentSettingsInfo>({ required: true });
       />
     </el-form-item>
 
-    <el-divider content-position="left">邮件通知</el-divider>
+    <el-divider content-position="left">邮件通知模板</el-divider>
     <el-form-item label="收到垃圾评论时通知博主">
       <el-switch v-model="model.notifySpam" />
     </el-form-item>
-    <el-form-item label="用户收到回复的邮件标题">
-      <el-input v-model="model.mailSubject" />
+
+    <el-form-item label="用户收到回复的邮件主题">
+      <el-input
+        v-model="model.mailSubject"
+        placeholder="您在 {{.SITE_NAME}} 上的评论有了新回复"
+      />
     </el-form-item>
-    <el-form-item label="用户收到回复的邮件模板 (支持HTML)">
-      <el-input v-model="model.mailTemplate" type="textarea" :rows="4" />
-      <div class="template-hint">
-        可用变量: $\{POST_TITLE}, $\{NICK}, $\{COMMENT}, $\{POST_URL}
+    <el-form-item label="用户收到回复的邮件内容模板 (支持HTML)">
+      <el-input v-model="model.mailTemplate" type="textarea" :rows="5" />
+      <div v-pre class="template-hint">
+        <b>可用占位符:</b>
+        <ul>
+          <li>
+            <code>{{.SITE_NAME}}</code
+            >: 您的网站名称
+          </li>
+          <li>
+            <code>{{.SITE_URL}}</code
+            >: 您的网站地址
+          </li>
+          <li>
+            <code>{{.POST_URL}}</code
+            >: 评论所在的文章链接
+          </li>
+          <li>
+            <code>{{.NICK}}</code
+            >: 新评论者的昵称
+          </li>
+          <li>
+            <code>{{.COMMENT}}</code
+            >: 新评论的内容 (HTML格式)
+          </li>
+          <li>
+            <code>{{.IMG}}</code
+            >: 新评论者的Gravatar头像链接
+          </li>
+          <li>
+            <code>{{.PARENT_NICK}}</code
+            >: 被回复者的昵称
+          </li>
+          <li>
+            <code>{{.PARENT_COMMENT}}</code
+            >: 被回复的评论内容 (HTML格式)
+          </li>
+          <li>
+            <code>{{.PARENT_IMG}}</code
+            >: 被回复者的Gravatar头像链接
+          </li>
+        </ul>
       </div>
     </el-form-item>
-    <el-form-item label="博主收到新评论的邮件标题">
-      <el-input v-model="model.mailSubjectAdmin" />
+
+    <el-form-item label="博主收到新评论的邮件主题">
+      <el-input
+        v-model="model.mailSubjectAdmin"
+        placeholder="{{.SITE_NAME}} 上有来自 {{.NICK}} 的新评论"
+      />
     </el-form-item>
-    <el-form-item label="博主收到新评论的邮件模板 (支持HTML)">
-      <el-input v-model="model.mailTemplateAdmin" type="textarea" :rows="4" />
-      <div class="template-hint">
-        可用变量: $\{POST_TITLE}, $\{NICK}, $\{COMMENT}, $\{MANAGE_URL}
+    <el-form-item label="博主收到新评论的邮件内容模板 (支持HTML)">
+      <el-input v-model="model.mailTemplateAdmin" type="textarea" :rows="5" />
+      <div v-pre class="template-hint">
+        <b>可用占位符:</b>
+        <ul>
+          <li>
+            <code>{{.SITE_NAME}}</code
+            >: 您的网站名称
+          </li>
+          <li>
+            <code>{{.SITE_URL}}</code
+            >: 您的网站地址
+          </li>
+          <li>
+            <code>{{.POST_URL}}</code
+            >: 评论所在的文章链接
+          </li>
+          <li>
+            <code>{{.NICK}}</code
+            >: 新评论者的昵称
+          </li>
+          <li>
+            <code>{{.COMMENT}}</code
+            >: 新评论的内容 (HTML格式)
+          </li>
+          <li>
+            <code>{{.IMG}}</code
+            >: 新评论者的Gravatar头像链接
+          </li>
+          <li>
+            <code>{{.MAIL}}</code
+            >: 新评论者的邮箱地址
+          </li>
+          <li>
+            <code>{{.IP}}</code
+            >: 新评论者的IP地址
+          </li>
+        </ul>
       </div>
     </el-form-item>
   </div>
@@ -107,9 +188,31 @@ const model = defineModel<CommentSettingsInfo>({ required: true });
 
 <style scoped>
 .template-hint {
+  font-size: 13px;
+  color: #606266;
+  line-height: 1.6;
+  margin-top: 6px;
+  background-color: #f5f7fa;
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+.template-hint b {
+  font-weight: 600;
+}
+.template-hint ul {
+  padding-left: 18px;
+  margin: 6px 0 0 0;
+  list-style-type: disc;
+}
+.template-hint li {
+  margin-bottom: 5px;
+}
+.template-hint code {
+  background-color: #e9e9eb;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-family: "Courier New", Courier, monospace;
   font-size: 12px;
-  color: #999;
-  line-height: 1.5;
-  margin-top: 4px;
+  margin-right: 8px;
 }
 </style>
