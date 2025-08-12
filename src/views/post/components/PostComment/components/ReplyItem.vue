@@ -308,11 +308,26 @@ const scrollToParent = () => {
     }
   }
 }
-.comment-content {
+
+:deep(.comment-content) {
   color: #373a47;
   line-height: 1.6;
   font-size: 0.95rem;
+  img {
+    max-height: 300px;
+    max-width: 300%;
+    border-radius: 4px;
+    vertical-align: middle;
+    &:not(.anzhiyu-owo-emotion) {
+      cursor: zoom-in;
+    }
+  }
+  .tanzhiyu-owo-emotion {
+    width: 3rem;
+    height: auto;
+  }
 }
+
 :deep(.comment-content p) {
   margin: 0;
 }

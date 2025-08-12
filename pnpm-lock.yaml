@@ -80,6 +80,9 @@ importers:
       ua-parser-js:
         specifier: ^2.0.4
         version: 2.0.4
+      viewerjs:
+        specifier: ^1.11.7
+        version: 1.11.7
       vite-plugin-pwa:
         specifier: ^1.0.0
         version: 1.0.0(vite@6.0.3(@types/node@20.17.9)(jiti@2.4.1)(sass@1.82.0)(terser@5.43.1)(yaml@2.6.1))(workbox-build@7.3.0)(workbox-window@7.3.0)
@@ -4605,6 +4608,9 @@ packages:
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
+
+  viewerjs@1.11.7:
+    resolution: {integrity: sha512-0JuVqOmL5v1jmEAlG5EBDR3XquxY8DWFQbFMprOXgaBB0F7Q/X9xWdEaQc59D8xzwkdUgXEMSSknTpriq95igg==}
 
   vite-code-inspector-plugin@0.18.2:
     resolution: {integrity: sha512-MfHvere+71vL0BOposwgbHKZ8o973mYnMhGmU4uzOMt+gsmIjqHxcUkak9K2RMkRB1mG7/Gehvyy28SkUuhg3A==}
@@ -9789,6 +9795,8 @@ snapshots:
       punycode: 2.3.1
 
   util-deprecate@1.0.2: {}
+
+  viewerjs@1.11.7: {}
 
   vite-code-inspector-plugin@0.18.2:
     dependencies:

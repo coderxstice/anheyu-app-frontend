@@ -240,7 +240,6 @@ watch(
 </template>
 
 <style lang="scss" scoped>
-/* 样式部分无需改动 */
 .comment-item {
   display: flex;
   gap: 1rem;
@@ -318,10 +317,23 @@ watch(
     font-size: 0.8rem;
   }
 }
-.comment-content {
+:deep(.comment-content) {
   color: #373a47;
   line-height: 1.6;
   font-size: 0.95rem;
+  img {
+    max-height: 300px;
+    max-width: 300%;
+    border-radius: 4px;
+    vertical-align: middle;
+    &:not(.anzhiyu-owo-emotion) {
+      cursor: zoom-in;
+    }
+  }
+  .anzhiyu-owo-emotion {
+    width: 3rem;
+    height: auto;
+  }
 }
 .comment-meta {
   display: flex;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed, watch, nextTick } from "vue";
+import { onMounted, onUnmounted, computed, watch, nextTick, ref } from "vue";
 import type { Comment } from "@/api/comment/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useCommentStore } from "@/store/modules/commentStore";
@@ -7,6 +7,8 @@ import { storeToRefs } from "pinia";
 import { ElSkeleton, ElEmpty, ElButton } from "element-plus";
 import CommentItem from "./components/CommentItem.vue";
 import CommentForm from "./components/CommentForm.vue";
+import Viewer from "viewerjs";
+import "viewerjs/dist/viewer.css";
 
 defineOptions({ name: "PostComment" });
 
@@ -20,6 +22,41 @@ const siteConfigStore = useSiteConfigStore();
 const commentStore = useCommentStore();
 const { comments, totalComments, isLoading, isLoadingMore, hasMore } =
   storeToRefs(commentStore);
+
+const postCommentRef = ref<HTMLElement | null>(null);
+let viewer: Viewer | null = null;
+
+const initViewer = () => {
+  if (viewer) {
+    viewer.destroy();
+  }
+  if (postCommentRef.value) {
+    viewer = new Viewer(postCommentRef.value, {
+      filter(image: HTMLImageElement) {
+        return (
+          !!image.closest(".comment-content") &&
+          !image.classList.contains("anzhiyu-owo-emotion")
+        );
+      },
+      navbar: false,
+      toolbar: {
+        zoomIn: true,
+        zoomOut: true,
+        oneToOne: true,
+        reset: true,
+        prev: false,
+        play: {
+          show: false
+        },
+        next: false,
+        rotateLeft: true,
+        rotateRight: true,
+        flipHorizontal: true,
+        flipVertical: true
+      }
+    });
+  }
+};
 
 const commentInfoConfig = computed(() => {
   const config = siteConfigStore.getSiteConfig.comment;
@@ -40,11 +77,18 @@ onMounted(() => {
   commentStore.initComments(props.articleId, pageSize);
 });
 
+onUnmounted(() => {
+  if (viewer) {
+    viewer.destroy();
+  }
+});
+
 watch(
   comments,
   newComments => {
     if (newComments && newComments.length > 0) {
       nextTick(() => {
+        // Collect comment IDs (logic remains the same).
         const commentIds: string[] = [];
         const collectIds = (commentList: Comment[]) => {
           for (const comment of commentList) {
@@ -56,6 +100,9 @@ watch(
         };
         collectIds(newComments);
         emit("comment-ids-loaded", commentIds);
+
+        // Initialize or update the image viewer.
+        initViewer();
       });
     }
   },
@@ -80,14 +127,14 @@ const scrollToComment = (id: string) => {
   }
 };
 
-// 暴露方法给父组件使用
+// Expose method to parent component.
 defineExpose({
   scrollToComment
 });
 </script>
 
 <template>
-  <div id="post-comment">
+  <div id="post-comment" ref="postCommentRef">
     <div class="main-comment-form-container">
       <h3 class="form-title">
         <i class="anzhiyufont anzhiyu-icon-comments" />
