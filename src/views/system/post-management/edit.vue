@@ -720,7 +720,6 @@ watch(
 
 <style lang="scss" scoped>
 .post-edit-container {
-  padding: 20px;
   background-color: var(--el-bg-color-page);
   min-height: calc(100vh - 88px);
   transition: background-color 0.3s;
