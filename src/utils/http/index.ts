@@ -229,6 +229,17 @@ class AnHttp {
           return Promise.reject(error);
         }
 
+        const isTestEmailRequest = config.url?.endsWith("/settings/test-email");
+        if (isTestEmailRequest) {
+          // 对于测试邮件请求，我们不使用全局错误提示，而是将错误直接抛出，
+          // 让组件中的 try...catch...finally 能够完整地执行，从而可以控制按钮的 loading 状态。
+          console.warn(
+            "检测到测试邮件接口错误，将错误传递到业务层处理:",
+            response?.data?.message || "未知错误"
+          );
+          return Promise.reject(error);
+        }
+
         // 对于其他所有错误（如404, 500等），调用全局错误处理器显示UI提示
         handleBackendError(error);
 

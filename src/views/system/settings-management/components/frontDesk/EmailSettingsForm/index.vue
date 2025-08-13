@@ -1,11 +1,37 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import type { EmailSettingsInfo } from "../../../type";
+import { ElMessage } from "element-plus";
+import { sendTestEmail } from "@/api/site";
 
 defineOptions({
   name: "EmailSettingsForm"
 });
 
 const model = defineModel<EmailSettingsInfo>({ required: true });
+
+const testEmailAddress = ref("");
+const isSending = ref(false);
+
+const handleSendTestEmail = async () => {
+  if (!testEmailAddress.value) {
+    ElMessage.warning("请输入要接收测试邮件的邮箱地址");
+    return;
+  }
+
+  isSending.value = true;
+  try {
+    const res = await sendTestEmail(testEmailAddress.value);
+    ElMessage.success(res.message || "测试邮件已成功发送！");
+  } catch (error: any) {
+    const errorMessage =
+      error?.response?.data?.message || "邮件发送失败，请检查配置或网络";
+    ElMessage.error(errorMessage);
+    console.error("发送测试邮件失败:", error);
+  } finally {
+    isSending.value = false;
+  }
+};
 </script>
 
 <template>
@@ -60,17 +86,14 @@ const model = defineModel<EmailSettingsInfo>({ required: true });
     <el-row :gutter="20">
       <el-col :span="12">
         <el-form-item label="发件人名称">
-          <el-input
-            v-model="model.smtpSenderName"
-            placeholder="例如: 我的网站"
-          />
+          <el-input v-model="model.smtpSenderName" placeholder="例如: 安和鱼" />
         </el-form-item>
       </el-col>
       <el-col :span="12">
         <el-form-item label="发件人邮箱">
           <el-input
             v-model="model.smtpSenderEmail"
-            placeholder="例如: noreply@example.com"
+            placeholder="例如: user@example.com（需要和SMTP登录用户名一致）"
           />
         </el-form-item>
       </el-col>
@@ -80,6 +103,29 @@ const model = defineModel<EmailSettingsInfo>({ required: true });
         v-model="model.smtpReplyToEmail"
         placeholder="例如: support@example.com"
       />
+    </el-form-item>
+
+    <el-divider content-position="left">服务连通性测试</el-divider>
+    <el-form-item label="发送测试邮件">
+      <div style="display: flex; width: 100%; gap: 10px">
+        <el-input
+          v-model="testEmailAddress"
+          placeholder="输入接收测试邮件的邮箱地址"
+          clearable
+        />
+        <el-button
+          type="primary"
+          :loading="isSending"
+          style="width: 120px"
+          @click="handleSendTestEmail"
+        >
+          {{ isSending ? "发送中..." : "发送" }}
+        </el-button>
+      </div>
+      <div class="el-form-item__info">
+        点击发送前，请确保上方的 SMTP
+        配置已填写并保存。此功能将使用已保存的配置进行发送。
+      </div>
     </el-form-item>
 
     <el-divider content-position="left">功能开关与模板</el-divider>

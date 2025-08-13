@@ -2,12 +2,13 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-19 01:17:38
- * @LastEditTime: 2025-06-21 23:29:42
+ * @LastEditTime: 2025-08-13 10:23:49
  * @LastEditors: 安知鱼
  */
 
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/utils/http/config";
+import type { BaseResponse } from "./post/type";
 
 export type SiteConfig = {
   APP_NAME: string;
@@ -39,5 +40,21 @@ export const getSiteConfigApi = () => {
   return http.request<SiteConfigResult>(
     "get",
     baseUrlApi("public/site-config")
+  );
+};
+
+/**
+ * @description 发送测试邮件
+ * @param to_email 接收测试邮件的目标邮箱地址
+ */
+export const sendTestEmail = (
+  to_email: string
+): Promise<BaseResponse<null>> => {
+  return http.request<BaseResponse<null>>(
+    "post",
+    baseUrlApi("settings/test-email"),
+    {
+      data: { to_email }
+    }
   );
 };
