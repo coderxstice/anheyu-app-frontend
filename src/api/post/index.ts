@@ -2,7 +2,7 @@
  * @Description: 文章管理模块 API 统一出口 (文章、标签、分类)
  * @Author: 安知鱼
  * @Date: 2025-07-25 18:05:00
- * @LastEditTime: 2025-08-07 13:38:07
+ * @LastEditTime: 2025-08-13 14:32:23
  * @LastEditors: 安知鱼
  */
 
@@ -24,7 +24,8 @@ import type {
   // 分类
   CategoryListResponse,
   PostCategoryResponse,
-  PostCategoryForm
+  PostCategoryForm,
+  ArchiveSummaryResponse
 } from "./type";
 
 // ===================================
@@ -211,5 +212,15 @@ export const getPublicArticle = (
   return http.request<BaseResponse<ArticleResponse>>(
     "get",
     baseUrlApi(`public/articles/${id}`)
+  );
+};
+
+/** @description [公开]获取文章归档摘要 */
+export const getArticleArchives = (): Promise<
+  BaseResponse<ArchiveSummaryResponse>
+> => {
+  return http.request<BaseResponse<ArchiveSummaryResponse>>(
+    "get",
+    baseUrlApi("public/articles/archives")
   );
 };

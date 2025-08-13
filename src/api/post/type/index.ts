@@ -2,7 +2,7 @@
  * @Description: 文章、标签、分类模块的所有类型定义
  * @Author: 安知鱼
  * @Date: 2025-07-23 11:07:00
- * @LastEditTime: 2025-08-10 18:43:40
+ * @LastEditTime: 2025-08-13 14:31:35
  * @LastEditors: 安知鱼
  */
 
@@ -73,7 +73,7 @@ export interface ArticleLink {
 // ===================================
 
 /**
- * @description 文章对象完整结构 (与后端最新接口一致)
+ * @description 文章对象完整结构
  */
 export interface Article {
   id: string;
@@ -147,4 +147,23 @@ export type ArticleResponse = Article;
 export interface ArticleListResponse {
   list: Article[];
   total: number;
+}
+
+// ===================================
+//         文章归档 (Post Archives)
+// ===================================
+/**
+ * @description 单个归档项
+ */
+export interface ArchiveItem {
+  year: number;
+  month: number;
+  count: number;
+}
+
+/**
+ * @description 归档列表的响应体数据
+ */
+export interface ArchiveSummaryResponse {
+  list: ArchiveItem[];
 }
