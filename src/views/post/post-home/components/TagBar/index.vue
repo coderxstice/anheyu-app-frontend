@@ -26,7 +26,7 @@ const fetchTags = async () => {
 
 // 点击标签后跳转
 const handleSelect = (tag: PostTag) => {
-  router.push(`/tags/${tag.name}`);
+  router.push(`/tags/${tag.name}/`);
 };
 
 // 监听路由变化，更新当前选中的标签
@@ -46,7 +46,7 @@ onMounted(() => {
       :key="tag.id"
       class="tag-item"
       :class="{ selected: selectedTagName === tag.name }"
-      :href="`/tags/${tag.name}`"
+      :href="`/tags/${tag.name}/`"
       @click.prevent="handleSelect(tag)"
     >
       <span class="tags-punctuation">#</span>

@@ -27,7 +27,7 @@ const fetchCategories = async () => {
 
 const handleSelect = (category: PostCategory | null) => {
   if (category) {
-    router.push(`/categories/${category.name}`);
+    router.push(`/categories/${category.name}/`);
   } else {
     router.push("/");
   }

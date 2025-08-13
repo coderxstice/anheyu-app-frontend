@@ -27,7 +27,7 @@ const fetchTags = async () => {
 
 // 跳转到标签详情页
 const goToTag = (tagName: string) => {
-  router.push({ path: `/tags/${tagName}` });
+  router.push({ path: `/tags/${tagName}/` });
 };
 
 onMounted(() => {

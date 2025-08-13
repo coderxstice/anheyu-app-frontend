@@ -2,7 +2,7 @@
  * @Description: 路由配置
  * @Author: 安知鱼
  * @Date: 2025-04-08 17:29:06
- * @LastEditTime: 2025-08-08 09:35:43
+ * @LastEditTime: 2025-08-13 15:02:32
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
@@ -59,8 +59,44 @@ export default [
         }
       },
       {
+        path: "archives/:year(\\d{4})/",
+        name: "PostArchivesByYear",
+        component: () => import("@/views/post/post-home/index.vue"),
+        meta: {
+          title: `${appName} - 归档`,
+          showLink: false
+        }
+      },
+      {
+        path: "archives/:year(\\d{4})/:month(\\d{1,2})/",
+        name: "PostArchivesByMonth",
+        component: () => import("@/views/post/post-home/index.vue"),
+        meta: {
+          title: `${appName} - 归档`,
+          showLink: false
+        }
+      },
+      {
         path: "archives/page/:id",
         name: "PostArchivesDetailPaginated",
+        component: () => import("@/views/post/post-home/index.vue"),
+        meta: {
+          title: `${appName} - 归档`,
+          showLink: false
+        }
+      },
+      {
+        path: "archives/:year(\\d{4})/page/:id",
+        name: "PostArchivesByYearPaginated",
+        component: () => import("@/views/post/post-home/index.vue"),
+        meta: {
+          title: `${appName} - 归档`,
+          showLink: false
+        }
+      },
+      {
+        path: "archives/:year(\\d{4})/:month(\\d{1,2})/page/:id",
+        name: "PostArchivesByMonthPaginated",
         component: () => import("@/views/post/post-home/index.vue"),
         meta: {
           title: `${appName} - 归档`,
@@ -77,7 +113,7 @@ export default [
         }
       },
       {
-        path: "tags/:name",
+        path: "tags/:name/",
         name: "PostTagsDetail",
         component: () => import("@/views/post/post-home/index.vue"),
         meta: {
@@ -104,7 +140,7 @@ export default [
         }
       },
       {
-        path: "categories/:name",
+        path: "categories/:name/",
         name: "PostHomeByCategory",
         component: () => import("@/views/post/post-home/index.vue"),
         meta: {

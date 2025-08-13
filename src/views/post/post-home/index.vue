@@ -44,6 +44,8 @@ const pagination = reactive({
 
 const currentCategoryName = ref<string | null>(null);
 const currentTagName = ref<string | null>(null);
+const currentYear = ref<number | null>(null);
+const currentMonth = ref<number | null>(null);
 
 const fetchData = async () => {
   loading.value = true;
@@ -56,6 +58,10 @@ const fetchData = async () => {
       params.category = currentCategoryName.value;
     } else if (pageType.value === "tag" && currentTagName.value) {
       params.tag = currentTagName.value;
+    } else if (pageType.value === "archive") {
+      // --- 新增逻辑：如果当前是归档页，则添加 year 和 month 参数 ---
+      if (currentYear.value) params.year = currentYear.value;
+      if (currentMonth.value) params.month = currentMonth.value;
     }
 
     const { data } = await getPublicArticles(params);
@@ -79,21 +85,42 @@ watch(
     if (pageType.value === "category") {
       currentCategoryName.value = (newParams.name as string) || null;
       currentTagName.value = null;
+      currentYear.value = null;
+      currentMonth.value = null;
     } else if (pageType.value === "tag") {
       currentTagName.value = (newParams.name as string) || null;
       currentCategoryName.value = null;
+      currentYear.value = null;
+      currentMonth.value = null;
+    } else if (pageType.value === "archive") {
+      currentYear.value = newParams.year ? Number(newParams.year) : null;
+      currentMonth.value = newParams.month ? Number(newParams.month) : null;
+      currentCategoryName.value = null;
+      currentTagName.value = null;
     } else {
       currentCategoryName.value = null;
       currentTagName.value = null;
+      currentYear.value = null;
+      currentMonth.value = null;
     }
     pagination.page = newParams.id ? Number(newParams.id) : 1;
   },
   { immediate: true, deep: true }
 );
 
-watch([() => pagination.page, currentCategoryName, currentTagName], fetchData, {
-  immediate: true
-});
+watch(
+  [
+    () => pagination.page,
+    currentCategoryName,
+    currentTagName,
+    currentYear,
+    currentMonth
+  ],
+  fetchData,
+  {
+    immediate: true
+  }
+);
 </script>
 
 <template>
@@ -152,6 +179,7 @@ watch([() => pagination.page, currentCategoryName, currentTagName], fetchData, {
 </template>
 
 <style lang="scss" scoped>
+/* 样式部分无需改动 */
 .post-home-top-container {
   margin: 0 auto;
   padding: 0 1.5rem;

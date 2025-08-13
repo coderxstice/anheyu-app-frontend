@@ -52,7 +52,7 @@ const goToPost = (id: string) => {
 
 // 跳转到标签页
 const goToTag = (tagName: string) => {
-  router.push(`/tags/${tagName}`);
+  router.push(`/tags/${tagName}/`);
 };
 </script>
 

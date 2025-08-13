@@ -70,7 +70,7 @@ onUnmounted(() => {
         <router-link
           v-for="tag in tagList"
           :key="tag.id"
-          :to="`/tags/${tag.name}`"
+          :to="`/tags/${tag.name}/`"
           :class="{ 'is-highlight': config.highlight.includes(tag.id) }"
         >
           {{ tag.name }}<sup>{{ tag.count }}</sup>

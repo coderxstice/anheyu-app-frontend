@@ -56,12 +56,12 @@ const goPost = (id: string) => {
 
 // 跳转到分类页面的方法
 const goToCategoryPage = (categoryName: string) => {
-  router.push(`/categories/${categoryName}`);
+  router.push(`/categories/${categoryName}/`);
 };
 
 // 跳转到标签页面的方法
 const goToTagPage = (tagName: string) => {
-  router.push(`/tags/${tagName}`);
+  router.push(`/tags/${tagName}/`);
 };
 </script>
 

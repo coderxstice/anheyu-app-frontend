@@ -32,7 +32,7 @@ const fetchCategories = async () => {
  * @param categoryName - 分类名称
  */
 const goToCategory = (categoryName: string) => {
-  router.push({ path: `/categories/${categoryName}` });
+  router.push({ path: `/categories/${categoryName}/` });
 };
 
 onMounted(() => {

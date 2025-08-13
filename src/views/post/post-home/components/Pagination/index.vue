@@ -63,12 +63,12 @@ const getPageUrl = (p: number) => {
 
   // 检查是否在分类页
   if (path.startsWith("/categories/")) {
-    if (p === 1) return `/categories/${name}`;
+    if (p === 1) return `/categories/${name}/`;
     return `/categories/${name}/page/${p}`;
   }
   // 检查是否在标签页
   else if (path.startsWith("/tags/")) {
-    if (p === 1) return `/tags/${name}`;
+    if (p === 1) return `/tags/${name}/`;
     return `/tags/${name}/page/${p}`;
   }
   // 检查是否在归档页

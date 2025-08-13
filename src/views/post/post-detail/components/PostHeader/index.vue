@@ -91,11 +91,11 @@ const formatDate = (dateString: string) => {
 };
 
 const goToCategory = (categoryName: string) => {
-  router.push(`/categories/${categoryName}`);
+  router.push(`/categories/${categoryName}/`);
 };
 
 const goToTag = (tagName: string) => {
-  router.push(`/tags/${tagName}`);
+  router.push(`/tags/${tagName}/`);
 };
 </script>
 
@@ -110,7 +110,7 @@ const goToTag = (tagName: string) => {
             class="post-meta-categories"
           >
             <a
-              :href="`/categories/${article.post_categories[0].name}`"
+              :href="`/categories/${article.post_categories[0].name}/`"
               @click.prevent="goToCategory(article.post_categories[0].name)"
             >
               {{ article.post_categories[0].name }}
@@ -122,7 +122,7 @@ const goToTag = (tagName: string) => {
                 v-for="tag in article.post_tags"
                 :key="tag.id"
                 class="post-meta__tags"
-                :href="`/tags/${tag.name}`"
+                :href="`/tags/${tag.name}/`"
                 @click.prevent="goToTag(tag.name)"
               >
                 <i class="anzhiyufont anzhiyu-icon-hashtag" />
