@@ -200,6 +200,15 @@ const updateSocials = (jsonString: string) => {
       </el-col>
     </el-row>
 
+    <el-divider content-position="left">归档</el-divider>
+    <el-row :gutter="20">
+      <el-col :span="12">
+        <el-form-item label="归档显示的月份个数">
+          <el-input-number v-model="model.archiveDisplayMonths" :min="0" />
+        </el-form-item>
+      </el-col>
+    </el-row>
+
     <el-form-item v-if="model.tagsEnable" label="选择高亮的标签">
       <HighlightTagSelector v-model="model.tagsHighlight" />
     </el-form-item>

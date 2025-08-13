@@ -595,6 +595,12 @@ const sidebarDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeySidebarSiteInfoTotalWordCount,
     defaultValue: true,
     type: "number"
+  },
+  {
+    frontendPath: "frontDesk.sidebar.archiveDisplayMonths",
+    backendKey: constant.KeySidebarArchiveDisplayMonths,
+    defaultValue: 6,
+    type: "number"
   }
 ];
 

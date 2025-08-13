@@ -3,7 +3,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-24 17:29:16
- * @LastEditTime: 2025-08-12 09:58:16
+ * @LastEditTime: 2025-08-13 11:54:12
  * @LastEditors: 安知鱼
  */
 
@@ -251,6 +251,7 @@ export interface SidebarPageSettingsInfo {
   siteInfoTotalPostCount: number;
   siteInfoRuntimeEnable: boolean;
   siteInfoTotalWordCount: number;
+  archiveDisplayMonths: number;
 }
 
 /**

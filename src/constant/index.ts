@@ -2,7 +2,7 @@
  * @Description: 系统配置相关的常量，与后端 Go 定义和 API 响应保持同步。
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:42:04
- * @LastEditTime: 2025-08-12 10:00:57
+ * @LastEditTime: 2025-08-13 11:54:55
  * @LastEditors: 安知鱼
  */
 
@@ -66,6 +66,8 @@ const KeySidebarSiteInfoRuntimeEnable: SettingKey =
   "sidebar.siteinfo.runtimeEnable";
 const KeySidebarSiteInfoTotalWordCount: SettingKey =
   "sidebar.siteinfo.totalWordCount";
+const KeySidebarArchiveDisplayMonths: SettingKey =
+  "sidebar.archive.displayMonths";
 
 // --- 前台及页脚配置 ---
 const KeyFrontDeskSiteOwnerName: SettingKey = "frontDesk.siteOwner.name";
@@ -229,6 +231,7 @@ export const constant = {
   KeySidebarSiteInfoTotalPostCount,
   KeySidebarSiteInfoRuntimeEnable,
   KeySidebarSiteInfoTotalWordCount,
+  KeySidebarArchiveDisplayMonths,
 
   // --- 前台及页脚配置 ---
   KeyFrontDeskSiteOwnerName,
