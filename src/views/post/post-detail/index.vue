@@ -233,7 +233,7 @@ watch(
     />
 
     <div class="layout">
-      <main v-loading="loading" class="post-content-inner">
+      <main class="post-content-inner">
         <div v-if="article" class="post-detail-content">
           <AiSummary
             v-if="article.summaries.length > 0"
