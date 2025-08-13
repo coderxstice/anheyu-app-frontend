@@ -108,7 +108,6 @@ const loading = ref(true);
 const isSubmitting = ref(false);
 const articleId = ref<string | null>(null);
 
-// ▼▼▼ 修改开始 ▼▼▼
 const form = reactive<ArticleForm>({
   title: "",
   content_md: "",
@@ -129,7 +128,6 @@ const form = reactive<ArticleForm>({
   copyright_author_href: "",
   copyright_url: ""
 });
-// ▲▲▲ 修改结束 ▲▲▲
 
 const categoryOptions = ref<PostCategory[]>([]);
 const tagOptions = ref<PostTag[]>([]);
@@ -206,7 +204,6 @@ const initPage = async () => {
         form.summaries = [];
       }
     } else {
-      // ▼▼▼ 修改开始 ▼▼▼
       Object.assign(form, {
         title: "",
         content_md: `## 在这里开始你的创作...`,
@@ -227,7 +224,6 @@ const initPage = async () => {
         copyright_author_href: "",
         copyright_url: ""
       });
-      // ▲▲▲ 修改结束 ▲▲▲
     }
 
     await fetchOptionsPromise;
@@ -783,7 +779,7 @@ watch(
 }
 
 .content-card {
-  height: calc(100vh - 88px - 40px);
+  height: calc(100% - 88px - 40px);
   display: flex;
   flex-direction: column;
 
