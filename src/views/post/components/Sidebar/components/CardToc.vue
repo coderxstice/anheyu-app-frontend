@@ -216,6 +216,12 @@ defineExpose({
 .toc-content {
   overflow: auto;
   max-height: calc(100vh - 200px);
+  &:hover {
+    .toc-link {
+      filter: blur(0);
+      opacity: 1;
+    }
+  }
 }
 
 .toc {
@@ -237,7 +243,9 @@ defineExpose({
   transition:
     color 0.2s ease-out,
     background-color 0.2s ease-out,
-    font-size 0.2s ease-out;
+    font-size 0.2s ease-out,
+    filter 0.2s ease-out,
+    opacity 0.2s ease-out;
   text-overflow: ellipsis;
   white-space: nowrap;
   &:not(.active) {

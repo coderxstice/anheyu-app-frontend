@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-07 10:15:13
- * @LastEditTime: 2025-08-13 16:48:18
+ * @LastEditTime: 2025-08-14 15:09:43
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -21,45 +21,48 @@ const postContentRef = ref<HTMLElement | null>(null);
 // 这个函数将处理 article 容器内的所有点击事件。
 const handleContentClick = (event: Event) => {
   const target = event.target as HTMLElement;
-  // 使用 .closest() 来查找被点击的元素是否是一个 Tab 按钮，或者是按钮的子元素。
+
+  // --- 1. 处理 Tab 按钮点击 ---
   const tabButton = target.closest(".tabs .nav-tabs .tab");
+  if (tabButton && tabButton instanceof HTMLButtonElement) {
+    event.preventDefault();
+    if (tabButton.classList.contains("active")) {
+      return;
+    }
+    const tabsContainer = tabButton.closest(".tabs");
+    if (!tabsContainer) return;
+    const targetId = tabButton.dataset.href;
+    if (!targetId) return;
 
-  // 如果点击的不是 Tab 按钮，则不执行任何操作。
-  if (!tabButton || !(tabButton instanceof HTMLButtonElement)) {
-    return;
+    tabsContainer.querySelectorAll(".nav-tabs .tab").forEach(btn => {
+      btn.classList.remove("active");
+    });
+    tabsContainer.querySelectorAll(".tab-item-content").forEach(content => {
+      content.classList.remove("active");
+    });
+
+    tabButton.classList.add("active");
+    const targetContent = tabsContainer.querySelector(`#${targetId}`);
+    if (targetContent) {
+      targetContent.classList.add("active");
+    }
+    return; // 处理完后退出函数
   }
 
-  // 阻止按钮的默认行为（如果有的话）
-  event.preventDefault();
-
-  // 如果点击的 Tab 已经是激活状态，则不执行任何操作。
-  if (tabButton.classList.contains("active")) {
-    return;
-  }
-
-  // 找到这个 Tab 按钮所属的父级 '.tabs' 容器。
-  const tabsContainer = tabButton.closest(".tabs");
-  if (!tabsContainer) return;
-
-  // 从按钮的 data-href 属性中获取目标内容面板的 ID。
-  const targetId = tabButton.dataset.href;
-  if (!targetId) return;
-
-  // 1. 在当前 Tab 分组内，禁用所有的 Tab 按钮和内容面板。
-  tabsContainer.querySelectorAll(".nav-tabs .tab").forEach(btn => {
-    btn.classList.remove("active");
-  });
-  tabsContainer.querySelectorAll(".tab-item-content").forEach(content => {
-    content.classList.remove("active");
-  });
-
-  // 2. 激活被点击的 Tab 按钮。
-  tabButton.classList.add("active");
-
-  // 3. 激活对应的 Tab 内容面板。
-  const targetContent = tabsContainer.querySelector(`#${targetId}`);
-  if (targetContent) {
-    targetContent.classList.add("active");
+  // --- 2. 【新增】处理“返回顶部”按钮点击 ---
+  const scrollToTopButton = target.closest(".tab-to-top button");
+  if (scrollToTopButton) {
+    event.preventDefault();
+    // 找到按钮所属的父级 '.tabs' 容器
+    const tabsContainer = scrollToTopButton.closest(".tabs");
+    if (tabsContainer) {
+      // 将该容器的顶部平滑滚动到视口的顶部
+      tabsContainer.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+    return; // 处理完后退出函数
   }
 };
 
@@ -79,7 +82,6 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <!-- 将 ref 添加到 article 元素上 -->
   <article
     id="article-container"
     ref="postContentRef"
@@ -106,6 +108,14 @@ $theme-link-color: #007bff;
     box-shadow: var(--anzhiyu-shadow-border);
     background: var(--anzhiyu-card-bg);
     padding: 8px;
+    & > .tab-to-top {
+      padding: 0 16px 10px 0;
+      width: 100%;
+      text-align: right;
+      button {
+        background: transparent;
+      }
+    }
     & > .nav-tabs {
       display: flex;
       flex-wrap: wrap;
@@ -122,7 +132,7 @@ $theme-link-color: #007bff;
         margin: 4px;
         border: var(--style-border-always);
         border-radius: 8px;
-        cursor: pointer; // 添加鼠标指针样式，提升用户体验
+        cursor: pointer;
         &.active {
           border: var(--style-border-hover-always);
           background: var(--anzhiyu-background);
@@ -137,21 +147,24 @@ $theme-link-color: #007bff;
         }
       }
     }
-    // [新增] Tab 内容面板的样式
     & > .tab-contents {
       padding: 1rem;
       .tab-item-content {
-        display: none; // 默认隐藏所有内容面板
-        animation: fadeIn 0.5s; // 可选：添加一个淡入动画
+        display: none;
+        position: relative;
+        animation: fadeIn 0.5s;
+        background: var(--anzhiyu-background);
+        border: var(--style-border-always);
+        padding: 1.2rem 1.2rem;
+        border-radius: 8px;
 
         &.active {
-          display: block; // 只显示激活状态的内容面板
+          display: block;
         }
       }
     }
   }
 
-  // [新增] 简单的淡入动画
   @keyframes fadeIn {
     from {
       opacity: 0;

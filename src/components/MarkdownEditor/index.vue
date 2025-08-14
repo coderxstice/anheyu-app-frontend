@@ -47,10 +47,10 @@ const toolbars: ToolbarNames[] = [
 const editorRef = ref<ExposeParam>();
 const theme = ref<Themes>("light");
 
-// 【新增】为组件根元素创建一个模板引用，用于事件监听
+// 为组件根元素创建一个模板引用，用于事件监听
 const containerRef = ref<HTMLElement | null>(null);
 
-// 【新增】处理 tabs 点击的函数
+// 处理 tabs 点击的函数
 const handleTabsClick = (event: MouseEvent) => {
   const target = event.target as HTMLElement;
 
@@ -132,6 +132,9 @@ defineExpose({
 <style lang="scss">
 .md-editor-fullscreen {
   z-index: 2100;
+}
+.md-editor-preview-wrapper {
+  overflow: hidden;
 }
 .md-editor-container {
   // 您提供的 tabs 样式，保持不变
