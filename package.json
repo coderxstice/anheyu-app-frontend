@@ -91,6 +91,7 @@
     "@iconify-icons/ri": "^1.2.10",
     "@iconify/vue": "^4.2.0",
     "@types/jszip": "^3.4.1",
+    "@types/markdown-it": "^14.1.2",
     "@types/node": "^20.17.9",
     "@types/nprogress": "^0.2.3",
     "@types/path-browserify": "^1.0.3",

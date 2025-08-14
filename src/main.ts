@@ -2,7 +2,7 @@
  * @Description: 主入口文件
  * @Author: 安知鱼
  * @Date: 2025-06-11 11:59:32
- * @LastEditTime: 2025-08-05 17:33:05
+ * @LastEditTime: 2025-08-14 13:56:46
  * @LastEditors: 安知鱼
  */
 import App from "./App.vue";
@@ -25,6 +25,12 @@ import "./style/tailwind.css";
 import "element-plus/dist/index.css";
 // 导入字体图标
 import "./assets/iconfont-anzhiyu/ali_iconfont_css.css";
+
+// 1. 引入我们封装好的安装函数
+import { installMarkdownEditorExtensions } from "./components/MarkdownEditor/config";
+
+// 2. 执行安装，完成所有相关配置
+installMarkdownEditorExtensions();
 
 const app = createApp(App);
 

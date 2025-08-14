@@ -5,7 +5,6 @@ import { ElMessage, ElNotification, ElMessageBox } from "element-plus";
 import { ArrowLeft } from "@element-plus/icons-vue";
 import { debounce } from "lodash-es";
 import type { FormInstance } from "element-plus";
-// ⭐ 1. 导入 md-editor-v3 的 ExposeParam 类型
 import type { ExposeParam } from "md-editor-v3";
 
 import MarkdownEditor from "@/components/MarkdownEditor/index.vue";
