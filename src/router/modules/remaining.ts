@@ -2,7 +2,7 @@
  * @Description: 路由配置
  * @Author: 安知鱼
  * @Date: 2025-04-08 17:29:06
- * @LastEditTime: 2025-08-13 15:02:32
+ * @LastEditTime: 2025-08-14 10:35:42
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
@@ -158,6 +158,16 @@ export default [
         }
       }
     ]
+  },
+  {
+    // 将文章编辑页提升为顶级路由，不再使用 Layout 组件
+    path: "/admin/post-management/edit/:id",
+    name: "PostEdit",
+    component: () => import("@/views/system/post-management/edit.vue"),
+    meta: {
+      title: "编辑文章",
+      showLink: false
+    }
   },
   {
     path: "/login",

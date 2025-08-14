@@ -240,7 +240,6 @@ const handleAvatarError = (event: Event, comment: AdminComment) => {
 </template>
 
 <style lang="scss" scoped>
-/* Styles remain unchanged */
 .comment-card {
   display: flex;
   padding: 16px;
@@ -310,6 +309,19 @@ const handleAvatarError = (event: Event, comment: AdminComment) => {
     &:hover {
       text-decoration: underline;
     }
+  }
+  :deep(img) {
+    max-height: 300px;
+    max-width: 300%;
+    border-radius: 4px;
+    vertical-align: middle;
+    &:not(.anzhiyu-owo-emotion) {
+      cursor: zoom-in;
+    }
+  }
+  :deep(.tanzhiyu-owo-emotion) {
+    width: 3rem;
+    height: auto;
   }
 }
 
