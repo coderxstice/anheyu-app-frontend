@@ -2,7 +2,7 @@
  * @Description: 文章管理模块 API 统一出口 (文章、标签、分类)
  * @Author: 安知鱼
  * @Date: 2025-07-25 18:05:00
- * @LastEditTime: 2025-08-13 14:32:23
+ * @LastEditTime: 2025-08-14 12:49:47
  * @LastEditors: 安知鱼
  */
 
@@ -25,7 +25,8 @@ import type {
   CategoryListResponse,
   PostCategoryResponse,
   PostCategoryForm,
-  ArchiveSummaryResponse
+  ArchiveSummaryResponse,
+  SuccessResponseUploadImage
 } from "./type";
 
 // ===================================
@@ -224,3 +225,19 @@ export const getArticleArchives = (): Promise<
     baseUrlApi("public/articles/archives")
   );
 };
+
+export function uploadArticleImage(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return http.request<SuccessResponseUploadImage>(
+    "post",
+    baseUrlApi("articles/upload"),
+    {
+      data: formData,
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    }
+  );
+}

@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted, computed } from "vue";
+import { ref, reactive, onMounted, onUnmounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { ElMessage, ElNotification } from "element-plus";
+import { ElMessage, ElNotification, ElMessageBox } from "element-plus";
 import { ArrowLeft } from "@element-plus/icons-vue";
+import { debounce } from "lodash-es";
 import type { FormInstance } from "element-plus";
+// ⭐ 1. 导入 md-editor-v3 的 ExposeParam 类型
+import type { ExposeParam } from "md-editor-v3";
 
 import MarkdownEditor from "@/components/MarkdownEditor/index.vue";
 import PostActionButtons from "./components/PostActionButtons.vue";
@@ -17,7 +20,8 @@ import {
   getCategoryList,
   getTagList,
   createCategory,
-  createTag
+  createTag,
+  uploadArticleImage
 } from "@/api/post";
 import type { ArticleForm, PostCategory, PostTag } from "@/api/post/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
@@ -33,6 +37,8 @@ const { device, pureApp, toggleSideBar } = useNav();
 let wasSidebarOpened = pureApp.getSidebarStatus;
 
 const formRef = ref<FormInstance>();
+// ⭐ 2. editorRef 的类型现在是 ExposeParam，以便调用 triggerSave
+const editorRef = ref<ExposeParam>();
 const loading = ref(true);
 const isSubmitting = ref(false);
 const articleId = ref<string | null>(null);
@@ -59,19 +65,31 @@ const form = reactive<ArticleForm>({
   copyright_url: ""
 });
 
+// ... 其他代码保持不变，直到 handleSubmit ...
+const initialFormState = reactive({
+  title: "",
+  content_md: ""
+});
 const categoryOptions = ref<PostCategory[]>([]);
 const tagOptions = ref<PostTag[]>([]);
-
 const isEditMode = computed(() => !!articleId.value);
 const pageTitle = computed(() => (isEditMode.value ? "编辑文章" : "新增文章"));
-
+const isDirty = computed(() => {
+  return (
+    form.title !== initialFormState.title ||
+    form.content_md !== initialFormState.content_md
+  );
+});
 const categorySelectKey = ref(0);
 const tagSelectKey = ref(0);
-
+const updateInitialState = () => {
+  initialFormState.title = form.title;
+  initialFormState.content_md = form.content_md;
+};
+const getDraftKey = () => `post_draft_${articleId.value || "new"}`;
 const initPage = async () => {
   loading.value = true;
   const id = route.params.id as string;
-
   try {
     const fetchOptionsPromise = Promise.all([
       getCategoryList(),
@@ -80,7 +98,6 @@ const initPage = async () => {
       categoryOptions.value = catRes.data;
       tagOptions.value = tagRes.data;
     });
-
     if (id !== "new") {
       articleId.value = id;
       const { data } = await getArticle(id);
@@ -91,15 +108,14 @@ const initPage = async () => {
         form.summaries = [];
       }
     }
-
     await fetchOptionsPromise;
   } catch (error) {
     ElMessage.error("页面数据加载失败，请重试");
   } finally {
     loading.value = false;
+    updateInitialState();
   }
 };
-
 const validateName = (name: string, type: "分类" | "标签"): boolean => {
   const pattern = /^[\u4e00-\u9fa5a-zA-Z0-9_-]{1,30}$/;
   if (!pattern.test(name)) {
@@ -111,7 +127,6 @@ const validateName = (name: string, type: "分类" | "标签"): boolean => {
   }
   return true;
 };
-
 const processTagsAndCategories = async () => {
   if (Array.isArray(form.post_category_ids)) {
     const categoryPromises = form.post_category_ids.map(async item => {
@@ -128,7 +143,6 @@ const processTagsAndCategories = async () => {
     });
     form.post_category_ids = await Promise.all(categoryPromises);
   }
-
   if (Array.isArray(form.post_tag_ids)) {
     const tagPromises = form.post_tag_ids.map(async item => {
       if (tagOptions.value.some(opt => opt.id === item)) {
@@ -146,30 +160,22 @@ const processTagsAndCategories = async () => {
   }
 };
 
-const handleSubmit = async (isPublish = false) => {
-  if (!form.title || form.title.trim() === "") {
-    ElNotification({
-      title: "提交错误",
-      message: "文章标题不能为空，请输入标题后再保存。",
-      type: "error"
-    });
-    return;
-  }
-
+// ⭐ 3. 提交逻辑被移动到 onSave 事件处理器中
+const onSaveHandler = async (
+  markdown: string,
+  htmlPromise: Promise<string>
+) => {
+  if (isSubmitting.value) return; // 防止重复触发
   isSubmitting.value = true;
-  try {
-    await processTagsAndCategories();
 
-    if (isPublish) {
-      form.status = "PUBLISHED";
-    } else {
-      if (form.status === "PUBLISHED") {
-        form.status = "DRAFT";
-      }
-    }
+  try {
+    const generatedHtml = await htmlPromise; // 等待 HTML 生成
+    await processTagsAndCategories();
 
     const dataToSubmit = {
       ...form,
+      content_md: markdown, // 使用事件提供的最新 markdown 内容
+      content_html: generatedHtml,
       summaries: form.summaries?.filter(s => s && s.trim() !== "")
     };
 
@@ -179,9 +185,12 @@ const handleSubmit = async (isPublish = false) => {
     } else {
       const res = await createArticle(dataToSubmit);
       ElMessage.success("创建成功");
-      // 创建成功后跳转到编辑页
+      localStorage.removeItem(getDraftKey());
       router.push({ name: "PostEdit", params: { id: res.data.id } });
     }
+
+    localStorage.removeItem(getDraftKey());
+    updateInitialState();
 
     await siteConfigStore.fetchSystemSettings([
       constant.KeySidebarSiteInfoTotalPostCount,
@@ -196,8 +205,81 @@ const handleSubmit = async (isPublish = false) => {
   }
 };
 
+// ⭐ 4. handleSubmit 现在只负责校验和触发保存
+const handleSubmit = (isPublish = false) => {
+  if (!form.title || form.title.trim() === "") {
+    ElNotification({
+      title: "提交错误",
+      message: "文章标题不能为空，请输入标题后再保存。",
+      type: "error"
+    });
+    return;
+  }
+
+  // 更新文章状态
+  if (isPublish) {
+    form.status = "PUBLISHED";
+  } else {
+    // 如果文章已经是发布状态，但这次点击的是“存为草稿”，则将其状态改回草稿
+    if (form.status === "PUBLISHED") {
+      form.status = "DRAFT";
+    }
+  }
+
+  // 以编程方式触发编辑器的 onSave 事件
+  editorRef.value?.triggerSave();
+};
+
+const handleImageUploadForMdV3 = async (
+  files: File[],
+  callback: (urls: string[]) => void
+) => {
+  const loadingInstance = ElMessage.info({
+    message: "正在上传图片...",
+    duration: 0
+  });
+
+  try {
+    const urls = await Promise.all(
+      files.map(async file => {
+        const res = await uploadArticleImage(file);
+        const url = res?.data?.url;
+        if (!url) {
+          throw new Error(`图片 ${file.name} 上传失败: 服务器未返回有效URL`);
+        }
+        return url;
+      })
+    );
+    callback(urls);
+    ElMessage.success("图片上传成功！");
+  } catch (error: any) {
+    console.error("图片上传失败:", error);
+    ElMessage.error(error.message || "图片上传失败，请稍后再试。");
+  } finally {
+    loadingInstance.close();
+  }
+};
+
 const handleGoBack = () => {
-  router.push({ name: "PostManagement" });
+  if (isDirty.value) {
+    ElMessageBox.confirm(
+      "您有未保存的更改，确定要离开吗？所有未保存的更改都将丢失。",
+      "警告",
+      {
+        confirmButtonText: "确定离开",
+        cancelButtonText: "取消",
+        type: "warning"
+      }
+    )
+      .then(() => {
+        router.push({ name: "PostManagement" });
+      })
+      .catch(() => {
+        ElMessage.info("已取消离开");
+      });
+  } else {
+    router.push({ name: "PostManagement" });
+  }
 };
 
 const handleCategoryChange = (currentValues: string[]) => {
@@ -208,7 +290,6 @@ const handleCategoryChange = (currentValues: string[]) => {
     categorySelectKey.value++;
   }
 };
-
 const handleTagChange = (currentValues: string[]) => {
   const isNewItemAdded = currentValues.some(
     val => !tagOptions.value.some(opt => opt.id === val)
@@ -217,15 +298,49 @@ const handleTagChange = (currentValues: string[]) => {
     tagSelectKey.value++;
   }
 };
-
-onMounted(() => {
-  initPage();
+watch(
+  () => [form.title, form.content_md],
+  debounce(newData => {
+    if (loading.value) return;
+    const draft = {
+      title: newData[0],
+      content_md: newData[1],
+      saveTime: new Date().toLocaleString()
+    };
+    localStorage.setItem(getDraftKey(), JSON.stringify(draft));
+  }, 2000),
+  { deep: true }
+);
+onMounted(async () => {
+  await initPage();
   wasSidebarOpened = pureApp.getSidebarStatus;
   if (device.value !== "mobile" && pureApp.getSidebarStatus) {
     toggleSideBar();
   }
+  const draftKey = getDraftKey();
+  const draft = localStorage.getItem(draftKey);
+  if (draft) {
+    const parsedDraft = JSON.parse(draft);
+    ElMessageBox.confirm(
+      `检测到您在 ${parsedDraft.saveTime} 有一份未保存的本地草稿，是否恢复？`,
+      "发现本地草稿",
+      {
+        confirmButtonText: "恢复",
+        cancelButtonText: "放弃",
+        type: "info"
+      }
+    )
+      .then(() => {
+        form.title = parsedDraft.title;
+        form.content_md = parsedDraft.content_md;
+        ElMessage.success("草稿已恢复");
+      })
+      .catch(() => {
+        localStorage.removeItem(draftKey);
+        ElMessage.info("已放弃本地草稿");
+      });
+  }
 });
-
 onUnmounted(() => {
   if (
     device.value !== "mobile" &&
@@ -265,7 +380,12 @@ onUnmounted(() => {
     </header>
 
     <main class="post-edit-main">
-      <MarkdownEditor v-model="form.content_md" height="100%" />
+      <MarkdownEditor
+        ref="editorRef"
+        v-model="form.content_md"
+        :on-upload-img="handleImageUploadForMdV3"
+        @onSave="onSaveHandler"
+      />
     </main>
 
     <PostSettingsDrawer
@@ -281,6 +401,7 @@ onUnmounted(() => {
 </template>
 
 <style lang="scss" scoped>
+/* 样式部分保持不变 */
 .post-edit-page {
   display: flex;
   flex-direction: column;

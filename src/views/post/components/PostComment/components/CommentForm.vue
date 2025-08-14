@@ -207,7 +207,6 @@ const handleImageUploadClick = () => {
   fileInputRef.value?.click();
 };
 
-// --- 【核心修改】更新图片上传处理逻辑 ---
 const handleFileChange = async (event: Event) => {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];

@@ -2,7 +2,7 @@
  * @Description: 文章、标签、分类模块的所有类型定义
  * @Author: 安知鱼
  * @Date: 2025-07-23 11:07:00
- * @LastEditTime: 2025-08-13 14:56:01
+ * @LastEditTime: 2025-08-14 12:49:35
  * @LastEditors: 安知鱼
  */
 
@@ -168,4 +168,13 @@ export interface ArchiveItem {
  */
 export interface ArchiveSummaryResponse {
   list: ArchiveItem[];
+}
+
+// 上传图片成功的响应体
+export interface SuccessResponseUploadImage {
+  code: number;
+  message: string;
+  data: {
+    url: string;
+  };
 }
