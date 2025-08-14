@@ -103,6 +103,18 @@
   --style-border-none: 1px solid transparent;
   --anzhiyu-code-stress: var(--anzhiyu-main);
   --text-highlight-color: #1f2d3d;
+  --hl-color: #90a4ae;
+  --hl-bg: #f6f8fa;
+  --hltools-bg: var(--anzhiyu-secondbg);
+  --hltools-color: var(--anzhiyu-fontcolor);
+  --hlnumber-bg: #f6f8fa;
+  --hlnumber-color: rgba(144, 164, 174, 0.5);
+  --hlscrollbar-bg: #dce4eb;
+  --hlexpand-bg: linear-gradient(
+    180deg,
+    rgba(246, 248, 250, 0.6),
+    rgba(246, 248, 250, 0.9)
+  );
 }
 
 /* 灰色模式 */

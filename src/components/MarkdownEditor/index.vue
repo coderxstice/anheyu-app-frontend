@@ -3,13 +3,48 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { MdEditor, type Themes } from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
 import type { ExposeParam, ToolbarNames } from "md-editor-v3";
+import { useSnackbar } from "@/composables/useSnackbar";
 
 const props = defineProps<{
   modelValue: string;
   onUploadImg: (files: File[], callback: (urls: string[]) => void) => void;
 }>();
 
-const emit = defineEmits(["update:modelValue", "onSave"]);
+// 【修改点】更新 onSave 的事件签名，明确它现在传递的是处理后的 HTML 字符串
+const emit = defineEmits<{
+  (e: "update:modelValue", value: string): void;
+  (e: "onSave", markdown: string, html: string): void;
+}>();
+
+const { showSnackbar } = useSnackbar();
+
+const sanitize = (html: string): string => {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  doc.querySelectorAll("details.md-editor-code").forEach(detailsElement => {
+    const summaryElement = detailsElement.querySelector(
+      "summary.md-editor-code-head"
+    );
+    if (!summaryElement) return;
+    const langSpan = detailsElement.querySelector(".md-editor-code-lang");
+    const language = langSpan ? langSpan.textContent?.trim() : "";
+    const newHeaderHtml = `
+      <i class="anzhiyufont anzhiyu-icon-angle-down expand"></i>
+      <div class="code-lang">${language}</div>
+      <i class="anzhiyufont anzhiyu-icon-paste copy-button"></i>`;
+    summaryElement.innerHTML = newHeaderHtml;
+  });
+  return doc.body.innerHTML;
+};
+
+// 一个中间处理函数，用于在 onSave 时应用 sanitize
+const handleSave = async (markdown: string, htmlPromise: Promise<string>) => {
+  // 1. 等待原始 HTML 生成
+  const rawHtml = await htmlPromise;
+  // 2. 对原始 HTML 应用我们的 sanitize 函数
+  const sanitizedHtml = sanitize(rawHtml);
+  // 3. 将处理后的 markdown 和 sanitizedHtml 传递给父组件
+  emit("onSave", markdown, sanitizedHtml);
+};
 
 const toolbars: ToolbarNames[] = [
   "bold",
@@ -46,35 +81,43 @@ const toolbars: ToolbarNames[] = [
 
 const editorRef = ref<ExposeParam>();
 const theme = ref<Themes>("light");
-
-// 为组件根元素创建一个模板引用，用于事件监听
 const containerRef = ref<HTMLElement | null>(null);
 
-// 处理 tabs 点击的函数
-const handleTabsClick = (event: MouseEvent) => {
+const handlePreviewClick = (event: MouseEvent) => {
   const target = event.target as HTMLElement;
-
-  // 检查点击的是否是一个未激活的 tab 按钮
   if (target.matches(".tabs .nav-tabs .tab:not(.active)")) {
     const tabsContainer = target.closest(".tabs");
     if (!tabsContainer) return;
-
-    // 获取目标内容区域的 ID
     const targetId = target.dataset.href;
     if (!targetId) return;
-
-    // 找到当前激活的按钮和内容区域，并移除 active class
     const currentActiveTab = tabsContainer.querySelector(".tab.active");
     const currentActiveContent = tabsContainer.querySelector(
       ".tab-item-content.active"
     );
     if (currentActiveTab) currentActiveTab.classList.remove("active");
     if (currentActiveContent) currentActiveContent.classList.remove("active");
-
-    // 为被点击的按钮和其对应的内容区域添加 active class
     const newActiveContent = tabsContainer.querySelector(`#${targetId}`);
     target.classList.add("active");
     if (newActiveContent) newActiveContent.classList.add("active");
+    return;
+  }
+  const copyButton = target.closest(".copy-button");
+  if (copyButton) {
+    event.preventDefault();
+    event.stopPropagation();
+    const codeContainer = copyButton.closest("details.md-editor-code");
+    const codeElement = codeContainer?.querySelector("pre code");
+    if (codeElement) {
+      navigator.clipboard
+        .writeText(codeElement.textContent || "")
+        .then(() => {
+          showSnackbar("复制成功，复制和转载请标注本文地址");
+        })
+        .catch(() => {
+          showSnackbar("复制失败，请手动复制");
+        });
+    }
+    return;
   }
 };
 
@@ -92,19 +135,15 @@ onMounted(() => {
     ? "dark"
     : "light";
   observer.observe(document.documentElement, { attributes: true });
-
-  // 【新增】组件挂载后，在根元素上添加点击事件监听器（事件委托）
   if (containerRef.value) {
-    containerRef.value.addEventListener("click", handleTabsClick);
+    containerRef.value.addEventListener("click", handlePreviewClick);
   }
 });
 
 onUnmounted(() => {
   observer.disconnect();
-
-  // 【新增】组件卸载前，移除事件监听器，防止内存泄漏
   if (containerRef.value) {
-    containerRef.value.removeEventListener("click", handleTabsClick);
+    containerRef.value.removeEventListener("click", handlePreviewClick);
   }
 });
 
@@ -122,9 +161,10 @@ defineExpose({
       :theme="theme"
       :toolbars="toolbars"
       :showCodeRowNumber="true"
+      :sanitize="sanitize"
       @update:model-value="val => emit('update:modelValue', val)"
       @onUploadImg="onUploadImg"
-      @onSave="(v, h) => emit('onSave', v, h)"
+      @onSave="handleSave"
     />
   </div>
 </template>
@@ -137,7 +177,73 @@ defineExpose({
   overflow: hidden;
 }
 .md-editor-container {
-  // 您提供的 tabs 样式，保持不变
+  .md-editor-code {
+    border: var(--style-border-always);
+    border-radius: 10px;
+    overflow: hidden;
+    &[open] {
+      .md-editor-code-head {
+        border-bottom: var(--style-border-always);
+      }
+    }
+  }
+
+  .md-editor-preview {
+    .md-editor-code pre code {
+      background: var(--anzhiyu-card-bg);
+      color: var(--hlnumber-color);
+      padding: 0;
+    }
+    span[rn-wrapper] {
+      background: var(--anzhiyu-secondbg);
+      border-right: var(--style-border-always);
+      top: 0px;
+      height: 100%;
+      span {
+        transform: translateY(10px);
+      }
+      &::before {
+        padding-right: 1rem;
+        color: var(--hlnumber-color);
+      }
+    }
+    .md-editor-code-block {
+      padding: 10px 0px;
+    }
+    .md-editor-code-head {
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      min-height: 24px;
+      height: 2.15em;
+      background: var(--hltools-bg);
+      color: var(--hltools-color);
+      font-size: 1rem;
+
+      .expand {
+        position: absolute;
+        padding: 0.57rem 0.7rem;
+        top: 50%;
+        transform: translate(0, -47%);
+        cursor: pointer;
+        transition: transform 0.3s;
+      }
+      .code-lang {
+        left: 2rem;
+        position: absolute;
+        text-transform: uppercase;
+        font-weight: 700;
+        font-size: 1.15em;
+        user-select: none;
+      }
+      .copy-button {
+        position: absolute;
+        right: 14px;
+        cursor: pointer;
+        transition: color 0.2s;
+      }
+    }
+  }
   .tabs {
     position: relative;
     border: 3px solid var(--anzhiyu-secondbg);
@@ -163,7 +269,7 @@ defineExpose({
         margin: 4px;
         border: var(--style-border-always);
         border-radius: 8px;
-        cursor: pointer; // 添加手型光标
+        cursor: pointer;
         &.active {
           border: var(--style-border-hover-always);
           background: var(--anzhiyu-background);

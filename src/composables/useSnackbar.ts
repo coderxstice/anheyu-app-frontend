@@ -3,8 +3,7 @@
 import Snackbar from "node-snackbar";
 import "node-snackbar/dist/snackbar.min.css";
 
-// 1. 定义一个接口来描述 Snackbar 的所有可能选项
-//    我们把 actionText 和 onActionClick 标记为可选属性
+// 1. 在接口中也加入 showAction 属性（可选，但更规范）
 interface SnackbarOptions {
   text: string;
   duration: number;
@@ -15,10 +14,10 @@ interface SnackbarOptions {
     | "top-center"
     | "top-left"
     | "top-right";
+  showAction?: boolean; // 【新增】
   actionText?: string;
   onActionClick?: (element: HTMLElement) => void;
   backgroundColor?: string;
-  // textColor?: string;
 }
 
 /**
@@ -47,19 +46,28 @@ export function useSnackbar() {
       text: text,
       duration: duration,
       pos: "top-center",
-      backgroundColor: bg
+      backgroundColor: bg,
+      showAction: false
     };
+
+    document.documentElement.style.setProperty(
+      "--anzhiyu-snackbar-time",
+      `${duration}ms`
+    );
 
     if (
       typeof onActionClick === "function" &&
       typeof actionText === "string" &&
       actionText.length > 0
     ) {
+      options.showAction = true;
       options.actionText = actionText;
       options.onActionClick = () => {
         onActionClick();
       };
     }
+
+    console.log(duration);
 
     Snackbar.show(options);
   };

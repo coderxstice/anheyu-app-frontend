@@ -102,7 +102,7 @@ export default function customTabsPlugin(md: MarkdownIt): void {
     let contentHtml = '<div class="tab-contents">';
 
     tabs.forEach((tab, index) => {
-      const isActive = index === 0; // 默认第一个为激活状态
+      const isActive = index === 0;
       const tabId = `${tabsId}-${index + 1}`;
 
       navHtml += `<button type="button" class="tab${isActive ? " active" : ""}" data-href="${tabId}">${tab.caption}</button>`;

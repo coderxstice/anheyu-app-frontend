@@ -36,7 +36,6 @@ const { device, pureApp, toggleSideBar } = useNav();
 let wasSidebarOpened = pureApp.getSidebarStatus;
 
 const formRef = ref<FormInstance>();
-// ⭐ 2. editorRef 的类型现在是 ExposeParam，以便调用 triggerSave
 const editorRef = ref<ExposeParam>();
 const loading = ref(true);
 const isSubmitting = ref(false);
@@ -162,19 +161,23 @@ const processTagsAndCategories = async () => {
 // ⭐ 3. 提交逻辑被移动到 onSave 事件处理器中
 const onSaveHandler = async (
   markdown: string,
-  htmlPromise: Promise<string>
+  // 接收的第二个参数不再是 Promise，而是处理好的 HTML 字符串
+  sanitizedHtml: string
 ) => {
-  if (isSubmitting.value) return; // 防止重复触发
+  if (isSubmitting.value) return;
   isSubmitting.value = true;
 
   try {
-    const generatedHtml = await htmlPromise; // 等待 HTML 生成
+    // 不再需要等待 Promise，直接使用 sanitizedHtml
+    // const generatedHtml = await htmlPromise; // <--- 删除这一行
+
     await processTagsAndCategories();
 
     const dataToSubmit = {
       ...form,
-      content_md: markdown, // 使用事件提供的最新 markdown 内容
-      content_html: generatedHtml,
+      content_md: markdown,
+      // 直接使用处理后的 HTML
+      content_html: sanitizedHtml,
       summaries: form.summaries?.filter(s => s && s.trim() !== "")
     };
 
@@ -400,7 +403,6 @@ onUnmounted(() => {
 </template>
 
 <style lang="scss" scoped>
-/* 样式部分保持不变 */
 .post-edit-page {
   display: flex;
   flex-direction: column;
@@ -456,6 +458,9 @@ onUnmounted(() => {
   min-height: 0;
   background-color: var(--el-bg-color);
   padding: 8px;
+}
+:deep(.md-editor-preview .md-editor-code .md-editor-code-head) {
+  z-index: 99 !important;
 }
 
 @media (max-width: 768px) {

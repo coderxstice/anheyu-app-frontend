@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-07 10:15:13
- * @LastEditTime: 2025-08-14 15:09:43
+ * @LastEditTime: 2025-08-14 18:57:00
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -46,10 +46,9 @@ const handleContentClick = (event: Event) => {
     if (targetContent) {
       targetContent.classList.add("active");
     }
-    return; // 处理完后退出函数
+    return;
   }
 
-  // --- 2. 【新增】处理“返回顶部”按钮点击 ---
   const scrollToTopButton = target.closest(".tab-to-top button");
   if (scrollToTopButton) {
     event.preventDefault();
@@ -62,7 +61,7 @@ const handleContentClick = (event: Event) => {
         block: "start"
       });
     }
-    return; // 处理完后退出函数
+    return;
   }
 };
 
@@ -91,14 +90,128 @@ onUnmounted(() => {
 </template>
 
 <style lang="scss">
+@use "./editor-code.scss";
+
 $light-blue: #87cefa;
 $theme-link-color: #007bff;
 
-// 文章容器样式
 .post-content {
   word-wrap: break-word;
   overflow-wrap: break-word;
   line-height: 1.8;
+
+  .md-editor-code {
+    color: var(--md-theme-code-block-color);
+    font-size: 12px;
+    line-height: 1;
+    margin: 20px 0;
+    position: relative;
+    border: var(--style-border-always);
+    border-radius: 10px;
+    overflow: hidden;
+
+    &[open] .md-editor-code-head {
+      border-bottom: var(--style-border-always);
+    }
+    pre {
+      position: relative;
+      margin: 0;
+      line-height: 1.6;
+      code {
+        background: var(--anzhiyu-card-bg);
+        color: var(--hlnumber-color);
+        position: relative;
+        display: block;
+        line-height: 1.6;
+        overflow: auto;
+        font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+          monospace;
+        font-size: 16px;
+        padding-left: 3.6rem;
+        margin: 0;
+      }
+    }
+    .md-editor-code-block {
+      display: inline-block;
+      width: 100%;
+      overflow: auto;
+      vertical-align: bottom;
+      color: #a9b7c6;
+      padding: 10px 0px;
+    }
+    span[rn-wrapper] {
+      background: var(--anzhiyu-secondbg);
+      border-right: var(--style-border-always);
+      top: 0px;
+      height: 100%;
+      user-select: none;
+      counter-reset: linenumber;
+      font-size: 100%;
+      left: 0;
+      width: 3em;
+      letter-spacing: -1px;
+      position: absolute;
+      pointer-events: none;
+      & > span {
+        display: block;
+        pointer-events: none;
+        counter-increment: linenumber;
+        &::before {
+          color: #999;
+          display: block;
+          padding-right: 0.5em;
+          text-align: right;
+          content: counter(linenumber);
+        }
+      }
+      span {
+        transform: translateY(10px);
+      }
+      &::before {
+        padding-right: 1rem;
+        color: var(--hlnumber-color);
+      }
+    }
+    .md-editor-code-head {
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      min-height: 24px;
+      height: 2.15em;
+      background: var(--hltools-bg);
+      color: var(--hltools-color);
+      font-size: 1rem;
+      margin-bottom: 0;
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      list-style: none;
+      position: sticky;
+      top: 0;
+      width: 100%;
+
+      .expand {
+        position: absolute;
+        padding: 0.57rem 0.7rem;
+        top: 50%;
+        transform: translate(0, -47%);
+        cursor: pointer;
+        transition: transform 0.3s;
+      }
+      .code-lang {
+        left: 2rem;
+        position: absolute;
+        text-transform: uppercase;
+        font-weight: 700;
+        font-size: 1.15em;
+        user-select: none;
+      }
+      .copy-button {
+        position: absolute;
+        right: 14px;
+        cursor: pointer;
+        transition: color 0.2s;
+      }
+    }
+  }
   .tabs {
     position: relative;
     border: 3px solid var(--anzhiyu-secondbg);
