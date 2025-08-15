@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useSnackbar } from "@/composables/useSnackbar";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
 defineProps({
   content: {
@@ -11,14 +12,23 @@ defineProps({
 
 const { showSnackbar } = useSnackbar();
 
-// 创建一个模板引用 (template ref)，以获取组件根元素的 DOM 实例。
+const siteConfigStore = useSiteConfigStore();
+
+const codeMaxLines = computed(
+  () => siteConfigStore.getSiteConfig?.code_block?.code_max_lines || 10
+);
+
 const postContentRef = ref<HTMLElement | null>(null);
 
-// 这个函数将处理 article 容器内的所有点击事件。
+const collapsedHeight = computed(() => {
+  const lines = codeMaxLines.value > 0 ? codeMaxLines.value : 10;
+  const height = lines * 25 + 50;
+  return `${height}px`;
+});
+
 const handleContentClick = (event: Event) => {
   const target = event.target as HTMLElement;
 
-  // --- 1. 处理 Tab 按钮点击 ---
   const tabButton = target.closest(".tabs .nav-tabs .tab");
   if (tabButton && tabButton instanceof HTMLButtonElement) {
     event.preventDefault();
@@ -79,16 +89,35 @@ const handleContentClick = (event: Event) => {
     return;
   }
 
+  // 代码块顶部的整个的折叠与展开
   const expandButton = target.closest(".expand");
   if (expandButton) {
     const detailsElement = expandButton.closest(".md-editor-code");
-    // 阻止<summary>的默认行为，以便完全由JS控制，避免奇怪的兼容性问题
     event.preventDefault();
     if (detailsElement) {
       // 手动切换 open 属性
       detailsElement.hasAttribute("open")
         ? detailsElement.removeAttribute("open")
         : detailsElement.setAttribute("open", "");
+    }
+    return;
+  }
+
+  // 代码块底部的部分展开与部分折叠
+  const expandCodeButton = target.closest(".code-expand-btn");
+  if (expandCodeButton) {
+    const container = expandCodeButton.closest<HTMLDetailsElement>(
+      "details.md-editor-code"
+    );
+    if (container) {
+      if (container.classList.contains("is-collapsed")) {
+        container.open = true;
+      }
+      container.classList.toggle("is-collapsed");
+      expandCodeButton.classList.toggle(
+        "is-expanded",
+        !container.classList.contains("is-collapsed")
+      );
     }
     return;
   }
@@ -138,6 +167,64 @@ $theme-link-color: #007bff;
     border: var(--style-border-always);
     border-radius: 10px;
     overflow: hidden;
+    @keyframes code-expand-key {
+      0% {
+        opacity: 0.6;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
+        filter: alpha(opacity=60);
+      }
+      50% {
+        opacity: 0.1;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=10)";
+        filter: alpha(opacity=10);
+      }
+      100% {
+        opacity: 0.6;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
+        filter: alpha(opacity=60);
+      }
+    }
+    &.is-collapsed {
+      & > pre {
+        overflow: hidden;
+        height: v-bind(collapsedHeight);
+      }
+      .code-expand-btn i {
+        animation: 1.2s ease 0s infinite normal none running code-expand-key;
+      }
+    }
+    .code-expand-btn {
+      bottom: 0;
+      z-index: 10;
+      width: 100%;
+      transition: all 0.3s;
+      font-size: 20px;
+      background: var(--anzhiyu-secondbg);
+      text-align: center;
+      font-size: var(--global-font-size);
+      cursor: pointer;
+      transform: translateZ(0);
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 32px;
+      font-size: 16px;
+      i {
+        color: var(--anzhiyu-fontcolor);
+        transition: transform 0.3s ease;
+      }
+      &:hover {
+        background: var(--anzhiyu-main);
+        i {
+          color: var(--anzhiyu-white);
+        }
+        transition: all 0.3s;
+      }
+      &.is-expanded i {
+        transform: rotate(180deg);
+      }
+    }
 
     &[open] {
       .md-editor-code-head {

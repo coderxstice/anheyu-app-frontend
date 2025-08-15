@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { MdEditor, type Themes } from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
 import type { ExposeParam, ToolbarNames } from "md-editor-v3";
 import { useSnackbar } from "@/composables/useSnackbar";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
 const props = defineProps<{
   modelValue: string;
@@ -17,31 +18,64 @@ const emit = defineEmits<{
 
 const { showSnackbar } = useSnackbar();
 
+const siteConfigStore = useSiteConfigStore();
+
+const codeMaxLines = computed(
+  () => siteConfigStore.getSiteConfig?.code_block?.code_max_lines || 10
+);
+
+const collapsedHeight = computed(() => {
+  const lines = codeMaxLines.value > 0 ? codeMaxLines.value : 10;
+  const height = lines * 25 + 15;
+  return `${height}px`;
+});
+
 const sanitize = (html: string): string => {
   const doc = new DOMParser().parseFromString(html, "text/html");
+
   doc.querySelectorAll("details.md-editor-code").forEach(detailsElement => {
     const summaryElement = detailsElement.querySelector(
       "summary.md-editor-code-head"
     );
     if (!summaryElement) return;
-
-    if (summaryElement.querySelector(".copy-button")) {
-      return;
+    if (!summaryElement.querySelector(".copy-button")) {
+      const langSpan = detailsElement.querySelector(".md-editor-code-lang");
+      const language = langSpan ? langSpan.textContent?.trim() : "";
+      const newHeaderHtml = `
+        <i class="anzhiyufont anzhiyu-icon-angle-down expand"></i>
+        <div class="code-lang">${language}</div>
+        <i class="anzhiyufont anzhiyu-icon-paste copy-button"></i>`;
+      summaryElement.innerHTML = newHeaderHtml;
     }
 
-    // 2. 如果是原始结构，才执行替换逻辑
-    const langSpan = detailsElement.querySelector(".md-editor-code-lang");
-    const language = langSpan ? langSpan.textContent?.trim() : "";
-    const newHeaderHtml = `
-      <i class="anzhiyufont anzhiyu-icon-angle-down expand"></i>
-      <div class="code-lang">${language}</div>
-      <i class="anzhiyufont anzhiyu-icon-paste copy-button"></i>`;
-    summaryElement.innerHTML = newHeaderHtml;
+    if (codeMaxLines.value !== -1) {
+      const preElement = detailsElement.querySelector("pre");
+      if (preElement) {
+        let lineCount = 0;
+        const rnWrapper = preElement.querySelector("span[rn-wrapper]");
+
+        if (rnWrapper) {
+          lineCount = rnWrapper.children.length;
+        } else {
+          lineCount = (preElement.textContent?.match(/\n/g) || []).length + 1;
+        }
+
+        if (lineCount > codeMaxLines.value) {
+          detailsElement.classList.add("is-collapsible", "is-collapsed");
+          if (!detailsElement.querySelector(".code-expand-btn")) {
+            const expandBtn = document.createElement("div");
+            expandBtn.className = "code-expand-btn";
+            expandBtn.innerHTML =
+              '<i class="anzhiyufont anzhiyu-icon-angle-double-down"></i>';
+            detailsElement.appendChild(expandBtn);
+          }
+        }
+      }
+    }
   });
   return doc.body.innerHTML;
 };
 
-// handleSave 函数现在是正确的，无需改动
 const handleSave = async (markdown: string, htmlPromise: Promise<string>) => {
   const rawHtml = await htmlPromise;
   const sanitizedHtml = sanitize(rawHtml);
@@ -87,6 +121,7 @@ const containerRef = ref<HTMLElement | null>(null);
 
 const handlePreviewClick = (event: MouseEvent) => {
   const target = event.target as HTMLElement;
+
   if (target.matches(".tabs .nav-tabs .tab:not(.active)")) {
     const tabsContainer = target.closest(".tabs");
     if (!tabsContainer) return;
@@ -103,6 +138,7 @@ const handlePreviewClick = (event: MouseEvent) => {
     if (newActiveContent) newActiveContent.classList.add("active");
     return;
   }
+
   const copyButton = target.closest(".copy-button");
   if (copyButton) {
     event.preventDefault();
@@ -120,6 +156,35 @@ const handlePreviewClick = (event: MouseEvent) => {
         });
     }
     return;
+  }
+
+  const expandCodeButton = target.closest(".code-expand-btn");
+  if (expandCodeButton) {
+    const container = expandCodeButton.closest<HTMLDetailsElement>(
+      "details.md-editor-code"
+    );
+    if (container) {
+      if (container.classList.contains("is-collapsed")) {
+        container.open = true;
+      }
+      container.classList.toggle("is-collapsed");
+      expandCodeButton.classList.toggle(
+        "is-expanded",
+        !container.classList.contains("is-collapsed")
+      );
+    }
+    return;
+  }
+
+  const header = target.closest("summary.md-editor-code-head");
+  if (header) {
+    const details = header.closest<HTMLDetailsElement>(
+      "details.md-editor-code"
+    );
+    if (details) {
+      event.preventDefault();
+      details.open = !details.open;
+    }
   }
 };
 
@@ -164,6 +229,7 @@ defineExpose({
       :toolbars="toolbars"
       :showCodeRowNumber="true"
       :sanitize="sanitize"
+      :auto-fold-threshold="99999999"
       @update:model-value="val => emit('update:modelValue', val)"
       @onUploadImg="onUploadImg"
       @onSave="handleSave"
@@ -183,6 +249,64 @@ defineExpose({
     border: var(--style-border-always);
     border-radius: 10px;
     overflow: hidden;
+    @keyframes code-expand-key {
+      0% {
+        opacity: 0.6;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
+        filter: alpha(opacity=60);
+      }
+      50% {
+        opacity: 0.1;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=10)";
+        filter: alpha(opacity=10);
+      }
+      100% {
+        opacity: 0.6;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
+        filter: alpha(opacity=60);
+      }
+    }
+    &.is-collapsed {
+      & > pre {
+        overflow: hidden;
+        height: v-bind(collapsedHeight);
+      }
+      .code-expand-btn i {
+        animation: 1.2s ease 0s infinite normal none running code-expand-key;
+      }
+    }
+    .code-expand-btn {
+      bottom: 0;
+      z-index: 10;
+      width: 100%;
+      transition: all 0.3s;
+      font-size: 20px;
+      background: var(--anzhiyu-secondbg);
+      text-align: center;
+      font-size: var(--global-font-size);
+      cursor: pointer;
+      transform: translateZ(0);
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 32px;
+      font-size: 16px;
+      i {
+        color: var(--anzhiyu-fontcolor);
+        transition: transform 0.3s ease;
+      }
+      &:hover {
+        background: var(--anzhiyu-main);
+        i {
+          color: var(--anzhiyu-white);
+        }
+        transition: all 0.3s;
+      }
+      &.is-expanded i {
+        transform: rotate(180deg);
+      }
+    }
     &[open] {
       .md-editor-code-head {
         border-bottom: var(--style-border-always);
@@ -191,12 +315,12 @@ defineExpose({
         }
       }
       pre {
-        max-height: 1000px; /* 动画：展开时的高度 */
+        max-height: 1000px;
         transition: max-height 0.35s ease-in-out;
       }
     }
     pre {
-      max-height: 0; /* 动画：默认折叠 */
+      max-height: 0;
       transition: max-height 0.35s ease-in-out;
       overflow: hidden;
       margin: 0;
@@ -235,17 +359,16 @@ defineExpose({
       background: var(--hltools-bg);
       color: var(--hltools-color);
       font-size: 1rem;
-
       .expand {
         position: absolute;
         padding: 0.57rem 0.7rem;
         top: 50%;
-        transform: translate(0, -47%) rotate(-90deg); /* 动画：默认折叠状态箭头旋转-90度 */
+        transform: translate(0, -47%) rotate(-90deg);
         cursor: pointer;
         transition: transform 0.3s;
       }
       .code-lang {
-        left: 2.5rem; // 为箭头留出空间
+        left: 2.5rem;
         position: absolute;
         text-transform: uppercase;
         font-weight: 700;
