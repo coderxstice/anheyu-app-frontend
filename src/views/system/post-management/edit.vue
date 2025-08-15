@@ -159,11 +159,7 @@ const processTagsAndCategories = async () => {
 };
 
 // ⭐ 3. 提交逻辑被移动到 onSave 事件处理器中
-const onSaveHandler = async (
-  markdown: string,
-  // 接收的第二个参数不再是 Promise，而是处理好的 HTML 字符串
-  sanitizedHtml: string
-) => {
+const onSaveHandler = async (markdown: string, sanitizedHtml: string) => {
   if (isSubmitting.value) return;
   isSubmitting.value = true;
 
@@ -180,6 +176,13 @@ const onSaveHandler = async (
       content_html: sanitizedHtml,
       summaries: form.summaries?.filter(s => s && s.trim() !== "")
     };
+
+    // 【日志】在发送给后端之前，打印最终的数据包
+    console.log("[关卡 B] 准备发送给后端的数据包:", dataToSubmit);
+    console.log(
+      "[关卡 B] 其中 content_html 的内容是:",
+      dataToSubmit.content_html
+    );
 
     if (isEditMode.value) {
       await updateArticle(articleId.value, dataToSubmit);

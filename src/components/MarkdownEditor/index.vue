@@ -10,7 +10,6 @@ const props = defineProps<{
   onUploadImg: (files: File[], callback: (urls: string[]) => void) => void;
 }>();
 
-// 【修改点】更新 onSave 的事件签名，明确它现在传递的是处理后的 HTML 字符串
 const emit = defineEmits<{
   (e: "update:modelValue", value: string): void;
   (e: "onSave", markdown: string, html: string): void;
@@ -25,6 +24,12 @@ const sanitize = (html: string): string => {
       "summary.md-editor-code-head"
     );
     if (!summaryElement) return;
+
+    if (summaryElement.querySelector(".copy-button")) {
+      return;
+    }
+
+    // 2. 如果是原始结构，才执行替换逻辑
     const langSpan = detailsElement.querySelector(".md-editor-code-lang");
     const language = langSpan ? langSpan.textContent?.trim() : "";
     const newHeaderHtml = `
@@ -36,13 +41,10 @@ const sanitize = (html: string): string => {
   return doc.body.innerHTML;
 };
 
-// 一个中间处理函数，用于在 onSave 时应用 sanitize
+// handleSave 函数现在是正确的，无需改动
 const handleSave = async (markdown: string, htmlPromise: Promise<string>) => {
-  // 1. 等待原始 HTML 生成
   const rawHtml = await htmlPromise;
-  // 2. 对原始 HTML 应用我们的 sanitize 函数
   const sanitizedHtml = sanitize(rawHtml);
-  // 3. 将处理后的 markdown 和 sanitizedHtml 传递给父组件
   emit("onSave", markdown, sanitizedHtml);
 };
 
@@ -184,7 +186,21 @@ defineExpose({
     &[open] {
       .md-editor-code-head {
         border-bottom: var(--style-border-always);
+        .expand {
+          transform: translate(0, -47%) rotate(0deg) !important;
+        }
       }
+      pre {
+        max-height: 1000px; /* 动画：展开时的高度 */
+        transition: max-height 0.35s ease-in-out;
+      }
+    }
+    pre {
+      max-height: 0; /* 动画：默认折叠 */
+      transition: max-height 0.35s ease-in-out;
+      overflow: hidden;
+      margin: 0;
+      border-radius: 0;
     }
   }
 
@@ -224,12 +240,12 @@ defineExpose({
         position: absolute;
         padding: 0.57rem 0.7rem;
         top: 50%;
-        transform: translate(0, -47%);
+        transform: translate(0, -47%) rotate(-90deg); /* 动画：默认折叠状态箭头旋转-90度 */
         cursor: pointer;
         transition: transform 0.3s;
       }
       .code-lang {
-        left: 2rem;
+        left: 2.5rem; // 为箭头留出空间
         position: absolute;
         text-transform: uppercase;
         font-weight: 700;

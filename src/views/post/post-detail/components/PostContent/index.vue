@@ -1,12 +1,6 @@
-<!--
- * @Description:
- * @Author: 安知鱼
- * @Date: 2025-08-07 10:15:13
- * @LastEditTime: 2025-08-14 18:57:00
- * @LastEditors: 安知鱼
--->
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
+import { useSnackbar } from "@/composables/useSnackbar";
 
 defineProps({
   content: {
@@ -14,6 +8,8 @@ defineProps({
     default: "PostContent"
   }
 });
+
+const { showSnackbar } = useSnackbar();
 
 // 创建一个模板引用 (template ref)，以获取组件根元素的 DOM 实例。
 const postContentRef = ref<HTMLElement | null>(null);
@@ -60,6 +56,39 @@ const handleContentClick = (event: Event) => {
         behavior: "smooth",
         block: "start"
       });
+    }
+    return;
+  }
+
+  const copyButton = target.closest(".copy-button");
+  if (copyButton) {
+    event.preventDefault();
+    event.stopPropagation();
+    const codeContainer = copyButton.closest(".md-editor-code");
+    const codeElement = codeContainer?.querySelector("pre code");
+    if (codeElement) {
+      navigator.clipboard
+        .writeText(codeElement.textContent || "")
+        .then(() => {
+          showSnackbar("复制成功，复制和转载请标注本文地址");
+        })
+        .catch(() => {
+          showSnackbar("复制失败，请手动复制");
+        });
+    }
+    return;
+  }
+
+  const expandButton = target.closest(".expand");
+  if (expandButton) {
+    const detailsElement = expandButton.closest(".md-editor-code");
+    // 阻止<summary>的默认行为，以便完全由JS控制，避免奇怪的兼容性问题
+    event.preventDefault();
+    if (detailsElement) {
+      // 手动切换 open 属性
+      detailsElement.hasAttribute("open")
+        ? detailsElement.removeAttribute("open")
+        : detailsElement.setAttribute("open", "");
     }
     return;
   }
@@ -110,14 +139,26 @@ $theme-link-color: #007bff;
     border-radius: 10px;
     overflow: hidden;
 
-    &[open] .md-editor-code-head {
-      border-bottom: var(--style-border-always);
+    &[open] {
+      .md-editor-code-head {
+        border-bottom: var(--style-border-always);
+        .expand {
+          transform: translate(0, -47%) rotate(0deg);
+        }
+      }
+      pre {
+        max-height: 1000px;
+      }
     }
     pre {
+      max-height: 0;
+      transition: max-height 0.35s ease-in-out;
+      overflow: hidden;
       position: relative;
       margin: 0;
       line-height: 1.6;
       code {
+        border-radius: 0px;
         background: var(--anzhiyu-card-bg);
         color: var(--hlnumber-color);
         position: relative;
@@ -131,6 +172,7 @@ $theme-link-color: #007bff;
         margin: 0;
       }
     }
+
     .md-editor-code-block {
       display: inline-block;
       width: 100%;
@@ -187,17 +229,18 @@ $theme-link-color: #007bff;
       position: sticky;
       top: 0;
       width: 100%;
+      cursor: pointer; // 让整个头部都可以点击
 
       .expand {
         position: absolute;
         padding: 0.57rem 0.7rem;
         top: 50%;
-        transform: translate(0, -47%);
-        cursor: pointer;
+        transform: translate(0, -47%) rotate(-90deg); /* 动画：默认折叠状态箭头旋转 */
+        /* 移除 cursor，因为父元素已经设置 */
         transition: transform 0.3s;
       }
       .code-lang {
-        left: 2rem;
+        left: 2.5rem; /* 为箭头留出空间 */
         position: absolute;
         text-transform: uppercase;
         font-weight: 700;
@@ -333,7 +376,6 @@ $theme-link-color: #007bff;
     margin-bottom: 0 !important;
   }
 
-  // 链接样式
   a {
     color: $theme-link-color;
     &:hover {
@@ -341,7 +383,6 @@ $theme-link-color: #007bff;
     }
   }
 
-  // 其他元素样式
   img {
     display: block;
     margin: 0 auto 20px;
@@ -372,7 +413,6 @@ $theme-link-color: #007bff;
     line-height: 1em;
   }
 
-  // 列表样式
   ol,
   ul {
     p {
@@ -389,7 +429,6 @@ $theme-link-color: #007bff;
         color: var(--pseudo-hover);
       }
     }
-    // 嵌套列表
     ol,
     ul {
       padding-left: 20px;
