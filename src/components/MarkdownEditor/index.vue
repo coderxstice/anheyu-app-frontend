@@ -33,6 +33,7 @@ const collapsedHeight = computed(() => {
 const sanitize = (html: string): string => {
   const doc = new DOMParser().parseFromString(html, "text/html");
 
+  // 处理代码块
   doc.querySelectorAll("details.md-editor-code").forEach(detailsElement => {
     const summaryElement = detailsElement.querySelector(
       "summary.md-editor-code-head"
@@ -73,6 +74,19 @@ const sanitize = (html: string): string => {
       }
     }
   });
+
+  doc.querySelectorAll("table").forEach(table => {
+    if (table.parentElement?.classList.contains("table-container")) {
+      return;
+    }
+    const container = document.createElement("div");
+    container.className = "table-container";
+    if (table.parentNode) {
+      table.parentNode.insertBefore(container, table);
+      container.appendChild(table);
+    }
+  });
+
   return doc.body.innerHTML;
 };
 
@@ -218,7 +232,6 @@ defineExpose({
   triggerSave: () => editorRef.value?.triggerSave()
 });
 </script>
-
 <template>
   <div ref="containerRef" class="md-editor-container">
     <MdEditor
@@ -329,6 +342,130 @@ defineExpose({
   }
 
   .md-editor-preview {
+    .table-container {
+      border-radius: 8px;
+      overflow: hidden;
+      border: var(--style-border-always);
+      overflow-x: auto;
+      margin: 1rem 0;
+      table {
+        display: table;
+        width: 100%;
+        border-spacing: 0;
+        border-collapse: collapse;
+        empty-cells: show;
+        margin: 0;
+      }
+      thead {
+        background: var(--anzhiyu-secondbg);
+      }
+      td,
+      th {
+        padding: 0.3rem 0.6rem;
+        vertical-align: middle;
+        border: var(--style-border-always);
+      }
+      tr > *:first-child {
+        border-left: none;
+      }
+      tr > *:last-child {
+        border-right: none;
+      }
+      tbody tr:last-child > * {
+        border-bottom: none;
+      }
+      thead tr:first-child > * {
+        border-top: none;
+      }
+    }
+    input[type="checkbox"] {
+      -webkit-appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      -o-appearance: none;
+      -ms-appearance: none;
+      appearance: none;
+      position: relative;
+      height: 16px;
+      width: 16px;
+      transition: all 0.15s ease-out 0s;
+      cursor: pointer;
+      display: inline-block;
+      outline: 0;
+      border-radius: 2px;
+      flex-shrink: 0;
+      margin-right: 8px;
+      border: 2px solid var(--anzhiyu-theme);
+      pointer-events: none;
+      box-sizing: border-box;
+      padding: 0;
+
+      &:checked {
+        background: var(--anzhiyu-theme);
+      }
+
+      &:before,
+      &:after {
+        position: absolute;
+        content: "";
+        background: #fff;
+      }
+
+      &:checked:before {
+        left: 0;
+        top: 7px;
+        width: 6px;
+        height: 2px;
+      }
+      &:checked:after {
+        right: 3px;
+        bottom: 1px;
+        width: 2px;
+        height: 10px;
+      }
+
+      &:before {
+        left: 1px;
+        top: 5px;
+        width: 0;
+        height: 2px;
+        transform: rotate(45deg);
+        transition: all 0.2s ease-in;
+      }
+      &:after {
+        right: 7px;
+        bottom: 3px;
+        width: 2px;
+        height: 0;
+        transition-delay: 0.25s;
+        transform: rotate(40deg);
+      }
+    }
+    a {
+      font-weight: 500;
+      border-bottom: solid 2px var(--anzhiyu-lighttext) !important;
+      color: var(--anzhiyu-fontcolor);
+      padding: 0 0.2rem !important;
+      text-decoration: none;
+      font-family: inherit;
+      transition: all 0.2s ease 0s !important;
+      line-height: 1.25rem;
+      &:hover {
+        color: var(--anzhiyu-white);
+        background: var(--anzhiyu-main);
+        box-shadow: var(--anzhiyu-shadow-lightblack);
+        border-radius: 0.25rem !important;
+        text-decoration: none;
+      }
+    }
+    blockquote {
+      border: var(--style-border-always);
+      background-color: var(--anzhiyu-secondbg);
+      color: var(--anzhiyu-secondtext);
+      border-radius: 8px;
+      margin: 1rem 0;
+      padding: 0.5rem 0.8rem;
+    }
     .md-editor-code pre code {
       background: var(--anzhiyu-card-bg);
       color: var(--hlnumber-color);

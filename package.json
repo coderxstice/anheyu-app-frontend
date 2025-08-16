@@ -60,6 +60,7 @@
     "element-plus": "^2.9.0",
     "gsap": "^3.13.0",
     "jszip": "^3.10.1",
+    "katex": "^0.16.22",
     "localforage": "^1.10.0",
     "md-editor-v3": "^5.8.4",
     "mitt": "^3.0.1",

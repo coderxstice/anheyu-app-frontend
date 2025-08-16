@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useSnackbar } from "@/composables/useSnackbar";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import "katex/dist/katex.min.css";
 
 defineProps({
   content: {
@@ -149,9 +150,6 @@ onUnmounted(() => {
 
 <style lang="scss">
 @use "./editor-code.scss";
-
-$light-blue: #87cefa;
-$theme-link-color: #007bff;
 
 .post-content {
   word-wrap: break-word;
@@ -417,6 +415,165 @@ $theme-link-color: #007bff;
     }
   }
 
+  .md-editor-mermaid {
+    overflow: hidden;
+    line-height: normal;
+    p {
+      font-size: 16px;
+    }
+    &[data-processed] {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    &[data-processed] .md-editor-mermaid-action {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.3s;
+      cursor: pointer;
+    }
+    &[data-processed] {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      svg {
+        transform-origin: top left;
+      }
+      &:hover .md-editor-mermaid-action {
+        opacity: 1;
+      }
+      .md-editor-mermaid-action svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+    &[data-grab] {
+      cursor: grab;
+    }
+  }
+
+  a {
+    font-weight: 500;
+    border-bottom: solid 2px var(--anzhiyu-lighttext) !important;
+    color: var(--anzhiyu-fontcolor);
+    padding: 0 0.2rem !important;
+    text-decoration: none;
+    font-family: inherit;
+    transition: all 0.2s ease 0s !important;
+    line-height: 1.25rem;
+    &:hover {
+      color: var(--anzhiyu-white);
+      background: var(--anzhiyu-main);
+      box-shadow: var(--anzhiyu-shadow-lightblack);
+      border-radius: 0.25rem !important;
+      text-decoration: none;
+    }
+  }
+  input[type="checkbox"] {
+    -webkit-appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -o-appearance: none;
+    -ms-appearance: none;
+    appearance: none;
+    position: relative;
+    height: 16px;
+    width: 16px;
+    transition: all 0.15s ease-out 0s;
+    cursor: pointer;
+    display: inline-block;
+    outline: 0;
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-right: 8px;
+    border: 2px solid var(--anzhiyu-theme);
+    pointer-events: none;
+    box-sizing: border-box;
+    padding: 0;
+
+    &:checked {
+      background: var(--anzhiyu-theme);
+    }
+
+    &:before,
+    &:after {
+      position: absolute;
+      content: "";
+      background: #fff;
+    }
+
+    &:checked:before {
+      left: 0;
+      top: 7px;
+      width: 6px;
+      height: 2px;
+    }
+    &:checked:after {
+      right: 3px;
+      bottom: 1px;
+      width: 2px;
+      height: 10px;
+    }
+
+    &:before {
+      left: 1px;
+      top: 5px;
+      width: 0;
+      height: 2px;
+      transform: rotate(45deg);
+      transition: all 0.2s ease-in;
+    }
+    &:after {
+      right: 7px;
+      bottom: 3px;
+      width: 2px;
+      height: 0;
+      transition-delay: 0.25s;
+      transform: rotate(40deg);
+    }
+  }
+
+  .table-container {
+    border-radius: 8px;
+    overflow: hidden;
+    border: var(--style-border-always);
+    overflow-x: scroll;
+    margin: 1rem 0;
+    table {
+      display: table;
+      width: 100%;
+      border-spacing: 0;
+      border-collapse: collapse;
+      empty-cells: show;
+    }
+    thead {
+      background: var(--anzhiyu-secondbg);
+    }
+    td,
+    th {
+      padding: 0.3rem 0.6rem;
+      vertical-align: middle;
+      border: var(--style-border-always);
+    }
+    tr > *:first-child {
+      border-left: none;
+    }
+    tr > *:last-child {
+      border-right: none;
+    }
+    tbody tr:last-child > * {
+      border-bottom: none;
+    }
+    thead tr:first-child > * {
+      border-top: none;
+    }
+  }
+
   code {
     padding: 0.2rem 0.4rem;
     border-radius: 4px;
@@ -463,13 +620,6 @@ $theme-link-color: #007bff;
     margin-bottom: 0 !important;
   }
 
-  a {
-    color: $theme-link-color;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-
   img {
     display: block;
     margin: 0 auto 20px;
@@ -508,7 +658,6 @@ $theme-link-color: #007bff;
     li {
       margin: 4px 0;
       &::marker {
-        color: $light-blue;
         font-weight: 600;
         font-size: 1.05em;
       }
