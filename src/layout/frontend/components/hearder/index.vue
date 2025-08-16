@@ -66,7 +66,12 @@
           </div>
         </nav>
 
-        <HeaderRight :navConfig="navConfig" />
+        <HeaderRight
+          :navConfig="navConfig"
+          :is-transparent="isHeaderTransparent"
+          :scroll-percent="scrollPercent"
+          :is-footer-visible="isFooterVisible"
+        />
       </div>
     </div>
   </header>
@@ -84,7 +89,8 @@ const siteConfigStore = useSiteConfigStore();
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);
 const route = useRoute();
 
-const { isHeaderTransparent, isScrolled } = useHeader();
+const { isHeaderTransparent, isScrolled, scrollPercent, isFooterVisible } =
+  useHeader();
 
 const isPostDetailPage = computed(() => route.name === "PostDetail");
 

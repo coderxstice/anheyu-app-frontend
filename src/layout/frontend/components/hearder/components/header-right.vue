@@ -30,12 +30,21 @@
       </a>
     </el-tooltip>
 
-    <!-- TODO: 控制台+滚动球 -->
+    <div
+      class="nav-button nav-totop"
+      :class="{ 'is-visible': showToTopButton, long: isFooterVisible }"
+      @click="scrollToTop"
+    >
+      <div class="totopbtn">
+        <i class="anzhiyufont anzhiyu-icon-arrow-up" />
+        <span class="percent">{{ toTopText }}</span>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { PropType } from "vue";
+import { computed, type PropType } from "vue";
 import { useSnackbar } from "@/composables/useSnackbar";
 import { useArticleStore } from "@/store/modules/articleStore";
 
@@ -43,19 +52,29 @@ defineOptions({
   name: "HeaderRight"
 });
 
-defineProps({
+const props = defineProps({
   navConfig: {
     type: Object as PropType<any>,
     required: false
+  },
+  isTransparent: {
+    type: Boolean,
+    default: true
+  },
+  scrollPercent: {
+    type: Number,
+    default: 0
+  },
+  isFooterVisible: {
+    type: Boolean,
+    default: false
   }
 });
 
 const articleStore = useArticleStore();
-
 const { showSnackbar } = useSnackbar();
 
 let travellingsTimer: ReturnType<typeof setTimeout> | null = null;
-
 const handleTravelClick = () => {
   if (travellingsTimer) {
     clearTimeout(travellingsTimer);
@@ -66,19 +85,29 @@ const handleTravelClick = () => {
       showSnackbar("跳转已取消");
     }
   };
-
-  // 调用 Snackbar
   showSnackbar(
     "即将跳转到「开往」项目的成员博客，不保证跳转网站的安全性和可用性",
     cancelAction,
     5000,
     "取消"
   );
-
-  // 设置一个5秒后执行的定时器，用于打开新页面
   travellingsTimer = setTimeout(() => {
     window.open("https://www.travellings.cn/go.html", "_blank");
   }, 5000);
+};
+
+const showToTopButton = computed(() => !props.isTransparent);
+const toTopText = computed(() => {
+  if (props.isFooterVisible) {
+    return "返回顶部";
+  }
+  return `${props.scrollPercent}`;
+});
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 };
 </script>
 
@@ -110,9 +139,96 @@ const handleTravelClick = () => {
       font-weight: 700;
     }
 
-    &:hover {
+    &:not(.nav-totop):hover {
       color: var(--anzhiyu-white);
       background: var(--anzhiyu-lighttext);
+    }
+  }
+
+  .nav-totop {
+    width: 0;
+    transform: scale(0);
+    transform-origin: right center;
+    margin-left: 0;
+    transition: all 0.3s ease-in-out;
+
+    &.is-visible {
+      width: 25px;
+      margin-left: 1rem;
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    &.is-visible.long {
+      width: 80px;
+      margin-left: 0rem;
+      .totopbtn {
+        width: 70px;
+      }
+    }
+
+    .totopbtn {
+      width: 25px;
+      height: 25px;
+      border-radius: 40px;
+      background: var(--anzhiyu-fontcolor);
+      color: var(--anzhiyu-card-bg);
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      transition: 0.3s;
+
+      i,
+      .percent {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        transition: all 0.3s;
+      }
+
+      i {
+        opacity: 0;
+      }
+
+      .percent {
+        opacity: 1;
+        font-size: 13px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+    }
+
+    &:not(.long):hover {
+      .totopbtn {
+        background: var(--anzhiyu-lighttext);
+        width: 35px;
+        height: 35px;
+        top: 0;
+        right: 0;
+        i {
+          opacity: 1;
+          color: var(--anzhiyu-card-bg);
+          transition: 0.3s;
+        }
+      }
+      .totopbtn .percent {
+        opacity: 0;
+      }
+    }
+
+    &.long:hover {
+      .totopbtn {
+        background: var(--anzhiyu-lighttext);
+      }
+      transform: scale(1);
+      .totopbtn i {
+        opacity: 1;
+      }
+      .totopbtn .percent {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.5);
+      }
     }
   }
 }
