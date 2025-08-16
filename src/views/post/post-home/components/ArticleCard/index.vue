@@ -72,7 +72,7 @@ const goToTagPage = (tagName: string) => {
     @click="goPost(article.id)"
   >
     <div class="post_cover">
-      <div :title="article.title">
+      <div :title="article.title" class="w-full h-full">
         <img
           v-if="article.cover_url"
           class="post_bg"
@@ -188,6 +188,7 @@ const goToTagPage = (tagName: string) => {
     }
     .post_bg {
       transition: all 0.6s ease;
+      border-radius: 0px;
     }
   }
 
@@ -337,6 +338,21 @@ const goToTagPage = (tagName: string) => {
   .post-meta-date {
     white-space: nowrap;
     flex-shrink: 0;
+  }
+}
+
+@media screen and (width > 760px) and (width <= 992px) {
+  .main-content .recent-post-item {
+    .post_cover {
+      overflow: hidden;
+      width: 40%;
+      height: 100%;
+      border-radius: 0;
+    }
+    .recent-post-info {
+      height: 100%;
+      width: 60%;
+    }
   }
 }
 

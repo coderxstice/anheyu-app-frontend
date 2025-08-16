@@ -458,6 +458,15 @@ const scrollToTop = () => {
   }
 }
 
+@media (max-width: 768px) {
+  .page-name-mask {
+    display: none;
+  }
+  .main-nav {
+    display: none !important;
+  }
+}
+
 #toggle-menu {
   display: block;
   font-size: 1.2rem;

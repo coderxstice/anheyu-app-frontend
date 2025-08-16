@@ -167,4 +167,9 @@ const props = defineProps<{
   overflow: hidden;
   transition: 0.2s;
 }
+@media (max-width: 768px) {
+  .back-home-button {
+    display: none;
+  }
+}
 </style>

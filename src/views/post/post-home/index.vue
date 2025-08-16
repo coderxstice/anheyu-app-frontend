@@ -179,7 +179,6 @@ watch(
 </template>
 
 <style lang="scss" scoped>
-/* 样式部分无需改动 */
 .post-home-top-container {
   margin: 0 auto;
   padding: 0 1.5rem;
@@ -211,6 +210,13 @@ watch(
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 0.625rem;
+  }
+}
+
+@media screen and (width > 760px) and (width <= 992px) {
+  .recent-post-item {
+    width: 100% !important;
+    flex-direction: row !important;
   }
 }
 </style>

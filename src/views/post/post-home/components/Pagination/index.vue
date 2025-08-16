@@ -175,7 +175,6 @@ const goToPage = () => {
 </template>
 
 <style lang="scss" scoped>
-/* 样式部分无需改动 */
 #pagination {
   display: flex;
   justify-content: center;
@@ -329,5 +328,31 @@ const goToPage = () => {
 
 .toPageGroup:hover > .extend {
   opacity: 0;
+}
+@media (max-width: 768px) {
+  #pagination {
+    .pagination {
+      display: none;
+    }
+    .extend {
+      width: 100%;
+      height: 3.125rem;
+      border-radius: 12px;
+      line-height: 3.125rem;
+      background: var(--anzhiyu-card-bg);
+      border: var(--style-border-always);
+      box-shadow: var(--anzhiyu-shadow-border);
+      position: static;
+      .pagination_tips_next,
+      .pagination_tips_prev {
+        opacity: 1;
+        margin-left: 0;
+        margin-right: 0;
+      }
+      i {
+        display: none;
+      }
+    }
+  }
 }
 </style>

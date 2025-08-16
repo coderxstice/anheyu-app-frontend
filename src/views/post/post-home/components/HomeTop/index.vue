@@ -610,7 +610,72 @@ const creativityPairs = computed(() => {
 
 @media (max-width: 992px) {
   .home-top-container {
+    display: flex;
     flex-direction: column;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    width: 100%;
+    overflow-x: scroll;
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .banners-title {
+      left: 2rem !important;
+    }
+
+    .left-section {
+      height: calc(328px + 0.625rem);
+      position: relative;
+      #random-banner {
+        height: calc(328px + 0.625rem);
+      }
+      .category-group {
+        position: absolute;
+        bottom: 2.9rem;
+        left: 2rem;
+        .category-item:nth-child(3) {
+          display: none;
+        }
+        .category-button {
+          flex-direction: row-reverse;
+          padding: 8px 18px 8px 14px;
+          border-radius: 60px;
+          color: var(--anzhiyu-white);
+          width: 105px;
+          position: relative;
+          i {
+            font-size: 1.375rem;
+            position: static;
+            filter: none;
+            transform: none;
+            opacity: 1;
+            width: auto;
+          }
+        }
+      }
+    }
+    .right-section {
+      display: flex;
+      width: auto;
+      height: auto;
+      overflow: overlay;
+      .topGroup {
+        display: flex;
+        flex-wrap: nowrap;
+        width: auto;
+        .recent-post-item {
+          width: 200px;
+          height: 168px;
+          .post_cover {
+            height: 60%;
+          }
+          .recent-post-info {
+            height: 40%;
+          }
+        }
+      }
+    }
   }
   .right-section,
   .topGroup {
@@ -621,12 +686,15 @@ const creativityPairs = computed(() => {
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
   }
-  .topGroup .recent-post-item {
-    width: 100%;
-    height: 220px;
-  }
   .topGroup .todayCard {
     display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  #skills-tags-group-all {
+    opacity: 0.1;
+    filter: blur(8px);
   }
 }
 </style>

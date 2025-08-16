@@ -208,7 +208,6 @@ const scrollToParent = () => {
 </template>
 
 <style lang="scss" scoped>
-/* 样式部分无需改动 */
 .comment-item {
   display: flex;
   gap: 1rem;

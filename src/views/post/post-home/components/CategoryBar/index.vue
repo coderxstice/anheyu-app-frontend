@@ -225,4 +225,44 @@ onUnmounted(() => {
     color: var(--anzhiyu-main);
   }
 }
+
+@media (max-width: 768px) {
+  .catalog-more {
+    display: none;
+  }
+  .category-bar {
+    background: transparent;
+    border: none;
+    padding: 0 2px;
+    .catalog-bar {
+      height: 100%;
+      .catalog-list {
+        height: 100%;
+      }
+
+      .catalog-list-item {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        &.select a {
+          background: var(--anzhiyu-main);
+        }
+        a {
+          display: flex;
+          align-items: center;
+          border-radius: 30px;
+          padding: 0px 19px;
+          height: 80%;
+          font-size: 14px;
+          background: var(--anzhiyu-card-bg);
+          border: var(--style-border-always);
+          &:hover {
+            background: var(--anzhiyu-main);
+          }
+        }
+      }
+    }
+  }
+}
 </style>
