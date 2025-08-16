@@ -243,6 +243,7 @@ defineExpose({
       :showCodeRowNumber="true"
       :sanitize="sanitize"
       :auto-fold-threshold="99999999"
+      :showToolbarName="true"
       @update:model-value="val => emit('update:modelValue', val)"
       @onUploadImg="onUploadImg"
       @onSave="handleSave"

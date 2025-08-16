@@ -1,20 +1,11 @@
-<!--
- * @Description:
- * @Author: 安知鱼
- * @Date: 2025-08-14 10:18:35
- * @LastEditTime: 2025-08-14 19:27:03
- * @LastEditors: 安知鱼
--->
 <script setup lang="ts">
-import { Setting } from "@element-plus/icons-vue";
-
 defineProps<{
   isSubmitting: boolean;
   isEditMode: boolean;
   status?: string;
 }>();
 
-const emit = defineEmits(["save", "publish", "open-settings"]);
+const emit = defineEmits(["save", "publish"]);
 </script>
 
 <template>
@@ -28,12 +19,8 @@ const emit = defineEmits(["save", "publish", "open-settings"]);
       :loading="isSubmitting"
       @click="emit('publish')"
     >
-      {{ isEditMode && status === "PUBLISHED" ? "更新发布" : "直接发布" }}
+      {{ isEditMode && status === "PUBLISHED" ? "更新文章" : "发布文章" }}
     </el-button>
-    <el-divider direction="vertical" />
-    <el-tooltip content="文章设置" placement="bottom">
-      <el-button :icon="Setting" circle @click="emit('open-settings')" />
-    </el-tooltip>
   </div>
 </template>
 

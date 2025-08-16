@@ -9,7 +9,7 @@ import type { ExposeParam } from "md-editor-v3";
 
 import MarkdownEditor from "@/components/MarkdownEditor/index.vue";
 import PostActionButtons from "./components/PostActionButtons.vue";
-import PostSettingsDrawer from "./components/PostSettingsDrawer.vue";
+import PublishDialog from "./components/PublishDialog.vue";
 
 import { useNav } from "@/layout/hooks/useNav";
 import {
@@ -40,7 +40,7 @@ const editorRef = ref<ExposeParam>();
 const loading = ref(true);
 const isSubmitting = ref(false);
 const articleId = ref<string | null>(null);
-const isSettingsDrawerVisible = ref(false);
+const isPublishDialogVisible = ref(false);
 
 const form = reactive<ArticleForm>({
   title: "",
@@ -63,7 +63,6 @@ const form = reactive<ArticleForm>({
   copyright_url: ""
 });
 
-// ... 其他代码保持不变，直到 handleSubmit ...
 const initialFormState = reactive({
   title: "",
   content_md: ""
@@ -71,7 +70,6 @@ const initialFormState = reactive({
 const categoryOptions = ref<PostCategory[]>([]);
 const tagOptions = ref<PostTag[]>([]);
 const isEditMode = computed(() => !!articleId.value);
-const pageTitle = computed(() => (isEditMode.value ? "编辑文章" : "新增文章"));
 const isDirty = computed(() => {
   return (
     form.title !== initialFormState.title ||
@@ -158,32 +156,17 @@ const processTagsAndCategories = async () => {
   }
 };
 
-// ⭐ 3. 提交逻辑被移动到 onSave 事件处理器中
 const onSaveHandler = async (markdown: string, sanitizedHtml: string) => {
   if (isSubmitting.value) return;
   isSubmitting.value = true;
-
   try {
-    // 不再需要等待 Promise，直接使用 sanitizedHtml
-    // const generatedHtml = await htmlPromise; // <--- 删除这一行
-
     await processTagsAndCategories();
-
     const dataToSubmit = {
       ...form,
       content_md: markdown,
-      // 直接使用处理后的 HTML
       content_html: sanitizedHtml,
       summaries: form.summaries?.filter(s => s && s.trim() !== "")
     };
-
-    // 【日志】在发送给后端之前，打印最终的数据包
-    console.log("[关卡 B] 准备发送给后端的数据包:", dataToSubmit);
-    console.log(
-      "[关卡 B] 其中 content_html 的内容是:",
-      dataToSubmit.content_html
-    );
-
     if (isEditMode.value) {
       await updateArticle(articleId.value, dataToSubmit);
       ElMessage.success("更新成功");
@@ -193,10 +176,8 @@ const onSaveHandler = async (markdown: string, sanitizedHtml: string) => {
       localStorage.removeItem(getDraftKey());
       router.push({ name: "PostEdit", params: { id: res.data.id } });
     }
-
     localStorage.removeItem(getDraftKey());
     updateInitialState();
-
     await siteConfigStore.fetchSystemSettings([
       constant.KeySidebarSiteInfoTotalPostCount,
       constant.KeySidebarSiteInfoTotalWordCount
@@ -209,8 +190,6 @@ const onSaveHandler = async (markdown: string, sanitizedHtml: string) => {
     isSubmitting.value = false;
   }
 };
-
-// ⭐ 4. handleSubmit 现在只负责校验和触发保存
 const handleSubmit = (isPublish = false) => {
   if (!form.title || form.title.trim() === "") {
     ElNotification({
@@ -220,19 +199,27 @@ const handleSubmit = (isPublish = false) => {
     });
     return;
   }
-
-  // 更新文章状态
   if (isPublish) {
     form.status = "PUBLISHED";
   } else {
-    // 如果文章已经是发布状态，但这次点击的是“存为草稿”，则将其状态改回草稿
-    if (form.status === "PUBLISHED") {
-      form.status = "DRAFT";
-    }
+    form.status = "DRAFT";
   }
-
-  // 以编程方式触发编辑器的 onSave 事件
   editorRef.value?.triggerSave();
+};
+const handleOpenPublishDialog = () => {
+  if (!form.title || form.title.trim() === "") {
+    ElNotification({
+      title: "操作无效",
+      message: "发布前请先填写文章标题。",
+      type: "warning"
+    });
+    return;
+  }
+  isPublishDialogVisible.value = true;
+};
+const handleConfirmPublish = () => {
+  isPublishDialogVisible.value = false;
+  handleSubmit(true);
 };
 
 const handleImageUploadForMdV3 = async (
@@ -243,7 +230,6 @@ const handleImageUploadForMdV3 = async (
     message: "正在上传图片...",
     duration: 0
   });
-
   try {
     const urls = await Promise.all(
       files.map(async file => {
@@ -264,7 +250,6 @@ const handleImageUploadForMdV3 = async (
     loadingInstance.close();
   }
 };
-
 const handleGoBack = () => {
   if (isDirty.value) {
     ElMessageBox.confirm(
@@ -280,13 +265,12 @@ const handleGoBack = () => {
         router.push({ name: "PostManagement" });
       })
       .catch(() => {
-        ElMessage.info("已取消离开");
+        // 用户取消，无操作
       });
   } else {
     router.push({ name: "PostManagement" });
   }
 };
-
 const handleCategoryChange = (currentValues: string[]) => {
   const isNewItemAdded = currentValues.some(
     val => !categoryOptions.value.some(opt => opt.id === val)
@@ -378,8 +362,7 @@ onUnmounted(() => {
           :is-edit-mode="isEditMode"
           :status="form.status"
           @save="handleSubmit(false)"
-          @publish="handleSubmit(true)"
-          @open-settings="isSettingsDrawerVisible = true"
+          @publish="handleOpenPublishDialog"
         />
       </div>
     </header>
@@ -393,14 +376,17 @@ onUnmounted(() => {
       />
     </main>
 
-    <PostSettingsDrawer
-      :key="categorySelectKey || tagSelectKey"
-      v-model="isSettingsDrawerVisible"
+    <PublishDialog
+      v-model="isPublishDialogVisible"
       :form="form"
       :category-options="categoryOptions"
       :tag-options="tagOptions"
+      :is-submitting="isSubmitting"
+      :category-select-key="categorySelectKey"
+      :tag-select-key="tagSelectKey"
       @change-category="handleCategoryChange"
       @change-tag="handleTagChange"
+      @confirm-publish="handleConfirmPublish"
     />
   </div>
 </template>
