@@ -254,10 +254,8 @@ defineExpose({
 .md-editor-fullscreen {
   z-index: 2100;
 }
-.md-editor-preview-wrapper {
-  overflow: hidden;
-}
 .md-editor-container {
+  height: 100%;
   .md-editor-code {
     border: var(--style-border-always);
     border-radius: 10px;

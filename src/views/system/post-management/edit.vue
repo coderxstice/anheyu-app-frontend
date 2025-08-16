@@ -461,6 +461,7 @@ onUnmounted(() => {
   min-height: 0;
   background-color: var(--el-bg-color);
   padding: 8px;
+  height: 500px;
 }
 :deep(.md-editor-preview .md-editor-code .md-editor-code-head) {
   z-index: 99 !important;

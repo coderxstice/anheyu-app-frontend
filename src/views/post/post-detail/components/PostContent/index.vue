@@ -415,9 +415,211 @@ onUnmounted(() => {
     }
   }
 
+  .md-editor-admonition-note {
+    --md-admonition-color: #212121;
+    --md-admonition-bg-color: #ffffff;
+    --md-admonition-border-color: rgb(166.2, 166.2, 166.2);
+  }
+  .md-editor-admonition-tip {
+    --md-admonition-color: #616161;
+    --md-admonition-bg-color: #f5f5f5;
+    --md-admonition-border-color: rgb(185.8, 185.8, 185.8);
+  }
+  .md-editor-admonition-info {
+    --md-admonition-color: #424242;
+    --md-admonition-bg-color: #f0f0f0;
+    --md-admonition-border-color: rgb(170.4, 170.4, 170.4);
+  }
+  .md-editor-admonition-quote {
+    --md-admonition-color: #455a64;
+    --md-admonition-bg-color: #eceff1;
+    --md-admonition-border-color: rgb(169.2, 179.4, 184.6);
+  }
+  .md-editor-admonition-abstract {
+    --md-admonition-color: #0288d1;
+    --md-admonition-bg-color: #e1f5fe;
+    --md-admonition-border-color: rgb(135.8, 201.4, 236);
+  }
+  .md-editor-admonition-attention {
+    --md-admonition-color: #1e88e5;
+    --md-admonition-bg-color: #e3f2fd;
+    --md-admonition-border-color: rgb(148.2, 199.6, 243.4);
+  }
+  .md-editor-admonition-example {
+    --md-admonition-color: #5e35b1;
+    --md-admonition-bg-color: #ede7f6;
+    --md-admonition-border-color: rgb(179.8, 159.8, 218.4);
+  }
+  .md-editor-admonition-hint {
+    --md-admonition-color: #00897b;
+    --md-admonition-bg-color: #e0f2f1;
+    --md-admonition-border-color: rgb(134.4, 200, 193.8);
+  }
+  .md-editor-admonition-success {
+    --md-admonition-color: #388e3c;
+    --md-admonition-bg-color: #e8f5e9;
+    --md-admonition-border-color: rgb(161.6, 203.8, 163.8);
+  }
+  .md-editor-admonition-question {
+    --md-admonition-color: #f9a825;
+    --md-admonition-bg-color: #fffde7;
+    --md-admonition-border-color: rgb(252.6, 219, 153.4);
+  }
+  .md-editor-admonition-caution {
+    --md-admonition-color: #fb8c00;
+    --md-admonition-bg-color: #fff8e1;
+    --md-admonition-border-color: rgb(253.4, 204.8, 135);
+  }
+  .md-editor-admonition-warning {
+    --md-admonition-color: #f57c00;
+    --md-admonition-bg-color: #fff3e0;
+    --md-admonition-border-color: rgb(251, 195.4, 134.4);
+  }
+  .md-editor-admonition-danger {
+    --md-admonition-color: #d84315;
+    --md-admonition-bg-color: #ffebee;
+    --md-admonition-border-color: rgb(239.4, 167.8, 151.2);
+  }
+  .md-editor-admonition-failure {
+    --md-admonition-color: #d32f2f;
+    --md-admonition-bg-color: #fee2e6;
+    --md-admonition-border-color: rgb(236.8, 154.4, 156.8);
+  }
+  .md-editor-admonition-bug {
+    --md-admonition-color: #c31a1a;
+    --md-admonition-bg-color: #fddadd;
+    --md-admonition-border-color: rgb(229.8, 141.2, 143);
+  }
+  .md-editor-admonition-error {
+    --md-admonition-color: #b71c1c;
+    --md-admonition-bg-color: #fdd2d6;
+    --md-admonition-border-color: rgb(225, 137.2, 139.6);
+  }
+
+  [data-theme="dark"] {
+    .md-editor-admonition-note {
+      --md-admonition-color: #e0e0e0;
+      --md-admonition-bg-color: #1e1e1e;
+      --md-admonition-border-color: rgb(107.6, 107.6, 107.6);
+    }
+    .md-editor-admonition-tip {
+      --md-admonition-color: #b0b0b0;
+      --md-admonition-bg-color: #262626;
+      --md-admonition-border-color: rgb(93.2, 93.2, 93.2);
+    }
+    .md-editor-admonition-info {
+      --md-admonition-color: #b3b3b3;
+      --md-admonition-bg-color: #2b2b2b;
+      --md-admonition-border-color: rgb(97.4, 97.4, 97.4);
+    }
+    .md-editor-admonition-quote {
+      --md-admonition-color: #b0bec5;
+      --md-admonition-bg-color: #263238;
+      --md-admonition-border-color: rgb(93.2, 106, 112.4);
+    }
+    .md-editor-admonition-abstract {
+      --md-admonition-color: #81d4fa;
+      --md-admonition-bg-color: #012f45;
+      --md-admonition-border-color: rgb(52.2, 113, 141.4);
+    }
+    .md-editor-admonition-attention {
+      --md-admonition-color: #64b5f6;
+      --md-admonition-bg-color: #102a4c;
+      --md-admonition-border-color: rgb(49.6, 97.6, 144);
+    }
+    .md-editor-admonition-example {
+      --md-admonition-color: #9575cd;
+      --md-admonition-bg-color: #271b52;
+      --md-admonition-border-color: rgb(83, 63, 131.2);
+    }
+    .md-editor-admonition-hint {
+      --md-admonition-color: #4db6ac;
+      --md-admonition-bg-color: #003d3a;
+      --md-admonition-border-color: rgb(30.8, 109.4, 103.6);
+    }
+    .md-editor-admonition-success {
+      --md-admonition-color: #81c784;
+      --md-admonition-bg-color: #1b5e20;
+      --md-admonition-border-color: rgb(67.8, 136, 72);
+    }
+    .md-editor-admonition-question {
+      --md-admonition-color: #ffd54f;
+      --md-admonition-bg-color: #3e2f00;
+      --md-admonition-border-color: rgb(139.2, 113.4, 31.6);
+    }
+    .md-editor-admonition-caution {
+      --md-admonition-color: #ffcc80;
+      --md-admonition-bg-color: #3e2600;
+      --md-admonition-border-color: rgb(139.2, 104.4, 51.2);
+    }
+    .md-editor-admonition-warning {
+      --md-admonition-color: #ffb74d;
+      --md-admonition-bg-color: #3d2600;
+      --md-admonition-border-color: rgb(138.6, 96, 30.8);
+    }
+    .md-editor-admonition-danger {
+      --md-admonition-color: #ef9a9a;
+      --md-admonition-bg-color: #3c0000;
+      --md-admonition-border-color: rgb(131.6, 61.6, 61.6);
+    }
+    .md-editor-admonition-failure {
+      --md-admonition-color: #ef9a9a;
+      --md-admonition-bg-color: #3c0900;
+      --md-admonition-border-color: rgb(131.6, 67, 61.6);
+    }
+    .md-editor-admonition-bug {
+      --md-admonition-color: #e68381;
+      --md-admonition-bg-color: #300000;
+      --md-admonition-border-color: rgb(120.8, 52.4, 51.6);
+    }
+    .md-editor-admonition-error {
+      --md-admonition-color: #ef5350;
+      --md-admonition-bg-color: #300000;
+      --md-admonition-border-color: rgb(124.4, 33.2, 32);
+    }
+  }
+  .md-editor-admonition {
+    background-color: var(--md-admonition-bg-color);
+    border: 1px solid var(--md-admonition-border-color);
+    border-radius: 6px;
+    color: var(--md-admonition-color);
+    display: flow-root;
+    font-size: 14px;
+    font-weight: 400;
+    margin: 1rem 0;
+    padding: 1em 1em 0.5em;
+    page-break-inside: avoid;
+  }
+  .md-editor-admonition-title {
+    margin: 0;
+    padding: 0;
+    position: relative;
+    font-weight: 700;
+  }
+  .md-editor-admonition p {
+    margin: 0.5em 0;
+    padding: 0;
+  }
+  .md-editor-admonition p:first-of-type {
+    margin-top: 0;
+  }
+  .md-editor-admonition + p:empty,
+  .md-editor-admonition + p:empty + p:empty {
+    display: none;
+  }
+  .md-editor-katex-inline[data-processed] {
+    display: initial;
+  }
+  .md-editor-katex-block[data-processed] {
+    display: block;
+  }
+
   .md-editor-mermaid {
     overflow: hidden;
     line-height: normal;
+    &:not([data-processed]) {
+      white-space: pre;
+    }
     p {
       font-size: 16px;
     }
