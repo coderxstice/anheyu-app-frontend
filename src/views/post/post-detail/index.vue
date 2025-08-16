@@ -236,7 +236,7 @@ watch(
       <main class="post-content-inner">
         <div v-if="article" class="post-detail-content">
           <AiSummary
-            v-if="article.summaries.length > 0"
+            v-if="article.summaries && article.summaries.length > 0"
             :summary="article.summaries"
           />
           <PostOutdateNotice :update-date="article.updated_at" />
