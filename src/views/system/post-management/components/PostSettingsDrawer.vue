@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps, defineEmits } from "vue";
 import type { ArticleForm, PostCategory, PostTag } from "@/api/post/type";
 import { Plus, Remove } from "@element-plus/icons-vue";
 
