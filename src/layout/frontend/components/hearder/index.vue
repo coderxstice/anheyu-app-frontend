@@ -4,7 +4,8 @@
       class="header-wrapper"
       :class="{
         'is-transparent': isHeaderTransparent,
-        'text-is-white': isHeaderTransparent && isPostDetailPage
+        'text-is-white': isHeaderTransparent && isPostDetailPage,
+        'is-scrolled': isScrolled
       }"
     >
       <div class="header-content">
@@ -26,9 +27,11 @@
         </div>
 
         <div class="page-name-mask">
-          <div class="page-name-container">
-            <span class="page-name">{{ siteConfig.APP_NAME }}</span>
-          </div>
+          <el-tooltip content="返回顶部" placement="bottom" :showArrow="false">
+            <div class="page-name-container" @click="scrollToTop">
+              <span class="page-name">{{ siteConfig.APP_NAME }}</span>
+            </div>
+          </el-tooltip>
         </div>
 
         <nav class="main-nav">
@@ -81,7 +84,7 @@ const siteConfigStore = useSiteConfigStore();
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);
 const route = useRoute();
 
-const { isHeaderTransparent } = useHeader();
+const { isHeaderTransparent, isScrolled } = useHeader();
 
 const isPostDetailPage = computed(() => route.name === "PostDetail");
 
@@ -89,6 +92,13 @@ const headerConfig = computed(() => siteConfig.value?.header);
 const navConfig = computed(() => headerConfig.value?.nav);
 const menuConfig = computed(() => headerConfig.value?.menu);
 const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
+
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+};
 </script>
 
 <style scoped lang="scss">
@@ -206,13 +216,26 @@ const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
           margin: auto;
           justify-content: center;
           animation-timing-function: ease-out;
+
+          opacity: 0;
+          transform: translateY(20px) scale(1.1);
+          transition:
+            transform 0.2s ease-out,
+            opacity 0.2s ease-out;
+          pointer-events: none;
+          cursor: pointer;
+
+          &:hover .page-name {
+            color: var(--anzhiyu-main);
+          }
+
           .page-name {
+            opacity: 1;
+            filter: none;
             display: inline;
             font-weight: 700;
             padding: 4px 8px;
-            opacity: 0;
-            filter: alpha(opacity=0);
-            transition: 0.1s;
+            transition: color 0.3s;
             text-overflow: ellipsis;
             overflow: hidden;
             white-space: nowrap;
@@ -245,6 +268,14 @@ const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
           display: flex;
           flex-direction: row;
           justify-content: center;
+
+          opacity: 1;
+          transform: translateY(0) scale(1);
+          transition:
+            transform 0.2s ease-out,
+            opacity 0.2s ease-out;
+          pointer-events: auto;
+
           .menus-item {
             padding: 0 0.4rem;
             display: flex;
@@ -360,6 +391,21 @@ const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
             }
           }
         }
+      }
+    }
+
+    &.is-scrolled {
+      .main-nav .menus-items {
+        opacity: 0;
+        transform: translateY(-50px) scale(1.1);
+        pointer-events: none;
+      }
+
+      .page-name-mask .page-name-container {
+        opacity: 1;
+        transform: translateY(-52px) scale(1);
+        pointer-events: auto;
+        z-index: 1;
       }
     }
 

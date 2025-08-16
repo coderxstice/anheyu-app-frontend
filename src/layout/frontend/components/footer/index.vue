@@ -1,5 +1,5 @@
 <template>
-  <footer v-if="siteConfig" class="footer-container">
+  <footer v-if="siteConfig" id="footer-container" class="footer-container">
     <div class="footer-wrap">
       <div v-if="footerConfig.socialBar" class="footer-social-bar">
         <el-tooltip
