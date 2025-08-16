@@ -35,26 +35,57 @@ const articleType = computed(() => {
 
 onMounted(() => {
   ctx = gsap.context(() => {
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: ".post-header-container",
-        start: "top top",
-        end: "bottom top",
-        scrub: true
+    // 使用 ScrollTrigger.matchMedia 来创建响应式动画
+    ScrollTrigger.matchMedia({
+      // 桌面端视图
+      "(min-width: 769px)": function () {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: ".post-header-container",
+            start: "top top",
+            end: "bottom top",
+            scrub: true
+          }
+        });
+
+        tl.to(".post-info", {
+          scale: 0.5,
+          ease: "none"
+        }).to(
+          ".post-top-cover",
+          {
+            scale: 0.5,
+            ease: "none"
+          },
+          "<"
+        );
+      },
+
+      // 移动端视图
+      "(max-width: 768px)": function () {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: ".post-header-container",
+            start: "top top",
+            end: "bottom top",
+            scrub: true
+          }
+        });
+
+        tl.to(".post-info", {
+          scale: 1,
+          ease: "none",
+          transformOrigin: "center top"
+        }).to(
+          ".post-top-cover",
+          {
+            scale: 1,
+            ease: "none"
+          },
+          "<"
+        );
       }
     });
-
-    tl.to(".post-info", {
-      scale: 0.5,
-      ease: "none"
-    }).to(
-      ".post-top-cover",
-      {
-        scale: 0.5,
-        ease: "none"
-      },
-      "<"
-    );
   });
 });
 
@@ -116,7 +147,7 @@ const goToTag = (tagName: string) => {
               {{ article.post_categories[0].name }}
             </a>
           </span>
-          <div class="tag_share">
+          <div v-if="article.post_tags.length" class="tag_share">
             <div class="post-meta__tag-list">
               <a
                 v-for="tag in article.post_tags"
@@ -386,9 +417,6 @@ const goToTag = (tagName: string) => {
 
 .post-meta-separator {
   margin: 0 0.75rem;
-  width: 1px;
-  height: 12px;
-  background: rgba(255, 255, 255, 0.3);
 }
 
 .post-meta-date,
@@ -464,6 +492,78 @@ const goToTag = (tagName: string) => {
   }
   & > use:nth-child(4) {
     fill: rgb(0 0 0 / 39%);
+  }
+}
+
+@media (max-width: 768px) {
+  .main-hero-waves-area.waves-area {
+    display: none;
+    visibility: hidden;
+  }
+  .post-info {
+    padding: 11rem 6% 1rem;
+    align-items: center;
+    gap: 0;
+
+    justify-content: normal;
+    background-image: linear-gradient(
+      to bottom,
+      var(--anzhiyu-none),
+      var(--anzhiyu-main)
+    );
+    height: fit-content;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    top: auto;
+    align-items: center;
+
+    .tag_share {
+      display: none;
+    }
+    .post-meta {
+      align-items: center;
+      margin-top: 1rem;
+    }
+    .post-meta .meta-firstline,
+    .post-meta .meta-secondline {
+      font-size: 0.75rem;
+      justify-content: center;
+    }
+  }
+  .post-top-cover {
+    transform: rotate(0) translateY(0) scale(1);
+    filter: blur(0);
+    width: 100%;
+    position: fixed;
+    height: 30rem;
+    z-index: 1;
+    margin: 0 0 0 auto;
+    opacity: 1;
+    &:after {
+      box-shadow: 0 0 105px 99px var(--anzhiyu-main) inset;
+      height: 70%;
+      top: 0;
+      left: 0;
+      position: absolute;
+      content: "";
+      width: 100%;
+    }
+
+    .post-top-bg {
+      min-height: 18.75rem;
+      height: 70%;
+      opacity: 1;
+      filter: none;
+      border-radius: 0;
+    }
+  }
+  .post-header-container {
+    height: 30rem;
+    background-color: var(--anzhiyu-main);
+    &::before {
+      display: none;
+    }
   }
 }
 </style>

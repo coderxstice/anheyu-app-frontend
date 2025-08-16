@@ -305,4 +305,23 @@ watch(
     min-width: 0;
   }
 }
+
+@media (max-width: 992px) {
+  .post-content-inner {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .layout {
+    padding: 0;
+    background-color: var(--anzhiyu-main);
+  }
+  .post-detail-content {
+    border: none;
+    border-radius: 12px 12px 0 0;
+    padding: 1rem 1rem;
+    z-index: 1;
+  }
+}
 </style>
