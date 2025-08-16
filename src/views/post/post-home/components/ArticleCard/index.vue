@@ -157,6 +157,10 @@ const goToTagPage = (tagName: string) => {
     margin-right: 4px;
   }
 
+  &:active {
+    transform: scale(0.97);
+  }
+
   &:hover {
     border: var(--style-border-hover);
     box-shadow: var(--anzhiyu-shadow-main);
