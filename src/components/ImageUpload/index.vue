@@ -13,7 +13,6 @@ import { uploadArticleImage } from "@/api/post";
 
 import Cropper from "cropperjs";
 
-// [新增] 定义自定义的 Cropper 模板
 const CUSTOM_CROPPER_TEMPLATE = `
   <cropper-canvas background style="height: 100%">
     <cropper-image rotatable scalable skewable translatable></cropper-image>
@@ -53,7 +52,6 @@ const imageUrl = computed({
 
 const isUploading = ref(false);
 
-// --- 网络链接弹窗 ---
 const linkDialogVisible = ref(false);
 const linkUrlInput = ref("");
 const openLinkDialog = () => {
@@ -69,7 +67,6 @@ const confirmAddLink = () => {
   }
 };
 
-// --- 统一的上传处理函数 ---
 const performUpload = async (file: File | Blob) => {
   const loading = ElMessage.info({
     message: "正在上传...",
@@ -102,7 +99,6 @@ const performUpload = async (file: File | Blob) => {
   }
 };
 
-// --- 裁剪上传逻辑 (编程式) ---
 const cropperDialogVisible = ref(false);
 const cropperImagePath = ref("");
 const cropperContainerRef = ref<HTMLDivElement | null>(null);
@@ -117,7 +113,6 @@ watch(cropperDialogVisible, isVisible => {
       image.src = cropperImagePath.value;
 
       image.onload = () => {
-        // [修改] 在创建实例时传入自定义模板
         cropperInstance.value = new Cropper(image, {
           container: cropperContainerRef.value,
           template: CUSTOM_CROPPER_TEMPLATE
@@ -171,7 +166,6 @@ const handleCropAndUpload = async () => {
   }
 };
 
-// --- 文件选择与分流处理 ---
 const uploadMode = ref<"direct" | "crop">("direct");
 
 const onFileSelected = (e: any) => {
@@ -191,7 +185,6 @@ const onFileSelected = (e: any) => {
   e.target.value = "";
 };
 
-// --- Dropdown 菜单事件处理 ---
 const handleCommand = (
   command: "direct-upload" | "crop-upload" | "link" | "delete"
 ) => {

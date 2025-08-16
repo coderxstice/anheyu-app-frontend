@@ -134,14 +134,14 @@ const creativityPairs = computed(() => {
           :key="item.name"
           class="category-item"
         >
-          <a
+          <router-link
             class="category-button"
             :style="{ background: item.background }"
-            :href="item.path"
+            :to="item.path"
           >
             <span class="category-button-text">{{ item.name }}</span>
             <i :class="['anzhiyufont', item.icon]" />
-          </a>
+          </router-link>
         </div>
       </div>
     </div>
@@ -151,11 +151,11 @@ const creativityPairs = computed(() => {
         class="topGroup"
         @mouseleave="hasRecommendedArticles ? collapseTopGroup() : null"
       >
-        <a
+        <router-link
           v-for="article in recommendedArticles"
           :key="article.id"
           class="recent-post-item"
-          :href="`/posts/${article.id}`"
+          :to="`/posts/${article.id}`"
           :title="article.title"
         >
           <div class="post_cover">
@@ -176,7 +176,7 @@ const creativityPairs = computed(() => {
           <div class="recent-post-info">
             <div class="article-title">{{ article.title }}</div>
           </div>
-        </a>
+        </router-link>
 
         <a
           v-if="homeTopConfig.banner"
