@@ -81,6 +81,16 @@ const typeIconMap = {
   local: ServerIcon,
   onedrive: CloudIcon
 };
+
+// 用于将 flag 转换为可读的文本
+const flagDisplayMap = {
+  article_image: "文章图片默认",
+  comment_image: "评论图片默认"
+};
+
+function getFlagDisplayName(flag: string): string {
+  return flagDisplayMap[flag] || "未知标志";
+}
 </script>
 
 <template>
@@ -120,7 +130,18 @@ const typeIconMap = {
               <IconifyIconOffline :icon="typeIconMap[item.type] || CloudIcon" />
             </el-icon>
             <div class="policy-details">
-              <h4 class="policy-name">{{ item.name }}</h4>
+              <h4 class="policy-name">
+                {{ item.name }}
+                <el-tag
+                  v-if="item.flag"
+                  type="warning"
+                  size="small"
+                  effect="dark"
+                  style="margin-left: 8px"
+                >
+                  {{ getFlagDisplayName(item.flag) }}
+                </el-tag>
+              </h4>
               <div class="policy-tags">
                 <el-tag
                   v-if="item.type === 'onedrive'"
@@ -145,7 +166,10 @@ const typeIconMap = {
               </el-tooltip>
 
               <el-popconfirm
-                v-if="item.type !== 'local' || item.virtual_path !== '/'"
+                v-if="
+                  !item.flag &&
+                  !(item.type === 'local' && item.virtual_path === '/')
+                "
                 :title="`确认删除存储策略 ${item.name} 吗?`"
                 @confirm="handleDelete(item)"
               >
@@ -176,7 +200,6 @@ const typeIconMap = {
       />
     </div>
 
-    <!-- 选择类型弹窗 -->
     <el-dialog
       v-model="chooseTypeDialogVisible"
       title="选择存储方式"
@@ -198,7 +221,6 @@ const typeIconMap = {
       </div>
     </el-dialog>
 
-    <!-- OneDrive 专属创建弹窗 -->
     <el-dialog
       v-model="oneDriveCreateDialogVisible"
       title="添加 OneDrive 存储策略"
@@ -299,6 +321,8 @@ const typeIconMap = {
     font-size: 1.1rem;
     font-weight: 600;
     margin: 0;
+    display: flex;
+    align-items: center;
   }
   .policy-tags {
     display: flex;

@@ -30,6 +30,7 @@ export interface StoragePolicy {
   max_size: number;
   base_path?: string;
   virtual_path?: string;
+  flag?: string;
 
   settings?: {
     chunk_size?: number;

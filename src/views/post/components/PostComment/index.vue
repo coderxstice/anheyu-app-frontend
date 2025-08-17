@@ -127,7 +127,6 @@ const scrollToComment = (id: string) => {
   }
 };
 
-// Expose method to parent component.
 defineExpose({
   scrollToComment
 });

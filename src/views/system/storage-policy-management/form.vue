@@ -110,6 +110,22 @@ defineExpose({ getRef });
     <el-form-item label="策略名称" prop="name">
       <el-input v-model="formData.name" placeholder="请输入策略名称" />
     </el-form-item>
+
+    <el-form-item label="策略标志" prop="flag">
+      <el-select
+        v-model="formData.flag"
+        placeholder="请选择策略标志"
+        style="width: 100%"
+      >
+        <el-option label="无 (普通策略)" value="" />
+        <el-option label="文章图片默认" value="article_image" />
+        <el-option label="评论图片默认" value="comment_image" />
+      </el-select>
+      <div class="form-item-help">
+        设置后，该策略将成为系统核心功能的默认存储位置。此标志在系统中具有唯一性。
+      </div>
+    </el-form-item>
+
     <el-form-item label="存储类型" prop="type">
       <el-select v-model="formData.type" :disabled="!!formData.id">
         <el-option label="本机存储" value="local" />
@@ -117,7 +133,6 @@ defineExpose({ getRef });
       </el-select>
     </el-form-item>
 
-    <!-- 动态加载特定策略的表单项 -->
     <component
       :is="providerFormComponent"
       v-if="providerFormComponent"
