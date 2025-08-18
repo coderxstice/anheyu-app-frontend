@@ -63,19 +63,12 @@ export const useCommentStore = defineStore("comment", () => {
     await fetchComments(1);
   }
 
-  /**
-   * 1. 为 fetchComments 添加 isSilent 参数
-   * @param page 页码
-   * @param isSilent 是否静默刷新，默认为 false
-   */
-  async function fetchComments(page = 1, isSilent = false) {
+  async function fetchComments(page = 1) {
     if (!currentArticleId.value) return;
-    if (!isSilent) {
-      if (page === 1) {
-        isLoading.value = true;
-      } else {
-        isLoadingMore.value = true;
-      }
+    if (page === 1) {
+      isLoading.value = true;
+    } else {
+      isLoadingMore.value = true;
     }
 
     try {
@@ -97,11 +90,8 @@ export const useCommentStore = defineStore("comment", () => {
     } catch (error) {
       console.error("获取评论失败:", error);
     } finally {
-      // 只有在非静默模式下才隐藏加载状态
-      if (!isSilent) {
-        isLoading.value = false;
-        isLoadingMore.value = false;
-      }
+      isLoading.value = false;
+      isLoadingMore.value = false;
     }
   }
 
@@ -111,13 +101,56 @@ export const useCommentStore = defineStore("comment", () => {
     }
   }
 
-  /**
-   * 2. 在 postComment 中调用 fetchComments 时，传入 isSilent = true
-   */
   async function postComment(payload: CreateCommentPayload) {
     try {
-      await createPublicComment(payload);
-      await fetchComments(1, true);
+      const res = await createPublicComment(payload);
+      const newCommentData = res.data;
+
+      if (!newCommentData || !newCommentData.id) {
+        throw new Error("API did not return a valid comment object.");
+      }
+
+      const newComment: Comment = {
+        ...newCommentData,
+        website: payload.website || null,
+        children: []
+      };
+
+      if (newComment.parent_id) {
+        let topLevelParent: Comment | null = null;
+
+        topLevelParent =
+          comments.value.find(c => c.id === newComment.parent_id) || null;
+
+        if (!topLevelParent) {
+          for (const potentialTopLevelParent of comments.value) {
+            if (
+              potentialTopLevelParent.children?.find(
+                child => child.id === newComment.parent_id
+              )
+            ) {
+              topLevelParent = potentialTopLevelParent;
+              break;
+            }
+          }
+        }
+
+        if (topLevelParent) {
+          if (!topLevelParent.children) {
+            topLevelParent.children = [];
+          }
+          topLevelParent.children.push(newComment);
+        } else {
+          console.warn(
+            "Parent comment's thread not found, falling back to a refresh."
+          );
+          await fetchComments(1);
+        }
+      } else {
+        comments.value.unshift(newComment);
+      }
+
+      totalComments.value++;
     } catch (error) {
       console.error("评论发布失败:", error);
       throw error;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, watch, nextTick } from "vue";
+import { computed, ref, onMounted, nextTick } from "vue"; // [修改] 移除了 watch
 import { useCommentStore } from "@/store/modules/commentStore";
 import type { Comment } from "@/api/comment/type";
 import { UAParser } from "ua-parser-js";
@@ -151,6 +151,8 @@ const checkHeight = () => {
 
 onMounted(checkHeight);
 
+// [核心修改] 移除了下面的 watch 侦听器，以防止在添加新回复时重新计算高度和展开状态
+/*
 watch(
   () => props.comment.children?.length,
   () => {
@@ -158,6 +160,7 @@ watch(
     checkHeight();
   }
 );
+*/
 </script>
 
 <template>
