@@ -140,3 +140,16 @@
   gap: 8px;
   flex-direction: column;
 }
+
+/*
+ * Fancybox 样式覆盖
+ */
+.fancybox__slide {
+  padding: 2rem !important;
+}
+
+@media (max-width: 768px) {
+  .fancybox__slide {
+    padding: 1rem !important;
+  }
+}

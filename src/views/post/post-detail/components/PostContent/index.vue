@@ -4,6 +4,9 @@ import { useSnackbar } from "@/composables/useSnackbar";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import "katex/dist/katex.min.css";
 
+import { Fancybox } from "@fancyapps/ui";
+import "@fancyapps/ui/dist/fancybox/fancybox.css";
+
 defineProps({
   content: {
     type: String,
@@ -12,7 +15,6 @@ defineProps({
 });
 
 const { showSnackbar } = useSnackbar();
-
 const siteConfigStore = useSiteConfigStore();
 
 const codeMaxLines = computed(
@@ -28,6 +30,7 @@ const collapsedHeight = computed(() => {
 });
 
 const handleContentClick = (event: Event) => {
+  // ... 此函数内容保持不变 ...
   const target = event.target as HTMLElement;
 
   const tabButton = target.closest(".tabs .nav-tabs .tab");
@@ -59,10 +62,8 @@ const handleContentClick = (event: Event) => {
   const scrollToTopButton = target.closest(".tab-to-top button");
   if (scrollToTopButton) {
     event.preventDefault();
-    // 找到按钮所属的父级 '.tabs' 容器
     const tabsContainer = scrollToTopButton.closest(".tabs");
     if (tabsContainer) {
-      // 将该容器的顶部平滑滚动到视口的顶部
       tabsContainer.scrollIntoView({
         behavior: "smooth",
         block: "start"
@@ -90,13 +91,11 @@ const handleContentClick = (event: Event) => {
     return;
   }
 
-  // 代码块顶部的整个的折叠与展开
   const expandButton = target.closest(".expand");
   if (expandButton) {
     const detailsElement = expandButton.closest(".md-editor-code");
     event.preventDefault();
     if (detailsElement) {
-      // 手动切换 open 属性
       detailsElement.hasAttribute("open")
         ? detailsElement.removeAttribute("open")
         : detailsElement.setAttribute("open", "");
@@ -104,7 +103,6 @@ const handleContentClick = (event: Event) => {
     return;
   }
 
-  // 代码块底部的部分展开与部分折叠
   const expandCodeButton = target.closest(".code-expand-btn");
   if (expandCodeButton) {
     const container = expandCodeButton.closest<HTMLDetailsElement>(
@@ -124,17 +122,21 @@ const handleContentClick = (event: Event) => {
   }
 };
 
-// 在组件挂载到 DOM 后，添加事件监听器。
 onMounted(() => {
   if (postContentRef.value) {
     postContentRef.value.addEventListener("click", handleContentClick);
+
+    Fancybox.bind(postContentRef.value, "img:not(a img)", {
+      groupAll: true
+    });
   }
 });
 
-// 在组件卸载时清理事件监听器，防止内存泄漏。
 onUnmounted(() => {
   if (postContentRef.value) {
     postContentRef.value.removeEventListener("click", handleContentClick);
+    Fancybox.unbind(postContentRef.value);
+    Fancybox.close(true);
   }
 });
 </script>
@@ -155,6 +157,10 @@ onUnmounted(() => {
   word-wrap: break-word;
   overflow-wrap: break-word;
   line-height: 1.8;
+
+  img:not(a img) {
+    cursor: zoom-in;
+  }
 
   .md-editor-code {
     color: var(--md-theme-code-block-color);

@@ -21,6 +21,42 @@ const emit = defineEmits(["comment-submitted"]);
 
 const commentStore = useCommentStore();
 
+const contentWithFancybox = computed(() => {
+  const content = props.comment.content_html;
+
+  if (!content) {
+    return "";
+  }
+
+  const imgTagRegex =
+    /<img(?![^>]*class="[^"]*anzhiyu-owo-emotion[^"]*")[^>]+>/g;
+
+  let matchFound = false;
+  const processedContent = content.replace(imgTagRegex, imgTag => {
+    matchFound = true;
+
+    const srcMatch = /src=(["'])(.*?)\1/.exec(imgTag);
+    const altMatch = /alt=(["'])(.*?)\1/.exec(imgTag);
+
+    if (!srcMatch) {
+      console.warn(
+        "   - Image tag found, but could not extract 'src' attribute. Skipping.",
+        imgTag
+      );
+      return imgTag;
+    }
+
+    const src = srcMatch[2];
+    const caption = altMatch ? altMatch[2] : "";
+    const galleryName = `gallery-comment-${props.comment.id}`;
+
+    const replacement = `<a href="${src}" data-fancybox="${galleryName}" data-caption="${caption}">${imgTag}</a>`;
+    return replacement;
+  });
+
+  return processedContent;
+});
+
 const isLiked = computed(() =>
   commentStore.likedCommentIds.has(props.comment.id)
 );
@@ -28,8 +64,6 @@ const handleLike = () => {
   commentStore.toggleLikeComment(props.comment.id);
 };
 
-// --- 博主标签逻辑修改 ---
-// 直接根据后端返回的 is_admin_comment 字段进行判断
 const isBlogger = computed(() => !!props.comment.is_admin_comment);
 
 const MAX_HEIGHT_THRESHOLD = 280;
@@ -149,7 +183,6 @@ watch(
         class="comment-avatar"
         @error="onAvatarError"
       />
-
       <div class="comment-main">
         <div class="comment-header">
           <div class="user-info">
@@ -176,7 +209,7 @@ watch(
             </button>
           </div>
         </div>
-        <div class="comment-content" v-html="comment.content_html" />
+        <div class="comment-content" v-html="contentWithFancybox" />
         <div class="comment-meta">
           <span
             v-if="config.show_region && comment.ip_location"
@@ -195,7 +228,6 @@ watch(
         </div>
       </div>
     </div>
-
     <div v-if="isReplyFormVisible" class="reply-form-wrapper">
       <CommentForm
         :article-id="comment.article_id"
@@ -206,7 +238,6 @@ watch(
         @cancel="handleCancelReply"
       />
     </div>
-
     <div
       v-if="comment.children && comment.children.length > 0"
       :ref="el => (childrenContainerRef = el as HTMLElement)"
@@ -223,7 +254,6 @@ watch(
         @comment-submitted="$emit('comment-submitted')"
       />
     </div>
-
     <div v-if="isOverflowing" class="toggle-wrapper">
       <button
         v-if="!isExpanded"
@@ -240,6 +270,7 @@ watch(
 </template>
 
 <style lang="scss" scoped>
+/* 样式与之前保持一致 */
 .comment-item {
   display: flex;
   gap: 1rem;
@@ -321,9 +352,15 @@ watch(
   color: #373a47;
   line-height: 1.6;
   font-size: 0.95rem;
+  a {
+    border-bottom: none;
+  }
+  p {
+    margin: 0.5rem 0;
+  }
   img {
     max-height: 300px;
-    max-width: 300%;
+    max-width: 100%;
     border-radius: 4px;
     vertical-align: middle;
     &:not(.anzhiyu-owo-emotion) {

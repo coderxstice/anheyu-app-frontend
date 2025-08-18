@@ -20,6 +20,31 @@ const emit = defineEmits(["comment-submitted"]);
 
 const commentStore = useCommentStore();
 
+const contentWithFancybox = computed(() => {
+  const content = props.comment.content_html;
+  if (!content) return "";
+
+  // 匹配所有非表情的 <img> 标签
+  const imgTagRegex =
+    /<img(?![^>]*class="[^"]*anzhiyu-owo-emotion[^"]*")[^>]+>/g;
+
+  return content.replace(imgTagRegex, imgTag => {
+    // 从匹配到的 imgTag 字符串中提取 src 和 alt 属性
+    const srcMatch = /src=(["'])(.*?)\1/.exec(imgTag);
+    const altMatch = /alt=(["'])(.*?)\1/.exec(imgTag);
+
+    if (!srcMatch) {
+      return imgTag;
+    }
+
+    const src = srcMatch[2];
+    const caption = altMatch ? altMatch[2] : "";
+    const galleryName = `gallery-comment-${props.comment.parent_id || props.comment.id}`;
+
+    return `<a href="${src}" data-fancybox="${galleryName}" data-caption="${caption}">${imgTag}</a>`;
+  });
+});
+
 const isLiked = computed(() =>
   commentStore.likedCommentIds.has(props.comment.id)
 );
@@ -27,8 +52,6 @@ const handleLike = () => {
   commentStore.toggleLikeComment(props.comment.id);
 };
 
-// --- 博主标签逻辑修改 ---
-// 直接根据后端返回的 is_admin_comment 字段进行判断
 const isBlogger = computed(() => !!props.comment.is_admin_comment);
 
 const isReplyFormVisible = ref(false);
@@ -173,7 +196,7 @@ const scrollToParent = () => {
           :
         </div>
 
-        <div class="comment-content" v-html="comment.content_html" />
+        <div class="comment-content" v-html="contentWithFancybox" />
 
         <div class="comment-meta">
           <span
@@ -208,6 +231,7 @@ const scrollToParent = () => {
 </template>
 
 <style lang="scss" scoped>
+/* 样式与之前保持一致，只修改了 comment-content 部分 */
 .comment-item {
   display: flex;
   gap: 1rem;
@@ -312,23 +336,29 @@ const scrollToParent = () => {
   color: #373a47;
   line-height: 1.6;
   font-size: 0.95rem;
+
+  /* [核心修改] 样式调整 */
+  a {
+    border-bottom: none;
+  }
+
+  p {
+    margin: 0;
+  }
+
   img {
     max-height: 300px;
-    max-width: 300%;
+    max-width: 100%; /* 确保图片不溢出 */
     border-radius: 4px;
     vertical-align: middle;
     &:not(.anzhiyu-owo-emotion) {
       cursor: zoom-in;
     }
   }
-  .tanzhiyu-owo-emotion {
+  .anzhiyu-owo-emotion {
     width: 3rem;
     height: auto;
   }
-}
-
-:deep(.comment-content p) {
-  margin: 0;
 }
 .comment-meta {
   display: flex;
