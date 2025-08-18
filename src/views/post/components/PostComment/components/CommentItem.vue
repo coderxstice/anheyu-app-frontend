@@ -371,6 +371,14 @@ watch(
     width: 3rem;
     height: auto;
   }
+  blockquote {
+    border: var(--style-border-always);
+    background-color: var(--anzhiyu-secondbg);
+    color: var(--anzhiyu-secondtext);
+    border-radius: 8px;
+    margin: 1rem 0;
+    padding: 0.5rem 0.8rem;
+  }
 }
 .comment-meta {
   display: flex;

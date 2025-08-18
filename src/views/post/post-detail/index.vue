@@ -13,6 +13,7 @@ import { getPublicArticle, getPublicArticles } from "@/api/post";
 import type { Article } from "@/api/post/type";
 import { useLoadingStore } from "@/store/modules/loadingStore";
 import { useCommentStore } from "@/store/modules/commentStore";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
 import PostHeader from "./components/PostHeader/index.vue";
 import PostOutdateNotice from "./components/PostOutdateNotice/index.vue";
@@ -36,6 +37,7 @@ const recentArticles = ref<Article[]>([]);
 const loading = ref(true);
 const loadingStore = useLoadingStore();
 const commentStore = useCommentStore();
+const siteConfigStore = useSiteConfigStore();
 
 const originalMainColor = ref<string | null>(null);
 const originalMainOpDeepColor = ref<string | null>(null);
@@ -70,6 +72,17 @@ const articleWithCommentCount = computed(() => {
   return {
     ...article.value,
     comment_count: commentStore.totalComments
+  };
+});
+
+const commentBarrageConfig = computed(() => {
+  const siteConfig = siteConfigStore.getSiteConfig;
+  if (!siteConfig || !siteConfig.GRAVATAR_URL) {
+    return null;
+  }
+  return {
+    gravatarUrl: siteConfig.GRAVATAR_URL,
+    defaultGravatarType: siteConfig.DEFAULT_GRAVATAR_TYPE
   };
 });
 
@@ -257,11 +270,16 @@ watch(
       </main>
       <Sidebar />
     </div>
-    <CommentBarrage v-if="article" :article-id="article.id" />
+    <CommentBarrage
+      v-if="article && commentBarrageConfig"
+      :gravatar-url="commentBarrageConfig.gravatarUrl"
+      :default-gravatar-type="commentBarrageConfig.defaultGravatarType"
+    />
   </div>
 </template>
 
 <style lang="scss" scoped>
+/* ... 样式部分保持不变 ... */
 .post-header-placeholder {
   width: 100%;
   height: 30rem;

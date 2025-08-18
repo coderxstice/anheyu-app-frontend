@@ -1,5 +1,3 @@
-// src/store/modules/commentStore.ts
-
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 import {
@@ -13,7 +11,6 @@ import type { Comment, CreateCommentPayload } from "@/api/comment/type";
 const LIKED_COMMENTS_KEY = "liked_comment_ids";
 
 export const useCommentStore = defineStore("comment", () => {
-  // --- State and Getters 保持不变 ---
   const comments = ref<Comment[]>([]);
   const totalComments = ref(0);
   const currentPage = ref(1);
@@ -73,8 +70,6 @@ export const useCommentStore = defineStore("comment", () => {
    */
   async function fetchComments(page = 1, isSilent = false) {
     if (!currentArticleId.value) return;
-
-    // 只有在非静默模式下才显示加载状态
     if (!isSilent) {
       if (page === 1) {
         isLoading.value = true;
@@ -122,7 +117,6 @@ export const useCommentStore = defineStore("comment", () => {
   async function postComment(payload: CreateCommentPayload) {
     try {
       await createPublicComment(payload);
-      // 以静默模式重新获取第一页数据
       await fetchComments(1, true);
     } catch (error) {
       console.error("评论发布失败:", error);
