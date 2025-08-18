@@ -2,23 +2,25 @@
  * @Description: 路由配置
  * @Author: 安知鱼
  * @Date: 2025-04-08 17:29:06
- * @LastEditTime: 2025-08-16 12:24:12
+ * @LastEditTime: 2025-08-18 14:05:12
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
 const FrontendLayout = () => import("@/layout/frontend/index.vue");
-import { LOCAL_STORAGE_KEY } from "@/constant/index";
-
-const configLocal = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
-const appName = configLocal?.config?.APP_NAME || "安和鱼";
-const subTitle = configLocal?.config?.SUB_TITLE || "安和鱼的个人博客";
+import { getConfig } from "@/config/base";
 
 export default [
   {
     path: "/",
     component: FrontendLayout,
     meta: {
-      title: `${appName} - ${subTitle}`,
+      title: () => {
+        const configs = getConfig();
+
+        const appName = configs?.APP_NAME;
+        const subTitle = configs?.SUB_TITLE;
+        return `${appName} - ${subTitle}`;
+      },
       rank: 100
     },
     children: [
@@ -27,7 +29,12 @@ export default [
         name: "PostHome",
         component: () => import("@/views/post/post-home/index.vue"),
         meta: {
-          title: `${appName} - ${subTitle}`,
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            const subTitle = configs?.SUB_TITLE;
+            return `${appName} - ${subTitle}`;
+          },
           showLink: false
         }
       },
@@ -36,7 +43,12 @@ export default [
         name: "PostDetail",
         component: () => import("@/views/post/post-detail/index.vue"),
         meta: {
-          title: `${appName} - 文章详情`,
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            const subTitle = configs?.SUB_TITLE;
+            return `${appName} - ${subTitle}`;
+          },
           showLink: false
         }
       },
@@ -45,7 +57,12 @@ export default [
         name: "PostPage",
         component: () => import("@/views/post/post-home/index.vue"),
         meta: {
-          title: `${appName} - ${subTitle}`,
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            const subTitle = configs?.SUB_TITLE;
+            return `${appName} - ${subTitle}`;
+          },
           showLink: false
         }
       },
@@ -54,7 +71,11 @@ export default [
         name: "PostArchives",
         component: () => import("@/views/post/post-home/index.vue"),
         meta: {
-          title: `${appName} - 归档`,
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 归档`;
+          },
           showLink: false
         }
       },
@@ -63,7 +84,11 @@ export default [
         name: "PostArchivesByYear",
         component: () => import("@/views/post/post-home/index.vue"),
         meta: {
-          title: `${appName} - 归档`,
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 归档`;
+          },
           showLink: false
         }
       },
@@ -72,7 +97,11 @@ export default [
         name: "PostArchivesByMonth",
         component: () => import("@/views/post/post-home/index.vue"),
         meta: {
-          title: `${appName} - 归档`,
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 归档`;
+          },
           showLink: false
         }
       },
@@ -81,7 +110,11 @@ export default [
         name: "PostArchivesDetailPaginated",
         component: () => import("@/views/post/post-home/index.vue"),
         meta: {
-          title: `${appName} - 归档`,
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 归档`;
+          },
           showLink: false
         }
       },
@@ -90,7 +123,11 @@ export default [
         name: "PostArchivesByYearPaginated",
         component: () => import("@/views/post/post-home/index.vue"),
         meta: {
-          title: `${appName} - 归档`,
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 归档`;
+          },
           showLink: false
         }
       },
@@ -99,7 +136,11 @@ export default [
         name: "PostArchivesByMonthPaginated",
         component: () => import("@/views/post/post-home/index.vue"),
         meta: {
-          title: `${appName} - 归档`,
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 归档`;
+          },
           showLink: false
         }
       },
@@ -108,7 +149,11 @@ export default [
         name: "PostTagsAll",
         component: () => import("@/views/post/tags/index.vue"),
         meta: {
-          title: `${appName} - 标签`,
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 标签`;
+          },
           showLink: false
         }
       },
@@ -117,7 +162,11 @@ export default [
         name: "PostTagsDetail",
         component: () => import("@/views/post/post-home/index.vue"),
         meta: {
-          title: `${appName} - 标签`,
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 标签`;
+          },
           showLink: false
         }
       },
@@ -126,7 +175,11 @@ export default [
         name: "PostTagsDetailPaginated",
         component: () => import("@/views/post/post-home/index.vue"),
         meta: {
-          title: `${appName} - 标签`,
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 标签`;
+          },
           showLink: false
         }
       },
@@ -135,7 +188,11 @@ export default [
         name: "PostCategoriesAll",
         component: () => import("@/views/post/categories/index.vue"),
         meta: {
-          title: `${appName} - 分类`,
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 分类`;
+          },
           showLink: false
         }
       },
@@ -144,7 +201,11 @@ export default [
         name: "PostHomeByCategory",
         component: () => import("@/views/post/post-home/index.vue"),
         meta: {
-          title: `${appName} - 分类`,
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 分类`;
+          },
           showLink: false
         }
       },
@@ -153,7 +214,24 @@ export default [
         name: "PostHomeByCategoryPaginated",
         component: () => import("@/views/post/post-home/index.vue"),
         meta: {
-          title: `${appName} - 分类`,
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 分类`;
+          },
+          showLink: false
+        }
+      },
+      {
+        path: "link",
+        name: "PostLink",
+        component: () => import("@/views/post/link/index.vue"),
+        meta: {
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 友人帐`;
+          },
           showLink: false
         }
       },
@@ -162,7 +240,11 @@ export default [
         name: "RandomPost",
         component: () => import("@/views/post/random-post/index.vue"),
         meta: {
-          title: `${appName} - 随机文章`,
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 随机文章`;
+          },
           showLink: false
         }
       }
@@ -173,6 +255,7 @@ export default [
     name: "PostEdit",
     component: () => import("@/views/system/post-management/edit.vue"),
     meta: {
+      // 这个标题不依赖动态配置，所以保持为字符串即可
       title: "编辑文章",
       showLink: false
     }
@@ -183,7 +266,11 @@ export default [
     component: () => import("@/views/login/index.vue"),
     alias: "/login/reset",
     meta: {
-      title: `${appName} - 登录`,
+      title: () => {
+        const configs = getConfig();
+        const appName = configs?.APP_NAME;
+        return `${appName} - 登录`;
+      },
       showLink: false,
       rank: 101
     }
@@ -192,7 +279,11 @@ export default [
     path: "/redirect",
     component: Layout,
     meta: {
-      title: `${appName} - 加载中`,
+      title: () => {
+        const configs = getConfig();
+        const appName = configs?.APP_NAME;
+        return `${appName} - 加载中`;
+      },
       showLink: false,
       rank: 102
     },
@@ -209,7 +300,11 @@ export default [
     name: "AlbumHome",
     component: () => import("@/views/album-home/index.vue"),
     meta: {
-      title: `${appName} - 相册`,
+      title: () => {
+        const configs = getConfig();
+        const appName = configs?.APP_NAME;
+        return `${appName} - 相册`;
+      },
       showLink: false,
       rank: 103
     }

@@ -136,9 +136,17 @@ router.beforeEach((to: ToRouteType, _from, next) => {
   if (!externalLink) {
     to.matched.some(item => {
       if (!item.meta.title) return "";
+
+      let titleText: string;
+      if (typeof item.meta.title === "function") {
+        titleText = item.meta.title();
+      } else {
+        titleText = item.meta.title as string;
+      }
+
       const Title = getConfig().Title;
-      if (Title) document.title = `${item.meta.title} | ${Title}`;
-      else document.title = item.meta.title as string;
+      if (Title) document.title = `${titleText} | ${Title}`;
+      else document.title = titleText;
     });
   }
 
@@ -253,8 +261,6 @@ router.beforeEach((to: ToRouteType, _from, next) => {
         }
         return to.path.startsWith(whitePath);
       });
-
-      console.log(isInWhiteList, isNotFound, router.getRoutes());
 
       // 如果是白名单页面，或者是 404 页面，则直接放行
       if (isInWhiteList || isNotFound) {

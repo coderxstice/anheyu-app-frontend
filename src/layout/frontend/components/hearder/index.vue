@@ -29,7 +29,7 @@
         <div class="page-name-mask">
           <el-tooltip content="返回顶部" placement="bottom" :showArrow="false">
             <div class="page-name-container" @click="scrollToTop">
-              <span class="page-name">{{ siteConfig.APP_NAME }}</span>
+              <span class="page-name">{{ currentPageTitle }}</span>
             </div>
           </el-tooltip>
         </div>
@@ -78,9 +78,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import { useArticleStore } from "@/store/modules/articleStore";
+
 import { useHeader } from "./hooks/useHeader";
 import BackMenuListGroups from "./components/back-menu-list-groups.vue";
 import HeaderRight from "./components/header-right.vue";
@@ -88,6 +90,7 @@ import HeaderRight from "./components/header-right.vue";
 const siteConfigStore = useSiteConfigStore();
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);
 const route = useRoute();
+const articleStore = useArticleStore();
 
 const { isHeaderTransparent, isScrolled, scrollPercent, isFooterVisible } =
   useHeader();
@@ -98,6 +101,28 @@ const headerConfig = computed(() => siteConfig.value?.header);
 const navConfig = computed(() => headerConfig.value?.nav);
 const menuConfig = computed(() => headerConfig.value?.menu);
 const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
+
+const currentPageTitle = computed(() => {
+  if (route.name === "PostDetail" && articleStore.currentArticleTitle) {
+    return articleStore.currentArticleTitle;
+  }
+
+  const title = route.meta.title;
+  if (typeof title === "function") {
+    return title();
+  }
+  return title || "";
+});
+
+watch(
+  currentPageTitle,
+  newTitle => {
+    if (newTitle) {
+      document.title = newTitle;
+    }
+  },
+  { immediate: true }
+);
 
 const scrollToTop = () => {
   window.scrollTo({

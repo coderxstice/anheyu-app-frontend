@@ -13,7 +13,7 @@ declare global {
    */
   interface CustomizeRouteMeta {
     /** 菜单名称（兼容国际化、非国际化，如何用国际化的写法就必须在根目录的`locales`文件夹下对应添加） `必填` */
-    title: string;
+    title: string | (() => string);
     /** 菜单图标 `可选` */
     icon?: string | FunctionalComponent | IconifyIcon;
     /** 菜单名称右侧的额外图标 */
@@ -90,7 +90,7 @@ declare global {
     alias?: string | Array<string>;
     meta?: {
       /** 菜单名称（兼容国际化、非国际化，如何用国际化的写法就必须在根目录的`locales`文件夹下对应添加）`必填` */
-      title: string;
+      title: string | (() => string);
       /** 菜单图标 `可选` */
       icon?: string | FunctionalComponent | IconifyIcon;
       /** 是否在菜单中显示（默认`true`）`可选` */

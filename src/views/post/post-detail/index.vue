@@ -14,6 +14,7 @@ import type { Article } from "@/api/post/type";
 import { useLoadingStore } from "@/store/modules/loadingStore";
 import { useCommentStore } from "@/store/modules/commentStore";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import { useArticleStore } from "@/store/modules/articleStore";
 
 import PostHeader from "./components/PostHeader/index.vue";
 import PostOutdateNotice from "./components/PostOutdateNotice/index.vue";
@@ -66,6 +67,7 @@ const handleCommentIdsLoaded = (ids: string[]) => {
 };
 
 const commentRef = ref<InstanceType<typeof PostComment> | null>(null);
+const articleStore = useArticleStore();
 
 const articleWithCommentCount = computed(() => {
   if (!article.value) return null;
@@ -97,9 +99,7 @@ const fetchRequiredData = async (id: string) => {
     ]);
 
     article.value = articleResponse.data;
-    if (document) {
-      document.title = articleResponse.data.title;
-    }
+    articleStore.setCurrentArticleTitle(articleResponse.data.title);
 
     recentArticles.value = recentArticlesResponse.data.list;
   } catch (error) {
