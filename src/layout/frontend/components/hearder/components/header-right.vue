@@ -232,4 +232,9 @@ const scrollToTop = () => {
     }
   }
 }
+@media (max-width: 768px) {
+  .header-right {
+    padding: 0 1.2rem;
+  }
+}
 </style>

@@ -226,12 +226,11 @@ const creativityPairs = computed(() => {
   cursor: wait;
 }
 
-/* 左侧区域样式 */
 .home-top-container {
   display: flex;
   gap: 0.5rem;
   width: 100%;
-  margin: 1rem auto 0;
+  margin: 0.5rem auto 0;
 }
 .left-section {
   flex: 1.2;

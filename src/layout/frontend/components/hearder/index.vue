@@ -465,6 +465,9 @@ const scrollToTop = () => {
   .main-nav {
     display: none !important;
   }
+  .frontend-header .header-wrapper .header-content {
+    padding: 0 1rem;
+  }
 }
 
 #toggle-menu {

@@ -219,4 +219,10 @@ watch(
     flex-direction: row !important;
   }
 }
+
+@media (max-width: 768px) {
+  .post-home-top-container {
+    padding: 0 1rem;
+  }
+}
 </style>
