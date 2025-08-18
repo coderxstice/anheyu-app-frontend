@@ -1,18 +1,33 @@
-<!--
- * @Description:
- * @Author: 安知鱼
- * @Date: 2025-08-18 13:27:18
- * @LastEditTime: 2025-08-18 13:27:22
- * @LastEditors: 安知鱼
--->
 <script setup lang="ts">
+import { onMounted } from "vue";
+import { useLinkStore } from "@/store/modules/link";
+import LinkTopBanner from "./components/LinkTopBanner.vue";
+import LinkListSection from "./components/LinkListSection.vue";
+
 defineOptions({
   name: "PostLink"
+});
+
+// 初始化 store
+const linkStore = useLinkStore();
+
+onMounted(() => {
+  linkStore.fetchInitialBannerLinks();
 });
 </script>
 
 <template>
-  <div>test</div>
+  <div class="post-link-page">
+    <LinkTopBanner />
+
+    <LinkListSection />
+  </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.post-link-page {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+</style>

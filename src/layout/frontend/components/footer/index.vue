@@ -217,35 +217,54 @@ import { ref, computed, onMounted } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { onEnter, onLeave } from "@/utils/transitions";
 import { getIconClass } from "@/utils/icon";
+import { getRandomLinks } from "@/api/postLink";
+
+interface FriendLink {
+  name: string;
+  href: string;
+}
 
 const siteConfigStore = useSiteConfigStore();
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);
 const footerConfig = computed(() => siteConfig.value?.footer);
 const icpNumber = computed(() => siteConfig.value?.ICP_NUMBER);
 
-const allFriends = ref([
-  { name: "胡桃木实验室", href: "https://www.htmacg.cn/" },
-  { name: "包子哟", href: "https://blog.bugjava.cn" },
-  { name: "道宣的窝", href: "https://daoxuan.cc/" },
-  { name: "张洪Heo", href: "https://blog.zhheo.com/" },
-  { name: "Leonus", href: "https://blog.leonus.cn/" },
-  { name: "無名のBlog", href: "https://wumou.org" }
-]);
-const displayedFriends = ref<{ name: string; href: string }[]>([]);
+const displayedFriends = ref<FriendLink[]>([]);
 const rotationCount = ref(0);
 const isAnimating = ref(false);
 
-function refreshFriendLinks() {
+async function refreshFriendLinks() {
   if (isAnimating.value) return;
   if (!footerConfig.value?.list?.randomFriends) return;
+
   const count = Number(footerConfig.value.list.randomFriends);
-  const shuffled = [...allFriends.value].sort(() => 0.5 - Math.random());
-  displayedFriends.value = shuffled.slice(0, count);
-  rotationCount.value++;
+  if (count <= 0) return;
+
+  // 立即触发动画以提供即时反馈
   isAnimating.value = true;
-  setTimeout(() => {
-    isAnimating.value = false;
-  }, 300);
+  rotationCount.value++;
+
+  try {
+    const res = await getRandomLinks({ num: count });
+    if (res.code === 200 && res.data && res.data.length > 0) {
+      // 将 API 返回的数据映射为模板所需的格式
+      displayedFriends.value = res.data.map(link => ({
+        name: link.name,
+        href: link.url
+      }));
+    } else {
+      console.error("未能获取到随机友链或返回数据为空");
+      displayedFriends.value = []; // 如果获取失败或无数据，清空列表
+    }
+  } catch (error) {
+    console.error("请求随机友链失败", error);
+    displayedFriends.value = []; // 出错时也清空列表
+  } finally {
+    // 等待动画结束后再重置状态
+    setTimeout(() => {
+      isAnimating.value = false;
+    }, 300);
+  }
 }
 
 const copyrightText = computed(() => {
