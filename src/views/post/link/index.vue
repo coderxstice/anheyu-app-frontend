@@ -1,6 +1,4 @@
-<!-- src/views/post/link/index.vue -->
 <script setup lang="ts">
-// 1. 导入 ref
 import { computed, onMounted, ref } from "vue";
 import { useLinkStore } from "@/store/modules/link";
 import LinkTopBanner from "./components/LinkTopBanner.vue";
@@ -24,7 +22,6 @@ onMounted(() => {
 
 const applyLinkSectionRef = ref<HTMLElement | null>(null);
 
-// 3. 创建处理滚动的方法
 const handleScrollToApply = () => {
   if (applyLinkSectionRef.value) {
     const offset = 80;
@@ -55,8 +52,9 @@ const handleScrollToApply = () => {
 
 <style lang="scss" scoped>
 .post-link-page {
-  padding: 20px;
-  max-width: 1400px;
   margin: 0 auto;
+  padding: 0 1.5rem;
+  max-width: 1400px;
+  width: 100%;
 }
 </style>
