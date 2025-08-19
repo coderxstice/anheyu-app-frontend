@@ -2,7 +2,7 @@
  * @Description: 系统配置相关的常量，与后端 Go 定义和 API 响应保持同步。
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:42:04
- * @LastEditTime: 2025-08-13 11:54:55
+ * @LastEditTime: 2025-08-19 15:46:05
  * @LastEditors: 安知鱼
  */
 
@@ -68,6 +68,12 @@ const KeySidebarSiteInfoTotalWordCount: SettingKey =
   "sidebar.siteinfo.totalWordCount";
 const KeySidebarArchiveDisplayMonths: SettingKey =
   "sidebar.archive.displayMonths";
+
+// 友链配置
+const KeyFriendLinkDefaultCategory: SettingKey = "FRIEND_LINK_DEFAULTCATEGORY";
+const KeyFriendLinkApplyCondition: SettingKey = "FRIEND_LINK_APPLY_CONDITION";
+const KeyFriendLinkApplyCustomCode: SettingKey =
+  "FRIEND_LINK_APPLY_CUSTOM_CODE";
 
 // --- 前台及页脚配置 ---
 const KeyFrontDeskSiteOwnerName: SettingKey = "frontDesk.siteOwner.name";
@@ -254,6 +260,11 @@ export const constant = {
   KeyFooterSocialBarRight,
   KeyFooterList,
   KeyFooterBarLinkList,
+
+  // 友链配置
+  KeyFriendLinkDefaultCategory,
+  KeyFriendLinkApplyCondition,
+  KeyFriendLinkApplyCustomCode,
 
   // --- 文章配置 ---
   KeyDefaultCover,

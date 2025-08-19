@@ -1,13 +1,10 @@
-// src/views/system/settings-management/type/index.ts
 /*
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-24 17:29:16
- * @LastEditTime: 2025-08-13 11:54:12
+ * @LastEditTime: 2025-08-19 15:50:45
  * @LastEditors: 安知鱼
  */
-
-// ... (其他接口 SiteInfo, PageSittingInfo, etc. 保持不变) ...
 
 /**
  * @description: 站点信息表单接口
@@ -52,6 +49,7 @@ export interface FileSettingsInfo {
   musicCoverSupportedExts: string;
 
   enableFfmpegGenerator: boolean;
+
   ffmpegPath: string;
   ffmpegMaxFileSize: string;
   ffmpegSupportedExts: string;
@@ -63,6 +61,7 @@ export interface FileSettingsInfo {
 
   queueThumbConcurrency: number;
   queueThumbMaxExecTime: number;
+
   queueThumbBackoffFactor: number;
   queueThumbMaxBackoff: number;
   queueThumbMaxRetries: number;
@@ -295,11 +294,30 @@ export interface EmailSettingsInfo {
   smtpForceSSL: boolean;
 }
 
+/**
+ * @description: 友链分类类型
+ */
+export interface FLinkCategory {
+  name: string;
+  style: string;
+  description: string;
+}
+
+/**
+ * @description: 友链配置表单接口
+ */
+export interface FLinkSettingsInfo {
+  friendLinkDefaultCategory: string;
+  friendLinkApplyCondition: string[];
+  friendLinkApplyCustomCode: string;
+}
+
 export interface FrontDeskSettings {
   home: HomePageSettingsInfo;
   sidebar: SidebarPageSettingsInfo;
   comment: CommentSettingsInfo;
   email: EmailSettingsInfo;
+  fLink: FLinkSettingsInfo;
 }
 
 /**
