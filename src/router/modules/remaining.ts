@@ -2,7 +2,7 @@
  * @Description: 路由配置
  * @Author: 安知鱼
  * @Date: 2025-04-08 17:29:06
- * @LastEditTime: 2025-08-18 14:05:12
+ * @LastEditTime: 2025-08-19 17:51:57
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
@@ -247,6 +247,19 @@ export default [
           },
           showLink: false
         }
+      },
+      {
+        path: "air-conditioner",
+        name: "AirConditioner",
+        component: () => import("@/views/post/air-conditioner/index.vue"),
+        meta: {
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 小空调`;
+          },
+          showLink: false
+        }
       }
     ]
   },
@@ -255,7 +268,6 @@ export default [
     name: "PostEdit",
     component: () => import("@/views/system/post-management/edit.vue"),
     meta: {
-      // 这个标题不依赖动态配置，所以保持为字符串即可
       title: "编辑文章",
       showLink: false
     }
