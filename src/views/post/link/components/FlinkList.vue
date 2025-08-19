@@ -28,12 +28,7 @@ defineProps<{
         :title="link.name"
         target="_blank"
       >
-        <img
-          class="flink-avatar"
-          :src="link.logo"
-          :alt="link.name"
-          onerror="this.onerror=null;this.src='/img/b_av.webp'"
-        />
+        <img class="flink-avatar" :src="link.logo" :alt="link.name" />
         <div class="flink-item-info">
           <span class="flink-item-name">{{ link.name }}</span>
           <span class="flink-item-desc" :title="link.description">{{

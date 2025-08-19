@@ -92,3 +92,14 @@
     transform: translateX(-50%);
   }
 }
+
+@keyframes light_tag {
+  0% {
+    transform: skewX(0deg);
+    left: -150px;
+  }
+  99% {
+    transform: skewX(-25deg);
+    left: 50px;
+  }
+}

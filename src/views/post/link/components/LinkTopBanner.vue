@@ -96,11 +96,7 @@ const pairedLinkList = computed(() => {
             target="_blank"
             :title="item.name"
           >
-            <img
-              :src="item.logo"
-              :title="item.name"
-              onerror="this.onerror=null;this.src='/img/b_av.webp'"
-            />
+            <img :src="item.logo" :title="item.name" />
             <span class="tags-group-title">{{ item.name }}</span>
           </a>
         </div>

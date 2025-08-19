@@ -2,7 +2,7 @@
  * @Description: 友链相关类型定义
  * @Author: 安知鱼
  * @Date: 2025-08-18 16:10:00
- * @LastEditTime: 2025-08-18 18:31:59
+ * @LastEditTime: 2025-08-19 15:01:18
  * @LastEditors: 安知鱼
  */
 
@@ -27,6 +27,7 @@ export interface LinkCategory {
   id: number;
   name: string;
   style: "card" | "list";
+  description: string;
 }
 
 /** 友链状态 */
