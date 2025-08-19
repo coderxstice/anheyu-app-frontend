@@ -2,7 +2,7 @@
  * @Description: 友情链接申请面板
  * @Author: 安知鱼
  * @Date: 2025-08-19 10:19:23
- * @LastEditTime: 2025-08-19 11:02:18
+ * @LastEditTime: 2025-08-19 17:33:48
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -118,7 +118,6 @@ watch(allChecked, isAllChecked => {
       </template>
       <p style="margin-top: 0">请<strong>勾选</strong>你符合的所有条件：</p>
       <div id="friendlink_checkboxs">
-        <!-- 移除了外层的 <p> 标签，并直接使用 div 来包裹，减少不必要的样式影响 -->
         <div
           v-for="(condition, index) in friendLinkApplyCondition"
           :key="index"
@@ -197,8 +196,7 @@ watch(allChecked, isAllChecked => {
 
 <style lang="scss" scoped>
 .apply-link-container {
-  max-width: 700px;
-  margin: 20px auto;
+  width: 100%;
 }
 
 .card-header {
@@ -207,9 +205,5 @@ watch(allChecked, isAllChecked => {
 
 .form-card {
   margin-top: 20px;
-}
-
-.submit-btn {
-  width: 100%;
 }
 </style>

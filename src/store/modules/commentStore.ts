@@ -20,7 +20,23 @@ export const useCommentStore = defineStore("comment", () => {
   const isLoadingMore = ref(false);
   const likedCommentIds = ref<Set<string>>(new Set());
 
-  const hasMore = computed(() => comments.value.length < totalComments.value);
+  const totalLocalComments = computed(() => {
+    let count = 0;
+    const countComments = (commentList: Comment[]) => {
+      for (const comment of commentList) {
+        count++;
+        if (comment.children && comment.children.length > 0) {
+          countComments(comment.children);
+        }
+      }
+    };
+    countComments(comments.value);
+    return count;
+  });
+
+  const hasMore = computed(
+    () => totalLocalComments.value < totalComments.value
+  );
 
   function loadLikedIdsFromStorage() {
     try {
@@ -117,8 +133,10 @@ export const useCommentStore = defineStore("comment", () => {
       };
 
       if (newComment.parent_id) {
+        // 这是对一条评论的回复
         let topLevelParent: Comment | null = null;
 
+        // 查找父评论所在的顶级评论线程
         topLevelParent =
           comments.value.find(c => c.id === newComment.parent_id) || null;
 
@@ -144,13 +162,15 @@ export const useCommentStore = defineStore("comment", () => {
           console.warn(
             "Parent comment's thread not found, falling back to a refresh."
           );
+          // 如果找不到父评论，做一个全量刷新作为保底
           await fetchComments(1);
         }
       } else {
+        // 这是一条新的顶级评论
         comments.value.unshift(newComment);
+        // 只有顶级评论才增加 totalComments 的值
+        totalComments.value++;
       }
-
-      totalComments.value++;
     } catch (error) {
       console.error("评论发布失败:", error);
       throw error;
