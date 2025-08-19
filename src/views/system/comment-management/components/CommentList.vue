@@ -194,7 +194,7 @@ const handleAvatarError = (event: Event, comment: AdminComment) => {
               </span>
               <span class="meta-item">
                 <IconifyIconOffline :icon="MapPinIcon" />
-                {{ comment.ip_address }} ({{ comment.ip_address }})
+                {{ comment.ip_location }} ({{ comment.ip_address }})
               </span>
               <span class="meta-item">
                 <IconifyIconOffline :icon="ThumbUpIcon" />
