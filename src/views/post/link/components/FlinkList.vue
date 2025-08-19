@@ -14,11 +14,10 @@ defineProps<{
   <div class="flink-list">
     <div v-for="link in links" :key="link.id" class="flink-list-item">
       <template v-if="link.tags && link.tags.length > 0">
-        <span
-          class="link-tag"
-          :style="{ backgroundColor: link.tags[0].color }"
-          >{{ link.tags[0].name }}</span
-        >
+        <span class="link-tag" :style="{ backgroundColor: link.tags[0].color }">
+          {{ link.tags[0].name }}
+          <i class="light" />
+        </span>
       </template>
 
       <a
@@ -42,69 +41,153 @@ defineProps<{
 
 <style lang="scss" scoped>
 .flink-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 15px;
+  padding: 0px;
+  margin: 0.625rem -6px 1.25rem;
+  overflow: hidden;
+  text-align: center;
 }
+
 .flink-list-item {
   position: relative;
-  background-color: var(--anzhiyu-background-op);
-  border-radius: 8px;
-  transition: all 0.3s;
+  width: calc(20% - 12px);
+  box-shadow: var(--anzhiyu-shadow-border);
+  display: flex;
+  margin: 6px;
+  transition: 0.3s ease-in-out;
+  border-radius: 12px;
+  border: var(--style-border-always);
+  background: var(--anzhiyu-card-bg);
+  height: 90px;
+  line-height: 17px;
+  transform: translateZ(0px);
+  overflow: hidden;
+  float: left;
 
   &:hover {
-    background-color: var(--anzhiyu-main-op);
     transform: scale(1.02);
+    box-shadow: var(--anzhiyu-shadow-main);
+    background: var(--anzhiyu-lighttext);
+    border: var(--style-border-hover);
+
+    .link-tag {
+      left: -70px;
+    }
+    .cf-friends-link {
+      .flink-avatar {
+        width: 0px;
+        height: 0px;
+        opacity: 0;
+        min-width: 0px;
+        min-height: 0px;
+        transition: 0.6s;
+        margin: 5px;
+      }
+      .flink-item-info {
+        min-width: calc(100% - 20px);
+        .flink-item-name {
+          color: var(--anzhiyu-card-bg);
+        }
+        .flink-item-desc {
+          width: 100%;
+          overflow: hidden;
+          color: var(--anzhiyu-card-bg);
+        }
+      }
+    }
   }
 
   .link-tag {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: bold;
+    top: 0px;
+    left: 0px;
+    background-color: var(--anzhiyu-blue);
+    box-shadow: var(--anzhiyu-shadow-blue);
+    color: var(--anzhiyu-white);
     z-index: 1;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    font-size: 0.6rem;
+    padding: 4px 8px;
+    border-radius: 12px 0px;
+    transition: 0.3s;
+    overflow: hidden;
   }
 
   .cf-friends-link {
     display: flex;
+    width: 100%;
+    height: 100%;
     align-items: center;
-    padding: 10px;
+    border-width: initial;
+    border-style: none;
+    border-color: initial;
+    border-image: initial;
+    color: var(--heo-fontcolor);
     text-decoration: none;
+    font-weight: 700;
+    padding: 0px 4px;
+    border-radius: 4px 4px 0px 0px;
 
     .flink-avatar {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      margin-right: 10px;
+      min-width: 60px;
+      min-height: 60px;
+      border-radius: 32px;
+      margin: 15px 20px 15px 15px;
+      transition: 0.3s;
+      background: var(--anzhiyu-background);
+      float: left;
+      width: 60px;
+      height: 60px;
       object-fit: cover;
     }
 
     .flink-item-info {
-      overflow: hidden;
-      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: calc(100% - 90px);
+      height: fit-content;
       .flink-item-name {
-        display: block;
-        color: var(--anzhiyu-fontcolor);
-        font-weight: bold;
-        white-space: nowrap;
-        overflow: hidden;
+        text-align: left;
+        font-size: 19px;
+        line-height: 20px;
+        max-width: calc(100% - 12px);
         text-overflow: ellipsis;
+        padding: 0px 10px 0px 0px;
+        overflow: hidden;
+        white-space: nowrap;
+        display: block;
+        font-weight: 700;
+        color: var(--anzhiyu-fontcolor);
       }
       .flink-item-desc {
-        display: block;
-        color: var(--anzhiyu-second-fontcolor);
-        font-size: 0.85rem;
-        white-space: nowrap;
-        overflow: hidden;
+        color: var(--anzhiyu-fontcolor);
+        text-align: left;
+        height: 40px;
         text-overflow: ellipsis;
-        margin-top: 4px;
+        opacity: 0.7;
+        -webkit-box-orient: vertical;
+        line-clamp: 2;
+        -webkit-line-clamp: 2;
+        white-space: normal;
+        padding: 5px 10px 16px 0px;
+        overflow: hidden;
+        font-size: 0.93rem;
       }
     }
+  }
+
+  .light {
+    cursor: pointer;
+    position: absolute;
+    top: 0px;
+    width: 100px;
+    height: 50px;
+    background-image: -webkit-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 0.5),
+      rgba(255, 255, 255, 0)
+    );
+    animation: 4s ease 0s infinite normal both running light_tag;
   }
 }
 </style>
