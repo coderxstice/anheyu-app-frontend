@@ -66,3 +66,73 @@ button {
   appearance: button;
   -webkit-appearance: button;
 }
+
+input[type="checkbox"]:not(.el-checkbox__original) {
+  -webkit-appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -o-appearance: none;
+  -ms-appearance: none;
+  appearance: none;
+  position: relative;
+  height: 16px;
+  width: 16px;
+  transition: all 0.15s ease-out 0s;
+  cursor: pointer;
+  display: inline-block;
+  outline: 0;
+  border-radius: 2px;
+  flex-shrink: 0;
+  margin-right: 8px;
+  border: 2px solid var(--anzhiyu-theme);
+  pointer-events: none;
+  box-sizing: border-box;
+  padding: 0;
+  transform: translateY(2px);
+
+  &:checked {
+    background: var(--anzhiyu-theme);
+  }
+
+  &:before,
+  &:after {
+    position: absolute;
+    content: "";
+    background: #fff;
+  }
+
+  &:checked:before {
+    left: 0;
+    top: 7px;
+    width: 6px;
+    height: 2px;
+  }
+  &:checked:after {
+    right: 3px;
+    bottom: 1px;
+    width: 2px;
+    height: 10px;
+  }
+
+  &:before {
+    left: 1px;
+    top: 5px;
+    width: 0;
+    height: 2px;
+    transform: rotate(45deg);
+    transition: all 0.2s ease-in;
+  }
+  &:after {
+    right: 7px;
+    bottom: 3px;
+    width: 2px;
+    height: 0;
+    transition-delay: 0.25s;
+    transform: rotate(40deg);
+  }
+}
+
+b,
+strong {
+  color: var(--anzhiyu-lighttext);
+}

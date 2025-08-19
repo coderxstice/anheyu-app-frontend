@@ -298,7 +298,6 @@ onMounted(() => {
   );
   color: var(--anzhiyu-fontcolor);
   margin-top: 1rem;
-  min-height: 26.875rem;
 }
 .footer-wrap {
   position: relative;

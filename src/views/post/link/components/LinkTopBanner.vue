@@ -1,3 +1,4 @@
+<!-- src/views/post/link/components/LinkTopBanner.vue -->
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useLinkStore } from "@/store/modules/link";
@@ -7,37 +8,37 @@ defineOptions({
   name: "LinkTopBanner"
 });
 
+const emit = defineEmits(["scrollToApply"]);
+
 const linkStore = useLinkStore();
 const isVisitingRandom = ref(false);
 
-// 从 Pinia store 中获取已处理好的 Banner 友链数据
 const linkList = computed(() => linkStore.bannerLinks);
 
-// 随机访问按钮点击事件
 const handleRandomVisit = async () => {
-  if (isVisitingRandom.value) return; // 防止重复点击
+  if (isVisitingRandom.value) return;
   isVisitingRandom.value = true;
   try {
     const res = await getRandomLinks({ num: 1 });
     if (res.code === 200 && res.data && res.data.length > 0) {
       const randomLink = res.data[0];
-      // 在新标签页中打开链接
       window.open(randomLink.url, "_blank");
     } else {
-      // 可以根据需要添加错误提示，例如使用 ElMessage
       console.error("未能获取到随机友链");
     }
   } catch (error) {
     console.error("请求随机友链失败", error);
   } finally {
-    isVisitingRandom.value = false; // 恢复按钮状态
+    isVisitingRandom.value = false;
   }
 };
 
-// 为了实现无缝滚动，我们将列表复制一份
+const triggerScrollToApply = () => {
+  emit("scrollToApply");
+};
+
 const displayLinkList = computed(() => {
   if (linkList.value.length === 0) return [];
-  // 如果友链数量过少，多复制几次以填满视觉
   if (linkList.value.length < 15) {
     return [
       ...linkList.value,
@@ -49,7 +50,6 @@ const displayLinkList = computed(() => {
   return [...linkList.value, ...linkList.value];
 });
 
-// 将友链列表两两分组，以匹配 DOM 结构
 const pairedLinkList = computed(() => {
   const pairs = [];
   for (let i = 0; i < displayLinkList.value.length; i += 2) {
@@ -75,7 +75,13 @@ const pairedLinkList = computed(() => {
         <i class="anzhiyufont anzhiyu-icon-paper-plane1" />
         <span class="banner-button-text"> 随机访问 </span>
       </button>
-      <a class="banner-button" href="javascript:;" rel="external nofollow">
+      <!-- 3. 修改 <a> 标签，移除 href，添加 @click 事件 -->
+      <a
+        class="banner-button"
+        href="#"
+        rel="external nofollow"
+        @click.prevent="triggerScrollToApply"
+      >
         <i class="anzhiyufont anzhiyu-icon-arrow-circle-right" />
         <span class="banner-button-text">申请友链</span>
       </a>

@@ -2,7 +2,7 @@
  * @Description: 友链功能所有API
  * @Author: 安知鱼
  * @Date: 2025-08-18 16:06:49
- * @LastEditTime: 2025-08-18 18:32:11
+ * @LastEditTime: 2025-08-19 11:04:09
  * @LastEditors: 安知鱼
  */
 import { http } from "@/utils/http";
@@ -60,11 +60,9 @@ export const getPublicLinkList = (
 export const applyLink = (
   data: ApplyLinkRequest
 ): Promise<BaseResponse<null>> => {
-  return http.request<BaseResponse<null>>(
-    "post",
-    baseUrlApi("public/links/apply"),
-    { data }
-  );
+  return http.request<BaseResponse<null>>("post", baseUrlApi("public/links"), {
+    data
+  });
 };
 
 // ------------------ 后台管理接口 ------------------

@@ -1,3 +1,10 @@
+<!--
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-07-10 11:28:27
+ * @LastEditTime: 2025-08-19 10:36:54
+ * @LastEditors: 安知鱼
+-->
 <template>
   <view />
 </template>
@@ -20,6 +27,7 @@ watch(needRefresh, newValue => {
     }).then(() => {
       // 用户点击“立即刷新”
       updateServiceWorker();
+      localStorage.removeItem("site_config_cache");
     });
   }
 });
