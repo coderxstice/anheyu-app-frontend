@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { onMounted } from "vue";
 import { RouterLink } from "vue-router";
-import { getArticleArchives } from "@/api/post";
-import type { ArchiveItem } from "@/api/post/type";
+import { storeToRefs } from "pinia";
+import { useArticleStore } from "@/store/modules/articleStore";
 
 defineOptions({
   name: "SidebarArchives"
 });
 
-// 存储从 API 获取的归档列表
-const archivesList = ref<ArchiveItem[]>([]);
+const articleStore = useArticleStore();
+const { archives: archivesList } = storeToRefs(articleStore);
+const { fetchArchives } = articleStore;
 
-// 月份数字到中文的映射
 const monthMap = [
   "一月",
   "二月",
@@ -27,24 +27,11 @@ const monthMap = [
   "十二月"
 ];
 
-// 辅助函数，根据数字获取中文月份
 const getMonthName = (month: number) => {
   return monthMap[month - 1] || "";
 };
 
-// 获取归档数据
-const fetchArchives = async () => {
-  try {
-    const res = await getArticleArchives();
-    if (res.code === 200) {
-      archivesList.value = res.data.list;
-    }
-  } catch (error) {
-    console.error("获取归档列表失败:", error);
-  }
-};
-
-// 组件挂载后执行数据获取
+// --- 组件挂载后调用 store action ---
 onMounted(() => {
   fetchArchives();
 });

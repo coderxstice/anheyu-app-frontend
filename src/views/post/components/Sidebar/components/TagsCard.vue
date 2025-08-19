@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
-import { getTagList } from "@/api/post";
-import { PostTag } from "@/api/post/type";
+import { storeToRefs } from "pinia";
+import { useArticleStore } from "@/store/modules/articleStore";
 
 defineOptions({
   name: "TagsCard"
@@ -14,8 +14,13 @@ const props = defineProps({
   }
 });
 
-const tagList = ref<PostTag[]>([]);
-const loading = ref(true);
+// --- 从 Store 获取状态和 actions ---
+const articleStore = useArticleStore();
+// 使用 storeToRefs 并通过别名，使模板代码无需改动
+const { tags: tagList, areTagsLoading: loading } = storeToRefs(articleStore);
+const { fetchTags } = articleStore; // 获取 action
+
+// --- UI 相关的本地状态保持不变 ---
 const tagCloudRef = ref<HTMLElement | null>(null);
 const isOverflow = ref(false);
 
@@ -26,20 +31,7 @@ const checkOverflow = () => {
   }
 };
 
-const fetchTags = async () => {
-  loading.value = true;
-  try {
-    const res = await getTagList();
-    if (res.code === 200 && res.data) {
-      tagList.value = res.data;
-    }
-  } catch (error) {
-    console.error("获取标签列表失败:", error);
-  } finally {
-    loading.value = false;
-  }
-};
-
+// 监视从 store 来的 tagList，当它变化时检查溢出
 watch(tagList, async () => {
   if (tagList.value.length > 0) {
     await nextTick();
@@ -48,6 +40,7 @@ watch(tagList, async () => {
 });
 
 onMounted(() => {
+  // 调用 store 中的 action 来获取数据
   fetchTags();
   window.addEventListener("resize", checkOverflow);
 });

@@ -59,7 +59,6 @@ const fetchData = async () => {
     } else if (pageType.value === "tag" && currentTagName.value) {
       params.tag = currentTagName.value;
     } else if (pageType.value === "archive") {
-      // --- 新增逻辑：如果当前是归档页，则添加 year 和 month 参数 ---
       if (currentYear.value) params.year = currentYear.value;
       if (currentMonth.value) params.month = currentMonth.value;
     }

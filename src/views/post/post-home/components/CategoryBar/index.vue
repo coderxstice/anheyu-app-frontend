@@ -1,29 +1,28 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick, watchEffect } from "vue";
-import { useRouter, useRoute } from "vue-router"; // 引入 useRoute
-import { getCategoryList } from "@/api/post";
+import {
+  ref,
+  onMounted,
+  onUnmounted,
+  nextTick,
+  watchEffect,
+  computed
+} from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { storeToRefs } from "pinia";
+import { useArticleStore } from "@/store/modules/articleStore";
 import type { PostCategory } from "@/api/post/type";
 
 const router = useRouter();
-const route = useRoute(); // 获取当前路由信息
+const route = useRoute();
 
-const categories = ref<PostCategory[]>([]);
+const articleStore = useArticleStore();
+const { categories } = storeToRefs(articleStore);
+const { fetchCategories } = articleStore;
+
 const selectedId = ref<string | null>(null);
-
 const catalogBarRef = ref<HTMLElement | null>(null);
 const isScrolledToEnd = ref(false);
 const showScrollButton = ref(false);
-
-const fetchCategories = async () => {
-  try {
-    const { data } = await getCategoryList();
-    categories.value = data;
-    await nextTick();
-    updateScrollVisibility();
-  } catch (error) {
-    console.error("获取分类列表失败:", error);
-  }
-};
 
 const handleSelect = (category: PostCategory | null) => {
   if (category) {
@@ -33,30 +32,27 @@ const handleSelect = (category: PostCategory | null) => {
   }
 };
 
-watchEffect(() => {
-  // 这个函数会在组件加载和 URL 变化时自动运行
-  const currentCategoryName = route.params.name as string;
-
-  if (currentCategoryName) {
-    // 根据 URL 中的分类名，查找对应的分类对象
-    const selectedCategory = categories.value.find(
-      c => c.name === currentCategoryName
-    );
-    // 如果找到了，就设置它的 ID 为选中 ID
-    if (selectedCategory) {
-      selectedId.value = selectedCategory.id;
+watchEffect(async () => {
+  if (categories.value.length > 0) {
+    const currentCategoryName = route.params.name as string;
+    if (currentCategoryName) {
+      const selectedCategory = categories.value.find(
+        c => c.name === currentCategoryName
+      );
+      selectedId.value = selectedCategory ? selectedCategory.id : null;
+    } else {
+      selectedId.value = null;
     }
-  } else {
-    // 如果 URL 中没有分类名 (即首页)，则取消所有选中
-    selectedId.value = null;
   }
+
+  await nextTick();
+  updateScrollVisibility();
 });
 
 const checkScrollPosition = () => {
   const el = catalogBarRef.value;
   if (!el) return;
-  const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
-  isScrolledToEnd.value = atEnd;
+  isScrolledToEnd.value = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
 };
 
 const updateScrollVisibility = () => {
@@ -69,7 +65,6 @@ const updateScrollVisibility = () => {
 const handleScrollNext = () => {
   const el = catalogBarRef.value;
   if (!el) return;
-
   if (isScrolledToEnd.value) {
     el.scrollTo({ left: 0, behavior: "smooth" });
   } else {
