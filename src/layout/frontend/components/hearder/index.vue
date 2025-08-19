@@ -56,6 +56,15 @@
                     <i :class="['anzhiyufont', item.icon]" />
                     <span>{{ item.title }}</span>
                   </a>
+                  <a
+                    v-else-if="item.path === '/travelling'"
+                    href="#"
+                    class="site-page"
+                    @click.prevent="handleTreasureLinkClick"
+                  >
+                    <i :class="['anzhiyufont', item.icon]" />
+                    <span>{{ item.title }}</span>
+                  </a>
                   <router-link v-else :to="item.path" class="site-page">
                     <i :class="['anzhiyufont', item.icon]" />
                     <span>{{ item.title }}</span>
@@ -113,6 +122,10 @@ const currentPageTitle = computed(() => {
   }
   return title || "";
 });
+
+const handleTreasureLinkClick = () => {
+  articleStore.navigateToRandomLink();
+};
 
 watch(
   currentPageTitle,

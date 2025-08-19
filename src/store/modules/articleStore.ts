@@ -2,7 +2,7 @@
  * @Description: 文章相关的状态管理
  * @Author: 安知鱼
  * @Date: 2025-08-02 18:31:47
- * @LastEditTime: 2025-08-19 20:33:42
+ * @LastEditTime: 2025-08-19 18:38:15
  * @LastEditors: 安知鱼
  */
 import { defineStore } from "pinia";
@@ -16,6 +16,8 @@ import {
   getTagList,
   getArticleArchives
 } from "@/api/post";
+// +++ 1. 引入获取随机友链的 API ---
+import { getRandomLinks } from "@/api/postLink";
 import type {
   Article,
   PostCategory,
@@ -28,6 +30,9 @@ export const useArticleStore = defineStore("article", () => {
   // --- 通用 State ---
   const isRandomArticleLoading = ref(false);
   const currentArticleTitle = ref("");
+
+  // +++ 2. 新增随机友链的加载状态 ---
+  const isRandomLinkLoading = ref(false);
 
   // --- 首页推荐文章 State ---
   const homeArticles = ref<Article[]>([]);
@@ -67,6 +72,27 @@ export const useArticleStore = defineStore("article", () => {
       ElMessage.error("获取随机文章失败，请稍后再试");
     } finally {
       isRandomArticleLoading.value = false;
+    }
+  }
+
+  async function navigateToRandomLink() {
+    if (isRandomLinkLoading.value) return;
+    isRandomLinkLoading.value = true;
+    try {
+      // 请求一个随机友链
+      const res = await getRandomLinks({ num: 1 });
+      if (res.code === 200 && res.data && res.data.length > 0) {
+        const randomLink = res.data[0];
+        // 在新标签页中打开友链地址
+        window.open(randomLink.url, "_blank");
+      } else {
+        ElMessage.warning(res.message || "暂时没有可供跳转的友链");
+      }
+    } catch (error) {
+      console.error("获取随机友链失败:", error);
+      ElMessage.error("获取随机友链失败，请稍后再试");
+    } finally {
+      isRandomLinkLoading.value = false;
     }
   }
 
@@ -160,6 +186,10 @@ export const useArticleStore = defineStore("article", () => {
     navigateToRandomArticle,
     setCurrentArticleTitle,
     clearCurrentArticleTitle,
+
+    // +++ 4. 导出新增的状态和方法 ---
+    isRandomLinkLoading,
+    navigateToRandomLink,
 
     // 首页推荐文章
     homeArticles,

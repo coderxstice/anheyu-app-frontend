@@ -2,7 +2,7 @@
  * @Description: 路由配置
  * @Author: 安知鱼
  * @Date: 2025-04-08 17:29:06
- * @LastEditTime: 2025-08-19 18:34:59
+ * @LastEditTime: 2025-08-19 18:41:17
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
@@ -244,19 +244,6 @@ export default [
             const configs = getConfig();
             const appName = configs?.APP_NAME;
             return `${appName} - 随机文章`;
-          },
-          showLink: false
-        }
-      },
-      {
-        path: "travelling",
-        name: "Travelling",
-        component: () => import("@/views/post/travelling/index.vue"),
-        meta: {
-          title: () => {
-            const configs = getConfig();
-            const appName = configs?.APP_NAME;
-            return `${appName} - 宝藏博主`;
           },
           showLink: false
         }
