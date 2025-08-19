@@ -2,7 +2,7 @@
  * @Description: 文章管理模块 API 统一出口 (文章、标签、分类)
  * @Author: 安知鱼
  * @Date: 2025-07-25 18:05:00
- * @LastEditTime: 2025-08-14 12:49:47
+ * @LastEditTime: 2025-08-19 15:57:00
  * @LastEditors: 安知鱼
  */
 
@@ -226,6 +226,7 @@ export const getArticleArchives = (): Promise<
   );
 };
 
+// @description 上传文章封面图
 export function uploadArticleImage(file: File) {
   const formData = new FormData();
   formData.append("file", file);

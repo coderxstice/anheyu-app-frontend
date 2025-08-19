@@ -2,7 +2,7 @@
  * @Description: 友链功能所有API
  * @Author: 安知鱼
  * @Date: 2025-08-18 16:06:49
- * @LastEditTime: 2025-08-19 11:04:09
+ * @LastEditTime: 2025-08-19 16:32:20
  * @LastEditors: 安知鱼
  */
 import { http } from "@/utils/http";
@@ -19,8 +19,10 @@ import type {
   UpdateLinkRequest,
   ReviewLinkRequest,
   CreateCategoryRequest,
+  UpdateCategoryRequest,
   LinkTag,
   CreateTagRequest,
+  UpdateTagRequest,
   GetRandomLinksParams
 } from "./type";
 
@@ -38,7 +40,9 @@ export const getRandomLinks = (
 };
 
 /** @description 获取所有公开的友链分类 */
-export const getLinkCategories = (): Promise<BaseResponse<LinkCategory[]>> => {
+export const getPublicLinkCategories = (): Promise<
+  BaseResponse<LinkCategory[]>
+> => {
   return http.request<BaseResponse<LinkCategory[]>>(
     "get",
     baseUrlApi("public/link-categories")
@@ -67,6 +71,7 @@ export const applyLink = (
 
 // ------------------ 后台管理接口 ------------------
 
+// --- 友链管理 ---
 /** @description [后台] 管理员创建友链 */
 export const createLink = (
   data: CreateLinkRequest
@@ -116,6 +121,15 @@ export const reviewLink = (
   );
 };
 
+// --- 分类管理 ---
+/** @description [后台] 获取所有友链分类 */
+export const getLinkCategories = (): Promise<BaseResponse<LinkCategory[]>> => {
+  return http.request<BaseResponse<LinkCategory[]>>(
+    "get",
+    baseUrlApi("links/categories")
+  );
+};
+
 /** @description [后台] 管理员创建友链分类 */
 export const createLinkCategory = (
   data: CreateCategoryRequest
@@ -127,6 +141,24 @@ export const createLinkCategory = (
   );
 };
 
+/** @description [后台] 管理员更新友链分类  */
+export const updateLinkCategory = (
+  id: number,
+  data: UpdateCategoryRequest
+): Promise<BaseResponse<LinkCategory>> => {
+  return http.request<BaseResponse<LinkCategory>>(
+    "put",
+    baseUrlApi(`links/categories/${id}`),
+    { data }
+  );
+};
+
+// --- 标签管理 ---
+/** @description [后台] 获取所有友链标签 */
+export const getLinkTags = (): Promise<BaseResponse<LinkTag[]>> => {
+  return http.request<BaseResponse<LinkTag[]>>("get", baseUrlApi("links/tags"));
+};
+
 /** @description [后台] 管理员创建友链标签 */
 export const createLinkTag = (
   data: CreateTagRequest
@@ -134,4 +166,16 @@ export const createLinkTag = (
   return http.request<BaseResponse<LinkTag>>("post", baseUrlApi("links/tags"), {
     data
   });
+};
+
+/** @description [后台] 管理员更新友链标签 */
+export const updateLinkTag = (
+  id: number,
+  data: UpdateTagRequest
+): Promise<BaseResponse<LinkTag>> => {
+  return http.request<BaseResponse<LinkTag>>(
+    "put",
+    baseUrlApi(`links/tags/${id}`),
+    { data }
+  );
 };

@@ -7,21 +7,21 @@
  */
 
 export default {
-  path: "/comment-management",
-  redirect: "/admin/comment-management",
+  path: "/flink-management",
+  redirect: "/admin/flink-management",
   meta: {
-    icon: "ep:comment",
-    title: "评论管理",
-    rank: 6
+    icon: "ep:link",
+    title: "友链管理",
+    rank: 7
   },
   children: [
     {
-      path: "/admin/comment-management",
-      name: "CommentManagement",
-      component: () => import("@/views/system/comment-management/index.vue"),
+      path: "/admin/flink-management",
+      name: "FlinkManagement",
+      component: () => import("@/views/system/flink-management/index.vue"),
       meta: {
-        title: "评论管理",
-        icon: "ep:comment",
+        title: "友链管理",
+        icon: "ep:link",
         roles: ["1"]
       }
     }

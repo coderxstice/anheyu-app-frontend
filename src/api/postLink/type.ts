@@ -2,7 +2,7 @@
  * @Description: 友链相关类型定义
  * @Author: 安知鱼
  * @Date: 2025-08-18 16:10:00
- * @LastEditTime: 2025-08-19 15:01:18
+ * @LastEditTime: 2025-08-19 16:32:02
  * @LastEditors: 安知鱼
  */
 
@@ -31,7 +31,7 @@ export interface LinkCategory {
 }
 
 /** 友链状态 */
-export type LinkStatus = "PENDING" | "APPROVED" | "REJECTED";
+export type LinkStatus = "PENDING" | "APPROVED" | "REJECTED" | "INVALID"; // 根据文档，增加 INVALID 状态
 
 /** 友链信息对象 (DTO) */
 export interface LinkItem {
@@ -74,20 +74,27 @@ export type UpdateLinkRequest = CreateLinkRequest;
 /** [后台] 审核友链 */
 export interface ReviewLinkRequest {
   status: "APPROVED" | "REJECTED";
-  siteshot?: string; // 当 status 为 APPROVED 且分类样式为 card 时必需
+  siteshot?: string;
 }
 
 /** [后台] 创建友链分类 */
 export interface CreateCategoryRequest {
   name: string;
   style: "card" | "list";
+  description?: string;
 }
+
+/** [后台] 更新友链分类 */
+export type UpdateCategoryRequest = CreateCategoryRequest;
 
 /** [后台] 创建友链标签 */
 export interface CreateTagRequest {
   name: string;
   color?: string;
 }
+
+/** [后台] 更新友链标签 */
+export type UpdateTagRequest = CreateTagRequest;
 
 // --- API 请求参数类型 (Query Params) ---
 
@@ -108,6 +115,11 @@ export interface GetAdminLinksParams {
   status?: LinkStatus;
 }
 
+/** 获取随机友链的查询参数 */
+export interface GetRandomLinksParams {
+  num?: number;
+}
+
 // --- API 响应数据类型 ---
 
 /** 分页友链列表响应 */
@@ -116,8 +128,4 @@ export interface PublicLinkListResponse {
   total: number;
   page: number;
   pageSize: number;
-}
-
-export interface GetRandomLinksParams {
-  num?: number;
 }
