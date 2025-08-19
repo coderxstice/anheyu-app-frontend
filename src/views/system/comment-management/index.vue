@@ -57,17 +57,10 @@ const getList = async () => {
 onMounted(getList);
 
 const onQueryUpdate = (newQuery: CommentQuery) => {
-  // 使用 Object.assign 将新查询对象的属性合并到旧对象上
-  // 这样可以保持原始的响应式引用，而不是替换整个对象
   Object.assign(queryParams, newQuery);
 };
 
 const handleSearch = () => {
-  console.log(
-    "【父组件】触发搜索时，接收到的参数是:",
-    JSON.parse(JSON.stringify(queryParams))
-  );
-
   queryParams.page = 1;
   getList();
 };
@@ -160,19 +153,19 @@ const handleReply = (comment: AdminComment) => {
       }
 
       const payload: CreateCommentPayload = {
-        article_id: comment.article_id,
+        target_path: comment.target_path,
         parent_id: comment.id,
         nickname: siteOwner.value.name,
         email: siteOwner.value.email,
         website: siteUrl.value,
         content: value,
-        allow_notification: false // 管理员回复通常不需要接收回复通知
+        allow_notification: false
       };
 
       try {
         await createPublicComment(payload);
         ElMessage.success("回复成功");
-        getList(); // 刷新列表以显示新回复
+        getList();
       } catch (error) {
         console.error("回复失败:", error);
         ElMessage.error("回复失败，请稍后重试");
@@ -236,6 +229,7 @@ const handleReply = (comment: AdminComment) => {
 </template>
 
 <style lang="scss" scoped>
+/* 样式保持不变 */
 .card-header {
   font-size: 18px;
   font-weight: 500;

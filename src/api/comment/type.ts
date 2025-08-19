@@ -1,15 +1,17 @@
 /*
- * @Description:
+ * @Description: 评论模块相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-08-10 22:21:27
- * @LastEditTime: 2025-08-12 19:16:13
+ * @LastEditTime: 2025-08-19 13:43:37
  * @LastEditors: 安知鱼
  */
+
 /**
  * @description 创建新评论时，发送到后端的数据结构
  */
 export interface CreateCommentPayload {
-  article_id: string;
+  target_path: string;
+  target_title?: string;
   parent_id?: string | null;
   nickname: string;
   email?: string;
@@ -19,20 +21,22 @@ export interface CreateCommentPayload {
 }
 
 /**
- * @description 评论数据对象 (用于API响应和前端渲染)
+ * @description 评论数据对象 (用于API响应和前端渲染) (V2)
  */
+
 export interface Comment {
   id: string;
   created_at: string;
   nickname: string;
   email_md5: string;
   website: string | null;
-  content_html: string; // 后端已将内部URI渲染为带签名的临时URL
+  content_html: string;
   is_admin_comment: boolean;
   ip_location: string;
-  user_agent: string;
-  article_id: string;
+  target_path: string;
+  target_title: string;
   parent_id: string | null;
+  user_agent: string;
   children: Comment[];
   reply_to_nick: string | null;
   like_count: number;
@@ -48,25 +52,29 @@ export interface CommentListResponse {
   pageSize: number;
 }
 
-// --- 后台管理相关类型 (保持不变) ---
-export interface AdminComment extends Comment {
+// --- 后台管理相关类型 ---
+/**
+ * @description 管理员评论对象 (V2)
+ */
+export interface AdminComment extends Omit<Comment, "contentHTML"> {
   email: string;
   ip_address: string;
   content: string;
   status: number;
-  article_slug: string;
   pinned_at: string | null;
 }
 
+/**
+ * @description 管理员评论查询参数 (V2)
+ */
 export interface CommentQuery {
   page?: number;
   pageSize?: number;
   nickname?: string;
   email?: string;
-  website?: string;
   ip_address?: string;
   content?: string;
-  article_slug?: string;
+  target_path?: string;
   status?: number;
 }
 

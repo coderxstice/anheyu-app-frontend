@@ -56,7 +56,7 @@ const vLazy = {
 defineOptions({ name: "CommentForm" });
 
 const props = defineProps({
-  articleId: { type: String, required: true },
+  targetPath: { type: String, required: true },
   parentId: { type: String, default: null },
   placeholder: { type: String, default: "欢迎留下宝贵的建议啦～" },
   showCancelButton: { type: Boolean, default: false }
@@ -89,7 +89,9 @@ const commentInfoConfig = computed(() => {
   };
 });
 
-const form = reactive<Omit<CreateCommentPayload, "article_id" | "parent_id">>({
+const form = reactive<
+  Omit<CreateCommentPayload, "target_path" | "parent_id" | "target_title">
+>({
   nickname: "",
   email: "",
   website: "",
@@ -134,7 +136,8 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         nickname,
         email,
         content,
-        article_id: props.articleId,
+        target_path: props.targetPath,
+        target_title: document.title,
         parent_id: props.parentId
       };
       if (website && website.trim() !== "") payload.website = website;
@@ -222,22 +225,15 @@ const handleFileChange = async (event: Event) => {
 
   isUploading.value = true;
   try {
-    // 1. 调用上传接口
     const res = await uploadCommentImage(file);
-
-    // 2. 从响应中安全地获取文件ID
     const fileId = res?.data?.id;
 
-    // 3. 校验ID是否存在
     if (!fileId) {
       throw new Error("服务器未返回有效的文件ID");
     }
 
-    // 4. 构建内部URI和完整的Markdown标签
     const internalURI = `anzhiyu://file/${fileId}`;
     const markdownImage = `![${file.name}](${internalURI})`;
-
-    // 5. 将Markdown标签插入到文本框
     insertTextAtCursor(markdownImage);
     ElMessage.success("图片已添加，提交后即可显示");
   } catch (error: any) {
@@ -335,6 +331,7 @@ onMounted(() => {
 onUnmounted(() => document.removeEventListener("click", handleClickOutside));
 </script>
 <template>
+  <!-- Template (HTML) 部分无需修改 -->
   <div class="comment-form">
     <el-form
       ref="formRef"
@@ -404,7 +401,6 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
                   </div>
                 </transition>
               </div>
-              <!-- 6. 修改图片上传按钮 -->
               <button
                 class="action-icon"
                 type="button"
@@ -414,7 +410,6 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
               >
                 <IconImage />
               </button>
-              <!-- 7. 添加隐藏的文件输入框 -->
               <input
                 ref="fileInputRef"
                 type="file"
@@ -641,7 +636,6 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
       &:hover {
         background-color: var(--anzhiyu-post-blockquote-bg);
       }
-      // 8. 添加禁用状态样式
       &[disabled] {
         cursor: not-allowed;
         opacity: 0.5;

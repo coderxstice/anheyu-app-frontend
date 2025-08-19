@@ -1,8 +1,8 @@
 /*
- * @Description:
+ * @Description: 评论模块 API 请求
  * @Author: 安知鱼
  * @Date: 2025-08-10 22:21:49
- * @LastEditTime: 2025-08-12 19:17:52
+ * @LastEditTime: 2025-08-19 13:27:07
  * @LastEditors: 安知鱼
  */
 import { http } from "@/utils/http";
@@ -18,12 +18,12 @@ import type {
 } from "./type";
 
 /**
- * @description 获取指定文章的评论列表
- * @param params 包含 articleId, page, pageSize 的参数对象
+ * @description 获取指定路径的评论列表
+ * @param params 包含 target_path, page, pageSize 的参数对象
  * @returns 分页后的评论数据
  */
 export const getPublicComments = (params: {
-  article_id: string;
+  target_path: string;
   page?: number;
   pageSize?: number;
 }): Promise<BaseResponse<CommentListResponse>> => {
@@ -70,13 +70,12 @@ export const unlikePublicComment = (id: string) => {
 };
 
 /**
- * @description: 为评论上传图片 (适配新流程)
+ * @description: 为评论上传图片
  * @param {File} file 图片文件
  * @returns {Promise<SuccessResponseUploadImage>} 返回包含文件公共ID的响应
  */
 export const uploadCommentImage = (file: File) => {
   const formData = new FormData();
-  // 根据接口文档，字段名必须是 'file'
   formData.append("file", file);
 
   return http.request<SuccessResponseUploadImage>(

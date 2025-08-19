@@ -15,7 +15,7 @@ export const useCommentStore = defineStore("comment", () => {
   const totalComments = ref(0);
   const currentPage = ref(1);
   const pageSize = ref(10);
-  const currentArticleId = ref<string | null>(null);
+  const currentTargetPath = ref<string | null>(null);
   const isLoading = ref(false);
   const isLoadingMore = ref(false);
   const likedCommentIds = ref<Set<string>>(new Set());
@@ -53,18 +53,18 @@ export const useCommentStore = defineStore("comment", () => {
     return false;
   }
 
-  async function initComments(articleId: string, pSize = 10) {
+  async function initComments(targetPath: string, pSize = 10) {
     loadLikedIdsFromStorage();
-    if (currentArticleId.value === articleId && comments.value.length > 0)
+    if (currentTargetPath.value === targetPath && comments.value.length > 0)
       return;
     resetStore(true);
-    currentArticleId.value = articleId;
+    currentTargetPath.value = targetPath;
     pageSize.value = pSize;
     await fetchComments(1);
   }
 
   async function fetchComments(page = 1) {
-    if (!currentArticleId.value) return;
+    if (!currentTargetPath.value) return;
     if (page === 1) {
       isLoading.value = true;
     } else {
@@ -73,7 +73,7 @@ export const useCommentStore = defineStore("comment", () => {
 
     try {
       const res = await getPublicComments({
-        article_id: currentArticleId.value,
+        target_path: currentTargetPath.value,
         page: page,
         pageSize: pageSize.value
       });
@@ -186,7 +186,7 @@ export const useCommentStore = defineStore("comment", () => {
     comments.value = [];
     totalComments.value = 0;
     currentPage.value = 1;
-    currentArticleId.value = null;
+    currentTargetPath.value = null;
     isLoading.value = false;
     isLoadingMore.value = false;
     if (!soft) {
@@ -201,7 +201,7 @@ export const useCommentStore = defineStore("comment", () => {
     pageSize,
     isLoading,
     isLoadingMore,
-    currentArticleId,
+    currentTargetPath,
     likedCommentIds,
     hasMore,
     initComments,

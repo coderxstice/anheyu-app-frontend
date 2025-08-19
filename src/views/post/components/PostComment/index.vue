@@ -12,7 +12,7 @@ import Fancybox from "@/components/Fancybox/index.vue";
 defineOptions({ name: "PostComment" });
 
 const props = defineProps({
-  articleId: { type: String, required: true }
+  targetPath: { type: String, required: true }
 });
 
 const emit = defineEmits(["comment-ids-loaded"]);
@@ -46,7 +46,8 @@ const fancyboxOptions = {
 
 onMounted(() => {
   const pageSize = commentInfoConfig.value.page_size || 10;
-  commentStore.initComments(props.articleId, pageSize);
+  // 更新: 调用 initComments 时传入 targetPath
+  commentStore.initComments(props.targetPath, pageSize);
 });
 
 watch(
@@ -105,7 +106,7 @@ defineExpose({
         </span>
       </h3>
       <CommentForm
-        :article-id="props.articleId"
+        :target-path="props.targetPath"
         :placeholder="commentInfoConfig.placeholder"
       />
     </div>

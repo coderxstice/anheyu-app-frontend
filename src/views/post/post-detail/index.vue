@@ -73,7 +73,7 @@ const articleWithCommentCount = computed(() => {
   if (!article.value) return null;
   return {
     ...article.value,
-    comment_count: commentStore.totalComments
+    commentCount: commentStore.totalComments
   };
 });
 
@@ -263,7 +263,7 @@ watch(
           <RelatedPosts :posts="article.related_articles" />
           <PostComment
             ref="commentRef"
-            :article-id="article.id"
+            :target-path="route.path"
             @comment-ids-loaded="handleCommentIdsLoaded"
           />
         </div>
@@ -279,7 +279,7 @@ watch(
 </template>
 
 <style lang="scss" scoped>
-/* ... 样式部分保持不变 ... */
+/* 样式部分保持不变 */
 .post-header-placeholder {
   width: 100%;
   height: 30rem;

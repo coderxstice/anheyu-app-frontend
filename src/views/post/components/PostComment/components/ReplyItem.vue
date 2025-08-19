@@ -24,12 +24,10 @@ const contentWithFancybox = computed(() => {
   const content = props.comment.content_html;
   if (!content) return "";
 
-  // 匹配所有非表情的 <img> 标签
   const imgTagRegex =
     /<img(?![^>]*class="[^"]*anzhiyu-owo-emotion[^"]*")[^>]+>/g;
 
   return content.replace(imgTagRegex, imgTag => {
-    // 从匹配到的 imgTag 字符串中提取 src 和 alt 属性
     const srcMatch = /src=(["'])(.*?)\1/.exec(imgTag);
     const altMatch = /alt=(["'])(.*?)\1/.exec(imgTag);
 
@@ -219,7 +217,7 @@ const scrollToParent = () => {
 
     <div v-if="isReplyFormVisible" class="reply-form-wrapper">
       <CommentForm
-        :article-id="comment.article_id"
+        :target-path="comment.target_path"
         :parent-id="comment.id"
         :placeholder="`回复 @${comment.nickname}`"
         show-cancel-button
@@ -231,7 +229,7 @@ const scrollToParent = () => {
 </template>
 
 <style lang="scss" scoped>
-/* 样式与之前保持一致，只修改了 comment-content 部分 */
+/* 样式保持不变 */
 .comment-item {
   display: flex;
   gap: 1rem;
@@ -337,7 +335,6 @@ const scrollToParent = () => {
   line-height: 1.6;
   font-size: 0.95rem;
 
-  /* [核心修改] 样式调整 */
   a {
     border-bottom: none;
   }
@@ -348,7 +345,7 @@ const scrollToParent = () => {
 
   img {
     max-height: 300px;
-    max-width: 100%; /* 确保图片不溢出 */
+    max-width: 100%;
     border-radius: 4px;
     vertical-align: middle;
     &:not(.anzhiyu-owo-emotion) {

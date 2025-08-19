@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, nextTick } from "vue"; // [修改] 移除了 watch
+import { computed, ref, onMounted, nextTick } from "vue";
 import { useCommentStore } from "@/store/modules/commentStore";
 import type { Comment } from "@/api/comment/type";
 import { UAParser } from "ua-parser-js";
@@ -150,17 +150,6 @@ const checkHeight = () => {
 };
 
 onMounted(checkHeight);
-
-// [核心修改] 移除了下面的 watch 侦听器，以防止在添加新回复时重新计算高度和展开状态
-/*
-watch(
-  () => props.comment.children?.length,
-  () => {
-    isExpanded.value = false;
-    checkHeight();
-  }
-);
-*/
 </script>
 
 <template>
@@ -233,7 +222,7 @@ watch(
     </div>
     <div v-if="isReplyFormVisible" class="reply-form-wrapper">
       <CommentForm
-        :article-id="comment.article_id"
+        :target-path="comment.target_path"
         :parent-id="comment.id"
         :placeholder="`回复 @${comment.nickname}`"
         show-cancel-button
@@ -273,7 +262,6 @@ watch(
 </template>
 
 <style lang="scss" scoped>
-/* 样式与之前保持一致 */
 .comment-item {
   display: flex;
   gap: 1rem;

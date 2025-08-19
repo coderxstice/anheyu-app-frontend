@@ -64,18 +64,12 @@ const handleCardClick = (commentId: string, event: MouseEvent) => {
   handleSelectionChange(selectedComments.value);
 };
 
-const getGravatarUrl = (email_md5: string) => {
+const getGravatarUrl = (emailMD5: string) => {
   const config = siteConfigStore.getSiteConfig;
-
-  // 1. 获取基础配置，并提供默认值
   let baseUrl = config.GRAVATAR_URL + "/avatar";
   const defaultType = config.DEFAULT_GRAVATAR_TYPE || "identicon";
-
-  // 2. 优化斜杠处理：先用正则表达式移除末尾所有可能存在的斜杠
   baseUrl = baseUrl.replace(/\/+$/, "");
-
-  // 3. 固定拼接斜杠和后续路径，确保URL结构正确
-  return `${baseUrl}/${email_md5 || ""}?d=${defaultType}&s=80`;
+  return `${baseUrl}/${emailMD5 || ""}?d=${defaultType}&s=80`;
 };
 
 const getAvatarSrc = (comment: AdminComment) => {
@@ -172,7 +166,7 @@ const handleAvatarError = (event: Event, comment: AdminComment) => {
               </el-tooltip>
             </div>
           </div>
-          <div class="comment-content" v-html="comment.content_html" />
+          <div class="comment-content" v-html="comment.content" />
           <div class="comment-footer">
             <div class="meta-info">
               <el-tooltip placement="top" :show-arrow="false">
@@ -191,16 +185,16 @@ const handleAvatarError = (event: Event, comment: AdminComment) => {
                 在
                 <el-link
                   type="primary"
-                  :href="`/posts/${comment.article_slug}`"
+                  :href="comment.target_path"
                   target="_blank"
                   :underline="false"
-                  >{{ comment.article_slug }}</el-link
+                  >{{ comment.target_title || comment.target_path }}</el-link
                 >
                 中
               </span>
               <span class="meta-item">
                 <IconifyIconOffline :icon="MapPinIcon" />
-                {{ comment.ip_address }} ({{ comment.ip_location }})
+                {{ comment.ip_address }} ({{ comment.ip_address }})
               </span>
               <span class="meta-item">
                 <IconifyIconOffline :icon="ThumbUpIcon" />
@@ -240,6 +234,7 @@ const handleAvatarError = (event: Event, comment: AdminComment) => {
 </template>
 
 <style lang="scss" scoped>
+/* 样式保持不变 */
 .comment-card {
   display: flex;
   padding: 16px;
