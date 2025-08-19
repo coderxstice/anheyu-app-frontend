@@ -15,16 +15,14 @@ const props = withDefaults(
     defaultGravatarType: string;
     maxBarrage?: number;
     barrageTime?: number;
+    observeTargetId?: string;
   }>(),
   {
     maxBarrage: 1,
-    barrageTime: 5000
+    barrageTime: 5000,
+    observeTargetId: "post-comment"
   }
 );
-
-const emit = defineEmits<{
-  (e: "close"): void;
-}>();
 
 const commentStore = useCommentStore();
 const { comments } = storeToRefs(commentStore);
@@ -42,17 +40,8 @@ const customEase = "cubic-bezier(0.42, 0, 0.3, 1.11)";
 const onEnter = (el: Element, done: () => void) => {
   gsap.fromTo(
     el,
-    {
-      opacity: 0,
-      y: 30
-    },
-    {
-      opacity: 1,
-      y: 0,
-      duration: 0.3,
-      ease: customEase,
-      onComplete: done
-    }
+    { opacity: 0, y: 30 },
+    { opacity: 1, y: 0, duration: 0.3, ease: customEase, onComplete: done }
   );
 };
 
@@ -60,7 +49,6 @@ const onLeave = (el: Element, done: () => void) => {
   const htmlEl = el as HTMLElement;
   htmlEl.style.position = "absolute";
   htmlEl.style.width = `${htmlEl.offsetWidth}px`;
-
   gsap.to(el, {
     opacity: 0,
     y: 30,
@@ -143,8 +131,8 @@ const processCommentHtml = (html: string): string => {
 
 onMounted(() => {
   nextTick(() => {
-    const postCommentTarget = document.getElementById("post-comment");
-    if (postCommentTarget && barrageContainer.value) {
+    const observeTarget = document.getElementById(props.observeTargetId);
+    if (observeTarget && barrageContainer.value) {
       const observerCallback = (entries: IntersectionObserverEntry[]) => {
         entries.forEach(entry => {
           if (barrageContainer.value && document.body.clientWidth > 768) {
@@ -155,7 +143,7 @@ onMounted(() => {
         });
       };
       observer = new IntersectionObserver(observerCallback, { threshold: 0 });
-      observer.observe(postCommentTarget);
+      observer.observe(observeTarget);
     }
   });
 });

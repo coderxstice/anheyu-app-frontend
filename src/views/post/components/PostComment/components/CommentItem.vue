@@ -393,10 +393,9 @@ onMounted(checkHeight);
   margin-left: 56px;
   padding-top: 1rem;
   margin-top: 1rem;
-  border-top: 1px solid #f0f0f0;
+
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
   transition: max-height 0.5s ease-in-out;
 
   &.is-collapsed {
@@ -419,6 +418,10 @@ onMounted(checkHeight);
         );
       }
     }
+  }
+  .reply-item-container {
+    border-top: var(--style-border-dashed);
+    padding: 1.25rem;
   }
 }
 .reply-form-wrapper {

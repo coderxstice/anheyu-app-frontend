@@ -101,9 +101,6 @@ const rules = reactive<FormRules>({
   ]
 });
 
-// --- 以下是您的业务逻辑，无需改动 ---
-
-// 流程控制
 const handleFocus = () => {
   // 通过调用子组件暴露的 focus 方法来实现聚焦
   switch (step.value) {

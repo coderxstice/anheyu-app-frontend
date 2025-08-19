@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 import { useLinkStore } from "@/store/modules/link";
 import LinkTopBanner from "./components/LinkTopBanner.vue";
 import LinkListSection from "./components/LinkListSection.vue";
 import ApplyLink from "./components/ApplyLink.vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import PostComment from "../components/PostComment/index.vue";
 
 defineOptions({
   name: "PostLink"
 });
 
+const route = useRoute();
 const linkStore = useLinkStore();
 const siteConfigStore = useSiteConfigStore();
 const friendLinkApplyCondition = computed(
@@ -47,6 +50,10 @@ const handleScrollToApply = () => {
     <div ref="applyLinkSectionRef">
       <ApplyLink :friendLinkApplyCondition="friendLinkApplyCondition" />
     </div>
+
+    <div class="link-comment-section">
+      <PostComment :target-path="route.path" />
+    </div>
   </div>
 </template>
 
@@ -56,5 +63,15 @@ const handleScrollToApply = () => {
   padding: 0 1.5rem;
   max-width: 1400px;
   width: 100%;
+}
+
+.link-comment-section {
+  margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+  .post-link-page {
+    padding: 0;
+  }
 }
 </style>

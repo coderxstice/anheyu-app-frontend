@@ -153,3 +153,29 @@
     padding: 1rem !important;
   }
 }
+
+// 友链
+.link-comment-section {
+  .textarea-wrapper {
+    background-color: var(--anzhiyu-card-bg) !important;
+  }
+  .el-textarea__inner {
+    background-color: var(--anzhiyu-card-bg) !important;
+  }
+
+  .comment-thread-item {
+    padding: 1rem;
+    padding-bottom: 1.5rem;
+    border: var(--style-border);
+    border-top: var(--style-border);
+    box-shadow: var(--anzhiyu-shadow-border);
+    margin-top: 0 !important;
+    margin-bottom: 0.5rem !important;
+    background: var(--anzhiyu-card-bg);
+    transition: 0.3s;
+    border-radius: 12px;
+  }
+  .comment-list-container {
+    margin-top: 0rem !important;
+  }
+}

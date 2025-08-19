@@ -25,7 +25,6 @@ import PostTools from "./components/PostTools/index.vue";
 import PostPagination from "./components/PostPagination/index.vue";
 import RelatedPosts from "./components/RelatedPosts/index.vue";
 import PostComment from "../components/PostComment/index.vue";
-import CommentBarrage from "./components/CommentBarrage/index.vue";
 import Sidebar from "../components/Sidebar/index.vue";
 
 defineOptions({
@@ -46,6 +45,7 @@ const originalMainOpLightColor = ref<string | null>(null);
 
 provide("recentArticles", recentArticles);
 
+// [核心修改] 恢复 snake_case
 provide(
   "articleContentHtml",
   computed(() => article.value?.content_html)
@@ -74,17 +74,6 @@ const articleWithCommentCount = computed(() => {
   return {
     ...article.value,
     commentCount: commentStore.totalComments
-  };
-});
-
-const commentBarrageConfig = computed(() => {
-  const siteConfig = siteConfigStore.getSiteConfig;
-  if (!siteConfig || !siteConfig.GRAVATAR_URL) {
-    return null;
-  }
-  return {
-    gravatarUrl: siteConfig.GRAVATAR_URL,
-    defaultGravatarType: siteConfig.DEFAULT_GRAVATAR_TYPE
   };
 });
 
@@ -270,11 +259,6 @@ watch(
       </main>
       <Sidebar />
     </div>
-    <CommentBarrage
-      v-if="article && commentBarrageConfig"
-      :gravatar-url="commentBarrageConfig.gravatarUrl"
-      :default-gravatar-type="commentBarrageConfig.defaultGravatarType"
-    />
   </div>
 </template>
 

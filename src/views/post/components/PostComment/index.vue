@@ -123,7 +123,6 @@ defineExpose({
           :key="comment.id"
           class="comment-thread-item"
         >
-          <hr />
           <CommentItem
             :id="`comment-${comment.id}`"
             :comment="comment"

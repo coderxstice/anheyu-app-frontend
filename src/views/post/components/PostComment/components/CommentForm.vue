@@ -331,7 +331,6 @@ onMounted(() => {
 onUnmounted(() => document.removeEventListener("click", handleClickOutside));
 </script>
 <template>
-  <!-- Template (HTML) 部分无需修改 -->
   <div class="comment-form">
     <el-form
       ref="formRef"
