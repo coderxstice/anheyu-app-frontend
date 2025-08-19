@@ -2,8 +2,6 @@
 import { computed, onMounted, ref } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useArticleStore } from "@/store/modules/articleStore";
-import { getHomeArticles } from "@/api/post";
-import type { Article } from "@/api/post/type";
 
 defineOptions({
   name: "HomeTop"
@@ -16,7 +14,8 @@ const siteConfig = computed(() => siteConfigStore.getSiteConfig);
 const homeTopConfig = computed(() => siteConfig.value?.HOME_TOP);
 const creativityConfig = computed(() => siteConfig.value?.CREATIVITY);
 
-const recommendedArticles = ref<Article[]>([]);
+const recommendedArticles = computed(() => articleStore.homeArticles);
+
 const isTopGroupExpanded = ref(false);
 const hasRecommendedArticles = computed(
   () => recommendedArticles.value && recommendedArticles.value.length > 0
@@ -37,22 +36,8 @@ const collapseTopGroup = () => {
   isTopGroupExpanded.value = false;
 };
 
-const fetchRecommendedArticles = async () => {
-  try {
-    const res = await getHomeArticles();
-    if (res.code === 200 && res.data) {
-      recommendedArticles.value = res.data;
-    } else {
-      recommendedArticles.value = [];
-    }
-  } catch (error) {
-    console.error("获取首页推荐文章失败:", error);
-    recommendedArticles.value = [];
-  }
-};
-
 onMounted(() => {
-  fetchRecommendedArticles();
+  articleStore.fetchHomeArticles();
 });
 
 const creativityList = computed(() => {

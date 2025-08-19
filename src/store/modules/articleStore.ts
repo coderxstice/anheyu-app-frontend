@@ -2,30 +2,29 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-02 18:31:47
- * @LastEditTime: 2025-08-18 14:15:13
+ * @LastEditTime: 2025-08-19 18:16:18
  * @LastEditors: 安知鱼
  */
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { ElMessage } from "element-plus";
 import { router } from "@/router";
-import { getRandomArticle } from "@/api/post";
+import { getRandomArticle, getHomeArticles } from "@/api/post";
+import type { Article } from "@/api/post/type";
 import defaultCover from "@/assets/img/post/default_cover.jpg";
 
 export const useArticleStore = defineStore("article", () => {
   // state
   const isRandomArticleLoading = ref(false);
-  /**
-   * @description 用于存储当前正在查看的文章的动态标题
-   */
   const currentArticleTitle = ref("");
 
+  const homeArticles = ref<Article[]>([]);
+  const isHomeArticlesLoading = ref(false);
+  const hasFetchedHomeArticles = ref(false);
+
   // actions
-  /**
-   * @description 跳转到一篇随机文章的详情页
-   */
   async function navigateToRandomArticle() {
-    if (isRandomArticleLoading.value) return; // 防止重复点击
+    if (isRandomArticleLoading.value) return;
 
     isRandomArticleLoading.value = true;
     try {
@@ -44,17 +43,34 @@ export const useArticleStore = defineStore("article", () => {
     }
   }
 
-  /**
-   * @description 设置当前文章的标题
-   * @param title - 文章的真实标题
-   */
+  async function fetchHomeArticles() {
+    if (hasFetchedHomeArticles.value) {
+      return;
+    }
+
+    if (isHomeArticlesLoading.value) return;
+    isHomeArticlesLoading.value = true;
+    try {
+      const res = await getHomeArticles();
+      if (res.code === 200 && res.data) {
+        homeArticles.value = res.data;
+      } else {
+        homeArticles.value = [];
+      }
+    } catch (error) {
+      console.error("获取首页推荐文章失败:", error);
+      homeArticles.value = [];
+    } finally {
+      isHomeArticlesLoading.value = false;
+      // --- 关键修改：无论请求成功、失败、或返回空数组，都将标志位置为 true ---
+      hasFetchedHomeArticles.value = true;
+    }
+  }
+
   function setCurrentArticleTitle(title: string) {
     currentArticleTitle.value = title;
   }
 
-  /**
-   * @description 清除当前文章的标题（离开文章页时调用）
-   */
   function clearCurrentArticleTitle() {
     currentArticleTitle.value = "";
   }
@@ -65,6 +81,12 @@ export const useArticleStore = defineStore("article", () => {
     navigateToRandomArticle,
     setCurrentArticleTitle,
     clearCurrentArticleTitle,
-    defaultCover
+    defaultCover,
+
+    homeArticles,
+    isHomeArticlesLoading,
+    fetchHomeArticles,
+
+    hasFetchedHomeArticles
   };
 });
