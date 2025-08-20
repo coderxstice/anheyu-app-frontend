@@ -32,7 +32,7 @@ export default defineComponent({
     GlobalLoading
   },
   setup() {
-    // 初始化全局访问统计
+    // 初始化全局访问统计（处理页面生命周期事件）
     useGlobalStatistics();
 
     return {};
