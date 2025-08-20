@@ -353,7 +353,7 @@ export interface FLinkCategory {
  * @description: 友链配置表单接口
  */
 export interface FLinkSettingsInfo {
-  friendLinkDefaultCategory: string;
+  friendLinkDefaultCategory: number;
   friendLinkApplyCondition: string[];
   friendLinkApplyCustomCode: string;
 }

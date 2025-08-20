@@ -830,8 +830,8 @@ const fLinkDescriptors: SettingDescriptor[] = [
   {
     frontendPath: "frontDesk.fLink.friendLinkDefaultCategory",
     backendKey: constant.KeyFriendLinkDefaultCategory,
-    defaultValue: "2",
-    type: "string"
+    defaultValue: 2,
+    type: "number"
   },
   {
     frontendPath: "frontDesk.fLink.friendLinkApplyCondition",

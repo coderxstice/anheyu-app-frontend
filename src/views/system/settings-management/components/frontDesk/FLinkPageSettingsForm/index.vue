@@ -11,7 +11,7 @@
           v-for="item in categories"
           :key="item.id"
           :label="item.name"
-          :value="item.id.toString()"
+          :value="item.id"
         />
       </el-select>
     </el-form-item>
@@ -95,6 +95,11 @@ const fetchCategories = async () => {
     const res = await getLinkCategories();
     if (res.code === 200) {
       categories.value = res.data || [];
+      console.log("友链分类加载完成:", categories.value);
+      console.log(
+        "当前选中的默认分类ID:",
+        model.value.friendLinkDefaultCategory
+      );
     } else {
       ElMessage.error("获取友链分类列表失败");
     }
