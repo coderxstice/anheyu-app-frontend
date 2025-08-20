@@ -78,6 +78,36 @@ export interface FileSettingsInfo {
 }
 
 /**
+ * @description: 装备项类型
+ */
+export interface EquipmentItem {
+  /** 装备名称 */
+  name: string;
+  /** 装备规格 */
+  specification: string;
+  /** 装备描述 */
+  description: string;
+  /** 装备图片 */
+  image: string;
+  /** 链接地址 */
+  link?: string;
+  /** 链接文本 */
+  linkText?: string;
+}
+
+/**
+ * @description: 装备分类类型
+ */
+export interface EquipmentCategory {
+  /** 分类标题 */
+  title: string;
+  /** 分类描述 */
+  description: string;
+  /** 装备列表 */
+  equipment_list: EquipmentItem[];
+}
+
+/**
  * @description: 文章配置表单接口
  */
 export interface PostSettingsInfo {
@@ -98,6 +128,22 @@ export interface PostSettingsInfo {
     weChat: string;
     aliPay: string;
   };
+  codeBlock: {
+    codeMaxLines: number;
+  };
+}
+
+/**
+ * @description: 装备页配置表单接口
+ */
+export interface EquipmentSettingsInfo {
+  banner: {
+    background: string;
+    title: string;
+    description: string;
+    tip: string;
+  };
+  list: EquipmentCategory[];
 }
 
 /**
@@ -312,12 +358,26 @@ export interface FLinkSettingsInfo {
   friendLinkApplyCustomCode: string;
 }
 
+/**
+ * @description: 装备页配置表单接口
+ */
+export interface EquipmentPageSettingsInfo {
+  banner: {
+    background: string;
+    title: string;
+    description: string;
+    tip: string;
+  };
+  list: EquipmentCategory[];
+}
+
 export interface FrontDeskSettings {
   home: HomePageSettingsInfo;
   sidebar: SidebarPageSettingsInfo;
   comment: CommentSettingsInfo;
   email: EmailSettingsInfo;
   fLink: FLinkSettingsInfo;
+  equipment: EquipmentSettingsInfo;
 }
 
 /**

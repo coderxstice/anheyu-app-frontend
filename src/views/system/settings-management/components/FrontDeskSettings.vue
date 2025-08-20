@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-26 15:01:42
- * @LastEditTime: 2025-08-19 15:46:56
+ * @LastEditTime: 2025-08-20 13:14:52
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -32,6 +32,11 @@
         <FLinkPageSettingsForm v-model="model.fLink" />
       </el-form>
     </el-tab-pane>
+    <el-tab-pane label="装备页配置" name="equipmentPage">
+      <el-form :model="model" label-position="top" class="setting-form">
+        <EquipmentPageForm v-model="model.equipment" />
+      </el-form>
+    </el-tab-pane>
   </el-tabs>
 </template>
 
@@ -43,6 +48,7 @@ import SidebarPageForm from "./frontDesk/SidebarPageForm/index.vue";
 import CommentSettingsForm from "./frontDesk/CommentSettingsForm/index.vue";
 import EmailSettingsForm from "./frontDesk/EmailSettingsForm/index.vue";
 import FLinkPageSettingsForm from "./frontDesk/FLinkPageSettingsForm/index.vue";
+import EquipmentPageForm from "./frontDesk/EquipmentPageForm/index.vue";
 
 const activeSubTab = ref("homePage");
 

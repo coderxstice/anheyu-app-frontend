@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-02 18:04:48
- * @LastEditTime: 2025-08-10 20:42:10
+ * @LastEditTime: 2025-08-20 13:17:25
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -122,12 +122,25 @@
       placeholder="请输入文章打赏支付宝二维码图片链接地址"
     />
   </el-form-item>
+
+  <el-form-item label="代码块最大行数">
+    <el-input-number
+      v-model="formData.codeBlock.codeMaxLines"
+      :min="1"
+      :max="1000"
+      controls-position="right"
+      style="width: 100px"
+      placeholder="例如: 50"
+    />
+    <div class="form-item-help">
+      代码块超过此行数时将显示滚动条，默认为10行。
+    </div>
+  </el-form-item>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
 import type { PostSettingsInfo } from "../../type";
-
 const props = defineProps<{
   modelValue: PostSettingsInfo;
 }>();

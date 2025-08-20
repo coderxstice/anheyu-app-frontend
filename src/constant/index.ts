@@ -110,6 +110,17 @@ const KeyPostThemePrimaryColorAPIToken: SettingKey =
 const KeyPostRewardEnable: SettingKey = "post.reward.enable";
 const KeyPostRewardWeChatQR: SettingKey = "post.reward.wechat_qr";
 const KeyPostRewardAlipayQR: SettingKey = "post.reward.alipay_qr";
+const KeyPostCodeBlockCodeMaxLines: SettingKey =
+  "post.code_block.code_max_lines";
+
+// --- 装备页面配置 ---
+const KeyPostEquipmentBannerBackground: SettingKey =
+  "equipment.banner.background";
+const KeyPostEquipmentBannerTitle: SettingKey = "equipment.banner.title";
+const KeyPostEquipmentBannerDescription: SettingKey =
+  "equipment.banner.description";
+const KeyPostEquipmentBannerTip: SettingKey = "equipment.banner.tip";
+const KeyPostEquipmentList: SettingKey = "equipment.list";
 
 // --- 评论配置 ---
 const KeyCommentLoginRequired: SettingKey = "comment.login_required";
@@ -276,6 +287,14 @@ export const constant = {
   KeyPostRewardWeChatQR,
   KeyPostRewardAlipayQR,
   KeyPostExpirationTime,
+  KeyPostCodeBlockCodeMaxLines,
+
+  // --- 装备页面配置 ---
+  KeyPostEquipmentBannerBackground,
+  KeyPostEquipmentBannerTitle,
+  KeyPostEquipmentBannerDescription,
+  KeyPostEquipmentBannerTip,
+  KeyPostEquipmentList,
 
   // --- 评论配置 ---
   KeyCommentLoginRequired,

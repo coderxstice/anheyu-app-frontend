@@ -2,7 +2,7 @@
  * @Description: 装备页面
  * @Author: 安知鱼
  * @Date: 2025-08-20 10:07:07
- * @LastEditTime: 2025-08-20 11:43:29
+ * @LastEditTime: 2025-08-20 13:16:57
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -22,7 +22,7 @@ const siteConfigStore = useSiteConfigStore();
 const postCommentRef = ref();
 
 const equipmentConfig = computed(
-  () => siteConfigStore.getSiteConfig?.post?.equipment
+  () => siteConfigStore.getSiteConfig?.equipment
 );
 
 // 装备数据从配置中获取

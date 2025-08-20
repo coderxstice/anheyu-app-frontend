@@ -353,8 +353,47 @@ const postDescriptors: SettingDescriptor[] = [
   {
     frontendPath: "post.reward.aliPay",
     backendKey: constant.KeyPostRewardAlipayQR,
-    defaultValue: 12,
+    defaultValue: "",
     type: "string"
+  },
+  {
+    frontendPath: "post.codeBlock.codeMaxLines",
+    backendKey: constant.KeyPostCodeBlockCodeMaxLines,
+    defaultValue: 10,
+    type: "number"
+  }
+];
+
+const equipmentDescriptors: SettingDescriptor[] = [
+  {
+    frontendPath: "frontDesk.equipment.banner.background",
+    backendKey: constant.KeyPostEquipmentBannerBackground,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.equipment.banner.title",
+    backendKey: constant.KeyPostEquipmentBannerTitle,
+    defaultValue: "好物",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.equipment.banner.description",
+    backendKey: constant.KeyPostEquipmentBannerDescription,
+    defaultValue: "实物装备推荐",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.equipment.banner.tip",
+    backendKey: constant.KeyPostEquipmentBannerTip,
+    defaultValue: "跟 安知鱼 一起享受科技带来的乐趣",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.equipment.list",
+    backendKey: constant.KeyPostEquipmentList,
+    defaultValue: [],
+    type: "json"
   }
 ];
 
@@ -819,6 +858,7 @@ export const allSettingDescriptors = [
   ...pageDescriptors,
   ...fileDescriptors,
   ...postDescriptors,
+  ...equipmentDescriptors,
   ...frontDeskDescriptors,
   ...sidebarDescriptors,
   ...commentDescriptors,
