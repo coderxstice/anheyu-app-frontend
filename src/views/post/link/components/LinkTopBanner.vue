@@ -185,6 +185,7 @@ const pairedLinkList = computed(() => {
   color: var(--anzhiyu-white);
   border: none;
   font-family: inherit;
+  padding: 10px;
 
   &.secondary {
     color: var(--anzhiyu-lighttext);

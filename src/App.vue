@@ -21,6 +21,7 @@ import { ReDialog } from "@/components/ReDialog";
 import ReloadPWA from "@/components/ReloadPWA/ReloadPWA.vue";
 import zhCn from "element-plus/es/locale/lang/zh-cn";
 import GlobalLoading from "@/components/GlobalLoading/index.vue";
+import { useGlobalStatistics } from "@/composables/useGlobalStatistics";
 
 export default defineComponent({
   name: "app",
@@ -31,6 +32,9 @@ export default defineComponent({
     GlobalLoading
   },
   setup() {
+    // 初始化全局访问统计
+    useGlobalStatistics();
+
     return {};
   },
   computed: {

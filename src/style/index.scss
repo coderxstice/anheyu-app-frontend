@@ -9,6 +9,7 @@
 
 /* 自定义全局 CssVar */
 :root {
+  --font-color: #4c4948;
   --el-color-primary: var(--anzhiyu-theme) !important;
   --el-border-radius-base: 12px !important;
   /* 左侧菜单展开、收起动画时长 */
@@ -70,7 +71,7 @@
   --anzhiyu-fontcolor: #363636;
   --anzhiyu-background: #f7f9fe;
   --anzhiyu-reverse: #000;
-  --anzhiyu-maskbg: rgba(0, 0, 0, 0.6);
+  --anzhiyu-maskbg: rgba(255,255,255,0.6);
   --anzhiyu-maskbgdeep: rgba(255, 255, 255, 0.85);
   --anzhiyu-hovertext: var(--anzhiyu-main);
   --anzhiyu-ahoverbg: #f7f7fa;

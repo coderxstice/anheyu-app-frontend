@@ -21,12 +21,17 @@ import {
   type Router,
   createRouter,
   type RouteRecordRaw,
-  type RouteComponent
+  type RouteComponent,
+  type RouteLocationNormalized
 } from "vue-router";
 import type { LoginResultData } from "@/api/user";
 // 从 auth.ts 导入的函数中，multipleTabsKey 已经包含在内
 import { userKey, removeToken, multipleTabsKey } from "@/utils/auth";
 import { useLoadingStore } from "@/store/modules/loadingStore";
+import { recordRouteChange } from "./statistics";
+
+// 定义路由类型别名
+type ToRouteType = RouteLocationNormalized;
 
 /** 自动导入全部静态路由，无需再手动引入！匹配 src/router/modules 目录（任何嵌套级别）中具有 .ts 扩展名的所有文件，除了 remaining.ts 文件
  * 如何匹配所有文件请看：https://github.com/mrmlnc/fast-glob#basic-syntax
@@ -279,6 +284,11 @@ router.beforeEach((to: ToRouteType, _from, next) => {
 router.afterEach((to, from) => {
   const loadingStore = useLoadingStore();
   const isReloadingSamePost = to.name === "PostDetail" && to.path === from.path;
+
+  // 记录路由变化（访问统计）
+  if (to.path !== from.path) {
+    recordRouteChange(to, from);
+  }
 
   if (to.name !== "PostDetail" || isReloadingSamePost) {
     loadingStore.stopLoading();

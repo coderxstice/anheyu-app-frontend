@@ -1,43 +1,122 @@
 <script setup lang="ts">
+import { onMounted, ref } from "vue";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import { ElMessage } from "element-plus";
+import type { BackendAboutPageConfig } from "@/types/about";
+
+// 组件导入
+import AuthorBox from "./components/AuthorBox.vue";
 import AuthorPageContent from "./components/AuthorPageContent.vue";
+import SkillsCard from "./components/SkillsCard.vue";
+import CareersCard from "./components/CareersCard.vue";
+import StatisticCard from "./components/StatisticCard.vue";
+import MapAndInfoCard from "./components/MapAndInfoCard.vue";
+import PersonalityCard from "./components/PersonalityCard.vue";
+import PhotoCard from "./components/PhotoCard.vue";
+import MaximCard from "./components/MaximCard.vue";
+import BuffCard from "./components/BuffCard.vue";
+import GameCard from "./components/GameCard.vue";
+import ComicCard from "./components/ComicCard.vue";
+import LikeTechCard from "./components/LikeTechCard.vue";
+import MusicCard from "./components/MusicCard.vue";
+
 defineOptions({
   name: "PostAbout"
+});
+
+const siteConfigStore = useSiteConfigStore();
+const aboutConfig = ref<BackendAboutPageConfig | null>(null);
+const isLoading = ref(true);
+
+onMounted(async () => {
+  try {
+    isLoading.value = true;
+    const config = siteConfigStore.getSiteConfig?.about?.page;
+
+    if (config) {
+      aboutConfig.value = config;
+    } else {
+      ElMessage.error("获取关于页面配置失败，请检查后端配置或联系管理员");
+    }
+  } catch (error) {
+    console.error("Failed to load about config:", error);
+    ElMessage.error("加载关于页面配置时发生错误，请稍后重试");
+  } finally {
+    isLoading.value = false;
+  }
 });
 </script>
 
 <template>
-  <div class="about-container">
-    <div class="author-box">
-      <div class="author-tag-left">
-        <span class="author-tag">🤖️ 数码科技爱好者</span
-        ><span class="author-tag">🔍 分享与热心帮助</span
-        ><span class="author-tag">🏠 智能家居小能手</span
-        ><span class="author-tag">🔨 设计开发一条龙</span>
-      </div>
-      <div class="author-img">
-        <img
-          class="no-lightbox entered loaded"
-          src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"
-          onerror='this.onerror=null,this.src="https://bu.dusays.com/2023/03/03/6401a79030db5.png"'
-          data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"
-          alt="avatar"
-          data-ll-status="loaded"
-        />
-      </div>
-      <div class="author-tag-right">
-        <span class="author-tag">专修交互与设计 🤝</span
-        ><span class="author-tag">脚踏实地行动派 🏃</span
-        ><span class="author-tag">团队小组发动机 🧱</span
-        ><span class="author-tag">壮汉人狠话不多 💢</span>
-      </div>
-    </div>
+  <div v-if="aboutConfig" class="about-container">
+    <!-- 作者头像框 -->
+    <AuthorBox
+      :avatar-img="aboutConfig.avatar_img"
+      :avatar-skills="{
+        left: aboutConfig.avatar_skills_left,
+        right: aboutConfig.avatar_skills_right
+      }"
+    />
+
     <div class="author-title">关于本站</div>
 
-    <AuthorPageContent />
+    <!-- 基础介绍内容 -->
+    <AuthorPageContent
+      :name="aboutConfig.name"
+      :description="aboutConfig.description"
+      :about-site-tips="aboutConfig.about_site_tips"
+    />
+
+    <!-- 技能和职业经历 -->
+    <div class="author-content">
+      <SkillsCard :skills-tips="aboutConfig.skills_tips" />
+      <CareersCard :careers="aboutConfig.careers" />
+    </div>
+
+    <!-- 访问统计和地图信息 -->
+    <div class="author-content">
+      <StatisticCard
+        :cover="aboutConfig.statistics_background"
+        link="/statistics"
+        text="更多统计"
+      />
+      <MapAndInfoCard
+        :map="aboutConfig.map"
+        :self-info="aboutConfig.self_info"
+      />
+    </div>
+
+    <!-- 性格和照片 -->
+    <div class="author-content">
+      <PersonalityCard :personalities="aboutConfig.personalities" />
+      <PhotoCard :photo-url="aboutConfig.personalities.photoUrl" />
+    </div>
+
+    <!-- 格言和特长 -->
+    <div class="author-content">
+      <MaximCard :maxim="aboutConfig.maxim" />
+      <BuffCard :buff="aboutConfig.buff" />
+    </div>
+
+    <!-- 游戏和漫画 -->
+    <div class="author-content">
+      <GameCard :game="aboutConfig.game" />
+      <ComicCard :comic="aboutConfig.comic" />
+    </div>
+
+    <!-- 技术和音乐 -->
+    <div class="author-content">
+      <LikeTechCard :like="aboutConfig.like" />
+      <MusicCard :music="aboutConfig.music" :author-name="aboutConfig.name" />
+    </div>
+  </div>
+
+  <div v-else class="loading-container">
+    <div class="loading">加载中...</div>
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .about-container {
   animation: slide-in 0.6s 0.2s backwards;
   max-width: 1400px;
@@ -46,102 +125,25 @@ defineOptions({
   display: flex;
   flex-direction: column;
   align-items: center;
-  .author-box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 0 16px 0;
-    .author-tag-left {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
 
-      .author-tag {
-        &:first-child,
-        &:last-child {
-          margin-right: -16px;
-        }
-      }
-    }
-    .author-tag {
-      transform: translate(0, -4px);
-      padding: 1px 8px;
-      background: var(--anzhiyu-card-bg);
-      border: var(--style-border-always);
-      border-radius: 40px;
-      margin-top: 6px;
-      font-size: 14px;
-      font-weight: 700;
-      box-shadow: var(--anzhiyu-shadow-lightblack);
-      animation: 6s ease-in-out 0s infinite normal none running floating;
-
-      &:nth-child(1) {
-        animation-delay: 0s;
-      }
-
-      &:nth-child(2) {
-        animation-delay: 0.6s;
-      }
-
-      &:nth-child(3) {
-        animation-delay: 1.2s;
-      }
-
-      &:nth-child(4) {
-        animation-delay: 1.8s;
-      }
-    }
-    .author-img {
-      margin: 0 30px;
-      border-radius: 50%;
-      width: 180px;
-      height: 180px;
-      position: relative;
-      background: var(--anzhiyu-secondbg);
-      user-select: none;
-      transition: 0.3s;
-      &:hover {
-        transform: scale(1.1);
-      }
-      img {
-        border-radius: 50%;
-        overflow: hidden;
-        width: 180px;
-        height: 180px;
-      }
-      &::before {
-        content: "";
-        transition: 1s;
-        width: 30px;
-        height: 30px;
-        background: var(--anzhiyu-green);
-        position: absolute;
-        border-radius: 50%;
-        border: 5px solid var(--anzhiyu-background);
-        bottom: 5px;
-        right: 10px;
-        z-index: 2;
-        box-sizing: content-box;
-      }
-    }
-    .author-tag-right {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-
-      .author-tag {
-        &:first-child,
-        &:last-child {
-          margin-left: -16px;
-        }
-      }
-    }
-  }
   .author-title {
     font-size: 2.5rem;
     font-weight: 700;
     margin: 0.625rem 0 1.25rem 0;
     line-height: 1;
+  }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+
+  .loading {
+    font-size: 18px;
+    color: var(--anzhiyu-secondtext);
+    opacity: 0.8;
   }
 }
 </style>

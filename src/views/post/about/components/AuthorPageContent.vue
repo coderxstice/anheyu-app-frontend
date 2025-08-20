@@ -1,11 +1,22 @@
 <!--
- * @Description:
+ * @Description: 作者页面内容组件
  * @Author: 安知鱼
  * @Date: 2025-08-20 14:51:39
- * @LastEditTime: 2025-08-20 14:57:31
+ * @LastEditTime: 2025-08-20 16:21:38
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
+import AboutSiteTips from "./AboutSiteTips.vue";
+import type { AboutSiteTips as AboutSiteTipsType } from "@/types/about";
+
+interface Props {
+  name: string;
+  description: string;
+  aboutSiteTips: AboutSiteTipsType;
+}
+
+defineProps<Props>();
+
 defineOptions({
   name: "AuthorPageContent"
 });
@@ -16,24 +27,12 @@ defineOptions({
     <div class="author-content">
       <div class="author-content-item myInfoAndSayHello">
         <div class="title1">你好，很高兴认识你👋</div>
-        <div class="title2">我叫 <span class="inline-word">张洪Heo</span></div>
-        <div class="title1">
-          是一名 设计师、产品经理、独立开发者、<span class="inline-word"
-            >博主</span
-          >
+        <div class="title2">
+          我叫 <span class="inline-word">{{ name }}</span>
         </div>
+        <div class="title1">{{ description }}</div>
       </div>
-      <div class="aboutsiteTips author-content-item">
-        <div class="author-content-item-tips">追求</div>
-        <h2>
-          源于<br />
-          热爱而去<span class="inline-word">创造</span>
-          <div class="mask">
-            <span class="first-tips">产品</span><span data-up="">设计</span
-            ><span data-show="">程序</span><span>体验</span>
-          </div>
-        </h2>
-      </div>
+      <AboutSiteTips :config="aboutSiteTips" />
     </div>
   </div>
 </template>
@@ -45,9 +44,9 @@ defineOptions({
 
 .author-content-item {
   border-radius: 12px;
-  background: var(--heo-card-bg);
+  background: var(--anzhiyu-card-bg);
   border: var(--style-border-always);
-  box-shadow: var(--heo-shadow-border);
+  box-shadow: var(--anzhiyu-shadow-border);
   position: relative;
   padding: 1rem 2rem;
   overflow: hidden;
@@ -95,7 +94,7 @@ defineOptions({
     font-family: Helvetica;
     line-height: 1.06;
     letter-spacing: -0.02em;
-    color: var(--heo-fontcolor);
+    color: var(--anzhiyu-fontcolor);
     margin-top: 0;
   }
   .mask {

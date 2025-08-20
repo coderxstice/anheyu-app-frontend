@@ -260,6 +260,7 @@ const scrollToTop = () => {
           margin: auto;
           justify-content: center;
           animation-timing-function: ease-out;
+          width: fit-content;
 
           opacity: 0;
           transform: translateY(20px) scale(1.1);

@@ -120,7 +120,7 @@ defineProps<{
     border-style: none;
     border-color: initial;
     border-image: initial;
-    color: var(--heo-fontcolor);
+    color: var(--anzhiyu-fontcolor);
     text-decoration: none;
     font-weight: 700;
     padding: 0px 4px;
