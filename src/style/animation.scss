@@ -103,3 +103,17 @@
     left: 50px;
   }
 }
+
+@keyframes floating {
+  0% {
+    transform: translate(0, -4px);
+  }
+
+  50% {
+    transform: translate(0, 4px);
+  }
+
+  100% {
+    transform: translate(0, -4px);
+  }
+}

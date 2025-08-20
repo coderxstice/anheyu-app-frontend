@@ -2,7 +2,7 @@
  * @Description: 路由配置
  * @Author: 安知鱼
  * @Date: 2025-04-08 17:29:06
- * @LastEditTime: 2025-08-20 10:07:21
+ * @LastEditTime: 2025-08-20 14:19:58
  * @LastEditors: 安知鱼
  */
 const Layout = () => import("@/layout/index.vue");
@@ -270,6 +270,19 @@ export default [
             const configs = getConfig();
             const appName = configs?.APP_NAME;
             return `${appName} - 我的装备`;
+          },
+          showLink: false
+        }
+      },
+      {
+        path: "about",
+        name: "PostAbout",
+        component: () => import("@/views/post/about/index.vue"),
+        meta: {
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 关于本站`;
           },
           showLink: false
         }
