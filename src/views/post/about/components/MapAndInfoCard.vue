@@ -112,7 +112,7 @@ onMounted(() => {
 
   @media screen and (max-width: 768px) {
     width: 100% !important;
-    flex-direction: row;
+    flex-direction: column;
   }
 }
 
@@ -133,8 +133,9 @@ onMounted(() => {
   }
 
   @media screen and (max-width: 768px) {
-    width: 50%;
-    margin-bottom: 0;
+    width: 100% !important;
+    height: 200px;
+    margin-bottom: 1rem;
   }
 
   &:hover {
@@ -181,8 +182,11 @@ onMounted(() => {
   height: 40%;
 
   @media screen and (max-width: 768px) {
-    height: 100%;
-    width: 49%;
+    height: auto;
+    width: 100% !important;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
 
   div {
@@ -190,6 +194,12 @@ onMounted(() => {
     flex-direction: column;
     margin: 0.5rem 2rem 0.5rem 0;
     min-width: 120px;
+
+    @media screen and (max-width: 768px) {
+      margin: 0;
+      min-width: auto;
+      width: 100%;
+    }
   }
 
   .selfInfo-title {
@@ -204,9 +214,13 @@ onMounted(() => {
     font-size: 34px;
     line-height: 1;
 
+    @media screen and (max-width: 768px) {
+      font-size: 28px;
+    }
+
     &#selfInfo-content-year {
       @media screen and (max-width: 768px) {
-        width: 90px;
+        width: auto;
       }
     }
   }

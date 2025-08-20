@@ -159,6 +159,11 @@ onMounted(() => {
   color: var(--anzhiyu-white);
   overflow: hidden;
 
+  @media screen and (max-width: 768px) {
+    width: 100% !important;
+    min-height: 300px;
+  }
+
   &::after {
     box-shadow: 0 -159px 173px 71px #0c1c2c inset;
     position: absolute;
@@ -199,6 +204,10 @@ onMounted(() => {
       font-size: 34px;
       line-height: 1;
       white-space: nowrap;
+
+      @media screen and (max-width: 768px) {
+        font-size: 28px;
+      }
     }
   }
 }
@@ -223,6 +232,13 @@ onMounted(() => {
   bottom: 1rem;
   left: 2rem;
 
+  @media screen and (max-width: 768px) {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    margin-top: 1rem;
+  }
+
   a {
     color: var(--anzhiyu-gray) !important;
     border: none !important;
@@ -238,6 +254,14 @@ onMounted(() => {
   position: absolute;
   bottom: 1.5rem;
   right: 2rem;
+
+  @media screen and (max-width: 768px) {
+    position: relative;
+    bottom: auto;
+    right: auto;
+    margin-top: 1rem;
+    text-align: center;
+  }
 
   .banner-button {
     height: 40px;
@@ -256,6 +280,11 @@ onMounted(() => {
     transform: translateZ(0);
     text-decoration: none;
     padding: 10px;
+
+    @media screen and (max-width: 768px) {
+      width: 100%;
+      justify-content: center;
+    }
 
     i,
     svg {

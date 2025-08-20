@@ -110,6 +110,10 @@ const creativityPairs = computed(() => {
   width: 50%;
   min-height: 450px;
 
+  @media screen and (max-width: 768px) {
+    width: 100% !important;
+  }
+
   .skill-icon {
     width: 32px;
     height: 32px;

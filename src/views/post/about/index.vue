@@ -126,11 +126,21 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
 
+  @media screen and (max-width: 768px) {
+    padding: 1rem;
+    max-width: 100%;
+  }
+
   .author-title {
     font-size: 2.5rem;
     font-weight: 700;
     margin: 0.625rem 0 1.25rem 0;
     line-height: 1;
+
+    @media screen and (max-width: 768px) {
+      font-size: 2rem;
+      margin: 0.5rem 0 1rem 0;
+    }
   }
 }
 
@@ -144,6 +154,19 @@ onMounted(async () => {
     font-size: 18px;
     color: var(--anzhiyu-secondtext);
     opacity: 0.8;
+  }
+}
+
+// 移动端适配
+@media screen and (max-width: 768px) {
+  .author-content {
+    flex-direction: column;
+    gap: 1rem;
+
+    > * {
+      width: 100% !important;
+      flex: none !important;
+    }
   }
 }
 </style>

@@ -52,6 +52,10 @@ defineProps<Props>();
   justify-content: center;
   margin: 0 0 16px 0;
 
+  @media screen and (max-width: 768px) {
+    margin: 0 0 12px 0;
+  }
+
   .author-tag-left {
     display: flex;
     flex-direction: column;
@@ -128,6 +132,7 @@ defineProps<Props>();
     @media screen and (max-width: 768px) {
       width: 120px;
       height: 120px;
+      margin: 0 20px;
     }
 
     &:hover {
@@ -161,8 +166,11 @@ defineProps<Props>();
       box-sizing: content-box;
 
       @media screen and (max-width: 768px) {
-        bottom: -5px;
-        right: -5px;
+        width: 20px;
+        height: 20px;
+        border: 3px solid var(--anzhiyu-background);
+        bottom: -3px;
+        right: -3px;
       }
     }
   }
