@@ -4,6 +4,7 @@
  * @Date: 2025-01-27
 -->
 <script setup lang="ts">
+import { ref, onMounted, watch } from "vue";
 import { useStatistics } from "@/composables/useStatistics";
 
 interface Props {
@@ -15,6 +16,86 @@ interface Props {
 defineProps<Props>();
 
 const { stats, isLoading, error } = useStatistics();
+
+// 动画数字状态
+const animatedStats = ref({
+  today_visitors: 0,
+  today_views: 0,
+  yesterday_visitors: 0,
+  yesterday_views: 0,
+  month_views: 0,
+  year_views: 0
+});
+
+// 数字动画函数
+const animateNumber = (
+  element: HTMLElement,
+  target: number,
+  duration: number = 2000
+) => {
+  let current = 0;
+  const increment = target / (duration / 16); // 16ms per frame for 60fps
+
+  const timer = setInterval(() => {
+    current += increment;
+    if (current >= target) {
+      current = target;
+      clearInterval(timer);
+    }
+    element.textContent = Math.floor(current).toLocaleString();
+  }, 16);
+};
+
+// 开始所有数字的动画
+const startNumberAnimation = () => {
+  if (!stats.value) return;
+
+  // 延迟一点开始动画，让用户看到数据加载完成
+  setTimeout(() => {
+    const elements = {
+      today_visitors: document.getElementById("statistic-today-visitors"),
+      today_views: document.getElementById("statistic-today-views"),
+      yesterday_visitors: document.getElementById(
+        "statistic-yesterday-visitors"
+      ),
+      yesterday_views: document.getElementById("statistic-yesterday-views"),
+      month_views: document.getElementById("statistic-month-views"),
+      year_views: document.getElementById("statistic-year-views")
+    };
+
+    // 为每个数字元素启动动画
+    Object.entries(elements).forEach(([key, element]) => {
+      if (
+        element &&
+        stats.value &&
+        stats.value[key as keyof typeof stats.value]
+      ) {
+        const targetValue = stats.value[
+          key as keyof typeof stats.value
+        ] as number;
+        animateNumber(element, targetValue, 1500 + Math.random() * 1000); // 随机动画时长
+      }
+    });
+  }, 300);
+};
+
+// 监听统计数据变化，启动动画
+watch(
+  stats,
+  newStats => {
+    if (newStats && !isLoading.value) {
+      startNumberAnimation();
+    }
+  },
+  { immediate: true }
+);
+
+// 组件挂载后，如果数据已经加载完成，启动动画
+onMounted(() => {
+  if (stats.value && !isLoading.value) {
+    startNumberAnimation();
+  }
+});
 </script>
 
 <template>
@@ -30,27 +111,27 @@ const { stats, isLoading, error } = useStatistics();
       <div v-if="!isLoading && !error" id="statistic">
         <div>
           <span>今日人数</span>
-          <span>{{ stats.today_visitors }}</span>
+          <span id="statistic-today-visitors">0</span>
         </div>
         <div>
           <span>今日访问</span>
-          <span>{{ stats.today_views }}</span>
+          <span id="statistic-today-views">0</span>
         </div>
         <div>
           <span>昨日人数</span>
-          <span>{{ stats.yesterday_visitors }}</span>
+          <span id="statistic-yesterday-visitors">0</span>
         </div>
         <div>
           <span>昨日访问</span>
-          <span>{{ stats.yesterday_views }}</span>
+          <span id="statistic-yesterday-views">0</span>
         </div>
         <div>
           <span>本月访问</span>
-          <span>{{ stats.month_views }}</span>
+          <span id="statistic-month-views">0</span>
         </div>
         <div>
           <span>年访问量</span>
-          <span>{{ stats.year_views }}</span>
+          <span id="statistic-year-views">0</span>
         </div>
       </div>
 
