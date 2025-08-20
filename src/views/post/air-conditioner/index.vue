@@ -5,7 +5,6 @@ defineOptions({
   name: "AirConditioner"
 });
 
-// 为 TypeScript 添加类型声明
 declare global {
   interface Window {
     anzhiyu_air_conditioner?: {
@@ -15,9 +14,6 @@ declare global {
   }
 }
 
-// --- 新增部分：CSS变量管理 ---
-
-// 1. 定义需要管理（备份和恢复）的CSS变量列表
 const cssVariablesToManage = [
   "--el-color-primary",
   "--el-color-primary-dark-1",
@@ -36,17 +32,13 @@ const cssVariablesToManage = [
   "--anzhiyu-main-op-light"
 ];
 
-// 2. 创建一个对象，用于存储这些变量的原始值
 let originalCSSValues: { [key: string]: string } = {};
-
-// --- 脚本加载与卸载部分（与之前相同） ---
 
 const SCRIPT_ID = "air-conditioner-script-tag";
 const SCRIPT_URL =
   "https://npm.elemecdn.com/anzhiyu-air-conditioner@1.0.1/index.3f125bc6.js";
 
 onMounted(() => {
-  // --- 新增逻辑：在挂载时，保存原始CSS变量值 ---
   const rootElement = document.documentElement;
   const computedStyle = window.getComputedStyle(rootElement);
 
@@ -57,7 +49,6 @@ onMounted(() => {
       originalCSSValues[variableName] = value;
     }
   });
-  // ---------------------------------------------
 
   // 加载外部脚本（此脚本加载后会覆盖我们刚刚保存的那些CSS变量）
   const script = document.createElement("script");
