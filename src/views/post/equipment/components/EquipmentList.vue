@@ -39,6 +39,10 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const emit = defineEmits<{
+  "comment-quote": [quoteText: string];
+}>();
+
 // 处理图片加载错误
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement;
@@ -59,9 +63,14 @@ const generateCommentText = (item: EquipmentItem) => {
 
 // 处理评论按钮点击
 const handleCommentClick = (item: EquipmentItem) => {
-  const commentText = generateCommentText(item);
-  // 这里可以添加评论功能的实现，比如调用 rm.rightMenuCommentText
-  console.log(`评论文本: ${commentText}`);
+  const quoteText = item.description;
+  emit("comment-quote", quoteText);
+
+  // 滚动到评论区域
+  const commentSection = document.querySelector(".link-comment-section");
+  if (commentSection) {
+    commentSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 };
 </script>
 
@@ -247,6 +256,7 @@ const handleCommentClick = (item: EquipmentItem) => {
           left: 0;
           width: 100%;
           padding: 0 16px;
+          align-items: center;
 
           .bber-reply {
             cursor: pointer;

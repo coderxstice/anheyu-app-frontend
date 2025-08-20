@@ -10,7 +10,7 @@ import AnBannerCard from "@/components/AnBannerCard";
 import EquipmentList from "./components/EquipmentList.vue";
 import PostComment from "../components/PostComment/index.vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 
 defineOptions({
@@ -19,6 +19,7 @@ defineOptions({
 
 const route = useRoute();
 const siteConfigStore = useSiteConfigStore();
+const postCommentRef = ref();
 
 const equipmentConfig = computed(
   () => siteConfigStore.getSiteConfig?.post?.equipment
@@ -26,6 +27,13 @@ const equipmentConfig = computed(
 
 // 装备数据从配置中获取
 const equipmentData = computed(() => equipmentConfig.value?.list || []);
+
+// 处理装备评论引用
+const handleEquipmentComment = (quoteText: string) => {
+  if (postCommentRef.value) {
+    postCommentRef.value.setQuoteText(quoteText);
+  }
+};
 </script>
 
 <template>
@@ -37,10 +45,13 @@ const equipmentData = computed(() => equipmentConfig.value?.list || []);
       :background-image="equipmentConfig?.banner?.background"
       :height="300"
     />
-    <EquipmentList :data="equipmentData" />
+    <EquipmentList
+      :data="equipmentData"
+      @comment-quote="handleEquipmentComment"
+    />
 
     <div class="link-comment-section">
-      <PostComment :target-path="route.path" />
+      <PostComment ref="postCommentRef" :target-path="route.path" />
     </div>
   </div>
 </template>

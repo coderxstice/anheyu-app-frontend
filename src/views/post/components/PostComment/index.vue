@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed, watch, nextTick } from "vue";
+import { onMounted, computed, watch, nextTick, ref } from "vue";
 import type { Comment } from "@/api/comment/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useCommentStore } from "@/store/modules/commentStore";
@@ -21,6 +21,8 @@ const siteConfigStore = useSiteConfigStore();
 const commentStore = useCommentStore();
 const { comments, totalComments, isLoading, isLoadingMore, hasMore } =
   storeToRefs(commentStore);
+
+const quoteText = ref("");
 
 const commentInfoConfig = computed(() => {
   const config = siteConfigStore.getSiteConfig.comment;
@@ -90,8 +92,21 @@ const scrollToComment = (id: string) => {
   }
 };
 
+const setQuoteText = (text: string) => {
+  quoteText.value = text;
+};
+
+const handleCommentSubmitted = () => {
+  quoteText.value = "";
+};
+
+const handleCancelQuote = () => {
+  quoteText.value = "";
+};
+
 defineExpose({
-  scrollToComment
+  scrollToComment,
+  setQuoteText
 });
 </script>
 
@@ -108,6 +123,9 @@ defineExpose({
       <CommentForm
         :target-path="props.targetPath"
         :placeholder="commentInfoConfig.placeholder"
+        :quote-text="quoteText"
+        @submitted="handleCommentSubmitted"
+        @cancel-quote="handleCancelQuote"
       />
     </div>
 

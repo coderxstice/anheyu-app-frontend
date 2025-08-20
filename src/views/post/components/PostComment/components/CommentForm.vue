@@ -59,10 +59,11 @@ const props = defineProps({
   targetPath: { type: String, required: true },
   parentId: { type: String, default: null },
   placeholder: { type: String, default: "欢迎留下宝贵的建议啦～" },
-  showCancelButton: { type: Boolean, default: false }
+  showCancelButton: { type: Boolean, default: false },
+  quoteText: { type: String, default: "" }
 });
 
-const emit = defineEmits(["submitted", "cancel"]);
+const emit = defineEmits(["submitted", "cancel", "cancel-quote"]);
 
 const siteConfigStore = useSiteConfigStore();
 const commentStore = useCommentStore();
@@ -132,10 +133,17 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async valid => {
     if (valid) {
       const { nickname, email, content, website } = form;
+
+      // 如果有引用文本，在内容前面添加引用格式
+      let finalContent = content;
+      if (props.quoteText && props.quoteText.trim()) {
+        finalContent = `> ${props.quoteText}\n\n${content}`;
+      }
+
       const payload: CreateCommentPayload = {
         nickname,
         email,
-        content,
+        content: finalContent,
         target_path: props.targetPath,
         target_title: document.title,
         parent_id: props.parentId
@@ -312,6 +320,19 @@ watch(
   }
 );
 
+watch(
+  () => props.quoteText,
+  newQuoteText => {
+    if (newQuoteText) {
+      // 聚焦到输入框
+      nextTick(() => {
+        textareaRef.value?.focus();
+      });
+    }
+  },
+  { immediate: true }
+);
+
 onMounted(() => {
   fetchEmojis();
   const userInfo = localStorage.getItem("comment-user-info");
@@ -332,6 +353,25 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
 </script>
 <template>
   <div class="comment-form">
+    <!-- 引用提示区域 -->
+    <div v-if="props.quoteText && props.quoteText.trim()" class="quote-preview">
+      <div class="quote-preview-header">
+        <i class="anzhiyufont anzhiyu-icon-quote" />
+        <span class="quote-preview-title">正在引用</span>
+        <button
+          class="quote-preview-close"
+          type="button"
+          title="取消引用"
+          @click="$emit('cancel-quote')"
+        >
+          <i class="anzhiyufont anzhiyu-icon-xmark" />
+        </button>
+      </div>
+      <div class="quote-preview-content">
+        {{ props.quoteText }}
+      </div>
+    </div>
+
     <el-form
       ref="formRef"
       :model="form"
@@ -510,6 +550,76 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
 
 .comment-form {
   border-radius: 8px;
+}
+
+.quote-preview {
+  background: var(--anzhiyu-secondbg);
+  border: var(--style-border-always);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+
+  .quote-preview-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    color: var(--anzhiyu-main);
+    font-size: 0.85rem;
+    font-weight: 600;
+
+    i {
+      font-size: 1rem;
+    }
+
+    .quote-preview-title {
+      flex: 1;
+    }
+
+    .quote-preview-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--anzhiyu-secondtext);
+      padding: 2px;
+      border-radius: 4px;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 1rem;
+      height: 1rem;
+
+      &:hover {
+        background: var(--anzhiyu-gray-op);
+        color: var(--anzhiyu-main);
+      }
+
+      i {
+        font-size: 0.8rem;
+      }
+    }
+  }
+
+  .quote-preview-content {
+    color: var(--anzhiyu-secondtext);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    padding: 8px 12px;
+    background: var(--anzhiyu-background);
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--anzhiyu-main);
+      border-radius: 2px;
+    }
+  }
 }
 
 .textarea-container {
