@@ -1,24 +1,24 @@
 @keyframes slide-in {
   0% {
-    -webkit-transform: translateY(20px);
-    -moz-transform: translateY(20px);
-    -o-transform: translateY(20px);
-    -ms-transform: translateY(20px);
-    transform: translateY(20px);
-    opacity: 0;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+    filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
     filter: alpha(opacity=0);
+    opacity: 0;
+    transform: translateY(20px);
+    transform: translateY(20px);
+    transform: translateY(20px);
+    transform: translateY(20px);
+    transform: translateY(20px);
   }
 
   100% {
-    -webkit-transform: translateY(0);
-    -moz-transform: translateY(0);
-    -o-transform: translateY(0);
-    -ms-transform: translateY(0);
-    transform: translateY(0);
-    opacity: 1;
-    -ms-filter: none;
     filter: none;
+    filter: none;
+    opacity: 1;
+    transform: translateY(0);
+    transform: translateY(0);
+    transform: translateY(0);
+    transform: translateY(0);
+    transform: translateY(0);
   }
 }
 
@@ -26,6 +26,7 @@
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(-50%);
   }
@@ -33,17 +34,16 @@
 
 @keyframes donate_effcet {
   0% {
-    opacity: 0;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+    filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
     filter: alpha(opacity=0);
+    opacity: 0;
     transform: translateY(-20px);
   }
 
   100% {
+    filter: none;
+    filter: none;
     opacity: 1;
-    -ms-filter: none;
-    filter: none;
-    filter: none;
     transform: translateY(0);
   }
 }
@@ -53,6 +53,7 @@
     opacity: 0;
     transform: translateY(0) scale(0.8);
   }
+
   to {
     opacity: 1;
     transform: translateY(-10px) scale(1);
@@ -62,16 +63,16 @@
 @keyframes commonTipsIn {
   0% {
     top: -40px;
-    opacity: 0;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+    filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
     filter: alpha(opacity=0);
+    opacity: 0;
   }
 
   100% {
     top: -50px;
-    opacity: 1;
-    -ms-filter: none;
     filter: none;
+    filter: none;
+    opacity: 1;
   }
 }
 
@@ -79,6 +80,7 @@
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
@@ -86,8 +88,9 @@
 
 @keyframes rowleft {
   0% {
-    transform: translateX(0px);
+    transform: translateX(0);
   }
+
   100% {
     transform: translateX(-50%);
   }
@@ -95,12 +98,13 @@
 
 @keyframes light_tag {
   0% {
-    transform: skewX(0deg);
     left: -150px;
+    transform: skewX(0deg);
   }
+
   99% {
-    transform: skewX(-25deg);
     left: 50px;
+    transform: skewX(-25deg);
   }
 }
 

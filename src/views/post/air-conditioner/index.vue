@@ -95,15 +95,17 @@ onUnmounted(() => {
   max-width: 1400px;
   padding: 0 1.5rem;
   margin: 0 auto;
+
   .air-conditioner-content {
+    width: 100%;
     background: var(--anzhiyu-card-bg);
     border: var(--style-border);
-    width: 100%;
     border-radius: 12px;
   }
 }
+
 .copyright-box a {
-  border-bottom: none !important;
   padding: 0 !important;
+  border-bottom: none !important;
 }
 </style>

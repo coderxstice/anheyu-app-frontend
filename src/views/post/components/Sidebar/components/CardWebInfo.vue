@@ -80,8 +80,8 @@ const runningDays = computed(() => {
 
 <style lang="scss" scoped>
 .webinfo {
-  padding: 0.2rem 0;
   min-height: 5.4rem;
+  padding: 0.2rem 0;
 }
 
 .webinfo-item {
@@ -96,10 +96,11 @@ const runningDays = computed(() => {
   display: flex;
   align-items: center;
   color: var(--anzhiyu-fontcolor);
+
   i {
     width: 1.5em;
-    text-align: center;
     margin-right: 4px;
+    text-align: center;
   }
 }
 </style>

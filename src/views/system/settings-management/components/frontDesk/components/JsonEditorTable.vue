@@ -119,14 +119,16 @@ const handleDeleteItem = (index: number) => {
 .json-editor-table {
   margin-bottom: 24px;
 }
+
 .mt-4 {
   margin-top: 1rem;
 }
+
 .custom-error {
-  color: var(--el-color-danger);
+  position: relative;
+  padding-top: 4px;
   font-size: 12px;
   line-height: 1;
-  padding-top: 4px;
-  position: relative;
+  color: var(--el-color-danger);
 }
 </style>

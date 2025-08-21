@@ -194,28 +194,29 @@ defineExpose({
 .card-widget {
   padding: 1rem;
   background: var(--anzhiyu-card-bg);
-  border-radius: 12px;
   border: var(--style-border);
+  border-radius: 12px;
 }
 
 .item-headline {
   display: flex;
   align-items: center;
+  padding-left: 0.25rem;
+  margin-bottom: 0.5rem;
   font-size: 1.1rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  padding-left: 0.25rem;
   color: var(--anzhiyu-fontcolor);
 
   i {
-    font-size: 1.2rem;
     margin-right: 0.5rem;
+    font-size: 1.2rem;
   }
 }
 
 .toc-content {
-  overflow: auto;
   max-height: calc(100vh - 200px);
+  overflow: auto;
+
   &:hover {
     .toc-link {
       filter: blur(0);
@@ -226,10 +227,10 @@ defineExpose({
 
 .toc {
   position: relative;
-  list-style: none;
+  z-index: 1;
   padding: 0;
   margin: 0;
-  z-index: 1;
+  list-style: none;
 }
 
 .toc-link {
@@ -237,22 +238,23 @@ defineExpose({
   display: flex;
   align-items: center;
   padding: 8px 8px 8px 12px;
-  border-radius: 8px;
-  color: var(--anzhiyu-secondtext);
   line-height: 1.5;
+  color: var(--anzhiyu-secondtext);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 8px;
   transition:
     color 0.2s ease-out,
     background-color 0.2s ease-out,
     font-size 0.2s ease-out,
     filter 0.2s ease-out,
     opacity 0.2s ease-out;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+
   &:not(.active) {
-    opacity: 0.6;
+    width: 100%;
     cursor: pointer;
     filter: blur(1px);
-    width: 100%;
+    opacity: 0.6;
   }
 
   .toc-text {
@@ -260,31 +262,31 @@ defineExpose({
   }
 
   &:hover {
-    background-color: var(--anzhiyu-main-op-light);
     color: var(--anzhiyu-lighttext);
+    background-color: var(--anzhiyu-main-op-light);
   }
 
   &.active {
+    font-weight: 600;
     color: var(--anzhiyu-lighttext);
     background-color: var(--anzhiyu-main-op-light);
-    font-weight: 600;
   }
 }
 
 .toc-indicator {
   position: absolute;
-  left: 0;
   top: 50%;
-  transform: translateY(50%);
+  left: 0;
+  z-index: 2;
   width: 4px;
   background-color: var(--anzhiyu-main);
   border-radius: 4px;
   opacity: 0;
-  z-index: 2;
   transition:
     top 0.2s cubic-bezier(0, 1, 0.5, 1),
     height 0.2s cubic-bezier(0, 1, 0.5, 1),
     opacity 0.2s ease-in-out;
+  transform: translateY(50%);
 }
 
 @for $i from 1 through 6 {
@@ -292,6 +294,7 @@ defineExpose({
     .toc-link {
       padding-left: ($i) * 0.8rem;
       font-size: #{0.95 - ($i - 1) * 0.05}rem;
+
       &.active {
         font-size: #{1.1 - ($i - 1) * 0.05}rem;
       }

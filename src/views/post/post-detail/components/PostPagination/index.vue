@@ -102,19 +102,18 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 .pagination-post {
   position: fixed;
-  width: 300px;
-  bottom: -100px;
   right: 20px;
-  z-index: 1000;
+  bottom: -100px;
+  z-index: 1002;
+  width: 300px;
   height: fit-content;
-  transition: cubic-bezier(0.42, 0, 0.3, 1.11) 0.3s;
-  border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
-  opacity: 0;
-  z-index: 1002;
   background: 0 0;
   border: var(--style-border);
+  border-radius: 12px;
+  opacity: 0;
+  transition: cubic-bezier(0.42, 0, 0.3, 1.11) 0.3s;
 
   &.show-pagination-post {
     bottom: 20px;
@@ -123,18 +122,19 @@ onUnmounted(() => {
 }
 
 .pagination-item {
-  background: var(--anzhiyu-maskbgdeep);
-  backdrop-filter: blur(5px);
-  transform: translateZ(0);
-  border: none;
-  height: fit-content;
-  padding: 0.5rem 0;
   display: flex;
   align-items: flex-start;
+  height: fit-content;
+  padding: 0.5rem 0;
   text-decoration: none;
+  background: var(--anzhiyu-maskbgdeep);
+  backdrop-filter: blur(5px);
+  border: none;
+  transform: translateZ(0);
 
   &:hover {
     background: var(--anzhiyu-main);
+
     .pagination-info .label,
     .pagination-info .info-title {
       color: var(--anzhiyu-white);
@@ -143,39 +143,40 @@ onUnmounted(() => {
 }
 
 .pagination-info {
-  text-align: left;
   position: relative;
-  padding: 0.625rem 1.25rem;
-  transform: none;
-  display: flex;
   top: 0;
+  display: flex;
   flex-direction: column;
   justify-content: center;
-  margin: auto;
-  height: 100%;
   width: 100%;
+  height: 100%;
+  padding: 0.625rem 1.25rem;
+  margin: auto;
+  text-align: left;
+  transform: none;
+
   .label {
-    color: var(--anzhiyu-fontcolor);
-    font-weight: 700;
-    font-size: 12px;
-    margin-bottom: 0.625rem;
-    border-bottom: var(--style-border);
-    line-height: 1;
     padding-bottom: 0.625rem;
+    margin-bottom: 0.625rem;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--anzhiyu-fontcolor);
+    border-bottom: var(--style-border);
   }
 }
 
 .info-title {
-  color: var(--anzhiyu-fontcolor);
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
-  white-space: normal;
-  line-height: 1.3;
   display: -webkit-box;
-  -webkit-box-orient: vertical;
+  margin-bottom: 0;
   overflow: hidden;
   font-size: 0.875rem;
   font-weight: 400;
-  margin-bottom: 0;
+  line-height: 1.3;
+  color: var(--anzhiyu-fontcolor);
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  white-space: normal;
+  -webkit-box-orient: vertical;
 }
 </style>

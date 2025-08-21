@@ -176,54 +176,60 @@ const goToPage = () => {
 
 <style lang="scss" scoped>
 #pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 1rem 0 0;
-  height: 2.5rem;
-  gap: 0.5rem;
   position: relative;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  margin: 1rem 0 0;
+
   .extend {
     width: 5rem;
+
     &:hover {
       transform: scale(1.03);
     }
   }
+
   .prev {
     position: absolute;
     left: 0;
+
     .pagination_tips_prev {
       margin-right: -32px;
-      transition: 0.3s;
       opacity: 0;
+      transition: 0.3s;
     }
+
     &:hover {
       .pagination_tips_prev {
         margin-right: 2px;
-        opacity: 1;
-        -ms-filter: none;
-        filter: none;
         white-space: nowrap;
+        filter: none;
+        filter: none;
+        opacity: 1;
       }
     }
   }
+
   .next {
     position: absolute;
     right: 0;
 
     .pagination_tips_next {
       margin-left: -32px;
-      transition: 0.3s;
       opacity: 0;
+      transition: 0.3s;
     }
 
     &:hover {
       .pagination_tips_next {
         margin-left: 2px;
-        opacity: 1;
-        -ms-filter: none;
-        filter: none;
         white-space: nowrap;
+        filter: none;
+        filter: none;
+        opacity: 1;
       }
     }
   }
@@ -231,25 +237,25 @@ const goToPage = () => {
 
 .pagination {
   display: flex;
-  justify-content: center;
-  align-items: center;
   gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
   user-select: none;
 }
 
 .page-number,
 .extend {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s;
-  border: var(--style-border);
-  background-color: var(--anzhiyu-card-bg);
   color: var(--anzhiyu-fontcolor, #333);
+  cursor: pointer;
+  background-color: var(--anzhiyu-card-bg);
+  border: var(--style-border);
+  border-radius: 8px;
+  transition: all 0.3s;
 }
 
 .page-number:hover,
@@ -260,10 +266,10 @@ const goToPage = () => {
 }
 
 .current {
-  background: var(--anzhiyu-main);
   color: var(--anzhiyu-white);
-  border-color: var(--anzhiyu-main);
   pointer-events: none;
+  background: var(--anzhiyu-main);
+  border-color: var(--anzhiyu-main);
 }
 
 .space {
@@ -274,16 +280,16 @@ const goToPage = () => {
   position: relative;
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 8px;
-  border: var(--style-border-always);
   overflow: hidden;
+  border: var(--style-border-always);
+  border-radius: 8px;
   transition: width 0.3s ease;
 }
 
 .toPageGroup > .extend {
-  border: none;
   width: 100%;
   height: 100%;
+  border: none;
 }
 
 .toPageGroup .toPageText {
@@ -292,32 +298,33 @@ const goToPage = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  border: none;
-  outline: none;
   padding: 0 2.5rem 0 1rem;
   font-size: 1rem;
   color: var(--anzhiyu-fontcolor);
   background: var(--anzhiyu-card-bg, #fff);
+  border: none;
+  outline: none;
 }
 
 .toPageGroup .toPageButton {
   position: absolute;
   top: 50%;
   right: 4px;
-  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 1.865rem;
   height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
   color: var(--anzhiyu-fontcolor);
+  cursor: pointer;
+  transform: translateY(-50%);
 }
 
 .toPageGroup:hover {
   width: 6rem;
   border-color: var(--anzhiyu-main);
-  box-shadow: var(--anzhiyu-shadow-main, 0 4px 10px rgba(73, 177, 245, 0.3));
+  box-shadow: var(--anzhiyu-shadow-main, 0 4px 10px rgb(73 177 245 / 30%));
+
   .toPageButton {
     height: 30px;
     background: var(--anzhiyu-secondbg);
@@ -329,26 +336,30 @@ const goToPage = () => {
 .toPageGroup:hover > .extend {
   opacity: 0;
 }
-@media (max-width: 768px) {
+
+@media (width <= 768px) {
   #pagination {
     .pagination {
       display: none;
     }
+
     .extend {
+      position: static;
       width: 100%;
       height: 3.125rem;
-      border-radius: 12px;
       line-height: 3.125rem;
       background: var(--anzhiyu-card-bg);
       border: var(--style-border-always);
+      border-radius: 12px;
       box-shadow: var(--anzhiyu-shadow-border);
-      position: static;
+
       .pagination_tips_next,
       .pagination_tips_prev {
-        opacity: 1;
-        margin-left: 0;
         margin-right: 0;
+        margin-left: 0;
+        opacity: 1;
       }
+
       i {
         display: none;
       }

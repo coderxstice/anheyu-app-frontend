@@ -198,148 +198,165 @@ onBeforeUnmount(() => {
 <style lang="scss" scoped>
 .comment-barrage {
   position: fixed;
-  bottom: 0;
   right: 60px;
-  padding: 0 0 20px 10px;
+  bottom: 0;
   z-index: 999;
   display: flex;
   flex-direction: column;
-  justify-content: end;
   align-items: flex-end;
-  transition: bottom 0.3s;
+  justify-content: end;
+  padding: 0 0 20px 10px;
   pointer-events: none;
+  transition: bottom 0.3s;
 }
-@media screen and (max-width: 768px) {
+
+@media screen and (width <= 768px) {
   .comment-barrage {
     display: none !important;
   }
 }
 
 .comment-barrage-item {
-  min-width: 300px;
-  max-width: 300px;
-  width: fit-content;
-  min-height: 80px;
-  max-height: 150px;
-  margin: 4px;
-  padding: 8px 14px;
-  border-radius: 8px;
-  color: var(--anzhiyu-fontcolor);
-  transition: 0.3s;
   display: flex;
   flex-direction: column;
-  border: var(--style-border);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  transform: translateZ(0);
-  box-shadow: var(--anzhiyu-shadow-border);
+  width: fit-content;
+  min-width: 300px;
+  max-width: 300px;
+  min-height: 80px;
+  max-height: 150px;
+  padding: 8px 14px;
+  margin: 4px;
+  color: var(--anzhiyu-fontcolor);
   pointer-events: auto;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgb(255 255 255 / 85%);
+  backdrop-filter: blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border: var(--style-border);
+  border-radius: 8px;
+  box-shadow: var(--anzhiyu-shadow-border);
+  transition: 0.3s;
+  transform: translateZ(0);
+
   :deep(blockquote) {
-    border: var(--style-border-always);
-    background-color: var(--anzhiyu-secondbg);
-    color: var(--anzhiyu-secondtext);
-    border-radius: 8px;
-    margin: 1rem 0;
     padding: 0.5rem 0.8rem;
+    margin: 1rem 0;
+    color: var(--anzhiyu-secondtext);
+    background-color: var(--anzhiyu-secondbg);
+    border: var(--style-border-always);
+    border-radius: 8px;
   }
+
   :deep(p) {
     margin: 0;
   }
 }
 
 [data-theme="dark"] .comment-barrage-item {
-  background: rgba(30, 30, 30, 0.8);
+  background: rgb(30 30 30 / 80%);
 }
 
 .comment-barrage-item:hover {
   border: var(--style-border-hover);
   box-shadow: var(--anzhiyu-shadow-main);
 }
+
 .barrageContent {
   color: var(--anzhiyu-fontcolor);
   text-decoration: none;
 }
+
 .barrageContent:hover {
   color: var(--anzhiyu-main);
 }
+
 .comment-barrage-item .comment-barrage-close {
+  padding: 4px;
+  line-height: 1;
   color: var(--anzhiyu-secondtext);
   cursor: pointer;
-  line-height: 1;
-  padding: 4px;
 }
+
 .comment-barrage-item .comment-barrage-close:hover {
   color: var(--anzhiyu-main);
 }
+
 .comment-barrage-item .barrageHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   height: 30px;
   padding: 0;
-  line-height: 30px;
-  font-size: 12px;
-  border-bottom: var(--style-border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 700;
   padding-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 30px;
+  border-bottom: var(--style-border);
 }
+
 .comment-barrage-item .barrageHead .barrageTitle {
-  color: var(--anzhiyu-card-bg);
-  margin-right: 8px;
-  background: var(--anzhiyu-fontcolor);
-  line-height: 1;
   padding: 4px;
-  border-radius: 4px;
+  margin-right: 8px;
+  line-height: 1;
+  color: var(--anzhiyu-card-bg);
   text-decoration: none;
+  background: var(--anzhiyu-fontcolor);
+  border-radius: 4px;
 }
+
 .comment-barrage-item .barrageHead .barrageTitle.barrageBloggerTitle {
   background: var(--anzhiyu-orange);
 }
+
 .comment-barrage-item .barrageAvatar {
   width: 16px;
   height: 16px;
   margin: 0;
-  margin-left: auto;
   margin-right: 8px;
-  border-radius: 50%;
+  margin-left: auto;
   background: var(--anzhiyu-secondbg);
+  border-radius: 50%;
 }
+
 .comment-barrage-item .barrageContent {
+  height: calc(100% - 30px);
+  margin-top: 6px;
+  overflow: scroll;
   font-size: 14px !important;
   font-weight: 400 !important;
-  height: calc(100% - 30px);
-  overflow: scroll;
   cursor: pointer;
-  margin-top: 6px;
 }
+
 .comment-barrage-item .barrageContent::-webkit-scrollbar {
-  height: 0;
   width: 4px;
+  height: 0;
 }
+
 .comment-barrage-item .barrageContent::-webkit-scrollbar-button {
   display: none;
 }
+
 .comment-barrage-item .barrageContent :deep(p) {
-  margin: 0;
-  padding: 0;
-  line-height: 1.3;
-  overflow: hidden;
-  text-overflow: ellipsis;
   display: -webkit-box;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  line-height: 1.3;
+  text-overflow: ellipsis;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
 }
+
 .comment-barrage-item .barrageContent :deep(blockquote p) {
   margin: 0;
 }
+
 .comment-barrage-item .barrageContent :deep(h1),
 .comment-barrage-item .barrageContent :deep(h2),
 .comment-barrage-item .barrageContent :deep(h3),
 .comment-barrage-item .barrageContent :deep(h4) {
+  margin: 8px 0 !important;
   font-size: 14px !important;
   font-weight: 400 !important;
-  margin: 8px 0 !important;
 }
 </style>

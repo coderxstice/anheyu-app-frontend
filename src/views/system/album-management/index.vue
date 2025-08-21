@@ -176,8 +176,10 @@ function onFullscreen() {
 :deep(.table-bar) {
   border: var(--style-border);
 }
+
 .search-form {
   border: var(--style-border);
+
   :deep(.el-form-item) {
     margin-bottom: 12px;
   }

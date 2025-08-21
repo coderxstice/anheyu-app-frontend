@@ -259,14 +259,14 @@ const handleCommand = (command: string, value?: any) => {
 
 <style>
 .upload-panel-popover.el-popover {
-  padding: 8px 0 !important;
   z-index: 2060 !important;
-  box-shadow:
-    0 5px 5px -3px rgba(0, 0, 0, 0.2),
-    0 8px 10px 1px rgba(0, 0, 0, 0.14),
-    0 3px 14px 2px rgba(0, 0, 0, 0.12) !important;
+  padding: 8px 0 !important;
   border: none !important;
   border-radius: 8px !important;
+  box-shadow:
+    0 5px 5px -3px rgb(0 0 0 / 20%),
+    0 8px 10px 1px rgb(0 0 0 / 14%),
+    0 3px 14px 2px rgb(0 0 0 / 12%) !important;
 }
 
 .dropdown-scale-enter-active,
@@ -286,45 +286,49 @@ const handleCommand = (command: string, value?: any) => {
 
 <style scoped>
 .popover-menu {
-  list-style: none;
-  margin: 0;
   padding: 0;
+  margin: 0;
+  list-style: none;
   user-select: none;
 }
+
 .popover-menu li {
+  position: relative;
   display: flex; /* 改为 flex 布局 */
   align-items: center; /* 垂直居中 */
   padding: 8px 24px 8px 32px; /* 调整 padding 为勾选图标留出空间 */
   font-size: 14px;
   cursor: pointer;
   transition: background-color 0.2s;
-  position: relative;
 }
+
 .popover-menu li:hover {
   background-color: #f5f7fa;
 }
 
 .popover-menu li.active {
-  color: var(--el-color-primary);
   font-weight: 500;
+  color: var(--el-color-primary);
 }
+
 .popover-menu li.active::before {
-  content: "✓";
   position: absolute;
-  left: 12px;
   top: 50%;
-  transform: translateY(-50%);
+  left: 12px;
   font-size: 12px;
   font-weight: bold;
+  content: "✓";
+  transform: translateY(-50%);
 }
 
 .popover-menu li.divider {
   height: 1px;
   padding: 0;
   margin: 8px 0;
-  background-color: #e9e9eb;
   cursor: default;
+  background-color: #e9e9eb;
 }
+
 .popover-menu li.divider:hover {
   background-color: #e9e9eb;
 }
@@ -340,15 +344,18 @@ const handleCommand = (command: string, value?: any) => {
 .list-leave-active {
   transition: all 0.4s ease;
 }
+
 .list-enter-from,
 .list-leave-to {
   opacity: 0;
   transform: translateX(30px);
 }
+
 .list-leave-active {
   position: absolute;
   width: calc(100% - 16px);
 }
+
 .list-move {
   transition: transform 0.4s ease;
 }
@@ -357,6 +364,7 @@ const handleCommand = (command: string, value?: any) => {
 .upload-panel-fade-leave-active {
   transition: all 0.3s ease;
 }
+
 .upload-panel-fade-enter-from,
 .upload-panel-fade-leave-to {
   opacity: 0;
@@ -365,24 +373,24 @@ const handleCommand = (command: string, value?: any) => {
 
 .upload-progress-panel {
   position: fixed;
-  bottom: 20px;
   right: 20px;
+  bottom: 20px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
   width: 420px;
+  max-height: 500px;
+  overflow: hidden;
+  color: #303133;
   background-color: #fff;
   border-radius: 12px;
   box-shadow:
-    0 6px 16px -8px rgba(0, 0, 0, 0.08),
-    0 9px 28px 0 rgba(0, 0, 0, 0.05),
-    0 12px 48px 16px rgba(0, 0, 0, 0.03);
-  display: flex;
-  flex-direction: column;
-  z-index: 2000;
-  color: #303133;
+    0 6px 16px -8px rgb(0 0 0 / 8%),
+    0 9px 28px 0 rgb(0 0 0 / 5%),
+    0 12px 48px 16px rgb(0 0 0 / 3%);
   transition:
     max-height 0.3s ease-in-out,
     height 0.3s ease-in-out;
-  overflow: hidden;
-  max-height: 500px;
 }
 
 .upload-progress-panel.is-collapsed {
@@ -390,27 +398,29 @@ const handleCommand = (command: string, value?: any) => {
 }
 
 .panel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 20px;
-  border-bottom: 1px solid #f0f0f0;
-  font-weight: 500;
-  flex-shrink: 0;
-  height: 53px;
   box-sizing: border-box;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  height: 53px;
+  padding: 12px 20px;
+  font-weight: 500;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .header-actions {
   display: flex;
-  align-items: center;
   gap: 16px;
+  align-items: center;
 }
+
 .action-icon {
-  color: #909399;
   font-size: 16px;
+  color: #909399;
   transition: color 0.2s;
 }
+
 .icon-wrapper:hover .action-icon {
   color: var(--el-color-primary);
 }
@@ -419,22 +429,23 @@ const handleCommand = (command: string, value?: any) => {
   overflow: hidden;
   transition: opacity 0.3s ease-in-out;
 }
+
 .is-collapsed .collapsible-content {
   opacity: 0;
 }
 
 .panel-body {
-  padding: 8px;
-  overflow-y: auto;
   flex: 1;
   height: calc(500px - 53px);
   max-height: calc(500px - 53px);
+  padding: 8px;
+  overflow-y: auto;
 }
 
 .empty-queue {
-  text-align: center;
   padding: 40px 0;
-  color: #909399;
   font-size: 14px;
+  color: #909399;
+  text-align: center;
 }
 </style>

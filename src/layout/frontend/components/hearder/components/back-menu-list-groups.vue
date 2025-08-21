@@ -55,13 +55,13 @@ const props = defineProps<{
 .back-home-button {
   position: relative;
   display: flex;
-  width: 35px;
-  height: 35px;
   align-items: center;
   justify-content: center;
+  width: 35px;
+  height: 35px;
   margin-right: 4px;
-  border-radius: 8px;
   cursor: pointer;
+  border-radius: 8px;
   transition: 0.3s;
 
   > i {
@@ -69,14 +69,14 @@ const props = defineProps<{
   }
 
   &:hover {
-    background: var(--anzhiyu-main);
     color: var(--anzhiyu-white);
+    background: var(--anzhiyu-main);
     box-shadow: var(--anzhiyu-shadow-main);
 
     .back-menu-list-groups {
+      pointer-events: auto;
       opacity: 1;
       transform: scale(1);
-      pointer-events: auto;
     }
   }
 }
@@ -85,20 +85,20 @@ const props = defineProps<{
   position: absolute;
   top: 55px;
   left: 0;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   padding: 0.5rem;
+  pointer-events: none;
   background-color: var(--anzhiyu-maskbgdeep);
+  backdrop-filter: blur(20px);
   border: var(--style-border);
   border-radius: 12px;
   box-shadow: var(--anzhiyu-shadow-border);
-  backdrop-filter: blur(20px);
   opacity: 0;
-  pointer-events: none;
+  transition: 0.2s;
   transform: scale(0.8);
   transform-origin: top left;
-  transition: 0.2s;
-  z-index: 10;
 }
 
 .back-menu-list-group {
@@ -122,7 +122,8 @@ const props = defineProps<{
   flex-wrap: wrap;
   width: 340px;
   margin-bottom: 8px;
-  &:before {
+
+  &::before {
     position: absolute;
     top: -24px;
     left: 0;
@@ -135,11 +136,11 @@ const props = defineProps<{
 
 .back-menu-item {
   display: flex;
-  align-items: center;
   gap: 0.5rem;
+  align-items: center;
   width: 162px;
-  margin: 4px;
   padding: 4px 8px;
+  margin: 4px;
   border-radius: 8px;
   transition: 0.2s;
 
@@ -155,19 +156,20 @@ const props = defineProps<{
 .back-menu-item-icon {
   width: 24px;
   height: 24px;
-  border-radius: 50%;
   background: var(--anzhiyu-secondbg);
+  border-radius: 50%;
 }
 
 .back-menu-item-text {
+  overflow: hidden;
   font-size: var(--global-font-size);
   color: var(--anzhiyu-fontcolor);
-  white-space: nowrap;
   text-overflow: ellipsis;
-  overflow: hidden;
+  white-space: nowrap;
   transition: 0.2s;
 }
-@media (max-width: 768px) {
+
+@media (width <= 768px) {
   .back-home-button {
     display: none;
   }

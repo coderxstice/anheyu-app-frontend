@@ -338,55 +338,62 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .card-link {
-  text-decoration: none;
-  color: inherit;
   display: block;
+  color: inherit;
+  text-decoration: none;
 }
 
 .control-panel {
   margin-bottom: 20px;
+
   .search-form {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
     gap: 10px;
+    align-items: center;
+
     .filter-select {
       width: 150px;
     }
   }
+
   .action-bar {
     margin-top: 10px;
   }
 }
+
 .content-area {
-  min-height: 400px;
   position: relative;
+  min-height: 400px;
 }
+
 .loading-placeholder {
   width: 100%;
   height: 400px;
 }
+
 .article-card {
-  margin-bottom: 20px;
-  border-radius: 8px;
-  overflow: hidden;
   position: relative;
   display: flex;
   flex-direction: column;
   height: calc(100% - 20px);
+  margin-bottom: 20px;
+  overflow: hidden;
+  border-radius: 8px;
 
   :deep(.el-card__body) {
-    padding: 0;
     display: flex;
-    flex-direction: column;
     flex-grow: 1;
+    flex-direction: column;
+    padding: 0;
   }
 }
+
 .card-cover {
   position: relative;
+  flex-shrink: 0;
   width: 100%;
   height: 150px;
-  flex-shrink: 0;
 
   .cover-image {
     width: 100%;
@@ -396,82 +403,89 @@ onMounted(() => {
 
   .image-slot {
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     width: 100%;
     height: 100%;
-    background: #f5f7fa;
-    color: #c0c4cc;
     font-size: 14px;
+    color: #c0c4cc;
+    background: #f5f7fa;
   }
 
   .card-link:hover & .cover-image {
     transform: scale(1.05);
   }
 }
+
 .status-ribbon {
   position: absolute;
   top: 10px;
   right: -30px;
-  padding: 4px 0;
   width: 120px;
-  text-align: center;
-  color: white;
+  padding: 4px 0;
   font-size: 12px;
   font-weight: bold;
+  color: white;
+  text-align: center;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
   transform: rotate(45deg);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
 .card-body {
-  padding: 16px;
-  flex-grow: 1;
   display: flex;
+  flex-grow: 1;
   flex-direction: column;
+  padding: 16px;
 }
+
 .card-title {
   margin: 0 0 12px;
+  overflow: hidden;
   font-size: 16px;
   font-weight: 600;
   color: var(--el-text-color-primary);
-  white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
   transition: color 0.3s;
 
   .card-link:hover & {
     color: var(--el-color-primary);
   }
 }
+
 .card-tags {
-  margin-top: auto;
   min-height: 24px;
+  margin-top: auto;
+
   .tag-item {
     margin-right: 5px;
     margin-bottom: 5px;
   }
 }
+
 .card-footer {
   display: flex;
+  flex-shrink: 0;
   flex-direction: column;
   gap: 8px;
   padding: 12px 16px;
-  border-top: 1px solid var(--el-border-color-lighter);
   background-color: var(--el-bg-color-overlay);
-  flex-shrink: 0;
+  border-top: 1px solid var(--el-border-color-lighter);
 
   .timestamps {
     display: flex;
-    align-items: center;
     gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
     font-size: 12px;
     color: var(--el-text-color-secondary);
     white-space: nowrap;
-    width: 100%;
-    justify-content: space-between;
+
     span {
       display: inline-flex;
-      align-items: center;
       gap: 4px;
+      align-items: center;
     }
   }
 
@@ -483,39 +497,45 @@ onMounted(() => {
 
     .stats {
       display: flex;
-      align-items: center;
       gap: 8px;
+      align-items: center;
       font-size: 12px;
       color: var(--el-text-color-secondary);
+
       span {
         display: inline-flex;
-        align-items: center;
         gap: 4px;
+        align-items: center;
       }
     }
 
     .actions {
       display: flex;
       gap: 8px;
+
       .el-button {
-        padding: 0;
         min-height: auto;
+        padding: 0;
       }
     }
   }
 }
+
 .actions {
   display: flex;
 }
+
 .actions .el-button {
-  padding: 0;
   min-height: auto;
+  padding: 0;
 }
+
 .pagination-container {
-  margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+  margin-top: 20px;
 }
+
 .el-empty {
   margin: 80px auto;
 }

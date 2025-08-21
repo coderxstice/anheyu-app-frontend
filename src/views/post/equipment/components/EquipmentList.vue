@@ -145,50 +145,49 @@ const handleCommentClick = (item: EquipmentItem) => {
   }
 
   .goodthings-item-description {
-    color: var(--anzhiyu-secondtext);
     margin-bottom: 1.5rem;
+    color: var(--anzhiyu-secondtext);
   }
 
   .equipment-item {
     .equipment-item-content {
       display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
+      flex-flow: row wrap;
       margin: 0 -8px;
 
       .equipment-item-content-item {
-        width: calc(25% - 12px);
-        border-radius: 12px;
-        border: var(--style-border-always);
-        overflow: hidden;
-        margin: 8px 6px;
-        background: var(--anzhiyu-card-bg);
-        box-shadow: var(--anzhiyu-shadow-border);
-        min-height: 400px;
         position: relative;
+        width: calc(25% - 12px);
+        min-height: 400px;
+        margin: 8px 6px;
+        overflow: hidden;
+        background: var(--anzhiyu-card-bg);
+        border: var(--style-border-always);
+        border-radius: 12px;
+        box-shadow: var(--anzhiyu-shadow-border);
 
-        @media (max-width: 1200px) {
+        @media (width <= 1200px) {
           width: calc(50% - 12px);
         }
 
-        @media (max-width: 768px) {
+        @media (width <= 768px) {
           width: 100%;
         }
 
         .equipment-item-content-item-info {
-          padding: 8px 16px 16px 16px;
+          padding: 8px 16px 16px;
           margin-top: 12px;
         }
 
         .equipment-item-content-item-name {
+          width: fit-content;
+          margin-bottom: 8px;
+          overflow: hidden;
           font-size: 18px;
           font-weight: bold;
           line-height: 1;
-          margin-bottom: 8px;
-          white-space: nowrap;
-          overflow: hidden;
           text-overflow: ellipsis;
-          width: fit-content;
+          white-space: nowrap;
           cursor: pointer;
 
           &:hover {
@@ -197,80 +196,80 @@ const handleCommentClick = (item: EquipmentItem) => {
         }
 
         .equipment-item-content-item-specification {
-          font-size: 12px;
-          color: var(--anzhiyu-secondtext);
-          line-height: 16px;
           margin-bottom: 5px;
-          white-space: nowrap;
           overflow: hidden;
+          font-size: 12px;
+          line-height: 16px;
+          color: var(--anzhiyu-secondtext);
           text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .equipment-item-content-item-description {
+          display: -webkit-box;
+          height: 60px;
+          overflow: hidden;
+          font-size: 14px;
           line-height: 20px;
           color: var(--anzhiyu-secondtext);
-          height: 60px;
-          display: -webkit-box;
-          overflow: hidden;
-          line-clamp: 3;
           -webkit-line-clamp: 3;
+          line-clamp: 3;
           -webkit-box-orient: vertical;
-          font-size: 14px;
         }
 
         a.equipment-item-content-item-link {
-          font-size: 12px;
-          background: var(--anzhiyu-gray-op);
           padding: 4px 8px;
-          border-radius: 8px;
-          cursor: pointer;
-          text-decoration: none;
+          font-size: 12px;
           color: inherit;
+          text-decoration: none;
+          cursor: pointer;
+          background: var(--anzhiyu-gray-op);
+          border-radius: 8px;
 
           &:hover {
-            background: var(--anzhiyu-main);
             color: var(--anzhiyu-white);
+            background: var(--anzhiyu-main);
           }
         }
 
         .equipment-item-content-item-cover {
+          display: flex;
+          align-items: center;
+          justify-content: center;
           width: 100%;
           height: 200px;
           background: var(--anzhiyu-secondbg);
-          display: flex;
-          justify-content: center;
-          align-items: center;
         }
 
         img.equipment-item-content-item-image {
-          object-fit: contain;
-          height: 80%;
           width: 260px;
+          height: 80%;
+          object-fit: contain;
         }
 
         .equipment-item-content-item-toolbar {
-          display: flex;
-          justify-content: space-between;
           position: absolute;
           bottom: 12px;
           left: 0;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
           width: 100%;
           padding: 0 16px;
-          align-items: center;
 
           .bber-reply {
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 4px 8px;
+            cursor: pointer;
             background: var(--anzhiyu-gray-op);
+            border-radius: 8px;
             transition: all 0.3s ease;
 
             &:hover {
-              background: var(--anzhiyu-main);
               color: var(--anzhiyu-white);
+              background: var(--anzhiyu-main);
             }
 
             i {

@@ -216,27 +216,32 @@ watch(
     padding: 0;
     overflow: hidden;
   }
+
   .panel-header {
     display: flex;
     align-items: center;
     padding: 16px 20px;
     border: var(--style-border);
+
     .file-icon-wrapper {
       flex-shrink: 0;
+
       .file-icon {
         width: 32px;
         height: 32px;
       }
     }
+
     .file-name {
+      flex-grow: 1;
+      margin-left: 12px;
+      overflow: hidden;
       font-size: 16px;
       font-weight: 600;
-      margin-left: 12px;
-      flex-grow: 1;
-      white-space: nowrap;
-      overflow: hidden;
       text-overflow: ellipsis;
+      white-space: nowrap;
     }
+
     .close-btn {
       margin-left: 8px;
     }
@@ -244,6 +249,7 @@ watch(
 
   .panel-tabs {
     padding: 0 20px;
+
     .el-tabs__header {
       margin-bottom: 24px;
     }
@@ -253,13 +259,14 @@ watch(
     // 增加一个 max-height 和 overflow-y 来允许内容滚动
     // 防止内容过多时撑开抽屉
     max-height: calc(100vh - 160px); // 根据你的布局微调这个值
-    overflow-y: auto;
     padding-bottom: 20px;
+    overflow-y: auto;
 
     .el-descriptions__title {
       font-size: 14px;
       color: #606266;
     }
+
     .el-descriptions {
       margin-top: 20px;
     }

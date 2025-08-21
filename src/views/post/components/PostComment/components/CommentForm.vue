@@ -521,6 +521,7 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
     opacity: 0;
     transform: translateY(0) scale(0.8);
   }
+
   to {
     opacity: 1;
     transform: translateY(-10px) scale(1);
@@ -529,22 +530,23 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
 
 .emoji-preview {
   position: fixed;
+  z-index: 9999;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  padding: 8px;
+  pointer-events: none;
   background-color: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 10px;
-  padding: 8px;
-  z-index: 9999;
-  pointer-events: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  animation: owoIn 0.2s cubic-bezier(0.42, 0, 0.3, 1.11);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
   transform: translateY(-10px);
+  animation: owoIn 0.2s cubic-bezier(0.42, 0, 0.3, 1.11);
+
   img {
+    display: block;
     width: 64px;
     height: 64px;
-    display: block;
   }
 }
 
@@ -553,20 +555,20 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
 }
 
 .quote-preview {
+  position: relative;
+  padding: 1rem;
+  margin-bottom: 1rem;
   background: var(--anzhiyu-secondbg);
   border: var(--style-border-always);
   border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  position: relative;
 
   .quote-preview-header {
     display: flex;
     align-items: center;
     margin-bottom: 0.5rem;
-    color: var(--anzhiyu-main);
     font-size: 0.85rem;
     font-weight: 600;
+    color: var(--anzhiyu-main);
 
     i {
       font-size: 1rem;
@@ -577,22 +579,22 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
     }
 
     .quote-preview-close {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--anzhiyu-secondtext);
-      padding: 2px;
-      border-radius: 4px;
-      transition: all 0.3s;
       display: flex;
       align-items: center;
       justify-content: center;
       width: 1rem;
       height: 1rem;
+      padding: 2px;
+      color: var(--anzhiyu-secondtext);
+      cursor: pointer;
+      background: none;
+      border: none;
+      border-radius: 4px;
+      transition: all 0.3s;
 
       &:hover {
-        background: var(--anzhiyu-gray-op);
         color: var(--anzhiyu-main);
+        background: var(--anzhiyu-gray-op);
       }
 
       i {
@@ -602,20 +604,20 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
   }
 
   .quote-preview-content {
-    color: var(--anzhiyu-secondtext);
+    position: relative;
+    padding: 8px 12px;
     font-size: 0.9rem;
     line-height: 1.5;
-    padding: 8px 12px;
+    color: var(--anzhiyu-secondtext);
     background: var(--anzhiyu-background);
-    position: relative;
 
     &::before {
-      content: "";
       position: absolute;
-      left: 0;
       top: 0;
       bottom: 0;
+      left: 0;
       width: 4px;
+      content: "";
       background: var(--anzhiyu-main);
       border-radius: 2px;
     }
@@ -624,178 +626,208 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
 
 .textarea-container {
   margin-bottom: 0.5rem;
+
   & > .el-form-item {
     margin-bottom: 0;
   }
 }
+
 .textarea-wrapper {
   position: relative;
   width: 100%;
+  padding: 16px;
+  background-color: var(--anzhiyu-secondbg);
   border: var(--style-border-always);
   border-radius: 12px;
-  background-color: var(--anzhiyu-secondbg);
-  padding: 16px;
   transition: border 0.2s;
+
   &:focus-within {
     border: var(--style-border-hover-always);
   }
+
   .textarea-actions {
+    z-index: 2;
     display: flex;
     gap: 8px;
-    z-index: 2;
+
     .OwO {
       position: relative;
+
       &.OwO-open .OwO-body {
         display: block;
       }
+
       .OwO-logo {
-        width: 1.25em;
-        height: 1.25em;
         display: flex;
         align-items: center;
         justify-content: center;
+        width: 1.25em;
+        height: 1.25em;
       }
+
       .OwO-body {
-        border: var(--style-border-always);
-        border-radius: 8px;
-        overflow: hidden;
-        background-color: var(--anzhiyu-card-bg);
-        backdrop-filter: saturate(180%) blur(10px);
-        cursor: auto;
-        transform: translateZ(0);
         position: absolute;
-        left: 0;
         top: 2rem;
-        max-width: 500px;
+        left: 0;
         z-index: 1000;
         min-width: 31.25rem;
+        max-width: 500px;
+        overflow: hidden;
+        cursor: auto;
+        background-color: var(--anzhiyu-card-bg);
+        backdrop-filter: saturate(180%) blur(10px);
+        border: var(--style-border-always);
+        border-radius: 8px;
         opacity: 0;
+        transform: translateZ(0);
+
         .OwO-items {
           max-height: 200px;
-          overflow-y: auto;
           padding: 10px;
+          overflow-y: auto;
+
           .OwO-item {
-            width: 14%;
             box-sizing: border-box;
-            list-style-type: none;
-            padding: 5px 10px;
-            border-radius: 5px;
             display: inline-block;
+            width: 14%;
+            padding: 5px 10px;
             font-size: 12px;
             line-height: 14px;
-            cursor: pointer;
             text-align: center;
+            list-style-type: none;
+            cursor: pointer;
+            border-radius: 5px;
             opacity: 0;
-            transform: translateY(20px);
             transition: background-color 0.3s;
+            transform: translateY(20px);
+
             &:hover {
-              background-color: rgba(144, 147, 153, 0.13);
+              background-color: rgb(144 147 153 / 13%);
             }
+
             img {
-              max-width: 100%;
               width: 2.25rem;
+              max-width: 100%;
               height: 2.25rem;
               object-fit: contain;
             }
           }
         }
       }
+
       .OwO-bar {
         width: 100%;
-        border-top: 1px solid rgba(144, 147, 153, 0.31);
+        border-top: 1px solid rgb(144 147 153 / 31%);
         border-radius: 0 0 4px 4px;
+
         .OwO-packages {
-          margin: 0;
-          padding: 0;
-          font-size: 0;
           width: 50px;
           height: 48px;
+          padding: 0;
+          margin: 0;
+          font-size: 0;
           background: var(--anzhiyu-background);
+
           .OwO-package-active {
             background: var(--anzhiyu-card-bg);
           }
+
           li:nth-child(1) {
             border-radius: 0 0 0 3px;
           }
+
           li {
-            list-style-type: none;
             display: inline-block;
-            line-height: 48px;
-            font-size: 28px;
             padding: 0 10px;
+            font-size: 28px;
+            line-height: 48px;
+            list-style-type: none;
             cursor: pointer;
             transition: 0.3s;
           }
         }
       }
     }
+
     .action-icon {
+      display: inline-block;
+      flex-shrink: 0;
+      align-self: center;
+      width: 1.25em;
+      margin-right: 10px;
+      line-height: 0;
+      color: var(--anzhiyu-fontcolor);
+      cursor: pointer;
+      user-select: none;
       background: var(--anzhiyu-secondbg);
       border-radius: 50%;
-      color: var(--anzhiyu-fontcolor);
       transition: background-color 0.2s;
-      align-self: center;
-      display: inline-block;
-      width: 1.25em;
-      line-height: 0;
-      margin-right: 10px;
-      cursor: pointer;
-      flex-shrink: 0;
-      user-select: none;
+
       &:hover {
         background-color: var(--anzhiyu-post-blockquote-bg);
       }
+
       &[disabled] {
         cursor: not-allowed;
         opacity: 0.5;
       }
     }
   }
+
   :deep(.el-textarea__inner) {
+    padding: 0;
+    color: var(--anzhiyu-fontcolor);
+    background-color: transparent;
     border: none;
     border-radius: 0;
-    background-color: transparent;
-    color: var(--anzhiyu-fontcolor);
     box-shadow: none;
-    padding: 0;
+
     &:focus {
       box-shadow: none;
     }
+
     &:hover {
       box-shadow: none;
     }
   }
+
   :deep(.el-input__count) {
-    background: transparent;
+    bottom: -25px;
     color: var(--anzhiyu-secondtext);
     user-select: none;
-    -webkit-user-select: none;
-    bottom: -25px;
+    user-select: none;
+    background: transparent;
   }
 }
+
 .form-meta-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   align-items: flex-start;
-  flex-wrap: wrap;
+
   .meta-inputs {
-    flex-grow: 1;
     display: grid;
+    flex-grow: 1;
     grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
+
     :deep(.el-form-item) {
       &:nth-child(1) .el-input-group--prepend {
-        &:before {
+        &::before {
           content: "输入QQ号会自动获取昵称和头像";
         }
+
         &::after {
           content: "";
         }
       }
+
       &:nth-child(2) .el-input-group--prepend {
-        &:before {
+        &::before {
           content: "收到回复将会发送到你的邮箱";
         }
+
         &::after {
           content: "";
         }
@@ -804,68 +836,78 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
 
     :deep(.el-input-group--prepend) {
       &::before {
-        display: none;
         position: absolute;
         top: -50px;
-        white-space: nowrap;
-        border-radius: 10px;
         left: 50%;
-        transform: translate(-50%);
-        padding: 4px 18px;
-        background: var(--anzhiyu-main-op-deep);
-        color: var(--anzhiyu-white);
         z-index: 100;
+        display: none;
+        padding: 4px 18px;
+        color: var(--anzhiyu-white);
+        white-space: nowrap;
+        background: var(--anzhiyu-main-op-deep);
         backdrop-filter: blur(10px);
+        border-radius: 10px;
+        transform: translate(-50%);
       }
+
       &:focus-within::before {
+        z-index: 2;
         display: block;
         animation: commonTipsIn 0.3s;
-        z-index: 2;
       }
+
       &::after {
-        display: none;
         position: absolute;
+        left: 50%;
+        display: none;
         border: 8px solid transparent;
         border-top-color: var(--anzhiyu-main-op-deep);
-        left: 50%;
         transform: translate(-50%, -10px);
       }
+
       &:focus-within::after {
         display: block;
         animation: commonTriangleIn 0.3s;
       }
     }
+
     :deep(.el-input-group__prepend) {
-      background-color: var(--anzhiyu-secondbg);
-      color: var(--anzhiyu-fontcolor);
       font-weight: 600;
+      color: var(--anzhiyu-fontcolor);
+      background-color: var(--anzhiyu-secondbg);
     }
+
     :deep(.el-input__inner) {
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
     }
   }
+
   .buttons-wrapper {
     display: flex;
     gap: 0.5rem;
+
     .submit-button {
       padding: 0 2rem;
       font-weight: 600;
+      color: var(--anzhiyu-background);
       background-color: var(--anzhiyu-fontcolor);
       border: 0 solid var(--anzhiyu-main);
-      color: var(--anzhiyu-background);
+
       &.is-disabled {
         opacity: 0.2;
       }
     }
+
     .cancel-button {
-      background: var(--anzhiyu-secondbg);
-      border-radius: 12px;
       color: var(--anzhiyu-fontcolor);
+      background: var(--anzhiyu-secondbg);
       border: 0 solid var(--anzhiyu-main);
+      border-radius: 12px;
+
       &:hover {
-        background: var(--anzhiyu-lighttext);
         color: var(--anzhiyu-white);
+        background: var(--anzhiyu-lighttext);
       }
     }
   }
@@ -873,10 +915,12 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
   &.is-reply {
     flex-direction: column;
     gap: 0;
+
     .meta-inputs {
-      width: 100%;
       grid-template-columns: repeat(3, 1fr);
+      width: 100%;
     }
+
     .buttons-wrapper {
       align-self: flex-end;
       margin-top: 0.5rem;
@@ -884,23 +928,27 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
   }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .form-meta-actions:not(.is-reply) {
     flex-direction: column;
+
     .meta-inputs {
-      width: 100%;
       grid-template-columns: 1fr;
+      width: 100%;
     }
+
     .buttons-wrapper {
       width: 100%;
+
       .submit-button {
         width: 100%;
       }
     }
   }
+
   .OwO-body {
-    min-width: auto !important;
     width: 100%;
+    min-width: auto !important;
   }
 }
 </style>

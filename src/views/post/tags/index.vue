@@ -55,19 +55,18 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .tag-cloud-amount {
-  min-height: 400px;
-  color: var(--anzhiyu-fontcolor);
   max-width: 1400px;
+  min-height: 400px;
   margin: 0 auto;
   margin-top: 0.5rem;
+  color: var(--anzhiyu-fontcolor);
 }
 
 .page-title {
   margin: 0.4rem 0 1rem 1rem;
-  text-align: center;
+  font-size: 2em;
   font-weight: 700;
   text-align: center;
-  font-size: 2em;
 }
 
 .tag-cloud-list {
@@ -75,55 +74,53 @@ onMounted(() => {
   flex-wrap: wrap;
   justify-content: center;
   text-align: center;
-
   animation: slide-in 0.6s 0.2s backwards;
 }
 
 .tag-item {
   display: flex;
-  width: fit-content;
-  color: var(--anzhiyu-fontcolor);
-  font-size: 1.4rem;
-  padding: 0.6rem 0.7rem;
-  background: var(--anzhiyu-card-bg);
-  margin: 0.7rem;
-  border-radius: 12px;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform-style: preserve-3d;
-  -webkit-transform-style: preserve-3d;
-  border: var(--style-border-always);
-  box-shadow: var(--anzhiyu-shadow-border);
   align-items: center;
+  width: fit-content;
+  padding: 0.6rem 0.7rem;
+  margin: 0.7rem;
+  font-size: 1.4rem;
+  color: var(--anzhiyu-fontcolor);
+  background: var(--anzhiyu-card-bg);
+  border: var(--style-border-always);
+  border-radius: 12px;
+  box-shadow: var(--anzhiyu-shadow-border);
+  backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  transform-style: preserve-3d;
 
   &:hover {
-    background: var(--anzhiyu-main);
-    box-shadow: var(--anzhiyu-shadow-blue);
     color: var(--anzhiyu-white);
+    background: var(--anzhiyu-main);
     border: var(--style-border-hover);
+    box-shadow: var(--anzhiyu-shadow-blue);
   }
 }
 
 .tags-punctuation {
   margin-right: 0.25rem;
-  opacity: 0.4;
   font-size: 1.2rem;
+  opacity: 0.4;
 }
 
 .tags-page-count {
-  margin-left: 8px;
-  background: var(--anzhiyu-secondbg);
-  color: var(--anzhiyu-fontcolor);
-  border-radius: 8px;
-  line-height: 1;
-  padding: 2px 4px;
-  transition: 0.2s;
-  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-width: 32px;
   height: 32px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  padding: 2px 4px;
+  margin-left: 8px;
+  font-size: 16px;
   line-height: 1;
+  color: var(--anzhiyu-fontcolor);
+  background: var(--anzhiyu-secondbg);
+  border-radius: 8px;
+  transition: 0.2s;
 }
 </style>

@@ -106,11 +106,12 @@ onMounted(async () => {
 <style scoped>
 .callback-container {
   display: flex;
-  justify-content: center;
   align-items: center;
-  height: calc(100vh - 180px);
+  justify-content: center;
   width: 100%;
+  height: calc(100vh - 180px);
 }
+
 .loading-view {
   width: 100%;
   height: 100%;

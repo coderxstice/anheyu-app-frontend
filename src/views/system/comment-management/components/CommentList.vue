@@ -238,12 +238,12 @@ const handleAvatarError = (event: Event, comment: AdminComment) => {
 .comment-card {
   display: flex;
   padding: 16px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  background-color: var(--el-bg-color);
   border: 1px solid var(--el-border-color-lighter);
   border-radius: 8px;
-  margin-bottom: 16px;
   transition: box-shadow 0.3s;
-  background-color: var(--el-bg-color);
-  cursor: pointer;
 
   &.is-pinned {
     border-left: 4px solid var(--el-color-primary);
@@ -251,36 +251,38 @@ const handleAvatarError = (event: Event, comment: AdminComment) => {
 }
 
 .comment-avatar {
-  margin: 0 16px;
   width: 45px;
   height: 45px;
-  border-radius: 50%;
+  margin: 0 16px;
   object-fit: cover;
   border: 1px solid var(--el-border-color-lighter);
+  border-radius: 50%;
 }
 
 .comment-main {
-  flex: 1;
   display: flex;
+  flex: 1;
   flex-direction: column;
 }
 
 .comment-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 8px;
 }
 
 .author-line {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
   font-size: 14px;
+
   .nickname {
     font-weight: bold;
     color: var(--el-text-color-primary);
   }
+
   .reply-info {
     color: var(--el-text-color-secondary);
   }
@@ -293,27 +295,33 @@ const handleAvatarError = (event: Event, comment: AdminComment) => {
 
 .comment-content {
   font-size: 14px;
-  color: var(--el-text-color-regular);
   line-height: 1.6;
+  color: var(--el-text-color-regular);
+
   :deep(p) {
-    margin: 0 0 8px 0;
+    margin: 0 0 8px;
   }
+
   :deep(a) {
     color: var(--el-color-primary);
     text-decoration: none;
+
     &:hover {
       text-decoration: underline;
     }
   }
+
   :deep(img) {
-    max-height: 300px;
     max-width: 300%;
-    border-radius: 4px;
+    max-height: 300px;
     vertical-align: middle;
+    border-radius: 4px;
+
     &:not(.anzhiyu-owo-emotion) {
       cursor: zoom-in;
     }
   }
+
   :deep(.tanzhiyu-owo-emotion) {
     width: 3rem;
     height: auto;
@@ -321,25 +329,26 @@ const handleAvatarError = (event: Event, comment: AdminComment) => {
 }
 
 .comment-footer {
-  margin-top: 12px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
   font-size: 12px;
   color: var(--el-text-color-secondary);
 }
 
 .meta-info {
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
   gap: 16px;
+  align-items: center;
 }
 
 .meta-item {
   display: flex;
-  align-items: center;
   gap: 4px;
+  align-items: center;
+
   &.article-slug .el-link {
     font-size: 12px;
   }

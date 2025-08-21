@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed, watch, nextTick, ref } from "vue";
+import { onMounted, computed, watch, nextTick, ref, onUnmounted } from "vue";
 import type { Comment } from "@/api/comment/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useCommentStore } from "@/store/modules/commentStore";
@@ -23,6 +23,10 @@ const { comments, totalComments, isLoading, isLoadingMore, hasMore } =
   storeToRefs(commentStore);
 
 const quoteText = ref("");
+
+// 滚动加载相关
+const commentListRef = ref<HTMLElement | null>(null);
+const isLoadingScroll = ref(false);
 
 const commentInfoConfig = computed(() => {
   const config = siteConfigStore.getSiteConfig.comment;
@@ -50,6 +54,14 @@ onMounted(() => {
   const pageSize = commentInfoConfig.value.page_size || 10;
   // 更新: 调用 initComments 时传入 targetPath
   commentStore.initComments(props.targetPath, pageSize);
+
+  // 添加滚动监听器
+  setupScrollListener();
+});
+
+onUnmounted(() => {
+  // 清理滚动监听器
+  removeScrollListener();
 });
 
 watch(
@@ -104,6 +116,42 @@ const handleCancelQuote = () => {
   quoteText.value = "";
 };
 
+// 滚动加载相关函数
+const setupScrollListener = () => {
+  const handleScroll = async () => {
+    if (isLoadingScroll.value || !commentStore.hasMore) return;
+
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+
+    // 当滚动到距离底部100px时，触发加载更多
+    if (scrollTop + windowHeight >= documentHeight - 100) {
+      isLoadingScroll.value = true;
+      try {
+        await commentStore.loadMore();
+      } finally {
+        isLoadingScroll.value = false;
+      }
+    }
+  };
+
+  window.addEventListener("scroll", handleScroll);
+
+  // 保存清理函数引用
+  (window as any).__commentScrollHandler = handleScroll;
+};
+
+const removeScrollListener = () => {
+  if ((window as any).__commentScrollHandler) {
+    window.removeEventListener(
+      "scroll",
+      (window as any).__commentScrollHandler
+    );
+    delete (window as any).__commentScrollHandler;
+  }
+};
+
 defineExpose({
   scrollToComment,
   setQuoteText
@@ -147,10 +195,12 @@ defineExpose({
             :config="commentInfoConfig"
           />
         </div>
-        <div v-if="hasMore" class="load-more-container">
-          <el-button :loading="isLoadingMore" @click="commentStore.loadMore"
-            >加载更多</el-button
-          >
+        <!-- 滚动加载提示 -->
+        <div v-if="isLoadingScroll" class="scroll-loading-container">
+          <div class="scroll-loading-spinner">
+            <i class="anzhiyufont anzhiyu-icon-refresh" />
+            <span>正在加载更多评论...</span>
+          </div>
         </div>
       </Fancybox>
     </div>
@@ -160,49 +210,57 @@ defineExpose({
 <style lang="scss" scoped>
 @keyframes comment-highlight-animation {
   0% {
-    background-color: rgba(0, 123, 255, 0.15);
+    background-color: rgb(0 123 255 / 15%);
   }
+
   100% {
     background-color: transparent;
   }
 }
 
 #post-comment {
-  border-radius: 8px;
   margin-bottom: 3rem;
+  border-radius: 8px;
 
   :deep(.comment--highlight) {
-    animation: comment-highlight-animation 2s ease-out;
     border-radius: 8px;
+    animation: comment-highlight-animation 2s ease-out;
   }
 }
+
 .main-comment-form-container {
   .form-title {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
     font-size: 1.5rem;
     font-weight: 600;
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+
     i {
       font-size: 1.5rem;
     }
   }
 }
+
 .comment-list-container {
+  width: 100%;
   margin-top: 3rem;
   overflow: hidden;
-  width: 100%;
+
   .comments-wrapper {
     display: flex;
     flex-direction: column;
+
     .comment-thread-item {
       & + .comment-thread-item {
         margin-top: 1.5rem;
       }
+
       &:first-child hr {
         display: none;
       }
+
       hr {
         margin-bottom: 1.5rem;
         border: none;
@@ -210,33 +268,36 @@ defineExpose({
       }
     }
   }
-  .load-more-container {
+
+  .scroll-loading-container {
+    width: 100%;
+    margin: 2rem auto 0;
     text-align: center;
-    width: 70%;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.5s;
-    font-size: 0.75rem;
-    box-shadow: 0 8px 16px -4px rgba(44, 45, 48, 0.047);
-    border-radius: 50px;
-    letter-spacing: 5px;
+  }
+
+  .scroll-loading-spinner {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    font-size: 0.875rem;
+    color: var(--anzhiyu-fontcolor);
     background-color: var(--anzhiyu-card-bg);
     border: var(--style-border);
-    margin: 2rem auto 0;
-    button {
-      height: 100%;
-      width: 100%;
-      border: none;
-      box-shadow: none;
-      background: transparent;
-      padding: 15px;
+    border-radius: 50px;
+    box-shadow: 0 8px 16px -4px rgb(44 45 48 / 4.7%);
+
+    i {
+      animation: spin 1s linear infinite;
+      font-size: 1rem;
     }
-    &:hover {
-      color: var(--anzhiyu-white);
-      background-color: var(--anzhiyu-main);
-      border: var(--style-border-none);
-      button {
-        color: var(--anzhiyu-white);
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
       }
     }
   }

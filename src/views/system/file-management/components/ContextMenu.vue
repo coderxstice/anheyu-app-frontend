@@ -268,58 +268,66 @@ watch(
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 2999;
   width: 100vw;
   height: 100vh;
-  background-color: transparent;
-  z-index: 2999;
   cursor: default;
   user-select: none;
+  background-color: transparent;
 }
+
 .context-menu {
   position: fixed;
   z-index: 3000;
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: var(--style-border);
-  padding: 6px;
   min-width: 180px;
+  padding: 6px;
+  background-color: #fff;
+  border: var(--style-border);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
   opacity: 0;
   transform: scale(0.8);
 }
+
 ul {
-  list-style: none;
-  margin: 0;
   padding: 0;
+  margin: 0;
+  list-style: none;
 }
+
 .menu-item {
   display: flex;
   align-items: center;
   padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
   font-size: 14px;
+  cursor: pointer;
+  border-radius: 6px;
   transition: background-color 0.2s ease;
 }
+
 .menu-item:not(.divider):hover {
   background-color: var(--anzhiyu-ahoverbg);
 }
+
 .menu-icon {
   width: 1em;
   height: 1em;
 }
+
 .menu-item.danger {
   color: var(--el-color-error);
 }
+
 .menu-item.danger:hover {
-  background-color: var(--el-color-error);
   color: #fff;
+  background-color: var(--el-color-error);
 }
+
 .menu-item.divider {
   height: 1px;
   padding: 0;
   margin: 6px 0;
-  background-color: #e0e0e0;
   cursor: default;
+  background-color: #e0e0e0;
 }
 </style>

@@ -58,6 +58,7 @@ const appLogo = computed(
   width: 100%;
   height: 48px;
   overflow: hidden;
+
   /* border-right: var(--style-border); */
 
   .sidebar-logo-link {

@@ -27,7 +27,7 @@ const emit = defineEmits(["save", "publish"]);
 <style lang="scss" scoped>
 .action-buttons {
   display: flex;
-  align-items: center;
   gap: 12px;
+  align-items: center;
 }
 </style>

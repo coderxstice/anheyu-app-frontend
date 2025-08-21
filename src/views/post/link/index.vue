@@ -59,17 +59,17 @@ const handleScrollToApply = () => {
 
 <style lang="scss" scoped>
 .post-link-page {
-  margin: 0 auto;
-  padding: 0 1.5rem;
-  max-width: 1400px;
   width: 100%;
+  max-width: 1400px;
+  padding: 0 1.5rem;
+  margin: 0 auto;
 }
 
 .link-comment-section {
   margin-top: 2rem;
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .post-link-page {
     padding: 0;
   }

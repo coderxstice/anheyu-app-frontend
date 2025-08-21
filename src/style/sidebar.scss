@@ -40,8 +40,8 @@
     justify-content: center;
     width: 40px;
     height: 40px;
-    border-radius: 8px;
     cursor: pointer;
+    border-radius: 8px;
   }
 
   .main-container {
@@ -49,11 +49,11 @@
     top: 0;
     right: 0;
     z-index: 998;
+    width: calc(100% - #{$sideBarWidth});
     height: 100vh;
     min-height: 100%;
     margin-left: $sideBarWidth;
     background: var(--anzhiyu-theme-menu-bg);
-    width: calc(100% - #{$sideBarWidth});
 
     /* main-content 属性动画 */
     transition:
@@ -80,6 +80,7 @@
   .main-container.main-hidden {
     width: 100% !important;
   }
+
   .main-hidden {
     margin-left: 0 !important;
 
@@ -119,6 +120,7 @@
       .el-scrollbar.pc {
         /* logo: 48px、leftCollapse: 40px、leftCollapse-shadow: 4px */
         height: calc(100% - 88px);
+
         // border-right: var(--style-border);
       }
 
@@ -609,8 +611,8 @@ body[layout="vertical"] {
     }
 
     .main-container {
-      margin-left: 54px;
       width: calc(100% - 54px);
+      margin-left: 54px;
       transition: width var(--anzhiyu-transition-duration);
     }
 

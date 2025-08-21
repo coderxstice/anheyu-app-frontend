@@ -249,71 +249,77 @@ const {
 
 <style>
 .file-management-container {
-  height: calc(100vh - 135px);
-  display: flex;
-  flex-direction: column;
   position: relative;
-  margin: 0 auto !important;
-  padding: 24px 24px 0;
-}
-.file-management-main {
-  width: 100%;
-  flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column;
+  height: calc(100vh - 135px);
+  padding: 24px 24px 0;
+  margin: 0 auto !important;
+}
+
+.file-management-main {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
   background-color: #fff;
   border: var(--style-border);
-  position: relative;
 }
+
 .file-content-area {
+  position: relative;
   flex: 1;
   overflow: hidden;
-  position: relative;
 }
+
 .drag-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  inset: 0;
   z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   pointer-events: none;
+  background-color: rgb(0 0 0 / 60%);
   border-radius: inherit;
 }
+
 .drag-content {
   text-align: center;
 }
+
 .drag-content .el-icon {
   font-size: 80px;
 }
+
 .drag-content span {
   display: block;
-  font-size: 24px;
   margin-top: 20px;
+  font-size: 24px;
 }
+
 .drag-content p {
+  margin-top: 8px;
   font-size: 16px;
   color: #eee;
-  margin-top: 8px;
 }
+
 .loading-overlay {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(255, 255, 255, 0.85);
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(255 255 255 / 85%);
 }
+
 .loading-spinner {
   width: 40px;
   height: 40px;
@@ -322,15 +328,18 @@ const {
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
+
 .loading-fade-enter-active,
 .loading-fade-leave-active {
   transition: opacity 0.3s ease-in-out;
 }
+
 .loading-fade-enter-from,
 .loading-fade-leave-to {
   opacity: 0;

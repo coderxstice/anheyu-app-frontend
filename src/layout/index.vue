@@ -228,7 +228,7 @@ const LayHeader = defineComponent({
   margin-right: 20px;
 }
 
-@media screen and (max-width: 760px) {
+@media screen and (width <= 760px) {
   .rmain-content {
     margin: 0 20px !important;
   }

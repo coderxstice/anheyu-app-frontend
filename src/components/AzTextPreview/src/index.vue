@@ -384,28 +384,31 @@ defineExpose({ open });
 .editor-settings-popper {
   position: fixed;
   z-index: 2001;
+  padding: 6px;
   background-color: var(--el-bg-color-overlay);
+  border: 1px solid var(--el-border-color-light);
   border-radius: 8px;
   box-shadow: var(--el-box-shadow-light);
-  border: 1px solid var(--el-border-color-light);
-  padding: 6px;
 }
+
 .context-menu-fade-scale-enter-active {
   transition:
     opacity 0.25s,
     transform 0.25s;
   transition-timing-function: cubic-bezier(0.18, 0.89, 0.32, 1.28);
 }
+
 .context-menu-fade-scale-leave-active {
   transition:
     opacity 0.2s,
     transform 0.2s;
   transition-timing-function: ease-in;
 }
+
 .context-menu-fade-scale-enter-from,
 .context-menu-fade-scale-leave-to {
-  transform: scale(0.8);
   opacity: 0;
+  transform: scale(0.8);
 }
 </style>
 
@@ -414,6 +417,7 @@ defineExpose({ open });
 .az-fade-leave-active {
   transition: opacity 0.3s ease;
 }
+
 .az-fade-enter-from,
 .az-fade-leave-to {
   opacity: 0;
@@ -422,24 +426,24 @@ defineExpose({ open });
 .az-text-preview-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(5px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
   z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(0 0 0 / 50%);
+  backdrop-filter: blur(5px);
 }
 
 .editor-modal {
-  width: 80vw;
-  height: 85vh;
-  max-width: 1400px;
-  background-color: #1e1e1e;
-  border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
+  width: 80vw;
+  max-width: 1400px;
+  height: 85vh;
   overflow: hidden;
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 50%);
   transition:
     width 0.3s,
     height 0.3s,
@@ -456,51 +460,60 @@ defineExpose({ open });
   background-color: #fff;
   border: 1px solid #e0e0e0;
 }
+
 .editor-modal.light-theme .editor-header {
-  background-color: #f5f7fa;
   color: #303133;
+  background-color: #f5f7fa;
   border-bottom: 1px solid #e0e0e0;
 }
+
 .editor-modal.light-theme .action-btn {
   color: #606266;
+
   &:hover {
     color: #303133;
   }
 }
+
 .editor-modal.light-theme .loading-container {
   background-color: #fff;
 }
+
 .editor-modal.light-theme .loading-spinner {
-  border-color: rgba(0, 0, 0, 0.1);
+  border-color: rgb(0 0 0 / 10%);
   border-top-color: #409eff;
 }
+
 .editor-modal.light-theme .loading-text {
   color: #606266;
 }
 
 .editor-header {
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 16px;
-  padding: 8px 16px;
-  background-color: #333;
-  color: #ccc;
   flex-shrink: 0;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 8px 16px;
+  color: #ccc;
   user-select: none;
+  background-color: #333;
   transition:
     background-color 0.3s,
     color 0.3s;
 }
+
 .header-left,
 .header-right {
   display: flex;
-  align-items: center;
   gap: 12px;
+  align-items: center;
 }
+
 .header-right {
   justify-content: flex-end;
 }
+
 .header-center {
   display: flex;
   justify-content: center;
@@ -509,44 +522,47 @@ defineExpose({ open });
 
 .file-info {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
   font-size: 14px;
 }
+
 .file-icon {
   width: 18px;
   height: 18px;
 }
+
 .file-name {
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 :deep(.el-button.is-dirty)::after {
-  content: "";
   position: absolute;
   top: 4px;
   right: 4px;
   width: 6px;
   height: 6px;
+  content: "";
   background-color: #e6a23c;
   border-radius: 50%;
 }
 
 .action-btn {
-  cursor: pointer;
   font-size: 16px;
   color: #ccc;
+  cursor: pointer;
   transition: color 0.2s;
+
   &:hover {
     color: #fff;
   }
 }
 
 .editor-content-wrapper {
-  flex-grow: 1;
   position: relative;
+  flex-grow: 1;
   width: 100%;
   height: 100%;
 }
@@ -554,51 +570,56 @@ defineExpose({ open });
 .loading-container {
   position: absolute;
   inset: 0;
+  z-index: 10;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
   gap: 10px;
+  align-items: center;
+  justify-content: center;
   background-color: #1e1e1e;
-  z-index: 10;
   transition: background-color 0.3s;
 }
+
 .loading-text {
-  color: #ccc;
   font-size: 14px;
+  color: #ccc;
 }
+
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid rgba(255, 255, 255, 0.2);
+  border: 4px solid rgb(255 255 255 / 20%);
   border-top-color: #fff;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
   transition: border-color 0.3s;
+  animation: spin 1s linear infinite;
 }
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
+
 .editor-container {
   width: 100%;
   height: 100%;
 }
 
 .editor-settings-menu {
-  border: none;
-  width: 200px;
   --el-menu-bg-color: transparent;
   --el-menu-hover-bg-color: var(--el-color-primary-light-9);
+
+  width: 200px;
+  border: none;
 
   .el-menu-item,
   :deep(.el-sub-menu__title) {
     height: 36px;
-    line-height: 36px;
-    font-size: 14px;
-    border-radius: 4px;
     margin: 2px 0;
+    font-size: 14px;
+    line-height: 36px;
+    border-radius: 4px;
   }
 }
 
@@ -609,9 +630,9 @@ defineExpose({ open });
 }
 
 .icon-placeholder {
+  flex-shrink: 0;
   width: 16px;
   height: 16px;
   margin-right: 8px;
-  flex-shrink: 0;
 }
 </style>

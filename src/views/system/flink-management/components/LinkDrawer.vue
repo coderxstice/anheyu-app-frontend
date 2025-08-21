@@ -285,8 +285,8 @@ onMounted(() => {
 <style lang="scss" scoped>
 .quick-add-select {
   display: flex;
-  width: 100%;
   align-items: center;
+  width: 100%;
 
   .select-main {
     flex-grow: 1;

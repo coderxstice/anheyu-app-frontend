@@ -40,6 +40,7 @@ export interface Comment {
   children: Comment[];
   reply_to_nick: string | null;
   like_count: number;
+  total_children: number;
 }
 
 /**

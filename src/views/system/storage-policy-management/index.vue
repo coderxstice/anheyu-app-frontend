@@ -250,137 +250,158 @@ function getFlagDisplayName(flag: string): string {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
-  padding: 4px;
   min-height: 150px;
+  padding: 4px;
 }
+
 .card-list-main {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   height: calc(100% - 48px);
+  padding: 16px;
   overflow: hidden;
   background-color: var(--el-bg-color);
   border-radius: 12px;
-  padding: 16px;
-  justify-content: space-between;
 }
+
 .card-list-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
   flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
 }
+
 .card-item {
   position: relative;
   height: 130px;
-  border-radius: 12px;
-  cursor: pointer;
   overflow: hidden;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
   background-color: var(--el-bg-color-page);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgb(0 0 0 / 5%);
+  transition: all 0.3s ease;
 }
+
 .pagination-container {
   margin-top: 20px;
 }
+
 .add-card {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  border: 2px dashed var(--el-border-color);
+  justify-content: center;
   color: var(--el-text-color-secondary);
+  border: 2px dashed var(--el-border-color);
+
   p {
     margin-top: 8px;
     font-size: 1rem;
   }
+
   &:hover {
-    border-color: var(--el-color-primary);
     color: var(--el-color-primary);
+    border-color: var(--el-color-primary);
   }
 }
+
 .policy-card {
-  padding: 20px;
   display: flex;
   align-items: center;
+  padding: 20px;
 
   .policy-content {
     display: flex;
-    align-items: center;
     gap: 16px;
+    align-items: center;
   }
+
   .policy-icon {
     color: var(--el-text-color-primary);
   }
+
   .policy-details {
     display: flex;
     flex-direction: column;
     gap: 8px;
   }
+
   .policy-name {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin: 0;
     display: flex;
     align-items: center;
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
   }
+
   .policy-tags {
     display: flex;
     gap: 8px;
   }
+
   .card-overlay {
     position: absolute;
     top: 0;
     left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     height: 100%;
     background: rgba(var(--el-bg-color-rgb), 0.7);
     backdrop-filter: blur(2px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
     opacity: 0;
     transition: opacity 0.4s ease;
   }
+
   .card-actions {
     display: flex;
     gap: 10px;
-    transform: translateY(20px);
     transition: transform 0.4s ease;
+    transform: translateY(20px);
+
     :deep(.el-button span) {
       margin-left: 0 !important;
     }
   }
+
   &:hover {
     .card-overlay {
       opacity: 1;
     }
+
     .card-actions {
       transform: translateY(0);
     }
   }
 }
+
 .storage-type-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
 }
+
 .type-item {
   display: flex;
-  align-items: center;
   gap: 12px;
+  align-items: center;
   padding: 16px;
+  cursor: pointer;
   border: 1px solid var(--el-border-color);
   border-radius: 8px;
-  cursor: pointer;
   transition: all 0.2s ease-in-out;
+
   &:hover {
-    border-color: var(--el-color-primary);
-    background-color: var(--anzhiyu-theme);
     color: var(--anzhiyu-white);
+    background-color: var(--anzhiyu-theme);
+    border-color: var(--el-color-primary);
   }
 }
-@media screen and (max-width: 768px) {
+
+@media screen and (width <= 768px) {
   .card-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }

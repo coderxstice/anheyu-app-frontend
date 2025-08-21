@@ -192,38 +192,45 @@ defineExpose({ submitForm });
 .create-form {
   padding: 0 10px;
 }
+
 .form-item-help {
-  color: #999;
+  margin-top: 4px;
   font-size: 12px;
   line-height: 1.5;
-  margin-top: 4px;
+  color: #999;
 }
+
 .info-block {
   margin-bottom: 22px;
+
   h3 {
-    font-size: 16px;
     margin-bottom: 8px;
+    font-size: 16px;
     font-weight: 600;
   }
+
   p {
+    margin: 0 0 8px;
     font-size: 14px;
-    color: var(--el-text-color-regular);
     line-height: 1.7;
-    margin: 0 0 8px 0;
+    color: var(--el-text-color-regular);
   }
+
   code {
-    background: var(--el-fill-color-light);
-    border-radius: 4px;
     padding: 2px 6px;
-    color: var(--el-text-color-primary);
-    border: 1px solid var(--el-border-color-light);
     font-size: 0.9em;
+    color: var(--el-text-color-primary);
+    background: var(--el-fill-color-light);
+    border: 1px solid var(--el-border-color-light);
+    border-radius: 4px;
   }
+
   .el-link {
     font-size: 14px;
     vertical-align: baseline;
   }
 }
+
 :deep(.el-form-item__label) {
   font-size: 16px;
   font-weight: 600;

@@ -1,12 +1,12 @@
 a {
-  transition: all 0.2s ease 0s;
   overflow-wrap: break-word;
+  transition: all 0.2s ease 0s;
   -webkit-user-drag: none;
 }
 
 hr {
-  display: flex;
   position: relative;
+  display: flex;
   margin: 1rem 0;
   border: 1px dashed var(--anzhiyu-theme-op);
 }
@@ -17,9 +17,9 @@ strong {
 }
 
 img {
+  max-width: 100%;
   border-style: none;
   border-radius: 8px;
-  max-width: 100%;
   transition: all 0.2s ease 0s;
   -webkit-user-drag: none;
   -khtml-user-drag: none;
@@ -29,25 +29,21 @@ img {
 
 p {
   display: block;
-  margin-block-start: 1rem;
-  margin-block-end: 1rem;
-  margin-inline-start: 0px;
-  margin-inline-end: 0px;
+  margin-block: 1rem;
+  margin-inline: 0;
   unicode-bidi: isolate;
 }
 
 h1 {
-  font-size: 2rem;
   margin: 0.67em 0;
+  font-size: 2rem;
 }
 
 h2 {
   display: block;
+  margin-block: 0.83em;
+  margin-inline: 0;
   font-size: 1.5em;
-  margin-block-start: 0.83em;
-  margin-block-end: 0.83em;
-  margin-inline-start: 0px;
-  margin-inline-end: 0px;
   font-weight: bold;
   unicode-bidi: isolate;
 }
@@ -64,65 +60,66 @@ samp {
 [type="submit"],
 button {
   appearance: button;
-  -webkit-appearance: button;
+  appearance: button;
 }
 
 input[type="checkbox"]:not(.el-checkbox__original) {
-  -webkit-appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  -o-appearance: none;
-  -ms-appearance: none;
-  appearance: none;
   position: relative;
-  height: 16px;
-  width: 16px;
-  transition: all 0.15s ease-out 0s;
-  cursor: pointer;
-  display: inline-block;
-  outline: 0;
-  border-radius: 2px;
-  flex-shrink: 0;
-  margin-right: 8px;
-  border: 2px solid var(--anzhiyu-theme);
-  pointer-events: none;
   box-sizing: border-box;
+  display: inline-block;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
   padding: 0;
+  margin-right: 8px;
+  appearance: none;
+  appearance: none;
+  appearance: none;
+  appearance: none;
+  appearance: none;
+  pointer-events: none;
+  cursor: pointer;
+  border: 2px solid var(--anzhiyu-theme);
+  border-radius: 2px;
+  outline: 0;
+  transition: all 0.15s ease-out 0s;
   transform: translateY(2px);
 
   &:checked {
     background: var(--anzhiyu-theme);
   }
 
-  &:before,
-  &:after {
+  &::before,
+  &::after {
     position: absolute;
     content: "";
     background: #fff;
   }
 
-  &:checked:before {
-    left: 0;
+  &:checked::before {
     top: 7px;
+    left: 0;
     width: 6px;
     height: 2px;
   }
-  &:checked:after {
+
+  &:checked::after {
     right: 3px;
     bottom: 1px;
     width: 2px;
     height: 10px;
   }
 
-  &:before {
-    left: 1px;
+  &::before {
     top: 5px;
+    left: 1px;
     width: 0;
     height: 2px;
-    transform: rotate(45deg);
     transition: all 0.2s ease-in;
+    transform: rotate(45deg);
   }
-  &:after {
+
+  &::after {
     right: 7px;
     bottom: 3px;
     width: 2px;

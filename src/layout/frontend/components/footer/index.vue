@@ -291,49 +291,55 @@ onMounted(() => {
 <style scoped lang="scss">
 .footer-container {
   position: relative;
+  margin-top: 1rem;
+  color: var(--anzhiyu-fontcolor);
   background: linear-gradient(
     180deg,
     var(--anzhiyu-card-bg-none) 0,
     var(--anzhiyu-card-bg) 25%
   );
-  color: var(--anzhiyu-fontcolor);
-  margin-top: 1rem;
 }
+
 .footer-wrap {
   position: relative;
   max-width: 1200px;
-  margin: 0 auto;
   min-height: 20.875rem;
+  margin: 0 auto;
 }
+
 a {
   color: var(--anzhiyu-fontcolor);
   text-decoration: none;
+
   &:hover {
     color: var(--anzhiyu-main);
   }
 }
+
 .footer-social-bar {
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
   padding: 1rem 0;
+
   .social-link {
-    font-size: 1.5rem;
     display: flex;
-    margin: 1rem 27px;
-    color: var(--anzhiyu-card-bg);
-    border-radius: 3rem;
+    align-items: center;
+    justify-content: center;
     width: 32px;
     height: 32px;
+    margin: 1rem 27px;
+    font-size: 1.5rem;
+    color: var(--anzhiyu-card-bg);
     background: var(--anzhiyu-fontcolor);
-    justify-content: center;
-    align-items: center;
+    border-radius: 3rem;
     transition: 0.3s;
+
     &:hover {
-      transform: scale(1.2);
       color: var(--anzhiyu-white);
       background: var(--anzhiyu-main);
+      transform: scale(1.2);
     }
   }
 }
@@ -341,11 +347,12 @@ a {
 .footer-back-to-top {
   width: 50px;
   height: 50px;
-  object-fit: cover;
-  border-radius: 50%;
   margin: 0 1rem;
   cursor: pointer;
+  object-fit: cover;
+  border-radius: 50%;
   transition: cubic-bezier(0, 0, 0, 1.29) 0.5s;
+
   &:hover {
     transform: rotate(360deg);
   }
@@ -353,8 +360,8 @@ a {
 
 .footer-link-grid {
   display: flex;
-  justify-content: space-between;
   flex-wrap: wrap;
+  justify-content: space-between;
   padding: 0 2rem;
 }
 
@@ -369,25 +376,27 @@ a {
 }
 
 .footer-title {
+  margin-bottom: 0.8rem;
+  margin-left: 4px;
   font-size: 1.1rem;
   font-weight: bold;
-  margin-bottom: 0.8rem;
   color: var(--anzhiyu-secondtext);
-  margin-left: 4px;
 }
 
 .random-friends-btn {
-  font-size: 1.1rem;
-  margin-left: 0.5rem;
-  cursor: pointer;
   display: flex;
   align-items: center;
   margin-bottom: 0.8rem;
+  margin-left: 0.5rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+
   > i {
     display: inline-block;
     transition:
       transform 0.3s ease-out,
       opacity 0.3s ease-out;
+
     &.is-animating {
       opacity: 0.2;
     }
@@ -396,16 +405,17 @@ a {
 
 .footer-links .footer-item {
   display: block;
-  margin-bottom: 0.5rem;
-  font-size: 0.95rem;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  max-width: 120px;
   width: fit-content;
-  padding: 0px 4px;
+  max-width: 120px;
+  padding: 0 4px;
   margin-right: 10px;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  font-size: 0.95rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   border-radius: 7px;
+
   &:hover {
     color: white;
     background: var(--anzhiyu-theme);
@@ -413,21 +423,22 @@ a {
 }
 
 .footer-custom-text {
-  text-align: center;
   padding: 1rem 0;
   font-size: 0.9rem;
   color: var(--anzhiyu-gray);
+  text-align: center;
 }
 
 .footer-badges {
-  text-align: center;
   padding: 1.5rem 0;
   margin: 0;
+  text-align: center;
 }
 
 .badge-link {
   display: inline-block;
   margin: 5px;
+
   img {
     height: 20px;
     vertical-align: middle;
@@ -435,32 +446,32 @@ a {
 }
 
 .footer-bottom-bar {
-  padding: 1rem;
-  color: var(--anzhiyu-fontcolor);
-  margin-top: 1rem;
-  background: var(--anzhiyu-secondbg);
   display: flex;
+  padding: 1rem;
+  margin-top: 1rem;
   overflow: hidden;
+  color: var(--anzhiyu-fontcolor);
+  background: var(--anzhiyu-secondbg);
   transition: 0.3s;
 }
 
 .bar-content {
   display: flex;
-  justify-content: space-between;
-  max-width: 1400px;
-  width: 100%;
-  margin: 0 auto;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
   line-height: 1;
 }
 
 .bar-left,
 .bar-right {
   display: flex;
-  align-items: center;
-  gap: 1rem;
   flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
   min-height: 32px;
 }
 
@@ -471,27 +482,28 @@ a {
 :deep(.bar-link) {
   margin-top: 8px;
   margin-bottom: 8px;
-  color: var(--anzhiyu-fontcolor);
   font-size: 1rem;
   font-weight: 700;
+  color: var(--anzhiyu-fontcolor);
   white-space: nowrap;
 }
 
 .cc-link {
   display: flex;
   align-items: center;
+
   i {
     margin: 0 2px;
   }
 }
 
-@media (min-width: 1200) {
+@media (width >= 1200) {
   .footer-link-grid {
     gap: 8rem;
   }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .footer-back-to-top {
     display: none;
   }

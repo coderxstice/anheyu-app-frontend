@@ -42,27 +42,30 @@ defineEmits(["update:enabled"]);
 <style scoped lang="scss">
 .setting-group {
   margin-bottom: 0;
-  border-left: 1px solid var(--el-border-color-light);
   border-right: 1px solid var(--el-border-color-light);
+  border-left: 1px solid var(--el-border-color-light);
 
   &:first-of-type {
     border-top: 1px solid var(--el-border-color-light);
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
   }
+
   &:last-of-type {
     border-bottom: 1px solid var(--el-border-color-light);
-    border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
   }
+
   &:not(:last-of-type) {
     border-bottom: none;
   }
 
   :deep(.el-collapse-item__header) {
-    padding: 0 16px;
     height: 56px;
+    padding: 0 16px;
     border-bottom: 1px solid transparent;
+
     &.is-active {
       border-bottom-color: var(--el-border-color-light);
     }
@@ -78,9 +81,10 @@ defineEmits(["update:enabled"]);
 }
 
 .setting-group-header {
-  width: 100%;
   display: flex;
   align-items: center;
+  width: 100%;
+
   .el-checkbox {
     :deep(.el-checkbox__label) {
       font-size: 16px;

@@ -113,30 +113,31 @@ const scrollToTop = () => {
 
 <style scoped lang="scss">
 .header-right {
-  z-index: 102;
   position: absolute;
   right: 0;
+  z-index: 102;
   display: flex;
   flex-direction: row;
-  height: 100%;
   align-items: center;
+  height: 100%;
   padding-right: 1.5rem;
 
   .nav-button {
-    margin-left: 1rem;
-    padding: 0;
-    border-radius: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: 0.3s;
-    height: 35px;
     width: 35px;
+    height: 35px;
+    padding: 0;
+    margin-left: 1rem;
     cursor: pointer;
+    border-radius: 50px;
+    transition: 0.3s;
+
     i {
       font-size: 1.2rem;
-      transition: color 0.3s;
       font-weight: 700;
+      transition: color 0.3s;
     }
 
     &:not(.nav-totop):hover {
@@ -147,35 +148,36 @@ const scrollToTop = () => {
 
   .nav-totop {
     width: 0;
-    transform: scale(0);
-    transform-origin: right center;
     margin-left: 0;
     transition: all 0.3s ease-in-out;
+    transform: scale(0);
+    transform-origin: right center;
 
     &.is-visible {
       width: 25px;
       margin-left: 1rem;
-      transform: scale(1);
       opacity: 1;
+      transform: scale(1);
     }
 
     &.is-visible.long {
       width: 80px;
-      margin-left: 0rem;
+      margin-left: 0;
+
       .totopbtn {
         width: 70px;
       }
     }
 
     .totopbtn {
-      width: 25px;
-      height: 25px;
-      border-radius: 40px;
-      background: var(--anzhiyu-fontcolor);
-      color: var(--anzhiyu-card-bg);
       position: absolute;
       top: 5px;
       right: 5px;
+      width: 25px;
+      height: 25px;
+      color: var(--anzhiyu-card-bg);
+      background: var(--anzhiyu-fontcolor);
+      border-radius: 40px;
       transition: 0.3s;
 
       i,
@@ -183,8 +185,8 @@ const scrollToTop = () => {
         position: absolute;
         top: 50%;
         left: 50%;
-        transform: translate(-50%, -50%);
         transition: all 0.3s;
+        transform: translate(-50%, -50%);
       }
 
       i {
@@ -192,39 +194,44 @@ const scrollToTop = () => {
       }
 
       .percent {
-        opacity: 1;
         font-size: 13px;
         font-weight: 700;
         white-space: nowrap;
+        opacity: 1;
       }
     }
 
     &:not(.long):hover {
       .totopbtn {
-        background: var(--anzhiyu-lighttext);
-        width: 35px;
-        height: 35px;
         top: 0;
         right: 0;
+        width: 35px;
+        height: 35px;
+        background: var(--anzhiyu-lighttext);
+
         i {
-          opacity: 1;
           color: var(--anzhiyu-card-bg);
+          opacity: 1;
           transition: 0.3s;
         }
       }
+
       .totopbtn .percent {
         opacity: 0;
       }
     }
 
     &.long:hover {
+      transform: scale(1);
+
       .totopbtn {
         background: var(--anzhiyu-lighttext);
       }
-      transform: scale(1);
+
       .totopbtn i {
         opacity: 1;
       }
+
       .totopbtn .percent {
         opacity: 0;
         transform: translate(-50%, -50%) scale(1.5);
@@ -232,7 +239,8 @@ const scrollToTop = () => {
     }
   }
 }
-@media (max-width: 768px) {
+
+@media (width <= 768px) {
   .header-right {
     padding: 0 1.2rem;
   }

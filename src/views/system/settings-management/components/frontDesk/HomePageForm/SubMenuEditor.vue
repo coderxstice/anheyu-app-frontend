@@ -161,13 +161,14 @@ const handleCancel = () => {
   position: relative;
   padding-bottom: 20px;
 }
+
 .validation-error {
-  color: var(--el-color-danger);
-  font-size: 12px;
-  line-height: 1;
   position: absolute;
   bottom: 0;
   left: 0;
   padding-top: 4px;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--el-color-danger);
 }
 </style>

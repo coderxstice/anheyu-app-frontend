@@ -455,52 +455,60 @@ defineExpose({
 <style lang="scss">
 .directional-reveal-popover {
   padding: 0 !important;
-  border-radius: 12px !important;
-  border: none !important;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
-  background-color: var(--anzhiyu-maskbgdeep, rgba(255, 255, 255, 0.9));
+  background-color: var(--anzhiyu-maskbgdeep, rgb(255 255 255 / 90%));
   backdrop-filter: blur(20px);
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 5px 15px rgb(0 0 0 / 10%) !important;
   transform-origin: top right;
 
   .popover-content {
     padding: 8px;
   }
+
   .popover-section {
     padding: 8px;
   }
+
   .popover-title {
-    font-size: 13px;
-    color: #909399;
-    margin-bottom: 12px;
-    font-weight: 500;
     padding-left: 4px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #909399;
   }
+
   .el-button-group.view-switcher {
-    width: 100%;
     display: flex;
+    width: 100%;
+
     .el-button {
       flex: 1;
     }
   }
+
   .slider-wrapper {
     display: flex;
-    align-items: center;
     gap: 12px;
+    align-items: center;
     padding: 0 4px;
+
     .el-slider {
       flex-grow: 1;
     }
+
     .slider-value {
+      min-width: 45px;
+      padding: 2px 8px;
       font-size: 14px;
       color: var(--el-text-color-primary);
-      background-color: var(--el-fill-color-light);
-      padding: 2px 8px;
-      border-radius: 4px;
-      min-width: 45px;
       text-align: center;
       user-select: none;
+      background-color: var(--el-fill-color-light);
+      border-radius: 4px;
     }
   }
+
   .el-divider--horizontal {
     margin: 8px 0;
   }
@@ -510,86 +518,102 @@ defineExpose({
 <style scoped lang="scss">
 .file-toolbar {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
+  justify-content: flex-end;
   padding: 4px 12px;
   background-color: var(--anzhiyu-card-bg);
   border: var(--style-border);
 }
+
 .right-actions {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
+
 :deep(.el-dropdown-menu__item.active) {
   color: var(--el-color-primary, #409eff);
   background-color: var(--el-color-primary-light-9, #ecf5ff);
 }
+
 .column-settings-body {
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: 8px;
   overflow: hidden;
   background-color: var(--el-bg-color);
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: 8px;
 }
+
 .column-settings-header {
   display: flex;
   justify-content: space-between;
   padding: 8px 16px;
-  background-color: var(--el-fill-color-light);
-  color: var(--el-text-color-secondary);
   font-size: 14px;
   font-weight: 500;
+  color: var(--el-text-color-secondary);
+  background-color: var(--el-fill-color-light);
 }
+
 .column-list {
   position: relative;
 }
+
 .column-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--el-border-color-lighter);
   background-color: var(--el-bg-color);
+  border-bottom: 1px solid var(--el-border-color-lighter);
+
   &:last-child {
     border-bottom: none;
   }
 }
+
 .column-name {
   font-size: 14px;
 }
+
 .column-actions {
   display: flex;
-  align-items: center;
   gap: 16px;
+  align-items: center;
   color: var(--el-text-color-regular);
+
   .action-icon {
-    cursor: pointer;
     font-size: 16px;
+    cursor: pointer;
     transition: color 0.2s ease;
+
     &:hover {
       color: var(--el-color-primary);
     }
+
     &.danger:hover {
       color: var(--el-color-danger);
     }
   }
 }
+
 .dialog-footer {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
 }
+
 .list-anim-move,
 .list-anim-enter-active,
 .list-anim-leave-active {
   transition: all 0.4s cubic-bezier(0.55, 0, 0.1, 1);
 }
+
 .list-anim-enter-from,
 .list-anim-leave-to {
   opacity: 0;
   transform: translateX(30px);
 }
+
 .list-anim-leave-active {
   position: absolute;
   width: calc(100% - 32px);

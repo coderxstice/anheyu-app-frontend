@@ -21,6 +21,39 @@ const emit = defineEmits(["comment-submitted"]);
 
 const commentStore = useCommentStore();
 
+// 子评论分页状态管理
+const childrenPage = ref(1); // 从第1页开始
+const childrenPageSize = ref(10);
+
+// 计算已经显示的子评论数量
+const displayedChildrenCount = computed(() => {
+  return props.comment.children?.length || 0;
+});
+
+// 计算下一次应该请求的页码和每页大小
+const getNextRequestParams = computed(() => {
+  const displayed = displayedChildrenCount.value;
+
+  if (displayed === 3) {
+    // 第一次点击"加载更多"：需要获取前13条，然后跳过前3条
+    // 由于API返回的是按时间排序的数据（从老到新），
+    // 这样就能显示从最新数据开始的前13条
+    return { page: 1, pageSize: 13, skipFirst: 3 };
+  } else if (displayed > 3) {
+    // 后续加载更多：每次显示10条新的评论
+    // 目标：显示到第 (displayed + 10) 条
+    const targetCount = displayed + 10;
+
+    // 由于API返回的是按时间排序的数据（从老到新），
+    // 我们需要获取前targetCount条数据，然后跳过前displayed条
+    // 这样就能显示从最新数据开始的前targetCount条
+    return { page: 1, pageSize: targetCount, skipFirst: displayed };
+  }
+
+  // 默认情况（不应该到这里）
+  return { page: 1, pageSize: 10, skipFirst: 0 };
+});
+
 const contentWithFancybox = computed(() => {
   const content = props.comment.content_html;
 
@@ -64,12 +97,27 @@ const handleLike = () => {
   commentStore.toggleLikeComment(props.comment.id);
 };
 
+// 子评论相关计算属性
+const isLoadingChildren = computed(() =>
+  commentStore.loadingChildrenCommentIds.has(props.comment.id)
+);
+const hasMoreChildren = computed(
+  () => props.comment.total_children > (props.comment.children?.length || 0)
+);
+const childrenCountText = computed(() => {
+  const currentCount = props.comment.children?.length || 0;
+  const totalCount = props.comment.total_children;
+  const remainingCount = totalCount - currentCount;
+  if (remainingCount <= 0) return "已显示全部回复";
+  return `展开 ${remainingCount} 条回复`;
+});
+
+const isDev = computed(() => {
+  return import.meta.env.DEV;
+});
+
 const isBlogger = computed(() => !!props.comment.is_admin_comment);
 
-const MAX_HEIGHT_THRESHOLD = 280;
-const childrenContainerRef = ref<HTMLElement | null>(null);
-const isExpanded = ref(false);
-const isOverflowing = ref(false);
 const isReplyFormVisible = ref(false);
 
 const gravatarSrc = computed(() => {
@@ -136,20 +184,23 @@ const handleCancelReply = () => {
   isReplyFormVisible.value = false;
 };
 
-const checkHeight = () => {
-  nextTick(() => {
-    const container = childrenContainerRef.value;
-    if (container) {
-      if (container.scrollHeight > MAX_HEIGHT_THRESHOLD) {
-        isOverflowing.value = true;
-      } else {
-        isOverflowing.value = false;
-      }
-    }
-  });
-};
+// 加载更多子评论
+const handleLoadMoreChildren = async () => {
+  const params = getNextRequestParams.value;
 
-onMounted(checkHeight);
+  try {
+    await commentStore.loadMoreChildren(
+      props.comment.id,
+      params.page,
+      params.pageSize,
+      params.skipFirst || 0
+    );
+
+    childrenPage.value++;
+  } catch (error) {
+    console.error("加载更多子评论失败:", error);
+  }
+};
 </script>
 
 <template>
@@ -232,11 +283,7 @@ onMounted(checkHeight);
     </div>
     <div
       v-if="comment.children && comment.children.length > 0"
-      :ref="el => (childrenContainerRef = el as HTMLElement)"
-      :class="[
-        'comment-children',
-        { 'is-collapsed': isOverflowing && !isExpanded }
-      ]"
+      class="comment-children"
     >
       <ReplyItem
         v-for="child in comment.children"
@@ -246,17 +293,29 @@ onMounted(checkHeight);
         @comment-submitted="$emit('comment-submitted')"
       />
     </div>
-    <div v-if="isOverflowing" class="toggle-wrapper">
+
+    <!-- 加载更多子评论按钮 -->
+    <div v-if="hasMoreChildren" class="load-more-children-wrapper">
       <button
-        v-if="!isExpanded"
-        class="expand-button"
-        @click="isExpanded = true"
+        class="load-more-children-button"
+        :class="{ 'is-loading': isLoadingChildren }"
+        :disabled="isLoadingChildren"
+        @click="handleLoadMoreChildren"
       >
-        展开
+        <span v-if="!isLoadingChildren">{{ childrenCountText }}</span>
+        <span v-else>加载中...</span>
       </button>
-      <button v-else class="collapse-button" @click="isExpanded = false">
-        收起
-      </button>
+    </div>
+
+    <!-- 调试信息 (仅开发环境显示) -->
+    <div
+      v-if="isDev"
+      class="debug-info"
+      style="margin-left: 56px; margin-top: 8px; font-size: 12px; color: #999"
+    >
+      调试: total_children={{ comment.total_children }}, children.length={{
+        comment.children?.length || 0
+      }}, hasMore={{ hasMoreChildren }}
     </div>
   </div>
 </template>
@@ -266,196 +325,211 @@ onMounted(checkHeight);
   display: flex;
   gap: 1rem;
 }
+
 .comment-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
   border: 1px solid #eee;
+  border-radius: 50%;
   transition: transform 0.3s;
+
   &:hover {
     transform: scale(1.1) rotate(10deg);
   }
 }
+
 .comment-main {
   flex: 1;
 }
+
 .comment-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 0.5rem;
 }
+
 .user-info {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
   flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
 }
+
 .nickname {
   font-weight: 600;
   color: #333;
 }
+
 .timestamp {
   font-size: 0.8rem;
   color: #999;
 }
+
 .master-tag {
-  background-color: var(--el-color-primary);
-  color: #fff;
-  font-size: 0.7rem;
   padding: 2px 6px;
-  border-radius: 4px;
+  font-size: 0.7rem;
   font-weight: bold;
+  color: #fff;
+  background-color: var(--el-color-primary);
+  border-radius: 4px;
 }
+
 .comment-actions {
   display: flex;
   gap: 0.5rem;
   height: 30px;
 }
+
 .action-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #8a919f;
-  padding: 4px;
   display: flex;
   align-items: center;
+  padding: 4px;
+  color: #8a919f;
+  cursor: pointer;
+  background: none;
+  border: none;
   border-radius: 4px;
   transition:
     color 0.3s,
     background-color 0.3s;
+
   &:hover {
     color: #333;
     background-color: #f1f3f4;
   }
+
   &.is-liked {
     color: var(--el-color-primary);
   }
+
   &.is-liked:hover {
     background-color: #f1f3f4;
   }
+
   .like-count {
     margin-left: 6px;
     font-size: 0.8rem;
   }
 }
+
 :deep(.comment-content) {
-  color: #373a47;
-  line-height: 1.6;
   font-size: 0.95rem;
+  line-height: 1.6;
+  color: #373a47;
+
   a {
     border-bottom: none;
   }
+
   p {
     margin: 0.5rem 0;
   }
+
   img {
-    max-height: 300px;
     max-width: 100%;
-    border-radius: 4px;
+    max-height: 300px;
     vertical-align: middle;
+    border-radius: 4px;
+
     &:not(.anzhiyu-owo-emotion) {
       cursor: zoom-in;
     }
   }
+
   .anzhiyu-owo-emotion {
     width: 3rem;
     height: auto;
   }
+
   blockquote {
-    border: var(--style-border-always);
-    background-color: var(--anzhiyu-secondbg);
-    color: var(--anzhiyu-secondtext);
-    border-radius: 8px;
-    margin: 1rem 0;
     padding: 0.5rem 0.8rem;
+    margin: 1rem 0;
+    color: var(--anzhiyu-secondtext);
+    background-color: var(--anzhiyu-secondbg);
+    border: var(--style-border-always);
+    border-radius: 8px;
   }
 }
+
 .comment-meta {
   display: flex;
-  align-items: center;
   gap: 1rem;
+  align-items: center;
   margin-top: 0.75rem;
   font-size: 0.8rem;
   color: #999;
 }
+
 .meta-item {
   display: flex;
-  align-items: center;
   gap: 0.3rem;
+  align-items: center;
 }
 
 :deep(.meta-item svg) {
   width: 14px;
   height: 14px;
 }
-.comment-children {
-  margin-left: 56px;
-  padding-top: 1rem;
-  margin-top: 1rem;
 
+.comment-children {
   display: flex;
   flex-direction: column;
-  transition: max-height 0.5s ease-in-out;
+  padding-top: 1rem;
+  margin-top: 1rem;
+  margin-left: 56px;
 
-  &.is-collapsed {
-    max-height: 280px;
-    overflow: hidden;
-    position: relative;
-    &::after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 60px;
-      background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff 80%);
-      [data-theme="dark"] & {
-        background: linear-gradient(
-          to bottom,
-          rgba(0, 0, 0, 0),
-          var(--anzhiyu-card-bg) 80%
-        );
-      }
-    }
-  }
   .reply-item-container {
-    border-top: var(--style-border-dashed);
     padding: 1.25rem;
+    border-top: var(--style-border-dashed);
   }
 }
+
 .reply-form-wrapper {
   margin-top: 1rem;
   margin-left: 56px;
 }
 
-.toggle-wrapper {
-  margin-left: 56px;
+.load-more-children-wrapper {
   margin-top: 1rem;
-  .expand-button,
-  .collapse-button {
-    border: var(--style-border);
-    box-shadow: 0 8px 16px -4px rgba(44, 45, 48, 0.047);
-    border-radius: 50px;
-    letter-spacing: 5px;
-    background-color: var(--anzhiyu-card-bg);
-    width: 100%;
-    cursor: pointer;
-    padding: 0.75rem;
-    text-align: center;
-    transition: all 0.5s;
-    font-size: 0.75rem;
-    &:hover {
-      color: var(--anzhiyu-white);
-      background-color: var(--anzhiyu-main);
-      border: var(--style-border-none);
-    }
+  margin-left: 56px;
+  text-align: center;
+}
+
+.load-more-children-button {
+  min-width: 120px;
+  padding: 0.5rem 1rem;
+  font-size: 0.7rem;
+  color: var(--anzhiyu-fontcolor);
+  text-align: center;
+  letter-spacing: 3px;
+  cursor: pointer;
+  background-color: var(--anzhiyu-card-bg);
+  border: var(--style-border);
+  border-radius: 50px;
+  box-shadow: 0 8px 16px -4px rgb(44 45 48 / 4.7%);
+  transition: all 0.3s;
+
+  &:hover:not(:disabled) {
+    color: var(--anzhiyu-white);
+    background-color: var(--anzhiyu-main);
+    border: var(--style-border-none);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &.is-loading {
+    color: var(--anzhiyu-main);
   }
 }
-@media (max-width: 768px) {
+
+@media (width <= 768px) {
   .comment-children,
   .reply-form-wrapper,
-  .toggle-wrapper {
+  .load-more-children-wrapper {
     margin-left: 0;
   }
 }

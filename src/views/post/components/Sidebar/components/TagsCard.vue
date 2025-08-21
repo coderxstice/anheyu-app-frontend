@@ -79,83 +79,83 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .card-tag-cloud {
-  max-height: 360px;
-  overflow: hidden;
   position: relative;
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+  flex-flow: row wrap;
   gap: 4px;
+  max-height: 360px;
+  overflow: hidden;
+
   a {
-    color: var(--anzhiyu-fontcolor);
     padding: 0 0.375rem;
     font-size: 1rem;
-    border-radius: 8px;
+    color: var(--anzhiyu-fontcolor);
     cursor: pointer;
+    border-radius: 8px;
 
     &.is-highlight {
-      color: var(--anzhiyu-theme);
       font-weight: bold;
+      color: var(--anzhiyu-theme);
     }
 
     &:hover {
-      background: var(--anzhiyu-lighttext);
       color: var(--anzhiyu-card-bg);
-      box-shadow: var(--anzhiyu-shadow-theme);
+      background: var(--anzhiyu-lighttext);
       border-radius: 4px;
+      box-shadow: var(--anzhiyu-shadow-theme);
     }
 
     sup {
-      opacity: 0.6;
       margin-left: 2px;
       font-size: 0.7em;
+      opacity: 0.6;
     }
   }
 
   &.is-overflow::after {
-    content: "";
     position: absolute;
+    right: 0;
     bottom: 0;
     left: 0;
-    right: 0;
     height: 150px;
+    pointer-events: none;
+    content: "";
     background-image: linear-gradient(
       to top,
       var(--anzhiyu-card-bg),
       transparent
     );
-    pointer-events: none;
   }
 }
 
 .loading-tip,
 .empty-tip {
-  color: var(--anzhiyu-secondtext);
-  font-size: 14px;
-  text-align: center;
   padding: 2rem 0;
+  font-size: 14px;
+  color: var(--anzhiyu-secondtext);
+  text-align: center;
 }
 
 .card-footer {
   text-align: center;
 
   .view-all-button {
-    width: 100%;
-    text-align: center;
-    background: var(--anzhiyu-secondbg);
-    color: var(--anzhiyu-fontcolor);
-    border-radius: 8px;
     display: flex;
     justify-content: center;
-    font-size: 14px;
-    user-select: none;
+    width: 100%;
     padding: 4px 0;
+    font-size: 14px;
+    color: var(--anzhiyu-fontcolor);
+    text-align: center;
+    user-select: none;
+    background: var(--anzhiyu-secondbg);
     border: var(--style-border-always);
+    border-radius: 8px;
     box-shadow: var(--anzhiyu-shadow-border);
 
     &:hover {
-      background-color: var(--anzhiyu-theme);
       color: var(--anzhiyu-white);
+      background-color: var(--anzhiyu-theme);
       border-color: var(--anzhiyu-theme);
       box-shadow: var(--anzhiyu-shadow-theme);
     }

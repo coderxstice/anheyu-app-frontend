@@ -269,89 +269,107 @@ watch(
 :root {
   --style-border: 1px solid #e0e0e0;
 }
+
 .file-breadcrumb-wrapper {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
   padding: 0 24px;
+  overflow: hidden;
+  cursor: text;
   background-color: var(--anzhiyu-card-bg);
   border: var(--style-border);
   border-radius: 12px;
-  overflow: hidden;
-  min-height: 52px;
-  display: flex;
-  align-items: center;
-  cursor: text;
 }
+
 .file-breadcrumb {
   display: flex;
   align-items: center;
   width: 100%;
 }
+
 .home-icon {
-  cursor: pointer;
   margin-right: 12px;
   font-size: 16px;
   color: var(--anzhiyu-fontcolor);
+  cursor: pointer;
 }
+
 .home-icon:hover {
   color: var(--el-color-primary);
 }
+
 .is-link {
+  display: inline-block;
+  padding: 8px;
   font-weight: normal;
   cursor: pointer;
-  display: inline-block;
-  padding: 8px 8px;
   border-radius: 4px;
   transition: background-color 0.2s;
 }
+
 .is-link:hover {
   color: var(--el-color-primary);
   background-color: #f5f7fa;
 }
+
 .el-breadcrumb__item:not(:last-child) .is-link {
-  color: var(--anzhiyu-fontcolor);
   font-weight: normal;
+  color: var(--anzhiyu-fontcolor);
 }
+
 .el-breadcrumb__item:first-child .is-link {
   color: var(--anzhiyu-fontcolor);
 }
+
 .el-dropdown-link {
-  cursor: pointer;
-  color: #303133;
-  font-weight: 600;
   display: flex;
   align-items: center;
-  padding: 8px 8px;
+  padding: 8px;
+  font-weight: 600;
+  color: #303133;
+  cursor: pointer;
   border-radius: 4px;
   transition: background-color 0.2s;
 }
+
 .el-dropdown-link .el-icon--right {
-  margin-left: 5px;
-  font-size: 12px;
   display: inline-flex;
   align-items: center;
+  margin-left: 5px;
+  font-size: 12px;
 }
+
 .danger-item {
   color: var(--el-color-error);
 }
+
 .danger-item:hover {
   color: var(--anzhiyu-card-bg) !important;
   background-color: var(--el-color-error) !important;
 }
+
 .danger-item .dropdown-icon {
   color: var(--el-color-error);
 }
+
 .danger-item:hover .dropdown-icon {
   color: var(--anzhiyu-card-bg) !important;
 }
+
 .el-dropdown-link:hover {
   background-color: #f5f7fa !important;
 }
+
 .input-mode {
-  width: 100%;
   display: flex;
   align-items: center;
+  width: 100%;
+
   :deep(.el-input__wrapper) {
-    box-shadow: none !important;
     padding: 4px !important;
+    box-shadow: none !important;
+
     &:hover {
       box-shadow: none !important;
     }

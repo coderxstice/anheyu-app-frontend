@@ -59,19 +59,18 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .category-cloud-amount {
-  min-height: 400px;
-  color: var(--anzhiyu-fontcolor);
   max-width: 1400px;
+  min-height: 400px;
   margin: 0 auto;
   margin-top: 0.5rem;
+  color: var(--anzhiyu-fontcolor);
 }
 
 .page-title {
   margin: 0.4rem 0 1rem 1rem;
-  text-align: center;
+  font-size: 2em;
   font-weight: 700;
   text-align: center;
-  font-size: 2em;
 }
 
 .category-cloud-list {
@@ -84,33 +83,33 @@ onMounted(() => {
 
 .category-item {
   display: flex;
-  width: fit-content;
-  color: var(--anzhiyu-fontcolor);
-  font-size: 1.4rem;
-  padding: 0.6rem 0.9rem;
-  background: var(--anzhiyu-card-bg);
-  margin: 0.7rem;
-  border-radius: 12px;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform-style: preserve-3d;
-  -webkit-transform-style: preserve-3d;
-  border: var(--style-border-always);
-  box-shadow: var(--anzhiyu-shadow-border);
   align-items: center;
+  width: fit-content;
+  padding: 0.6rem 0.9rem;
+  margin: 0.7rem;
+  font-size: 1.4rem;
+  color: var(--anzhiyu-fontcolor);
   cursor: pointer;
+  background: var(--anzhiyu-card-bg);
+  border: var(--style-border-always);
+  border-radius: 12px;
+  box-shadow: var(--anzhiyu-shadow-border);
+  backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  transform-style: preserve-3d;
 
   &:hover {
-    background: var(--anzhiyu-main);
-    box-shadow: var(--anzhiyu-shadow-blue);
     color: var(--anzhiyu-white);
+    background: var(--anzhiyu-main);
     border: var(--style-border-hover);
+    box-shadow: var(--anzhiyu-shadow-blue);
   }
 }
 
 .category-punctuation {
   margin-right: 0.25rem;
-  opacity: 0.4;
   font-size: 1.2rem;
+  opacity: 0.4;
 }
 </style>

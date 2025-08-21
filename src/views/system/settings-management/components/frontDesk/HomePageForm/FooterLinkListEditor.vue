@@ -159,30 +159,30 @@ const removeLink = (columnIndex: number, linkIndex: number) => {
 
 <style scoped lang="scss">
 .footer-link-editor {
+  padding: 16px;
   border: 1px solid var(--el-border-color-lighter);
   border-radius: 4px;
-  padding: 16px;
 }
 
 .column-item {
-  border: 1px solid var(--el-border-color-light);
-  border-radius: 4px;
   margin-bottom: 16px;
   background-color: var(--el-bg-color-page);
+  border: 1px solid var(--el-border-color-light);
+  border-radius: 4px;
 }
 
 .column-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   padding: 8px 16px;
   background-color: var(--el-fill-color-lighter);
   border-bottom: 1px solid var(--el-border-color-light);
 }
 
 .column-title {
-  font-weight: bold;
   font-size: 14px;
+  font-weight: bold;
 }
 
 .column-content {

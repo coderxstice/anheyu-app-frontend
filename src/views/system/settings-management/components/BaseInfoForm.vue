@@ -155,9 +155,9 @@ onMounted(() => {
 }
 
 .form-item-help {
-  color: #909399;
+  margin-top: 4px;
   font-size: 12px;
   line-height: 1.5;
-  margin-top: 4px;
+  color: #909399;
 }
 </style>

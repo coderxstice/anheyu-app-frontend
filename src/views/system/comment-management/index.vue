@@ -234,13 +234,15 @@ const handleReply = (comment: AdminComment) => {
   font-size: 18px;
   font-weight: 500;
 }
+
 .toolbar {
   margin-top: 16px;
   margin-bottom: 16px;
 }
+
 .pagination {
-  margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+  margin-top: 20px;
 }
 </style>

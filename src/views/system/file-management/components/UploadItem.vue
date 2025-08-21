@@ -211,127 +211,147 @@ const onAnimateLeave = (el: Element, done: () => void) => {
 
 <style scoped>
 .upload-item {
+  position: relative;
   display: flex;
   align-items: center;
   padding: 10px 12px;
+  overflow: hidden;
   border-radius: 8px;
   transition: background-color 0.2s;
-  position: relative;
-  overflow: hidden;
 }
+
 .upload-item:hover {
   background-color: #f5f7fa;
 }
+
 .item-icon {
-  font-size: 28px;
-  margin-right: 12px;
-  color: #909399;
-  flex-shrink: 0;
   position: relative;
   z-index: 2;
+  flex-shrink: 0;
+  margin-right: 12px;
+  font-size: 28px;
+  color: #909399;
 }
+
 .item-info {
-  flex-grow: 1;
-  min-width: 0;
-  min-height: 42px;
+  position: relative;
+  z-index: 2;
   display: flex;
+  flex-grow: 1;
   flex-direction: column;
   justify-content: center;
-  position: relative;
-  z-index: 2;
+  min-width: 0;
+  min-height: 42px;
 }
+
 .item-name {
-  font-size: 14px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
 .status-tag {
   height: 18px;
   padding: 0 6px;
   line-height: 16px;
   border: none;
 }
+
 .item-error-display {
+  display: flex;
+  align-items: center;
+  height: 22px;
+  margin-top: 2px;
   font-size: 12px;
   color: var(--el-color-error);
-  display: flex;
-  align-items: center;
-  margin-top: 2px;
-  height: 22px;
 }
+
 .status-action-wrapper {
   position: relative;
-  height: 22px;
   display: flex;
   align-items: center;
+  height: 22px;
 }
+
 .item-error-display + .status-action-wrapper {
   display: none;
 }
+
 .upload-item:hover .item-error-display {
   display: none;
 }
+
 .upload-item:hover .item-error-display + .status-action-wrapper {
   display: flex;
 }
+
 .item-status-display,
 .item-actions {
   width: 100%;
 }
+
 .item-detail-info {
+  display: flex;
+  gap: 8px;
+  align-items: center;
   font-size: 12px;
   color: #606266;
-  display: flex;
-  align-items: center;
-  gap: 8px;
   white-space: nowrap;
 }
+
 .speed {
-  color: var(--el-color-primary);
-  font-weight: 500;
   min-width: 75px;
+  font-weight: 500;
+  color: var(--el-color-primary);
   text-align: left;
 }
+
 .size-info {
   color: #909399;
 }
+
 .item-message {
+  overflow: hidden;
   font-size: 12px;
   line-height: 1.4;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   color: #909399;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
 .item-message.is-success {
   color: var(--el-color-success);
 }
+
 .item-actions {
   display: flex;
+  gap: 8px;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
-  background-color: rgba(245, 247, 250, 0.85);
-  backdrop-filter: blur(2px);
   padding: 0 4px;
+  background-color: rgb(245 247 250 / 85%);
+  backdrop-filter: blur(2px);
 }
+
 .item-actions .el-button {
   width: 28px;
   height: 28px;
 }
+
 .progress-bar-bg {
   position: absolute;
   bottom: 0;
   left: 0;
+  z-index: 1;
   width: 100%;
   height: 2px;
   background-color: #e9e9eb;
-  z-index: 1;
 }
+
 .progress-bar-fg {
   height: 100%;
   background-color: var(--el-color-primary);

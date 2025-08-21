@@ -154,15 +154,16 @@ watch(
 
 <style scoped>
 .thumbnail-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 6px;
   overflow: hidden;
-  position: relative;
+  border-radius: 6px;
 }
+
 .thumbnail-image {
   width: 100%;
   height: 100%;
@@ -171,15 +172,17 @@ watch(
     transform 0.2s ease-in-out,
     opacity 0.3s ease-in-out;
 }
+
 .thumbnail-image:hover {
   transform: scale(1.1);
 }
+
 .thumbnail-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .thumbnail-placeholder.is-loading {
@@ -189,19 +192,23 @@ watch(
   z-index: 1;
   background-color: var(--el-fill-color-light);
 }
+
 .thumbnail-placeholder.is-loading .el-icon {
   font-size: 32px;
   color: var(--el-color-primary-light-3);
   animation: spin 1.5s linear infinite;
 }
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
+
 .file-icon-fallback {
   width: 50px;
   height: 50px;

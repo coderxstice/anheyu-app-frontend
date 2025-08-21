@@ -30,9 +30,9 @@ const formData = defineModel<Partial<StoragePolicy>>({ required: true });
 </template>
 <style scoped>
 .form-item-help {
-  color: #999;
+  margin-top: 4px;
   font-size: 12px;
   line-height: 1.5;
-  margin-top: 4px;
+  color: #999;
 }
 </style>

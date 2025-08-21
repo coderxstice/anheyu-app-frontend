@@ -62,6 +62,7 @@ const handleEquipmentComment = (quoteText: string) => {
   padding: 1.5rem;
   margin: 0 auto;
 }
+
 .link-comment-section {
   margin-top: 2rem;
 }

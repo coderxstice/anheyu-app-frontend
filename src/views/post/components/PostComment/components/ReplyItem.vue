@@ -229,99 +229,123 @@ const scrollToParent = () => {
 </template>
 
 <style lang="scss" scoped>
-/* 样式保持不变 */
+
+@media (width <= 768px) {
+  .reply-form-wrapper {
+    margin-left: 0;
+  }
+}
+
 .comment-item {
   display: flex;
   gap: 1rem;
 }
+
 .comment-avatar {
   width: 32px;
   height: 32px;
-  border-radius: 50%;
   border: 1px solid #eee;
+  border-radius: 50%;
   transition: transform 0.3s;
+
   &:hover {
     transform: scale(1.1) rotate(10deg);
   }
 }
+
 .comment-main {
-  flex: 1;
   display: flex;
+  flex: 1;
   flex-direction: column;
 }
+
 .comment-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 0.5rem;
 }
+
 .user-info {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
   flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
 }
+
 .nickname {
-  font-weight: 600;
   font-size: 0.9rem;
+  font-weight: 600;
   color: #333;
   text-decoration: none;
+
   &:hover {
     color: var(--el-color-primary);
   }
 }
+
 .master-tag {
-  background-color: var(--el-color-primary);
-  color: #fff;
-  font-size: 0.7rem;
   padding: 2px 6px;
-  border-radius: 4px;
+  font-size: 0.7rem;
   font-weight: bold;
+  color: #fff;
+  background-color: var(--el-color-primary);
+  border-radius: 4px;
 }
+
 .timestamp {
   font-size: 0.8rem;
   color: #999;
 }
+
 .comment-actions {
   display: flex;
   gap: 0.5rem;
   height: 30px;
 }
+
 .action-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #8a919f;
-  padding: 4px;
   display: flex;
   align-items: center;
+  padding: 4px;
+  color: #8a919f;
+  cursor: pointer;
+  background: none;
+  border: none;
   border-radius: 4px;
   transition:
     color 0.3s,
     background-color 0.3s;
+
   &:hover {
     color: #333;
     background-color: #f1f3f4;
   }
+
   &.is-liked {
     color: var(--el-color-primary);
   }
+
   &.is-liked:hover {
     background-color: #f1f3f4;
   }
+
   .like-count {
     margin-left: 6px;
     font-size: 0.8rem;
   }
 }
+
 .reply-to-block {
   margin-bottom: 0.5rem;
   font-size: 0.75rem;
   color: var(--anzhiyu-secondtext);
+
   a {
-    font-weight: 500;
     padding: 0 0.2em;
+    font-weight: 500;
     text-decoration: none;
+
     &:hover {
       color: var(--anzhiyu-white);
       background-color: var(--anzhiyu-theme);
@@ -331,9 +355,9 @@ const scrollToParent = () => {
 }
 
 :deep(.comment-content) {
-  color: #373a47;
-  line-height: 1.6;
   font-size: 0.95rem;
+  line-height: 1.6;
+  color: #373a47;
 
   a {
     border-bottom: none;
@@ -344,44 +368,47 @@ const scrollToParent = () => {
   }
 
   img {
-    max-height: 300px;
     max-width: 100%;
-    border-radius: 4px;
+    max-height: 300px;
     vertical-align: middle;
+    border-radius: 4px;
+
     &:not(.anzhiyu-owo-emotion) {
       cursor: zoom-in;
     }
   }
+
   .anzhiyu-owo-emotion {
     width: 3rem;
     height: auto;
   }
 }
+
 .comment-meta {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: 1rem;
+  align-items: center;
   margin-top: 0.75rem;
   font-size: 0.8rem;
   color: #999;
-  flex-wrap: wrap;
 }
+
 .meta-item {
   display: flex;
-  align-items: center;
   gap: 0.3rem;
+  align-items: center;
 }
+
 :deep(.meta-item svg) {
   width: 14px;
   height: 14px;
 }
+
 .reply-form-wrapper {
   margin-top: 1rem;
   margin-left: 48px;
 }
-@media (max-width: 768px) {
-  .reply-form-wrapper {
-    margin-left: 0;
-  }
-}
+
+/* 样式保持不变 */
 </style>

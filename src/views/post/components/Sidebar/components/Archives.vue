@@ -65,43 +65,43 @@ onMounted(() => {
 <style lang="scss" scoped>
 .card-archive-list {
   display: flex;
-  flex-direction: row;
+  flex-flow: row wrap;
   justify-content: space-between;
-  flex-wrap: wrap;
-  margin: 0;
   padding: 0;
+  margin: 0;
   list-style: none;
 }
 
 .card-archive-list-item {
+  flex: 0 0 48%;
   width: 100%;
   box-flex: 1;
-  flex: 0 0 48%;
+
   .card-archive-list-link {
-    border-radius: var(--anzhiyu-border-radius);
-    margin: 4px 0;
     display: flex;
     flex-direction: column;
-    border: var(--style-border);
     padding: 3px 10px;
+    margin: 4px 0;
     color: var(--font-color);
-    transition: all 0.2s;
+    border: var(--style-border);
+    border-radius: var(--anzhiyu-border-radius);
     border-radius: 8px;
+    transition: all 0.2s;
 
     &:hover {
-      background-color: var(--anzhiyu-main);
       color: var(--anzhiyu-white);
+      background-color: var(--anzhiyu-main);
     }
   }
 }
 
 .card-archive-list-date {
-  width: auto;
   flex: inherit;
+  width: auto;
   overflow: hidden;
+  font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 13px;
   opacity: 0.6;
 }
 
@@ -115,14 +115,13 @@ onMounted(() => {
   }
 
   .card-archive-list-count {
-    text-align: left;
-    font-size: 1.1rem;
-    line-height: 0.9;
-    font-weight: 700;
     overflow: hidden;
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 2;
+    text-align: left;
     text-overflow: ellipsis;
     white-space: nowrap;
-    line-height: 2;
   }
 }
 </style>

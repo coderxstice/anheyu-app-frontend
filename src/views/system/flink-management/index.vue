@@ -283,11 +283,13 @@ onMounted(() => {
 
 .header-card {
   margin-bottom: 20px;
+
   .el-form {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
   }
+
   .add-button {
     margin-left: auto;
   }
@@ -299,6 +301,7 @@ onMounted(() => {
 
 .link-card {
   margin-bottom: 20px;
+
   .card-header {
     display: flex;
     align-items: center;
@@ -311,36 +314,37 @@ onMounted(() => {
   }
 
   .site-name {
+    margin: 0;
+    overflow: hidden;
     font-size: 16px;
     font-weight: bold;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .site-url {
-    font-size: 12px;
     display: block;
-    white-space: nowrap;
     overflow: hidden;
+    font-size: 12px;
     text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .description {
+    display: -webkit-box;
+    min-height: 40px;
+    margin: 0 0 10px;
+    overflow: hidden;
     font-size: 14px;
     color: #606266;
-    margin: 0 0 10px;
-    min-height: 40px;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    line-clamp: 2;
     -webkit-line-clamp: 2;
-    overflow: hidden;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
   }
 
   .meta-info {
     margin-bottom: 10px;
+
     .tag-item {
       margin-left: 5px;
     }
@@ -352,8 +356,8 @@ onMounted(() => {
 
   .card-footer {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
   }
 
   .actions {
@@ -363,7 +367,7 @@ onMounted(() => {
 }
 
 .el-pagination {
-  margin-top: 20px;
   justify-content: flex-end;
+  margin-top: 20px;
 }
 </style>

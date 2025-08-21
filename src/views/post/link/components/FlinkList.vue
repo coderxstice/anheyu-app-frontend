@@ -41,7 +41,7 @@ defineProps<{
 
 <style lang="scss" scoped>
 .flink-list {
-  padding: 0px;
+  padding: 0;
   margin: 0.625rem -6px 1.25rem;
   overflow: hidden;
   text-align: center;
@@ -49,44 +49,48 @@ defineProps<{
 
 .flink-list-item {
   position: relative;
-  width: calc(20% - 12px);
-  box-shadow: var(--anzhiyu-shadow-border);
   display: flex;
-  margin: 6px;
-  transition: 0.3s ease-in-out;
-  border-radius: 12px;
-  border: var(--style-border-always);
-  background: var(--anzhiyu-card-bg);
-  height: 90px;
-  line-height: 17px;
-  transform: translateZ(0px);
-  overflow: hidden;
   float: left;
+  width: calc(20% - 12px);
+  height: 90px;
+  margin: 6px;
+  overflow: hidden;
+  line-height: 17px;
+  background: var(--anzhiyu-card-bg);
+  border: var(--style-border-always);
+  border-radius: 12px;
+  box-shadow: var(--anzhiyu-shadow-border);
+  transition: 0.3s ease-in-out;
+  transform: translateZ(0);
 
   &:hover {
-    transform: scale(1.02);
-    box-shadow: var(--anzhiyu-shadow-main);
     background: var(--anzhiyu-lighttext);
     border: var(--style-border-hover);
+    box-shadow: var(--anzhiyu-shadow-main);
+    transform: scale(1.02);
 
     .link-tag {
       left: -70px;
     }
+
     .cf-friends-link {
       .flink-avatar {
-        width: 0px;
-        height: 0px;
-        opacity: 0;
-        min-width: 0px;
-        min-height: 0px;
-        transition: 0.6s;
+        width: 0;
+        min-width: 0;
+        height: 0;
+        min-height: 0;
         margin: 5px;
+        opacity: 0;
+        transition: 0.6s;
       }
+
       .flink-item-info {
         min-width: calc(100% - 20px);
+
         .flink-item-name {
           color: var(--anzhiyu-card-bg);
         }
+
         .flink-item-desc {
           width: 100%;
           overflow: hidden;
@@ -98,45 +102,45 @@ defineProps<{
 
   .link-tag {
     position: absolute;
-    top: 0px;
-    left: 0px;
-    background-color: var(--anzhiyu-blue);
-    box-shadow: var(--anzhiyu-shadow-blue);
-    color: var(--anzhiyu-white);
+    top: 0;
+    left: 0;
     z-index: 1;
-    font-size: 0.6rem;
     padding: 4px 8px;
-    border-radius: 12px 0px;
-    transition: 0.3s;
     overflow: hidden;
+    font-size: 0.6rem;
+    color: var(--anzhiyu-white);
+    background-color: var(--anzhiyu-blue);
+    border-radius: 12px 0;
+    box-shadow: var(--anzhiyu-shadow-blue);
+    transition: 0.3s;
   }
 
   .cf-friends-link {
     display: flex;
+    align-items: center;
     width: 100%;
     height: 100%;
-    align-items: center;
-    border-width: initial;
-    border-style: none;
-    border-color: initial;
-    border-image: initial;
+    padding: 0 4px;
+    font-weight: 700;
     color: var(--anzhiyu-fontcolor);
     text-decoration: none;
-    font-weight: 700;
-    padding: 0px 4px;
-    border-radius: 4px 4px 0px 0px;
+    border-color: initial;
+    border-style: none;
+    border-width: initial;
+    border-radius: 4px 4px 0 0;
+    border-image: initial;
 
     .flink-avatar {
-      min-width: 60px;
-      min-height: 60px;
-      border-radius: 32px;
-      margin: 15px 20px 15px 15px;
-      transition: 0.3s;
-      background: var(--anzhiyu-background);
       float: left;
       width: 60px;
+      min-width: 60px;
       height: 60px;
+      min-height: 60px;
+      margin: 15px 20px 15px 15px;
       object-fit: cover;
+      background: var(--anzhiyu-background);
+      border-radius: 32px;
+      transition: 0.3s;
     }
 
     .flink-item-info {
@@ -145,47 +149,49 @@ defineProps<{
       justify-content: center;
       width: calc(100% - 90px);
       height: fit-content;
+
       .flink-item-name {
-        text-align: left;
-        font-size: 19px;
-        line-height: 20px;
-        max-width: calc(100% - 12px);
-        text-overflow: ellipsis;
-        padding: 0px 10px 0px 0px;
-        overflow: hidden;
-        white-space: nowrap;
         display: block;
+        max-width: calc(100% - 12px);
+        padding: 0 10px 0 0;
+        overflow: hidden;
+        font-size: 19px;
         font-weight: 700;
-        color: var(--anzhiyu-fontcolor);
-      }
-      .flink-item-desc {
+        line-height: 20px;
         color: var(--anzhiyu-fontcolor);
         text-align: left;
-        height: 40px;
         text-overflow: ellipsis;
-        opacity: 0.7;
-        -webkit-box-orient: vertical;
-        line-clamp: 2;
-        -webkit-line-clamp: 2;
-        white-space: normal;
-        padding: 5px 10px 16px 0px;
+        white-space: nowrap;
+      }
+
+      .flink-item-desc {
+        height: 40px;
+        padding: 5px 10px 16px 0;
         overflow: hidden;
         font-size: 0.93rem;
+        color: var(--anzhiyu-fontcolor);
+        text-align: left;
+        text-overflow: ellipsis;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        white-space: normal;
+        opacity: 0.7;
+        -webkit-box-orient: vertical;
       }
     }
   }
 
   .light {
-    cursor: pointer;
     position: absolute;
-    top: 0px;
+    top: 0;
     width: 100px;
     height: 50px;
-    background-image: -webkit-linear-gradient(
+    cursor: pointer;
+    background-image: linear-gradient(
       0deg,
-      rgba(255, 255, 255, 0),
-      rgba(255, 255, 255, 0.5),
-      rgba(255, 255, 255, 0)
+      rgb(255 255 255 / 0%),
+      rgb(255 255 255 / 50%),
+      rgb(255 255 255 / 0%)
     );
     animation: 4s ease 0s infinite normal both running light_tag;
   }

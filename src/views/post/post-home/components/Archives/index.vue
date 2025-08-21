@@ -103,18 +103,18 @@ const goToTag = (tagName: string) => {
 
 <style lang="scss" scoped>
 .archive-page {
-  box-shadow: var(--anzhiyu-shadow-border);
-  padding: 1.25rem 2.5rem;
-  border-radius: 12px;
-  background: var(--anzhiyu-card-bg);
-  border: var(--style-border);
-  width: 100%;
-  align-self: flex-start;
-  animation: slide-in 0.6s 0.1s backwards;
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.625rem;
+  align-self: flex-start;
+  width: 100%;
+  padding: 1.25rem 2.5rem;
+  background: var(--anzhiyu-card-bg);
+  border: var(--style-border);
+  border-radius: 12px;
+  box-shadow: var(--anzhiyu-shadow-border);
+  animation: slide-in 0.6s 0.1s backwards;
 }
 
 .article-sort-title {
@@ -123,63 +123,65 @@ const goToTag = (tagName: string) => {
   color: var(--anzhiyu-fontcolor);
 
   sup {
+    top: -0.625rem;
     margin-left: 4px;
     font-size: 16px;
     font-weight: 700;
     opacity: 0.4;
-    top: -0.625rem;
   }
 }
 
 .article-sort-item-year {
   position: relative;
+  padding-left: 1rem;
   font-size: 1rem;
   font-weight: 700;
-  padding-left: 1rem;
 
   &::before {
-    content: "";
     position: absolute;
-    left: 0;
     top: 50%;
-    transform: translateY(-50%);
+    left: 0;
     width: 6px;
     height: 1.5rem;
+    content: "";
     background: var(--anzhiyu-main);
     border-radius: 4px;
+    transform: translateY(-50%);
   }
 }
 
 .article-sort-item {
   position: relative;
   display: flex;
-  -webkit-box-align: center;
   align-items: center;
-  transition: all 0.2s ease-in-out 0s;
   overflow: hidden;
   border-radius: 12px;
+  transition: all 0.2s ease-in-out 0s;
+  -webkit-box-align: center;
 }
+
 .article-sort {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
+
 .article-sort-item-img {
-  border-radius: 12px;
-  min-width: 151px;
-  min-height: 80px;
-  background: var(--anzhiyu-secondbg);
-  mask-image: -webkit-radial-gradient(center, #fff, #000);
-  -webkit-mask-image: -webkit-radial-gradient(center, #fff, #000);
-  overflow: hidden;
   width: 80px;
+  min-width: 151px;
   height: 80px;
+  min-height: 80px;
+  overflow: hidden;
+  background: var(--anzhiyu-secondbg);
+  border-radius: 12px;
+  mask-image: radial-gradient(center, #fff, #000);
+  mask-image: radial-gradient(center, #fff, #000);
 
   img {
     width: 100%;
     height: 100%;
-    transition: all 0.6s ease 0s;
     object-fit: cover;
+    transition: all 0.6s ease 0s;
   }
 
   &:hover img {
@@ -188,11 +190,11 @@ const goToTag = (tagName: string) => {
 }
 
 .article-sort-item-info {
-  padding: 0 1rem;
   display: flex;
-  flex-direction: column;
-  -webkit-box-flex: 1;
   flex: 1 1 0%;
+  flex-direction: column;
+  padding: 0 1rem;
+  -webkit-box-flex: 1;
 }
 
 .article-sort-item-time {
@@ -200,16 +202,16 @@ const goToTag = (tagName: string) => {
 }
 
 .article-sort-item-title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: fit-content;
   order: 0;
+  width: fit-content;
+  overflow: hidden;
+  font-size: 1.1em;
   font-weight: 700;
   line-height: 1.3;
-  line-clamp: 1;
-  -webkit-line-clamp: 1;
   color: var(--anzhiyu-fontcolor);
-  font-size: 1.1em;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
   transition: all 0.3s ease 0s;
 
   &:hover {
@@ -218,26 +220,28 @@ const goToTag = (tagName: string) => {
 }
 
 .article-sort-item-tags {
-  margin-top: 8px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100%;
-  font-size: 0.7rem;
   display: flex;
   gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+  overflow: hidden;
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 
   .article-meta__tags {
-    color: var(--anzhiyu-secondtext);
-    transition: color 0.3s;
-    overflow: hidden;
-    text-overflow: ellipsis;
     width: fit-content;
+    overflow: hidden;
+    color: var(--anzhiyu-secondtext);
+    text-overflow: ellipsis;
     border-radius: 8px;
+    transition: color 0.3s;
+
     .tags-punctuation {
-      font-size: 12px;
       margin-right: 1px;
+      font-size: 12px;
     }
+
     &:hover {
       color: var(--anzhiyu-main);
     }

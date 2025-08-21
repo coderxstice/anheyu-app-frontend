@@ -126,33 +126,34 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .category-bar-container {
-  width: 100%;
   display: flex;
+  width: 100%;
   margin-bottom: 0.5rem;
 }
 
 .category-bar {
-  padding: 0.5rem 10px;
-  background: var(--anzhiyu-card-bg);
   display: flex;
   align-items: center;
-  white-space: nowrap;
-  overflow: hidden;
-  border: var(--style-border);
   width: 100%;
   height: 50px;
+  padding: 0.5rem 10px;
+  overflow: hidden;
+  white-space: nowrap;
+  background: var(--anzhiyu-card-bg);
+  border: var(--style-border);
   border-radius: 12px;
   transition: all 0.3s ease 0s;
-  animation: slide-in 0.6s 0.3s backwards;
   transform: translateX(-1px);
+  animation: slide-in 0.6s 0.3s backwards;
 }
 
 .catalog-bar {
   display: flex;
-  align-items: center;
   flex-grow: 1;
+  align-items: center;
   overflow-x: auto;
   scrollbar-width: none;
+
   &::-webkit-scrollbar {
     display: none;
   }
@@ -164,37 +165,40 @@ onUnmounted(() => {
 }
 
 .catalog-list-item {
-  cursor: pointer;
   font-weight: 600;
+  cursor: pointer;
+
   a {
+    display: block;
     padding: 2px 12px;
     border-radius: 8px;
     transition: all 0.3s;
-    display: block;
   }
+
   &:hover a {
-    background: var(--anzhiyu-main);
     color: var(--anzhiyu-white);
+    background: var(--anzhiyu-main);
   }
+
   &.select a {
-    background: var(--anzhiyu-main);
     color: var(--anzhiyu-white);
+    background: var(--anzhiyu-main);
   }
 }
 
 .category-bar-next {
-  cursor: pointer;
-  width: 30px;
-  height: 30px;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  margin-left: 10px;
-  border-radius: 8px;
+  width: 30px;
+  height: 30px;
   padding: 4px;
+  margin-left: 10px;
+  cursor: pointer;
   background: var(--anzhiyu-card-bg);
+  border-radius: 8px;
   transition: all 0.3s ease-in-out;
-  flex-shrink: 0;
 
   i {
     transition: transform 0.3s ease-in-out;
@@ -205,53 +209,59 @@ onUnmounted(() => {
   }
 
   &:hover {
-    background: var(--anzhiyu-main);
     color: var(--anzhiyu-white);
+    background: var(--anzhiyu-main);
   }
 }
 
 .catalog-more {
   margin-left: 1rem;
   font-weight: bold;
-  white-space: nowrap;
-  text-decoration: none;
   color: var(--anzhiyu-fontcolor);
+  text-decoration: none;
+  white-space: nowrap;
+
   &:hover {
     color: var(--anzhiyu-main);
   }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .catalog-more {
     display: none;
   }
+
   .category-bar {
+    padding: 0 2px;
     background: transparent;
     border: none;
-    padding: 0 2px;
+
     .catalog-bar {
       height: 100%;
+
       .catalog-list {
         height: 100%;
       }
 
       .catalog-list-item {
         display: flex;
-        justify-content: center;
         align-items: center;
+        justify-content: center;
 
         &.select a {
           background: var(--anzhiyu-main);
         }
+
         a {
           display: flex;
           align-items: center;
-          border-radius: 30px;
-          padding: 0px 19px;
           height: 80%;
+          padding: 0 19px;
           font-size: 14px;
           background: var(--anzhiyu-card-bg);
           border: var(--style-border-always);
+          border-radius: 30px;
+
           &:hover {
             background: var(--anzhiyu-main);
           }

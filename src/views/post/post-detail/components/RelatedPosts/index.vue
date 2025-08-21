@@ -66,11 +66,11 @@ const defaultCover = articleStore.defaultCover;
 }
 
 .headline {
-  margin-bottom: 1rem;
-  font-weight: 700;
-  font-size: 1.25rem;
   display: flex;
   align-items: center;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 700;
 
   i {
     font-size: 22px;
@@ -95,27 +95,28 @@ const defaultCover = articleStore.defaultCover;
 
 .relatedPosts-list {
   display: flex;
-  flex-wrap: wrap;
+  flex-flow: column wrap;
   justify-content: space-between;
-  flex-direction: column;
 
   & > div {
-    border-radius: 12px;
-    mask-image: -webkit-radial-gradient(center, #fff, #000);
-    -webkit-mask-image: -webkit-radial-gradient(center, #fff, #000);
-    background: var(--anzhiyu-secondbg);
-    border: var(--style-border);
-    transition: 0.3s;
-    cursor: pointer;
-    overflow: hidden;
-    width: 100%;
-    margin-bottom: 8px;
     position: relative;
     display: inline-block;
-    vertical-align: bottom;
+    width: 100%;
     height: 200px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    vertical-align: bottom;
+    cursor: pointer;
+    background: var(--anzhiyu-secondbg);
+    border: var(--style-border);
+    border-radius: 12px;
+    mask-image: radial-gradient(center, #fff, #000);
+    mask-image: radial-gradient(center, #fff, #000);
+    transition: 0.3s;
+
     &:hover {
       background: var(--anzhiyu-main);
+
       a .title {
         color: var(--anzhiyu-white);
       }
@@ -127,40 +128,40 @@ const defaultCover = articleStore.defaultCover;
   display: flex;
   width: 100%;
   height: 100%;
+
   .cover {
     width: 360px;
     min-width: 45%;
-    height: 100%;
-    transition: all 0.6s ease 0s;
-    object-fit: cover;
     max-width: 45%;
+    height: 100%;
+    object-fit: cover;
     border-radius: 0;
+    transition: all 0.6s ease 0s;
   }
 
   .content {
-    padding: 0 1rem;
     width: 100%;
+    padding: 0 1rem;
 
     &.is-center {
-      text-align: center;
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      flex-direction: row;
+      flex-flow: row wrap;
       align-items: center;
+      justify-content: center;
+      text-align: center;
     }
   }
 
   .title {
-    color: var(--anzhiyu-fontcolor);
+    margin-right: auto;
+    overflow: hidden;
+    font-size: 1.125rem;
     font-weight: 700;
     line-height: 1.5;
-    line-clamp: 4;
-    -webkit-line-clamp: 4;
-    font-size: 1.125rem;
+    color: var(--anzhiyu-fontcolor);
     text-align: left;
-    overflow: hidden;
-    margin-right: auto;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
   }
 }
 </style>

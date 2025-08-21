@@ -120,25 +120,28 @@ const formData = computed({
 }
 
 .form-item-help {
-  color: #909399;
+  margin-top: 4px;
   font-size: 12px;
   line-height: 1.5;
-  margin-top: 4px;
+  color: #909399;
 }
 
 .el-divider {
-  margin: 40px 0 28px 0;
+  margin: 40px 0 28px;
+
   h3 {
     margin: 0;
     color: #606266;
   }
 }
+
 .el-image {
   border: var(--style-border);
 }
 
 .logo-inputs {
   width: 100%;
+
   .logo-input-item {
     &:first-child {
       margin-bottom: 10px;

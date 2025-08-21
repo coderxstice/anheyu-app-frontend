@@ -48,49 +48,55 @@ const props = defineProps({
 
 <style lang="scss" scoped>
 .card-wechat {
-  background: #57bd6a;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  height: 110px;
   padding: 0;
   cursor: pointer;
-  height: 110px;
-  &:hover:before {
+  background: #57bd6a;
+
+  &:hover::before {
     top: 100%;
     opacity: 0;
     transition: 0.3s ease-out;
   }
+
   &::before {
-    content: "";
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+    content: "";
     background-image: var(--blur-background);
-    background-position: center center;
     background-repeat: no-repeat;
+    background-position: center center;
     background-size: cover;
     backdrop-filter: blur(10px);
     transition: 0.2s cubic-bezier(0.45, 0.04, 0.43, 1.21);
   }
 }
+
 [data-theme="dark"] .card-wechat {
   background-color: #121121;
 }
+
 #flip-wrapper {
-  perspective: 1000px;
   position: relative;
+  z-index: 1;
   width: 235px;
   height: 110px;
-  z-index: 1;
+  perspective: 1000px;
 }
+
 #flip-content {
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
   transition: cubic-bezier(0, 0, 0, 1.29) 0.3s;
 }
+
 #flip-content .face {
   position: absolute;
   width: 100%;
@@ -98,12 +104,14 @@ const props = defineProps({
   backface-visibility: hidden;
   background-size: 100%;
 }
+
 #flip-content .back.face {
-  display: block;
-  transform: rotateY(180deg);
   box-sizing: border-box;
+  display: block;
   background-size: 100%;
+  transform: rotateY(180deg);
 }
+
 #flip-wrapper:hover #flip-content {
   transform: rotateY(180deg);
 }

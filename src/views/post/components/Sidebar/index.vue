@@ -53,14 +53,14 @@ const wechatConfig = computed(() => {
 
 <style lang="scss" scoped>
 .aside-content {
-  width: 300px;
-  transition: all 0.3s;
   display: flex;
   flex-direction: column;
   gap: 0.625rem;
+  width: 300px;
+  transition: all 0.3s;
 }
 
-@media (max-width: 992px) {
+@media (width <= 992px) {
   .aside-content {
     display: none;
   }

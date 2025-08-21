@@ -295,18 +295,18 @@ const _uid = Math.random().toString(36).substring(2);
 <style scoped lang="scss">
 .image-uploader-v2 {
   display: flex;
-  align-items: flex-end;
   gap: 16px;
+  align-items: flex-end;
   width: 100%;
 }
 
 .preview-area {
   width: 200px;
   height: 112px; // 16:9
-  border-radius: 6px;
-  border: 1px solid var(--el-border-color);
-  background-color: var(--el-fill-color-light);
   overflow: hidden;
+  background-color: var(--el-fill-color-light);
+  border: 1px solid var(--el-border-color);
+  border-radius: 6px;
 
   .el-image {
     width: 100%;
@@ -328,8 +328,8 @@ const _uid = Math.random().toString(36).substring(2);
   height: 100%;
 
   :deep(img) {
-    max-width: 100%;
     display: block;
+    max-width: 100%;
   }
 }
 </style>

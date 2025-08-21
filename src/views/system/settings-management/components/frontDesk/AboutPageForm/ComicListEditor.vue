@@ -109,8 +109,8 @@ const removeComic = (index: number) => {
 
     .comic-item-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       margin-bottom: 16px;
 
       .comic-index {

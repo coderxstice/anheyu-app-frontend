@@ -82,28 +82,34 @@ onUnmounted(() => {
 .link-group {
   margin-top: 30px;
 }
+
 .power_title_bar {
   margin-bottom: 20px;
+
   h2 {
-    font-size: 1.5rem;
     margin: 0;
+    font-size: 1.5rem;
+
     .headerlink {
-      text-decoration: none;
       color: var(--anzhiyu-fontcolor);
+      text-decoration: none;
     }
+
     span {
       font-size: 1.2rem;
       color: var(--anzhiyu-second-fontcolor);
     }
   }
+
   .flink-desc {
+    margin: 0;
     color: var(--anzhiyu-secondtext);
-    margin: 0px;
   }
 }
+
 .loading-tip {
-  text-align: center;
-  color: var(--anzhiyu-second-fontcolor);
   padding: 20px 0;
+  color: var(--anzhiyu-second-fontcolor);
+  text-align: center;
 }
 </style>

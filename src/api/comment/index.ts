@@ -135,3 +135,23 @@ export const deleteAdminComments = (ids: string[]) => {
     data: { ids }
   });
 };
+
+/**
+ * @description 分页加载指定父评论的子评论
+ * @param parentId 父评论的ID
+ * @param params 分页参数
+ * @returns 子评论列表和分页信息
+ */
+export const getCommentChildren = (
+  parentId: string,
+  params?: {
+    page?: number;
+    pageSize?: number;
+  }
+): Promise<BaseResponse<CommentListResponse>> => {
+  return http.request<BaseResponse<CommentListResponse>>(
+    "get",
+    baseUrlApi(`public/comments/${parentId}/children`),
+    { params }
+  );
+};

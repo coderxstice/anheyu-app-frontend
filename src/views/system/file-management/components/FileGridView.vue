@@ -200,142 +200,154 @@ onUnmounted(() => {
 
 <style scoped>
 .file-grid-view {
-  padding: 24px;
+  position: relative;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 20px;
+  place-content: flex-start flex-start;
+
   /* 关键：让这个容器自身可以滚动 */
   height: 100%;
+  padding: 24px;
   overflow-y: auto;
-  position: relative;
-  align-content: flex-start;
-  justify-content: flex-start;
 }
+
 .grid-item {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   padding: 16px 8px;
-  border-radius: 8px;
+  text-align: center;
   cursor: pointer;
+  user-select: none;
   border: 1px solid transparent;
+  border-radius: 8px;
   transition:
     background-color 0.2s ease,
     border-color 0.2s ease,
     opacity 0.3s ease;
-  text-align: center;
-  user-select: none;
-  position: relative;
 }
+
 .grid-item:hover {
   background-color: #f5f7fa;
 }
+
 .grid-item.selected {
   background-color: var(--el-color-primary-light-9);
   border-color: var(--el-color-primary);
 }
 
 .grid-item.is-uploading {
-  opacity: 0.5;
-  cursor: not-allowed;
   pointer-events: none;
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .grid-item.is-disabled {
-  cursor: not-allowed;
   color: #a8abb2;
+  cursor: not-allowed;
   opacity: 0.6;
 }
+
 .grid-item.is-disabled:hover {
   background-color: transparent;
 }
+
 .grid-item.is-disabled .file-icon {
   color: #c0c4cc;
 }
 
 .item-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 60px;
   height: 60px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   margin-bottom: 12px;
-  position: relative;
 }
 
 .uploading-overlay {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(255 255 255 / 70%);
+  backdrop-filter: blur(2px);
   border-radius: 8px;
 }
+
 .uploading-indicator {
   font-size: 24px;
-  animation: spin 1.5s linear infinite;
   color: var(--el-color-primary);
+  animation: spin 1.5s linear infinite;
 }
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
 
 .item-name {
+  display: -webkit-box;
   width: 100%;
   min-width: 0;
-  font-size: 14px;
-  word-break: break-all;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  line-clamp: 2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.4;
   height: calc(1.4 * 2 * 1em);
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  line-clamp: 2;
+  word-break: break-all;
+  -webkit-box-orient: vertical;
 }
+
 .grid-empty {
   grid-column: 1 / -1;
-  align-self: center;
-  justify-self: center;
+  place-self: center center;
 }
 
 .grid-item-full-width {
   grid-column: 1 / -1;
 }
+
 .load-more-indicator {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   padding: 15px 0;
-  color: #909399;
   font-size: 14px;
+  color: #909399;
 }
+
 .load-more-indicator .el-icon {
   margin-right: 8px;
 }
+
 .is-loading {
   animation: spin 1.5s linear infinite;
 }
 
 .no-more-indicator {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   padding: 0 0 20px;
-  color: #c0c4cc;
   font-size: 13px;
+  color: #c0c4cc;
 }
+
 .grid-item:hover :deep(.thumbnail-image) {
   transform: scale(1.1);
 }

@@ -81,9 +81,9 @@ const getStyle = computed((): CSSProperties => {
 <style lang="scss" scoped>
 .an-icon-box {
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
   width: 20px;
   height: 20px;
   color: #fff;

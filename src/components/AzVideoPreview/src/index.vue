@@ -90,6 +90,7 @@ defineExpose({ open, close });
 .az-fade-leave-active {
   transition: opacity 0.3s ease;
 }
+
 .az-fade-enter-from,
 .az-fade-leave-to {
   opacity: 0;
@@ -97,28 +98,26 @@ defineExpose({ open, close });
 
 .az-video-preview-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(10px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  inset: 0;
   z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(0 0 0 / 80%);
+  backdrop-filter: blur(10px);
 }
 
 .video-container {
   position: relative;
   width: 80vw;
   max-width: 1200px;
+
   /* 使用 aspect-ratio 来保持视频比例，例如 16:9 */
   aspect-ratio: 16 / 9;
+  overflow: hidden;
   background-color: #000;
   border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 50%);
 }
 
 /* 播放器挂载点必须撑满容器 */
@@ -131,13 +130,13 @@ defineExpose({ open, close });
   position: absolute;
   top: 10px;
   right: 15px;
+  z-index: 10;
   font-size: 2rem;
   font-weight: bold;
   color: white;
+  text-shadow: 0 0 5px rgb(0 0 0 / 50%);
   cursor: pointer;
-  z-index: 10;
   transition: transform 0.2s ease;
-  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 
   &:hover {
     transform: scale(1.2);

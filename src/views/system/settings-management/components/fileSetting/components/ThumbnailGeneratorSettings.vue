@@ -237,12 +237,13 @@ const activeGenerators = ref<string[]>([]);
 @use "./shared-settings-styles.scss";
 
 h2 {
-  font-size: 1.2em;
-  font-weight: 600;
+  padding-bottom: 8px;
   margin-top: 40px;
   margin-bottom: 20px;
-  padding-bottom: 8px;
+  font-size: 1.2em;
+  font-weight: 600;
   border-bottom: 1px solid var(--el-border-color-lighter);
+
   &:first-child {
     margin-top: 10px;
   }

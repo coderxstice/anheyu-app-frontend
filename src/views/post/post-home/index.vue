@@ -179,21 +179,21 @@ watch(
 
 <style lang="scss" scoped>
 .post-home-top-container {
-  margin: 0 auto;
-  padding: 0 1.5rem;
-  max-width: 1400px;
   width: 100%;
-  animation: slide-in 0.6s 0.1s backwards;
+  max-width: 1400px;
+  padding: 0 1.5rem;
+  margin: 0 auto;
   overflow: hidden;
   user-select: none;
+  animation: slide-in 0.6s 0.1s backwards;
 }
 
 .layout {
-  padding: 0.5rem 1.5rem 1rem;
-  max-width: 1400px;
-  margin: 0 auto;
   display: flex;
   gap: 0.625rem;
+  max-width: 1400px;
+  padding: 0.5rem 1.5rem 1rem;
+  margin: 0 auto;
 }
 
 .main-content {
@@ -202,24 +202,25 @@ watch(
 }
 
 .recent-posts {
-  min-height: 400px;
   width: 100%;
+  min-height: 400px;
+
   &.double-column-container {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
     gap: 0.625rem;
+    justify-content: space-between;
   }
 }
 
 @media screen and (width > 760px) and (width <= 992px) {
   .recent-post-item {
-    width: 100% !important;
     flex-direction: row !important;
+    width: 100% !important;
   }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .post-home-top-container {
     padding: 0 1rem;
   }

@@ -95,10 +95,10 @@ const {
       align-items: center;
       justify-content: space-around;
       height: 40px;
-      border-radius: 8px;
       padding: 10px;
       color: #000000d9;
       cursor: pointer;
+      border-radius: 8px;
 
       p {
         font-size: 14px;

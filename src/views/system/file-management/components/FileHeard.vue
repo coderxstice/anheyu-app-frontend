@@ -160,16 +160,18 @@ const onToolbarLeave = (el: HTMLElement, done: () => void) => {
 <style scoped lang="scss">
 .file-heard-actions {
   display: flex;
-  height: 40px;
   align-items: center;
+  height: 40px;
+
   .new-btn {
-    border: var(--style-border);
     height: 40px;
+    border: var(--style-border);
   }
 }
+
 .actions-container {
-  flex-grow: 1;
   position: relative;
+  flex-grow: 1;
   height: 100%;
 }
 
@@ -182,45 +184,52 @@ const onToolbarLeave = (el: HTMLElement, done: () => void) => {
 .selection-toolbar {
   display: flex;
   align-items: center;
+
   .action-group {
     display: flex;
     align-items: center;
-    border-radius: var(--el-border-radius-base);
     overflow: hidden;
     border: 1px solid var(--el-border-color);
+    border-radius: var(--el-border-radius-base);
 
     .el-button {
-      border-radius: 0;
-      border-left: 1px solid var(--el-border-color-lighter);
-      border-right: none;
       border-top: none;
+      border-right: none;
       border-bottom: none;
+      border-left: 1px solid var(--el-border-color-lighter);
+      border-radius: 0;
+
       &:first-child {
         border-left: none;
       }
     }
   }
 }
+
 .selection-count {
-  cursor: default !important;
   color: var(--el-text-color-primary) !important;
+  cursor: default !important;
   background-color: transparent !important;
   border-left: 1px solid var(--el-border-color-lighter) !important;
 }
 
 .search-wrapper {
-  cursor: pointer;
   height: 100%;
+  cursor: pointer;
+
   :deep(.el-input) {
     height: 100%;
   }
 }
+
 :deep(.el-input.is-readonly .el-input__wrapper) {
   cursor: pointer !important;
+
   &:hover {
     box-shadow: 0 0 0 1px var(--el-color-primary) inset !important;
   }
 }
+
 :deep(.el-input.is-readonly .el-input__inner) {
   cursor: pointer !important;
 }

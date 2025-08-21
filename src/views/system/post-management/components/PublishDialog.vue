@@ -333,15 +333,16 @@ const handleConfirm = () => {
 
 <style lang="scss" scoped>
 .form-item-help {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  line-height: 1.5;
   margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--el-text-color-secondary);
 }
+
 .summary-item {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
   width: 100%;
   margin-bottom: 8px;
 
@@ -349,10 +350,13 @@ const handleConfirm = () => {
     flex-grow: 1;
   }
 }
+
 .status-radio-group {
   width: 100%;
+
   :deep(.el-radio-button) {
     width: calc(100% / 3);
+
     .el-radio-button__inner {
       width: 100%;
     }
@@ -360,7 +364,7 @@ const handleConfirm = () => {
 }
 
 :deep(.el-dialog__body) {
-  padding: 10px 20px 20px 20px;
+  padding: 10px 20px 20px;
 }
 
 .publish-tabs {

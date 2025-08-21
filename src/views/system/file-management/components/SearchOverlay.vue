@@ -105,39 +105,45 @@ const onLeave = (el: HTMLElement, done: () => void) => {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
   z-index: 2050;
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100vw;
+  height: 100vh;
   padding-top: 15vh;
+
   /* [!修改] 为背景添加可点击的光标样式 */
   cursor: pointer;
+  background-color: rgb(255 255 255 / 90%);
+  backdrop-filter: blur(10px);
 }
+
 .search-box {
   width: 100%;
   max-width: 600px;
   cursor: default;
 }
+
 .close-icon {
   position: absolute;
   top: 40px;
   right: 40px;
   font-size: 24px;
-  cursor: pointer;
   color: #909399;
+  cursor: pointer;
+
   &:hover {
     color: var(--el-color-primary);
   }
 }
+
 :deep(.el-input__wrapper) {
-  border-radius: 24px !important;
   padding: 4px 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 4px 20px rgb(0 0 0 / 10%) !important;
 }
+
 :deep(.el-input__prefix .el-icon) {
   font-size: 20px;
 }

@@ -59,12 +59,12 @@ const isOutdated = computed(() => {
 <style lang="scss" scoped>
 .post-outdate-notice {
   display: flex;
-  align-items: center;
-  border-radius: 3px;
-  background-color: #ffe6e6;
-  color: #f66;
-  padding: 0.5em 1em 0.5em 1em;
-  border-left: 5px solid #ff8080;
   gap: 0.5em;
+  align-items: center;
+  padding: 0.5em 1em;
+  color: #f66;
+  background-color: #ffe6e6;
+  border-left: 5px solid #ff8080;
+  border-radius: 3px;
 }
 </style>

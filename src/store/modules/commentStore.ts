@@ -4,7 +4,8 @@ import {
   getPublicComments,
   createPublicComment,
   likePublicComment,
-  unlikePublicComment
+  unlikePublicComment,
+  getCommentChildren
 } from "@/api/comment";
 import type { Comment, CreateCommentPayload } from "@/api/comment/type";
 
@@ -19,6 +20,7 @@ export const useCommentStore = defineStore("comment", () => {
   const isLoading = ref(false);
   const isLoadingMore = ref(false);
   const likedCommentIds = ref<Set<string>>(new Set());
+  const loadingChildrenCommentIds = ref<Set<string>>(new Set()); // 正在加载子评论的评论ID集合
 
   const totalLocalComments = computed(() => {
     let count = 0;
@@ -177,6 +179,42 @@ export const useCommentStore = defineStore("comment", () => {
     }
   }
 
+  async function loadMoreChildren(
+    parentCommentId: string,
+    page = 1,
+    pageSize = 10,
+    skipFirst = 0
+  ) {
+    if (loadingChildrenCommentIds.value.has(parentCommentId)) {
+      return; // 已经在加载中
+    }
+
+    loadingChildrenCommentIds.value.add(parentCommentId);
+
+    try {
+      const res = await getCommentChildren(parentCommentId, { page, pageSize });
+      const data = res.data;
+
+      if (data && data.list) {
+        // 如果需要跳过前面的数据，则进行切片处理
+        const newChildren =
+          skipFirst > 0 ? data.list.slice(skipFirst) : data.list;
+
+        // 找到父评论并添加新的子评论
+        findAndUpdateComment(comments.value, parentCommentId, parentComment => {
+          if (!parentComment.children) {
+            parentComment.children = [];
+          }
+          parentComment.children.push(...newChildren);
+        });
+      }
+    } catch (error) {
+      console.error("加载子评论失败:", error);
+    } finally {
+      loadingChildrenCommentIds.value.delete(parentCommentId);
+    }
+  }
+
   async function toggleLikeComment(commentId: string) {
     const isCurrentlyLiked = likedCommentIds.value.has(commentId);
     try {
@@ -209,6 +247,7 @@ export const useCommentStore = defineStore("comment", () => {
     currentTargetPath.value = null;
     isLoading.value = false;
     isLoadingMore.value = false;
+    loadingChildrenCommentIds.value.clear();
     if (!soft) {
       likedCommentIds.value.clear();
     }
@@ -223,9 +262,11 @@ export const useCommentStore = defineStore("comment", () => {
     isLoadingMore,
     currentTargetPath,
     likedCommentIds,
+    loadingChildrenCommentIds,
     hasMore,
     initComments,
     loadMore,
+    loadMoreChildren,
     postComment,
     toggleLikeComment,
     resetStore

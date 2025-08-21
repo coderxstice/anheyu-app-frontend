@@ -137,24 +137,25 @@ const goToTagPage = (tagName: string) => {
 
 <style lang="scss" scoped>
 .recent-post-item {
+  position: relative;
   display: flex;
   flex-direction: row;
   align-items: center;
-  overflow: hidden;
   height: 18em;
-  position: relative;
-  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
   background: var(--anzhiyu-card-bg);
   border: var(--style-border);
+  border-radius: 12px;
   transition: all 0.3s;
-  cursor: pointer;
+
   .unvisited-post,
   .newPost {
-    display: inline;
-    color: var(--anzhiyu-secondtext);
-    font-size: 0.75rem;
     position: relative;
+    display: inline;
     margin-right: 4px;
+    font-size: 0.75rem;
+    color: var(--anzhiyu-secondtext);
   }
 
   &:active {
@@ -164,60 +165,64 @@ const goToTagPage = (tagName: string) => {
   &:hover {
     border: var(--style-border-hover);
     box-shadow: var(--anzhiyu-shadow-main);
+
     .post_bg {
       filter: brightness(0.82);
       transform: scale(1.03);
     }
+
     .recent-post-info .article-title {
       color: var(--anzhiyu-main);
     }
   }
 
   .post_cover {
-    overflow: hidden;
+    flex-shrink: 0;
     width: 45%;
     height: 100%;
-    flex-shrink: 0;
+    overflow: hidden;
 
     a,
     img {
+      display: block;
       width: 100%;
       height: 100%;
-      display: block;
       object-fit: cover;
     }
+
     .post_bg {
+      border-radius: 0;
       transition: all 0.6s ease;
-      border-radius: 0px;
     }
   }
 
   .anzhiyu-icon-hashtag {
-    opacity: 0.6;
     font-size: 13px;
+    opacity: 0.6;
   }
 
   .recent-post-info {
-    flex-grow: 1;
-    width: 55%;
-    padding: 2rem;
     display: flex;
+    flex-grow: 1;
     flex-direction: column;
+    width: 55%;
     min-width: 0;
+    padding: 2rem;
 
     .article-title {
-      font-size: 1.5rem;
-      line-height: 1.2;
+      display: -webkit-box;
       margin-bottom: 1rem;
+      overflow: hidden;
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--anzhiyu-fontcolor);
+      text-decoration: none;
       -webkit-line-clamp: 2;
       line-clamp: 2;
-      font-weight: 700;
-      color: var(--anzhiyu-fontcolor);
       transition: 0.3s;
-      display: -webkit-box;
-      overflow: hidden;
       -webkit-box-orient: vertical;
-      text-decoration: none;
+
       &:hover {
         color: var(--anzhiyu-main);
       }
@@ -230,10 +235,10 @@ const goToTagPage = (tagName: string) => {
 }
 
 .recent-post-item.double-column-item {
-  width: calc(50% - 0.3125rem);
   flex-direction: column;
-  height: auto;
   align-items: flex-start;
+  width: calc(50% - 0.3125rem);
+  height: auto;
 
   .post_cover {
     width: 100%;
@@ -242,16 +247,16 @@ const goToTagPage = (tagName: string) => {
   }
 
   .recent-post-info {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
     width: 100%;
     padding: 18px 32px;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
 
     .recent-post-info-top {
       .article-title {
-        font-size: 1.3rem;
         margin-top: 0.5rem;
+        font-size: 1.3rem;
       }
     }
 
@@ -263,14 +268,14 @@ const goToTagPage = (tagName: string) => {
 
 .recent-post-info-top-tips {
   display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.8rem;
-  margin-bottom: 0.5rem;
-  color: var(--anzhiyu-secondtext);
-  font-size: 0.75rem;
   height: 20px;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  font-size: 0.75rem;
+  color: var(--anzhiyu-secondtext);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
   &:has(.sticky-warp) {
     transform: translateX(-4px);
   }
@@ -278,8 +283,8 @@ const goToTagPage = (tagName: string) => {
   .sticky-warp {
     display: inline-flex;
     align-items: center;
-    color: #ff5722;
     margin-right: 8px;
+    color: #ff5722;
 
     .sticky {
       margin-left: 4px;
@@ -288,10 +293,10 @@ const goToTagPage = (tagName: string) => {
   }
 
   .category-tip {
-    margin-right: 4px;
     display: inline;
-    color: var(--anzhiyu-secondtext);
+    margin-right: 4px;
     font-size: 0.75rem;
+    color: var(--anzhiyu-secondtext);
     transition: color 0.3s;
 
     &:hover {
@@ -302,33 +307,35 @@ const goToTagPage = (tagName: string) => {
 
 .article-meta-wrap {
   display: flex;
-  justify-content: space-between;
+  gap: 1rem;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
   font-size: 0.8rem;
   color: var(--anzhiyu-secondtext);
-  gap: 1rem;
 
   .tags {
+    display: block;
     flex-shrink: 1;
     min-width: 0;
-    display: block;
-    white-space: nowrap;
+    padding: 4px 0;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding: 4px 0;
+    white-space: nowrap;
   }
 
   .tags .article-meta__tags {
     display: inline;
-    color: var(--anzhiyu-secondtext);
-    border-radius: 4px;
     padding: 3px 4px;
     overflow: hidden;
+    color: var(--anzhiyu-secondtext);
+    border-radius: 4px;
     transition: all 0.2s;
+
     &:hover {
       color: var(--anzhiyu-white);
       background-color: var(--anzhiyu-main);
+
       .anzhiyu-icon-hashtag {
         opacity: 1;
       }
@@ -336,32 +343,33 @@ const goToTagPage = (tagName: string) => {
   }
 
   .post-meta-date {
-    white-space: nowrap;
     flex-shrink: 0;
+    white-space: nowrap;
   }
 }
 
 @media screen and (width > 760px) and (width <= 992px) {
   .main-content .recent-post-item {
     .post_cover {
-      overflow: hidden;
       width: 40%;
       height: 100%;
+      overflow: hidden;
       border-radius: 0;
     }
+
     .recent-post-info {
-      height: 100%;
       width: 60%;
+      height: 100%;
     }
   }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .recent-post-item,
   .recent-post-item.double-column-item {
     flex-direction: column;
-    height: auto;
     width: 100%;
+    height: auto;
 
     .post_cover,
     .recent-post-info {
@@ -374,6 +382,7 @@ const goToTagPage = (tagName: string) => {
 
     .recent-post-info {
       padding: 1rem;
+
       .article-title {
         font-size: 1.2rem;
       }

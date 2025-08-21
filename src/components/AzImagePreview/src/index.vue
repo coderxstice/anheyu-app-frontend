@@ -434,6 +434,7 @@ $transition: opacity 0.2s ease-in-out;
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(359deg);
   }
@@ -453,6 +454,7 @@ $transition: opacity 0.2s ease-in-out;
   transition:
     opacity 0.5s ease 0.2s,
     transform 0.4s cubic-bezier(0.33, 0, 0.2, 1) 0.2s;
+
   img {
     transition:
       clip-path 0.4s cubic-bezier(0.33, 0, 0.2, 1),
@@ -463,6 +465,7 @@ $transition: opacity 0.2s ease-in-out;
 .pic-fade-enter-from {
   opacity: 0;
   transform: translateY(2px) scale(0.995);
+
   img {
     clip-path: inset(0% 20% 0% 20%);
     filter: brightness(1.02) contrast(0.98);
@@ -472,6 +475,7 @@ $transition: opacity 0.2s ease-in-out;
 .pic {
   will-change: transform, opacity;
   backface-visibility: hidden;
+
   img {
     transform: translateZ(0);
   }
@@ -498,17 +502,21 @@ $transition: opacity 0.2s ease-in-out;
       flex-direction: column;
       align-items: flex-start;
     }
+
     .poptrox-popup {
       margin-bottom: 120px;
       border-radius: 0 !important;
     }
+
     .poptrox-popup::before {
       display: none;
     }
+
     .poptrox-popup .caption {
       position: fixed;
       bottom: 0;
     }
+
     .poptrox-popup .closer,
     .poptrox-popup .nav-previous,
     .poptrox-popup .nav-next {
@@ -543,6 +551,7 @@ $transition: opacity 0.2s ease-in-out;
       .closer {
         background-size: 3em;
       }
+
       .nav-previous,
       .nav-next {
         background-size: 4em;
@@ -561,6 +570,7 @@ $transition: opacity 0.2s ease-in-out;
       display: block;
       width: 100%;
       height: 100%;
+      cursor: auto;
       content: "";
       background-image: linear-gradient(
           to left,
@@ -576,7 +586,6 @@ $transition: opacity 0.2s ease-in-out;
         );
       opacity: 0;
       transition: $transition;
-      cursor: auto;
     }
 
     &:hover::before {
@@ -588,12 +597,14 @@ $transition: opacity 0.2s ease-in-out;
       opacity: 0.8;
       transition: all 0.3s ease-in-out;
     }
+
     span.tag-list a:hover {
       opacity: 1;
     }
 
     .tag-info-bottom {
       display: flex;
+
       span {
         display: flex;
         gap: 4px;
@@ -609,16 +620,16 @@ $transition: opacity 0.2s ease-in-out;
     .nav-next {
       position: absolute;
       z-index: 2;
+      cursor: pointer;
       background-repeat: no-repeat;
       background-position: center;
       opacity: 0;
       transition: $transition;
-      cursor: pointer;
     }
 
     .delayed-hidden {
-      opacity: 0 !important;
       pointer-events: none !important;
+      opacity: 0 !important;
     }
 
     .closer {
@@ -647,6 +658,7 @@ $transition: opacity 0.2s ease-in-out;
       left: 0;
       transform: scaleX(-1);
     }
+
     .nav-next {
       right: 0;
     }
@@ -663,10 +675,10 @@ $transition: opacity 0.2s ease-in-out;
       padding: 2em 2em 0.1em;
       padding-bottom: 2rem;
       text-align: left;
+      cursor: auto;
       background-image: $caption-gradient;
       opacity: 0.8;
       transition: $transition;
-      cursor: auto;
 
       h2,
       h3,
@@ -676,6 +688,7 @@ $transition: opacity 0.2s ease-in-out;
         margin: 0;
         font-weight: bold;
       }
+
       p {
         font-size: 15px;
         color: #fff;
@@ -705,6 +718,7 @@ $transition: opacity 0.2s ease-in-out;
     &:hover .nav-previous,
     &:hover .nav-next {
       opacity: 0.5;
+
       &:hover {
         opacity: 1;
       }
@@ -712,8 +726,9 @@ $transition: opacity 0.2s ease-in-out;
 
     .tag-categorys .link {
       margin: 0;
-      background: rgb(0 0 0 / 80%);
       cursor: pointer;
+      background: rgb(0 0 0 / 80%);
+
       &:hover {
         background: #0d00ff;
       }
@@ -730,6 +745,7 @@ $transition: opacity 0.2s ease-in-out;
 
   .tag-categorys {
     display: flex;
+
     .link {
       z-index: 1;
       display: flex;
@@ -746,6 +762,7 @@ $transition: opacity 0.2s ease-in-out;
       backdrop-filter: saturate(180%) blur(20px);
       border-radius: 8px;
       transition: 0.3s;
+
       &:hover {
         color: #fff;
         background: #0d00ff;

@@ -62,10 +62,10 @@ onMounted(() => {
   flex-wrap: wrap;
   gap: 0.6rem 0.8rem;
   padding: 1rem 1.25rem;
+  margin-bottom: 0.5rem;
   background: var(--anzhiyu-card-bg);
   border: var(--style-border);
   border-radius: 12px;
-  margin-bottom: 0.5rem;
   transition:
     background-color 0.3s,
     border-color 0.3s;
@@ -76,19 +76,20 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   padding: 4px 10px;
-  border: 1px solid var(--anzhiyu-gray-100, #eef0f2);
-  border-radius: 8px;
   font-size: 0.875rem;
   line-height: 1.5;
   color: var(--anzhiyu-fontcolor);
-  background-color: var(--anzhiyu-gray-50, #f8f9fa);
-  cursor: pointer;
   text-decoration: none;
+  cursor: pointer;
+  background-color: var(--anzhiyu-gray-50, #f8f9fa);
+  border: 1px solid var(--anzhiyu-gray-100, #eef0f2);
+  border-radius: 8px;
   transition: all 0.2s ease-in-out;
 
   &:hover {
-    background: var(--anzhiyu-main);
     color: var(--anzhiyu-white);
+    background: var(--anzhiyu-main);
+
     .tags-punctuation {
       color: var(--anzhiyu-white);
     }
@@ -100,8 +101,8 @@ onMounted(() => {
   }
 
   &.selected {
-    background-color: var(--anzhiyu-main);
     color: var(--anzhiyu-white);
+    background-color: var(--anzhiyu-main);
     border-color: var(--anzhiyu-main);
 
     .tags-punctuation {
@@ -122,12 +123,12 @@ onMounted(() => {
 }
 
 .tags-page-count {
+  padding: 1px 6px;
   margin-left: 0.5rem;
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--anzhiyu-secondtext);
   background-color: var(--anzhiyu-gray-200, #e9ecef);
-  padding: 1px 6px;
   border-radius: 5px;
   transition: all 0.2s ease-in-out;
 }

@@ -83,14 +83,17 @@ const equipmentListJson = computed({
 .el-form-item {
   margin-bottom: 24px;
 }
+
 .form-item-help {
-  color: #909399;
+  margin-top: 4px;
   font-size: 12px;
   line-height: 1.5;
-  margin-top: 4px;
+  color: #909399;
 }
+
 .el-divider {
-  margin: 40px 0 28px 0;
+  margin: 40px 0 28px;
+
   h3 {
     margin: 0;
     color: #606266;

@@ -107,7 +107,7 @@ const handleSendTestEmail = async () => {
 
     <el-divider content-position="left">服务连通性测试</el-divider>
     <el-form-item label="发送测试邮件">
-      <div style="display: flex; width: 100%; gap: 10px">
+      <div style="display: flex; gap: 10px; width: 100%">
         <el-input
           v-model="testEmailAddress"
           placeholder="输入接收测试邮件的邮箱地址"
@@ -191,31 +191,35 @@ const handleSendTestEmail = async () => {
 
 <style scoped>
 .template-hint {
-  font-size: 13px;
-  color: #606266;
-  line-height: 1.6;
-  margin-top: 6px;
-  background-color: #f5f7fa;
   padding: 8px 16px;
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #606266;
+  background-color: #f5f7fa;
   border-radius: 4px;
 }
+
 .template-hint b {
   font-weight: 600;
 }
+
 .template-hint ul {
   padding-left: 18px;
-  margin: 6px 0 0 0;
+  margin: 6px 0 0;
   list-style-type: disc;
 }
+
 .template-hint li {
   margin-bottom: 5px;
 }
+
 .template-hint code {
-  background-color: #e9e9eb;
   padding: 2px 5px;
-  border-radius: 3px;
+  margin-right: 8px;
   font-family: "Courier New", Courier, monospace;
   font-size: 12px;
-  margin-right: 8px;
+  background-color: #e9e9eb;
+  border-radius: 3px;
 }
 </style>

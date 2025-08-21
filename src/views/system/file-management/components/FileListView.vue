@@ -460,35 +460,36 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
 <style scoped lang="scss">
 .file-list-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
-  position: relative;
   overflow: hidden;
 }
 
 .file-list-header {
-  display: flex;
-  align-items: center;
-  color: #64748b;
-  font-weight: 500;
-  border-bottom: var(--style-border);
-  flex-shrink: 0;
-  user-select: none;
   position: relative;
   z-index: 10;
-  background-color: var(--anzhiyu-card-bg);
   box-sizing: border-box;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+
   /* 让内容宽度决定自身宽度，而不是100% */
   width: fit-content;
   min-width: 100%;
+  font-weight: 500;
+  color: #64748b;
+  user-select: none;
+  background-color: var(--anzhiyu-card-bg);
+  border-bottom: var(--style-border);
 }
 
 .virtual-scroll-container {
-  flex: 1;
-  overflow: auto;
   position: relative;
+  flex: 1;
   min-height: 0;
+  overflow: auto;
   background-color: var(--anzhiyu-card-bg);
 }
 
@@ -497,6 +498,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
   top: 0;
   left: 0;
   height: 0;
+
   /* width 由JS动态设置 */
 }
 
@@ -504,42 +506,44 @@ const handleKeyDown = (event: KeyboardEvent) => {
   position: absolute;
   top: 0;
   left: 0;
-  min-width: 100%; /* 确保在内容少时也撑满 */
-  width: fit-content; /* 宽度由内容决定 */
-  padding: 0 8px;
   box-sizing: border-box;
+  width: fit-content; /* 宽度由内容决定 */
+  min-width: 100%; /* 确保在内容少时也撑满 */
+  padding: 0 8px;
   background-color: var(--anzhiyu-card-bg);
 }
 
 .file-item {
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   height: 38px;
   margin: 1px 0;
+  user-select: none;
   border-radius: 6px;
   transition: background-color 0.2s ease;
-  user-select: none;
-  box-sizing: border-box;
 }
 
 .column {
-  padding: 12px 8px;
-  font-size: 14px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: flex;
-  align-items: center;
   position: relative;
-  flex-shrink: 0;
   box-sizing: border-box;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  padding: 12px 8px;
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 
   &.column-name {
     padding-left: 20px;
   }
+
   &.column-size {
     color: #64748b;
   }
+
   &.column-updated_at,
   &.column-created_at {
     color: #64748b;
@@ -547,28 +551,28 @@ const handleKeyDown = (event: KeyboardEvent) => {
 }
 
 .state-view {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 60px 20px;
-  color: #909399;
-  font-size: 14px;
-  box-sizing: border-box;
   position: absolute;
   top: 0;
   left: 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  font-size: 14px;
+  color: #909399;
 }
 
 .state-view-overlay {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
   display: flex;
-  justify-content: center;
   align-items: center;
-  color: #909399;
+  justify-content: center;
   font-size: 14px;
+  color: #909399;
   pointer-events: none;
+  transform: translateX(-50%);
 
   &.bottom-indicator {
     bottom: 20px;
@@ -578,113 +582,118 @@ const handleKeyDown = (event: KeyboardEvent) => {
 .file-list-header .column {
   cursor: pointer;
   transition: background-color 0.2s;
+
   &:hover {
-    background-color: var(--anzhiyu-ahoverbg);
     color: var(--anzhiyu-hovertext);
+    background-color: var(--anzhiyu-ahoverbg);
   }
 }
 
 .column-resizer {
   position: absolute;
-  right: 0;
   top: 50%;
-  transform: translateY(-50%);
+  right: 0;
   bottom: 0;
+  z-index: 10;
   width: 3px;
   height: 60%;
-  border-radius: 8px;
   cursor: col-resize;
-  z-index: 10;
   background-color: transparent;
+  border-radius: 8px;
   transition:
     background-color 0.2s ease-in-out,
     width 0.2s ease-in-out;
+  transform: translateY(-50%);
 
   &::before {
-    content: "";
     position: absolute;
-    top: -10px;
-    bottom: -10px;
-    left: -7px;
-    right: -7px;
-    background-color: transparent;
+    inset: -10px -7px;
     cursor: col-resize;
+    content: "";
+    background-color: transparent;
   }
 
   &.is-hovered,
   &.is-resizing {
-    background-color: var(--anzhiyu-theme);
     width: 5px;
+    background-color: var(--anzhiyu-theme);
   }
 }
 
 .column-add-container {
-  flex-grow: 1; /* 占据所有剩余空间 */
   position: relative;
+  flex-grow: 1; /* 占据所有剩余空间 */
   min-width: 50px; /* 保证有一个最小宽度 */
 }
 
 .column-add {
   position: absolute;
+  top: 50%;
+
   /* 不再使用 right 定位，而是 left */
   left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
+  transform: translateY(-50%);
 }
 
 .column-name-content {
   display: flex;
-  align-items: center;
   gap: 12px;
+  align-items: center;
   overflow: hidden;
 }
+
 .file-icon {
+  flex-shrink: 0;
   width: 24px;
   height: 24px;
-  flex-shrink: 0;
 }
+
 .selected-icon {
   color: gold;
   cursor: pointer;
 }
+
 .file-name-text {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .sort-indicator-wrapper {
-  margin-left: 4px;
-  width: 16px;
-  height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
 }
+
 .sort-indicator.active {
   color: var(--el-color-primary);
 }
+
 .sort-indicator-hover {
   color: #c0c4cc;
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
 }
+
 .file-list-header .column:hover .sort-indicator-hover {
   opacity: 1;
 }
 
 .add-btn-wrapper {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: var(--anzhiyu-card-bg);
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 32px;
+  height: 32px;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: var(--anzhiyu-card-bg);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
   transition: all 0.2s ease-in-out;
 
   .el-icon {
@@ -694,6 +703,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
   &:hover {
     background-color: var(--el-color-primary);
+
     .el-icon {
       color: var(--anzhiyu-card-bg);
     }
@@ -704,18 +714,22 @@ const handleKeyDown = (event: KeyboardEvent) => {
 .add-btn-slide-leave-active {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .add-btn-slide-enter-from,
 .add-btn-slide-leave-to {
   opacity: 0;
   transform: translateY(-50%) translateX(20px);
 }
+
 .file-item:hover {
-  background-color: var(--anzhiyu-ahoverbg);
   color: var(--anzhiyu-black);
+  background-color: var(--anzhiyu-ahoverbg);
 }
+
 .file-item.selected {
   color: var(--anzhiyu-fontcolor);
   background-color: var(--anzhiyu-theme, #007bff) !important;
+
   .column-name-content,
   .column.column-size,
   .column.column-updated_at,
@@ -723,17 +737,21 @@ const handleKeyDown = (event: KeyboardEvent) => {
     color: var(--anzhiyu-card-bg) !important;
   }
 }
+
 .file-item.is-uploading {
-  opacity: 0.5;
-  cursor: not-allowed;
   pointer-events: none;
-}
-.file-item.is-disabled {
   cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.file-item.is-disabled {
   color: #a8abb2;
+  cursor: not-allowed;
+
   &:hover {
     background-color: transparent;
   }
+
   .file-icon {
     color: #c0c4cc;
   }
@@ -742,16 +760,19 @@ const handleKeyDown = (event: KeyboardEvent) => {
 .is-loading {
   animation: spin 1.5s linear infinite;
 }
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
+
 .uploading-indicator {
-  animation: spin 1.5s linear infinite;
   margin-left: 8px;
+  animation: spin 1.5s linear infinite;
 }
 </style>

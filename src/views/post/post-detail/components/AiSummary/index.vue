@@ -62,22 +62,22 @@ const refreshSummary = () => {
 
 <style lang="scss" scoped>
 .post-ai-description {
-  background: var(--anzhiyu-secondbg);
-  border-radius: 12px;
-  padding: 12px 20px;
-  line-height: 1.3;
-  border: var(--style-border-always);
-  margin-top: 8px;
   min-height: 100px;
+  padding: 12px 20px;
+  margin-top: 8px;
+  line-height: 1.3;
+  background: var(--anzhiyu-secondbg);
+  border: var(--style-border-always);
+  border-radius: 12px;
 }
 
 .ai-title {
   display: flex;
+  gap: 5px;
   align-items: center;
   margin-bottom: 0.5rem;
-  color: var(--anzhiyu-secondtext);
   font-size: 0.9rem;
-  gap: 5px;
+  color: var(--anzhiyu-secondtext);
 }
 
 .ai-title .ai-title-text {
@@ -89,11 +89,12 @@ const refreshSummary = () => {
 .ai-title .anzhiyu-icon-arrow-rotate-right {
   color: var(--anzhiyu-main);
 }
+
 .ai-title .anzhiyu-icon-bilibili {
   font-size: 19px;
   color: var(--anzhiyu-main);
-  transform: translateY(1px);
   user-select: none;
+  transform: translateY(1px);
 }
 
 .ai-title .anzhiyufont {
@@ -117,13 +118,13 @@ const refreshSummary = () => {
 }
 
 .ai-title #ai-tag {
+  padding: 2px 8px;
   margin-left: auto;
   font-size: 0.8rem;
-  background: var(--anzhiyu-main);
-  color: var(--anzhiyu-white);
-  padding: 2px 8px;
-  border-radius: 4px;
   font-weight: bold;
+  color: var(--anzhiyu-white);
+  background: var(--anzhiyu-main);
+  border-radius: 4px;
 }
 
 .ai-explanation {

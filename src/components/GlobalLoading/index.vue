@@ -58,21 +58,35 @@ watch(
 </template>
 
 <style lang="scss" scoped>
+
+
+@keyframes loadingAction {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+}
+
 .loading-box {
-  user-select: none;
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 1001;
   width: 100%;
   height: 100%;
-  z-index: 1001;
   overflow: hidden;
+  user-select: none;
 
   .loading-bg {
+    position: relative; // 改为 relative 以便定位小圆点
     display: flex;
     width: 100%;
     height: 100%;
-    position: relative; // 改为 relative 以便定位小圆点
     background: var(--anzhiyu-card-bg);
     transition: opacity 0.3s;
   }
@@ -81,9 +95,9 @@ watch(
 .loading-img {
   width: 100px;
   height: 100px;
-  border-radius: 50%;
   margin: auto; // 使其在 flex 容器中居中
   border: 4px solid #f0f0f2;
+  border-radius: 50%;
   animation-name: loadingAction;
   animation-duration: 0.8s; // 让呼吸效果更柔和
   animation-iteration-count: infinite;
@@ -95,28 +109,17 @@ watch(
 }
 
 .loading-image-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: 30px;
   height: 30px;
   background: #6bdf8f;
-  position: absolute;
-  border-radius: 50%;
   border: 6px solid var(--anzhiyu-card-bg);
-  top: 50%;
-  left: 50%;
+  border-radius: 50%;
   // 精确调整位置，使其在 100px 的头像右下角
   // (头像半径50 - 小圆点半径15 + 边框等偏移)
   transform: translate(24px, 24px);
-}
-
-@keyframes loadingAction {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0.6;
-    transform: scale(0.95);
-  }
 }
 
 /* 过渡动画 */

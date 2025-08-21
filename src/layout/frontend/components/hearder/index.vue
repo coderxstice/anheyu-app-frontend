@@ -152,88 +152,96 @@ const scrollToTop = () => {
     z-index: 99;
   }
 }
+
 .frontend-header {
-  height: 60px;
-  width: 100%;
-  font-size: 1rem;
   position: relative;
+  width: 100%;
+  height: 60px;
+  font-size: 1rem;
 
   a {
-    text-decoration: none;
     color: var(--anzhiyu-fontcolor);
+    text-decoration: none;
     transition: color 0.3s;
+
     &:hover {
       color: var(--anzhiyu-main);
     }
   }
 
   .header-wrapper {
+    position: fixed;
+    top: 0;
+    z-index: 1000;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    top: 0;
-    z-index: 1000;
-    outline: 1px solid var(--anzhiyu-card-border);
-    position: fixed;
     background-color: var(--anzhiyu-card-bg);
+    outline: 1px solid var(--anzhiyu-card-border);
     transition:
       background-color 0.3s,
       outline-color 0.3s;
 
     .header-content {
-      max-width: 1400px;
-      width: 100%;
-      display: flex;
       position: relative;
-      padding: 0 1.5rem;
+      display: flex;
       align-items: center;
+      width: 100%;
+      max-width: 1400px;
+      padding: 0 1.5rem;
 
       .header-left {
+        z-index: 102;
         display: flex;
-        align-items: center;
         flex-wrap: nowrap;
+        align-items: center;
         height: 60px;
         transition: 0.3s;
-        z-index: 102;
+
         .site-name-link {
-          border-radius: 50px;
-          white-space: nowrap;
-          overflow: hidden;
-          padding: 0 2px;
-          height: 35px;
-          line-height: 35px;
           position: relative;
           display: flex;
           align-items: center;
           justify-content: center;
+          height: 35px;
+          padding: 0 2px;
+          overflow: hidden;
+          line-height: 35px;
+          white-space: nowrap;
+          border-radius: 50px;
           transition: 0.3s;
+
           i {
             position: absolute;
-            transition: 0.3s;
-            opacity: 0;
-            font-weight: 700;
             left: 50%;
+            font-weight: 700;
+            opacity: 0;
+            transition: 0.3s;
             transform: translateX(-50%);
           }
+
           &:hover {
             color: var(--anzhiyu-white);
             background: var(--anzhiyu-main);
+
             i {
-              opacity: 1;
               color: var(--anzhiyu-white);
               filter: none;
+              opacity: 1;
             }
+
             .site-title {
               opacity: 0;
             }
           }
+
           .site-title {
-            letter-spacing: normal;
-            font-size: 1.2rem;
             padding: 0 5px;
-            line-height: 2rem;
+            font-size: 1.2rem;
             font-weight: 700;
+            line-height: 2rem;
+            letter-spacing: normal;
             cursor: pointer;
             transition:
               all 0.3s,
@@ -242,93 +250,96 @@ const scrollToTop = () => {
           }
         }
       }
+
       .page-name-mask {
+        position: absolute;
+        left: 0;
         width: 100%;
         height: 100%;
-        position: absolute;
         overflow: hidden;
-        left: 0;
+
         .page-name-container {
-          align-items: center;
-          display: flex;
-          border-radius: 12px;
-          height: 40px;
           position: absolute;
           top: 62px;
-          left: 0;
           right: 0;
-          margin: auto;
+          left: 0;
+          display: flex;
+          align-items: center;
           justify-content: center;
-          animation-timing-function: ease-out;
           width: fit-content;
-
+          height: 40px;
+          margin: auto;
+          pointer-events: none;
+          cursor: pointer;
+          border-radius: 12px;
           opacity: 0;
-          transform: translateY(20px) scale(1.1);
           transition:
             transform 0.2s ease-out,
             opacity 0.2s ease-out;
-          pointer-events: none;
-          cursor: pointer;
+          transform: translateY(20px) scale(1.1);
+          animation-timing-function: ease-out;
 
           &:hover .page-name {
             color: var(--anzhiyu-main);
           }
 
           .page-name {
-            opacity: 1;
-            filter: none;
-            display: inline;
-            font-weight: 700;
-            padding: 4px 8px;
-            transition: color 0.3s;
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
             position: relative;
-            text-align: center;
-            cursor: pointer;
             top: 0;
+            display: inline;
+            padding: 4px 8px;
+            overflow: hidden;
             font-size: 1.1rem;
+            font-weight: 700;
+            text-align: center;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+            filter: none;
+            opacity: 1;
+            transition: color 0.3s;
             animation-timing-function: ease-in;
           }
         }
       }
+
       .main-nav {
+        position: absolute;
+        left: 0;
         display: flex;
+        align-items: center;
         justify-content: center;
         width: 100%;
-        position: absolute;
         height: 60px;
-        left: 0;
         margin: 0;
         transform: translateZ(0);
-        align-items: center;
+
         .menus-items {
           position: relative;
-          width: fit-content;
-          text-align: center;
-          left: 0;
-          right: 0;
           top: 0;
+          right: 0;
+          left: 0;
           display: flex;
           flex-direction: row;
           justify-content: center;
-
+          width: fit-content;
+          text-align: center;
+          pointer-events: auto;
           opacity: 1;
-          transform: translateY(0) scale(1);
           transition:
             transform 0.2s ease-out,
             opacity 0.2s ease-out;
-          pointer-events: auto;
+          transform: translateY(0) scale(1);
 
           .menus-item {
-            padding: 0 0.4rem;
+            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
+            padding: 0 0.4rem;
             margin: auto;
-            position: relative;
             border-radius: 30px;
+
             &:first-child .menus-item-child::after {
               position: absolute;
               top: -60px;
@@ -346,13 +357,14 @@ const scrollToTop = () => {
               height: 60px;
               content: "";
             }
+
             .menu-title {
-              letter-spacing: 0.3rem;
-              font-weight: 700;
-              padding: 0 0.8em 0 1em;
               height: 35px;
-              line-height: 35px;
+              padding: 0 0.8em 0 1em;
               font-size: 1rem;
+              font-weight: 700;
+              line-height: 35px;
+              letter-spacing: 0.3rem;
               cursor: pointer;
               border-radius: 50px;
               transition: all 0.3s;
@@ -360,35 +372,37 @@ const scrollToTop = () => {
 
             .menus-item-child {
               position: absolute;
-              opacity: 0;
-              filter: alpha(opacity=0);
-              width: max-content;
-              border-radius: 5px;
               top: 35px;
-              box-shadow: var(--anzhiyu-shadow-black);
-              border: var(--style-border);
-              transition: 0.2s;
-              background-color: var(--anzhiyu-card-bg);
-              border-radius: 50px;
               right: auto;
               left: auto;
-              padding: 6px 4px;
               box-sizing: content-box;
+              width: max-content;
+              padding: 6px 4px;
+              margin-top: 8px;
               line-height: 35px;
+              pointer-events: none;
+              background-color: var(--anzhiyu-card-bg);
+              filter: alpha(opacity=0);
+              border: var(--style-border);
+              border-radius: 50px;
+              box-shadow: var(--anzhiyu-shadow-black);
+              opacity: 0;
+              transition: 0.2s;
               transform: translateY(-10px) scale(0);
               transform-origin: top;
-              pointer-events: none;
-              margin-top: 8px;
+
               li {
-                border-radius: 50px;
-                transition: all 0.3s;
                 display: inline-block;
                 margin: 0 3px;
+                border-radius: 50px;
+                transition: all 0.3s;
+
                 a {
                   padding: 2px 16px;
                 }
               }
-              &:before {
+
+              &::before {
                 position: absolute;
                 top: -12px;
                 left: 0;
@@ -398,39 +412,43 @@ const scrollToTop = () => {
               }
 
               .site-page {
-                letter-spacing: 0;
                 display: flex;
                 align-items: center;
-                border-radius: 100px;
                 padding: 0.3rem 0.8rem;
                 color: var(--anzhiyu-fontcolor);
                 text-shadow: none;
+                letter-spacing: 0;
+                border-radius: 100px;
                 transition: 0.3s;
+
                 &:hover {
-                  background: var(--anzhiyu-lighttext);
-                  color: var(--anzhiyu-card-bg);
-                  margin: 0 auto;
-                  transform: scale(1);
                   padding: 0.3rem 1rem;
+                  margin: 0 auto;
+                  color: var(--anzhiyu-card-bg);
+                  background: var(--anzhiyu-lighttext);
+                  transform: scale(1);
                 }
+
                 i {
+                  margin-right: 6px;
                   font-size: 0.9rem;
                   line-height: 1;
-                  margin-right: 6px;
                   line-height: 35px;
                 }
               }
             }
+
             &:hover {
               .menu-title {
                 color: var(--anzhiyu-white) !important;
                 background: var(--anzhiyu-main);
               }
+
               .menus-item-child {
+                pointer-events: all;
+                filter: none;
                 border: var(--style-border-hover);
                 opacity: 1;
-                filter: none;
-                pointer-events: all;
                 transform: translateY(0) scale(1);
               }
             }
@@ -441,16 +459,16 @@ const scrollToTop = () => {
 
     &.is-scrolled {
       .main-nav .menus-items {
+        pointer-events: none;
         opacity: 0;
         transform: translateY(-50px) scale(1.1);
-        pointer-events: none;
       }
 
       .page-name-mask .page-name-container {
+        z-index: 1;
+        pointer-events: auto;
         opacity: 1;
         transform: translateY(-52px) scale(1);
-        pointer-events: auto;
-        z-index: 1;
       }
     }
 
@@ -465,17 +483,21 @@ const scrollToTop = () => {
       :deep(.back-menu-button),
       :deep(.nav-button) {
         color: var(--anzhiyu-white);
+
         &:hover {
           color: var(--anzhiyu-white);
           background: var(--anzhiyu-white-op);
         }
       }
+
       .header-content .header-left .site-name-link:hover {
-        background: var(--anzhiyu-white-op);
         color: var(--anzhiyu-white);
+        background: var(--anzhiyu-white-op);
       }
+
       .back-home-button {
         color: var(--anzhiyu-white);
+
         &:hover {
           background: var(--anzhiyu-white-op);
         }
@@ -483,13 +505,16 @@ const scrollToTop = () => {
 
       .main-nav .menus-items .menus-item .menu-title {
         color: var(--anzhiyu-white);
+
         &:hover {
           color: var(--anzhiyu-white);
         }
       }
+
       .header-content .main-nav .menus-items .menus-item:hover .menu-title {
         background: var(--anzhiyu-white-op);
       }
+
       .main-nav .menus-items .menus-item:hover .menu-title {
         color: var(--anzhiyu-white) !important;
       }
@@ -497,13 +522,15 @@ const scrollToTop = () => {
   }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .page-name-mask {
     display: none;
   }
+
   .main-nav {
     display: none !important;
   }
+
   .frontend-header .header-wrapper .header-content {
     padding: 0 1rem;
   }
@@ -512,7 +539,8 @@ const scrollToTop = () => {
 #toggle-menu {
   display: block;
   font-size: 1.2rem;
-  @media (min-width: 992px) {
+
+  @media (width >= 992px) {
     display: none;
   }
 }

@@ -117,83 +117,82 @@ const pairedLinkList = computed(() => {
 }
 
 .flink_top {
+  position: relative;
   display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
-  position: relative;
-  box-shadow: var(--anzhiyu-shadow-border);
-  flex-direction: column;
-  will-change: transform;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
   background: var(--anzhiyu-card-bg);
   border: var(--style-border-always);
   border-radius: 12px;
-  overflow: hidden;
+  box-shadow: var(--anzhiyu-shadow-border);
   transition: 0.3s;
-  margin-bottom: 0.5rem;
+  will-change: transform;
 }
 
 .banners-title {
+  position: absolute;
   top: 1.875rem;
   left: 2.5rem;
-  position: absolute;
   display: flex;
   flex-direction: column;
 }
 
 .banners-title-small {
-  font-size: 12px;
-  line-height: 1;
-  color: var(--anzhiyu-secondtext);
   margin-top: 8px;
   margin-bottom: 0.625rem;
   margin-left: 2px;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--anzhiyu-secondtext);
 }
 
 .banners-title-big {
+  margin-bottom: 8px;
+  overflow: hidden;
   font-size: 2rem;
   font-weight: bold;
+  font-weight: 700;
+  line-height: 1;
+  line-clamp: 1;
   background: linear-gradient(90deg, #4285f4, #9b59b6, #e91e63, #f44336);
-  -webkit-background-clip: text;
+  background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-
-  line-height: 1;
-  font-weight: 700;
-  margin-bottom: 8px;
-  line-clamp: 1;
-  overflow: hidden;
 }
 
 .banner-button-group {
   position: absolute;
-  right: 2.5rem;
   top: 2.5rem;
-  display: flex;
-
+  right: 2.5rem;
   z-index: 1;
+  display: flex;
 }
 
 .banner-button {
   display: flex;
   align-items: center;
   padding: 8px 12px;
-  border-radius: 12px;
-  text-decoration: none;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  background: var(--anzhiyu-fontcolor);
-  color: var(--anzhiyu-white);
-  border: none;
-  font-family: inherit;
   padding: 10px;
+  font-family: inherit;
+  font-weight: bold;
+  color: var(--anzhiyu-white);
+  text-decoration: none;
+  background: var(--anzhiyu-fontcolor);
+  border: none;
+  border-radius: 12px;
+  transition: all 0.3s ease;
 
   &.secondary {
-    color: var(--anzhiyu-lighttext);
     margin-right: 1rem;
-    box-shadow: var(--anzhiyu-shadow-border);
+    font-weight: 400;
+    color: var(--anzhiyu-lighttext);
     background: var(--anzhiyu-secondbg);
     border: var(--style-border-always);
-    font-weight: 400;
+    box-shadow: var(--anzhiyu-shadow-border);
+
     &:hover {
       color: var(--anzhiyu-white);
     }
@@ -201,24 +200,25 @@ const pairedLinkList = computed(() => {
 
   &:not(:disabled):hover {
     background: var(--anzhiyu-main);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgb(0 0 0 / 10%);
   }
 }
 
 .tags-group-all {
-  transform: rotate(0deg);
-  padding-bottom: 2.5rem;
   display: flex;
+  padding-bottom: 2.5rem;
+  transform: rotate(0deg);
+
   .tags-group-wrapper {
-    margin-top: 8.75rem;
     display: flex;
+    margin-top: 8.75rem;
     animation: 120s linear 0s infinite normal none running rowleft;
   }
 }
 
 .tags-group-icon:hover .tags-group-title {
-  opacity: 1;
   backdrop-filter: saturate(180%) blur(20px);
+  opacity: 1;
 }
 
 .tags-group-icon-pair {
@@ -227,20 +227,22 @@ const pairedLinkList = computed(() => {
 }
 
 .tags-group-icon {
-  width: 120px;
-  height: 120px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgb(255, 255, 255);
+  width: 120px;
+  height: 120px;
   font-size: 66px;
   font-weight: 700;
-  box-shadow: var(--anzhiyu-shadow-blackdeep);
+  color: rgb(255 255 255);
   border-radius: 50%;
+  box-shadow: var(--anzhiyu-shadow-blackdeep);
+
   &:nth-child(2n) {
     margin-top: 1rem;
     transform: translate(-60px);
+
     &:hover {
       background: var(--anzhiyu-main-op);
       transform: translate(-60px) scale(1.05);
@@ -253,30 +255,30 @@ const pairedLinkList = computed(() => {
   }
 
   img {
+    width: 60%;
     min-width: 100%;
     min-height: 100%;
     object-fit: cover;
     border-radius: 50%;
-    width: 60%;
   }
 
   .tags-group-title {
-    font-size: 14px;
-    color: var(--anzhiyu-card-bg);
     position: absolute;
-    width: 100%;
-    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 14px;
+    color: var(--anzhiyu-card-bg);
     background: var(--anzhiyu-lighttext);
     border-radius: 120px;
+    opacity: 0;
     transition: 0.3s;
   }
 }
 
-@media screen and (min-width: 1200px) {
+@media screen and (width >= 1200px) {
   .flink_top {
     animation: slide-in 0.6s 0.2s backwards;
   }

@@ -72,13 +72,13 @@ const handleThemeChange = (theme: "light" | "dark" | "system") => {
 }
 
 :deep(.el-dropdown-menu__item.is-active) {
-  background-color: var(--el-color-primary-light-9);
-  color: var(--el-color-primary);
   font-weight: bold;
+  color: var(--el-color-primary);
+  background-color: var(--el-color-primary-light-9);
 }
 
 :deep(.el-dropdown-menu__item:not(.is-active):hover) {
-  background-color: var(--el-dropdown-menuItem-hover-fill);
   color: var(--el-dropdown-menuItem-hover-color);
+  background-color: var(--el-dropdown-menuItem-hover-fill);
 }
 </style>

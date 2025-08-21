@@ -132,9 +132,10 @@ const handleSave = async () => {
 .setting-form {
   max-width: 800px;
 }
+
 .save-button-container {
-  margin-top: 24px;
   padding-top: 24px;
+  margin-top: 24px;
   border-top: 1px solid var(--el-border-color-lighter);
 }
 </style>

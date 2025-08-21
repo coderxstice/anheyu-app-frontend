@@ -63,62 +63,72 @@ const formatDate = (dateString: string) => {
 .item-headline {
   display: flex;
   align-items: center;
+  padding-left: 0.25rem;
+  margin-bottom: 0.5rem;
   font-size: 1.1rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  padding-left: 0.25rem;
   color: var(--anzhiyu-fontcolor);
+
   i {
-    font-size: 1rem;
     margin-right: 0.5rem;
+    font-size: 1rem;
   }
 }
+
 .aside-list {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
+
 .aside-list-item {
   display: flex;
   gap: 0.75rem;
 }
+
 .thumbnail {
+  flex-shrink: 0;
   width: 4rem;
   height: 4rem;
-  flex-shrink: 0;
   overflow: hidden;
   border-radius: 8px;
+
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease-out;
   }
+
   &:hover img {
     transform: scale(1.1);
   }
 }
+
 .content {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   gap: 0.5rem;
+  justify-content: center;
   min-width: 0;
+
   .title {
-    color: var(--anzhiyu-fontcolor);
-    font-size: 0.9rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
     display: -webkit-box;
-    line-clamp: 2;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    transition: color 0.2s;
+    overflow: hidden;
+    font-size: 0.9rem;
     font-weight: 700;
+    color: var(--anzhiyu-fontcolor);
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    transition: color 0.2s;
+    -webkit-box-orient: vertical;
+
     &:hover {
       color: var(--anzhiyu-main);
     }
   }
+
   time {
     font-size: 0.75rem;
     color: var(--anzhiyu-fontcolor-grey);

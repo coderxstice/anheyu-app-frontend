@@ -65,14 +65,14 @@ const hasTags = computed(() => processedTags.value.length > 0);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 12px;
   width: fit-content;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  transition: all 0.2s ease-in-out;
-  margin: 0 8px 0 0;
-  color: var(--anzhiyu-white);
   height: 40px;
+  padding: 4px 12px;
+  margin: 0 8px 0 0;
+  font-size: 0.85rem;
+  color: var(--anzhiyu-white);
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
 }
 
 .post-meta__box__tag-list {
@@ -83,22 +83,26 @@ const hasTags = computed(() => processedTags.value.length > 0);
 .post-meta__box__tags:nth-child(5n) {
   background-color: #4a4a4a;
 }
+
 .post-meta__box__tags:nth-child(5n + 1) {
   background-color: #ff5e5c;
 }
+
 .post-meta__box__tags:nth-child(5n + 2) {
   background-color: #ffbb50;
 }
+
 .post-meta__box__tags:nth-child(5n + 3) {
   background-color: #1ac756;
 }
+
 .post-meta__box__tags:nth-child(5n + 4) {
   background-color: #19b5fe;
 }
 
 .post-meta__box__tags:hover {
-  background-color: var(--anzhiyu-main);
   color: #fff;
+  background-color: var(--anzhiyu-main);
   box-shadow: var(--anzhiyu-shadow-theme);
 }
 
@@ -107,22 +111,22 @@ span.tags-punctuation {
 }
 
 [data-theme="light"] span.tagsPageCount {
-  background-color: transparent;
   color: #fff;
+  background-color: transparent;
 }
 
 .tagsPageCount {
+  display: inline-block;
+  min-width: 22.5px;
   padding: 4px 6px;
+  margin-left: 4px;
+  font-size: 0.7rem;
+  line-height: 0.6rem;
+  color: var(--anzhiyu-fontcolor);
+  text-align: center;
   background: var(--anzhiyu-secondbg);
   border: var(--style-border-always);
-  min-width: 22.5px;
-  display: inline-block;
   border-radius: 4px;
-  line-height: 0.6rem;
-  text-align: center;
-  font-size: 0.7rem;
-  color: var(--anzhiyu-fontcolor);
-  margin-left: 4px;
 }
 
 [data-theme="dark"] .post-meta__box a {
@@ -134,7 +138,7 @@ span.tags-punctuation {
 }
 
 [data-theme="light"] .post-meta__box__tags span.tagsPageCount {
-  background-color: transparent;
   color: white;
+  background-color: transparent;
 }
 </style>
