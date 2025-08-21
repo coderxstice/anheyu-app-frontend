@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-26 15:01:42
- * @LastEditTime: 2025-08-20 13:14:52
+ * @LastEditTime: 2025-08-21 11:18:22
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -37,6 +37,11 @@
         <EquipmentPageForm v-model="model.equipment" />
       </el-form>
     </el-tab-pane>
+    <el-tab-pane label="关于页配置" name="aboutPage">
+      <el-form :model="model" label-position="top" class="setting-form">
+        <AboutPageForm v-model="model.about" />
+      </el-form>
+    </el-tab-pane>
   </el-tabs>
 </template>
 
@@ -49,6 +54,7 @@ import CommentSettingsForm from "./frontDesk/CommentSettingsForm/index.vue";
 import EmailSettingsForm from "./frontDesk/EmailSettingsForm/index.vue";
 import FLinkPageSettingsForm from "./frontDesk/FLinkPageSettingsForm/index.vue";
 import EquipmentPageForm from "./frontDesk/EquipmentPageForm/index.vue";
+import AboutPageForm from "./frontDesk/AboutPageForm/index.vue";
 
 const activeSubTab = ref("homePage");
 

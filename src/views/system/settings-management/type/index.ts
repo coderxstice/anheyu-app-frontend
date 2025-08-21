@@ -371,6 +371,98 @@ export interface EquipmentPageSettingsInfo {
   list: EquipmentCategory[];
 }
 
+/**
+ * @description: 关于页配置表单接口
+ */
+export interface AboutPageSettingsInfo {
+  name: string;
+  description: string;
+  avatarImg: string;
+  subtitle: string;
+  avatarSkillsLeft: string[];
+  avatarSkillsRight: string[];
+  aboutSiteTips: {
+    tips: string;
+    title1: string;
+    title2: string;
+    word: string[];
+  };
+  map: {
+    background: string;
+    backgroundDark: string;
+    strengthenTitle: string;
+    title: string;
+  };
+  selfInfo: {
+    tips1: string;
+    contentYear: string;
+    tips2: string;
+    content2: string;
+    tips3: string;
+    content3: string;
+  };
+  personalities: {
+    authorName: string;
+    nameUrl: string;
+    personalityImg: string;
+    personalityType: string;
+    personalityTypeColor: string;
+    photoUrl: string;
+    tips: string;
+  };
+  maxim: {
+    top: string;
+    bottom: string;
+    tips: string;
+  };
+  buff: {
+    top: string;
+    bottom: string;
+    tips: string;
+  };
+  game: {
+    background: string;
+    title: string;
+    uid: string;
+    tips: string;
+  };
+  comic: {
+    title: string;
+    tips: string;
+    list: Array<{
+      cover: string;
+      href: string;
+      name: string;
+    }>;
+  };
+  like: {
+    background: string;
+    title: string;
+    bottom: string;
+    tips: string;
+  };
+  music: {
+    background: string;
+    title: string;
+    link: string;
+    tips: string;
+  };
+  careers: {
+    img: string;
+    title: string;
+    tips: string;
+    list: Array<{
+      color: string;
+      desc: string;
+    }>;
+  };
+  skillsTips: {
+    title: string;
+    tips: string;
+  };
+  statisticsBackground: string;
+}
+
 export interface FrontDeskSettings {
   home: HomePageSettingsInfo;
   sidebar: SidebarPageSettingsInfo;
@@ -378,6 +470,7 @@ export interface FrontDeskSettings {
   email: EmailSettingsInfo;
   fLink: FLinkSettingsInfo;
   equipment: EquipmentSettingsInfo;
+  about: AboutPageSettingsInfo;
 }
 
 /**

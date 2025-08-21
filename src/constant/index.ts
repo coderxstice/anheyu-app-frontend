@@ -122,6 +122,30 @@ const KeyPostEquipmentBannerDescription: SettingKey =
 const KeyPostEquipmentBannerTip: SettingKey = "equipment.banner.tip";
 const KeyPostEquipmentList: SettingKey = "equipment.list";
 
+// --- 关于页面配置 ---
+const KeyAboutPageName: SettingKey = "about.page.name";
+const KeyAboutPageDescription: SettingKey = "about.page.description";
+const KeyAboutPageAvatarImg: SettingKey = "about.page.avatar_img";
+const KeyAboutPageSubtitle: SettingKey = "about.page.subtitle";
+const KeyAboutPageAvatarSkillsLeft: SettingKey =
+  "about.page.avatar_skills_left";
+const KeyAboutPageAvatarSkillsRight: SettingKey =
+  "about.page.avatar_skills_right";
+const KeyAboutPageAboutSiteTips: SettingKey = "about.page.about_site_tips";
+const KeyAboutPageMap: SettingKey = "about.page.map";
+const KeyAboutPageSelfInfo: SettingKey = "about.page.self_info";
+const KeyAboutPagePersonalities: SettingKey = "about.page.personalities";
+const KeyAboutPageMaxim: SettingKey = "about.page.maxim";
+const KeyAboutPageBuff: SettingKey = "about.page.buff";
+const KeyAboutPageGame: SettingKey = "about.page.game";
+const KeyAboutPageComic: SettingKey = "about.page.comic";
+const KeyAboutPageLike: SettingKey = "about.page.like";
+const KeyAboutPageMusic: SettingKey = "about.page.music";
+const KeyAboutPageCareers: SettingKey = "about.page.careers";
+const KeyAboutPageSkillsTips: SettingKey = "about.page.skills_tips";
+const KeyAboutPageStatisticsBackground: SettingKey =
+  "about.page.statistics_background";
+
 // --- 评论配置 ---
 const KeyCommentLoginRequired: SettingKey = "comment.login_required";
 const KeyCommentPageSize: SettingKey = "comment.page_size";
@@ -295,6 +319,27 @@ export const constant = {
   KeyPostEquipmentBannerDescription,
   KeyPostEquipmentBannerTip,
   KeyPostEquipmentList,
+
+  // --- 关于页面配置 ---
+  KeyAboutPageName,
+  KeyAboutPageDescription,
+  KeyAboutPageAvatarImg,
+  KeyAboutPageSubtitle,
+  KeyAboutPageAvatarSkillsLeft,
+  KeyAboutPageAvatarSkillsRight,
+  KeyAboutPageAboutSiteTips,
+  KeyAboutPageMap,
+  KeyAboutPageSelfInfo,
+  KeyAboutPagePersonalities,
+  KeyAboutPageMaxim,
+  KeyAboutPageBuff,
+  KeyAboutPageGame,
+  KeyAboutPageComic,
+  KeyAboutPageLike,
+  KeyAboutPageMusic,
+  KeyAboutPageCareers,
+  KeyAboutPageSkillsTips,
+  KeyAboutPageStatisticsBackground,
 
   // --- 评论配置 ---
   KeyCommentLoginRequired,

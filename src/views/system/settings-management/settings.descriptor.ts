@@ -397,6 +397,238 @@ const equipmentDescriptors: SettingDescriptor[] = [
   }
 ];
 
+const aboutPageDescriptors: SettingDescriptor[] = [
+  {
+    frontendPath: "frontDesk.about.name",
+    backendKey: constant.KeyAboutPageName,
+    defaultValue: "安知鱼",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.about.description",
+    backendKey: constant.KeyAboutPageDescription,
+    defaultValue: "是一名 前端工程师、学生、独立开发者、博主",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.about.avatarImg",
+    backendKey: constant.KeyAboutPageAvatarImg,
+    defaultValue:
+      "https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.about.subtitle",
+    backendKey: constant.KeyAboutPageSubtitle,
+    defaultValue: "生活明朗，万物可爱✨",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.about.avatarSkillsLeft",
+    backendKey: constant.KeyAboutPageAvatarSkillsLeft,
+    defaultValue: [
+      "🤖️ 数码科技爱好者",
+      "🔍 分享与热心帮助",
+      "🏠 智能家居小能手",
+      "🔨 设计开发一条龙"
+    ],
+    type: "json"
+  },
+  {
+    frontendPath: "frontDesk.about.avatarSkillsRight",
+    backendKey: constant.KeyAboutPageAvatarSkillsRight,
+    defaultValue: [
+      "专修交互与设计 🤝",
+      "脚踏实地行动派 🏃",
+      "团队小组发动机 🧱",
+      "壮汉人狠话不多 💢"
+    ],
+    type: "json"
+  },
+  {
+    frontendPath: "frontDesk.about.aboutSiteTips",
+    backendKey: constant.KeyAboutPageAboutSiteTips,
+    defaultValue: {
+      tips: "追求",
+      title1: "源于",
+      title2: "热爱而去 感受",
+      word: ["学习", "生活", "程序", "体验"]
+    },
+    type: "json"
+  },
+  {
+    frontendPath: "frontDesk.about.map",
+    backendKey: constant.KeyAboutPageMap,
+    defaultValue: {
+      background:
+        "https://img02.anheyu.com/adminuploads/1/2022/09/24/632e6f48981d8.jpg",
+      backgroundDark:
+        "https://img02.anheyu.com/adminuploads/1/2022/09/26/6330ebf1f3e65.jpg",
+      strengthenTitle: "中国，长沙市",
+      title: "我现在住在"
+    },
+    type: "json"
+  },
+  {
+    frontendPath: "frontDesk.about.selfInfo",
+    backendKey: constant.KeyAboutPageSelfInfo,
+    defaultValue: {
+      tips1: "生于",
+      contentYear: "2002",
+      tips2: "湖南信息学院",
+      content2: "软件工程",
+      tips3: "现在职业",
+      content3: "软件工程师👨"
+    },
+    type: "json"
+  },
+  {
+    frontendPath: "frontDesk.about.personalities",
+    backendKey: constant.KeyAboutPagePersonalities,
+    defaultValue: {
+      authorName: "执政官",
+      nameUrl: "https://www.16personalities.com/ch/esfj-%E4%BA%BA%E6%A0%BC",
+      personalityImg:
+        "https://npm.elemecdn.com/anzhiyu-blog@2.0.8/img/svg/ESFJ-A.svg",
+      personalityType: "ESFJ-A",
+      personalityTypeColor: "#ac899c",
+      photoUrl:
+        "https://img02.anheyu.com/adminuploads/1/2022/09/24/632e9643611ec.jpg",
+      tips: "性格"
+    },
+    type: "json"
+  },
+  {
+    frontendPath: "frontDesk.about.maxim",
+    backendKey: constant.KeyAboutPageMaxim,
+    defaultValue: {
+      top: "生活明朗，",
+      bottom: "万物可爱。",
+      tips: "座右铭"
+    },
+    type: "json"
+  },
+  {
+    frontendPath: "frontDesk.about.buff",
+    backendKey: constant.KeyAboutPageBuff,
+    defaultValue: {
+      top: "脑回路新奇的 酸菜鱼",
+      bottom: "二次元指数 MAX",
+      tips: "特长"
+    },
+    type: "json"
+  },
+  {
+    frontendPath: "frontDesk.about.game",
+    backendKey: constant.KeyAboutPageGame,
+    defaultValue: {
+      background:
+        "https://img02.anheyu.com/adminuploads/1/2022/12/19/63a079ca63c8a.webp",
+      title: "原神",
+      uid: "UID: 125766904",
+      tips: "爱好游戏"
+    },
+    type: "json"
+  },
+  {
+    frontendPath: "frontDesk.about.comic",
+    backendKey: constant.KeyAboutPageComic,
+    defaultValue: {
+      title: "追番",
+      tips: "爱好番剧",
+      list: [
+        {
+          cover:
+            "https://img02.anheyu.com/adminuploads/1/2022/12/13/63988658aa1b1.webp",
+          href: "https://www.bilibili.com/bangumi/media/md5267750/?spm_id_from=666.25.b_6d656469615f6d6f64756c65.1",
+          name: "约定的梦幻岛"
+        },
+        {
+          cover:
+            "https://img02.anheyu.com/adminuploads/1/2022/12/13/6398864e572ed.webp",
+          href: "https://www.bilibili.com/bangumi/media/md28229899/?spm_id_from=666.25.b_6d656469615f6d6f64756c65.1",
+          name: "咒术回战"
+        },
+        {
+          cover:
+            "https://img02.anheyu.com/adminuploads/1/2022/12/13/639886315d658.webp",
+          href: "https://www.bilibili.com/bangumi/media/md8892/?spm_id_from=666.25.b_6d656469615f6d6f64756c65.1",
+          name: "紫罗兰永恒花园"
+        },
+        {
+          cover:
+            "https://img02.anheyu.com/adminuploads/1/2022/12/13/639886403d472.webp",
+          href: "https://www.bilibili.com/bangumi/media/md22718131/?spm_id_from=666.25.b_6d656469615f6d6f64756c65.1",
+          name: "鬼灭之刃"
+        },
+        {
+          cover:
+            "https://img02.anheyu.com/adminuploads/1/2022/12/13/6398862649585.webp",
+          href: "https://www.bilibili.com/bangumi/media/md135652/?spm_id_from=666.25.b_6d656469615f6d6f64756c65.1",
+          name: "JOJO的奇妙冒险 黄金之风"
+        }
+      ]
+    },
+    type: "json"
+  },
+  {
+    frontendPath: "frontDesk.about.like",
+    backendKey: constant.KeyAboutPageLike,
+    defaultValue: {
+      background:
+        "https://img02.anheyu.com/adminuploads/1/2022/09/24/632f0dd8f33c6.webp",
+      title: "数码科技",
+      bottom: "手机、电脑软硬件",
+      tips: "关注偏好"
+    },
+    type: "json"
+  },
+  {
+    frontendPath: "frontDesk.about.music",
+    backendKey: constant.KeyAboutPageMusic,
+    defaultValue: {
+      background:
+        "https://p2.music.126.net/Mrg1i7DwcwjWBvQPIMt_Mg==/79164837213438.jpg",
+      title: "许嵩、民谣、华语流行",
+      link: "/music",
+      tips: "音乐偏好"
+    },
+    type: "json"
+  },
+  {
+    frontendPath: "frontDesk.about.careers",
+    backendKey: constant.KeyAboutPageCareers,
+    defaultValue: {
+      img: "https://img02.anheyu.com/adminuploads/1/2022/09/26/6330e9bcc39cc.png",
+      title: "无限进步",
+      tips: "生涯",
+      list: [
+        {
+          color: "#357ef5",
+          desc: "EDU,软件工程专业"
+        }
+      ]
+    },
+    type: "json"
+  },
+  {
+    frontendPath: "frontDesk.about.skillsTips",
+    backendKey: constant.KeyAboutPageSkillsTips,
+    defaultValue: {
+      title: "开启创造力",
+      tips: "技能"
+    },
+    type: "json"
+  },
+  {
+    frontendPath: "frontDesk.about.statisticsBackground",
+    backendKey: constant.KeyAboutPageStatisticsBackground,
+    defaultValue:
+      "https://upload-bbs.miyoushe.com/upload/2025/08/20/125766904/0d61be5d781e63642743883eb5580024_4597572337700501322.png",
+    type: "string"
+  }
+];
+
 const frontDeskDescriptors: SettingDescriptor[] = [
   {
     frontendPath: "frontDesk.home.siteOwnerName",
@@ -859,6 +1091,7 @@ export const allSettingDescriptors = [
   ...fileDescriptors,
   ...postDescriptors,
   ...equipmentDescriptors,
+  ...aboutPageDescriptors,
   ...frontDeskDescriptors,
   ...sidebarDescriptors,
   ...commentDescriptors,
