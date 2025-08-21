@@ -92,8 +92,8 @@ const creativityPairs = computed(() => {
               <span>{{ item.name }}</span>
             </div>
           </div>
-          <div class="skill-info">
-            <span>等等...</span>
+          <div class="flex items-center">
+            <span>...</span>
           </div>
         </div>
       </div>
