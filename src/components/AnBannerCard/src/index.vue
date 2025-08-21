@@ -2,7 +2,7 @@
  * @Description: 横幅卡片组件 - 简化版本，专注于文字内容展示
  * @Author: 安知鱼
  * @Date: 2025-01-27
- * @LastEditTime: 2025-08-20 11:17:15
+ * @LastEditTime: 2025-08-21 19:52:39
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -69,6 +69,7 @@ const backgroundStyle = computed(() => ({
   position: relative;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+  animation: slide-in 0.6s 0s backwards;
 
   background-color: var(--anzhiyu-main);
   background-position: left 28%;
@@ -85,7 +86,6 @@ const backgroundStyle = computed(() => ({
     #67044d
   );
   background-size: 400%;
-  animation: gradient 15s ease infinite;
 
   .author-content {
     width: 100%;
