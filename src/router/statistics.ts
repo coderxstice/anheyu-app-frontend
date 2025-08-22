@@ -7,8 +7,18 @@ import type { RouteLocationNormalized } from "vue-router";
  */
 
 let currentPath: string = "";
+let currentPageTitle: string = "";
 let pageStartTime: number = 0;
-let isFirstLoad: boolean = true; // 标记是否是首次加载
+let isFirstLoad: boolean = true;
+
+/**
+ * 检查路径是否为后台管理路径
+ * @param path - 路由路径
+ */
+const isAdminPath = (path: string): boolean => {
+  if (!path) return false;
+  return path.startsWith("/admin/") || path === "/admin";
+};
 
 // 记录路由变化
 export function recordRouteChange(
@@ -16,13 +26,32 @@ export function recordRouteChange(
   from: RouteLocationNormalized
 ) {
   try {
+    // --- 核心修改 1: 检查来源和目标路径 ---
+    const fromIsAdmin = isAdminPath(from?.path);
+    const toIsAdmin = isAdminPath(to.path);
+
+    // 如果从后台页面跳转到后台页面，则完全不处理
+    if (fromIsAdmin && toIsAdmin) {
+      console.log("🚫 后台页面内部跳转，跳过所有统计");
+      return;
+    }
+
     console.log(
       `路由变化触发: from=${from?.fullPath || "/"}, to=${to.fullPath}, isFirstLoad=${isFirstLoad}`
     );
 
-    // 如果是首次加载（页面刷新或直接访问），只记录当前页面，不记录停留时间
+    // 如果是首次加载（页面刷新或直接访问）
     if (isFirstLoad) {
-      currentPath = to.path;
+      isFirstLoad = false; // 无论如何，先消耗掉首次加载标记
+
+      // 如果首次加载的页面是后台页面，则不记录并直接返回
+      if (toIsAdmin) {
+        console.log(`🚫 首次访问是后台页面，跳过统计: ${to.fullPath}`);
+        return;
+      }
+
+      currentPath = to.fullPath;
+      currentPageTitle = document.title;
       pageStartTime = Date.now();
 
       // 记录新页面的访问（初始访问）
@@ -33,25 +62,42 @@ export function recordRouteChange(
         duration: 0
       });
 
-      isFirstLoad = false;
       console.log(`✅ 首次访问记录完成: ${to.fullPath}`);
       return;
     }
 
     // 如果路径发生变化，记录上一个页面的停留时间
-    if (currentPath && currentPath !== to.path && pageStartTime > 0) {
+    // --- 核心修改 2: 仅当上一个页面不是后台页面时才记录停留时间 ---
+    if (
+      currentPath &&
+      currentPath !== to.fullPath &&
+      pageStartTime > 0 &&
+      !isAdminPath(currentPath)
+    ) {
       const duration = Math.floor((Date.now() - pageStartTime) / 1000);
+
       recordVisit({
         url_path: currentPath,
-        page_title: document.title,
+        page_title: currentPageTitle, // 使用保存的上一个页面的标题（修复BUG）
         referer: from?.fullPath || document.referrer,
         duration: duration
       });
       console.log(`📊 记录页面停留时间: ${currentPath}, 停留${duration}秒`);
     }
 
-    // 更新当前路径和开始时间
-    currentPath = to.path;
+    // --- 核心修改 3: 如果目标是后台页面，则重置状态并停止后续记录 ---
+    if (toIsAdmin) {
+      console.log(`🚫 进入后台页面，暂停统计: ${to.fullPath}`);
+      // 清空当前记录，这样从后台跳出时不会错误地记录后台页面的停留时间
+      currentPath = "";
+      currentPageTitle = "";
+      pageStartTime = 0;
+      return;
+    }
+
+    // 更新当前路径、标题和开始时间，为下一次记录停留时间做准备
+    currentPath = to.fullPath;
+    currentPageTitle = document.title;
     pageStartTime = Date.now();
 
     // 记录新页面的访问（初始访问）
@@ -70,8 +116,11 @@ export function recordRouteChange(
   }
 }
 
-// 记录页面停留时间（用于SPA应用）
+// 记录页面停留时间（用于SPA应用） - 这个函数不受影响，但最好也加上判断
 export function recordPageDuration(path: string, duration: number) {
+  if (isAdminPath(path)) {
+    return;
+  }
   try {
     recordVisit({
       url_path: path,
