@@ -25,12 +25,13 @@ defineProps<Props>();
       <div class="content-bottom">
         <div class="tips">跟 {{ authorName }} 一起欣赏更多音乐</div>
       </div>
-      <div class="banner-button-group">
+      <!-- ToDo: 需要写完音乐界面和音乐球 -->
+      <!-- <div class="banner-button-group">
         <a class="banner-button" @click="$router.push(music.link)">
           <i class="anzhiyufont anzhiyu-icon-arrow-circle-right" />
           <span class="banner-button-text">更多推荐</span>
         </a>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
