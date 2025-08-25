@@ -2,10 +2,10 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-22 00:40:29
- * @LastEditTime: 2025-08-25 18:52:52
+ * @LastEditTime: 2025-08-25 19:05:34
  * @LastEditors: 安知鱼
  */
-// src/components/Announcement/index.ts
+// src/components/AnNouncement/index.ts
 import { addDialog } from "@/components/ReDialog/index";
 import { h } from "vue";
 
