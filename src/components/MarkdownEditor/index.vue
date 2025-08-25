@@ -252,6 +252,20 @@ defineExpose({
 </template>
 
 <style lang="scss">
+@keyframes code-expand-key {
+  0% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 0.1;
+  }
+
+  100% {
+    opacity: 0.6;
+  }
+}
+
 .md-editor-fullscreen {
   z-index: 2100;
 }
@@ -260,33 +274,13 @@ defineExpose({
   height: 100%;
 
   .md-editor-code {
-    @keyframes code-expand-key {
-      0% {
-        filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
-        filter: alpha(opacity=60);
-        opacity: 0.6;
-      }
-
-      50% {
-        filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=10)";
-        filter: alpha(opacity=10);
-        opacity: 0.1;
-      }
-
-      100% {
-        filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
-        filter: alpha(opacity=60);
-        opacity: 0.6;
-      }
-    }
-
     overflow: hidden;
     border: var(--style-border-always);
     border-radius: 10px;
 
     &.is-collapsed {
       & > pre {
-        height: v-bind(collapsedheight);
+        height: v-bind(collapsedHeight);
         overflow: hidden;
       }
 

@@ -153,17 +153,31 @@ onUnmounted(() => {
 <style lang="scss">
 @use "./editor-code.scss";
 
-.post-content {
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-
-    to {
-      opacity: 1;
-    }
+@keyframes code-expand-key {
+  0% {
+    opacity: 0.6;
   }
 
+  50% {
+    opacity: 0.1;
+  }
+
+  100% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.post-content {
   line-height: 1.8;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -173,26 +187,6 @@ onUnmounted(() => {
   }
 
   .md-editor-code {
-    @keyframes code-expand-key {
-      0% {
-        filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
-        filter: alpha(opacity=60);
-        opacity: 0.6;
-      }
-
-      50% {
-        filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=10)";
-        filter: alpha(opacity=10);
-        opacity: 0.1;
-      }
-
-      100% {
-        filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
-        filter: alpha(opacity=60);
-        opacity: 0.6;
-      }
-    }
-
     position: relative;
     margin: 20px 0;
     overflow: hidden;
@@ -204,7 +198,7 @@ onUnmounted(() => {
 
     &.is-collapsed {
       & > pre {
-        height: v-bind(collapsedheight);
+        height: v-bind(collapsedHeight);
         overflow: hidden;
       }
 
