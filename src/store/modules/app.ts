@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-22 02:00:40
- * @LastEditTime: 2025-07-22 10:06:39
+ * @LastEditTime: 2025-08-25 18:54:46
  * @LastEditors: 安知鱼
  */
 import { defineStore } from "pinia";
@@ -16,7 +16,7 @@ import {
 } from "../utils";
 
 export const useAppStore = defineStore({
-  id: "maoyu-app",
+  id: "anheyu-app",
   state: (): appType => ({
     sidebar: {
       opened:

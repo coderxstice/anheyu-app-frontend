@@ -13,7 +13,7 @@ import { merge, set } from "lodash-es";
 import { LOCAL_STORAGE_KEY } from "@/constant/index";
 
 // 引入公告相关的函数
-import { checkAndShowAnnouncementByConfig } from "@/components/AnNouncement";
+import { checkAndShowAnnouncementByConfig } from "@/components/AnNouncement/index";
 
 // 定义了缓存的有效期（24小时）
 const CACHE_EXPIRATION_TIME = 24 * 60 * 60 * 1000;
@@ -77,7 +77,7 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
       if (state.siteConfig?.SITE_URL) {
         let siteURL = state.siteConfig.SITE_URL;
         if (siteURL.endsWith("/")) {
-          siteURL = siteURL.slice(0, -1); // 去掉末尾的斜杠
+          siteURL = siteURL.slice(0, -1);
         }
         return siteURL;
       }
@@ -87,7 +87,7 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
 
   actions: {
     /**
-     * @description (保留) 用于合并已经嵌套好的对象或顶层属性。
+     * @description 用于合并已经嵌套好的对象或顶层属性。
      * @param newSettings - 需要合并到 state 的新配置
      */
     _updateStateAndCache(newSettings: Partial<CombinedSiteSettings>) {
