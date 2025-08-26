@@ -399,6 +399,9 @@ onMounted(() => {
     width: 100%;
     height: 100%;
     transition: transform 0.3s ease;
+    :deep(img) {
+      border-radius: 0px;
+    }
   }
 
   .image-slot {
