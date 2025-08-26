@@ -22,7 +22,7 @@ import { handleBackendError } from "./error"; // 引入我们之前创建的全�
  * @property {object} paramsSerializer - 自定义请求参数序列化逻辑，这里使用`qs`库。
  */
 const defaultConfig: AxiosRequestConfig = {
-  timeout: 10000,
+  timeout: 30000,
   headers: {
     Accept: "application/json, text/plain, */*",
     "Content-Type": "application/json",

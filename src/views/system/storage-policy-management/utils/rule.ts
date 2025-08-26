@@ -1,4 +1,3 @@
-// src/views/system/storage-policy-management/utils/rule.ts
 import { reactive } from "vue";
 import type { FormRules } from "element-plus";
 

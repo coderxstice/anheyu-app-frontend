@@ -70,9 +70,13 @@ watch(
   },
   { immediate: true }
 );
-watch([maxsizeValue, maxsizeUnit], ([newSize, newUnit]) => {
-  formData.value.max_size = Math.round(newSize * newUnit);
-});
+watch(
+  [maxsizeValue, maxsizeUnit],
+  ([newSize, newUnit]) => {
+    formData.value.max_size = Math.round(newSize * newUnit);
+  },
+  { immediate: true }
+);
 
 // “上传分片大小”的逻辑
 const chunkSizeValue = ref(50);
@@ -88,10 +92,14 @@ watch(
   },
   { immediate: true }
 );
-watch([chunkSizeValue, chunkSizeUnit], ([newSize, newUnit]) => {
-  if (!formData.value.settings) formData.value.settings = {};
-  formData.value.settings.chunk_size = Math.round(newSize * newUnit);
-});
+watch(
+  [chunkSizeValue, chunkSizeUnit],
+  ([newSize, newUnit]) => {
+    if (!formData.value.settings) formData.value.settings = {};
+    formData.value.settings.chunk_size = Math.round(newSize * newUnit);
+  },
+  { immediate: true }
+);
 
 function getRef() {
   return ruleFormRef.value;
