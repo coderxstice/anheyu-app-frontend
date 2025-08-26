@@ -152,7 +152,26 @@ class AnHttp {
           "/auth/refresh-token",
           "/auth/login",
           "auth/check-email",
-          "public/wallpapers"
+          "public/wallpapers",
+          "public/site-config",
+          // 文章（前台）
+          "public/articles",
+          "public/articles/home",
+          "public/articles/random",
+          "public/articles/archives",
+          // 友链（前台）
+          "public/links",
+          "public/links/random",
+          "public/link-categories",
+          // 评论（前台）
+          "public/comments",
+          "public/comments/upload",
+          "public/comments/like",
+          "public/comments/unlike",
+          "public/comments/children",
+          // 统计
+          "public/statistics/basic",
+          "public/statistics/visit"
         ];
         if (whiteList.some(url => config.url?.endsWith(url))) {
           return config;

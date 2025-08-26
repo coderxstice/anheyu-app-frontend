@@ -51,7 +51,7 @@ const handleSortChange = (newOrder: string) => {
       </a>
       <h1>
         <a style="cursor: pointer">
-          <strong>{{ siteName }}</strong>
+          <strong class="site-name">{{ siteName }}</strong>
         </a>
       </h1>
     </div>
@@ -292,6 +292,10 @@ const handleSortChange = (newOrder: string) => {
     height: 30px;
     margin-right: 1rem;
     border-radius: 20px;
+  }
+
+  .site-name {
+    color: var(--font-color);
   }
 
   @media screen and (width <= 736px) {

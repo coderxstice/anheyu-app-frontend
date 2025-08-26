@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { getPublicLinkList, getLinkCategories } from "@/api/postLink";
+import { getPublicLinkList, getPublicLinkCategories } from "@/api/postLink";
 import type { LinkItem, LinkCategory } from "@/api/postLink/type";
 
 interface LinkState {
@@ -28,7 +28,7 @@ export const useLinkStore = defineStore("postLink", {
   actions: {
     async fetchCategories() {
       if (this.categories.length > 0) return;
-      const res = await getLinkCategories();
+      const res = await getPublicLinkCategories();
       if (res.code === 200) {
         this.categories = res.data;
         this.categories.forEach(cat => {

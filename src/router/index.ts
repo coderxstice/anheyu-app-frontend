@@ -109,6 +109,7 @@ export function resetRouter() {
 const whiteList = [
   "/",
   "/login/",
+  "/album",
   "/album/",
   "/login/reset",
   "/posts/",
@@ -117,7 +118,12 @@ const whiteList = [
   "/page/",
   "/categories",
   "/categories/",
-  "/archives"
+  "/archives",
+  "/about",
+  "/link",
+  "/random-post",
+  "/air-conditioner",
+  "/equipment"
 ];
 
 const { VITE_HIDE_HOME } = import.meta.env;
