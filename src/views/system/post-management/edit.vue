@@ -345,7 +345,7 @@ onUnmounted(() => {
   <div v-loading="loading" class="post-edit-page">
     <header class="post-edit-header">
       <div class="header-left">
-        <el-tooltip content="返回列表" placement="bottom">
+        <el-tooltip content="返回列表" placement="bottom" :show-arrow="false">
           <el-button :icon="ArrowLeft" text circle @click="handleGoBack" />
         </el-tooltip>
         <div class="title-container">
