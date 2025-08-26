@@ -295,7 +295,7 @@ const handleSortChange = (newOrder: string) => {
   }
 
   .site-name {
-    color: var(--font-color);
+    color: #fff;
   }
 
   @media screen and (width <= 736px) {
