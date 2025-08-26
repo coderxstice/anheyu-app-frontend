@@ -110,6 +110,9 @@ onUnmounted(() => {
   display: block;
   width: 100%;
   height: 100%;
+  img {
+    border-radius: 0;
+  }
 }
 
 .az-image-placeholder,
