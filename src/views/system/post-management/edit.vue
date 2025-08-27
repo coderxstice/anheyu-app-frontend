@@ -69,7 +69,9 @@ const initialFormState = reactive({
 });
 const categoryOptions = ref<PostCategory[]>([]);
 const tagOptions = ref<PostTag[]>([]);
-const isEditMode = computed(() => !!articleId.value);
+const isEditMode = computed(
+  () => !!articleId.value && articleId.value !== "new"
+);
 const isDirty = computed(() => {
   return (
     form.title !== initialFormState.title ||
