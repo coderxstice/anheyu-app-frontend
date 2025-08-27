@@ -17,7 +17,7 @@ import { useMultiTagsStoreHook } from "./multiTags";
 import { getToken, setToken, removeToken } from "@/utils/auth";
 import { message } from "@/utils/message";
 
-export const useUserStore = defineStore("yuyu-user", () => {
+export const useUserStore = defineStore("anheyu-user", () => {
   const initialTokenData = getToken();
   const userInfo = initialTokenData?.userInfo;
 

@@ -65,7 +65,7 @@ if (!formData.value.settings) {
     <el-form-item label="云端存储根目录" prop="base_path">
       <el-input
         v-model="formData.base_path"
-        placeholder="例如 /YuyuAlbum/Work"
+        placeholder="例如 /anheyuAlbum/Work"
       />
       <div class="form-item-help">
         文件在 OneDrive 中的存放根目录，以 / 开头。

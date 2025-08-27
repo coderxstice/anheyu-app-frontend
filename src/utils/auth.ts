@@ -2,7 +2,7 @@ import { useUserStoreHook } from "@/store/modules/user";
 import { storageLocal } from "@pureadmin/utils";
 import type { LoginResultData } from "@/api/user";
 
-export const userKey = "yuyu-user-info";
+export const userKey = "anheyu-user-info";
 export const multipleTabsKey = "multiple-tabs";
 
 /**

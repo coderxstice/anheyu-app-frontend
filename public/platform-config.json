@@ -20,6 +20,6 @@
   "MenuArrowIconNoTransition": false,
   "CachingAsyncRoutes": false,
   "TooltipEffect": "light",
-  "ResponsiveStorageNameSpace": "yuyu-responsive-",
+  "ResponsiveStorageNameSpace": "anheyu-responsive-",
   "MenuSearchHistory": 6
 }

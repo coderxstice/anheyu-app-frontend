@@ -30,5 +30,5 @@ export const getConfig = (key?: string): any => {
 };
 
 export const responsiveStorageNameSpace = (): string => {
-  return getConfig()?.ResponsiveStorageNameSpace ?? "yuyu-responsive-";
+  return getConfig()?.ResponsiveStorageNameSpace ?? "anheyu-responsive-";
 };

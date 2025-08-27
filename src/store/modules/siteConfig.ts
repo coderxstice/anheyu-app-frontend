@@ -28,7 +28,7 @@ interface CombinedSiteSettings extends Partial<SiteConfig> {
   [key: string]: any;
 }
 
-export const useSiteConfigStore = defineStore("yuyu-site-config", {
+export const useSiteConfigStore = defineStore("anheyu-site-config", {
   // 定义了 store 的统一状态
   state: (): {
     siteConfig: CombinedSiteSettings;
@@ -193,42 +193,35 @@ export const useSiteConfigStore = defineStore("yuyu-site-config", {
     },
 
     /**
-     * @description 用于保存系统设置到后端，并智能更新缓存
+     * @description 用于保存系统设置到后端，并智能更新本地状态
      */
     async saveSystemSettings(settingsToUpdate: SettingsMap) {
       this.loading = true;
       try {
         const updateRes = await updateSettingsApi(settingsToUpdate);
+
+        // 检查后端API的返回结果
         if (updateRes.code !== 200) {
+          // 如果后端返回了错误信息，显示它并中断执行
+          message(`保存失败: ${updateRes.message}`, { type: "error" });
           return Promise.reject(new Error(updateRes.message));
         }
 
-        try {
-          const configRes = await getSiteConfigApi();
-          if (configRes.code === 200 && configRes.data) {
-            this._updateStateAndCache(configRes.data);
-            message("设置已保存成功", { type: "success" });
-            return Promise.resolve();
-          } else {
-            // 如果获取最新配置失败，降级为清除缓存，强制下次刷新时重新获取
-            localStorage.removeItem(LOCAL_STORAGE_KEY);
-            this.isLoaded = false;
-            return Promise.reject(
-              new Error("设置保存成功，但刷新缓存失败，请手动刷新页面。")
-            );
-          }
-        } catch (fetchError) {
-          // 如果网络请求失败，同样降级处理
-          localStorage.removeItem(LOCAL_STORAGE_KEY);
-          this.isLoaded = false;
-          console.error("刷新站点配置缓存时出错:", fetchError);
-          return Promise.reject(
-            new Error("设置保存成功，但刷新缓存时出错，请手动刷新页面。")
-          );
-        }
-      } catch (error) {
+        // 保存成功后，直接使用我们已知的、已更改的数据来增量更新 store
+        // 这一步是关键，它避免了重新获取全部配置，从而解决了递归更新的错误
+        this.updateSettingsByDotKeys(settingsToUpdate);
+
+        // 显示成功提示
+        message("设置已保存成功", { type: "success" });
+        return Promise.resolve();
+      } catch (error: any) {
+        // 捕获请求过程中的网络错误或其他异常
+        message(`保存失败: ${error.message || "未知网络错误"}`, {
+          type: "error"
+        });
         return Promise.reject(error);
       } finally {
+        // 无论成功还是失败，最后都将加载状态设置为 false
         this.loading = false;
       }
     },

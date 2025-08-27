@@ -6,7 +6,7 @@ import {
   responsiveStorageNameSpace
 } from "../utils";
 
-export const useEpThemeStore = defineStore("yuyu-epTheme", {
+export const useEpThemeStore = defineStore("anheyu-epTheme", {
   state: () => ({
     epThemeColor:
       storageLocal().getItem<StorageConfigs>(

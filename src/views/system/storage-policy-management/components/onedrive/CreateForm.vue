@@ -20,7 +20,7 @@ const formData = ref<Partial<StoragePolicy>>({
   server: "https://graph.microsoft.com/v1.0",
   bucket_name: "",
   secret_key: "",
-  base_path: "/YuyuAlbum",
+  base_path: "/anheyuAlbum",
   virtual_path: "/onedrive",
   settings: {
     drive_type: "default"
@@ -107,7 +107,7 @@ defineExpose({ submitForm });
     <el-form-item label="云端存储根目录" prop="base_path">
       <el-input
         v-model="formData.base_path"
-        placeholder="例如 /YuyuAlbum/Work"
+        placeholder="例如 /anheyuAlbum/Work"
       />
       <div class="form-item-help">
         文件在 OneDrive 中的存放根目录，以 / 开头。

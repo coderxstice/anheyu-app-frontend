@@ -69,7 +69,7 @@ export function getPluginsList(
             handler: "CacheFirst",
             options: {
               // 为这个缓存策略创建一个专门的缓存空间
-              cacheName: "yuyu-image-cache",
+              cacheName: "anheyu-image-cache",
               // 配置插件，用于管理缓存的有效期和数量
               expiration: {
                 // 最多缓存 100 张图片

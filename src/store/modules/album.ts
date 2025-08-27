@@ -8,7 +8,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-export const useAlbumStore = defineStore("yuyu-album", () => {
+export const useAlbumStore = defineStore("anheyu-album", () => {
   // State: 定义排序状态，默认值为按排序号
   const sortOrder = ref("display_order_asc");
 
