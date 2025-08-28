@@ -394,6 +394,68 @@ defineExpose({
       }
     }
 
+    ul {
+      counter-reset: li 0;
+    }
+
+    ol > li::before {
+      margin-top: 0.45em;
+      width: 1.45em;
+      height: 1.45em;
+      border-radius: 0.725em;
+      content: counter(li);
+      counter-increment: li 1;
+      text-align: center;
+      font-size: 0.85em;
+      line-height: 1.45em;
+    }
+
+    ol li:not(.tab),
+    ul li:not(.tab) {
+      position: relative;
+      margin: 0.2rem 0;
+    }
+
+    ol > li:not(.tab) {
+      padding: 0.2em 0.2em 0.2em 1.8em;
+    }
+
+    ul > li:not(.tab)::before {
+      top: 0.6em;
+      width: 0.84em;
+      height: 0.84em;
+      border-radius: 0.42em;
+      content: "";
+      line-height: 0.42em;
+    }
+
+    ul > li:not(.tab) {
+      padding: 0.2em 0.2em 0.2em 1.4em;
+    }
+
+    ul > li:not(.tab):before {
+      border: 0.21em solid var(--anzhiyu-lighttext);
+      background: var(--anzhiyu-lighttext);
+    }
+
+    ol,
+    ul {
+      margin-top: 0.4rem;
+      padding: 0 0 0 0.8rem;
+      list-style: none;
+      counter-reset: li 0;
+    }
+
+    ol li::before,
+    ul li::before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: var(--anzhiyu-main);
+      color: #fff;
+      transition: all 0.3s ease-out 0s;
+    }
+
     a {
       padding: 0 0.2rem !important;
       font-family: inherit;
