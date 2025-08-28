@@ -143,7 +143,6 @@ onUnmounted(() => {
   border: var(--style-border);
   border-radius: 12px;
   transition: all 0.3s ease 0s;
-  transform: translateX(-1px);
   animation: slide-in 0.6s 0.3s backwards;
 }
 
@@ -153,6 +152,7 @@ onUnmounted(() => {
   align-items: center;
   overflow-x: auto;
   scrollbar-width: none;
+  transform: translateX(-1px);
 
   &::-webkit-scrollbar {
     display: none;
