@@ -19,7 +19,7 @@ import {
   getCategoryList,
   getTagList,
   createCategory,
-  updateCategory, // [新增] 引入 updateCategory
+  updateCategory,
   createTag,
   uploadArticleImage
 } from "@/api/post";
@@ -48,6 +48,8 @@ const isSubmitting = ref(false);
 const articleId = ref<string | null>(null);
 const isPublishDialogVisible = ref(false);
 const seriesCategoryId = ref<string | null>(null);
+// [新增] 用于存储页面加载时的原始系列ID
+const originalSeriesCategoryId = ref<string | null>(null);
 
 const form = reactive<ArticleForm>({
   title: "",
@@ -112,6 +114,11 @@ const initPage = async () => {
       if (!Array.isArray(form.summaries)) {
         form.summaries = [];
       }
+      // [新增] 记录初始的系列分类ID
+      const originalSeries = data.post_categories.find(c => c.is_series);
+      if (originalSeries) {
+        originalSeriesCategoryId.value = originalSeries.id;
+      }
     }
     await fetchOptionsPromise;
   } catch (error) {
@@ -132,8 +139,22 @@ const validateName = (name: string, type: "分类" | "标签"): boolean => {
   }
   return true;
 };
-
 const processTagsAndCategories = async () => {
+  const oldSeriesId = originalSeriesCategoryId.value;
+  const newSeriesId = seriesCategoryId.value;
+
+  if (oldSeriesId && oldSeriesId !== newSeriesId) {
+    try {
+      await updateCategory(oldSeriesId, { is_series: false });
+      const localCat = categoryOptions.value.find(c => c.id === oldSeriesId);
+      if (localCat) localCat.is_series = false;
+    } catch (error) {
+      console.error(`尝试降级分类 ${oldSeriesId} 失败:`, error);
+      ElMessage.error("更新原系列分类失败，可能仍有其他文章在使用它。");
+      throw new Error("分类降级失败");
+    }
+  }
+
   if (Array.isArray(form.post_category_ids)) {
     const categoryPromises = form.post_category_ids.map(async item => {
       const existingCategory = categoryOptions.value.find(
@@ -141,7 +162,7 @@ const processTagsAndCategories = async () => {
       );
 
       if (existingCategory) {
-        if (item === seriesCategoryId.value && !existingCategory.is_series) {
+        if (item === newSeriesId && !existingCategory.is_series) {
           await updateCategory(item, { is_series: true });
           existingCategory.is_series = true;
         }
@@ -153,7 +174,7 @@ const processTagsAndCategories = async () => {
       }
 
       const payload: PostCategoryForm = { name: item };
-      if (item === seriesCategoryId.value) {
+      if (item === newSeriesId) {
         payload.is_series = true;
       }
 
@@ -165,6 +186,7 @@ const processTagsAndCategories = async () => {
     form.post_category_ids = await Promise.all(categoryPromises);
   }
 
+  // 3. 标签处理逻辑保持不变
   if (Array.isArray(form.post_tag_ids)) {
     const tagPromises = form.post_tag_ids.map(async item => {
       if (tagOptions.value.some(opt => opt.id === item)) {
@@ -204,12 +226,20 @@ const onSaveHandler = async (markdown: string, sanitizedHtml: string) => {
     }
     localStorage.removeItem(getDraftKey());
     updateInitialState();
+    // 更新完成后，重置原始系列ID状态，为下一次编辑做准备
+    originalSeriesCategoryId.value = seriesCategoryId.value;
     await siteConfigStore.fetchSystemSettings([
       constant.KeySidebarSiteInfoTotalPostCount,
       constant.KeySidebarSiteInfoTotalWordCount
     ]);
   } catch (error) {
-    if (!(error instanceof Error && error.message.includes("校验失败"))) {
+    if (
+      !(
+        error instanceof Error &&
+        (error.message.includes("校验失败") ||
+          error.message.includes("分类降级失败"))
+      )
+    ) {
       ElMessage.error(isEditMode.value ? "更新失败" : "创建失败");
     }
   } finally {
@@ -504,3 +534,4 @@ onUnmounted(() => {
   }
 }
 </style>
+s

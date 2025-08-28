@@ -179,7 +179,6 @@ const handleConfirm = () => {
                     :key="item.id"
                     :label="item.name"
                     :value="item.id"
-                    :disabled="item.is_series"
                   />
                 </el-select>
               </el-form-item>
