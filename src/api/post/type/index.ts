@@ -2,7 +2,7 @@
  * @Description: 文章、标签、分类模块的所有类型定义
  * @Author: 安知鱼
  * @Date: 2025-07-23 11:07:00
- * @LastEditTime: 2025-08-14 12:49:35
+ * @LastEditTime: 2025-08-28 13:52:15
  * @LastEditors: 安知鱼
  */
 
@@ -47,11 +47,14 @@ export interface PostCategory {
   updated_at: string;
   name: string;
   description: string;
+  count: number;
+  is_series: boolean;
 }
 
 export interface PostCategoryForm {
   name?: string;
   description?: string;
+  is_series?: boolean;
 }
 
 export type PostCategoryResponse = PostCategory;

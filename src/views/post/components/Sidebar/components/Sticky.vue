@@ -1,20 +1,15 @@
-<!--
- * @Description:
- * @Author: 安知鱼
- * @Date: 2025-08-05 18:31:42
- * @LastEditTime: 2025-08-13 13:42:14
- * @LastEditors: 安知鱼
--->
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, inject, ref } from "vue";
+import type { Ref } from "vue";
 import { useRoute } from "vue-router";
+import type { PostCategory } from "@/api/post/type";
 
-// 引入所有需要用到的侧边栏卡片组件
 import TagsCard from "./TagsCard.vue";
 import CardWebInfo from "./CardWebInfo.vue";
 import CardToc from "./CardToc.vue";
 import CardRecentPost from "./CardRecentPost.vue";
 import Archives from "./Archives.vue";
+import CardSeriesPost from "./CardSeriesPost.vue";
 
 const props = defineProps({
   config: {
@@ -23,11 +18,13 @@ const props = defineProps({
   }
 });
 
-// 1. 获取当前路由信息
 const route = useRoute();
-
-// 2. 创建一个计算属性，判断当前是否为文章详情页
 const isPostDetailPage = computed(() => route.name === "PostDetail");
+
+const seriesCategory = inject<Ref<PostCategory | null>>(
+  "seriesCategory",
+  ref(null)
+);
 
 const tagsConfig = computed(() => {
   if (!props.config?.sidebar?.tags?.enable) return null;
@@ -53,6 +50,7 @@ defineOptions({
 <template>
   <div class="sticky-container">
     <template v-if="isPostDetailPage">
+      <CardSeriesPost v-if="seriesCategory" />
       <CardToc />
       <CardRecentPost />
     </template>

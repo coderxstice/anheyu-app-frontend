@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ArticleForm, PostCategory, PostTag } from "@/api/post/type";
-import { Plus, Remove } from "@element-plus/icons-vue";
-import { computed, ref, watch } from "vue";
+import { Plus, Remove, InfoFilled } from "@element-plus/icons-vue";
+import { computed, ref, watch, type PropType } from "vue";
 import ImageUpload from "@/components/ImageUpload/index.vue";
 
 const props = defineProps<{
@@ -12,24 +12,41 @@ const props = defineProps<{
   isSubmitting: boolean;
   categorySelectKey: number;
   tagSelectKey: number;
+  seriesCategoryId: string | null;
 }>();
 
 const emit = defineEmits([
   "update:modelValue",
+  "update:seriesCategoryId",
   "change-category",
   "change-tag",
   "confirm-publish"
 ]);
 
 const activeTab = ref("common");
+const isSeriesMode = ref(false);
 
 const isVisible = computed({
   get: () => props.modelValue,
   set: val => emit("update:modelValue", val)
 });
 
+const seriesCategoryModel = computed({
+  get: () => props.seriesCategoryId,
+  set: val => emit("update:seriesCategoryId", val)
+});
+
 const internalForm = props.form;
 const copyrightType = ref<"original" | "reprint">("original");
+
+const handleModeChange = (isSeries: boolean) => {
+  // 清空已选分类，避免数据污染
+  internalForm.post_category_ids = [];
+  if (!isSeries) {
+    // 从系列模式切换回普通模式时，清空系列ID
+    emit("update:seriesCategoryId", null);
+  }
+};
 
 watch(
   () => props.modelValue,
@@ -41,6 +58,19 @@ watch(
       } else {
         copyrightType.value = "original";
       }
+
+      const currentCategoryIds = props.form.post_category_ids ?? [];
+      if (currentCategoryIds.length === 1) {
+        const categoryId = currentCategoryIds[0];
+        const category = props.categoryOptions.find(c => c.id === categoryId);
+        if (category && category.is_series) {
+          isSeriesMode.value = true;
+          emit("update:seriesCategoryId", category.id);
+          return;
+        }
+      }
+      isSeriesMode.value = false;
+      emit("update:seriesCategoryId", null);
     }
   }
 );
@@ -52,6 +82,15 @@ watch(copyrightType, newType => {
     internalForm.copyright_url = "";
   }
 });
+
+watch(
+  () => props.seriesCategoryId,
+  newSeriesId => {
+    if (isSeriesMode.value) {
+      internalForm.post_category_ids = newSeriesId ? [newSeriesId] : [];
+    }
+  }
+);
 
 const statusOptions = [
   { value: "PUBLISHED", label: "发布" },
@@ -91,8 +130,35 @@ const handleConfirm = () => {
       <el-tab-pane label="常用设置" name="common">
         <el-form :model="internalForm" label-position="top">
           <el-row :gutter="24">
+            <el-col :span="24">
+              <el-form-item>
+                <template #label>
+                  <span>分类设置</span>
+                  <el-tooltip
+                    content="一篇文章只能属于一个系列, 或多个普通分类"
+                    placement="top"
+                    :show-arrow="false"
+                  >
+                    <el-icon style="margin-left: 4px; vertical-align: middle"
+                      ><InfoFilled
+                    /></el-icon>
+                  </el-tooltip>
+                </template>
+                <el-radio-group
+                  v-model="isSeriesMode"
+                  @change="handleModeChange"
+                >
+                  <el-radio-button :value="false">普通分类</el-radio-button>
+                  <el-radio-button :value="true">系列</el-radio-button>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
             <el-col :span="12">
-              <el-form-item label="分类" prop="post_category_ids">
+              <el-form-item
+                v-show="!isSeriesMode"
+                label="分类"
+                prop="post_category_ids"
+              >
                 <el-select
                   :key="props.categorySelectKey"
                   v-model="internalForm.post_category_ids"
@@ -111,10 +177,50 @@ const handleConfirm = () => {
                     :key="item.id"
                     :label="item.name"
                     :value="item.id"
+                    :disabled="item.is_series"
                   />
                 </el-select>
               </el-form-item>
+
+              <el-form-item
+                v-show="isSeriesMode"
+                label="所属系列"
+                prop="post_category_ids"
+              >
+                <el-select
+                  v-model="seriesCategoryModel"
+                  filterable
+                  allow-create
+                  default-first-option
+                  placeholder="选择或创建一个系列"
+                  style="width: 100%"
+                  no-data-text="输入名称后按回车键创建"
+                  clearable
+                  @change="
+                    value => emit('change-category', value ? [value] : [])
+                  "
+                >
+                  <el-option
+                    v-for="item in categoryOptions"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id"
+                  >
+                    <span style="float: left">{{ item.name }}</span>
+                    <span
+                      v-if="item.is_series"
+                      style="
+                        float: right;
+                        color: var(--el-text-color-secondary);
+                        font-size: 13px;
+                      "
+                      >系列</span
+                    >
+                  </el-option>
+                </el-select>
+              </el-form-item>
             </el-col>
+
             <el-col :span="12">
               <el-form-item label="标签" prop="post_tag_ids">
                 <el-select

@@ -1,19 +1,23 @@
 <script setup lang="ts">
 import { computed, inject, ref } from "vue";
 import type { Ref } from "vue";
-import type { ArticleLink } from "@/api/post/type";
+import type { Article, PostCategory } from "@/api/post/type";
 import { useArticleStore } from "@/store/modules/articleStore";
 
 defineOptions({
-  name: "CardRecentPost"
+  name: "CardSeriesPost"
 });
 
 const articleStore = useArticleStore();
 const defaultCover = articleStore.defaultCover;
 
-const articles = inject<Ref<ArticleLink[]>>("recentArticles", ref([]));
+const seriesPosts = inject<Ref<Article[]>>("seriesArticles", ref([]));
+const seriesCategory = inject<Ref<PostCategory | null>>(
+  "seriesCategory",
+  ref(null)
+);
 
-const displayPosts = computed(() => articles.value.slice(0, 5));
+const displayPosts = computed(() => seriesPosts.value);
 
 const formatDate = (dateString: string) => {
   if (!dateString) return "";
@@ -25,10 +29,10 @@ const formatDate = (dateString: string) => {
 };
 </script>
 <template>
-  <div v-if="displayPosts.length > 0" class="card-widget card-recent-post">
+  <div v-if="displayPosts.length > 0" class="card-widget card-series-post">
     <div class="item-headline">
-      <i class="anzhiyufont anzhiyu-icon-history" />
-      <span>最近发布</span>
+      <i class="anzhiyufont anzhiyu-icon-cube" />
+      <span>{{ seriesCategory?.name || "系列文章" }}</span>
     </div>
     <div class="aside-list">
       <router-link
@@ -82,11 +86,9 @@ const formatDate = (dateString: string) => {
 .aside-list-item {
   display: flex;
   gap: 0.75rem;
-  // [新增] 重置 a 标签的默认样式
   color: inherit;
   text-decoration: none;
 
-  // [新增] 当鼠标悬停在整个项目上时，改变标题颜色
   &:hover .title {
     color: var(--anzhiyu-main);
   }

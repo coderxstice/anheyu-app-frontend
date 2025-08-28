@@ -22,7 +22,12 @@ import {
   createTag,
   uploadArticleImage
 } from "@/api/post";
-import type { ArticleForm, PostCategory, PostTag } from "@/api/post/type";
+import type {
+  ArticleForm,
+  PostCategory,
+  PostTag,
+  PostCategoryForm
+} from "@/api/post/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { constant } from "@/constant";
 
@@ -41,6 +46,7 @@ const loading = ref(true);
 const isSubmitting = ref(false);
 const articleId = ref<string | null>(null);
 const isPublishDialogVisible = ref(false);
+const seriesCategoryId = ref<string | null>(null);
 
 const form = reactive<ArticleForm>({
   title: "",
@@ -134,7 +140,11 @@ const processTagsAndCategories = async () => {
       if (!validateName(item, "分类")) {
         throw new Error(`分类名 "${item}" 校验失败`);
       }
-      const res = await createCategory({ name: item });
+      const payload: PostCategoryForm = { name: item };
+      if (item === seriesCategoryId.value) {
+        payload.is_series = true;
+      }
+      const res = await createCategory(payload);
       const newCategory = res.data;
       categoryOptions.value.push(newCategory);
       return newCategory.id;
@@ -380,6 +390,7 @@ onUnmounted(() => {
 
     <PublishDialog
       v-model="isPublishDialogVisible"
+      v-model:seriesCategoryId="seriesCategoryId"
       :form="form"
       :category-options="categoryOptions"
       :tag-options="tagOptions"

@@ -2,7 +2,7 @@
  * @Description: 文章相关的状态管理
  * @Author: 安知鱼
  * @Date: 2025-08-02 18:31:47
- * @LastEditTime: 2025-08-19 18:38:15
+ * @LastEditTime: 2025-08-28 13:46:17
  * @LastEditors: 安知鱼
  */
 import { defineStore } from "pinia";
@@ -16,7 +16,6 @@ import {
   getTagList,
   getArticleArchives
 } from "@/api/post";
-// +++ 1. 引入获取随机友链的 API ---
 import { getRandomLinks } from "@/api/postLink";
 import type {
   Article,
@@ -31,7 +30,6 @@ export const useArticleStore = defineStore("article", () => {
   const isRandomArticleLoading = ref(false);
   const currentArticleTitle = ref("");
 
-  // +++ 2. 新增随机友链的加载状态 ---
   const isRandomLinkLoading = ref(false);
 
   // --- 首页推荐文章 State ---

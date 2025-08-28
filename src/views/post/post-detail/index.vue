@@ -10,10 +10,9 @@ import {
 } from "vue";
 import { useRoute } from "vue-router";
 import { getPublicArticle, getPublicArticles } from "@/api/post";
-import type { Article } from "@/api/post/type";
+import type { Article, ArticleLink } from "@/api/post/type";
 import { useLoadingStore } from "@/store/modules/loadingStore";
 import { useCommentStore } from "@/store/modules/commentStore";
-import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useArticleStore } from "@/store/modules/articleStore";
 
 import PostHeader from "./components/PostHeader/index.vue";
@@ -33,19 +32,25 @@ defineOptions({
 
 const route = useRoute();
 const article = ref<Article | null>(null);
-const recentArticles = ref<Article[]>([]);
+const recentArticles = ref<ArticleLink[]>([]);
+const seriesArticles = ref<Article[]>([]);
 const loading = ref(true);
 const loadingStore = useLoadingStore();
 const commentStore = useCommentStore();
-const siteConfigStore = useSiteConfigStore();
 
 const originalMainColor = ref<string | null>(null);
 const originalMainOpDeepColor = ref<string | null>(null);
 const originalMainOpLightColor = ref<string | null>(null);
 
+const seriesCategory = computed(() => {
+  if (!article.value) return null;
+  return article.value.post_categories.find(cat => cat.is_series) || null;
+});
+
+provide("seriesCategory", seriesCategory);
+provide("seriesArticles", seriesArticles);
 provide("recentArticles", recentArticles);
 
-// [核心修改] 恢复 snake_case
 provide(
   "articleContentHtml",
   computed(() => article.value?.content_html)
@@ -82,15 +87,22 @@ const fetchRequiredData = async (id: string) => {
     loading.value = true;
   }
   try {
-    const [articleResponse, recentArticlesResponse] = await Promise.all([
-      getPublicArticle(id),
-      getPublicArticles({ page: 1, pageSize: 6 })
-    ]);
-
+    const articleResponse = await getPublicArticle(id);
     article.value = articleResponse.data;
     articleStore.setCurrentArticleTitle(articleResponse.data.title);
+    recentArticles.value = article.value.related_articles || [];
 
-    recentArticles.value = recentArticlesResponse.data.list;
+    if (seriesCategory.value) {
+      const seriesResponse = await getPublicArticles({
+        category: seriesCategory.value.name,
+        pageSize: 100
+      });
+      seriesArticles.value = seriesResponse.data.list.filter(
+        p => p.id !== article.value?.id
+      );
+    } else {
+      seriesArticles.value = [];
+    }
   } catch (error) {
     console.error("获取页面数据失败:", error);
   } finally {
@@ -102,9 +114,7 @@ const hydrate = () => {
   if (window && window.__INITIAL_DATA__) {
     article.value = window.__INITIAL_DATA__;
     loading.value = false;
-    getPublicArticles({ page: 1, pageSize: 5 }).then(res => {
-      recentArticles.value = res.data.list;
-    });
+    recentArticles.value = article.value?.related_articles || [];
     delete window.__INITIAL_DATA__;
     return true;
   }
