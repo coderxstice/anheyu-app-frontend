@@ -6,7 +6,8 @@ import {
   onUnmounted,
   nextTick,
   provide,
-  computed
+  computed,
+  type Ref
 } from "vue";
 import { useRoute } from "vue-router";
 import { getPublicArticle, getPublicArticles } from "@/api/post";
@@ -30,49 +31,24 @@ defineOptions({
   name: "PostDetail"
 });
 
+// --- 核心响应式状态 ---
 const route = useRoute();
 const article = ref<Article | null>(null);
 const recentArticles = ref<ArticleLink[]>([]);
 const seriesArticles = ref<Article[]>([]);
 const loading = ref(true);
+const commentRef = ref<InstanceType<typeof PostComment> | null>(null);
+
+// --- Pinia Stores ---
 const loadingStore = useLoadingStore();
 const commentStore = useCommentStore();
+const articleStore = useArticleStore();
 
-const originalMainColor = ref<string | null>(null);
-const originalMainOpDeepColor = ref<string | null>(null);
-const originalMainOpLightColor = ref<string | null>(null);
-
+// --- 计算属性 ---
 const seriesCategory = computed(() => {
   if (!article.value) return null;
   return article.value.post_categories.find(cat => cat.is_series) || null;
 });
-
-provide("seriesCategory", seriesCategory);
-provide("seriesArticles", seriesArticles);
-provide("recentArticles", recentArticles);
-
-provide(
-  "articleContentHtml",
-  computed(() => article.value?.content_html)
-);
-
-const headingTocItems = ref<{ id: string }[]>([]);
-const commentIds = ref<string[]>([]);
-const allSpyIds = computed(() => {
-  const headingIds = headingTocItems.value.map(item => item.id);
-  return [...headingIds, ...commentIds.value];
-});
-provide("allSpyIds", allSpyIds);
-
-provide("updateHeadingTocItems", (items: { id: string }[]) => {
-  headingTocItems.value = items;
-});
-const handleCommentIdsLoaded = (ids: string[]) => {
-  commentIds.value = ids;
-};
-
-const commentRef = ref<InstanceType<typeof PostComment> | null>(null);
-const articleStore = useArticleStore();
 
 const articleWithCommentCount = computed(() => {
   if (!article.value) return null;
@@ -82,20 +58,148 @@ const articleWithCommentCount = computed(() => {
   };
 });
 
+const headingTocItems = ref<{ id: string }[]>([]);
+const commentIds = ref<string[]>([]);
+const allSpyIds = computed(() => [
+  ...headingTocItems.value.map(item => item.id),
+  ...commentIds.value
+]);
+
+provide("seriesCategory", seriesCategory);
+provide("seriesArticles", seriesArticles);
+provide("recentArticles", recentArticles);
+provide(
+  "articleContentHtml",
+  computed(() => article.value?.content_html)
+);
+provide("allSpyIds", allSpyIds);
+provide("updateHeadingTocItems", (items: { id: string }[]) => {
+  headingTocItems.value = items;
+});
+
+// --- 方法与逻辑 ---
+
+/**
+ * @description 管理文章主色调主题的逻辑
+ * @param articleRef - 文章数据的 ref
+ */
+const useArticleTheme = (articleRef: Ref<Article | null>) => {
+  const originalColors = {
+    main: "",
+    mainOpDeep: "",
+    mainOpLight: ""
+  };
+
+  const saveOriginalColors = () => {
+    const rootStyle = getComputedStyle(document.documentElement);
+    originalColors.main = rootStyle.getPropertyValue("--anzhiyu-main").trim();
+    originalColors.mainOpDeep = rootStyle
+      .getPropertyValue("--anzhiyu-main-op-deep")
+      .trim();
+    originalColors.mainOpLight = rootStyle
+      .getPropertyValue("--anzhiyu-main-op-light")
+      .trim();
+  };
+
+  const restoreOriginalColors = () => {
+    const rootStyle = document.documentElement.style;
+    if (originalColors.main)
+      rootStyle.setProperty("--anzhiyu-main", originalColors.main);
+    if (originalColors.mainOpDeep)
+      rootStyle.setProperty(
+        "--anzhiyu-main-op-deep",
+        originalColors.mainOpDeep
+      );
+    if (originalColors.mainOpLight)
+      rootStyle.setProperty(
+        "--anzhiyu-main-op-light",
+        originalColors.mainOpLight
+      );
+  };
+
+  watch(
+    () => articleRef.value?.primary_color,
+    newColor => {
+      const rootStyle = document.documentElement.style;
+      if (newColor) {
+        rootStyle.setProperty("--anzhiyu-main", newColor);
+        // 简单判断是否为 HEX 颜色以添加透明度
+        if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(newColor)) {
+          rootStyle.setProperty("--anzhiyu-main-op-deep", `${newColor}dd`);
+          rootStyle.setProperty("--anzhiyu-main-op-light", `${newColor}0d`);
+        } else {
+          // 如果不是标准 HEX，则直接使用原色
+          rootStyle.setProperty("--anzhiyu-main-op-deep", newColor);
+          rootStyle.setProperty("--anzhiyu-main-op-light", newColor);
+        }
+      } else {
+        restoreOriginalColors();
+      }
+    },
+    { immediate: true }
+  );
+
+  onMounted(saveOriginalColors);
+  onUnmounted(() => {
+    commentStore.resetStore();
+    restoreOriginalColors();
+  });
+};
+
+useArticleTheme(article);
+
+const handleCommentIdsLoaded = (ids: string[]) => {
+  commentIds.value = ids;
+};
+
+/**
+ * @description 获取页面所需的所有数据
+ * @param id - 文章ID
+ */
 const fetchRequiredData = async (id: string) => {
+  if (window && window.__INITIAL_DATA__) {
+    article.value = window.__INITIAL_DATA__;
+    loading.value = false;
+    delete window.__INITIAL_DATA__;
+
+    getPublicArticles({ page: 1, pageSize: 5 }).then(res => {
+      recentArticles.value = res.data.list.map(p => ({
+        id: p.id,
+        title: p.title,
+        cover_url: p.cover_url,
+        abbrlink: p.abbrlink || "",
+        created_at: p.created_at
+      }));
+    });
+    return;
+  }
+
   if (!article.value) {
     loading.value = true;
   }
+
   try {
-    const articleResponse = await getPublicArticle(id);
+    const [articleResponse, recentArticlesResponse] = await Promise.all([
+      getPublicArticle(id),
+      getPublicArticles({ page: 1, pageSize: 5 })
+    ]);
+
     article.value = articleResponse.data;
     articleStore.setCurrentArticleTitle(articleResponse.data.title);
-    recentArticles.value = article.value.related_articles || [];
 
+    recentArticles.value = recentArticlesResponse.data.list.map(p => ({
+      id: p.id,
+      title: p.title,
+      cover_url: p.cover_url,
+      abbrlink: p.abbrlink || "",
+      created_at: p.created_at
+    }));
+
+    // 获取系列文章
     if (seriesCategory.value) {
       const seriesResponse = await getPublicArticles({
         category: seriesCategory.value.name,
-        pageSize: 100
+        pageSize: 9999
       });
       seriesArticles.value = seriesResponse.data.list.filter(
         p => p.id !== article.value?.id
@@ -107,114 +211,33 @@ const fetchRequiredData = async (id: string) => {
     console.error("获取页面数据失败:", error);
   } finally {
     loading.value = false;
+    nextTick(() => {
+      loadingStore.stopLoading();
+    });
   }
 };
 
-const hydrate = () => {
-  if (window && window.__INITIAL_DATA__) {
-    article.value = window.__INITIAL_DATA__;
-    loading.value = false;
-    recentArticles.value = article.value?.related_articles || [];
-    delete window.__INITIAL_DATA__;
-    return true;
-  }
-  return false;
-};
-
-watch(
-  article,
-  newArticle => {
-    const rootStyle = document.documentElement.style;
-    const rootComputedStyle = getComputedStyle(document.documentElement);
-
-    if (originalMainColor.value === null) {
-      originalMainColor.value = rootComputedStyle
-        .getPropertyValue("--anzhiyu-main")
-        .trim();
-      originalMainOpDeepColor.value = rootComputedStyle
-        .getPropertyValue("--anzhiyu-main-op-deep")
-        .trim();
-      originalMainOpLightColor.value = rootComputedStyle
-        .getPropertyValue("--anzhiyu-main-op-light")
-        .trim();
-    }
-
-    if (newArticle && newArticle.primary_color) {
-      const newColor = newArticle.primary_color;
-      rootStyle.setProperty("--anzhiyu-main", newColor);
-
-      if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(newColor)) {
-        rootStyle.setProperty("--anzhiyu-main-op-deep", `${newColor}dd`);
-        rootStyle.setProperty("--anzhiyu-main-op-light", `${newColor}0d`);
-      } else {
-        rootStyle.setProperty("--anzhiyu-main-op-deep", newColor);
-        rootStyle.setProperty("--anzhiyu-main-op-light", newColor);
-      }
-    } else {
-      if (originalMainColor.value) {
-        rootStyle.setProperty("--anzhiyu-main", originalMainColor.value);
-      }
-      if (originalMainOpDeepColor.value) {
-        rootStyle.setProperty(
-          "--anzhiyu-main-op-deep",
-          originalMainOpDeepColor.value
-        );
-      }
-      if (originalMainOpLightColor.value) {
-        rootStyle.setProperty(
-          "--anzhiyu-main-op-light",
-          originalMainOpLightColor.value
-        );
-      }
-    }
-
-    if (newArticle) {
-      nextTick(() => {
-        loadingStore.stopLoading();
-      });
-    }
-  },
-  { immediate: true }
-);
-
-onUnmounted(() => {
-  commentStore.resetStore();
-
-  const rootStyle = document.documentElement.style;
-  if (originalMainColor.value) {
-    rootStyle.setProperty("--anzhiyu-main", originalMainColor.value);
-  }
-  if (originalMainOpDeepColor.value) {
-    rootStyle.setProperty(
-      "--anzhiyu-main-op-deep",
-      originalMainOpDeepColor.value
-    );
-  }
-  if (originalMainOpLightColor.value) {
-    rootStyle.setProperty(
-      "--anzhiyu-main-op-light",
-      originalMainOpLightColor.value
-    );
-  }
-});
-
+// --- 生命周期钩子 ---
 onMounted(() => {
   const handleInitialHash = () => {
     const hash = window.location.hash;
     if (!hash) return;
 
-    const id = decodeURIComponent(hash.slice(1));
-    const targetElement = document.getElementById(id);
+    try {
+      const id = decodeURIComponent(hash.slice(1));
+      const targetElement = document.getElementById(id);
 
-    if (targetElement) {
-      if (id.startsWith("comment-")) {
-        commentRef.value?.scrollToComment(id);
-      } else {
-        const rect = targetElement.getBoundingClientRect();
-        const absoluteTop = rect.top + window.scrollY;
-        const top = absoluteTop - 80;
-        window.scrollTo({ top: top, behavior: "smooth" });
+      if (targetElement) {
+        if (id.startsWith("comment-")) {
+          commentRef.value?.scrollToComment(id);
+        } else {
+          const top =
+            targetElement.getBoundingClientRect().top + window.scrollY - 80;
+          window.scrollTo({ top, behavior: "smooth" });
+        }
       }
+    } catch (e) {
+      console.error("处理URL哈希值失败:", e);
     }
   };
 
@@ -224,9 +247,6 @@ onMounted(() => {
 watch(
   () => route.params.id,
   newId => {
-    if (hydrate()) {
-      return;
-    }
     if (newId) {
       fetchRequiredData(newId as string);
     }
@@ -259,7 +279,7 @@ watch(
             :prev-article="article.prev_article"
             :next-article="article.next_article"
           />
-          <RelatedPosts :posts="article.related_articles" />
+          <RelatedPosts :posts="recentArticles" />
           <PostComment
             ref="commentRef"
             :target-path="route.path"
