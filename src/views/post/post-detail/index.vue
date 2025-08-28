@@ -279,7 +279,8 @@ watch(
             :prev-article="article.prev_article"
             :next-article="article.next_article"
           />
-          <RelatedPosts :posts="recentArticles" />
+          <!-- 相关文章可以直接在文章详情中获取，最近文章才需要从文章列表获取，这里是相关文章，最近文章数据才通过provide传递 -->
+          <RelatedPosts :posts="article.related_articles" />
           <PostComment
             ref="commentRef"
             :target-path="route.path"
