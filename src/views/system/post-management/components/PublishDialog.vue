@@ -40,10 +40,12 @@ const internalForm = props.form;
 const copyrightType = ref<"original" | "reprint">("original");
 
 const handleModeChange = (isSeries: boolean) => {
-  // 清空已选分类，避免数据污染
-  internalForm.post_category_ids = [];
-  if (!isSeries) {
-    // 从系列模式切换回普通模式时，清空系列ID
+  if (isSeries) {
+    internalForm.post_category_ids = props.seriesCategoryId
+      ? [props.seriesCategoryId]
+      : [];
+  } else {
+    internalForm.post_category_ids = [];
     emit("update:seriesCategoryId", null);
   }
 };

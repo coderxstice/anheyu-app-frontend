@@ -19,6 +19,7 @@ import {
   getCategoryList,
   getTagList,
   createCategory,
+  updateCategory, // [新增] 引入 updateCategory
   createTag,
   uploadArticleImage
 } from "@/api/post";
@@ -131,19 +132,31 @@ const validateName = (name: string, type: "分类" | "标签"): boolean => {
   }
   return true;
 };
+
 const processTagsAndCategories = async () => {
   if (Array.isArray(form.post_category_ids)) {
     const categoryPromises = form.post_category_ids.map(async item => {
-      if (categoryOptions.value.some(opt => opt.id === item)) {
+      const existingCategory = categoryOptions.value.find(
+        opt => opt.id === item
+      );
+
+      if (existingCategory) {
+        if (item === seriesCategoryId.value && !existingCategory.is_series) {
+          await updateCategory(item, { is_series: true });
+          existingCategory.is_series = true;
+        }
         return item;
       }
+
       if (!validateName(item, "分类")) {
         throw new Error(`分类名 "${item}" 校验失败`);
       }
+
       const payload: PostCategoryForm = { name: item };
       if (item === seriesCategoryId.value) {
         payload.is_series = true;
       }
+
       const res = await createCategory(payload);
       const newCategory = res.data;
       categoryOptions.value.push(newCategory);
@@ -151,6 +164,7 @@ const processTagsAndCategories = async () => {
     });
     form.post_category_ids = await Promise.all(categoryPromises);
   }
+
   if (Array.isArray(form.post_tag_ids)) {
     const tagPromises = form.post_tag_ids.map(async item => {
       if (tagOptions.value.some(opt => opt.id === item)) {
