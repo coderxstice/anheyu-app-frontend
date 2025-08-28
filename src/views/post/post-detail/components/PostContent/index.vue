@@ -403,7 +403,7 @@ onUnmounted(() => {
       font-size: 1rem;
       color: var(--hltools-color);
       list-style: none;
-      cursor: pointer; // 让整个头部都可以点击
+      cursor: pointer;
       background: var(--hltools-bg);
       -webkit-tap-highlight-color: rgb(0 0 0 / 0%);
 
@@ -412,14 +412,13 @@ onUnmounted(() => {
         top: 50%;
         padding: 0.57rem 0.7rem;
 
-        /* 移除 cursor，因为父元素已经设置 */
         transition: transform 0.3s;
-        transform: translate(0, -47%) rotate(-90deg); /* 动画：默认折叠状态箭头旋转 */
+        transform: translate(0, -47%) rotate(-90deg);
       }
 
       .code-lang {
         position: absolute;
-        left: 2.5rem; /* 为箭头留出空间 */
+        left: 2.5rem;
         font-size: 1.15em;
         font-weight: 700;
         text-transform: uppercase;
@@ -714,6 +713,9 @@ onUnmounted(() => {
     border: 1px solid var(--md-admonition-border-color);
     border-radius: 6px;
     page-break-inside: avoid;
+    p {
+      color: var(--md-admonition-color);
+    }
   }
 
   .md-editor-admonition-title {

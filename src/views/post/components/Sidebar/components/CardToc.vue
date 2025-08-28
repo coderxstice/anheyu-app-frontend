@@ -240,8 +240,7 @@ defineExpose({
   padding: 8px 8px 8px 12px;
   line-height: 1.5;
   color: var(--anzhiyu-secondtext);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow: hidden;
   border-radius: 8px;
   transition:
     color 0.2s ease-out,
@@ -258,6 +257,11 @@ defineExpose({
   }
 
   .toc-text {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
     transition: transform 0.2s ease-out;
   }
 
