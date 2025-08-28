@@ -381,7 +381,7 @@ onUnmounted(() => {
       }
 
       span {
-        transform: translateY(10px);
+        transform: translateY(12px);
       }
 
       &::before {
@@ -889,6 +889,10 @@ onUnmounted(() => {
     overflow-x: scroll;
     border: var(--style-border-always);
     border-radius: 8px;
+
+    p {
+      margin: 8px 0;
+    }
 
     table {
       display: table;

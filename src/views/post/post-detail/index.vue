@@ -263,7 +263,6 @@ watch(
 </template>
 
 <style lang="scss" scoped>
-/* 样式部分保持不变 */
 .post-header-placeholder {
   width: 100%;
   height: 30rem;
