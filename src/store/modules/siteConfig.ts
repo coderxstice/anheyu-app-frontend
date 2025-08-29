@@ -207,9 +207,27 @@ export const useSiteConfigStore = defineStore("anheyu-site-config", {
           return Promise.reject(new Error(updateRes.message));
         }
 
-        // 保存成功后，直接使用我们已知的、已更改的数据来增量更新 store
-        // 这一步是关键，它避免了重新获取全部配置，从而解决了递归更新的错误
-        this.updateSettingsByDotKeys(settingsToUpdate);
+        // 在进行乐观更新前，创建一个副本用于更新本地 state
+        const stateUpdatePayload = { ...settingsToUpdate };
+        // 遍历这个副本，如果发现有值是 JSON 字符串，就将其解析回对象
+        for (const key in stateUpdatePayload) {
+          const value = stateUpdatePayload[key];
+          // 一个简单的判断：如果值是字符串且以 '{' 或 '[' 开头，就尝试解析它
+          if (
+            typeof value === "string" &&
+            (value.startsWith("{") || value.startsWith("["))
+          ) {
+            try {
+              stateUpdatePayload[key] = JSON.parse(value);
+            } catch (e) {
+              // 如果解析失败，说明它不是一个有效的 JSON，保持原样即可
+              console.error(`解析乐观更新数据失败 (key: ${key}):`, e);
+            }
+          }
+        }
+
+        // 使用处理过的数据（对象而非字符串）来执行乐观更新
+        this.updateSettingsByDotKeys(stateUpdatePayload);
 
         // 显示成功提示
         message("设置已保存成功", { type: "success" });
