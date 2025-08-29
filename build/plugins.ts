@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-11 11:59:32
- * @LastEditTime: 2025-08-29 16:26:18
+ * @LastEditTime: 2025-08-29 20:33:35
  * @LastEditors: 安知鱼
  */
 import { cdn } from "./cdn";
@@ -57,6 +57,7 @@ export function getPluginsList(
           "**/vendor-monaco-editor.*.js",
           "index.html"
         ],
+        navigateFallback: null,
         runtimeCaching: [
           {
             handler: "NetworkFirst",
