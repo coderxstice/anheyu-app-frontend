@@ -938,8 +938,18 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
     }
   }
   .OwO-body {
-    width: 100%;
+    width: calc(100vw - 2rem - 32px);
     min-width: auto !important;
+    .OwO-items .OwO-item {
+      width: 25% !important;
+    }
+  }
+  .form-meta-actions {
+    margin-top: 1rem;
+    gap: 0;
+    .meta-inputs {
+      gap: 0;
+    }
   }
 }
 </style>

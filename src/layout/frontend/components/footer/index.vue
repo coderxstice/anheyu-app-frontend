@@ -507,5 +507,10 @@ a {
   .footer-back-to-top {
     display: none;
   }
+  .footer-container {
+    z-index: 99;
+    background: var(--anzhiyu-card-bg);
+    margin-top: -1px;
+  }
 }
 </style>
