@@ -241,6 +241,7 @@ onMounted(() => {
                     :key="cat.id"
                     :content="`分类: ${cat.name}`"
                     placement="top"
+                    :show-arrow="false"
                   >
                     <el-tag type="info" size="small" class="tag-item">{{
                       cat.name
@@ -251,6 +252,7 @@ onMounted(() => {
                     :key="tag.id"
                     :content="`标签: ${tag.name}`"
                     placement="top"
+                    :show-arrow="false"
                   >
                     <el-tag size="small" class="tag-item">{{
                       tag.name

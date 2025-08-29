@@ -31,7 +31,11 @@
           v-if="file.metadata?.['sys:upload_session_id']"
           class="uploading-overlay"
         >
-          <el-tooltip content="文件上传中..." placement="top">
+          <el-tooltip
+            content="文件上传中..."
+            placement="top"
+            :show-arrow="false"
+          >
             <el-icon class="uploading-indicator">
               <Loading />
             </el-icon>

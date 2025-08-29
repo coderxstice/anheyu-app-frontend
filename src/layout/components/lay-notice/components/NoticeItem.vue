@@ -66,6 +66,7 @@ function hoverDescription(event, description) {
           :content="noticeItem.title"
           placement="top-start"
           :enterable="!isMobile"
+          :show-arrow="false"
         >
           <div
             ref="titleRef"
@@ -91,6 +92,7 @@ function hoverDescription(event, description) {
         :disabled="!descriptionTooltip"
         :content="noticeItem.description"
         placement="top-start"
+        :show-arrow="false"
       >
         <div
           ref="descriptionRef"
@@ -165,6 +167,7 @@ function hoverDescription(event, description) {
       display: -webkit-box;
       overflow: hidden;
       text-overflow: ellipsis;
+      line-clamp: 2;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
     }

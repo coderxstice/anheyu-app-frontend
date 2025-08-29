@@ -75,7 +75,7 @@
 
           <div v-else :key="`actions-${item.id}`" class="item-actions">
             <template v-if="item.status === 'success'">
-              <el-tooltip content="删除记录" placement="top"
+              <el-tooltip content="删除记录" placement="top" :show-arrow="false"
                 ><el-button
                   circle
                   :icon="Delete"
@@ -83,13 +83,13 @@
               /></el-tooltip>
             </template>
             <template v-if="item.status === 'error'">
-              <el-tooltip content="重试" placement="top"
+              <el-tooltip content="重试" placement="top" :show-arrow="false"
                 ><el-button
                   circle
                   :icon="RefreshRight"
                   @click="emit('retry-item', item.id)"
               /></el-tooltip>
-              <el-tooltip content="删除" placement="top"
+              <el-tooltip content="删除" placement="top" :show-arrow="false"
                 ><el-button
                   circle
                   :icon="Delete"
@@ -97,19 +97,19 @@
               /></el-tooltip>
             </template>
             <template v-if="item.status === 'conflict'">
-              <el-tooltip content="覆盖" placement="top"
+              <el-tooltip content="覆盖" placement="top" :show-arrow="false"
                 ><el-button
                   circle
                   :icon="Switch"
                   @click="emit('resolve-conflict', item.id, 'overwrite')"
               /></el-tooltip>
-              <el-tooltip content="重命名" placement="top"
+              <el-tooltip content="重命名" placement="top" :show-arrow="false"
                 ><el-button
                   circle
                   :icon="EditPen"
                   @click="emit('resolve-conflict', item.id, 'rename')"
               /></el-tooltip>
-              <el-tooltip content="删除" placement="top"
+              <el-tooltip content="删除" placement="top" :show-arrow="false"
                 ><el-button
                   circle
                   :icon="Delete"
@@ -117,13 +117,13 @@
               /></el-tooltip>
             </template>
             <template v-if="item.status === 'resumable'">
-              <el-tooltip content="继续上传" placement="top"
+              <el-tooltip content="继续上传" placement="top" :show-arrow="false"
                 ><el-button
                   circle
                   :icon="RefreshRight"
                   @click="emit('retry-item', item.id)"
               /></el-tooltip>
-              <el-tooltip content="删除任务" placement="top"
+              <el-tooltip content="删除任务" placement="top" :show-arrow="false"
                 ><el-button
                   circle
                   :icon="Delete"
@@ -131,7 +131,7 @@
               /></el-tooltip>
             </template>
             <template v-if="['uploading', 'pending'].includes(item.status)">
-              <el-tooltip content="取消" placement="top"
+              <el-tooltip content="取消" placement="top" :show-arrow="false"
                 ><el-button
                   circle
                   :icon="CircleClose"

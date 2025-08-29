@@ -39,27 +39,31 @@
 
           <el-button-group class="ml-2 action-group">
             <!-- 所有的操作都通过 emit 发出 -->
-            <el-tooltip content="下载" placement="bottom">
+            <el-tooltip content="下载" placement="bottom" :show-arrow="false">
               <el-button :icon="Download" @click="emit('download')" />
             </el-tooltip>
-            <el-tooltip content="复制" placement="bottom">
+            <el-tooltip content="复制" placement="bottom" :show-arrow="false">
               <el-button :icon="CopyDocument" @click="emit('copy')" />
             </el-tooltip>
-            <el-tooltip content="移动" placement="bottom">
+            <el-tooltip content="移动" placement="bottom" :show-arrow="false">
               <el-button :icon="Folder" @click="emit('move')" />
             </el-tooltip>
 
             <!-- 使用从 props 传入的 isSingleSelection -->
             <template v-if="isSingleSelection">
-              <el-tooltip content="重命名" placement="bottom">
+              <el-tooltip
+                content="重命名"
+                placement="bottom"
+                :show-arrow="false"
+              >
                 <el-button :icon="EditPen" @click="emit('rename')" />
               </el-tooltip>
-              <el-tooltip content="分享" placement="bottom">
+              <el-tooltip content="分享" placement="bottom" :show-arrow="false">
                 <el-button :icon="Share" @click="emit('share')" />
               </el-tooltip>
             </template>
 
-            <el-tooltip content="删除" placement="bottom">
+            <el-tooltip content="删除" placement="bottom" :show-arrow="false">
               <el-button type="danger" :icon="Delete" @click="emit('delete')" />
             </el-tooltip>
           </el-button-group>

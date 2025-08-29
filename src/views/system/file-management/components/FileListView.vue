@@ -56,7 +56,7 @@
       <div class="column-add-container">
         <transition name="add-btn-slide">
           <div v-if="isHeaderHovered" class="column-add">
-            <el-tooltip content="配置列" placement="top">
+            <el-tooltip content="配置列" placement="top" :show-arrow="false">
               <div class="add-btn-wrapper">
                 <el-icon @click="emit('open-column-settings')"
                   ><Plus

@@ -16,7 +16,7 @@
             <el-tooltip
               content="返回主页"
               placement="bottom"
-              :showArrow="false"
+              :show-arrow="false"
             >
               <div>
                 <span class="site-title">{{ siteName }}</span>

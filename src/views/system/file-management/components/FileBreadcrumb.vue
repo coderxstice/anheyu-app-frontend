@@ -1,7 +1,7 @@
 <template>
   <div class="file-breadcrumb-wrapper" @click="switchToEditMode">
     <div v-if="!isEditing" class="file-breadcrumb">
-      <el-tooltip content="返回根目录" placement="bottom">
+      <el-tooltip content="返回根目录" placement="bottom" :show-arrow="false">
         <el-icon class="home-icon" @click.stop="onNavigate('/')"
           ><HomeFilled
         /></el-icon>
@@ -104,7 +104,7 @@
     </div>
 
     <div v-else class="input-mode">
-      <el-tooltip content="返回根目录" placement="bottom">
+      <el-tooltip content="返回根目录" placement="bottom" :show-arrow="false">
         <el-icon class="home-icon" @click.stop="onNavigate('/')"
           ><HomeFilled
         /></el-icon>
