@@ -2,122 +2,165 @@
   <div v-if="model.homeTop">
     <el-form-item label="网站拥有者名称">
       <el-input
-        v-model="model.siteOwnerName"
+        :model-value="model.siteOwnerName"
         placeholder="例如：安知鱼"
         clearable
+        @update:model-value="model = { ...model, siteOwnerName: $event }"
       />
     </el-form-item>
     <el-form-item label="网站拥有者邮箱">
       <el-input
-        v-model="model.siteOwnerEmail"
+        :model-value="model.siteOwnerEmail"
         placeholder="例如：anzhiyu-c@qq.com"
         clearable
+        @update:model-value="model = { ...model, siteOwnerEmail: $event }"
       />
     </el-form-item>
 
     <el-divider content-position="left">首页顶部配置</el-divider>
-    <el-row :gutter="20">
-      <el-col :span="12">
-        <el-form-item label="主标题">
-          <el-input
-            v-model="model.homeTop.title"
-            placeholder="例如：生活明朗"
-          />
-        </el-form-item>
-      </el-col>
-      <el-col :span="12">
-        <el-form-item label="副标题">
-          <el-input
-            v-model="model.homeTop.subTitle"
-            placeholder="例如：万物可爱。"
-          />
-        </el-form-item>
-      </el-col>
-    </el-row>
-    <el-form-item label="站点标语">
-      <el-input
-        v-model="model.homeTop.siteText"
-        placeholder="例如：ANHEYU.COM"
-      />
-    </el-form-item>
-
-    <el-divider content-position="left" style="margin-top: 20px"
-      >横幅设置</el-divider
-    >
-    <div v-if="model.homeTop.banner">
+    <template v-if="model.homeTop">
       <el-row :gutter="20">
         <el-col :span="12">
-          <el-form-item label="横幅标题">
-            <el-input v-model="model.homeTop.banner.title" />
+          <el-form-item label="主标题">
+            <el-input
+              :model-value="model.homeTop.title"
+              placeholder="例如：生活明朗"
+              @update:model-value="updateHomeTopField('title', $event)"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="横幅提示">
-            <el-input v-model="model.homeTop.banner.tips" />
+          <el-form-item label="副标题">
+            <el-input
+              :model-value="model.homeTop.subTitle"
+              placeholder="例如：万物可爱。"
+              @update:model-value="updateHomeTopField('subTitle', $event)"
+            />
           </el-form-item>
         </el-col>
       </el-row>
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <el-form-item label="横幅图片 URL">
-            <el-input v-model="model.homeTop.banner.image" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="横幅链接">
-            <el-input v-model="model.homeTop.banner.link" />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-form-item label="新窗口打开横幅链接">
-        <el-switch v-model="model.homeTop.banner.isExternal" />
+      <el-form-item label="站点标语">
+        <el-input
+          :model-value="model.homeTop.siteText"
+          placeholder="例如：ANHEYU.COM"
+          @update:model-value="updateHomeTopField('siteText', $event)"
+        />
       </el-form-item>
-    </div>
 
-    <el-divider content-position="left" style="margin-top: 20px"
-      >分类设置 (必须为3项)</el-divider
-    >
-    <el-table
-      v-if="model.homeTop.category"
-      :data="model.homeTop.category"
-      border
-      style="width: 100%"
-    >
-      <el-table-column label="名称" prop="name">
-        <template #default="{ row }">
-          <el-input v-model="row.name" placeholder="分类名称" />
-        </template>
-      </el-table-column>
-      <el-table-column label="路径" prop="path">
-        <template #default="{ row }">
-          <el-input v-model="row.path" placeholder="例如：/categories/前端/" />
-        </template>
-      </el-table-column>
-      <el-table-column label="图标" prop="icon">
-        <template #default="{ row }">
-          <el-input v-model="row.icon" placeholder="例如：anzhiyu-icon-dove" />
-        </template>
-      </el-table-column>
-      <el-table-column label="背景" prop="background">
-        <template #default="{ row }">
-          <el-input
-            v-model="row.background"
-            placeholder="例如：linear-gradient(...)"
+      <el-divider content-position="left" style="margin-top: 20px"
+        >横幅设置</el-divider
+      >
+      <div v-if="model.homeTop.banner">
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="横幅标题">
+              <el-input
+                :model-value="model.homeTop.banner.title"
+                @update:model-value="updateHomeTopBannerField('title', $event)"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="横幅提示">
+              <el-input
+                :model-value="model.homeTop.banner.tips"
+                @update:model-value="updateHomeTopBannerField('tips', $event)"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="横幅图片 URL">
+              <el-input
+                :model-value="model.homeTop.banner.image"
+                @update:model-value="updateHomeTopBannerField('image', $event)"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="横幅链接">
+              <el-input
+                :model-value="model.homeTop.banner.link"
+                @update:model-value="updateHomeTopBannerField('link', $event)"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-form-item label="新窗口打开横幅链接">
+          <el-switch
+            :model-value="model.homeTop.banner.isExternal"
+            @update:model-value="updateHomeTopBannerField('isExternal', $event)"
           />
-        </template>
-      </el-table-column>
-    </el-table>
+        </el-form-item>
+      </div>
+
+      <el-divider content-position="left" style="margin-top: 20px"
+        >分类设置 (必须为3项)</el-divider
+      >
+      <el-table
+        v-if="model.homeTop.category"
+        :data="model.homeTop.category"
+        border
+        style="width: 100%"
+      >
+        <el-table-column label="名称" prop="name">
+          <template #default="{ row, $index }">
+            <el-input
+              :model-value="row.name"
+              placeholder="分类名称"
+              @update:model-value="updateCategoryField($index, 'name', $event)"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="路径" prop="path">
+          <template #default="{ row, $index }">
+            <el-input
+              :model-value="row.path"
+              placeholder="例如：/categories/前端/"
+              @update:model-value="updateCategoryField($index, 'path', $event)"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="图标" prop="icon">
+          <template #default="{ row, $index }">
+            <el-input
+              :model-value="row.icon"
+              placeholder="例如：anzhiyu-icon-dove"
+              @update:model-value="updateCategoryField($index, 'icon', $event)"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="背景" prop="background">
+          <template #default="{ row, $index }">
+            <el-input
+              :model-value="row.background"
+              placeholder="例如：linear-gradient(...)"
+              @update:model-value="
+                updateCategoryField($index, 'background', $event)
+              "
+            />
+          </template>
+        </el-table-column>
+      </el-table>
+    </template>
   </div>
   <el-divider content-position="left">页眉配置</el-divider>
   <el-row :gutter="20">
     <el-col :span="8">
       <el-form-item label="启用开往模块">
-        <el-switch v-model="model.navTravel" />
+        <el-switch
+          :model-value="model.navTravel"
+          @update:model-value="model = { ...model, navTravel: !!$event }"
+        />
       </el-form-item>
     </el-col>
     <el-col :span="8">
       <el-form-item label="启用轻提醒模块弹窗">
-        <el-switch v-model="model.navClock" />
+        <el-switch
+          :model-value="model.navClock"
+          @update:model-value="model = { ...model, navClock: !!$event }"
+        />
       </el-form-item>
     </el-col>
   </el-row>
@@ -127,7 +170,7 @@
     title="导航菜单列表"
     :columns="menuColumns"
     :new-item-template="{ title: '', items: [] }"
-    @update:model-value="model.menu = JSON.parse($event || '[]')"
+    @update:model-value="model = { ...model, menu: JSON.parse($event || '[]') }"
   >
     <template #col-items="{ scope }">
       <el-button @click="openSubMenuEditor(scope.row)">
@@ -141,7 +184,9 @@
     title="页眉下拉菜单列表"
     :columns="navMenuItemsColumns"
     :new-item-template="{ title: '', items: [] }"
-    @update:model-value="model.navMenuItems = JSON.parse($event || '[]')"
+    @update:model-value="
+      model = { ...model, navMenuItems: JSON.parse($event || '[]') }
+    "
   >
     <template #col-items="{ scope }">
       <el-button @click="openNavMenuItemsEditor(scope.row)">
@@ -154,63 +199,79 @@
 
   <el-form-item label="页脚版权所有者">
     <el-input
-      v-model="model.footerOwnerName"
+      :model-value="model.footerOwnerName"
       placeholder="例如：安知鱼"
       clearable
+      @update:model-value="model = { ...model, footerOwnerName: $event }"
     />
   </el-form-item>
   <el-form-item label="页脚版权起始年份">
     <el-input
-      v-model="model.footerOwnerSince"
+      :model-value="model.footerOwnerSince"
       placeholder="例如：2020"
       clearable
+      @update:model-value="model = { ...model, footerOwnerSince: $event }"
     />
   </el-form-item>
 
   <el-divider content-position="left">网站运行时间</el-divider>
   <el-form-item label="启用页脚运行时间模块">
-    <el-switch v-model="model.footerRuntimeEnable" />
+    <el-switch
+      :model-value="model.footerRuntimeEnable"
+      @update:model-value="model = { ...model, footerRuntimeEnable: !!$event }"
+    />
   </el-form-item>
   <el-form-item label="网站上线时间(控制侧边栏建站天数以及页脚运行时间)">
     <el-date-picker
-      v-model="model.footerRuntimeLaunchTime"
+      :model-value="model.footerRuntimeLaunchTime"
       type="datetime"
       placeholder="选择日期和时间"
       format="MM/DD/YYYY HH:mm:ss"
       value-format="MM/DD/YYYY HH:mm:ss"
       style="width: 100%"
+      @update:model-value="
+        model = { ...model, footerRuntimeLaunchTime: $event }
+      "
     />
   </el-form-item>
 
   <el-divider content-position="left">链接配置</el-divider>
   <el-form-item label="页脚列表随机友链数量">
     <el-input
-      v-model="model.footerListRandomFriends"
+      :model-value="model.footerListRandomFriends"
       placeholder="例如：3"
       clearable
+      @update:model-value="
+        model = { ...model, footerListRandomFriends: $event }
+      "
     />
   </el-form-item>
   <el-form-item label="底部栏作者链接">
     <el-input
-      v-model="model.footerBarAuthorLink"
+      :model-value="model.footerBarAuthorLink"
       placeholder="/about"
       clearable
+      @update:model-value="model = { ...model, footerBarAuthorLink: $event }"
     />
   </el-form-item>
   <el-form-item label="底部栏CC协议链接">
     <el-input
-      v-model="model.footerBarCCLink"
+      :model-value="model.footerBarCCLink"
       placeholder="/copyright"
       clearable
+      @update:model-value="model = { ...model, footerBarCCLink: $event }"
     />
   </el-form-item>
 
   <el-divider content-position="left">图片配置</el-divider>
   <el-form-item label="社交链接栏中间图片 URL">
     <el-input
-      v-model="model.footerSocialBarCenterImg"
+      :model-value="model.footerSocialBarCenterImg"
       placeholder="图片 URL"
       clearable
+      @update:model-value="
+        model = { ...model, footerSocialBarCenterImg: $event }
+      "
     />
   </el-form-item>
 
@@ -219,7 +280,9 @@
     title="徽标列表"
     :columns="badgeColumns"
     :new-item-template="{ link: '', shields: '', message: '' }"
-    @update:model-value="model.footerBadges = JSON.parse($event || '[]')"
+    @update:model-value="
+      model = { ...model, footerBadges: JSON.parse($event || '[]') }
+    "
   />
 
   <JsonEditorTable
@@ -227,7 +290,9 @@
     title="社交链接栏左侧列表"
     :columns="socialLinkColumns"
     :new-item-template="{ title: '', link: '', icon: '' }"
-    @update:model-value="model.footerSocialBarLeft = JSON.parse($event || '[]')"
+    @update:model-value="
+      model = { ...model, footerSocialBarLeft: JSON.parse($event || '[]') }
+    "
     @item-deleted="syncDeleteRight"
   />
 
@@ -237,7 +302,7 @@
     :columns="socialLinkColumns"
     :new-item-template="{ title: '', link: '', icon: '' }"
     @update:model-value="
-      model.footerSocialBarRight = JSON.parse($event || '[]')
+      model = { ...model, footerSocialBarRight: JSON.parse($event || '[]') }
     "
     @item-deleted="syncDeleteLeft"
   />
@@ -257,13 +322,17 @@
     title="底部栏链接列表"
     :columns="footerBarLinkColumns"
     :new-item-template="{ text: '', link: '' }"
-    @update:model-value="model.footerBarLinkList = JSON.parse($event || '[]')"
+    @update:model-value="
+      model = { ...model, footerBarLinkList: JSON.parse($event || '[]') }
+    "
   />
 
   <el-divider content-position="left">页脚多栏链接列表</el-divider>
   <FooterLinkListEditor
     :model-value="JSON.stringify(model.footerList)"
-    @update:model-value="model.footerList = JSON.parse($event || '[]')"
+    @update:model-value="
+      model = { ...model, footerList: JSON.parse($event || '[]') }
+    "
   />
 
   <SubMenuEditor
@@ -286,7 +355,9 @@ import type {
   HomePageSettingsInfo,
   JsonEditorTableColumn,
   SubMenuItem,
-  NavMenuItem
+  NavMenuItem,
+  HomeTopInfo,
+  HomeTopCategoryItem
 } from "../../../type";
 import JsonEditorTable from "../components/JsonEditorTable.vue";
 import FooterLinkListEditor from "./FooterLinkListEditor.vue";
@@ -297,21 +368,64 @@ const model = defineModel<Omit<HomePageSettingsInfo, "footerCustomText">>({
   required: true
 });
 
+// --- Helper functions to update nested state immutably ---
+const updateHomeTopField = (key: keyof HomeTopInfo, value: any) => {
+  model.value = {
+    ...model.value,
+    homeTop: {
+      ...model.value.homeTop,
+      [key]: value
+    }
+  };
+};
+
+const updateHomeTopBannerField = (
+  key: keyof HomeTopInfo["banner"],
+  value: any
+) => {
+  model.value = {
+    ...model.value,
+    homeTop: {
+      ...model.value.homeTop,
+      banner: {
+        ...model.value.homeTop.banner,
+        [key]: value
+      }
+    }
+  };
+};
+
+const updateCategoryField = (
+  index: number,
+  key: keyof HomeTopCategoryItem,
+  value: any
+) => {
+  const newCategory = [...model.value.homeTop.category];
+  newCategory[index] = { ...newCategory[index], [key]: value };
+  updateHomeTopField("category", newCategory);
+};
+
+// --- Watcher for category array validation ---
 watch(
   () => model.value.homeTop?.category,
   newCategory => {
     if (!newCategory) return;
 
-    // 遍历数组，去除每个 path 属性末尾的斜杠
-    newCategory.forEach(item => {
+    let isChanged = false;
+    let processedCategory = [...newCategory];
+
+    // 1. Sanitize paths
+    processedCategory = processedCategory.map(item => {
       if (typeof item.path === "string" && item.path.endsWith("/")) {
-        // 使用正则表达式替换一个或多个尾随斜杠
-        item.path = item.path.replace(/\/+$/, "");
+        isChanged = true;
+        return { ...item, path: item.path.replace(/\/+$/, "") };
       }
+      return item;
     });
 
-    // 保持原有的数组长度必须为3的逻辑
-    if (newCategory.length !== 3) {
+    // 2. Enforce array length of 3
+    if (processedCategory.length !== 3) {
+      isChanged = true;
       const categoryTemplate = {
         name: "",
         path: "",
@@ -319,33 +433,34 @@ watch(
         background: "",
         isExternal: false
       };
-
-      if (newCategory.length > 3) {
-        model.value.homeTop.category = newCategory.slice(0, 3);
+      if (processedCategory.length > 3) {
+        processedCategory = processedCategory.slice(0, 3);
       } else {
-        const needed = 3 - newCategory.length;
+        const needed = 3 - processedCategory.length;
         for (let i = 0; i < needed; i++) {
-          model.value.homeTop.category.push({ ...categoryTemplate });
+          processedCategory.push({ ...categoryTemplate });
         }
       }
+    }
+
+    if (isChanged) {
+      updateHomeTopField("category", processedCategory);
     }
   },
   { deep: true, immediate: true }
 );
 
-// for Header Menu
+// --- Table column definitions ---
 const menuColumns = ref<JsonEditorTableColumn[]>([
   { prop: "title", label: "主菜单标题" },
   { prop: "items", label: "子菜单项", slot: "col-items", width: "200px" }
 ]);
 
-// for Header Nav Dropdown Menu
 const navMenuItemsColumns = ref<JsonEditorTableColumn[]>([
   { prop: "title", label: "分组标题" },
   { prop: "items", label: "链接列表", slot: "col-items", width: "200px" }
 ]);
 
-// for Footer Sections
 const badgeColumns = ref<JsonEditorTableColumn[]>([
   { prop: "link", label: "链接" },
   { prop: "shields", label: "徽标图片URL" },
@@ -363,7 +478,7 @@ const footerBarLinkColumns = ref<JsonEditorTableColumn[]>([
   { prop: "link", label: "链接" }
 ]);
 
-// --- Editor for header.menu (SubMenuEditor) ---
+// --- Modal/Editor visibility and data logic ---
 const isSubMenuEditorVisible = ref(false);
 interface MainMenuRow {
   title: string;
@@ -386,11 +501,9 @@ const openNavMenuItemsEditor = (row: NavMenuGroupRow) => {
   isNavMenuEditorVisible.value = true;
 };
 
-// --- Social Links Sync Logic (Simplified) ---
+// --- Social Links Sync Logic ---
 const isListIncomplete = (list: any[]): boolean => {
-  if (list.length === 0) {
-    return false;
-  }
+  if (list.length === 0) return false;
   const lastItem = list[list.length - 1];
   return Object.values(lastItem).some(
     v => v === "" || v === null || v === undefined
@@ -408,19 +521,29 @@ const addSocialLinkPair = () => {
   }
 
   const newItem = { title: "", link: "", icon: "" };
-  model.value.footerSocialBarLeft.push({ ...newItem });
-  model.value.footerSocialBarRight.push({ ...newItem });
+  const newLeft = [...model.value.footerSocialBarLeft, { ...newItem }];
+  const newRight = [...model.value.footerSocialBarRight, { ...newItem }];
+
+  model.value = {
+    ...model.value,
+    footerSocialBarLeft: newLeft,
+    footerSocialBarRight: newRight
+  };
 };
 
 const syncDeleteRight = (index: number) => {
   if (index < model.value.footerSocialBarRight.length) {
-    model.value.footerSocialBarRight.splice(index, 1);
+    const newRight = [...model.value.footerSocialBarRight];
+    newRight.splice(index, 1);
+    model.value = { ...model.value, footerSocialBarRight: newRight };
   }
 };
 
 const syncDeleteLeft = (index: number) => {
   if (index < model.value.footerSocialBarLeft.length) {
-    model.value.footerSocialBarLeft.splice(index, 1);
+    const newLeft = [...model.value.footerSocialBarLeft];
+    newLeft.splice(index, 1);
+    model.value = { ...model.value, footerSocialBarLeft: newLeft };
   }
 };
 </script>
