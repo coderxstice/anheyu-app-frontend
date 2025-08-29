@@ -9,7 +9,7 @@
         >
           <div class="panel-header">
             <!-- Tooltip for Close Icon -->
-            <el-tooltip content="关闭" placement="bottom">
+            <el-tooltip content="关闭" placement="bottom" :show-arrow="false">
               <span class="icon-wrapper" @click="emit('close')">
                 <el-icon class="action-icon"><Close /></el-icon>
               </span>
@@ -19,7 +19,11 @@
 
             <div class="header-actions">
               <!-- Tooltip for Add Icon -->
-              <el-tooltip content="添加文件" placement="bottom">
+              <el-tooltip
+                content="添加文件"
+                placement="bottom"
+                :show-arrow="false"
+              >
                 <span class="icon-wrapper" @click="emit('add-files')">
                   <el-icon class="action-icon"><Plus /></el-icon>
                 </span>
@@ -35,6 +39,7 @@
                 popper-class="upload-panel-popover"
                 transition="dropdown-scale"
                 :teleported="true"
+                :show-arrow="false"
               >
                 <template #reference>
                   <span
@@ -103,6 +108,7 @@
               <el-tooltip
                 :content="isCollapsed ? '展开' : '收起'"
                 placement="bottom"
+                :show-arrow="false"
               >
                 <span class="icon-wrapper" @click="emit('toggle-collapse')">
                   <el-icon class="action-icon">

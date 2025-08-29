@@ -37,12 +37,12 @@
             </div>
 
             <div class="header-right">
-              <el-tooltip content="全屏" placement="bottom">
+              <el-tooltip content="全屏" placement="bottom" :show-arrow="false">
                 <span class="action-btn" @click="toggleFullScreen">
                   <IconifyIconOnline icon="ant-design:fullscreen-outlined" />
                 </span>
               </el-tooltip>
-              <el-tooltip content="关闭" placement="bottom">
+              <el-tooltip content="关闭" placement="bottom" :show-arrow="false">
                 <span class="action-btn" @click="close">
                   <IconifyIconOnline icon="ant-design:close-outlined" />
                 </span>
