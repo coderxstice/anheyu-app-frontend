@@ -57,6 +57,14 @@
       展示给全体用户（包括匿名用户）的公告，留空不展示。当此项内容更改时，所有用户会重新看到公告。
     </div>
   </el-form-item>
+
+  <el-form-item label="ICP备案号">
+    <el-input
+      v-model="formData.icpNumber"
+      placeholder="例如：京ICP备12345678号"
+    />
+    <div class="form-item-help">网站的ICP备案号，用于页脚显示。</div>
+  </el-form-item>
 </template>
 
 <script setup lang="ts">

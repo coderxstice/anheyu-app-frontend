@@ -21,6 +21,7 @@ export interface SiteInfo {
   favicon: string;
   iconMedium: string;
   iconLarge: string;
+  icpNumber: string;
 }
 
 /**

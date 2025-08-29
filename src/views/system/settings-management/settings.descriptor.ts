@@ -82,6 +82,12 @@ const siteDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyLogoURL512,
     defaultValue: "",
     type: "string"
+  },
+  {
+    frontendPath: "site.icpNumber",
+    backendKey: constant.KeyIcpNumber,
+    defaultValue: "",
+    type: "string"
   }
 ];
 
