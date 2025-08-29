@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-11 11:59:32
- * @LastEditTime: 2025-08-04 13:35:30
+ * @LastEditTime: 2025-08-29 16:26:18
  * @LastEditors: 安知鱼
  */
 import { cdn } from "./cdn";
@@ -54,9 +54,22 @@ export function getPluginsList(
         navigateFallbackDenylist: [/^\/api\/(.+)/, /^\/f\/(.+)/],
         globIgnores: [
           "**/monacoeditorwork/*.js",
-          "**/vendor-monaco-editor.*.js"
+          "**/vendor-monaco-editor.*.js",
+          "index.html"
         ],
         runtimeCaching: [
+          {
+            handler: "NetworkFirst",
+            urlPattern: ({ request }) => request.mode === "navigate",
+            options: {
+              cacheName: "anheyu-pages-cache",
+              networkTimeoutSeconds: 5,
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 7
+              }
+            }
+          },
           {
             // 匹配 /static/img/ 目录下的所有图片文件
             urlPattern:
