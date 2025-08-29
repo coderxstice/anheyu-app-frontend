@@ -33,23 +33,33 @@ interface EmojiPackage {
   items: { icon: string; text: string }[];
 }
 
+// 方案一：采用健壮的、修复了懒加载问题的 vLazy 指令
 const vLazy = {
-  mounted: (
-    el: HTMLImageElement,
-    binding: { value: { url: string; index: number } }
-  ) => {
+  mounted: (el: HTMLImageElement, binding: { value: { url: string } }) => {
     el.src =
       "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
     const observer = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting) {
-          observer.unobserve(el);
           el.src = binding.value.url;
+          observer.unobserve(el);
         }
       },
       { root: el.closest(".OwO-items") }
     );
-    observer.observe(el);
+
+    requestAnimationFrame(() => {
+      observer.observe(el);
+    });
+
+    (el as any)._imageObserver = observer;
+  },
+  beforeUnmount: (el: HTMLElement) => {
+    const observer = (el as any)._imageObserver;
+    if (observer) {
+      observer.disconnect();
+    }
   }
 };
 
@@ -134,7 +144,6 @@ const submitForm = async (formEl: FormInstance | undefined) => {
     if (valid) {
       const { nickname, email, content, website } = form;
 
-      // 如果有引用文本，在内容前面添加引用格式
       let finalContent = content;
       if (props.quoteText && props.quoteText.trim()) {
         finalContent = `> ${props.quoteText}\n\n${content}`;
@@ -222,9 +231,7 @@ const handleFileChange = async (event: Event) => {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
 
-  if (!file) {
-    return;
-  }
+  if (!file) return;
   if (!file.type.startsWith("image/")) {
     ElMessage.error("请选择有效的图片文件");
     target.value = "";
@@ -324,7 +331,6 @@ watch(
   () => props.quoteText,
   newQuoteText => {
     if (newQuoteText) {
-      // 聚焦到输入框
       nextTick(() => {
         textareaRef.value?.focus();
       });
@@ -332,6 +338,27 @@ watch(
   },
   { immediate: true }
 );
+
+// 方案二：采用你的 watch 逻辑，但只负责动画，不再手动加载图片
+watch(activeEmojiPackageIndex, () => {
+  if (showEmojiPicker.value) {
+    nextTick(() => {
+      const items = owoContainerRef.value?.querySelectorAll(".OwO-item");
+      if (items && items.length > 0) {
+        // 重置状态到初始动画状态 (由CSS定义)
+        gsap.set(items, { opacity: 0, y: 20 });
+        // 重新应用进入动画
+        gsap.to(items, {
+          opacity: 1,
+          y: 0,
+          duration: 0.3,
+          ease: "power2.out",
+          stagger: 0.02
+        });
+      }
+    });
+  }
+});
 
 onMounted(() => {
   fetchEmojis();
@@ -351,9 +378,9 @@ onMounted(() => {
 
 onUnmounted(() => document.removeEventListener("click", handleClickOutside));
 </script>
+
 <template>
   <div class="comment-form">
-    <!-- 引用提示区域 -->
     <div v-if="props.quoteText && props.quoteText.trim()" class="quote-preview">
       <div class="quote-preview-header">
         <i class="anzhiyufont anzhiyu-icon-quote" />
@@ -371,7 +398,6 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
         {{ props.quoteText }}
       </div>
     </div>
-
     <el-form
       ref="formRef"
       :model="form"
@@ -406,9 +432,8 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
                   <div v-if="showEmojiPicker" class="OwO-body">
                     <ul class="OwO-items">
                       <li
-                        v-for="(emoji, index) in emojiData[
-                          activeEmojiPackageIndex
-                        ].items"
+                        v-for="emoji in emojiData[activeEmojiPackageIndex]
+                          .items"
                         :key="emoji.text"
                         class="OwO-item"
                         :title="emoji.text"
@@ -416,10 +441,7 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
                         @mouseenter="handleEmojiEnter($event, emoji)"
                         @mouseleave="handleEmojiLeave"
                       >
-                        <img
-                          v-lazy="{ url: emoji.icon, index: index }"
-                          :alt="emoji.text"
-                        />
+                        <img v-lazy="{ url: emoji.icon }" :alt="emoji.text" />
                       </li>
                     </ul>
                     <div class="OwO-bar">
@@ -460,26 +482,25 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
           </div>
         </el-form-item>
       </div>
-
       <div v-if="!commentInfoConfig.login_required">
         <div
           :class="['form-meta-actions', { 'is-reply': props.showCancelButton }]"
         >
           <div class="meta-inputs">
             <el-form-item prop="nickname">
-              <el-input v-model="form.nickname" placeholder="必填"
-                ><template #prepend>昵称</template></el-input
-              >
+              <el-input v-model="form.nickname" placeholder="必填">
+                <template #prepend>昵称</template>
+              </el-input>
             </el-form-item>
             <el-form-item prop="email">
-              <el-input v-model="form.email" placeholder="必填"
-                ><template #prepend>邮箱</template></el-input
-              >
+              <el-input v-model="form.email" placeholder="必填">
+                <template #prepend>邮箱</template>
+              </el-input>
             </el-form-item>
             <el-form-item prop="website">
-              <el-input v-model="form.website" placeholder="选填"
-                ><template #prepend>网址</template></el-input
-              >
+              <el-input v-model="form.website" placeholder="选填">
+                <template #prepend>网址</template>
+              </el-input>
             </el-form-item>
           </div>
           <div class="buttons-wrapper">
@@ -487,15 +508,17 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
               v-if="props.showCancelButton"
               class="cancel-button"
               @click="$emit('cancel')"
-              >取消</el-button
             >
+              取消
+            </el-button>
             <el-button
               type="primary"
               class="submit-button"
               :disabled="isSubmitDisabled"
               @click="submitForm(formRef)"
-              >发送</el-button
             >
+              发送
+            </el-button>
           </div>
         </div>
       </div>
@@ -508,7 +531,6 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
         />
       </div>
     </el-form>
-
     <div v-if="isPreviewVisible" ref="emojiPreviewRef" class="emoji-preview">
       <img :src="previewEmojiUrl" alt="emoji-preview" />
     </div>
@@ -521,7 +543,6 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
     opacity: 0;
     transform: translateY(0) scale(0.8);
   }
-
   to {
     opacity: 1;
     transform: translateY(-10px) scale(1);
@@ -626,7 +647,6 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
 
 .textarea-container {
   margin-bottom: 0.5rem;
-
   & > .el-form-item {
     margin-bottom: 0;
   }
@@ -640,7 +660,6 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
   border: var(--style-border-always);
   border-radius: 12px;
   transition: border 0.2s;
-
   &:focus-within {
     border: var(--style-border-hover-always);
   }
@@ -652,11 +671,9 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
 
     .OwO {
       position: relative;
-
       &.OwO-open .OwO-body {
         display: block;
       }
-
       .OwO-logo {
         display: flex;
         align-items: center;
@@ -664,7 +681,6 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
         width: 1.25em;
         height: 1.25em;
       }
-
       .OwO-body {
         position: absolute;
         top: 2rem;
@@ -698,8 +714,8 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
             cursor: pointer;
             border-radius: 5px;
             opacity: 0;
-            transition: background-color 0.3s;
             transform: translateY(20px);
+            transition: background-color 0.3s;
 
             &:hover {
               background-color: rgb(144 147 153 / 13%);
@@ -714,14 +730,12 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
           }
         }
       }
-
       .OwO-bar {
         width: 100%;
         border-top: 1px solid rgb(144 147 153 / 31%);
         border-radius: 0 0 4px 4px;
 
         .OwO-packages {
-          width: 50px;
           height: 48px;
           padding: 0;
           margin: 0;
@@ -737,6 +751,7 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
           }
 
           li {
+            width: 50px;
             display: inline-block;
             padding: 0 10px;
             font-size: 28px;
@@ -762,11 +777,9 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
       background: var(--anzhiyu-secondbg);
       border-radius: 50%;
       transition: background-color 0.2s;
-
       &:hover {
         background-color: var(--anzhiyu-post-blockquote-bg);
       }
-
       &[disabled] {
         cursor: not-allowed;
         opacity: 0.5;
@@ -781,20 +794,16 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
     border: none;
     border-radius: 0;
     box-shadow: none;
-
     &:focus {
       box-shadow: none;
     }
-
     &:hover {
       box-shadow: none;
     }
   }
-
   :deep(.el-input__count) {
     bottom: -25px;
     color: var(--anzhiyu-secondtext);
-    user-select: none;
     user-select: none;
     background: transparent;
   }
@@ -817,23 +826,19 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
         &::before {
           content: "输入QQ号会自动获取昵称和头像";
         }
-
         &::after {
           content: "";
         }
       }
-
       &:nth-child(2) .el-input-group--prepend {
         &::before {
           content: "收到回复将会发送到你的邮箱";
         }
-
         &::after {
           content: "";
         }
       }
     }
-
     :deep(.el-input-group--prepend) {
       &::before {
         position: absolute;
@@ -849,13 +854,11 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
         border-radius: 10px;
         transform: translate(-50%);
       }
-
       &:focus-within::before {
         z-index: 2;
         display: block;
         animation: commonTipsIn 0.3s;
       }
-
       &::after {
         position: absolute;
         left: 50%;
@@ -864,19 +867,16 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
         border-top-color: var(--anzhiyu-main-op-deep);
         transform: translate(-50%, -10px);
       }
-
       &:focus-within::after {
         display: block;
         animation: commonTriangleIn 0.3s;
       }
     }
-
     :deep(.el-input-group__prepend) {
       font-weight: 600;
       color: var(--anzhiyu-fontcolor);
       background-color: var(--anzhiyu-secondbg);
     }
-
     :deep(.el-input__inner) {
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
@@ -886,7 +886,6 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
   .buttons-wrapper {
     display: flex;
     gap: 0.5rem;
-
     .submit-button {
       padding: 0 2rem;
       font-weight: 600;
@@ -898,13 +897,11 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
         opacity: 0.2;
       }
     }
-
     .cancel-button {
       color: var(--anzhiyu-fontcolor);
       background: var(--anzhiyu-secondbg);
       border: 0 solid var(--anzhiyu-main);
       border-radius: 12px;
-
       &:hover {
         color: var(--anzhiyu-white);
         background: var(--anzhiyu-lighttext);
@@ -915,12 +912,10 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
   &.is-reply {
     flex-direction: column;
     gap: 0;
-
     .meta-inputs {
       grid-template-columns: repeat(3, 1fr);
       width: 100%;
     }
-
     .buttons-wrapper {
       align-self: flex-end;
       margin-top: 0.5rem;
@@ -931,21 +926,17 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
 @media (width <= 768px) {
   .form-meta-actions:not(.is-reply) {
     flex-direction: column;
-
     .meta-inputs {
       grid-template-columns: 1fr;
       width: 100%;
     }
-
     .buttons-wrapper {
       width: 100%;
-
       .submit-button {
         width: 100%;
       }
     }
   }
-
   .OwO-body {
     width: 100%;
     min-width: auto !important;

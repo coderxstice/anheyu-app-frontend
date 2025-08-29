@@ -52,7 +52,6 @@ const fancyboxOptions = {
 
 onMounted(() => {
   const pageSize = commentInfoConfig.value.page_size || 10;
-  // 更新: 调用 initComments 时传入 targetPath
   commentStore.initComments(props.targetPath, pageSize);
 
   // 添加滚动监听器
