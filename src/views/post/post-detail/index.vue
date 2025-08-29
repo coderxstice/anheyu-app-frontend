@@ -201,9 +201,7 @@ const fetchRequiredData = async (id: string) => {
         category: seriesCategory.value.name,
         pageSize: 9999
       });
-      seriesArticles.value = seriesResponse.data.list.filter(
-        p => p.id !== article.value?.id
-      );
+      seriesArticles.value = seriesResponse.data.list;
     } else {
       seriesArticles.value = [];
     }
