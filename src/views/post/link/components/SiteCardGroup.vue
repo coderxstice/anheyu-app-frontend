@@ -144,11 +144,7 @@ defineProps<{ links: LinkItem[] }>();
     border-width: initial;
     border-radius: 0;
     border-image: initial;
-    mask-image: radial-gradient(
-      center center,
-      rgb(255 255 255),
-      rgb(0 0 0)
-    );
+    mask-image: radial-gradient(center center, rgb(255 255 255), rgb(0 0 0));
 
     img {
       width: 100%;
@@ -231,11 +227,11 @@ defineProps<{ links: LinkItem[] }>();
     width: 100px;
     height: 50px;
     cursor: pointer;
-    background-image: linear-gradient(
+    background-image: -webkit-linear-gradient(
       0deg,
-      rgb(255 255 255 / 0%),
-      rgb(255 255 255 / 50%),
-      rgb(255 255 255 / 0%)
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 0.5),
+      rgba(255, 255, 255, 0)
     );
     animation: 4s ease 0s infinite normal both running light_tag;
   }

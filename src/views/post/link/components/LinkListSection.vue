@@ -29,7 +29,10 @@ const handleScroll = () => {
 onMounted(async () => {
   await linkStore.fetchCategories();
   if (linkStore.categories.length > 0) {
-    linkStore.fetchLinksForCategory(linkStore.categories[0].id);
+    // 获取所有分类的友链数据
+    for (const category of linkStore.categories) {
+      linkStore.fetchLinksForCategory(category.id);
+    }
   }
   window.addEventListener("scroll", handleScroll);
 });
@@ -60,6 +63,7 @@ onUnmounted(() => {
           {{ category?.description }}
         </div>
       </div>
+
       <SiteCardGroup
         v-if="category.style === 'card'"
         :links="linkStore.linksByCategory[category.id]?.list || []"
