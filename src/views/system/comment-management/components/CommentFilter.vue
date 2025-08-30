@@ -74,7 +74,6 @@ const handleReset = () => {
         @keyup.enter="handleSearch"
       />
     </el-form-item>
-    <!-- [核心修改] V2 适配：article_slug -> target_path -->
     <el-form-item label="所属路径">
       <el-input
         v-model="query.target_path"

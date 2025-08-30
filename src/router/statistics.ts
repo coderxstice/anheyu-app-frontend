@@ -26,7 +26,6 @@ export function recordRouteChange(
   from: RouteLocationNormalized
 ) {
   try {
-    // --- 核心修改 1: 检查来源和目标路径 ---
     const fromIsAdmin = isAdminPath(from?.path);
     const toIsAdmin = isAdminPath(to.path);
 
@@ -67,7 +66,6 @@ export function recordRouteChange(
     }
 
     // 如果路径发生变化，记录上一个页面的停留时间
-    // --- 核心修改 2: 仅当上一个页面不是后台页面时才记录停留时间 ---
     if (
       currentPath &&
       currentPath !== to.fullPath &&
@@ -78,17 +76,15 @@ export function recordRouteChange(
 
       recordVisit({
         url_path: currentPath,
-        page_title: currentPageTitle, // 使用保存的上一个页面的标题（修复BUG）
+        page_title: currentPageTitle,
         referer: from?.fullPath || document.referrer,
         duration: duration
       });
       console.log(`📊 记录页面停留时间: ${currentPath}, 停留${duration}秒`);
     }
 
-    // --- 核心修改 3: 如果目标是后台页面，则重置状态并停止后续记录 ---
     if (toIsAdmin) {
       console.log(`🚫 进入后台页面，暂停统计: ${to.fullPath}`);
-      // 清空当前记录，这样从后台跳出时不会错误地记录后台页面的停留时间
       currentPath = "";
       currentPageTitle = "";
       pageStartTime = 0;
