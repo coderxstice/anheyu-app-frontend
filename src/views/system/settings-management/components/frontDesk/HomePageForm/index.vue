@@ -5,7 +5,7 @@
         :model-value="model.siteOwnerName"
         placeholder="例如：安知鱼"
         clearable
-        @update:model-value="model = { ...model, siteOwnerName: $event }"
+        @update:model-value="updateSiteOwnerName"
       />
     </el-form-item>
     <el-form-item label="网站拥有者邮箱">
@@ -13,7 +13,7 @@
         :model-value="model.siteOwnerEmail"
         placeholder="例如：anzhiyu-c@qq.com"
         clearable
-        @update:model-value="model = { ...model, siteOwnerEmail: $event }"
+        @update:model-value="updateSiteOwnerEmail"
       />
     </el-form-item>
 
@@ -151,7 +151,7 @@
       <el-form-item label="启用开往模块">
         <el-switch
           :model-value="model.navTravel"
-          @update:model-value="model = { ...model, navTravel: !!$event }"
+          @update:model-value="updateNavTravel"
         />
       </el-form-item>
     </el-col>
@@ -159,7 +159,7 @@
       <el-form-item label="启用轻提醒模块弹窗">
         <el-switch
           :model-value="model.navClock"
-          @update:model-value="model = { ...model, navClock: !!$event }"
+          @update:model-value="updateNavClock"
         />
       </el-form-item>
     </el-col>
@@ -170,7 +170,7 @@
     title="导航菜单列表"
     :columns="menuColumns"
     :new-item-template="{ title: '', items: [] }"
-    @update:model-value="model = { ...model, menu: JSON.parse($event || '[]') }"
+    @update:model-value="updateMenu(JSON.parse($event || '[]'))"
   >
     <template #col-items="{ scope }">
       <el-button @click="openSubMenuEditor(scope.row)">
@@ -184,9 +184,7 @@
     title="页眉下拉菜单列表"
     :columns="navMenuItemsColumns"
     :new-item-template="{ title: '', items: [] }"
-    @update:model-value="
-      model = { ...model, navMenuItems: JSON.parse($event || '[]') }
-    "
+    @update:model-value="updateNavMenuItems(JSON.parse($event || '[]'))"
   >
     <template #col-items="{ scope }">
       <el-button @click="openNavMenuItemsEditor(scope.row)">
@@ -202,7 +200,7 @@
       :model-value="model.footerOwnerName"
       placeholder="例如：安知鱼"
       clearable
-      @update:model-value="model = { ...model, footerOwnerName: $event }"
+      @update:model-value="updateFooterOwnerName"
     />
   </el-form-item>
   <el-form-item label="页脚版权起始年份">
@@ -210,7 +208,7 @@
       :model-value="model.footerOwnerSince"
       placeholder="例如：2020"
       clearable
-      @update:model-value="model = { ...model, footerOwnerSince: $event }"
+      @update:model-value="updateFooterOwnerSince"
     />
   </el-form-item>
 
@@ -218,7 +216,7 @@
   <el-form-item label="启用页脚运行时间模块">
     <el-switch
       :model-value="model.footerRuntimeEnable"
-      @update:model-value="model = { ...model, footerRuntimeEnable: !!$event }"
+      @update:model-value="updateFooterRuntimeEnable"
     />
   </el-form-item>
   <el-form-item label="网站上线时间(控制侧边栏建站天数以及页脚运行时间)">
@@ -229,9 +227,7 @@
       format="MM/DD/YYYY HH:mm:ss"
       value-format="MM/DD/YYYY HH:mm:ss"
       style="width: 100%"
-      @update:model-value="
-        model = { ...model, footerRuntimeLaunchTime: $event }
-      "
+      @update:model-value="updateFooterRuntimeLaunchTime"
     />
   </el-form-item>
 
@@ -241,9 +237,7 @@
       :model-value="model.footerListRandomFriends"
       placeholder="例如：3"
       clearable
-      @update:model-value="
-        model = { ...model, footerListRandomFriends: $event }
-      "
+      @update:model-value="updateFooterListRandomFriends"
     />
   </el-form-item>
   <el-form-item label="底部栏作者链接">
@@ -251,7 +245,7 @@
       :model-value="model.footerBarAuthorLink"
       placeholder="/about"
       clearable
-      @update:model-value="model = { ...model, footerBarAuthorLink: $event }"
+      @update:model-value="updateFooterBarAuthorLink"
     />
   </el-form-item>
   <el-form-item label="底部栏CC协议链接">
@@ -259,7 +253,7 @@
       :model-value="model.footerBarCCLink"
       placeholder="/copyright"
       clearable
-      @update:model-value="model = { ...model, footerBarCCLink: $event }"
+      @update:model-value="updateFooterBarCCLink"
     />
   </el-form-item>
 
@@ -269,9 +263,7 @@
       :model-value="model.footerSocialBarCenterImg"
       placeholder="图片 URL"
       clearable
-      @update:model-value="
-        model = { ...model, footerSocialBarCenterImg: $event }
-      "
+      @update:model-value="updateFooterSocialBarCenterImg"
     />
   </el-form-item>
 
@@ -280,9 +272,7 @@
     title="徽标列表"
     :columns="badgeColumns"
     :new-item-template="{ link: '', shields: '', message: '' }"
-    @update:model-value="
-      model = { ...model, footerBadges: JSON.parse($event || '[]') }
-    "
+    @update:model-value="updateFooterBadges(JSON.parse($event || '[]'))"
   />
 
   <JsonEditorTable
@@ -290,9 +280,7 @@
     title="社交链接栏左侧列表"
     :columns="socialLinkColumns"
     :new-item-template="{ title: '', link: '', icon: '' }"
-    @update:model-value="
-      model = { ...model, footerSocialBarLeft: JSON.parse($event || '[]') }
-    "
+    @update:model-value="updateFooterSocialBarLeft"
     @item-deleted="syncDeleteRight"
   />
 
@@ -301,9 +289,7 @@
     title="社交链接栏右侧列表"
     :columns="socialLinkColumns"
     :new-item-template="{ title: '', link: '', icon: '' }"
-    @update:model-value="
-      model = { ...model, footerSocialBarRight: JSON.parse($event || '[]') }
-    "
+    @update:model-value="updateFooterSocialBarRight(JSON.parse($event || '[]'))"
     @item-deleted="syncDeleteLeft"
   />
 
@@ -322,17 +308,13 @@
     title="底部栏链接列表"
     :columns="footerBarLinkColumns"
     :new-item-template="{ text: '', link: '' }"
-    @update:model-value="
-      model = { ...model, footerBarLinkList: JSON.parse($event || '[]') }
-    "
+    @update:model-value="updateFooterBarLinkList(JSON.parse($event || '[]'))"
   />
 
   <el-divider content-position="left">页脚多栏链接列表</el-divider>
   <FooterLinkListEditor
     :model-value="JSON.stringify(model.footerList)"
-    @update:model-value="
-      model = { ...model, footerList: JSON.parse($event || '[]') }
-    "
+    @update:model-value="updateFooterList(JSON.parse($event || '[]'))"
   />
 
   <SubMenuEditor
@@ -545,5 +527,148 @@ const syncDeleteLeft = (index: number) => {
     newLeft.splice(index, 1);
     model.value = { ...model.value, footerSocialBarLeft: newLeft };
   }
+};
+
+// --- Footer Badges Update Logic ---
+const updateFooterBadges = (newBadges: any[]) => {
+  model.value = {
+    ...model.value,
+    footerBadges: newBadges
+  };
+};
+
+// --- Footer Social Bar Left Update Logic ---
+const updateFooterSocialBarLeft = (newLeft: any[]) => {
+  model.value = {
+    ...model.value,
+    footerSocialBarLeft: newLeft
+  };
+};
+
+// --- Footer Social Bar Right Update Logic ---
+const updateFooterSocialBarRight = (newRight: any[]) => {
+  model.value = {
+    ...model.value,
+    footerSocialBarRight: newRight
+  };
+};
+
+// --- Footer Bar Link List Update Logic ---
+const updateFooterBarLinkList = (newList: any[]) => {
+  model.value = {
+    ...model.value,
+    footerBarLinkList: newList
+  };
+};
+
+// --- Footer List Update Logic ---
+const updateFooterList = (newList: any[]) => {
+  model.value = {
+    ...model.value,
+    footerList: newList
+  };
+};
+
+// --- Menu Update Logic ---
+const updateMenu = (newMenu: any[]) => {
+  model.value = {
+    ...model.value,
+    menu: newMenu
+  };
+};
+
+// --- Nav Menu Items Update Logic ---
+const updateNavMenuItems = (newItems: any[]) => {
+  model.value = {
+    ...model.value,
+    navMenuItems: newItems
+  };
+};
+
+// --- Site Owner Update Logic ---
+const updateSiteOwnerName = (newName: string) => {
+  model.value = {
+    ...model.value,
+    siteOwnerName: newName
+  };
+};
+
+const updateSiteOwnerEmail = (newEmail: string) => {
+  model.value = {
+    ...model.value,
+    siteOwnerEmail: newEmail
+  };
+};
+
+// --- Navigation Update Logic ---
+const updateNavTravel = (newValue: boolean) => {
+  model.value = {
+    ...model.value,
+    navTravel: !!newValue
+  };
+};
+
+const updateNavClock = (newValue: boolean) => {
+  model.value = {
+    ...model.value,
+    navClock: !!newValue
+  };
+};
+
+// --- Footer Update Logic ---
+const updateFooterOwnerName = (newName: string) => {
+  model.value = {
+    ...model.value,
+    footerOwnerName: newName
+  };
+};
+
+const updateFooterOwnerSince = (newYear: string) => {
+  model.value = {
+    ...model.value,
+    footerOwnerSince: newYear
+  };
+};
+
+const updateFooterRuntimeEnable = (newValue: boolean) => {
+  model.value = {
+    ...model.value,
+    footerRuntimeEnable: !!newValue
+  };
+};
+
+const updateFooterRuntimeLaunchTime = (newTime: string) => {
+  model.value = {
+    ...model.value,
+    footerRuntimeLaunchTime: newTime
+  };
+};
+
+const updateFooterListRandomFriends = (newCount: string) => {
+  model.value = {
+    ...model.value,
+    footerListRandomFriends: newCount
+  };
+};
+
+const updateFooterBarAuthorLink = (newLink: string) => {
+  model.value = {
+    ...model.value,
+    footerBarAuthorLink: newLink
+  };
+};
+
+const updateFooterBarCCLink = (newLink: string) => {
+  model.value = {
+    ...model.value,
+    footerBarCCLink: newLink
+  };
+};
+
+const updateFooterSocialBarCenterImg = (newImg: string) => {
+  model.value = {
+    ...model.value,
+    footerSocialBarCenterImg: newImg
+  };
 };
 </script>

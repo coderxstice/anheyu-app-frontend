@@ -399,7 +399,6 @@ const siteTipsWordsText = computed({
 });
 
 const updateComicList = (newList: any[]) => {
-  // 创建新的comic对象，确保Vue能检测到变化
   formData.value.comic = {
     ...formData.value.comic,
     list: newList
@@ -407,7 +406,6 @@ const updateComicList = (newList: any[]) => {
 };
 
 const updateCareerList = (newList: any[]) => {
-  // 创建新的careers对象，确保Vue能检测到变化
   formData.value.careers = {
     ...formData.value.careers,
     list: newList
