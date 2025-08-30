@@ -12,6 +12,11 @@ const routes: any = router.options.routes;
 const multiTags: any = useMultiTagsStoreHook().multiTags;
 
 const getBreadcrumb = (): void => {
+  // 如果当前路径是重定向路径，则不计算面包屑
+  if (route.path.startsWith("/redirect")) {
+    return;
+  }
+
   // 当前路由信息
   let currentRoute;
 
@@ -94,7 +99,11 @@ onMounted(() => {
 
 watch(
   () => route.path,
-  () => {
+  (newPath, oldPath) => {
+    // 过滤重定向路径，避免在重定向过程中重新计算面包屑
+    if (newPath.startsWith("/redirect") || oldPath?.startsWith("/redirect")) {
+      return;
+    }
     getBreadcrumb();
   },
   {
