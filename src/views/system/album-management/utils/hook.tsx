@@ -221,7 +221,7 @@ export function useAlbum() {
           height: number;
           fileSize: number;
           format: string;
-          fileHash: string; // 新增哈希值返回
+          fileHash: string;
         }> {
           return new Promise(async (resolve, reject) => {
             if (!url) {
@@ -239,7 +239,10 @@ export function useAlbum() {
               // 获取文件大小和格式
               let fileSize = 0;
               let format = "unknown";
-              let fileHash = "";
+              // 初始化时生成备用哈希值，确保不为空
+              const timestamp = Date.now();
+              const randomStr = Math.random().toString(36).substring(2, 15);
+              let fileHash = `fallback_${timestamp}_${randomStr}`;
 
               try {
                 const res = await fetch(url);
@@ -304,19 +307,25 @@ export function useAlbum() {
             return hashHex;
           } catch (error) {
             console.error("计算文件哈希值时发生错误:", error);
-            return ""; // 失败时返回空哈希值
+            // 生成基于时间戳的备用哈希值，确保不为空
+            const timestamp = Date.now();
+            const randomStr = Math.random().toString(36).substring(2, 15);
+            return `fallback_${timestamp}_${randomStr}`;
           }
         }
 
         // 默认的元数据返回值
         function getDefaultMetadata() {
+          // 生成基于时间戳的备用哈希值，确保不为空
+          const timestamp = Date.now();
+          const randomStr = Math.random().toString(36).substring(2, 15);
           return {
             width: 0,
             height: 0,
             fileSize: 0,
             format: "unknown",
             aspectRatio: "0:0",
-            fileHash: ""
+            fileHash: `fallback_${timestamp}_${randomStr}`
           };
         }
 
