@@ -27,6 +27,7 @@ export interface CreateCommentPayload {
 export interface Comment {
   id: string;
   created_at: string;
+  pinned_at: string | null;
   nickname: string;
   email_md5: string;
   website: string | null;

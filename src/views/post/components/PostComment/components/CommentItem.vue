@@ -233,6 +233,7 @@ const handleLoadMoreChildren = async () => {
             <span v-if="isBlogger" class="master-tag">{{
               config.master_tag
             }}</span>
+            <span v-if="comment.pinned_at" class="pinned-tag"> 置顶 </span>
             <span class="timestamp">{{ formattedDate }}</span>
           </div>
           <div class="comment-actions">
@@ -373,6 +374,22 @@ const handleLoadMoreChildren = async () => {
   color: #fff;
   background-color: var(--el-color-primary);
   border-radius: 4px;
+}
+
+.pinned-tag {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  padding: 2px 6px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: #fff;
+  background-color: #ff6b6b;
+  border-radius: 4px;
+
+  i {
+    font-size: 0.7rem;
+  }
 }
 
 .comment-actions {
