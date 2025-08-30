@@ -6,11 +6,7 @@
 <template>
   <el-form-item label="动漫列表">
     <div class="comic-list-container">
-      <div
-        v-for="(comic, index) in localComicList"
-        :key="index"
-        class="comic-item"
-      >
+      <div v-for="(comic, index) in comicList" :key="index" class="comic-item">
         <el-card shadow="hover">
           <div class="comic-item-header">
             <span class="comic-index">#{{ index + 1 }}</span>
@@ -54,7 +50,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
 import { Delete, Plus } from "@element-plus/icons-vue";
 
 interface ComicItem {
@@ -69,36 +64,24 @@ const props = defineProps<{
 
 const emit = defineEmits(["update:comic-list"]);
 
-const localComicList = ref<ComicItem[]>([...props.comicList]);
-
-// 监听外部数据变化
-watch(
-  () => props.comicList,
-  newList => {
-    localComicList.value = [...newList];
-  },
-  { deep: true }
-);
-
-// 监听本地数据变化，同步到父组件
-watch(
-  localComicList,
-  newList => {
-    emit("update:comic-list", newList);
-  },
-  { deep: true }
-);
-
 const addComic = () => {
-  localComicList.value.push({
+  // 创建新的动漫项
+  const newComic: ComicItem = {
     cover: "",
     href: "",
     name: ""
-  });
+  };
+
+  // 创建新的数组并添加新项，避免直接修改props
+  const updatedList = [...props.comicList, newComic];
+  emit("update:comic-list", updatedList);
 };
 
 const removeComic = (index: number) => {
-  localComicList.value.splice(index, 1);
+  // 创建新的数组并移除指定项，避免直接修改props
+  const updatedList = [...props.comicList];
+  updatedList.splice(index, 1);
+  emit("update:comic-list", updatedList);
 };
 </script>
 

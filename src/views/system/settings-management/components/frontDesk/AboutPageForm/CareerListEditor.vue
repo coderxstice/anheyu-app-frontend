@@ -7,7 +7,7 @@
   <el-form-item label="生涯列表">
     <div class="career-list-container">
       <div
-        v-for="(career, index) in localCareerList"
+        v-for="(career, index) in careerList"
         :key="index"
         class="career-item"
       >
@@ -51,7 +51,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
 import { Delete, Plus } from "@element-plus/icons-vue";
 
 interface CareerItem {
@@ -65,35 +64,23 @@ const props = defineProps<{
 
 const emit = defineEmits(["update:career-list"]);
 
-const localCareerList = ref<CareerItem[]>([...props.careerList]);
-
-// 监听外部数据变化
-watch(
-  () => props.careerList,
-  newList => {
-    localCareerList.value = [...newList];
-  },
-  { deep: true }
-);
-
-// 监听本地数据变化，同步到父组件
-watch(
-  localCareerList,
-  newList => {
-    emit("update:career-list", newList);
-  },
-  { deep: true }
-);
-
 const addCareer = () => {
-  localCareerList.value.push({
+  // 创建新的生涯项
+  const newCareer: CareerItem = {
     color: "#409eff",
     desc: ""
-  });
+  };
+
+  // 创建新的数组并添加新项，避免直接修改props
+  const updatedList = [...props.careerList, newCareer];
+  emit("update:career-list", updatedList);
 };
 
 const removeCareer = (index: number) => {
-  localCareerList.value.splice(index, 1);
+  // 创建新的数组并移除指定项，避免直接修改props
+  const updatedList = [...props.careerList];
+  updatedList.splice(index, 1);
+  emit("update:career-list", updatedList);
 };
 </script>
 

@@ -264,7 +264,7 @@
   <!-- 动漫列表编辑 -->
   <ComicListEditor
     :comic-list="formData.comic.list"
-    @update:comic-list="formData.comic.list = $event"
+    @update:comic-list="updateComicList"
   />
 
   <!-- 喜好 -->
@@ -326,7 +326,7 @@
   <!-- 生涯列表编辑 -->
   <CareerListEditor
     :career-list="formData.careers.list"
-    @update:career-list="formData.careers.list = $event"
+    @update:career-list="updateCareerList"
   />
 
   <!-- 技能提示 -->
@@ -397,6 +397,22 @@ const siteTipsWordsText = computed({
       .filter(item => item);
   }
 });
+
+const updateComicList = (newList: any[]) => {
+  // 创建新的comic对象，确保Vue能检测到变化
+  formData.value.comic = {
+    ...formData.value.comic,
+    list: newList
+  };
+};
+
+const updateCareerList = (newList: any[]) => {
+  // 创建新的careers对象，确保Vue能检测到变化
+  formData.value.careers = {
+    ...formData.value.careers,
+    list: newList
+  };
+};
 </script>
 
 <style scoped lang="scss">
