@@ -366,7 +366,7 @@ a {
 }
 
 .footer-group {
-  min-width: 120px;
+  min-width: 130px;
   text-align: left;
 }
 
