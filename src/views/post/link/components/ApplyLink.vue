@@ -2,7 +2,7 @@
  * @Description: 友情链接申请面板
  * @Author: 安知鱼
  * @Date: 2025-08-19 10:19:23
- * @LastEditTime: 2025-08-19 17:33:48
+ * @LastEditTime: 2025-08-30 15:08:17
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -44,7 +44,8 @@ const form = reactive<ApplyLinkRequest>({
   name: "",
   url: "",
   logo: "",
-  description: ""
+  description: "",
+  siteshot: ""
 });
 const rules = reactive<FormRules>({
   name: [{ required: true, message: "请输入网站名称", trigger: "blur" }],
@@ -60,7 +61,14 @@ const rules = reactive<FormRules>({
       trigger: ["blur", "change"]
     }
   ],
-  description: [{ required: true, message: "请输入网站简介", trigger: "blur" }]
+  description: [{ required: true, message: "请输入网站简介", trigger: "blur" }],
+  siteshot: [
+    {
+      type: "url",
+      message: "请输入有效的网站快照链接",
+      trigger: ["blur", "change"]
+    }
+  ]
 });
 
 const handleSubmit = async (formEl: FormInstance | undefined) => {
@@ -179,6 +187,15 @@ watch(allChecked, isAllChecked => {
             placeholder="生活明朗，万物可爱"
           />
         </el-form-item>
+        <el-form-item label="网站快照" prop="siteshot">
+          <el-input
+            v-model="form.siteshot"
+            placeholder="https://example.com/siteshot.png (可选)"
+          />
+          <div class="form-tip">
+            <small>网站快照是您网站的截图，用于在友链页面展示。</small>
+          </div>
+        </el-form-item>
         <el-form-item>
           <el-button
             type="primary"
@@ -205,5 +222,12 @@ watch(allChecked, isAllChecked => {
 
 .form-card {
   margin-top: 20px;
+}
+
+.form-tip {
+  margin-top: 8px;
+  color: #909399;
+  font-size: 12px;
+  line-height: 1.4;
 }
 </style>

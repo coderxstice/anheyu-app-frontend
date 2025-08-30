@@ -2,7 +2,7 @@
  * @Description: 友链相关类型定义
  * @Author: 安知鱼
  * @Date: 2025-08-18 16:10:00
- * @LastEditTime: 2025-08-19 16:32:02
+ * @LastEditTime: 2025-08-30 15:35:40
  * @LastEditors: 安知鱼
  */
 
@@ -54,6 +54,7 @@ export interface ApplyLinkRequest {
   url: string;
   logo?: string;
   description?: string;
+  siteshot?: string;
 }
 
 /** [后台] 创建友链 */

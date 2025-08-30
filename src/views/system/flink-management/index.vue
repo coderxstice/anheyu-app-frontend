@@ -75,6 +75,14 @@
               v-if="link.category || (link.tags && link.tags.length > 0)"
               class="meta-info"
             >
+              <el-tag
+                v-if="link.category && link.category.style"
+                size="small"
+                class="mr-2"
+                :type="link.category.style === 'card' ? 'primary' : 'success'"
+              >
+                样式: {{ link.category.style === "card" ? "卡片" : "列表" }}
+              </el-tag>
               <el-tag v-if="link.category" size="small" type="info">{{
                 link.category.name
               }}</el-tag>
@@ -162,7 +170,7 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive } from "vue";
 import { Search, Refresh, Plus, Edit, Delete } from "@element-plus/icons-vue";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { getAdminLinkList, deleteLink, reviewLink } from "@/api/postLink";
 import type {
   LinkItem,
@@ -245,11 +253,32 @@ const handleDelete = async (id: number) => {
 
 const handleReview = async (id: number, status: "APPROVED" | "REJECTED") => {
   try {
-    await reviewLink(id, { status });
+    // 如果是审核通过，可能需要输入网站快照
+    let siteshot: string | undefined;
+    if (status === "APPROVED") {
+      // 使用 ElMessageBox 提示用户输入网站快照
+      const { value } = await ElMessageBox.prompt(
+        "请输入网站快照链接（可选）：",
+        "审核通过",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          inputPlaceholder: "https://example.com/siteshot.png",
+          inputPattern: /^$|^https?:\/\/.+/, // 允许空值或有效的URL
+          inputErrorMessage: "请输入有效的网站快照链接"
+        }
+      );
+      siteshot = value || undefined;
+    }
+
+    await reviewLink(id, { status, siteshot });
     ElMessage.success("审核操作成功");
     getLinkList();
   } catch (error) {
-    console.error("审核失败", error);
+    if (error !== "cancel") {
+      console.error("审核失败", error);
+      ElMessage.error("审核失败");
+    }
   }
 };
 

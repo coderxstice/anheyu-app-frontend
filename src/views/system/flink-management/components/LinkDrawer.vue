@@ -29,6 +29,18 @@
         />
       </el-form-item>
 
+      <el-form-item label="网站快照" prop="siteshot">
+        <el-input
+          v-model="formData.siteshot"
+          placeholder="请输入网站快照链接 (可选)"
+        />
+        <div class="form-tip">
+          <small
+            >网站快照是网站的截图，用于在友链页面展示。如果友链使用卡片样式，建议提供网站快照。</small
+          >
+        </div>
+      </el-form-item>
+
       <!-- 带有“即时新增”功能的分类选择器 -->
       <el-form-item label="分类" prop="category_id">
         <div class="quick-add-select">
@@ -179,6 +191,13 @@ const formRules = reactive<FormRules>({
   name: [{ required: true, message: "请输入网站名称", trigger: "blur" }],
   url: [{ required: true, message: "请输入网站地址", trigger: "blur" }],
   logo: [{ required: true, message: "请输入网站LOGO", trigger: "blur" }],
+  siteshot: [
+    {
+      type: "url",
+      message: "请输入有效的网站快照链接",
+      trigger: ["blur", "change"]
+    }
+  ],
   category_id: [
     { required: true, message: "请选择或新建一个分类", trigger: "change" }
   ],
@@ -292,5 +311,12 @@ onMounted(() => {
     flex-grow: 1;
     margin-right: 10px;
   }
+}
+
+.form-tip {
+  margin-top: 8px;
+  color: #909399;
+  font-size: 12px;
+  line-height: 1.4;
 }
 </style>
