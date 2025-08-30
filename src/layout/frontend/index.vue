@@ -14,6 +14,8 @@
     </main>
 
     <Footer />
+
+    <SearchModal />
   </div>
 </template>
 
@@ -25,6 +27,7 @@ import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 
 import Header from "./components/hearder/index.vue";
 import Footer from "./components/footer/index.vue";
+import SearchModal from "./components/SearchModal/index.vue";
 
 const { $storage } = useGlobal<GlobalPropertiesApi>();
 const route = useRoute();

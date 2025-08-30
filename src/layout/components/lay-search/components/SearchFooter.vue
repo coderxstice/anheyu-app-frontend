@@ -56,6 +56,7 @@ const { device } = useNav();
   .search-footer-total {
     position: absolute;
     right: 20px;
+    margin: 0;
   }
 }
 </style>
