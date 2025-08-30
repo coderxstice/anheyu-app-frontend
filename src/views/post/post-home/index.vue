@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, watch, computed } from "vue";
+import { ref, reactive, watch, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import HomeTop from "./components/HomeTop/index.vue";
 import CategoryBar from "./components/CategoryBar/index.vue";
@@ -11,6 +11,7 @@ import Sidebar from "../components/Sidebar/index.vue";
 import { getPublicArticles } from "@/api/post";
 import type { Article, GetArticleListParams } from "@/api/post/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import { resetThemeToDefault } from "@/utils/themeManager";
 
 defineOptions({
   name: "PostHome"
@@ -120,6 +121,11 @@ watch(
     immediate: true
   }
 );
+
+// 在首页挂载时重置主题色到默认值
+onMounted(() => {
+  resetThemeToDefault();
+});
 </script>
 
 <template>

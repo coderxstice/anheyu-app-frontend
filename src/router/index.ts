@@ -25,10 +25,10 @@ import {
   type RouteLocationNormalized
 } from "vue-router";
 import type { LoginResultData } from "@/api/user";
-// 从 auth.ts 导入的函数中，multipleTabsKey 已经包含在内
 import { userKey, removeToken, multipleTabsKey } from "@/utils/auth";
 import { useLoadingStore } from "@/store/modules/loadingStore";
 import { recordRouteChange } from "./statistics";
+import { resetThemeToDefault } from "@/utils/themeManager";
 
 // 定义路由类型别名
 type ToRouteType = RouteLocationNormalized;
@@ -294,6 +294,11 @@ router.afterEach((to, from) => {
   // 记录路由变化（访问统计）
   if (to.path !== from.path) {
     recordRouteChange(to, from);
+  }
+
+  // 当离开文章详情页时，重置主题色到默认值
+  if (from.name === "PostDetail" && to.name !== "PostDetail") {
+    resetThemeToDefault();
   }
 
   if (to.name !== "PostDetail" || isReloadingSamePost) {

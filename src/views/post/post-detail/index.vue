@@ -15,6 +15,11 @@ import type { Article, ArticleLink } from "@/api/post/type";
 import { useLoadingStore } from "@/store/modules/loadingStore";
 import { useCommentStore } from "@/store/modules/commentStore";
 import { useArticleStore } from "@/store/modules/articleStore";
+import {
+  saveOriginalThemeColors,
+  restoreOriginalThemeColors,
+  setArticleTheme
+} from "@/utils/themeManager";
 
 import PostHeader from "./components/PostHeader/index.vue";
 import PostOutdateNotice from "./components/PostOutdateNotice/index.vue";
@@ -84,65 +89,18 @@ provide("updateHeadingTocItems", (items: { id: string }[]) => {
  * @param articleRef - 文章数据的 ref
  */
 const useArticleTheme = (articleRef: Ref<Article | null>) => {
-  const originalColors = {
-    main: "",
-    mainOpDeep: "",
-    mainOpLight: ""
-  };
-
-  const saveOriginalColors = () => {
-    const rootStyle = getComputedStyle(document.documentElement);
-    originalColors.main = rootStyle.getPropertyValue("--anzhiyu-main").trim();
-    originalColors.mainOpDeep = rootStyle
-      .getPropertyValue("--anzhiyu-main-op-deep")
-      .trim();
-    originalColors.mainOpLight = rootStyle
-      .getPropertyValue("--anzhiyu-main-op-light")
-      .trim();
-  };
-
-  const restoreOriginalColors = () => {
-    const rootStyle = document.documentElement.style;
-    if (originalColors.main)
-      rootStyle.setProperty("--anzhiyu-main", originalColors.main);
-    if (originalColors.mainOpDeep)
-      rootStyle.setProperty(
-        "--anzhiyu-main-op-deep",
-        originalColors.mainOpDeep
-      );
-    if (originalColors.mainOpLight)
-      rootStyle.setProperty(
-        "--anzhiyu-main-op-light",
-        originalColors.mainOpLight
-      );
-  };
-
   watch(
     () => articleRef.value?.primary_color,
     newColor => {
-      const rootStyle = document.documentElement.style;
-      if (newColor) {
-        rootStyle.setProperty("--anzhiyu-main", newColor);
-        // 简单判断是否为 HEX 颜色以添加透明度
-        if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(newColor)) {
-          rootStyle.setProperty("--anzhiyu-main-op-deep", `${newColor}dd`);
-          rootStyle.setProperty("--anzhiyu-main-op-light", `${newColor}0d`);
-        } else {
-          // 如果不是标准 HEX，则直接使用原色
-          rootStyle.setProperty("--anzhiyu-main-op-deep", newColor);
-          rootStyle.setProperty("--anzhiyu-main-op-light", newColor);
-        }
-      } else {
-        restoreOriginalColors();
-      }
+      setArticleTheme(newColor || "");
     },
     { immediate: true }
   );
 
-  onMounted(saveOriginalColors);
+  onMounted(saveOriginalThemeColors);
   onUnmounted(() => {
     commentStore.resetStore();
-    restoreOriginalColors();
+    restoreOriginalThemeColors();
   });
 };
 

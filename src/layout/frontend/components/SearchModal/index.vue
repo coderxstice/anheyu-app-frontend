@@ -3,16 +3,17 @@
     <div ref="dialogRef" class="search-dialog">
       <div class="search-nav">
         <div class="search-dialog-title">搜索</div>
-        <button
+        <div
           class="search-close-button"
           aria-label="关闭搜索框"
           @click="closeModal"
         >
           <i class="anzhiyufont anzhiyu-icon-xmark" />
-        </button>
+        </div>
       </div>
       <div class="search-wrap">
         <div class="search-input-container">
+          <i class="anzhiyufont anzhiyu-icon-magnifying-glass search-icon" />
           <input
             ref="inputRef"
             v-model="keyword"
@@ -29,7 +30,6 @@
           <span>按 Ctrl/⌘ + K 打开</span>
         </div>
 
-        <!-- 搜索结果 -->
         <div v-if="keyword.trim() && !loading" class="search-results">
           <div v-if="searchResults.length > 0" class="results-header">
             <span class="results-count">找到 {{ total }} 条结果</span>
@@ -42,47 +42,63 @@
               class="result-item"
               @click="handleResultClick(result)"
             >
-              <div class="result-title" v-html="result.title" />
-              <div class="result-snippet" v-html="result.snippet" />
-              <div class="result-meta">
-                <span class="result-author">{{ result.author }}</span>
-                <span class="result-category">{{ result.category }}</span>
-                <span class="result-date">
-                  {{ formatDate(result.publish_date) }}
-                </span>
-                <span
-                  v-if="result.tags && result.tags.length > 0"
-                  class="result-tags"
-                >
-                  <span v-for="tag in result.tags" :key="tag" class="tag">
-                    {{ tag }}
-                  </span>
-                </span>
+              <div class="result-thumbnail">
+                <img
+                  :src="result.cover_url || defaultCover"
+                  :alt="result.title"
+                />
+              </div>
+              <div class="result-details">
+                <div class="result-content">
+                  <div class="result-title" v-html="result.title" />
+                  <div class="result-snippet" v-html="result.snippet" />
+                </div>
+                <div class="result-footer">
+                  <div class="result-meta">
+                    <span class="result-author">{{ result.author }}</span>
+                    <span class="result-date">
+                      {{ formatDate(result.publish_date) }}
+                    </span>
+                    <span
+                      v-if="result.tags && result.tags.length > 0"
+                      class="result-tags"
+                    >
+                      <span
+                        v-for="tag in result.tags.slice(0, 3)"
+                        :key="tag"
+                        class="tag"
+                      >
+                        {{ tag }}
+                      </span>
+                    </span>
+                  </div>
+                  <div class="result-arrow">
+                    <i class="anzhiyufont anzhiyu-icon-arrow-right-s-line" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- 分页 -->
           <div v-if="totalPages > 1" class="pagination">
-            <button
+            <div
               class="page-btn"
               :disabled="currentPage <= 1"
               @click="changePage(currentPage - 1)"
             >
               上一页
-            </button>
+            </div>
             <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
-            <button
+            <div
               class="page-btn"
               :disabled="currentPage >= totalPages"
               @click="changePage(currentPage + 1)"
             >
               下一页
-            </button>
+            </div>
           </div>
         </div>
 
-        <!-- 无结果提示 -->
         <div
           v-if="keyword.trim() && !loading && searchResults.length === 0"
           class="no-results"
@@ -92,7 +108,6 @@
           <div class="no-results-tip">尝试使用其他关键词或检查拼写</div>
         </div>
 
-        <!-- 加载状态 -->
         <div v-if="loading" class="loading">
           <div class="loading-spinner" />
           <div class="loading-text">搜索中...</div>
@@ -104,10 +119,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, nextTick, computed } from "vue";
+import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { gsap } from "gsap";
+import { useArticleStore } from "@/store/modules/articleStore";
 
-// 搜索结果类型定义
 interface SearchHit {
   id: string;
   title: string;
@@ -139,6 +154,9 @@ interface SearchResponse {
   data: SearchResult;
 }
 
+const articleStore = useArticleStore();
+const defaultCover = articleStore.defaultCover;
+
 const maskRef = ref<HTMLDivElement | null>(null);
 const dialogRef = ref<HTMLDivElement | null>(null);
 const inputRef = ref<HTMLInputElement | null>(null);
@@ -152,15 +170,10 @@ const currentPage = ref(1);
 const totalPages = ref(0);
 const pageSize = 10;
 
-// 是否展示提示与占位内容
 const tipsVisible = ref(true);
 
-// 防抖搜索
 let searchTimeout: NodeJS.Timeout | null = null;
 
-/**
- * 执行搜索
- */
 async function performSearch(page: number = 1) {
   if (!keyword.value.trim()) {
     searchResults.value = [];
@@ -183,8 +196,13 @@ async function performSearch(page: number = 1) {
 
     const data: SearchResponse = await response.json();
 
-    if (data.code === 0) {
-      searchResults.value = data.data.hits;
+    if (data.code === 200) {
+      const regex = new RegExp(keyword.value.trim(), "gi");
+      searchResults.value = data.data.hits.map(hit => ({
+        ...hit,
+        title: hit.title.replace(regex, match => `<em>${match}</em>`),
+        snippet: hit.snippet.replace(regex, match => `<em>${match}</em>`)
+      }));
       total.value = data.data.pagination.total;
       totalPages.value = data.data.pagination.totalPages;
     } else {
@@ -195,15 +213,11 @@ async function performSearch(page: number = 1) {
     searchResults.value = [];
     total.value = 0;
     totalPages.value = 0;
-    // 这里可以添加错误提示UI
   } finally {
     loading.value = false;
   }
 }
 
-/**
- * 处理输入变化，防抖搜索
- */
 function handleInput() {
   if (searchTimeout) {
     clearTimeout(searchTimeout);
@@ -220,40 +234,24 @@ function handleInput() {
   }, 300);
 }
 
-/**
- * 回车搜索
- */
 function handleEnter() {
   if (keyword.value.trim()) {
     performSearch(1);
   }
 }
 
-/**
- * 切换页面
- */
 function changePage(page: number) {
   if (page >= 1 && page <= totalPages.value) {
     performSearch(page);
   }
 }
 
-/**
- * 点击搜索结果
- */
 function handleResultClick(result: SearchHit) {
-  // 跳转到文章页面
-  if (result.abbrlink) {
-    window.location.href = `/${result.abbrlink}`;
-  } else {
-    window.location.href = `/article/${result.id}`;
-  }
+  const targetId = result.abbrlink || result.id;
+  window.location.href = `/posts/${targetId}`;
   closeModal();
 }
 
-/**
- * 格式化日期
- */
 function formatDate(dateString: string): string {
   try {
     const date = new Date(dateString);
@@ -267,9 +265,6 @@ function formatDate(dateString: string): string {
   }
 }
 
-/**
- * 打开弹窗：执行遮罩与对话框入场动画，并锁定页面滚动
- */
 function openModal() {
   if (isOpen.value) return;
   isOpen.value = true;
@@ -278,10 +273,8 @@ function openModal() {
   const dialog = dialogRef.value;
   if (!mask || !dialog) return;
 
-  // 锁定滚动，防止背景滚动
   document.documentElement.style.overflow = "hidden";
 
-  // 先显示元素，再做入场动画
   gsap.set(mask, { display: "block", opacity: 0, pointerEvents: "auto" });
   gsap.set(dialog, { display: "flex", opacity: 0, y: 24, scale: 0.98 });
 
@@ -310,9 +303,6 @@ function openModal() {
     });
 }
 
-/**
- * 关闭弹窗：执行遮罩与对话框退场动画，动画结束后隐藏并解锁滚动
- */
 function closeModal() {
   if (!isOpen.value) return;
   const mask = maskRef.value;
@@ -345,11 +335,6 @@ function closeModal() {
   }
 }
 
-/**
- * 键盘事件：
- * - Esc 关闭
- * - Ctrl/⌘ + K 打开
- */
 function onKeydown(e: KeyboardEvent) {
   if (e.key === "Escape") {
     e.preventDefault();
@@ -362,10 +347,6 @@ function onKeydown(e: KeyboardEvent) {
   }
 }
 
-/**
- * 文档点击事件委托：
- * - 监听带有放大镜图标 `.anzhiyu-icon-magnifying-glass` 的点击来打开弹窗
- */
 function onDocumentClick(e: MouseEvent) {
   const target = e.target as HTMLElement | null;
   if (!target) return;
@@ -383,7 +364,6 @@ function onDocumentClick(e: MouseEvent) {
 }
 
 onMounted(() => {
-  // 初始化为隐藏状态
   if (maskRef.value) {
     gsap.set(maskRef.value, { display: "none", opacity: 0 });
   }
@@ -391,7 +371,6 @@ onMounted(() => {
     gsap.set(dialogRef.value, { display: "none", opacity: 0 });
   }
 
-  // 绑定事件
   window.addEventListener("keydown", onKeydown);
   document.addEventListener("click", onDocumentClick, {
     capture: true
@@ -436,7 +415,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   padding: 0;
-  width: 36rem;
+  width: 40rem;
   max-width: 90vw;
   background: var(--anzhiyu-card-bg);
   border-radius: 16px;
@@ -460,7 +439,8 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 1.5rem;
+  border-bottom: var(--style-border);
   flex-shrink: 0;
 }
 
@@ -497,13 +477,22 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding: 0 1.5rem 1.5rem;
+  padding: 1.25rem;
+  overflow-y: auto;
 }
 
 .search-input-container {
   position: relative;
   display: flex;
   align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.875rem;
+  font-size: 1.1rem;
+  color: var(--anzhiyu-secondtext);
+  pointer-events: none;
 }
 
 .search-input {
@@ -515,7 +504,7 @@ onBeforeUnmount(() => {
     background-color 0.2s,
     box-shadow 0.2s;
   color: var(--anzhiyu-fontcolor);
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
   outline: 0px;
   background: var(--anzhiyu-secondbg);
   border: var(--style-border);
@@ -542,41 +531,80 @@ onBeforeUnmount(() => {
   gap: 0.5rem;
 }
 
-// 搜索结果样式
 .search-results {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .results-header {
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--anzhiyu-gray-2);
+  margin-bottom: 0.5rem;
+  padding-left: 0.5rem;
 }
 
 .results-count {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: var(--anzhiyu-secondtext);
 }
 
 .results-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .result-item {
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--anzhiyu-gray-2);
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
   background: var(--anzhiyu-card-bg);
+  border: var(--style-border);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease-in-out;
 }
 
 .result-item:hover {
   border-color: var(--anzhiyu-theme);
-  box-shadow: 0 2px 8px var(--anzhiyu-theme-op);
-  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--anzhiyu-theme-op);
+  transform: translateY(-2px);
+}
+
+.result-item:hover .result-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.result-item:hover .result-thumbnail img {
+  transform: scale(1.1);
+}
+
+.result-thumbnail {
+  flex-shrink: 0;
+  width: 6rem;
+  height: 6rem;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.result-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease-out;
+}
+
+.result-details {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-width: 0;
+  align-self: stretch;
+}
+
+.result-content {
+  flex-grow: 1;
 }
 
 .result-title {
@@ -585,18 +613,42 @@ onBeforeUnmount(() => {
   color: var(--anzhiyu-fontcolor);
   margin-bottom: 0.5rem;
   line-height: 1.4;
+  display: -webkit-box;
+  line-clamp: 1;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.result-title:deep(em) {
+  color: var(--anzhiyu-theme);
+  font-style: normal;
 }
 
 .result-snippet {
   font-size: 0.9rem;
   color: var(--anzhiyu-secondtext);
-  margin-bottom: 0.75rem;
-  line-height: 1.5;
+  line-height: 1.6;
   display: -webkit-box;
   line-clamp: 2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.result-snippet:deep(em) {
+  font-style: normal;
+  font-weight: 500;
+}
+
+.result-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 0.5rem;
 }
 
 .result-meta {
@@ -609,40 +661,45 @@ onBeforeUnmount(() => {
 }
 
 .result-author,
-.result-category,
 .result-date {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
+  white-space: nowrap;
 }
 
 .result-tags {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.375rem;
 }
 
 .tag {
-  padding: 0.2rem 0.5rem;
+  padding: 0.15rem 0.5rem;
   background: var(--anzhiyu-theme-op);
   color: var(--anzhiyu-theme);
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.75rem;
+  white-space: nowrap;
 }
 
-// 分页样式
+.result-arrow {
+  color: var(--anzhiyu-theme);
+  font-size: 1.25rem;
+  opacity: 0;
+  transform: translateX(-5px);
+  transition: all 0.25s ease-in-out;
+}
+
 .pagination {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 1rem;
   margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--anzhiyu-gray-2);
+  padding-top: 1.5rem;
+  border-top: var(--style-border);
 }
 
 .page-btn {
   padding: 0.5rem 1rem;
-  border: 1px solid var(--anzhiyu-gray-2);
+  border: var(--style-border);
   background: var(--anzhiyu-card-bg);
   color: var(--anzhiyu-fontcolor);
   border-radius: 6px;
@@ -652,6 +709,7 @@ onBeforeUnmount(() => {
 
 .page-btn:hover:not(:disabled) {
   border-color: var(--anzhiyu-theme);
+  color: var(--anzhiyu-theme);
   background: var(--anzhiyu-theme-op);
 }
 
@@ -665,8 +723,8 @@ onBeforeUnmount(() => {
   color: var(--anzhiyu-secondtext);
 }
 
-// 无结果样式
-.no-results {
+.no-results,
+.loading {
   margin-top: 2rem;
   text-align: center;
   padding: 2rem;
@@ -688,17 +746,10 @@ onBeforeUnmount(() => {
   color: var(--anzhiyu-secondtext);
 }
 
-// 加载样式
-.loading {
-  margin-top: 2rem;
-  text-align: center;
-  padding: 2rem;
-}
-
 .loading-spinner {
   width: 2rem;
   height: 2rem;
-  border: 2px solid var(--anzhiyu-gray-2);
+  border: var(--style-border);
   border-top: 2px solid var(--anzhiyu-theme);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -717,5 +768,10 @@ onBeforeUnmount(() => {
   100% {
     transform: rotate(360deg);
   }
+}
+
+:deep(em) {
+  font-style: normal;
+  color: var(--anzhiyu-theme);
 }
 </style>
