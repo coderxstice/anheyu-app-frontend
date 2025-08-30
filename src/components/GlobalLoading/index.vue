@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from "vue";
+import { computed } from "vue";
 import { useLoadingStore } from "@/store/modules/loadingStore";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
@@ -7,36 +7,11 @@ const loadingStore = useLoadingStore();
 const siteConfigStore = useSiteConfigStore();
 
 const avatarUrl = computed(() => siteConfigStore.getSiteConfig?.USER_AVATAR);
-const isClickable = ref(false);
-let clickTimer: number | null = null;
 
+// 点击头像，立即关闭全局加载动画
 const forceClose = () => {
-  if (isClickable.value) {
-    loadingStore.stopLoading();
-  }
+  loadingStore.stopLoading();
 };
-
-watch(
-  () => loadingStore.isLoading,
-  isLoading => {
-    if (isLoading) {
-      // 1. 重置状态
-      isClickable.value = false;
-      if (clickTimer) clearTimeout(clickTimer);
-
-      // 2. 启动2秒计时器
-      clickTimer = window.setTimeout(() => {
-        // 3. 2秒后，检查加载状态是否仍然为 true
-        if (loadingStore.isLoading) {
-          isClickable.value = true;
-        }
-      }, 2000);
-    } else {
-      // 加载正常结束时，清理计时器，防止它在后台继续运行
-      if (clickTimer) clearTimeout(clickTimer);
-    }
-  }
-);
 </script>
 
 <template>
@@ -45,10 +20,9 @@ watch(
       <div class="loading-bg">
         <img
           v-if="avatarUrl"
-          class="loading-img nolazyload"
+          class="loading-img clickable"
           alt="加载头像"
           :src="avatarUrl"
-          :class="{ clickable: isClickable }"
           @click="forceClose"
         />
         <div class="loading-image-dot" />
@@ -58,8 +32,6 @@ watch(
 </template>
 
 <style lang="scss" scoped>
-
-
 @keyframes loadingAction {
   0% {
     opacity: 1;
@@ -83,7 +55,7 @@ watch(
   user-select: none;
 
   .loading-bg {
-    position: relative; // 改为 relative 以便定位小圆点
+    position: relative;
     display: flex;
     width: 100%;
     height: 100%;
@@ -95,11 +67,11 @@ watch(
 .loading-img {
   width: 100px;
   height: 100px;
-  margin: auto; // 使其在 flex 容器中居中
+  margin: auto;
   border: 4px solid #f0f0f2;
   border-radius: 50%;
   animation-name: loadingAction;
-  animation-duration: 0.8s; // 让呼吸效果更柔和
+  animation-duration: 0.8s;
   animation-iteration-count: infinite;
   animation-direction: alternate;
 
@@ -117,12 +89,9 @@ watch(
   background: #6bdf8f;
   border: 6px solid var(--anzhiyu-card-bg);
   border-radius: 50%;
-  // 精确调整位置，使其在 100px 的头像右下角
-  // (头像半径50 - 小圆点半径15 + 边框等偏移)
   transform: translate(24px, 24px);
 }
 
-/* 过渡动画 */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
