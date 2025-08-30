@@ -162,6 +162,10 @@ const fetchRequiredData = async (id: string) => {
     loading.value = false;
     delete window.__INITIAL_DATA__;
 
+    nextTick(() => {
+      loadingStore.stopLoading();
+    });
+
     getPublicArticles({ page: 1, pageSize: 5 }).then(res => {
       recentArticles.value = res.data.list.map(p => ({
         id: p.id,
