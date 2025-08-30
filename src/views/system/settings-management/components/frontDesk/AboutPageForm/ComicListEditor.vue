@@ -1,8 +1,3 @@
-<!--
- * @Description: 动漫列表编辑器
- * @Author: 安知鱼
- * @Date: 2025-08-21
--->
 <template>
   <el-form-item label="动漫列表">
     <div class="comic-list-container">
@@ -58,30 +53,24 @@ interface ComicItem {
   name: string;
 }
 
-const props = defineProps<{
-  comicList: ComicItem[];
-}>();
-
-const emit = defineEmits(["update:comic-list"]);
+// 使用 defineModel 接收来自父组件的 v-model:comic-list
+const comicList = defineModel<ComicItem[]>("comic-list", { required: true });
 
 const addComic = () => {
-  // 创建新的动漫项
   const newComic: ComicItem = {
     cover: "",
     href: "",
     name: ""
   };
-
-  // 创建新的数组并添加新项，避免直接修改props
-  const updatedList = [...props.comicList, newComic];
-  emit("update:comic-list", updatedList);
+  // 直接修改 comicList.value，defineModel 会自动 emit 更新
+  comicList.value = [...comicList.value, newComic];
 };
 
 const removeComic = (index: number) => {
-  // 创建新的数组并移除指定项，避免直接修改props
-  const updatedList = [...props.comicList];
+  const updatedList = [...comicList.value];
   updatedList.splice(index, 1);
-  emit("update:comic-list", updatedList);
+  // 直接修改 comicList.value，defineModel 会自动 emit 更新
+  comicList.value = updatedList;
 };
 </script>
 

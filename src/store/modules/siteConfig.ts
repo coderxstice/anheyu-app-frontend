@@ -9,7 +9,7 @@ import {
   type SettingsMap
 } from "@/api/sys-settings";
 import { message } from "@/utils/message";
-import { merge, set } from "lodash-es";
+import { set } from "lodash-es";
 import { LOCAL_STORAGE_KEY } from "@/constant/index";
 
 // 引入公告相关的函数
@@ -117,15 +117,12 @@ export const useSiteConfigStore = defineStore("anheyu-site-config", {
      * @param flatSettings - 一个扁平的对象, e.g., { "sidebar.siteinfo.totalPostCount": 70 }
      */
     updateSettingsByDotKeys(flatSettings: Record<string, any>) {
-      const nestedUpdate = {};
-
       for (const dotKey in flatSettings) {
         if (Object.prototype.hasOwnProperty.call(flatSettings, dotKey)) {
-          set(nestedUpdate, dotKey, flatSettings[dotKey]);
+          // 直接使用 lodash.set 可靠地更新状态
+          set(this.siteConfig, dotKey, flatSettings[dotKey]);
         }
       }
-
-      merge(this.siteConfig, nestedUpdate);
 
       const dataToCache = {
         config: this.siteConfig,
@@ -200,19 +197,14 @@ export const useSiteConfigStore = defineStore("anheyu-site-config", {
       try {
         const updateRes = await updateSettingsApi(settingsToUpdate);
 
-        // 检查后端API的返回结果
         if (updateRes.code !== 200) {
-          // 如果后端返回了错误信息，显示它并中断执行
           message(`保存失败: ${updateRes.message}`, { type: "error" });
           return Promise.reject(new Error(updateRes.message));
         }
 
-        // 在进行乐观更新前，创建一个副本用于更新本地 state
         const stateUpdatePayload = { ...settingsToUpdate };
-        // 遍历这个副本，如果发现有值是 JSON 字符串，就将其解析回对象
         for (const key in stateUpdatePayload) {
           const value = stateUpdatePayload[key];
-          // 一个简单的判断：如果值是字符串且以 '{' 或 '[' 开头，就尝试解析它
           if (
             typeof value === "string" &&
             (value.startsWith("{") || value.startsWith("["))

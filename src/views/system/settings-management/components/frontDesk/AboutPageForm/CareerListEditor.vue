@@ -1,8 +1,3 @@
-<!--
- * @Description: 生涯列表编辑器
- * @Author: 安知鱼
- * @Date: 2025-08-21
--->
 <template>
   <el-form-item label="生涯列表">
     <div class="career-list-container">
@@ -58,29 +53,23 @@ interface CareerItem {
   desc: string;
 }
 
-const props = defineProps<{
-  careerList: CareerItem[];
-}>();
-
-const emit = defineEmits(["update:career-list"]);
+// 使用 defineModel 接收来自父组件的 v-model:career-list
+const careerList = defineModel<CareerItem[]>("career-list", { required: true });
 
 const addCareer = () => {
-  // 创建新的生涯项
   const newCareer: CareerItem = {
     color: "#409eff",
     desc: ""
   };
-
-  // 创建新的数组并添加新项，避免直接修改props
-  const updatedList = [...props.careerList, newCareer];
-  emit("update:career-list", updatedList);
+  // 直接修改 careerList.value，defineModel 会自动 emit 更新
+  careerList.value = [...careerList.value, newCareer];
 };
 
 const removeCareer = (index: number) => {
-  // 创建新的数组并移除指定项，避免直接修改props
-  const updatedList = [...props.careerList];
+  const updatedList = [...careerList.value];
   updatedList.splice(index, 1);
-  emit("update:career-list", updatedList);
+  // 直接修改 careerList.value，defineModel 会自动 emit 更新
+  careerList.value = updatedList;
 };
 </script>
 

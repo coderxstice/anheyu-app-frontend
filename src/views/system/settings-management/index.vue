@@ -43,7 +43,7 @@
 import { reactive, onMounted, watch } from "vue";
 import { ElMessage } from "element-plus";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
-import { get, set, isEqual } from "lodash-es";
+import { get, set, isEqual, cloneDeep } from "lodash-es";
 
 // 引入描述符和新的工具函数
 import { allSettingDescriptors } from "./settings.descriptor";
@@ -84,7 +84,7 @@ watch(
       const backendValue = get(newSettings, desc.backendKey);
       if (backendValue !== undefined) {
         const parsedValue = parseBackendValue(backendValue, desc.type);
-        set(form, frontendPath, parsedValue);
+        set(form, frontendPath, cloneDeep(parsedValue));
       }
     });
   },
@@ -103,8 +103,25 @@ const handleSave = async () => {
   descriptorMap.forEach((desc, frontendPath) => {
     const currentValue = get(form, frontendPath);
     const originalValueRaw = get(originalSettings, desc.backendKey);
-    // 同样需要解析原始值，以确保同类型比较
     const originalValueParsed = parseBackendValue(originalValueRaw, desc.type);
+
+    if (desc.frontendPath === "frontDesk.about.careers") {
+      console.log("--- 正在调试 生涯列表[careers] ---");
+      // 使用 JSON.stringify 来查看对象的快照，避免控制台显示实时引用
+      console.log(
+        "表单中的当前值 (currentValue):",
+        JSON.stringify(currentValue, null, 2)
+      );
+      console.log(
+        "Store中的原始值 (originalValueParsed):",
+        JSON.stringify(originalValueParsed, null, 2)
+      );
+      console.log(
+        "isEqual 的比较结果:",
+        isEqual(currentValue, originalValueParsed)
+      );
+      console.log("--- 调试结束 ---");
+    }
 
     // 使用 lodash.isEqual 进行深度比较，完美处理对象和数组
     if (!isEqual(currentValue, originalValueParsed)) {
