@@ -609,6 +609,7 @@ onMounted(async () => {
   border-radius: 1rem;
   box-shadow: var(--shadow);
   border: 1px solid var(--border-color);
+  margin: 1rem;
 }
 
 .error-icon {
@@ -660,7 +661,7 @@ onMounted(async () => {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: minmax(320px, 400px) 1fr;
   grid-template-rows: auto;
   gap: 1.5rem;
 }
@@ -670,7 +671,6 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  width: 400px;
 }
 
 .side-column {
@@ -678,6 +678,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  min-width: 0;
 }
 
 .card {
@@ -704,9 +705,8 @@ onMounted(async () => {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
-  max-width: 400px;
 }
 
 .stat-card {
@@ -879,9 +879,13 @@ onMounted(async () => {
   color: #a0aec0;
 }
 
+.top-pages-section {
+  overflow-x: auto;
+}
+
 .pages-list .list-header {
   display: grid;
-  grid-template-columns: minmax(300px, 1fr) 100px 100px 100px 100px;
+  grid-template-columns: minmax(300px, 1fr) repeat(4, 110px);
   gap: 1rem;
   font-size: 0.75rem;
   color: var(--text-secondary);
@@ -898,7 +902,7 @@ onMounted(async () => {
 }
 .pages-list li {
   display: grid;
-  grid-template-columns: minmax(300px, 1fr) 100px 100px 100px 100px;
+  grid-template-columns: minmax(300px, 1fr) repeat(4, 110px);
   gap: 1rem;
   align-items: center;
   padding: 0.75rem 0.5rem;
@@ -921,24 +925,18 @@ onMounted(async () => {
 .page-views {
   font-weight: 600;
   color: var(--text-primary);
-  text-align: center;
+  text-align: right;
 }
 
-.page-unique {
-  text-align: center;
-}
-
-.page-duration {
-  text-align: center;
-}
-
+.page-unique,
+.page-duration,
 .page-bounce {
-  text-align: center;
+  text-align: right;
 }
 
 .analytics-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2rem 1.5rem;
 }
 
@@ -987,28 +985,79 @@ onMounted(async () => {
 }
 
 @media (max-width: 768px) {
-  .pages-list .list-header,
-  .pages-list li {
-    grid-template-columns: minmax(200px, 1fr) 70px 70px 70px 70px;
-    gap: 0.5rem;
-    font-size: 0.75rem;
+  .dashboard-header h1 {
+    font-size: 1.5rem;
   }
-
-  .pages-list .list-header {
-    padding: 0 0.25rem 0.5rem;
+  .card {
+    padding: 1rem;
   }
-
-  .pages-list li {
-    padding: 0.5rem 0.25rem;
+  .card-header {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
   }
-}
-
-@media (max-width: 768px) {
-  .welcome-dashboard {
-    padding: 1.5rem;
-  }
-  .analytics-grid {
+  .stats-grid {
     grid-template-columns: 1fr;
+  }
+  .top-pages-section {
+    overflow-x: visible;
+  }
+  .pages-list .list-header {
+    display: none;
+  }
+  .pages-list ul {
+    margin-top: -1rem;
+  }
+  .pages-list li {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    box-shadow: none;
+  }
+  .pages-list li:last-child {
+    margin-bottom: 0;
+  }
+  .page-path {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .page-views,
+  .page-unique,
+  .page-duration,
+  .page-bounce {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    text-align: right;
+  }
+
+  .page-views::before,
+  .page-unique::before,
+  .page-duration::before,
+  .page-bounce::before {
+    color: var(--text-secondary);
+    text-align: left;
+  }
+
+  .page-views::before {
+    content: "浏览量";
+  }
+  .page-unique::before {
+    content: "独立访客";
+  }
+  .page-duration::before {
+    content: "停留时间";
+  }
+  .page-bounce::before {
+    content: "跳出率";
   }
 }
 </style>
