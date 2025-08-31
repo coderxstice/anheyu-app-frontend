@@ -51,9 +51,17 @@ export function useNav() {
 
   /** 昵称（如果昵称为空则显示用户名） */
   const username = computed(() => {
+    console.log(useUserStoreHook()?.username);
+
     return isAllEmpty(useUserStoreHook()?.nickname)
-      ? useUserStoreHook()?.username
-      : useUserStoreHook()?.nickname;
+      ? useUserStoreHook()?.nickname
+      : useUserStoreHook()?.username;
+  });
+
+  const email = computed(() => {
+    return isAllEmpty(useUserStoreHook()?.email)
+      ? useUserStoreHook()?.email
+      : useUserStoreHook()?.username;
   });
 
   const avatarsStyle = computed(() => {
@@ -156,6 +164,7 @@ export function useNav() {
     isCollapse,
     pureApp,
     username,
+    email,
     userAvatar,
     avatarsStyle,
     tooltipEffect

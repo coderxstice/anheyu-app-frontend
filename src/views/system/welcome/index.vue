@@ -17,7 +17,7 @@
     <div v-if="!loading && !error" class="dashboard-content">
       <header class="dashboard-header">
         <div class="header-text">
-          <h1>欢迎回来, 安知鱼 👋</h1>
+          <h1>欢迎回来, {{ username }} 👋</h1>
           <p>{{ currentTime }}</p>
         </div>
       </header>
@@ -301,6 +301,7 @@ import {
 import { getArticleList } from "@/api/post";
 import type { StatisticData } from "@/types/about";
 import CustomTooltip from "@/components/CustomTooltip/index.vue";
+import { useNav } from "@/layout/hooks/useNav";
 
 defineOptions({
   name: "Welcome"
@@ -361,17 +362,7 @@ const currentTime = computed(() => {
   return now.toLocaleDateString("zh-CN", options);
 });
 
-// 方法
-const loadStatistics = async () => {
-  try {
-    const response = await getStatistics();
-    if (response.data) {
-      statistics.value = response.data;
-    }
-  } catch (error) {
-    console.error("加载统计数据失败:", error);
-  }
-};
+const { username } = useNav();
 
 const loadStatisticsSummary = async () => {
   try {
@@ -895,6 +886,13 @@ onMounted(async () => {
   padding: 0 0.5rem 0.75rem;
   border-bottom: 1px solid var(--border-color);
 }
+
+/* --- ADDED FOR ALIGNMENT --- */
+.pages-list .list-header > span:not(:first-child) {
+  text-align: right;
+}
+/* --- END OF ADDED STYLES --- */
+
 .pages-list ul {
   list-style: none;
   padding: 0;
