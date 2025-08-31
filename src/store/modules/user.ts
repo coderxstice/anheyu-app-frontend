@@ -24,6 +24,7 @@ export const useUserStore = defineStore("anheyu-user", () => {
   const avatar = ref<string>(userInfo?.avatar ?? "");
   const username = ref<string>(userInfo?.username ?? "");
   const nickname = ref<string>(userInfo?.nickname ?? "");
+  const email = ref<string>(userInfo?.email ?? "");
   const roles = ref<string[]>(
     initialTokenData?.roles?.length ? initialTokenData.roles : []
   );
@@ -37,6 +38,7 @@ export const useUserStore = defineStore("anheyu-user", () => {
     avatar.value = info.avatar;
     username.value = info.username;
     nickname.value = info.nickname;
+    email.value = info.email;
     roles.value = info.userGroup ? [info.userGroup.name] : [];
   }
 
@@ -78,6 +80,7 @@ export const useUserStore = defineStore("anheyu-user", () => {
     username.value = "";
     nickname.value = "";
     avatar.value = "";
+    email.value = "";
     roles.value = [];
     removeToken();
     useMultiTagsStoreHook().handleTags("equal", [...routerArrays]);
@@ -115,7 +118,7 @@ export const useUserStore = defineStore("anheyu-user", () => {
   }
 
   /**
-   * @description 模拟发送密码重置邮件
+   * @description 模拟发送密码重置邮件 TODO: 需要修改
    */
   async function sendPasswordResetEmail(data: { email: string }) {
     return new Promise<any>(resolve => {
@@ -124,7 +127,7 @@ export const useUserStore = defineStore("anheyu-user", () => {
       resolve({ code: 200, message: "重置邮件已发送，请检查收件箱" });
     });
   }
-  /** 重设密码 */
+  /** 重设密码 TODO: 需要修改 */
   async function resetPassword(data: object) {
     return new Promise<any>(resolve => {
       console.log("模拟使用以下信息重设密码：", data);
@@ -137,6 +140,7 @@ export const useUserStore = defineStore("anheyu-user", () => {
     avatar,
     username,
     nickname,
+    email,
     roles,
     isRemembered,
     loginDay,
