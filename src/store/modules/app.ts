@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-22 02:00:40
- * @LastEditTime: 2025-08-25 18:54:46
+ * @LastEditTime: 2025-08-31 22:49:21
  * @LastEditors: 安知鱼
  */
 import { defineStore } from "pinia";
@@ -78,6 +78,12 @@ export const useAppStore = defineStore({
     },
     toggleDevice(device: string) {
       this.device = device;
+      // 设备切换时保持布局设置
+      if (device === "mobile" && this.layout) {
+        // 确保移动端也保持用户的布局设置
+        const body = document.documentElement as HTMLElement;
+        body.setAttribute("layout", this.layout);
+      }
     },
     setLayout(layout) {
       this.layout = layout;

@@ -286,6 +286,19 @@ export default [
           },
           showLink: false
         }
+      },
+      {
+        path: ":pathMatch(.*)",
+        name: "CustomPage",
+        component: () => import("@/views/custom-page/index.vue"),
+        meta: {
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 页面`;
+          },
+          showLink: false
+        }
       }
     ]
   },
@@ -345,15 +358,6 @@ export default [
       },
       showLink: false,
       rank: 103
-    }
-  },
-  {
-    path: "/:pathMatch(.*)*",
-    name: "NotFound",
-    component: () => import("@/views/error/no-page.vue"),
-    meta: {
-      title: `404 - 页面不存在`,
-      showLink: false
     }
   }
 ] satisfies Array<RouteConfigsTable>;
