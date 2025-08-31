@@ -119,7 +119,7 @@
             >
               {{ friend.name }}
             </a>
-            <router-link to="/link/" class="footer-item" title="更多友情链接"
+            <router-link to="/link" class="footer-item" title="更多友情链接"
               >更多</router-link
             >
           </div>
