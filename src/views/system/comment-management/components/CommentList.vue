@@ -234,7 +234,6 @@ const handleAvatarError = (event: Event, comment: AdminComment) => {
 </template>
 
 <style lang="scss" scoped>
-/* 样式保持不变 */
 .comment-card {
   display: flex;
   padding: 16px;

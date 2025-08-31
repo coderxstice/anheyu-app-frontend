@@ -36,9 +36,6 @@ export function useAlbum() {
       cellRenderer: ({ row }) => {
         const thumbnailUrl =
           row.imageUrl + "?" + (row.thumbParam ? row.thumbParam : "");
-
-        console.log("缩略图URL:", row.imageUrl, row.thumbParam);
-
         return h("img", {
           src: thumbnailUrl,
           alt: "缩略图",
@@ -136,7 +133,6 @@ export function useAlbum() {
       slot: "operation"
     }
   ];
-
   function resetForm(formEl) {
     if (!formEl) return;
     formEl.resetFields();
@@ -147,24 +143,147 @@ export function useAlbum() {
 
   async function onSearch() {
     loading.value = true;
-
     const { currentPage, pageSize } = pagination;
-
     const { data } = await getWallpapertList({
       page: currentPage,
       pageSize: pageSize,
       created_at: form.created_at,
       sort: form.sort
     });
-
     dataList.value = data.list;
     pagination.total = data.total;
     pagination.currentPage = data.pageNum;
     pagination.pageSize = data.pageSize;
-
     setTimeout(() => {
       loading.value = false;
     }, 300);
+  }
+
+  /**
+   * 策略性地获取图片Blob数据
+   * 优先尝试直接fetch，失败后回退到后端代理
+   * @param url 图片的原始URL
+   * @returns Promise<Blob>
+   */
+  async function fetchImageBlobWithStrategies(url: string): Promise<Blob> {
+    const proxyUrl = `/api/proxy/download?url=${encodeURIComponent(url)}`;
+
+    try {
+      // 策略1: 尝试直接 fetch
+      console.log("尝试直接获取图片元数据:", url);
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`直接获取失败，状态码: ${response.status}`);
+      }
+      return await response.blob();
+    } catch (error) {
+      console.warn("直接获取失败，回退到后端代理:", error);
+      // 策略2: 尝试使用后端代理
+      try {
+        const proxyResponse = await fetch(proxyUrl);
+        if (!proxyResponse.ok) {
+          throw new Error(`代理获取失败，状态码: ${proxyResponse.status}`);
+        }
+        return await proxyResponse.blob();
+      } catch (proxyError) {
+        console.error("所有获取图片的方案均失败:", proxyError);
+        // 抛出最终错误，让调用者处理
+        throw proxyError;
+      }
+    }
+  }
+
+  /**
+   * 从Blob数据中获取图片尺寸
+   * @param blob 图片的Blob对象
+   * @returns Promise<{ width: number; height: number }>
+   */
+  function getImageDimensionsFromBlob(
+    blob: Blob
+  ): Promise<{ width: number; height: number }> {
+    return new Promise((resolve, reject) => {
+      const objectUrl = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        resolve({ width: img.width, height: img.height });
+        URL.revokeObjectURL(objectUrl); // 及时释放内存
+      };
+      img.onerror = err => {
+        reject(err);
+        URL.revokeObjectURL(objectUrl); // 出错也要释放
+      };
+      img.src = objectUrl;
+    });
+  }
+
+  /**
+   * 计算文件的SHA-256哈希值
+   * @param blob 文件的Blob对象
+   * @returns Promise<string>
+   */
+  async function getFileHash(blob: Blob): Promise<string> {
+    try {
+      const buffer = await blob.arrayBuffer();
+      const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    } catch (error) {
+      console.error("计算文件哈希值失败:", error);
+      const timestamp = Date.now();
+      const randomStr = Math.random().toString(36).substring(2, 15);
+      return `fallback_${timestamp}_${randomStr}`; // 返回备用哈希
+    }
+  }
+
+  // 默认的元数据返回值
+  function getDefaultMetadata() {
+    const timestamp = Date.now();
+    const randomStr = Math.random().toString(36).substring(2, 15);
+    return {
+      width: 0,
+      height: 0,
+      fileSize: 0,
+      format: "unknown",
+      fileHash: `fallback_${timestamp}_${randomStr}`
+    };
+  }
+
+  /**
+   * 获取图片元数据的主函数
+   * @param url 图片URL
+   */
+  async function getImageMeta(url: string) {
+    if (!url) {
+      message("图片 URL 不能为空", { type: "error" });
+      return getDefaultMetadata();
+    }
+
+    try {
+      // 1. 使用策略函数获取Blob
+      const blob = await fetchImageBlobWithStrategies(url);
+
+      // 2. 从Blob并行计算尺寸和哈希
+      const [dimensions, fileHash] = await Promise.all([
+        getImageDimensionsFromBlob(blob),
+        getFileHash(blob)
+      ]);
+
+      // 3. 组装元数据
+      const fileSize = blob.size;
+      const format = url.split(".").pop()?.toLowerCase() ?? "unknown";
+
+      return {
+        width: dimensions.width,
+        height: dimensions.height,
+        fileSize,
+        format,
+        fileHash
+      };
+    } catch (error) {
+      console.error("获取图片元数据失败:", error);
+      message("无法获取图片元数据，请检查URL或网络连接", { type: "error" });
+      return getDefaultMetadata(); // 发生任何错误都返回默认值
+    }
   }
 
   function openDialog(title = "新增", row?: FormItemProps) {
@@ -216,124 +335,11 @@ export function useAlbum() {
           onSearch(); // 刷新表格数据
         }
 
-        function getImageMeta(url: string): Promise<{
-          width: number;
-          height: number;
-          fileSize: number;
-          format: string;
-          fileHash: string;
-        }> {
-          return new Promise(async (resolve, reject) => {
-            if (!url) {
-              reject(new Error("图片 URL 不能为空。"));
-              return;
-            }
-
-            const img = new Image();
-            img.crossOrigin = "Anonymous";
-
-            img.onload = async function () {
-              const width = img.width;
-              const height = img.height;
-
-              // 获取文件大小和格式
-              let fileSize = 0;
-              let format = "unknown";
-              // 初始化时生成备用哈希值，确保不为空
-              const timestamp = Date.now();
-              const randomStr = Math.random().toString(36).substring(2, 15);
-              let fileHash = `fallback_${timestamp}_${randomStr}`;
-
-              try {
-                const res = await fetch(url);
-                if (!res.ok) {
-                  console.warn(
-                    `获取图片元数据失败，来自 ${url}: ${res.status} ${res.statusText}`
-                  );
-                  resolve(getDefaultMetadata());
-                  return;
-                }
-                const blob = await res.blob();
-                fileSize = blob.size;
-
-                // 获取文件格式
-                const extension = url.split(".").pop()?.toLowerCase();
-                format = extension || "unknown";
-
-                // 获取文件哈希值
-                fileHash = await getFileHash(blob);
-
-                resolve({
-                  width,
-                  height,
-                  fileSize,
-                  format,
-                  fileHash
-                });
-              } catch (error) {
-                console.warn(
-                  `获取或处理来自 ${url} 的图片数据时发生错误:`,
-                  error
-                );
-                resolve(getDefaultMetadata());
-              } finally {
-                // 清理图片对象以释放资源
-                img.onload = null;
-                img.onerror = null;
-              }
-            };
-
-            img.onerror = function () {
-              console.warn(`加载来自 ${url} 的图片失败`);
-              resolve(getDefaultMetadata());
-              // 清理图片对象
-              img.onload = null;
-              img.onerror = null;
-            };
-
-            img.src = url;
-          });
-        }
-
-        // 计算文件哈希值（使用 SHA-256 作为示例）
-        async function getFileHash(blob: Blob): Promise<string> {
-          try {
-            const buffer = await blob.arrayBuffer();
-            const hashBuffer = await crypto.subtle.digest("SHA-256", buffer); // 使用 SHA-256 算法计算哈希
-            const hashArray = Array.from(new Uint8Array(hashBuffer)); // 转换为字节数组
-            const hashHex = hashArray
-              .map(byte => byte.toString(16).padStart(2, "0"))
-              .join(""); // 转为十六进制字符串
-            return hashHex;
-          } catch (error) {
-            console.error("计算文件哈希值时发生错误:", error);
-            // 生成基于时间戳的备用哈希值，确保不为空
-            const timestamp = Date.now();
-            const randomStr = Math.random().toString(36).substring(2, 15);
-            return `fallback_${timestamp}_${randomStr}`;
-          }
-        }
-
-        // 默认的元数据返回值
-        function getDefaultMetadata() {
-          // 生成基于时间戳的备用哈希值，确保不为空
-          const timestamp = Date.now();
-          const randomStr = Math.random().toString(36).substring(2, 15);
-          return {
-            width: 0,
-            height: 0,
-            fileSize: 0,
-            format: "unknown",
-            aspectRatio: "0:0",
-            fileHash: `fallback_${timestamp}_${randomStr}`
-          };
-        }
-
         FormRef.validate(async valid => {
           if (valid) {
             // 表单规则校验通过
             if (title === "新增") {
-              // 🧠 获取图片宽高并写入 curData
+              // 🧠 调用重构后的函数获取图片元数据
               const imageInfo = await getImageMeta(curData.imageUrl);
               addWallpapert({
                 ...curData,
@@ -355,6 +361,9 @@ export function useAlbum() {
                 }
               });
             }
+          } else {
+            // 如果校验失败，确保关闭加载状态
+            closeLoading();
           }
         });
       }
@@ -392,13 +401,11 @@ export function useAlbum() {
   const loadingConfig = reactive<LoadingConfig>({
     text: "正在加载第一页...",
     viewBox: "-10, -10, 50, 50"
-    // svg: "",
-    // background: rgba()
   });
 
   function onSizeChange(val) {
     pagination.pageSize = val;
-    pagination.currentPage = 1; // 切换页容量后回到首页
+    pagination.currentPage = 1;
     onSearch();
   }
 
@@ -421,13 +428,9 @@ export function useAlbum() {
     onSizeChange,
     onCurrentChange,
     loadingConfig,
-    /** 搜索 */
     onSearch,
-    /** 重置 */
     resetForm,
-    /** 新增、修改图片 */
     openDialog,
-    /** 删除图片 */
     handleDelete
   };
 }

@@ -65,10 +65,47 @@ async function fetchMainColor(imageUrl: string) {
  */
 function downloadImage(url: string) {
   return new Promise<void>((resolve, reject) => {
+    // 策略1: 尝试直接下载（XMLHttpRequest + 进度条）
+    tryDirectDownload(url)
+      .then(() => resolve())
+      .catch(error => {
+        console.warn("直接下载失败，尝试后端代理:", error);
+
+        // 策略2: 使用后端代理下载
+        tryBackendProxy(url)
+          .then(() => resolve())
+          .catch(error2 => {
+            console.error("所有下载方案都失败:", error2);
+            text.value = "下载失败";
+            visible.value = false;
+            reject(error2);
+          });
+      });
+  });
+}
+
+/**
+ * 策略1: 尝试直接下载（XMLHttpRequest + 进度条）
+ */
+function tryDirectDownload(url: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    console.log("尝试直接下载:", url);
+
+    // 检查URL是否可访问
+    if (!isUrlAccessible(url)) {
+      reject(new Error("URL不可访问"));
+      return;
+    }
+
     const xhr = new XMLHttpRequest();
     currentDownload = xhr;
     xhr.open("GET", url, true);
     xhr.responseType = "blob";
+    xhr.timeout = 30000; // 30秒超时
+
+    // 设置请求头
+    xhr.setRequestHeader("Accept", "image/webp,image/apng,image/*,*/*;q=0.8");
+    xhr.setRequestHeader("Cache-Control", "no-cache");
 
     xhr.onprogress = event => {
       if (event.lengthComputable) {
@@ -78,7 +115,21 @@ function downloadImage(url: string) {
 
     xhr.onload = () => {
       if (xhr.status === 200) {
-        const blobUrl = URL.createObjectURL(xhr.response);
+        const blob = xhr.response;
+
+        // 验证下载的文件
+        if (blob.size === 0) {
+          reject(new Error("下载的文件为空"));
+          return;
+        }
+
+        // 验证文件类型
+        if (!blob.type.startsWith("image/")) {
+          reject(new Error("下载的不是图片文件"));
+          return;
+        }
+
+        const blobUrl = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = blobUrl;
         a.download = url.split("/").pop() || "image.jpg";
@@ -94,7 +145,7 @@ function downloadImage(url: string) {
       } else {
         text.value = "下载失败";
         visible.value = false;
-        reject();
+        reject(new Error(`HTTP ${xhr.status}`));
       }
       currentDownload = null;
     };
@@ -102,7 +153,107 @@ function downloadImage(url: string) {
     xhr.onerror = () => {
       text.value = "下载失败";
       visible.value = false;
-      reject();
+      reject(new Error("Network error"));
+      currentDownload = null;
+    };
+
+    xhr.ontimeout = () => {
+      text.value = "下载超时";
+      visible.value = false;
+      reject(new Error("Timeout"));
+      currentDownload = null;
+    };
+
+    xhr.send();
+  });
+}
+
+/**
+ * 检查URL是否可访问
+ */
+function isUrlAccessible(url: string): boolean {
+  try {
+    const urlObj = new URL(url);
+    return urlObj.protocol === "http:" || urlObj.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 策略2: 使用后端代理下载
+ */
+function tryBackendProxy(url: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    console.log("使用后端代理下载:", url);
+
+    // 重置进度条
+    progress.value = 0;
+    text.value = "正在通过代理下载...";
+
+    // 调用后端代理接口
+    const proxyUrl = `/api/proxy/download?url=${encodeURIComponent(url)}`;
+
+    const xhr = new XMLHttpRequest();
+    currentDownload = xhr;
+    xhr.open("GET", proxyUrl, true);
+    xhr.responseType = "blob";
+    xhr.timeout = 60000; // 60秒超时（代理下载可能较慢）
+
+    xhr.onprogress = event => {
+      if (event.lengthComputable) {
+        progress.value = Math.floor((event.loaded / event.total) * 100);
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        const blob = xhr.response;
+
+        // 验证下载的文件
+        if (blob.size === 0) {
+          reject(new Error("代理下载的文件为空"));
+          return;
+        }
+
+        // 验证文件类型
+        if (!blob.type.startsWith("image/")) {
+          reject(new Error("代理下载的不是图片文件"));
+          return;
+        }
+
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = url.split("/").pop() || "image.jpg";
+        a.click();
+        URL.revokeObjectURL(blobUrl);
+
+        text.value = "代理下载成功！";
+        setTimeout(() => {
+          visible.value = false;
+        }, 1500);
+
+        resolve();
+      } else {
+        text.value = "代理下载失败";
+        visible.value = false;
+        reject(new Error(`Proxy HTTP ${xhr.status}`));
+      }
+      currentDownload = null;
+    };
+
+    xhr.onerror = () => {
+      text.value = "代理下载失败";
+      visible.value = false;
+      reject(new Error("Proxy network error"));
+      currentDownload = null;
+    };
+
+    xhr.ontimeout = () => {
+      text.value = "代理下载超时";
+      visible.value = false;
+      reject(new Error("Proxy timeout"));
       currentDownload = null;
     };
 

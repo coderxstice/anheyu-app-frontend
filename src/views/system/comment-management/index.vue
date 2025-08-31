@@ -229,7 +229,6 @@ const handleReply = (comment: AdminComment) => {
 </template>
 
 <style lang="scss" scoped>
-/* 样式保持不变 */
 .card-header {
   font-size: 18px;
   font-weight: 500;

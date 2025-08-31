@@ -186,7 +186,6 @@ const processTagsAndCategories = async () => {
     form.post_category_ids = await Promise.all(categoryPromises);
   }
 
-  // 3. 标签处理逻辑保持不变
   if (Array.isArray(form.post_tag_ids)) {
     const tagPromises = form.post_tag_ids.map(async item => {
       if (tagOptions.value.some(opt => opt.id === item)) {

@@ -30,7 +30,6 @@ const collapsedHeight = computed(() => {
 });
 
 const handleContentClick = (event: Event) => {
-  // ... 此函数内容保持不变 ...
   const target = event.target as HTMLElement;
 
   const tabButton = target.closest(".tabs .nav-tabs .tab");

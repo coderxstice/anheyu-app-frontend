@@ -16,11 +16,9 @@ const props = defineProps({
 
 // --- 从 Store 获取状态和 actions ---
 const articleStore = useArticleStore();
-// 使用 storeToRefs 并通过别名，使模板代码无需改动
 const { tags: tagList, areTagsLoading: loading } = storeToRefs(articleStore);
-const { fetchTags } = articleStore; // 获取 action
+const { fetchTags } = articleStore;
 
-// --- UI 相关的本地状态保持不变 ---
 const tagCloudRef = ref<HTMLElement | null>(null);
 const isOverflow = ref(false);
 

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-05 18:27:55
- * @LastEditTime: 2025-08-07 16:08:47
+ * @LastEditTime: 2025-08-31 12:37:06
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -28,7 +28,6 @@ const props = defineProps({
   }
 });
 
-// 动态计算建站天数的逻辑保持不变
 const runningDays = computed(() => {
   if (!props.config.launch_time) {
     return 0;

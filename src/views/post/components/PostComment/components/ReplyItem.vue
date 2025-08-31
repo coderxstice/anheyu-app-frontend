@@ -229,7 +229,6 @@ const scrollToParent = () => {
 </template>
 
 <style lang="scss" scoped>
-
 @media (width <= 768px) {
   .reply-form-wrapper {
     margin-left: 0;
@@ -409,6 +408,4 @@ const scrollToParent = () => {
   margin-top: 1rem;
   margin-left: 48px;
 }
-
-/* 样式保持不变 */
 </style>
