@@ -886,6 +886,13 @@ onMounted(async () => {
   padding: 0 0.5rem 0.75rem;
   border-bottom: 1px solid var(--border-color);
 }
+
+/* --- ADDED FOR ALIGNMENT --- */
+.pages-list .list-header > span:not(:first-child) {
+  text-align: right;
+}
+/* --- END OF ADDED STYLES --- */
+
 .pages-list ul {
   list-style: none;
   padding: 0;
