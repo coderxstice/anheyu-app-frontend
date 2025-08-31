@@ -30,6 +30,73 @@ interface VisitRecordResponse {
   data: null;
 }
 
+// 访客分析数据类型
+interface VisitorAnalytics {
+  top_countries: Array<{
+    country: string;
+    count: number;
+  }>;
+  top_cities: Array<{
+    city: string;
+    count: number;
+  }>;
+  top_browsers: Array<{
+    browser: string;
+    count: number;
+  }>;
+  top_os: Array<{
+    os: string;
+    count: number;
+  }>;
+  top_devices: Array<{
+    device: string;
+    count: number;
+  }>;
+  top_referers: Array<{
+    referer: string;
+    count: number;
+  }>;
+}
+
+// 热门页面数据类型
+interface URLStatistics {
+  url_path: string;
+  page_title: string;
+  total_views: number;
+  unique_views: number;
+  bounce_count: number;
+  bounce_rate: number;
+  avg_duration: number;
+  last_visited_at: string;
+}
+
+// 访客趋势数据类型
+interface VisitorTrendData {
+  daily: Array<{
+    date: string;
+    visitors: number;
+    views: number;
+  }>;
+  weekly: Array<{
+    date: string;
+    visitors: number;
+    views: number;
+  }> | null;
+  monthly: Array<{
+    date: string;
+    visitors: number;
+    views: number;
+  }> | null;
+}
+
+// 统计概览数据类型
+interface StatisticsSummary {
+  basic_stats: StatisticData;
+  top_pages: URLStatistics[];
+  analytics: VisitorAnalytics;
+  trend_data: VisitorTrendData;
+}
+
 // 获取访问统计数据
 export function getStatistics() {
   return http.request<StatisticsResponse>(
@@ -47,18 +114,42 @@ export function recordVisit(data: VisitRecordRequest) {
   );
 }
 
-// 备用的模拟数据获取函数
-export function getMockStatistics(): Promise<StatisticData> {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve({
-        today_visitors: Math.floor(Math.random() * 500) + 100,
-        today_views: Math.floor(Math.random() * 1000) + 200,
-        yesterday_visitors: Math.floor(Math.random() * 400) + 150,
-        yesterday_views: Math.floor(Math.random() * 800) + 300,
-        month_views: Math.floor(Math.random() * 20000) + 5000,
-        year_views: Math.floor(Math.random() * 100000) + 50000
-      });
-    }, 1000);
-  });
+// 获取访客分析数据
+export function getVisitorAnalytics(startDate?: string, endDate?: string) {
+  const params: any = {};
+  if (startDate) params.start_date = startDate;
+  if (endDate) params.end_date = endDate;
+
+  return http.request<{
+    code: number;
+    message: string;
+    data: VisitorAnalytics;
+  }>("get", "/api/statistics/analytics", { params });
+}
+
+// 获取热门页面
+export function getTopPages(limit: number = 10) {
+  return http.request<{ code: number; message: string; data: URLStatistics[] }>(
+    "get",
+    "/api/statistics/top-pages",
+    { params: { limit } }
+  );
+}
+
+// 获取访客趋势数据
+export function getVisitorTrend(period: string = "daily", days: number = 30) {
+  return http.request<{
+    code: number;
+    message: string;
+    data: VisitorTrendData;
+  }>("get", "/api/statistics/trend", { params: { period, days } });
+}
+
+// 获取统计概览
+export function getStatisticsSummary() {
+  return http.request<{
+    code: number;
+    message: string;
+    data: StatisticsSummary;
+  }>("get", "/api/statistics/summary");
 }
