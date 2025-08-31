@@ -120,6 +120,11 @@ const hideFooter = computed(() => {
 onMounted(() => {
   if (isMobile) {
     toggle("mobile", false);
+    // 移动端保持用户的布局设置
+    const currentLayout = useAppStoreHook().layout;
+    if (currentLayout) {
+      setTheme(currentLayout);
+    }
   }
 });
 
@@ -218,6 +223,13 @@ const LayHeader = defineComponent({
   height: 100%;
   background: #000;
   opacity: 0.3;
+  transition: opacity 0.3s ease;
+
+  // 移动端遮罩层优化
+  @media screen and (max-width: 768px) {
+    opacity: 0.5;
+    backdrop-filter: blur(2px);
+  }
 }
 
 .re-screen {

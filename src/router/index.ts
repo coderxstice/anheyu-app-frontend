@@ -115,6 +115,7 @@ const whiteList = [
   "/posts/",
   "/tags",
   "/tags/",
+  "/tags/",
   "/page/",
   "/categories",
   "/categories/",
@@ -123,7 +124,8 @@ const whiteList = [
   "/link",
   "/random-post",
   "/air-conditioner",
-  "/equipment"
+  "/equipment",
+  "/page"
 ];
 
 const { VITE_HIDE_HOME } = import.meta.env;
@@ -262,8 +264,11 @@ router.beforeEach((to: ToRouteType, _from, next) => {
   } else {
     // 未登录用户逻辑
     if (to.path !== "/login") {
-      // 检查当前路由是否是 404 页面
+      // 检查当前路由是否是 404 页面或自定义页面
       const isNotFound = to.matched.some(record => record.name === "NotFound");
+      const isCustomPage = to.matched.some(
+        record => record.name === "CustomPage"
+      );
 
       // 检查路径是否在白名单中
       const isInWhiteList = whiteList.some(whitePath => {
@@ -273,8 +278,8 @@ router.beforeEach((to: ToRouteType, _from, next) => {
         return to.path.startsWith(whitePath);
       });
 
-      // 如果是白名单页面，或者是 404 页面，则直接放行
-      if (isInWhiteList || isNotFound) {
+      // 如果是白名单页面，或者是 404 页面，或者是自定义页面，则直接放行
+      if (isInWhiteList || isNotFound || isCustomPage) {
         next();
       } else {
         // 否则，重定向到首页

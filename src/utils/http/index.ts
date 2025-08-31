@@ -171,7 +171,9 @@ class AnHttp {
           "public/comments/children",
           // 统计
           "public/statistics/basic",
-          "public/statistics/visit"
+          "public/statistics/visit",
+          // 自定义页面
+          "public/pages"
         ];
         if (whiteList.some(url => config.url?.endsWith(url))) {
           return config;
@@ -259,7 +261,12 @@ class AnHttp {
           return Promise.reject(error);
         }
 
-        // 对于其他所有错误（如404, 500等），调用全局错误处理器显示UI提示
+        // 对于404错误，直接抛出到业务层，让业务层决定如何处理
+        if (response?.status === 404) {
+          return Promise.reject(error);
+        }
+
+        // 对于其他所有错误（如500等），调用全局错误处理器显示UI提示
         handleBackendError(error);
 
         // 返回一个永远处于挂起状态的Promise，以中断业务层代码的执行

@@ -29,6 +29,10 @@
       <el-tab-pane label="前台配置" name="frontDeskSetting">
         <FrontDeskSettings v-model="form.frontDesk" />
       </el-tab-pane>
+
+      <el-tab-pane label="页面管理" name="pageManagement">
+        <PageManagement />
+      </el-tab-pane>
     </el-tabs>
 
     <div class="save-button-container">
@@ -61,6 +65,7 @@ import PageSittingForm from "./components/PageSittingForm.vue";
 import FileSettings from "./components/fileSetting/FileSettingsForm.vue";
 import PostSettings from "./components/postSettings/index.vue";
 import FrontDeskSettings from "./components/FrontDeskSettings.vue";
+import PageManagement from "../page-management/index.vue";
 
 let activeName = "siteConfig";
 const siteConfigStore = useSiteConfigStore();

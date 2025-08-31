@@ -11,6 +11,7 @@ import LaySidebarLogo from "../lay-sidebar/components/SidebarLogo.vue";
 import LaySidebarItem from "../lay-sidebar/components/SidebarItem.vue";
 import LaySidebarLeftCollapse from "../lay-sidebar/components/SidebarLeftCollapse.vue";
 import LaySidebarCenterCollapse from "../lay-sidebar/components/SidebarCenterCollapse.vue";
+import { Close } from "@element-plus/icons-vue";
 
 const route = useRoute();
 const isShow = ref(false);
@@ -30,6 +31,11 @@ const {
 } = useNav();
 
 const subMenuData = ref([]);
+
+// 触摸手势相关状态
+const touchStartX = ref(0);
+const touchStartY = ref(0);
+const isTouching = ref(false);
 
 const menuData = computed(() => {
   return pureApp.layout === "mix" && device.value !== "mobile"
@@ -63,6 +69,37 @@ function getSubMenuData() {
   subMenuData.value = parenetRoute?.children;
 }
 
+// 触摸事件处理
+const handleTouchStart = (event: TouchEvent) => {
+  if (device.value !== "mobile") return;
+
+  const touch = event.touches[0];
+  touchStartX.value = touch.clientX;
+  touchStartY.value = touch.clientY;
+  isTouching.value = true;
+};
+
+const handleTouchMove = (event: TouchEvent) => {
+  if (device.value !== "mobile" || !isTouching.value) return;
+
+  const touch = event.touches[0];
+  const deltaX = touch.clientX - touchStartX.value;
+  const deltaY = Math.abs(touch.clientY - touchStartY.value);
+
+  // 如果垂直滑动距离大于水平滑动距离，不处理
+  if (deltaY > Math.abs(deltaX)) return;
+
+  // 向左滑动超过50px时关闭侧边栏
+  if (deltaX < -50 && pureApp.getSidebarStatus) {
+    toggleSideBar();
+    isTouching.value = false;
+  }
+};
+
+const handleTouchEnd = () => {
+  isTouching.value = false;
+};
+
 watch(
   () => [route.path, usePermissionStoreHook().wholeMenus],
   () => {
@@ -89,9 +126,16 @@ onBeforeUnmount(() => {
 <template>
   <div
     v-loading="loading"
-    :class="['sidebar-container', showLogo ? 'has-logo' : 'no-logo']"
-    @mouseenter.prevent="isShow = true"
-    @mouseleave.prevent="isShow = false"
+    :class="[
+      'sidebar-container',
+      showLogo ? 'has-logo' : 'no-logo',
+      device === 'mobile' ? 'mobile-sidebar' : ''
+    ]"
+    @mouseenter.prevent="device !== 'mobile' ? (isShow = true) : null"
+    @mouseleave.prevent="device !== 'mobile' ? (isShow = false) : null"
+    @touchstart="handleTouchStart"
+    @touchmove="handleTouchMove"
+    @touchend="handleTouchEnd"
   >
     <LaySidebarLogo v-if="showLogo" :collapse="isCollapse" />
     <el-scrollbar
@@ -127,6 +171,14 @@ onBeforeUnmount(() => {
       :is-active="pureApp.sidebar.opened"
       @toggleClick="toggleSideBar"
     />
+    <!-- 移动端侧边栏关闭按钮 -->
+    <div
+      v-if="device === 'mobile'"
+      class="mobile-close-btn"
+      @click="toggleSideBar"
+    >
+      <el-icon><Close /></el-icon>
+    </div>
   </div>
 </template>
 
