@@ -9,17 +9,13 @@ import {
   type SettingsMap
 } from "@/api/sys-settings";
 import { message } from "@/utils/message";
-import { set } from "lodash-es";
+import { set, merge } from "lodash-es";
 import { LOCAL_STORAGE_KEY } from "@/constant/index";
 
-// 引入公告相关的函数
 import { checkAndShowAnnouncementByConfig } from "@/components/AnNouncement/index";
 
-// 定义了缓存的有效期（24小时）
 const CACHE_EXPIRATION_TIME = 24 * 60 * 60 * 1000;
 
-// 将 SiteConfig 的所有属性设为可选，并允许包含来自 sys-settings 的任意键值对
-// 这样它就能容纳所有类型的配置了
 interface CombinedSiteSettings extends Partial<SiteConfig> {
   title?: string;
   fixedHeader?: boolean;
@@ -29,56 +25,40 @@ interface CombinedSiteSettings extends Partial<SiteConfig> {
 }
 
 export const useSiteConfigStore = defineStore("anheyu-site-config", {
-  // 定义了 store 的统一状态
   state: (): {
     siteConfig: CombinedSiteSettings;
-    isLoaded: boolean; // 标记公共配置是否已加载
-    loading: boolean; // 用于在请求系统设置时显示加载状态
+    isLoaded: boolean;
+    loading: boolean;
   } => ({
     siteConfig: {},
     isLoaded: false,
     loading: false
   }),
 
-  // 定义了 store 的 getters
   getters: {
-    // 获取完整的站点配置对象
-    getSiteConfig(state): CombinedSiteSettings {
-      return state.siteConfig;
-    },
-    // 获取相册图片后端 API 地址
-    getWallpaperBackendApiUrl(state): string | null {
+    getSiteConfig: state => state.siteConfig,
+    getWallpaperBackendApiUrl: state => {
       if (state.siteConfig?.API_URL) {
         let apiUrl = state.siteConfig.API_URL;
-        if (!apiUrl.endsWith("/")) {
-          apiUrl += "/";
-        }
+        if (!apiUrl.endsWith("/")) apiUrl += "/";
         return apiUrl;
       }
       return null;
     },
-    getTitle(state): string {
-      return state.siteConfig?.APP_NAME || "安和鱼";
-    },
-    getFixedHeader(state): boolean {
-      return typeof state.siteConfig?.fixedHeader === "boolean"
+    getTitle: state => state.siteConfig?.APP_NAME || "安和鱼",
+    getFixedHeader: state =>
+      typeof state.siteConfig?.fixedHeader === "boolean"
         ? state.siteConfig.fixedHeader
-        : getConfig().FixedHeader;
-    },
-    getHiddenSideBar(state): boolean {
-      return typeof state.siteConfig?.hiddenSideBar === "boolean"
+        : getConfig().FixedHeader,
+    getHiddenSideBar: state =>
+      typeof state.siteConfig?.hiddenSideBar === "boolean"
         ? state.siteConfig.hiddenSideBar
-        : getConfig().HiddenSideBar;
-    },
-    getLogo(state): string {
-      return state.siteConfig?.LOGO_URL_192x192 || "/logo.svg";
-    },
-    getSiteUrl(state): string | null {
+        : getConfig().HiddenSideBar,
+    getLogo: state => state.siteConfig?.LOGO_URL_192x192 || "/logo.svg",
+    getSiteUrl: state => {
       if (state.siteConfig?.SITE_URL) {
         let siteURL = state.siteConfig.SITE_URL;
-        if (siteURL.endsWith("/")) {
-          siteURL = siteURL.slice(0, -1);
-        }
+        if (siteURL.endsWith("/")) siteURL = siteURL.slice(0, -1);
         return siteURL;
       }
       return null;
@@ -86,25 +66,22 @@ export const useSiteConfigStore = defineStore("anheyu-site-config", {
   },
 
   actions: {
-    /**
-     * @description 用于合并已经嵌套好的对象或顶层属性。
-     * @param newSettings - 需要合并到 state 的新配置
-     */
     _updateStateAndCache(newSettings: Partial<CombinedSiteSettings>) {
-      // 将新旧配置合并
-      this.siteConfig = { ...this.siteConfig, ...newSettings };
+      // 1. 创建当前状态的深拷贝以获取普通JS对象
+      const currentStatePlain = JSON.parse(JSON.stringify(this.siteConfig));
+      // 2. 在普通对象上执行合并操作
+      const mergedState = merge(currentStatePlain, newSettings);
+      // 3. 用合并后的普通对象替换整个状态
+      this.siteConfig = mergedState;
 
-      // 确保 API_URL 总是以斜杠结尾
       if (this.siteConfig.API_URL && !this.siteConfig.API_URL.endsWith("/")) {
         this.siteConfig.API_URL += "/";
       }
 
-      // 传递 SiteAnnouncement 给公告函数
       if (this.siteConfig.SITE_ANNOUNCEMENT !== undefined) {
         checkAndShowAnnouncementByConfig(this.siteConfig.SITE_ANNOUNCEMENT);
       }
 
-      // 将合并后的最新配置存入缓存
       const dataToCache = {
         config: this.siteConfig,
         timestamp: Date.now()
@@ -112,23 +89,36 @@ export const useSiteConfigStore = defineStore("anheyu-site-config", {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToCache));
     },
 
-    /**
-     * @description 根据点分路径键的扁平对象，精确更新嵌套的 siteConfig 状态和缓存
-     * @param flatSettings - 一个扁平的对象, e.g., { "sidebar.siteinfo.totalPostCount": 70 }
-     */
     updateSettingsByDotKeys(flatSettings: Record<string, any>) {
+      // 更新内存状态
       for (const dotKey in flatSettings) {
         if (Object.prototype.hasOwnProperty.call(flatSettings, dotKey)) {
-          // 直接使用 lodash.set 可靠地更新状态
           set(this.siteConfig, dotKey, flatSettings[dotKey]);
         }
       }
 
-      const dataToCache = {
-        config: this.siteConfig,
-        timestamp: Date.now()
-      };
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToCache));
+      // 安全地更新localStorage缓存
+      try {
+        const cachedDataRaw = localStorage.getItem(LOCAL_STORAGE_KEY);
+        let configToCache = {};
+        if (cachedDataRaw) {
+          configToCache = JSON.parse(cachedDataRaw).config || {};
+        }
+
+        for (const dotKey in flatSettings) {
+          if (Object.prototype.hasOwnProperty.call(flatSettings, dotKey)) {
+            set(configToCache, dotKey, flatSettings[dotKey]);
+          }
+        }
+
+        const dataToCache = {
+          config: configToCache,
+          timestamp: Date.now()
+        };
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToCache));
+      } catch (error) {
+        console.error("Failed to update site config in localStorage:", error);
+      }
     },
 
     async fetchSiteConfig() {
@@ -138,7 +128,8 @@ export const useSiteConfigStore = defineStore("anheyu-site-config", {
         fixedHeader: getConfig().FixedHeader,
         hiddenSideBar: getConfig().HiddenSideBar
       };
-      this.siteConfig = { ...initialConfig, ...this.siteConfig };
+      // 初始化时合并，以防siteConfig为空
+      merge(this.siteConfig, initialConfig);
 
       const cachedData = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (cachedData) {
@@ -152,8 +143,7 @@ export const useSiteConfigStore = defineStore("anheyu-site-config", {
             localStorage.removeItem(LOCAL_STORAGE_KEY);
           }
         } catch (error) {
-          console.log("缓存数据解析失败，清除缓存:", error);
-
+          console.error("Failed to parse cached data:", error);
           localStorage.removeItem(LOCAL_STORAGE_KEY);
         }
       }
@@ -169,16 +159,13 @@ export const useSiteConfigStore = defineStore("anheyu-site-config", {
       }
     },
 
-    /**
-     * @description 专门用于从后台管理页面获取详细的系统设置
-     * @param keys - 需要获取的设置项的键名数组 (应为点分路径格式)
-     */
     async fetchSystemSettings(keys: string[]) {
       this.loading = true;
       try {
         const res = await getSettingsApi(keys);
         if (res.code === 200 && res.data) {
-          this.updateSettingsByDotKeys(res.data);
+          // 返回的是嵌套对象，调用_updateStateAndCache
+          this._updateStateAndCache(res.data);
         } else {
           return Promise.reject(new Error(res.message));
         }
@@ -189,9 +176,6 @@ export const useSiteConfigStore = defineStore("anheyu-site-config", {
       }
     },
 
-    /**
-     * @description 用于保存系统设置到后端，并智能更新本地状态
-     */
     async saveSystemSettings(settingsToUpdate: SettingsMap) {
       this.loading = true;
       try {
@@ -203,44 +187,27 @@ export const useSiteConfigStore = defineStore("anheyu-site-config", {
         }
 
         const stateUpdatePayload = { ...settingsToUpdate };
-        for (const key in stateUpdatePayload) {
-          const value = stateUpdatePayload[key];
-          if (
-            typeof value === "string" &&
-            (value.startsWith("{") || value.startsWith("["))
-          ) {
-            try {
-              stateUpdatePayload[key] = JSON.parse(value);
-            } catch (e) {
-              // 如果解析失败，说明它不是一个有效的 JSON，保持原样即可
-              console.error(`解析乐观更新数据失败 (key: ${key}):`, e);
-            }
-          }
-        }
+        // (JSON parsing logic could be here if needed)
 
-        // 使用处理过的数据（对象而非字符串）来执行乐观更新
+        // 是扁平点路径对象，调用updateSettingsByDotKeys
         this.updateSettingsByDotKeys(stateUpdatePayload);
 
-        // 显示成功提示
         message("设置已保存成功", { type: "success" });
         return Promise.resolve();
       } catch (error: any) {
-        // 捕获请求过程中的网络错误或其他异常
         message(`保存失败: ${error.message || "未知网络错误"}`, {
           type: "error"
         });
         return Promise.reject(error);
       } finally {
-        // 无论成功还是失败，最后都将加载状态设置为 false
         this.loading = false;
       }
     },
 
-    // 用于在客户端修改如 fixedHeader 等不需持久化到后端的设置
     changeSetting(data: { key: keyof CombinedSiteSettings; value: any }) {
       const { key, value } = data;
       const changes: Partial<CombinedSiteSettings> = {};
-      changes[key] = value;
+      set(changes, key, value);
       this._updateStateAndCache(changes);
     }
   }
