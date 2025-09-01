@@ -4,6 +4,7 @@
     :title="`预览 - ${pageData?.title || '页面'}`"
     width="80%"
     :close-on-click-modal="false"
+    append-to-body
     @close="handleClose"
   >
     <div v-if="pageData" class="preview-container">

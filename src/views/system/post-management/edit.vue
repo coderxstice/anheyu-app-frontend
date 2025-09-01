@@ -18,16 +18,15 @@ import {
   updateArticle,
   getCategoryList,
   getTagList,
-  createCategory,
-  updateCategory,
+  // createCategory, // 不再需要从这里创建分类
   createTag,
   uploadArticleImage
 } from "@/api/post";
 import type {
   ArticleForm,
   PostCategory,
-  PostTag,
-  PostCategoryForm
+  PostTag
+  // PostCategoryForm //不再需要
 } from "@/api/post/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { constant } from "@/constant";
@@ -47,9 +46,6 @@ const loading = ref(true);
 const isSubmitting = ref(false);
 const articleId = ref<string | null>(null);
 const isPublishDialogVisible = ref(false);
-const seriesCategoryId = ref<string | null>(null);
-// [新增] 用于存储页面加载时的原始系列ID
-const originalSeriesCategoryId = ref<string | null>(null);
 
 const form = reactive<ArticleForm>({
   title: "",
@@ -114,11 +110,6 @@ const initPage = async () => {
       if (!Array.isArray(form.summaries)) {
         form.summaries = [];
       }
-      // [新增] 记录初始的系列分类ID
-      const originalSeries = data.post_categories.find(c => c.is_series);
-      if (originalSeries) {
-        originalSeriesCategoryId.value = originalSeries.id;
-      }
     }
     await fetchOptionsPromise;
   } catch (error) {
@@ -128,7 +119,7 @@ const initPage = async () => {
     updateInitialState();
   }
 };
-const validateName = (name: string, type: "分类" | "标签"): boolean => {
+const validateName = (name: string, type: "标签"): boolean => {
   const pattern = /^[\u4e00-\u9fa5a-zA-Z0-9_-]{1,30}$/;
   if (!pattern.test(name)) {
     ElMessage.error({
@@ -139,64 +130,23 @@ const validateName = (name: string, type: "分类" | "标签"): boolean => {
   }
   return true;
 };
+
+// 核心改动点：简化此函数，移除处理分类创建的逻辑
 const processTagsAndCategories = async () => {
-  const oldSeriesId = originalSeriesCategoryId.value;
-  const newSeriesId = seriesCategoryId.value;
-
-  if (oldSeriesId && oldSeriesId !== newSeriesId) {
-    try {
-      await updateCategory(oldSeriesId, { is_series: false });
-      const localCat = categoryOptions.value.find(c => c.id === oldSeriesId);
-      if (localCat) localCat.is_series = false;
-    } catch (error) {
-      console.error(`尝试降级分类 ${oldSeriesId} 失败:`, error);
-      ElMessage.error("更新原系列分类失败，可能仍有其他文章在使用它。");
-      throw new Error("分类降级失败");
-    }
-  }
-
-  if (Array.isArray(form.post_category_ids)) {
-    const categoryPromises = form.post_category_ids.map(async item => {
-      const existingCategory = categoryOptions.value.find(
-        opt => opt.id === item
-      );
-
-      if (existingCategory) {
-        if (item === newSeriesId && !existingCategory.is_series) {
-          await updateCategory(item, { is_series: true });
-          existingCategory.is_series = true;
-        }
-        return item;
-      }
-
-      if (!validateName(item, "分类")) {
-        throw new Error(`分类名 "${item}" 校验失败`);
-      }
-
-      const payload: PostCategoryForm = { name: item };
-      if (item === newSeriesId) {
-        payload.is_series = true;
-      }
-
-      const res = await createCategory(payload);
-      const newCategory = res.data;
-      categoryOptions.value.push(newCategory);
-      return newCategory.id;
-    });
-    form.post_category_ids = await Promise.all(categoryPromises);
-  }
-
+  // 分类 ID 数组现在只包含有效的、已存在的 ID，无需处理
   if (Array.isArray(form.post_tag_ids)) {
     const tagPromises = form.post_tag_ids.map(async item => {
+      // 如果 item 已经是 tagOptions 中的一个 id，直接返回
       if (tagOptions.value.some(opt => opt.id === item)) {
         return item;
       }
+      // 否则，它是一个新创建的标签名称 (字符串)
       if (!validateName(item, "标签")) {
         throw new Error(`标签名 "${item}" 校验失败`);
       }
       const res = await createTag({ name: item });
       const newTag = res.data;
-      tagOptions.value.push(newTag);
+      tagOptions.value.push(newTag); // 更新前端的 tag 列表
       return newTag.id;
     });
     form.post_tag_ids = await Promise.all(tagPromises);
@@ -225,20 +175,12 @@ const onSaveHandler = async (markdown: string, sanitizedHtml: string) => {
     }
     localStorage.removeItem(getDraftKey());
     updateInitialState();
-    // 更新完成后，重置原始系列ID状态，为下一次编辑做准备
-    originalSeriesCategoryId.value = seriesCategoryId.value;
     await siteConfigStore.fetchSystemSettings([
       constant.KeySidebarSiteInfoTotalPostCount,
       constant.KeySidebarSiteInfoTotalWordCount
     ]);
   } catch (error) {
-    if (
-      !(
-        error instanceof Error &&
-        (error.message.includes("校验失败") ||
-          error.message.includes("分类降级失败"))
-      )
-    ) {
+    if (!(error instanceof Error && error.message.includes("校验失败"))) {
       ElMessage.error(isEditMode.value ? "更新失败" : "创建失败");
     }
   } finally {
@@ -319,27 +261,33 @@ const handleGoBack = () => {
       .then(() => {
         router.push({ name: "PostManagement" });
       })
-      .catch(() => {
-        // 用户取消，无操作
-      });
+      .catch(() => {});
   } else {
     router.push({ name: "PostManagement" });
   }
 };
-const handleCategoryChange = (currentValues: string[]) => {
-  const isNewItemAdded = currentValues.some(
-    val => !categoryOptions.value.some(opt => opt.id === val)
-  );
-  if (isNewItemAdded) {
-    categorySelectKey.value++;
-  }
+
+const handleCategoryChange = () => {
+  // 这个函数现在可以保留为空，或者用于其他逻辑
+  // 主要目的是保留 @change 事件，以触发可能的 re-render
+  // 由于我们强制 key 更新，这个函数体不是必须的
 };
+
 const handleTagChange = (currentValues: string[]) => {
   const isNewItemAdded = currentValues.some(
     val => !tagOptions.value.some(opt => opt.id === val)
   );
   if (isNewItemAdded) {
     tagSelectKey.value++;
+  }
+};
+const refreshCategories = async () => {
+  try {
+    const { data } = await getCategoryList();
+    categoryOptions.value = data;
+    categorySelectKey.value++;
+  } catch (error) {
+    ElMessage.error("刷新分类列表失败");
   }
 };
 watch(
@@ -433,7 +381,6 @@ onUnmounted(() => {
 
     <PublishDialog
       v-model="isPublishDialogVisible"
-      v-model:seriesCategoryId="seriesCategoryId"
       :form="form"
       :category-options="categoryOptions"
       :tag-options="tagOptions"
@@ -443,6 +390,7 @@ onUnmounted(() => {
       @change-category="handleCategoryChange"
       @change-tag="handleTagChange"
       @confirm-publish="handleConfirmPublish"
+      @refresh-categories="refreshCategories"
     />
   </div>
 </template>
@@ -533,4 +481,3 @@ onUnmounted(() => {
   }
 }
 </style>
-s
