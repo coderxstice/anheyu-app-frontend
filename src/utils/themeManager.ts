@@ -44,6 +44,13 @@ export const restoreOriginalThemeColors = () => {
       originalColors.mainOpLight
     );
   }
+
+  // 恢复meta标签的原始主题色
+  if (originalColors.main) {
+    updateMetaThemeColor(originalColors.main);
+  } else {
+    restoreMetaThemeColor();
+  }
 };
 
 /**
@@ -79,7 +86,61 @@ export const setArticleTheme = (primaryColor: string) => {
       rootStyle.setProperty("--anzhiyu-main-op-deep", primaryColor);
       rootStyle.setProperty("--anzhiyu-main-op-light", primaryColor);
     }
+
+    // 更新页面meta标签的主题色
+    updateMetaThemeColor(primaryColor);
   } else {
     restoreOriginalThemeColors();
+    restoreMetaThemeColor();
   }
+};
+
+/**
+ * @description 更新meta标签的主题色
+ * @param color - 主题色值
+ */
+const updateMetaThemeColor = (color: string) => {
+  // 更新 theme-color meta标签
+  let themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  if (!themeColorMeta) {
+    themeColorMeta = document.createElement("meta");
+    themeColorMeta.setAttribute("name", "theme-color");
+    document.head.appendChild(themeColorMeta);
+  }
+  themeColorMeta.setAttribute("content", color);
+
+  // 更新 msapplication-TileColor meta标签
+  let tileColorMeta = document.querySelector(
+    'meta[name="msapplication-TileColor"]'
+  );
+  if (!tileColorMeta) {
+    tileColorMeta = document.createElement("meta");
+    tileColorMeta.setAttribute("name", "msapplication-TileColor");
+    document.head.appendChild(tileColorMeta);
+  }
+  tileColorMeta.setAttribute("content", color);
+
+  // 更新 Open Graph 主题色标签
+  let ogThemeColorMeta = document.querySelector(
+    'meta[property="og:theme-color"]'
+  );
+  if (!ogThemeColorMeta) {
+    ogThemeColorMeta = document.createElement("meta");
+    ogThemeColorMeta.setAttribute("property", "og:theme-color");
+    document.head.appendChild(ogThemeColorMeta);
+  }
+  ogThemeColorMeta.setAttribute("content", color);
+};
+
+/**
+ * @description 恢复meta标签的默认主题色
+ */
+const restoreMetaThemeColor = () => {
+  // 恢复默认主题色到meta标签
+  const defaultThemeColor =
+    getComputedStyle(document.documentElement)
+      .getPropertyValue("--anzhiyu-background")
+      .trim() || "#f7f9fe";
+
+  updateMetaThemeColor(defaultThemeColor);
 };
