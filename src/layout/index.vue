@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import "animate.css";
-// 引入 src/components/ReIcon/src/offlineIcon.ts 文件中所有使用addIcon添加过的本地图标
 import "@/components/ReIcon/src/offlineIcon";
 import { setType } from "./types";
 import { useLayout } from "./hooks/useLayout";
@@ -225,7 +224,6 @@ const LayHeader = defineComponent({
   opacity: 0.3;
   transition: opacity 0.3s ease;
 
-  // 移动端遮罩层优化
   @media screen and (max-width: 768px) {
     opacity: 0.5;
     backdrop-filter: blur(2px);

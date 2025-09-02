@@ -15,6 +15,7 @@ import type { Article, ArticleLink } from "@/api/post/type";
 import { useLoadingStore } from "@/store/modules/loadingStore";
 import { useCommentStore } from "@/store/modules/commentStore";
 import { useArticleStore } from "@/store/modules/articleStore";
+import { useAppStore } from "@/store/modules/app";
 import {
   saveOriginalThemeColors,
   restoreOriginalThemeColors,
@@ -29,8 +30,12 @@ import PostCopyright from "./components/PostCopyright/index.vue";
 import PostTools from "./components/PostTools/index.vue";
 import PostPagination from "./components/PostPagination/index.vue";
 import RelatedPosts from "./components/RelatedPosts/index.vue";
+import CommentBarrage from "./components/CommentBarrage/index.vue";
 import PostComment from "../components/PostComment/index.vue";
 import Sidebar from "../components/Sidebar/index.vue";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import { useUiStore } from "@/store/modules/uiStore";
+import { storeToRefs } from "pinia";
 
 defineOptions({
   name: "PostDetail"
@@ -48,6 +53,8 @@ const commentRef = ref<InstanceType<typeof PostComment> | null>(null);
 const loadingStore = useLoadingStore();
 const commentStore = useCommentStore();
 const articleStore = useArticleStore();
+const uiStore = useUiStore();
+const appStore = useAppStore();
 
 // --- 计算属性 ---
 const seriesCategory = computed(() => {
@@ -62,6 +69,21 @@ const articleWithCommentCount = computed(() => {
     commentCount: commentStore.totalComments
   };
 });
+
+const siteConfigStore = useSiteConfigStore();
+const commentBarrageConfig = computed(() => {
+  const siteConfig = siteConfigStore.getSiteConfig;
+  if (!siteConfig || !siteConfig.GRAVATAR_URL) {
+    return null;
+  }
+  return {
+    gravatarUrl: siteConfig.GRAVATAR_URL,
+    defaultGravatarType: siteConfig.DEFAULT_GRAVATAR_TYPE
+  };
+});
+const { isConsoleOpen } = storeToRefs(appStore);
+
+const { isCommentBarrageVisible } = storeToRefs(uiStore);
 
 const headingTocItems = ref<{ id: string }[]>([]);
 const commentIds = ref<string[]>([]);
@@ -261,6 +283,12 @@ watch(
       </main>
       <Sidebar />
     </div>
+    <CommentBarrage
+      v-if="article && commentBarrageConfig"
+      v-show="isCommentBarrageVisible && !isConsoleOpen"
+      :gravatar-url="commentBarrageConfig.gravatarUrl"
+      :default-gravatar-type="commentBarrageConfig.defaultGravatarType"
+    />
   </div>
 </template>
 

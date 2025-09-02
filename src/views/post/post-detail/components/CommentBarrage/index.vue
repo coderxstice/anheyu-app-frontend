@@ -40,8 +40,21 @@ const customEase = "cubic-bezier(0.42, 0, 0.3, 1.11)";
 const onEnter = (el: Element, done: () => void) => {
   gsap.fromTo(
     el,
-    { opacity: 0, y: 30 },
-    { opacity: 1, y: 0, duration: 0.3, ease: customEase, onComplete: done }
+    {
+      opacity: 0,
+      y: 30,
+      scale: 1,
+      rotationZ: 0
+    },
+    {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      rotationZ: 0,
+      duration: 0.4,
+      ease: customEase,
+      onComplete: done
+    }
   );
 };
 
@@ -52,7 +65,8 @@ const onLeave = (el: Element, done: () => void) => {
   gsap.to(el, {
     opacity: 0,
     y: 30,
-    duration: 0.3,
+    scale: 1,
+    duration: 0.4,
     ease: customEase,
     onComplete: done
   });
