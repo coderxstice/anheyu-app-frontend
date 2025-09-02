@@ -490,6 +490,10 @@ const scrollToTop = () => {
         }
       }
 
+      :deep(#center-console + label i) {
+        background: var(--anzhiyu-white);
+      }
+
       .header-content .header-left .site-name-link:hover {
         color: var(--anzhiyu-white);
         background: var(--anzhiyu-white-op);

@@ -30,6 +30,20 @@
       </a>
     </el-tooltip>
 
+    <input
+      id="center-console"
+      type="checkbox"
+      :checked="isConsoleOpen"
+      @change="appStore.toggleConsole()"
+    />
+    <label class="widget" for="center-console" title="中控台">
+      <i class="left" />
+      <i class="widget center" />
+      <i class="widget right" />
+    </label>
+
+    <Console />
+
     <div
       class="nav-button nav-totop"
       :class="{ 'is-visible': showToTopButton, long: isFooterVisible }"
@@ -45,8 +59,11 @@
 
 <script setup lang="ts">
 import { computed, type PropType } from "vue";
+import { storeToRefs } from "pinia";
 import { useSnackbar } from "@/composables/useSnackbar";
 import { useArticleStore } from "@/store/modules/articleStore";
+import { useAppStore } from "@/store/modules/app";
+import Console from "./console.vue";
 
 defineOptions({
   name: "HeaderRight"
@@ -72,6 +89,8 @@ const props = defineProps({
 });
 
 const articleStore = useArticleStore();
+const appStore = useAppStore();
+const { isConsoleOpen } = storeToRefs(appStore);
 const { showSnackbar } = useSnackbar();
 
 let travellingsTimer: ReturnType<typeof setTimeout> | null = null;
@@ -112,6 +131,17 @@ const scrollToTop = () => {
 </script>
 
 <style scoped lang="scss">
+[data-theme="dark"]
+  .header-right
+  #center-console:checked
+  + label:is(.widget, #center-console:checked + label.widget:hover)
+  i {
+  background: var(--anzhiyu-black) !important;
+}
+
+[data-theme="dark"] #center-console + label i {
+  background: var(--anzhiyu-white) !important;
+}
 .header-right {
   position: absolute;
   right: 0;
@@ -121,6 +151,119 @@ const scrollToTop = () => {
   align-items: center;
   height: 100%;
   padding-right: 1.5rem;
+
+  --animation-on: cubic-bezier(0.6, 0.1, 0, 1);
+  --animation-in: cubic-bezier(0.6, 0.2, 0.25, 1);
+  --animation-ot: opacity 0.5s var(--animation-in) backwards,
+    transform 1s var(--animation-in) backwards;
+  --animation-otf: opacity 0.5s var(--animation-in) backwards,
+    transform 1s var(--animation-in) backwards,
+    filter 0.7s var(--animation-in) backwards;
+
+  #center-console {
+    display: none;
+  }
+
+  #center-console + label {
+    --icon-size: 1.375rem;
+    position: relative;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    height: var(--icon-size);
+    width: var(--icon-size);
+    cursor: pointer;
+    transition: 1s;
+    margin-left: 1rem;
+  }
+
+  #center-console + label:hover i.left {
+    width: calc(var(--icon-size) / 2.5);
+  }
+
+  #center-console + label:hover i.center {
+    opacity: 0.5;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+    filter: alpha(opacity=50);
+    width: calc(var(--icon-size) / 2.5);
+  }
+
+  #center-console + label:hover i.right {
+    width: calc(var(--icon-size) / 2.5);
+    height: calc(var(--icon-size) / 1.15);
+    transform: none;
+  }
+
+  #center-console + label i {
+    background: var(--light-grey);
+    position: absolute;
+    border-radius: calc(var(--icon-size) * 0.15);
+    transition: 0.5s var(--animation-on);
+    inset: 0;
+    margin: auto;
+    right: auto;
+    width: calc(var(--icon-size) / 3);
+    height: calc(var(--icon-size) / 3);
+    transform: translateY(calc(var(--icon-size) / 4));
+  }
+
+  #center-console + label i.left {
+    width: 100%;
+    transform: translateY(calc(var(--icon-size) / -4));
+  }
+
+  #center-console + label i.right {
+    left: auto;
+    right: 0;
+    width: calc(var(--icon-size) / 2);
+  }
+
+  #center-console:checked + label {
+    right: 0;
+    top: 0.5rem;
+    z-index: 99999;
+  }
+
+  #center-console:checked + label:hover::after {
+    background: var(--anzhiyu-main) !important;
+  }
+
+  #center-console:checked + label::after {
+    content: "";
+    width: 35px;
+    height: 35px;
+    display: block;
+    position: absolute;
+    z-index: -1;
+    top: -6px;
+    left: -6.3px;
+    background: var(--anzhiyu-fontcolor) !important;
+    border-radius: 50px;
+  }
+
+  #center-console:checked
+    + label:is(.widget, #center-console:checked + label.widget:hover)
+    i {
+    height: calc(var(--icon-size) / 4.5);
+    background: var(--anzhiyu-white) !important;
+  }
+
+  #center-console:checked + label i.left {
+    width: 100% !important;
+    transform: rotate(-45deg) !important;
+  }
+
+  #center-console:checked + label i.center {
+    width: 0 !important;
+  }
+
+  #center-console:checked + label i.right {
+    width: 100% !important;
+    transform: rotate(45deg) !important;
+  }
+  #center-console + label i {
+    background: var(--font-color);
+  }
 
   .nav-button {
     display: flex;
@@ -155,14 +298,14 @@ const scrollToTop = () => {
 
     &.is-visible {
       width: 25px;
-      margin-left: 1rem;
+      margin-left: 1.5rem;
       opacity: 1;
       transform: scale(1);
     }
 
     &.is-visible.long {
       width: 80px;
-      margin-left: 0;
+      margin-left: 1rem;
 
       .totopbtn {
         width: 70px;
@@ -243,6 +386,10 @@ const scrollToTop = () => {
 @media (width <= 768px) {
   .header-right {
     padding: 0 1.2rem;
+  }
+  #center-console,
+  #center-console + label {
+    display: none;
   }
 }
 </style>

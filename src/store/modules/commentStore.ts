@@ -5,7 +5,8 @@ import {
   createPublicComment,
   likePublicComment,
   unlikePublicComment,
-  getCommentChildren
+  getCommentChildren,
+  getLatestPublicComments
 } from "@/api/comment";
 import type { Comment, CreateCommentPayload } from "@/api/comment/type";
 
@@ -20,7 +21,10 @@ export const useCommentStore = defineStore("comment", () => {
   const isLoading = ref(false);
   const isLoadingMore = ref(false);
   const likedCommentIds = ref<Set<string>>(new Set());
-  const loadingChildrenCommentIds = ref<Set<string>>(new Set()); // 正在加载子评论的评论ID集合
+  const loadingChildrenCommentIds = ref<Set<string>>(new Set());
+
+  const latestComments = ref<Comment[]>([]);
+  const isLoadingLatest = ref(false);
 
   const totalLocalComments = computed(() => {
     let count = 0;
@@ -135,10 +139,7 @@ export const useCommentStore = defineStore("comment", () => {
       };
 
       if (newComment.parent_id) {
-        // 这是对一条评论的回复
         let topLevelParent: Comment | null = null;
-
-        // 查找父评论所在的顶级评论线程
         topLevelParent =
           comments.value.find(c => c.id === newComment.parent_id) || null;
 
@@ -164,13 +165,10 @@ export const useCommentStore = defineStore("comment", () => {
           console.warn(
             "Parent comment's thread not found, falling back to a refresh."
           );
-          // 如果找不到父评论，做一个全量刷新作为保底
           await fetchComments(1);
         }
       } else {
-        // 这是一条新的顶级评论
         comments.value.unshift(newComment);
-        // 只有顶级评论才增加 totalComments 的值
         totalComments.value++;
       }
     } catch (error) {
@@ -186,21 +184,17 @@ export const useCommentStore = defineStore("comment", () => {
     skipFirst = 0
   ) {
     if (loadingChildrenCommentIds.value.has(parentCommentId)) {
-      return; // 已经在加载中
+      return;
     }
-
     loadingChildrenCommentIds.value.add(parentCommentId);
-
     try {
       const res = await getCommentChildren(parentCommentId, { page, pageSize });
       const data = res.data;
 
       if (data && data.list) {
-        // 如果需要跳过前面的数据，则进行切片处理
         const newChildren =
           skipFirst > 0 ? data.list.slice(skipFirst) : data.list;
 
-        // 找到父评论并添加新的子评论
         findAndUpdateComment(comments.value, parentCommentId, parentComment => {
           if (!parentComment.children) {
             parentComment.children = [];
@@ -253,6 +247,22 @@ export const useCommentStore = defineStore("comment", () => {
     }
   }
 
+  async function fetchLatestComments(limit = 6) {
+    if (isLoadingLatest.value) return;
+    isLoadingLatest.value = true;
+    try {
+      const res = await getLatestPublicComments({ page: 1, pageSize: limit });
+      if (res.data && res.data.list) {
+        latestComments.value = res.data.list;
+      }
+    } catch (error) {
+      console.error("获取最新评论失败:", error);
+      latestComments.value = [];
+    } finally {
+      isLoadingLatest.value = false;
+    }
+  }
+
   return {
     comments,
     totalComments,
@@ -269,6 +279,9 @@ export const useCommentStore = defineStore("comment", () => {
     loadMoreChildren,
     postComment,
     toggleLikeComment,
-    resetStore
+    resetStore,
+    latestComments,
+    isLoadingLatest,
+    fetchLatestComments
   };
 });

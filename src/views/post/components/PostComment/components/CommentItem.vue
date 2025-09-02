@@ -359,12 +359,12 @@ const handleLoadMoreChildren = async () => {
 
 .nickname {
   font-weight: 600;
-  color: #333;
+  color: var(--anzhiyu-fontcolor);
 }
 
 .timestamp {
   font-size: 0.8rem;
-  color: #999;
+  color: var(--anzhiyu-fontcolor);
 }
 
 .master-tag {
@@ -412,7 +412,7 @@ const handleLoadMoreChildren = async () => {
     background-color 0.3s;
 
   &:hover {
-    color: #333;
+    color: var(--anzhiyu-fontcolor);
     background-color: #f1f3f4;
   }
 
@@ -433,7 +433,7 @@ const handleLoadMoreChildren = async () => {
 :deep(.comment-content) {
   font-size: 0.95rem;
   line-height: 1.6;
-  color: #373a47;
+  color: var(--anzhiyu-fontcolor);
 
   a {
     border-bottom: none;
@@ -475,7 +475,7 @@ const handleLoadMoreChildren = async () => {
   align-items: center;
   margin-top: 0.75rem;
   font-size: 0.8rem;
-  color: #999;
+  color: var(--anzhiyu-fontcolor);
 }
 
 .meta-item {

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-22 02:00:40
- * @LastEditTime: 2025-08-31 22:49:21
+ * @LastEditTime: 2025-09-02 11:42:45
  * @LastEditors: 安知鱼
  */
 import { defineStore } from "pinia";
@@ -15,8 +15,7 @@ import {
   responsiveStorageNameSpace
 } from "../utils";
 
-export const useAppStore = defineStore({
-  id: "anheyu-app",
+export const useAppStore = defineStore("anheyu-app", {
   state: (): appType => ({
     sidebar: {
       opened:
@@ -36,7 +35,8 @@ export const useAppStore = defineStore({
     viewportSize: {
       width: document.documentElement.clientWidth,
       height: document.documentElement.clientHeight
-    }
+    },
+    isConsoleOpen: false
   }),
   getters: {
     getSidebarStatus(state) {
@@ -50,6 +50,9 @@ export const useAppStore = defineStore({
     },
     getViewportHeight(state) {
       return state.viewportSize.height;
+    },
+    getConsoleStatus(state) {
+      return state.isConsoleOpen;
     }
   },
   actions: {
@@ -93,6 +96,13 @@ export const useAppStore = defineStore({
     },
     setSortSwap(val) {
       this.sortSwap = val;
+    },
+    toggleConsole(status?: boolean) {
+      if (typeof status === "boolean") {
+        this.isConsoleOpen = status;
+      } else {
+        this.isConsoleOpen = !this.isConsoleOpen;
+      }
     }
   }
 });
