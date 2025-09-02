@@ -99,6 +99,15 @@
             <i class="anzhiyufont anzhiyu-icon-moon" />
           </button>
         </div>
+        <div
+          class="console-btn-item"
+          :class="{ on: isCommentBarrageVisible }"
+          title="热评开关"
+        >
+          <button class="commentBarrage" @click="toggleCommentBarrage()">
+            <i class="anzhiyufont anzhiyu-icon-message" />
+          </button>
+        </div>
       </div>
     </div>
     <div class="console-mask" @click="appStore.toggleConsole(false)" />
@@ -115,6 +124,7 @@ import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useCommentStore } from "@/store/modules/commentStore";
 import type { Comment } from "@/api/comment/type";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
+import { useUiStore } from "@/store/modules/uiStore";
 
 const { dataTheme, dataThemeChange } = useDataThemeChange();
 
@@ -122,6 +132,10 @@ const appStore = useAppStore();
 const articleStore = useArticleStore();
 const commentStore = useCommentStore();
 const router = useRouter();
+const uiStore = useUiStore();
+
+const { isCommentBarrageVisible } = storeToRefs(uiStore);
+const { toggleCommentBarrage } = uiStore;
 
 const siteConfigStore = useSiteConfigStore();
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);

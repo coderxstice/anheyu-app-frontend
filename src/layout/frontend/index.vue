@@ -1,8 +1,8 @@
 <!--
  * @Description:
  * @Author: 安知鱼
- * @Date: 2025-07-25 18:52:39
- * @LastEditTime: 2025-08-09 09:36:03
+ * @Date: 2025-08-21 17:48:59
+ * @LastEditTime: 2025-09-02 12:32:37
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -16,6 +16,8 @@
     <Footer />
 
     <SearchModal />
+
+    <RightMenu />
   </div>
 </template>
 
@@ -28,6 +30,7 @@ import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 import Header from "./components/hearder/index.vue";
 import Footer from "./components/footer/index.vue";
 import SearchModal from "./components/SearchModal/index.vue";
+import RightMenu from "./components/RightMenu/index.vue";
 
 const { $storage } = useGlobal<GlobalPropertiesApi>();
 const route = useRoute();
