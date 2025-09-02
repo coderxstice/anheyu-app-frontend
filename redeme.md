@@ -2,7 +2,7 @@
 
 ## 贡献者
 
-[![contributors](https://opencollective.com/hexo-theme-anzhiyu/contributors.svg?width=890&button=false)](https://github.com/anzhiyu-c/hexo-theme-anzhiyu/)
+[![contributors](https://opencollective.com/anheyu-app-frontend/contributors.svg?width=890&button=false)](https://github.com/anzhiyu-c/anheyu-app-frontend)
 
 UI/UX：[@张洪 Heo](https://github.com/zhheo)
 
