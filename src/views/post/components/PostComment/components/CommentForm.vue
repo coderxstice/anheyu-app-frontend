@@ -33,7 +33,6 @@ interface EmojiPackage {
   items: { icon: string; text: string }[];
 }
 
-// 方案一：采用健壮的、修复了懒加载问题的 vLazy 指令
 const vLazy = {
   mounted: (el: HTMLImageElement, binding: { value: { url: string } }) => {
     el.src =
