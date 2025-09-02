@@ -2,7 +2,7 @@
  * @Description: 评论模块 API 请求
  * @Author: 安知鱼
  * @Date: 2025-08-10 22:21:49
- * @LastEditTime: 2025-08-19 13:27:07
+ * @LastEditTime: 2025-09-02 00:54:01
  * @LastEditors: 安知鱼
  */
 import { http } from "@/utils/http";
@@ -152,6 +152,22 @@ export const getCommentChildren = (
   return http.request<BaseResponse<CommentListResponse>>(
     "get",
     baseUrlApi(`public/comments/${parentId}/children`),
+    { params }
+  );
+};
+
+/**
+ * @description 获取全站最新评论列表
+ * @param params 分页参数 { page, pageSize }
+ * @returns 分页后的评论数据
+ */
+export const getLatestPublicComments = (params?: {
+  page?: number;
+  pageSize?: number;
+}): Promise<BaseResponse<CommentListResponse>> => {
+  return http.request<BaseResponse<CommentListResponse>>(
+    "get",
+    baseUrlApi("public/comments/latest"),
     { params }
   );
 };

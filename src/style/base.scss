@@ -149,3 +149,20 @@ b,
 strong {
   color: var(--anzhiyu-lighttext);
 }
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--anzhiyu-card-border);
+  opacity: 0.5;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid var(--anzhiyu-background);
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--anzhiyu-background);
+}

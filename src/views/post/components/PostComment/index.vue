@@ -194,7 +194,6 @@ defineExpose({
             :config="commentInfoConfig"
           />
         </div>
-        <!-- 滚动加载提示 -->
         <div v-if="isLoadingScroll" class="scroll-loading-container">
           <div class="scroll-loading-spinner">
             <i class="anzhiyufont anzhiyu-icon-refresh" />

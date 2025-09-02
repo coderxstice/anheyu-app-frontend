@@ -177,12 +177,14 @@ const fetchRequiredData = async (id: string) => {
   }
 };
 
-// --- 生命周期钩子 ---
-onMounted(() => {
-  const handleInitialHash = () => {
-    const hash = window.location.hash;
-    if (!hash) return;
+/**
+ * @description 处理URL哈希值变化，滚动到对应元素
+ * @param hash - URL中的hash值 (例如 #comment-123)
+ */
+const handleHashChange = (hash: string) => {
+  if (!hash) return;
 
+  setTimeout(() => {
     try {
       const id = decodeURIComponent(hash.slice(1));
       const targetElement = document.getElementById(id);
@@ -199,10 +201,19 @@ onMounted(() => {
     } catch (e) {
       console.error("处理URL哈希值失败:", e);
     }
-  };
+  }, 800);
+};
 
-  setTimeout(handleInitialHash, 800);
+onMounted(() => {
+  handleHashChange(route.hash);
 });
+
+watch(
+  () => route.hash,
+  newHash => {
+    handleHashChange(newHash);
+  }
+);
 
 watch(
   () => route.params.id,

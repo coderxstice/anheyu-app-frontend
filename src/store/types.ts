@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-06-24 22:37:24
+ * @LastEditTime: 2025-09-02 00:11:31
  * @LastEditors: 安知鱼
  */
 import type { RouteRecordName } from "vue-router";
@@ -27,6 +27,7 @@ export type appType = {
   layout: string;
   device: string;
   viewportSize: { width: number; height: number };
+  isConsoleOpen: boolean;
 };
 
 export type multiType = {
