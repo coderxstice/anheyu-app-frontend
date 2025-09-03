@@ -288,6 +288,19 @@ export default [
         }
       },
       {
+        path: "recentcomments",
+        name: "RecentComments",
+        component: () => import("@/views/post/recent-comments/index.vue"),
+        meta: {
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 最近评论`;
+          },
+          showLink: false
+        }
+      },
+      {
         path: ":pathMatch(.*)",
         name: "CustomPage",
         component: () => import("@/views/custom-page/index.vue"),

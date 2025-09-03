@@ -166,3 +166,8 @@ strong {
 ::-webkit-scrollbar-track {
   background-color: var(--anzhiyu-background);
 }
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--anzhiyu-lighttext);
+  display: block !important;
+}

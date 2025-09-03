@@ -173,7 +173,9 @@ class AnHttp {
           "public/statistics/basic",
           "public/statistics/visit",
           // 自定义页面
-          "public/pages"
+          "public/pages",
+          // 最近评论
+          "public/comments/latest"
         ];
         if (whiteList.some(url => config.url?.endsWith(url))) {
           return config;

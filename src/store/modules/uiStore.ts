@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-09-02 13:30:17
- * @LastEditTime: 2025-09-02 13:33:49
+ * @LastEditTime: 2025-09-03 16:33:32
  * @LastEditors: 安知鱼
  */
 import { ref, watch } from "vue";
@@ -36,8 +36,58 @@ export const useUiStore = defineStore("ui", () => {
     { immediate: false }
   );
 
+  // 控制快捷键功能是否启用的状态，默认为 true (启用)
+  const isShortcutsEnabled = ref(
+    Storage.getData("isShortcutsEnabled", nameSpace) ?? true
+  );
+
+  // 切换快捷键启用状态的 action
+  function toggleShortcuts(value?: boolean) {
+    if (typeof value === "boolean") {
+      isShortcutsEnabled.value = value;
+    } else {
+      isShortcutsEnabled.value = !isShortcutsEnabled.value;
+    }
+  }
+
+  // 监听状态变化，自动保存到存储
+  watch(
+    isShortcutsEnabled,
+    newValue => {
+      Storage.set("isShortcutsEnabled", JSON.stringify(newValue));
+    },
+    { immediate: false }
+  );
+
+  // 控制右键菜单模式的状态，默认为 true (使用本站菜单)
+  const useCustomContextMenu = ref(
+    Storage.getData("useCustomContextMenu", nameSpace) ?? true
+  );
+
+  // 切换右键菜单模式的 action
+  function toggleContextMenuMode(value?: boolean) {
+    if (typeof value === "boolean") {
+      useCustomContextMenu.value = value;
+    } else {
+      useCustomContextMenu.value = !useCustomContextMenu.value;
+    }
+  }
+
+  // 监听状态变化，自动保存到存储
+  watch(
+    useCustomContextMenu,
+    newValue => {
+      Storage.set("useCustomContextMenu", JSON.stringify(newValue));
+    },
+    { immediate: false }
+  );
+
   return {
     isCommentBarrageVisible,
-    toggleCommentBarrage
+    toggleCommentBarrage,
+    isShortcutsEnabled,
+    toggleShortcuts,
+    useCustomContextMenu,
+    toggleContextMenuMode
   };
 });

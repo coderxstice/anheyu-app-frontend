@@ -9,10 +9,9 @@
               <div class="card-hor-content">
                 <span class="author-content-item-title">最近评论</span>
                 <a
-                  class="go_to_recent_comments"
-                  href="/recentcomments/"
+                  class="go_to_recent_comments !text-[var(--anzhiyu-fontcolor)]"
+                  href="/recentcomments"
                   title="最近评论"
-                  data-pjax-state="load"
                 >
                   <i class="anzhiyufont anzhiyu-icon-circle-arrow-right"
                 /></a>
@@ -108,6 +107,17 @@
             <i class="anzhiyufont anzhiyu-icon-message" />
           </button>
         </div>
+
+        <div
+          id="consoleKeyboard"
+          class="console-btn-item"
+          :class="{ on: isShortcutsEnabled }"
+          title="快捷键开关"
+        >
+          <button class="keyboard-switch" @click="toggleShortcuts()">
+            <i class="anzhiyufont anzhiyu-icon-keyboard" />
+          </button>
+        </div>
       </div>
     </div>
     <div class="console-mask" @click="appStore.toggleConsole(false)" />
@@ -134,8 +144,8 @@ const commentStore = useCommentStore();
 const router = useRouter();
 const uiStore = useUiStore();
 
-const { isCommentBarrageVisible } = storeToRefs(uiStore);
-const { toggleCommentBarrage } = uiStore;
+const { isCommentBarrageVisible, isShortcutsEnabled } = storeToRefs(uiStore);
+const { toggleCommentBarrage, toggleShortcuts } = uiStore;
 
 const siteConfigStore = useSiteConfigStore();
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);
@@ -303,9 +313,10 @@ onMounted(() => {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    height: 100%;
+    flex: 1;
     overflow-y: scroll;
     align-content: flex-start;
+    flex-shrink: 0;
     &::-webkit-scrollbar {
       display: none;
     }
@@ -322,8 +333,8 @@ onMounted(() => {
       display: flex;
       flex-direction: column;
       width: calc(100% / 2 - 4px);
-      height: calc(100% / 3 - 6px);
-      min-height: 140px;
+      flex-shrink: 0;
+      justify-content: space-between;
       &:hover {
         border-color: var(--anzhiyu-lighttext);
       }
@@ -336,6 +347,8 @@ onMounted(() => {
       border-bottom: var(--style-border-always);
       padding-bottom: 8px;
       width: 100%;
+      flex-shrink: 0;
+      min-height: 40px;
       img {
         width: 24px;
         height: 24px;
@@ -370,6 +383,8 @@ onMounted(() => {
       -webkit-line-clamp: 2;
       line-height: 1.7;
       font-size: 14px;
+      flex-shrink: 0;
+      min-height: 48px;
     }
     .comment-title {
       font-size: 12px;
@@ -385,6 +400,8 @@ onMounted(() => {
       line-height: 1;
       opacity: 0.6;
       padding-top: 8px;
+      flex-shrink: 0;
+      min-height: 20px;
     }
   }
   .go_to_recent_comments {
@@ -400,7 +417,7 @@ onMounted(() => {
   .console-card-group-right {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
     height: 100%;
     width: 60%;
     overflow: hidden;
@@ -446,20 +463,22 @@ onMounted(() => {
     transform: translateY(20px);
     transition: 0.3s;
     opacity: 0;
-    max-width: 1400px;
     gap: 0.5rem;
     max-height: calc(100dvh - 180px);
     max-width: calc(100% - 64px);
     height: 800px;
+    width: 100%;
   }
 
   .console-card.tags {
-    height: calc(100% - 139px);
+    flex: 1;
+    min-height: 0;
     .card-tag-cloud {
       display: flex;
       flex-wrap: wrap;
       overflow-y: scroll;
       gap: 6px;
+      min-height: 0;
       &::-webkit-scrollbar {
         width: 8px;
       }
@@ -502,18 +521,19 @@ onMounted(() => {
     border: none;
     overflow: hidden;
     border-radius: 0;
+    flex-shrink: 0;
     .card-archive-list {
       display: flex;
       flex-direction: row;
       justify-content: flex-start;
       flex-wrap: wrap;
-      height: 164px;
       gap: 8px;
       li.card-archive-list-item {
-        flex: 0 0 24%;
+        flex: 0 0 calc(25% - 6px);
         cursor: pointer;
         transition: 0.3s;
         border-radius: 12px;
+        height: 82px;
 
         &:hover .card-archive-list-link {
           background: var(--anzhiyu-main);
@@ -530,6 +550,7 @@ onMounted(() => {
         box-shadow: var(--anzhiyu-shadow-border);
         transition: 0.3s;
         justify-content: center;
+        height: 100%;
       }
     }
     .card-archive-list-date {
@@ -623,6 +644,7 @@ onMounted(() => {
     }
     .console-card.history .card-archive-list li.card-archive-list-item {
       flex: 0 0 calc(50% - 4px);
+      height: 82px;
     }
   }
 }
@@ -637,6 +659,7 @@ onMounted(() => {
     }
     .console-card.history .card-archive-list li.card-archive-list-item {
       flex: 0 0 100%;
+      height: 82px;
     }
   }
 }

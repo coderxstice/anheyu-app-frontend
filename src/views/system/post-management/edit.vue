@@ -18,16 +18,10 @@ import {
   updateArticle,
   getCategoryList,
   getTagList,
-  // createCategory, // 不再需要从这里创建分类
   createTag,
   uploadArticleImage
 } from "@/api/post";
-import type {
-  ArticleForm,
-  PostCategory,
-  PostTag
-  // PostCategoryForm //不再需要
-} from "@/api/post/type";
+import type { ArticleForm, PostCategory, PostTag } from "@/api/post/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { constant } from "@/constant";
 

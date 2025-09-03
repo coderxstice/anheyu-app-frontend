@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-26 15:01:42
- * @LastEditTime: 2025-08-21 11:18:22
+ * @LastEditTime: 2025-09-03 10:30:39
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -42,6 +42,11 @@
         <AboutPageForm v-model="model.about" />
       </el-form>
     </el-tab-pane>
+    <el-tab-pane label="最近评论页配置" name="recentCommentsPage">
+      <el-form :model="model" label-position="top" class="setting-form">
+        <RecentCommentsPageForm v-model="model.recentComments" />
+      </el-form>
+    </el-tab-pane>
   </el-tabs>
 </template>
 
@@ -55,6 +60,7 @@ import EmailSettingsForm from "./frontDesk/EmailSettingsForm/index.vue";
 import FLinkPageSettingsForm from "./frontDesk/FLinkPageSettingsForm/index.vue";
 import EquipmentPageForm from "./frontDesk/EquipmentPageForm/index.vue";
 import AboutPageForm from "./frontDesk/AboutPageForm/index.vue";
+import RecentCommentsPageForm from "./frontDesk/RecentCommentsPageForm/index.vue";
 
 const activeSubTab = ref("homePage");
 

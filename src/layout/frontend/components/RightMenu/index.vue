@@ -23,6 +23,10 @@
         <i class="anzhiyufont anzhiyu-icon-copy" />
         <span>复制选中文本</span>
       </div>
+      <div class="rightMenu-item" @click.stop="searchLocal">
+        <i class="anzhiyufont anzhiyu-icon-magnifying-glass" />
+        <span>站内搜索</span>
+      </div>
       <div class="rightMenu-item" @click.stop="searchBaidu">
         <i class="anzhiyufont anzhiyu-icon-magnifying-glass" />
         <span>百度搜索</span>
@@ -91,7 +95,7 @@ const { dataTheme, dataThemeChange } = useDataThemeChange();
 const { showSnackbar } = useSnackbar();
 const uiStore = useUiStore();
 
-const { isCommentBarrageVisible } = storeToRefs(uiStore);
+const { isCommentBarrageVisible, useCustomContextMenu } = storeToRefs(uiStore);
 const { toggleCommentBarrage } = uiStore;
 
 const menuStyle = computed(() => ({
@@ -105,6 +109,11 @@ const handleToggleCommentBarrage = () => {
 };
 
 const handleContextMenu = (event: MouseEvent) => {
+  // 如果关闭了本站右键菜单，则直接返回，显示浏览器原生菜单
+  if (!useCustomContextMenu.value) {
+    return;
+  }
+
   // 仅在桌面端设备生效
   if (window.innerWidth < 768) return;
 
@@ -203,12 +212,21 @@ const copySelectedText = () => {
 };
 
 const searchBaidu = () => {
-  // 修改：直接使用暂存的文本
   const text = capturedText.value;
   if (text) {
     window.open(
       `https://www.baidu.com/s?wd=${encodeURIComponent(text)}`,
       "_blank"
+    );
+  }
+  hideMenu();
+};
+
+const searchLocal = () => {
+  const text = capturedText.value;
+  if (text) {
+    window.dispatchEvent(
+      new CustomEvent("frontend-open-search", { detail: { keyword: text } })
     );
   }
   hideMenu();
