@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-24 17:29:16
- * @LastEditTime: 2025-08-19 15:50:45
+ * @LastEditTime: 2025-09-03 10:27:31
  * @LastEditors: 安知鱼
  */
 
@@ -464,6 +464,15 @@ export interface AboutPageSettingsInfo {
   statisticsBackground: string;
 }
 
+export interface RecentCommentsSettingsInfo {
+  banner: {
+    background: string;
+    title: string;
+    description: string;
+    tip: string;
+  };
+}
+
 export interface FrontDeskSettings {
   home: HomePageSettingsInfo;
   sidebar: SidebarPageSettingsInfo;
@@ -472,6 +481,7 @@ export interface FrontDeskSettings {
   fLink: FLinkSettingsInfo;
   equipment: EquipmentSettingsInfo;
   about: AboutPageSettingsInfo;
+  recentComments: RecentCommentsSettingsInfo;
 }
 
 /**

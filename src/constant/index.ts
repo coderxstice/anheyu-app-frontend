@@ -2,7 +2,7 @@
  * @Description: 系统配置相关的常量，与后端 Go 定义和 API 响应保持同步。
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:42:04
- * @LastEditTime: 2025-08-19 15:46:05
+ * @LastEditTime: 2025-09-03 10:25:49
  * @LastEditors: 安知鱼
  */
 
@@ -121,6 +121,14 @@ const KeyPostEquipmentBannerDescription: SettingKey =
   "equipment.banner.description";
 const KeyPostEquipmentBannerTip: SettingKey = "equipment.banner.tip";
 const KeyPostEquipmentList: SettingKey = "equipment.list";
+
+// --- 最近评论页面配置 ---
+const KeyRecentCommentsBannerBackground: SettingKey =
+  "recent_comments.banner.background";
+const KeyRecentCommentsBannerTitle: SettingKey = "recent_comments.banner.title";
+const KeyRecentCommentsBannerDescription: SettingKey =
+  "recent_comments.banner.description";
+const KeyRecentCommentsBannerTip: SettingKey = "recent_comments.banner.tip";
 
 // --- 关于页面配置 ---
 const KeyAboutPageName: SettingKey = "about.page.name";
@@ -319,6 +327,12 @@ export const constant = {
   KeyPostEquipmentBannerDescription,
   KeyPostEquipmentBannerTip,
   KeyPostEquipmentList,
+
+  // --- 最近评论页面配置 ---
+  KeyRecentCommentsBannerBackground,
+  KeyRecentCommentsBannerTitle,
+  KeyRecentCommentsBannerDescription,
+  KeyRecentCommentsBannerTip,
 
   // --- 关于页面配置 ---
   KeyAboutPageName,

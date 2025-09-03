@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, computed, watch, nextTick, ref, onUnmounted } from "vue";
+import { useRoute } from "vue-router";
 import type { Comment } from "@/api/comment/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useCommentStore } from "@/store/modules/commentStore";
@@ -17,6 +18,7 @@ const props = defineProps({
 
 const emit = defineEmits(["comment-ids-loaded"]);
 
+const route = useRoute();
 const siteConfigStore = useSiteConfigStore();
 const commentStore = useCommentStore();
 const { comments, totalComments, isLoading, isLoadingMore, hasMore } =
@@ -50,18 +52,49 @@ const fancyboxOptions = {
   }
 };
 
+/**
+ * @description 处理URL哈希值变化，滚动到对应评论
+ * @param hash - URL中的hash值 (例如 #comment-123)
+ */
+const handleHashChange = (hash: string) => {
+  if (!hash) return;
+
+  setTimeout(() => {
+    try {
+      const id = decodeURIComponent(hash.slice(1));
+
+      if (id.startsWith("comment-")) {
+        scrollToComment(id);
+      }
+    } catch (e) {
+      console.error("处理URL哈希值失败:", e);
+    }
+  }, 800);
+};
+
 onMounted(() => {
   const pageSize = commentInfoConfig.value.page_size || 10;
   commentStore.initComments(props.targetPath, pageSize);
 
   // 添加滚动监听器
   setupScrollListener();
+
+  // 处理初始哈希值
+  handleHashChange(route.hash);
 });
 
 onUnmounted(() => {
   // 清理滚动监听器
   removeScrollListener();
 });
+
+// 监听哈希值变化
+watch(
+  () => route.hash,
+  newHash => {
+    handleHashChange(newHash);
+  }
+);
 
 watch(
   comments,

@@ -9,10 +9,9 @@
               <div class="card-hor-content">
                 <span class="author-content-item-title">最近评论</span>
                 <a
-                  class="go_to_recent_comments"
-                  href="/recentcomments/"
+                  class="go_to_recent_comments !text-[var(--anzhiyu-fontcolor)]"
+                  href="/recentcomments"
                   title="最近评论"
-                  data-pjax-state="load"
                 >
                   <i class="anzhiyufont anzhiyu-icon-circle-arrow-right"
                 /></a>

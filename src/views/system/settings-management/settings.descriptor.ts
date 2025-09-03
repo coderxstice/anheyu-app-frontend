@@ -403,6 +403,33 @@ const equipmentDescriptors: SettingDescriptor[] = [
   }
 ];
 
+const recentCommentsDescriptors: SettingDescriptor[] = [
+  {
+    frontendPath: "frontDesk.recentComments.banner.background",
+    backendKey: constant.KeyRecentCommentsBannerBackground,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.recentComments.banner.title",
+    backendKey: constant.KeyRecentCommentsBannerTitle,
+    defaultValue: "评论",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.recentComments.banner.description",
+    backendKey: constant.KeyRecentCommentsBannerDescription,
+    defaultValue: "最近评论",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.recentComments.banner.tip",
+    backendKey: constant.KeyRecentCommentsBannerTip,
+    defaultValue: "发表你的观点和看法，让更多人看到",
+    type: "string"
+  }
+];
+
 const aboutPageDescriptors: SettingDescriptor[] = [
   {
     frontendPath: "frontDesk.about.name",
@@ -1097,6 +1124,7 @@ export const allSettingDescriptors = [
   ...fileDescriptors,
   ...postDescriptors,
   ...equipmentDescriptors,
+  ...recentCommentsDescriptors,
   ...aboutPageDescriptors,
   ...frontDeskDescriptors,
   ...sidebarDescriptors,

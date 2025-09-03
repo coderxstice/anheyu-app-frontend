@@ -125,7 +125,8 @@ const whiteList = [
   "/random-post",
   "/air-conditioner",
   "/equipment",
-  "/page"
+  "/page",
+  "/recentcomments"
 ];
 
 const { VITE_HIDE_HOME } = import.meta.env;
