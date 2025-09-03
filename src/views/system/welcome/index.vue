@@ -284,6 +284,72 @@
             </div>
           </section>
         </div>
+
+        <section class="card visitor-logs-section">
+          <h3 class="card-header">访客记录</h3>
+          <div
+            v-if="logsLoading"
+            class="loading-overlay"
+            style="position: relative; inset: auto"
+          >
+            <div class="loading-spinner" />
+            <p>正在加载访客记录...</p>
+          </div>
+          <div v-else class="visitor-table-wrapper">
+            <div class="pages-list">
+              <div class="list-header">
+                <span>UA</span>
+                <span>IP</span>
+                <span>城市</span>
+                <span>访问页面</span>
+                <span>停留时间</span>
+              </div>
+              <ul>
+                <li
+                  v-for="item in visitorLogs"
+                  :key="item.created_at + item.ip_address + item.url_path"
+                >
+                  <CustomTooltip :content="item.user_agent" placement="top">
+                    <span class="ua-text" :title="item.user_agent">
+                      {{ item.user_agent || "-" }}
+                    </span>
+                  </CustomTooltip>
+                  <span class="ip-text">{{ item.ip_address || "-" }}</span>
+                  <span class="city-text">{{ item.city || "未知" }}</span>
+                  <CustomTooltip :content="item.url_path" placement="top">
+                    <span class="page-path" :title="item.url_path">
+                      {{ item.url_path }}
+                    </span>
+                  </CustomTooltip>
+                  <span class="page-duration">
+                    {{ formatDuration(item.duration) }}
+                  </span>
+                </li>
+              </ul>
+            </div>
+            <div v-if="logsTotal > logsPageSize" class="pagination">
+              <button
+                class="retry-btn"
+                :disabled="logsPage <= 1"
+                @click="() => loadVisitorLogs(logsPage - 1)"
+              >
+                上一页
+              </button>
+              <span class="pagination-info">
+                第 {{ logsPage }} 页 / 共
+                {{ Math.max(1, Math.ceil(logsTotal / logsPageSize)) }}
+                页
+              </span>
+              <button
+                class="retry-btn"
+                :disabled="logsPage >= Math.ceil(logsTotal / logsPageSize)"
+                @click="() => loadVisitorLogs(logsPage + 1)"
+              >
+                下一页
+              </button>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   </div>
@@ -296,7 +362,8 @@ import {
   getStatisticsSummary,
   getVisitorAnalytics,
   getTopPages,
-  getVisitorTrend
+  getVisitorTrend,
+  getVisitorLogs
 } from "@/api/statistics";
 import { getArticleList } from "@/api/post";
 import type { StatisticData } from "@/types/about";
@@ -362,6 +429,42 @@ function limitTopReferers<T extends { top_referers?: unknown[] }>(
   }
   return analytics;
 }
+
+// 访客记录与分页
+type VisitorLogItem = {
+  user_agent: string;
+  ip_address: string;
+  city: string;
+  url_path: string;
+  duration: number;
+  created_at: string;
+};
+
+const visitorLogs = ref<VisitorLogItem[]>([]);
+const logsLoading = ref(false);
+const logsPage = ref(1);
+const logsPageSize = ref(20);
+const logsTotal = ref(0);
+
+const loadVisitorLogs = async (page = logsPage.value) => {
+  logsLoading.value = true;
+  try {
+    const { data } = await getVisitorLogs({
+      page,
+      page_size: logsPageSize.value
+    });
+    if (data) {
+      visitorLogs.value = data.list || [];
+      logsTotal.value = data.total || 0;
+      logsPage.value = data.page || page;
+      logsPageSize.value = data.page_size || logsPageSize.value;
+    }
+  } catch (e) {
+    console.error("加载访客日志失败:", e);
+  } finally {
+    logsLoading.value = false;
+  }
+};
 
 // 计算属性
 const currentTime = computed(() => {
@@ -548,6 +651,8 @@ const retryLoad = async () => {
 onMounted(async () => {
   try {
     await Promise.all([loadStatisticsSummary(), loadArticleStats()]);
+    // 独立加载访客日志
+    await loadVisitorLogs(1);
   } catch (err) {
     error.value = "数据加载失败，请检查网络连接或联系管理员";
   } finally {
@@ -817,12 +922,15 @@ onMounted(async () => {
 
 .trend-chart {
   height: 200px;
+  overflow-x: auto;
+  padding-bottom: 10px;
 }
 .chart-bars {
   display: flex;
   align-items: flex-end;
   gap: 4px;
   height: 100%;
+  min-width: 500px;
 }
 .bar-wrapper {
   flex: 1;
@@ -904,12 +1012,16 @@ onMounted(async () => {
   border-bottom: 1px solid var(--border-color);
 }
 
-/* --- ADDED FOR ALIGNMENT --- */
 .pages-list .list-header > span:not(:first-child) {
   text-align: right;
 }
-/* --- END OF ADDED STYLES --- */
+.visitor-table-wrapper .list-header > span:not(:first-child) {
+  text-align: left;
+}
 
+.visitor-table-wrapper .page-duration {
+  text-align: left;
+}
 .pages-list ul {
   list-style: none;
   padding: 0;
@@ -947,6 +1059,73 @@ onMounted(async () => {
 .page-duration,
 .page-bounce {
   text-align: right;
+}
+.visitor-table-wrapper {
+  overflow-x: auto;
+}
+
+.visitor-logs-section {
+  grid-column: 1 / -1;
+}
+
+.visitor-logs-section .pages-list {
+  max-height: 70vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.visitor-logs-section .pages-list::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.visitor-logs-section .pages-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.visitor-logs-section .pages-list::-webkit-scrollbar-thumb {
+  background-color: var(--accent-primary-light);
+  border-radius: 4px;
+}
+
+.visitor-logs-section .pages-list::-webkit-scrollbar-thumb:hover {
+  background-color: var(--accent-primary);
+}
+
+.visitor-logs-section .pages-list .list-header {
+  grid-template-columns:
+    minmax(200px, 1.5fr) 140px 120px minmax(200px, 1.5fr)
+    110px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--bg-color-alt);
+}
+
+.visitor-logs-section .pages-list li {
+  grid-template-columns:
+    minmax(200px, 1.5fr) 140px 120px minmax(200px, 1.5fr)
+    110px;
+}
+
+.visitor-logs-section .ua-text,
+.visitor-logs-section .ip-text,
+.visitor-logs-section .city-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.visitor-logs-section .pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.visitor-logs-section .pagination-info {
+  color: var(--text-secondary);
 }
 
 .analytics-grid {
@@ -993,9 +1172,123 @@ onMounted(async () => {
   .dashboard-grid {
     grid-template-columns: 1fr;
   }
+  .side-column .pages-list {
+    padding-top: 1rem;
+  }
   .main-column,
   .side-column {
     grid-column: span 1;
+  }
+  .dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+  .card {
+    padding: 1rem;
+  }
+  .card-header {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .top-pages-section,
+  .visitor-logs-section {
+    overflow-x: visible;
+    width: 100%;
+    overflow: hidden;
+  }
+  .pages-list .list-header {
+    display: none;
+  }
+  .pages-list ul {
+    margin-top: -1rem;
+  }
+  .pages-list li {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    box-shadow: none;
+    grid-template-columns: auto;
+  }
+  .pages-list li:last-child {
+    margin-bottom: 0;
+  }
+  .visitor-table-wrapper .pages-list li:last-child {
+    border-bottom: 1px solid var(--border-color) !important;
+  }
+  .visitor-logs-section .pages-list {
+    padding: 1rem 0 0;
+  }
+  .page-path,
+  .ua-text,
+  .ip-text,
+  .city-text,
+  .page-views,
+  .page-unique,
+  .page-duration,
+  .page-bounce {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    text-align: right;
+  }
+  .page-path::before,
+  .ua-text::before,
+  .ip-text::before,
+  .city-text::before,
+  .page-views::before,
+  .page-unique::before,
+  .page-duration::before,
+  .page-bounce::before {
+    color: var(--text-secondary);
+    text-align: left;
+  }
+  .top-pages-section .page-path,
+  .visitor-logs-section .ua-text {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .visitor-logs-section .page-path {
+    font-weight: normal;
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+  .top-pages-section .page-views::before {
+    content: "浏览量";
+  }
+  .top-pages-section .page-unique::before {
+    content: "独立访客";
+  }
+  .top-pages-section .page-duration::before {
+    content: "停留时间";
+  }
+  .top-pages-section .page-bounce::before {
+    content: "跳出率";
+  }
+  .visitor-logs-section .ua-text::before {
+    content: "UA";
+  }
+  .visitor-logs-section .ip-text::before {
+    content: "IP";
+  }
+  .visitor-logs-section .city-text::before {
+    content: "城市";
+  }
+  .visitor-logs-section .page-path::before {
+    content: "访问页面";
+  }
+  .visitor-logs-section .page-duration::before {
+    content: "停留时间";
   }
 }
 
@@ -1042,6 +1335,10 @@ onMounted(async () => {
     margin-bottom: 0.5rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--border-color);
+  }
+  .card.trend-section {
+    width: 100%;
+    display: none;
   }
 
   .page-views,

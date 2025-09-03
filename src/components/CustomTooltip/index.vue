@@ -1,33 +1,29 @@
-<!--
- * @Description: 自定义hover提示组件
- * @Author: 安知鱼
- * @Date: 2025-08-31 15:50:00
- * @LastEditTime: 2025-08-31 15:53:54
- * @LastEditors: 安知鱼
--->
 <template>
   <div
+    ref="triggerRef"
     class="custom-tooltip-wrapper"
     @mouseenter="showTooltip"
     @mouseleave="hideTooltip"
   >
     <slot />
-    <div
-      v-if="isVisible"
-      class="custom-tooltip"
-      :class="placement"
-      :style="tooltipStyle"
-    >
-      <div class="tooltip-content">
-        {{ content }}
+    <Teleport to="body">
+      <div
+        v-if="isVisible"
+        class="custom-tooltip"
+        :class="placement"
+        :style="tooltipStyle"
+      >
+        <div class="tooltip-content">
+          {{ content }}
+        </div>
+        <div class="tooltip-arrow" />
       </div>
-      <div class="tooltip-arrow" />
-    </div>
+    </Teleport>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from "vue";
+import { ref, watch, nextTick, onUnmounted } from "vue";
 
 interface Props {
   content: string;
@@ -41,16 +37,67 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const isVisible = ref(false);
+const triggerRef = ref<HTMLDivElement | null>(null);
+const tooltipStyle = ref({});
 let showTimer: NodeJS.Timeout | null = null;
 let hideTimer: NodeJS.Timeout | null = null;
 
-const tooltipStyle = computed(() => {
-  const baseStyle = {
+const updatePosition = () => {
+  if (!triggerRef.value) return;
+
+  const rect = triggerRef.value.getBoundingClientRect();
+  const style: {
+    position: "fixed";
+    top?: string;
+    left?: string;
+    transform?: string;
+    "--tooltip-bg": string;
+    "--tooltip-text": string;
+  } = {
+    position: "fixed",
     "--tooltip-bg": "#1f2937",
     "--tooltip-text": "#ffffff"
-  } as any;
+  };
 
-  return baseStyle;
+  const margin = 8;
+
+  switch (props.placement) {
+    case "top":
+      style.left = `${rect.left + rect.width / 2}px`;
+      style.top = `${rect.top - margin}px`;
+      style.transform = "translate(-50%, -100%)";
+      break;
+    case "bottom":
+      style.left = `${rect.left + rect.width / 2}px`;
+      style.top = `${rect.bottom + margin}px`;
+      style.transform = "translateX(-50%)";
+      break;
+    case "left":
+      style.left = `${rect.left - margin}px`;
+      style.top = `${rect.top + rect.height / 2}px`;
+      style.transform = "translate(-100%, -50%)";
+      break;
+    case "right":
+      style.left = `${rect.right + margin}px`;
+      style.top = `${rect.top + rect.height / 2}px`;
+      style.transform = "translateY(-50%)";
+      break;
+  }
+
+  tooltipStyle.value = style;
+};
+
+watch(isVisible, val => {
+  if (val) {
+    nextTick(() => {
+      updatePosition();
+      window.addEventListener("scroll", updatePosition, true);
+      window.addEventListener("resize", updatePosition);
+    });
+  } else {
+    window.removeEventListener("scroll", updatePosition, true);
+    window.removeEventListener("resize", updatePosition);
+  }
 });
 
 const showTooltip = () => {
@@ -58,7 +105,6 @@ const showTooltip = () => {
     clearTimeout(hideTimer);
     hideTimer = null;
   }
-
   showTimer = setTimeout(() => {
     isVisible.value = true;
   }, props.delay);
@@ -69,21 +115,30 @@ const hideTooltip = () => {
     clearTimeout(showTimer);
     showTimer = null;
   }
-
   hideTimer = setTimeout(() => {
     isVisible.value = false;
   }, 100);
 };
+
+onUnmounted(() => {
+  window.removeEventListener("scroll", updatePosition, true);
+  window.removeEventListener("resize", updatePosition);
+});
 </script>
 
 <style scoped lang="scss">
 .custom-tooltip-wrapper {
   position: relative;
   display: inline-block;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
+/* Tooltip is now a top-level element, its position is fixed */
 .custom-tooltip {
-  position: absolute;
   z-index: 9999;
   background: var(--tooltip-bg);
   color: var(--tooltip-text);
@@ -98,11 +153,6 @@ const hideTooltip = () => {
     0 2px 4px -1px rgba(0, 0, 0, 0.06);
 
   &.top {
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-bottom: 8px;
-
     .tooltip-arrow {
       top: 100%;
       left: 50%;
@@ -114,11 +164,6 @@ const hideTooltip = () => {
   }
 
   &.bottom {
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-top: 8px;
-
     .tooltip-arrow {
       bottom: 100%;
       left: 50%;
@@ -130,11 +175,6 @@ const hideTooltip = () => {
   }
 
   &.left {
-    right: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-    margin-right: 8px;
-
     .tooltip-arrow {
       left: 100%;
       top: 50%;
@@ -146,11 +186,6 @@ const hideTooltip = () => {
   }
 
   &.right {
-    left: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-    margin-left: 8px;
-
     .tooltip-arrow {
       right: 100%;
       top: 50%;
