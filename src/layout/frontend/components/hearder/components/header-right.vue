@@ -25,7 +25,7 @@
       </div>
     </el-tooltip>
     <el-tooltip content="搜索" placement="top" :show-arrow="false" :offset="8">
-      <a class="nav-button">
+      <a class="nav-button" @click="handleSearchClick">
         <i class="anzhiyufont anzhiyu-icon-magnifying-glass" />
       </a>
     </el-tooltip>
@@ -127,6 +127,11 @@ const scrollToTop = () => {
     top: 0,
     behavior: "smooth"
   });
+};
+
+const handleSearchClick = () => {
+  // 触发自定义事件来打开搜索框
+  window.dispatchEvent(new CustomEvent("frontend-open-search"));
 };
 </script>
 

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-21 17:48:59
- * @LastEditTime: 2025-09-02 12:32:37
+ * @LastEditTime: 2025-09-03 16:58:52
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -18,6 +18,8 @@
     <SearchModal />
 
     <RightMenu />
+
+    <KeyboardTips :visible="showShortcutsPanel" :shortcuts="shortcuts" />
   </div>
 </template>
 
@@ -26,14 +28,18 @@ import { onBeforeMount, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useGlobal } from "@pureadmin/utils";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
+import { useKeyboardShortcuts } from "@/composables/useKeyboardShortcuts";
 
 import Header from "./components/hearder/index.vue";
 import Footer from "./components/footer/index.vue";
 import SearchModal from "./components/SearchModal/index.vue";
 import RightMenu from "./components/RightMenu/index.vue";
+import KeyboardTips from "./components/KeyboardTips/index.vue";
 
 const { $storage } = useGlobal<GlobalPropertiesApi>();
 const route = useRoute();
+
+const { showShortcutsPanel, shortcuts } = useKeyboardShortcuts();
 
 const mainContentClass = computed(() => {
   return route.name === "PostDetail" ? "is-post-detail" : "";

@@ -173,6 +173,8 @@ const pageSize = 10;
 const tipsVisible = ref(true);
 
 let searchTimeout: NodeJS.Timeout | null = null;
+// 保存事件处理器引用以便卸载时正确移除
+let handleOpenSearchRef: ((e: Event) => void) | null = null;
 
 async function performSearch(page: number = 1) {
   if (!keyword.value.trim()) {
@@ -273,8 +275,6 @@ function openModal() {
   const dialog = dialogRef.value;
   if (!mask || !dialog) return;
 
-  document.documentElement.style.overflow = "hidden";
-
   gsap.set(mask, { display: "block", opacity: 0, pointerEvents: "auto" });
   gsap.set(dialog, { display: "flex", opacity: 0, y: 24, scale: 0.98 });
 
@@ -326,7 +326,6 @@ function closeModal() {
   function onClosed() {
     gsap.set(dialog, { display: "none" });
     gsap.set(mask, { display: "none" });
-    document.documentElement.style.overflow = "";
     isOpen.value = false;
     keyword.value = "";
     searchResults.value = [];
@@ -347,21 +346,7 @@ function onKeydown(e: KeyboardEvent) {
   }
 }
 
-function onDocumentClick(e: MouseEvent) {
-  const target = e.target as HTMLElement | null;
-  if (!target) return;
-
-  const isSearchIcon = !!(
-    target.closest(".anzhiyufont.anzhiyu-icon-magnifying-glass") ||
-    target
-      .closest("a")
-      ?.querySelector(".anzhiyufont.anzhiyu-icon-magnifying-glass")
-  );
-  if (isSearchIcon) {
-    e.preventDefault();
-    openModal();
-  }
-}
+// 移除全局点击监听，改为使用自定义事件或数据属性来精确控制
 
 onMounted(() => {
   if (maskRef.value) {
@@ -372,11 +357,23 @@ onMounted(() => {
   }
 
   window.addEventListener("keydown", onKeydown);
-  document.addEventListener("click", onDocumentClick, {
-    capture: true
-  });
 
-  window.addEventListener("frontend-open-search", openModal as EventListener);
+  handleOpenSearchRef = (e: Event) => {
+    const custom = e as CustomEvent;
+    const kw = custom?.detail?.keyword as string | undefined;
+    if (kw && typeof kw === "string") {
+      keyword.value = kw;
+    }
+    openModal();
+    if (keyword.value.trim()) {
+      performSearch(1);
+    }
+  };
+
+  window.addEventListener(
+    "frontend-open-search",
+    handleOpenSearchRef as EventListener
+  );
 });
 
 onBeforeUnmount(() => {
@@ -385,13 +382,13 @@ onBeforeUnmount(() => {
   }
 
   window.removeEventListener("keydown", onKeydown);
-  document.removeEventListener("click", onDocumentClick, {
-    capture: true
-  } as any);
-  window.removeEventListener(
-    "frontend-open-search",
-    openModal as EventListener
-  );
+  if (handleOpenSearchRef) {
+    window.removeEventListener(
+      "frontend-open-search",
+      handleOpenSearchRef as EventListener
+    );
+    handleOpenSearchRef = null;
+  }
 });
 </script>
 
