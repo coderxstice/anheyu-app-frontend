@@ -89,6 +89,16 @@ interface VisitorTrendData {
   }> | null;
 }
 
+// 访客日志数据类型
+export interface VisitorLogDTO {
+  user_agent: string;
+  ip_address: string;
+  city: string;
+  url_path: string;
+  duration: number;
+  created_at: string;
+}
+
 // 统计概览数据类型
 interface StatisticsSummary {
   basic_stats: StatisticData;
@@ -143,6 +153,25 @@ export function getVisitorTrend(period: string = "daily", days: number = 30) {
     message: string;
     data: VisitorTrendData;
   }>("get", "/api/statistics/trend", { params: { period, days } });
+}
+
+// 获取访客访问日志
+export function getVisitorLogs(params: {
+  start_date?: string;
+  end_date?: string;
+  page?: number;
+  page_size?: number;
+}) {
+  return http.request<{
+    code: number;
+    message: string;
+    data: {
+      list: VisitorLogDTO[];
+      total: number;
+      page: number;
+      page_size: number;
+    };
+  }>("get", "/api/statistics/visitor-logs", { params });
 }
 
 // 获取统计概览

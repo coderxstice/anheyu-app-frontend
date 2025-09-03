@@ -2,7 +2,7 @@
  * @Description: 系统配置相关的常量，与后端 Go 定义和 API 响应保持同步。
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:42:04
- * @LastEditTime: 2025-09-03 10:25:49
+ * @LastEditTime: 2025-09-03 17:39:51
  * @LastEditors: 安知鱼
  */
 
@@ -103,10 +103,6 @@ const KeyDefaultCover: SettingKey = "post.default.cover";
 const KeyPostExpirationTime: SettingKey = "post.expiration_time";
 const KeyDoubleColumn: SettingKey = "post.default.double_column";
 const KeyPostDefaultPageSize: SettingKey = "post.default.page_size";
-const KeyPostThemePrimaryColorAPIURL: SettingKey =
-  "post.theme.primary_color_api_url";
-const KeyPostThemePrimaryColorAPIToken: SettingKey =
-  "post.theme.primary_color_api_token";
 const KeyPostRewardEnable: SettingKey = "post.reward.enable";
 const KeyPostRewardWeChatQR: SettingKey = "post.reward.wechat_qr";
 const KeyPostRewardAlipayQR: SettingKey = "post.reward.alipay_qr";
@@ -313,8 +309,6 @@ export const constant = {
   KeyDefaultCover,
   KeyDoubleColumn,
   KeyPostDefaultPageSize,
-  KeyPostThemePrimaryColorAPIURL,
-  KeyPostThemePrimaryColorAPIToken,
   KeyPostRewardEnable,
   KeyPostRewardWeChatQR,
   KeyPostRewardAlipayQR,
