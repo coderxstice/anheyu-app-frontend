@@ -1,10 +1,3 @@
-<!--
- * @Description:
- * @Author: 安知鱼
- * @Date: 2025-09-03 10:00:12
- * @LastEditTime: 2025-09-03 10:40:29
- * @LastEditors: 安知鱼
--->
 <template>
   <div class="recent-comments-page">
     <AnBannerCard
@@ -16,46 +9,44 @@
     />
 
     <div class="comments-page">
-      <!-- 加载状态 -->
       <div v-if="loading" class="loading-state">
         <div class="loading-spinner" />
         <span>正在加载评论...</span>
       </div>
 
-      <!-- 空状态 -->
       <div v-else-if="!comments.length" class="empty-state">
-        <i class="heoblogIcon icon-chat-1-fill" />
+        <i class="anzhiyufont anzhiyu-icon-comments" />
         <span>暂无评论</span>
       </div>
 
-      <!-- 评论列表 -->
-      <div
-        v-for="comment in comments"
-        v-else
-        :key="comment.id"
-        class="comment-card"
-        :title="comment.content_html"
-        @click="handleCommentClick(comment)"
-      >
-        <div class="comment-info">
-          <img
-            :src="`https://weavatar.com/avatar/${comment.email_md5}?d=https%3A%2F%2Fbu.dusays.com%2F2024%2F04%2F18%2F66209793d5145.png`"
-            :alt="`${comment.nickname}的头像`"
-            class="no-lazyload no-fancybox"
-          />
-          <div>
-            <span class="comment-user">{{ comment.nickname }}</span>
+      <template v-else>
+        <div
+          v-for="comment in comments"
+          :key="comment.id"
+          class="comment-card"
+          :title="comment.content_html"
+          @click="handleCommentClick(comment)"
+        >
+          <div class="comment-info">
+            <img
+              :src="`https://weavatar.com/avatar/${comment.email_md5}?d=https%3A%2F%2Fbu.dusays.com%2F2024%2F04%2F18%2F66209793d5145.png`"
+              :alt="`${comment.nickname}的头像`"
+            />
+            <div>
+              <span class="comment-user">{{ comment.nickname }}</span>
+            </div>
+            <span class="comment-time">{{
+              formatTime(comment.created_at)
+            }}</span>
           </div>
-          <span class="comment-time">{{ formatTime(comment.created_at) }}</span>
+          <div class="comment-content" v-html="comment.content_html" />
+          <div class="comment-title">
+            <i class="anzhiyufont anzhiyu-icon-comments" />
+            {{ comment.target_title || "未知文章" }}
+          </div>
         </div>
-        <div class="comment-content" v-html="comment.content_html" />
-        <div class="comment-title">
-          <i class="heoblogIcon icon-chat-1-fill" />
-          {{ comment.target_title || "未知文章" }}
-        </div>
-      </div>
+      </template>
 
-      <!-- 分页加载更多 -->
       <div v-if="hasMore && !loading" class="load-more">
         <button class="load-more-btn" @click="loadMore">加载更多评论</button>
       </div>
@@ -172,12 +163,17 @@ onMounted(() => {
 }
 
 .comments-page {
-  display: flex;
-  flex-wrap: wrap;
-  min-height: 100px;
   width: 100%;
   margin-top: 16px;
-  gap: 12px;
+  min-height: 100px;
+  column-count: 3;
+  column-gap: 12px;
+
+  .loading-state,
+  .empty-state,
+  .load-more {
+    column-span: all;
+  }
 
   .loading-state {
     width: 100%;
@@ -226,7 +222,9 @@ onMounted(() => {
 
   .comment-card {
     position: relative;
-    width: calc(33.3333% - 8px);
+    width: 100%;
+    break-inside: avoid;
+    margin-bottom: 12px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
@@ -344,17 +342,13 @@ onMounted(() => {
 // 响应式设计
 @media (max-width: 768px) {
   .comments-page {
-    .comment-card {
-      width: calc(50% - 6px);
-    }
+    column-count: 2;
   }
 }
 
 @media (max-width: 480px) {
   .comments-page {
-    .comment-card {
-      width: 100%;
-    }
+    column-count: 1;
   }
 }
 </style>
