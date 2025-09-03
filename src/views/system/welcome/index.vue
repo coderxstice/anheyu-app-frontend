@@ -350,6 +350,19 @@ const statisticsSummary = ref({
   }
 });
 
+// 仅保留前10条来源数据
+function limitTopReferers<T extends { top_referers?: unknown[] }>(
+  analytics: T
+): T {
+  if (analytics && Array.isArray((analytics as any).top_referers)) {
+    (analytics as any).top_referers = (analytics as any).top_referers.slice(
+      0,
+      10
+    );
+  }
+  return analytics;
+}
+
 // 计算属性
 const currentTime = computed(() => {
   const now = new Date();
@@ -377,7 +390,9 @@ const loadStatisticsSummary = async () => {
         statisticsSummary.value.top_pages = response.data.top_pages;
       }
       if (response.data.analytics) {
-        statisticsSummary.value.analytics = response.data.analytics;
+        statisticsSummary.value.analytics = limitTopReferers(
+          response.data.analytics
+        );
       } else {
         await loadVisitorAnalyticsDirectly();
       }
@@ -481,7 +496,7 @@ const loadVisitorAnalyticsDirectly = async () => {
   try {
     const response = await getVisitorAnalytics();
     if (response.data) {
-      statisticsSummary.value.analytics = response.data;
+      statisticsSummary.value.analytics = limitTopReferers(response.data);
     }
   } catch (error) {
     console.error("访客分析接口调用失败:", error);
@@ -503,7 +518,9 @@ const loadAllStatisticsSeparately = async () => {
       statisticsSummary.value.basic_stats = basicStats.value.data;
     }
     if (analytics.status === "fulfilled" && analytics.value.data) {
-      statisticsSummary.value.analytics = analytics.value.data;
+      statisticsSummary.value.analytics = limitTopReferers(
+        analytics.value.data
+      );
     }
     if (topPages.status === "fulfilled" && topPages.value.data) {
       statisticsSummary.value.top_pages = topPages.value.data;

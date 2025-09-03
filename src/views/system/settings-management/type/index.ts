@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-24 17:29:16
- * @LastEditTime: 2025-09-03 10:27:31
+ * @LastEditTime: 2025-09-03 17:41:10
  * @LastEditors: 安知鱼
  */
 
@@ -120,10 +120,6 @@ export interface PostSettingsInfo {
     pageSize: number;
   };
   expirationTime: number;
-  theme: {
-    primaryColorApiUrl: string;
-    primaryColorApiToken: string;
-  };
   reward: {
     enable: boolean;
     weChat: string;

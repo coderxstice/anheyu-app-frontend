@@ -333,18 +333,6 @@ const postDescriptors: SettingDescriptor[] = [
     type: "number"
   },
   {
-    frontendPath: "post.theme.primaryColorApiUrl",
-    backendKey: constant.KeyPostThemePrimaryColorAPIURL,
-    defaultValue: 12,
-    type: "string"
-  },
-  {
-    frontendPath: "post.theme.primaryColorApiToken",
-    backendKey: constant.KeyPostThemePrimaryColorAPIToken,
-    defaultValue: 12,
-    type: "string"
-  },
-  {
     frontendPath: "post.reward.enable",
     backendKey: constant.KeyPostRewardEnable,
     defaultValue: 12,
