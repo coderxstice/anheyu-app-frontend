@@ -119,6 +119,7 @@
               :model-value="row.path"
               placeholder="例如：/categories/前端/"
               @update:model-value="updateCategoryField($index, 'path', $event)"
+              @blur="handleCategoryPathBlur($index, $event)"
             />
           </template>
         </el-table-column>
@@ -387,6 +388,16 @@ const updateCategoryField = (
   updateHomeTopField("category", newCategory);
 };
 
+// 处理路径字段失焦时自动添加尾随斜杠
+const handleCategoryPathBlur = (index: number, event: Event) => {
+  const input = event.target as HTMLInputElement;
+  const value = input.value.trim();
+
+  if (value !== "" && !value.endsWith("/")) {
+    updateCategoryField(index, "path", value + "/");
+  }
+};
+
 // --- Watcher for category array validation ---
 watch(
   () => model.value.homeTop?.category,
@@ -396,14 +407,7 @@ watch(
     let isChanged = false;
     let processedCategory = [...newCategory];
 
-    // 1. Sanitize paths
-    processedCategory = processedCategory.map(item => {
-      if (typeof item.path === "string" && item.path.endsWith("/")) {
-        isChanged = true;
-        return { ...item, path: item.path.replace(/\/+$/, "") };
-      }
-      return item;
-    });
+    // 1. Remove the automatic path sanitization to avoid interfering with user input
 
     // 2. Enforce array length of 3
     if (processedCategory.length !== 3) {
