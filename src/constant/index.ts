@@ -162,7 +162,11 @@ const KeyCommentShowRegion: SettingKey = "comment.show_region";
 const KeyCommentLimitPerMinute: SettingKey = "comment.limit_per_minute";
 const KeyCommentLimitLength: SettingKey = "comment.limit_length";
 const KeyCommentForbiddenWords: SettingKey = "comment.forbidden_words";
-const KeyCommentNotifySpam: SettingKey = "comment.notify_spam";
+const KeyCommentNotifyAdmin: SettingKey = "comment.notify_admin";
+const KeyCommentNotifyReply: SettingKey = "comment.notify_reply";
+const KeyPushooChannel: SettingKey = "pushoo.channel";
+const KeyPushooURL: SettingKey = "pushoo.url";
+const KeyScMailNotify: SettingKey = "sc.mail_notify";
 const KeyCommentMailSubject: SettingKey = "comment.mail_subject";
 const KeyCommentMailTemplate: SettingKey = "comment.mail_template";
 const KeyCommentMailSubjectAdmin: SettingKey = "comment.mail_subject_admin";
@@ -361,7 +365,11 @@ export const constant = {
   KeyCommentLimitPerMinute,
   KeyCommentLimitLength,
   KeyCommentForbiddenWords,
-  KeyCommentNotifySpam,
+  KeyCommentNotifyAdmin,
+  KeyCommentNotifyReply,
+  KeyPushooChannel,
+  KeyPushooURL,
+  KeyScMailNotify,
   KeyCommentMailSubject,
   KeyCommentMailTemplate,
   KeyCommentMailSubjectAdmin,
