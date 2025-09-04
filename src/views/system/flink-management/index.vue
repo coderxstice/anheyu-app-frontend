@@ -31,6 +31,9 @@
           <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
         </el-form-item>
         <el-form-item class="add-button">
+          <el-button type="primary" :icon="Setting" @click="handleManage">
+            管理分类标签
+          </el-button>
           <el-button type="success" :icon="Plus" @click="handleCreate">
             新建友链
           </el-button>
@@ -71,10 +74,7 @@
             </div>
             <p class="description">{{ link.description || "暂无描述" }}</p>
 
-            <div
-              v-if="link.category || (link.tags && link.tags.length > 0)"
-              class="meta-info"
-            >
+            <div v-if="link.category || link.tag" class="meta-info">
               <el-tag
                 v-if="link.category && link.category.style"
                 size="small"
@@ -87,11 +87,15 @@
                 link.category.name
               }}</el-tag>
               <el-tag
-                v-for="tag in link.tags"
-                :key="tag.id"
+                v-if="link.tag"
                 size="small"
+                :color="link.tag.color"
                 class="tag-item"
-                >{{ tag.name }}</el-tag
+                :style="{
+                  color: 'white !important',
+                  background: link.tag.color
+                }"
+                >{{ link.tag.name }}</el-tag
               >
             </div>
 
@@ -164,12 +168,22 @@
       :data="drawer.data"
       @success="getLinkList"
     />
+
+    <!-- 5. 分类和标签管理器 -->
+    <CategoryTagManager v-model="manager.visible" @refresh="getLinkList" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, reactive } from "vue";
-import { Search, Refresh, Plus, Edit, Delete } from "@element-plus/icons-vue";
+import {
+  Search,
+  Refresh,
+  Plus,
+  Edit,
+  Delete,
+  Setting
+} from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getAdminLinkList, deleteLink, reviewLink } from "@/api/postLink";
 import type {
@@ -178,6 +192,7 @@ import type {
   LinkStatus
 } from "@/api/postLink/type";
 import LinkDrawer from "./components/LinkDrawer.vue";
+import CategoryTagManager from "./components/CategoryTagManager.vue";
 
 defineOptions({
   name: "FlinkManagement"
@@ -288,6 +303,10 @@ const drawer = reactive({
   data: null as LinkItem | null
 });
 
+const manager = reactive({
+  visible: false
+});
+
 const handleCreate = () => {
   drawer.isEdit = false;
   drawer.data = null;
@@ -298,6 +317,10 @@ const handleEdit = (row: LinkItem) => {
   drawer.isEdit = true;
   drawer.data = row;
   drawer.visible = true;
+};
+
+const handleManage = () => {
+  manager.visible = true;
 };
 
 onMounted(() => {
@@ -376,6 +399,10 @@ onMounted(() => {
 
     .tag-item {
       margin-left: 5px;
+      color: white !important;
+      border: none !important;
+      border-radius: 12px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
   }
 

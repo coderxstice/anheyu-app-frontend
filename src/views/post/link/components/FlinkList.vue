@@ -13,9 +13,9 @@ defineProps<{
 <template>
   <div class="flink-list">
     <div v-for="link in links" :key="link.id" class="flink-list-item">
-      <template v-if="link.tags && link.tags.length > 0">
-        <span class="link-tag" :style="{ backgroundColor: link.tags[0].color }">
-          {{ link.tags[0].name }}
+      <template v-if="link.tag">
+        <span class="link-tag" :style="{ background: link.tag.color }">
+          {{ link.tag.name }}
           <i class="light" />
         </span>
       </template>
@@ -102,7 +102,7 @@ defineProps<{
 
   .link-tag {
     position: absolute;
-    top: 0;
+    top: -1;
     left: 0;
     z-index: 1;
     padding: 4px 8px;

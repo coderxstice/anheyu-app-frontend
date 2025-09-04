@@ -6,9 +6,9 @@ defineProps<{ links: LinkItem[] }>();
 <template>
   <div class="site-card-group">
     <div v-for="link in links" :key="link.id" class="site-card">
-      <template v-if="link.tags && link.tags.length > 0">
-        <span class="link-tag" :style="{ background: link.tags[0].color }">
-          {{ link.tags[0].name }}
+      <template v-if="link.tag">
+        <span class="link-tag" :style="{ background: link.tag.color }">
+          {{ link.tag.name }}
           <i class="light" />
         </span>
       </template>

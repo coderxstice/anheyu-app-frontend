@@ -41,14 +41,13 @@
         </div>
       </el-form-item>
 
-      <!-- 带有“即时新增”功能的分类选择器 -->
+      <!-- 现代化的分类选择器 -->
       <el-form-item label="分类" prop="category_id">
-        <div class="quick-add-select">
+        <div class="modern-selector">
           <el-select
             v-model="formData.category_id"
             placeholder="请选择分类"
-            class="select-main"
-            filterable
+            class="selector-main"
             :loading="categoryLoading"
           >
             <el-option
@@ -56,26 +55,41 @@
               :key="item.id"
               :label="item.name"
               :value="item.id"
-            />
+            >
+              <div class="category-option">
+                <span class="category-name">{{ item.name }}</span>
+                <el-tag
+                  size="small"
+                  :type="item.style === 'card' ? 'primary' : 'success'"
+                >
+                  {{ item.style === "card" ? "卡片" : "列表" }}
+                </el-tag>
+              </div>
+            </el-option>
           </el-select>
           <el-button
             :icon="Plus"
             circle
-            title="新建分类"
+            title="快速新建分类"
             @click="isCategoryCreatorVisible = true"
+          />
+          <el-button
+            :icon="Setting"
+            circle
+            title="管理分类和标签"
+            @click="isManagerVisible = true"
           />
         </div>
       </el-form-item>
 
-      <!-- 带有“即时新增”功能的标签选择器 -->
-      <el-form-item label="标签" prop="tag_ids">
-        <div class="quick-add-select">
+      <!-- 现代化的标签选择器（单选） -->
+      <el-form-item label="标签" prop="tag_id">
+        <div class="modern-selector">
           <el-select
-            v-model="formData.tag_ids"
-            multiple
-            filterable
-            placeholder="请选择标签"
-            class="select-main"
+            v-model="formData.tag_id"
+            clearable
+            placeholder="请选择标签（可选）"
+            class="selector-main"
             :loading="tagLoading"
           >
             <el-option
@@ -83,13 +97,28 @@
               :key="item.id"
               :label="item.name"
               :value="item.id"
-            />
+            >
+              <div class="tag-option">
+                <span
+                  class="option-tag"
+                  :style="{ backgroundColor: item.color }"
+                >
+                  {{ item.name }}
+                </span>
+              </div>
+            </el-option>
           </el-select>
           <el-button
             :icon="Plus"
             circle
-            title="新建标签"
+            title="快速新建标签"
             @click="isTagCreatorVisible = true"
+          />
+          <el-button
+            :icon="Setting"
+            circle
+            title="管理分类和标签"
+            @click="isManagerVisible = true"
           />
         </div>
       </el-form-item>
@@ -120,7 +149,7 @@
       </div>
     </template>
 
-    <!-- “即时新增”弹窗组件实例 -->
+    <!-- "即时新增"弹窗组件实例 -->
     <QuickCreateForm
       v-model="isCategoryCreatorVisible"
       entity-type="category"
@@ -131,12 +160,18 @@
       entity-type="tag"
       @success="handleTagCreated"
     />
+
+    <!-- 分类和标签管理器 -->
+    <CategoryTagManager
+      v-model="isManagerVisible"
+      @refresh="handleManagerRefresh"
+    />
   </el-drawer>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, reactive, onMounted } from "vue";
-import { Plus } from "@element-plus/icons-vue";
+import { ref, watch, reactive, onMounted, computed } from "vue";
+import { Plus, Setting } from "@element-plus/icons-vue";
 import type { FormInstance, FormRules } from "element-plus";
 import { ElMessage } from "element-plus";
 import type {
@@ -152,6 +187,7 @@ import {
   updateLink
 } from "@/api/postLink";
 import QuickCreateForm from "./QuickCreateForm.vue";
+import CategoryTagManager from "./CategoryTagManager.vue";
 
 const props = defineProps<{
   modelValue: boolean;
@@ -170,9 +206,12 @@ const allTags = ref<LinkTag[]>([]);
 const categoryLoading = ref(false);
 const tagLoading = ref(false);
 
-// “即时新增”弹窗的显示状态
+// "即时新增"弹窗的显示状态
 const isCategoryCreatorVisible = ref(false);
 const isTagCreatorVisible = ref(false);
+
+// 分类和标签管理器的显示状态
+const isManagerVisible = ref(false);
 
 // 表单数据
 const initialFormData: CreateLinkRequest = {
@@ -182,7 +221,7 @@ const initialFormData: CreateLinkRequest = {
   description: "",
   siteshot: "",
   category_id: null,
-  tag_ids: [],
+  tag_id: null,
   status: "PENDING"
 };
 const formData = ref<CreateLinkRequest>({ ...initialFormData });
@@ -236,10 +275,13 @@ const handleCategoryCreated = async (newCategory: LinkCategory) => {
 
 const handleTagCreated = async (newTag: LinkTag) => {
   await fetchTags();
-  if (!Array.isArray(formData.value.tag_ids)) {
-    formData.value.tag_ids = [];
-  }
-  formData.value.tag_ids.push(newTag.id);
+  formData.value.tag_id = newTag.id;
+};
+
+// --- 管理器相关方法 ---
+const handleManagerRefresh = async () => {
+  await fetchCategories();
+  await fetchTags();
 };
 
 // --- 抽屉与表单控制 ---
@@ -256,7 +298,7 @@ watch(
           description: props.data.description,
           siteshot: props.data.siteshot,
           category_id: props.data.category?.id || null,
-          tag_ids: props.data.tags?.map(t => t.id) || [],
+          tag_id: props.data.tag?.id || null,
           status: props.data.status
         };
       } else {
@@ -302,21 +344,98 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.quick-add-select {
+.modern-selector {
   display: flex;
   align-items: center;
   width: 100%;
+  gap: 8px;
 
-  .select-main {
-    flex-grow: 1;
-    margin-right: 10px;
+  .selector-main {
+    flex: 1;
+  }
+}
+
+.category-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+
+  .category-name {
+    flex: 1;
+  }
+}
+
+.tag-option {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  min-height: 30px;
+
+  .option-tag {
+    position: relative;
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 6px;
+    color: white !important;
+    border: none;
+    border-radius: 8px 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    line-height: 1.2;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100px;
+      width: 100px;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, 0.3),
+        rgba(255, 255, 255, 0)
+      );
+      animation: tag-light 3s ease-in-out infinite;
+    }
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
   }
 }
 
 .form-tip {
   margin-top: 8px;
-  color: #909399;
+  color: var(--el-text-color-regular);
   font-size: 12px;
   line-height: 1.4;
+}
+
+// 选择器下拉选项样式优化
+:deep(.el-select-dropdown__item) {
+  padding: 8px 20px;
+}
+
+:deep(.el-select__tags) {
+  max-width: calc(100% - 30px);
+}
+
+// 标签光效动画
+@keyframes tag-light {
+  0% {
+    left: -100px;
+  }
+  50% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 </style>
