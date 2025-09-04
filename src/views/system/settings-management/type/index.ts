@@ -311,7 +311,11 @@ export interface CommentSettingsInfo {
   limitPerMinute: number;
   limitLength: number;
   forbiddenWords: string;
-  notifySpam: boolean;
+  notifyAdmin: boolean;
+  notifyReply: boolean;
+  pushooChannel: string;
+  pushooURL: string;
+  scMailNotify: boolean;
   mailSubject: string;
   mailSubjectAdmin: string;
   mailTemplate: string;

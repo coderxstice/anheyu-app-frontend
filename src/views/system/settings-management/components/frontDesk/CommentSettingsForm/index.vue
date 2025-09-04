@@ -1,11 +1,26 @@
 <script setup lang="ts">
 import type { CommentSettingsInfo } from "../../../type";
+import { ElMessage } from "element-plus";
+import { useClipboard } from "@vueuse/core";
 
 defineOptions({
   name: "CommentSettingsForm"
 });
 
 const model = defineModel<CommentSettingsInfo>({ required: true });
+
+const { copy } = useClipboard();
+const handleCopy = (text: string) => {
+  copy(text)
+    .then(() => {
+      ElMessage.success(`占位符 ${text} 已复制!`);
+    })
+    .catch(() => {
+      ElMessage.error("复制失败");
+    });
+};
+
+const tip = `https://api.day.app/YOUR_KEY/{{.TITLE}}/{{.BODY}}?isArchive=1&sound=health&icon={{.SITE_URL}}/favicon.ico&group={{.SITE_NAME}}&url={{.POST_URL}}`;
 </script>
 
 <template>
@@ -81,11 +96,110 @@ const model = defineModel<CommentSettingsInfo>({ required: true });
       />
     </el-form-item>
 
-    <el-divider content-position="left">邮件通知模板</el-divider>
-    <el-form-item label="收到垃圾评论时通知博主">
-      <el-switch v-model="model.notifySpam" />
-    </el-form-item>
+    <el-divider content-position="left">通知设置</el-divider>
+    <el-row :gutter="20">
+      <el-col :span="8">
+        <el-form-item label="收到评论时通知博主">
+          <el-switch v-model="model.notifyAdmin" />
+        </el-form-item>
+      </el-col>
+      <el-col :span="8">
+        <el-form-item label="开启评论回复通知功能">
+          <el-switch v-model="model.notifyReply" />
+        </el-form-item>
+      </el-col>
+      <el-col :span="8">
+        <el-form-item label="同时通过邮件和IM通知">
+          <el-switch v-model="model.scMailNotify" />
+        </el-form-item>
+      </el-col>
+    </el-row>
 
+    <el-divider content-position="left">即时通知配置</el-divider>
+    <el-row :gutter="20">
+      <el-col :span="12">
+        <el-form-item label="推送平台">
+          <el-select
+            v-model="model.pushooChannel"
+            placeholder="选择推送平台"
+            clearable
+          >
+            <el-option label="Bark" value="bark" />
+            <el-option label="Webhook" value="webhook" />
+          </el-select>
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item label="推送URL">
+          <el-input
+            v-model="model.pushooURL"
+            placeholder="例如：https://api.day.app/YOUR_KEY/{{.TITLE}}/{{.BODY}}?isArchive=1&sound=health&icon={{.SITE_URL}}/favicon.ico&group={{.SITE_NAME}}&url={{.POST_URL}}"
+          />
+        </el-form-item>
+      </el-col>
+    </el-row>
+    <div class="pushoo-hint">
+      <b>推送平台说明:</b>
+      <ul>
+        <li>
+          <b>Bark:</b>
+          iOS推送服务，URL格式(示例)：
+          {{ tip }}
+        </li>
+        <li><b>Webhook:</b> 自定义Webhook，将发送JSON格式的POST请求</li>
+      </ul>
+      <p>
+        <b>通知逻辑:</b>
+        如果配置了即时通知但未开启"同时通过邮件和IM通知"，则只发送即时通知，不发送邮件
+      </p>
+    </div>
+    <div class="template-hint">
+      <b>可用占位符 (点击可复制):</b>
+      <ul>
+        <li @click="handleCopy('{{.TITLE}}')">
+          <code v-pre>{{.TITLE}}</code
+          >: 推送的默认标题
+        </li>
+        <li @click="handleCopy('{{.BODY}}')">
+          <code v-pre>{{.BODY}}</code
+          >: 推送的默认内容
+        </li>
+        <li @click="handleCopy('{{.SITE_NAME}}')">
+          <code v-pre>{{.SITE_NAME}}</code
+          >: 网站名称
+        </li>
+        <li @click="handleCopy('{{.POST_URL}}')">
+          <code v-pre>{{.POST_URL}}</code
+          >: 评论所在页面的链接
+        </li>
+        <li @click="handleCopy('{{.NICK}}')">
+          <code v-pre>{{.NICK}}</code
+          >: 新评论者的昵称
+        </li>
+        <li @click="handleCopy('{{.COMMENT}}')">
+          <code v-pre>{{.COMMENT}}</code
+          >: 新评论的内容 (纯文本)
+        </li>
+        <li @click="handleCopy('{{.PARENT_NICK}}')">
+          <code v-pre>{{.PARENT_NICK}}</code
+          >: 被回复者的昵称 (仅在回复时有效)
+        </li>
+        <li @click="handleCopy('{{.MAIL}}')">
+          <code v-pre>{{.MAIL}}</code
+          >: 新评论者的邮箱
+        </li>
+        <li @click="handleCopy('{{.IP}}')">
+          <code v-pre>{{.IP}}</code
+          >: 新评论者的IP地址
+        </li>
+        <li @click="handleCopy('{{.TIME}}')">
+          <code v-pre>{{.TIME}}</code
+          >: 评论发表时间
+        </li>
+      </ul>
+    </div>
+
+    <el-divider content-position="left">邮件模板设置</el-divider>
     <el-form-item label="用户收到回复的邮件主题">
       <el-input
         v-model="model.mailSubject"
@@ -209,6 +323,13 @@ const model = defineModel<CommentSettingsInfo>({ required: true });
 
 .template-hint li {
   margin-bottom: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.template-hint li:hover {
+  background-color: #ecf5ff;
+  color: #409eff;
 }
 
 .template-hint code {
@@ -218,5 +339,36 @@ const model = defineModel<CommentSettingsInfo>({ required: true });
   font-size: 12px;
   background-color: #e9e9eb;
   border-radius: 3px;
+}
+
+.pushoo-hint {
+  padding: 12px 16px;
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #606266;
+  background-color: #f0f9ff;
+  border: 1px solid #b3e5fc;
+  border-radius: 4px;
+}
+
+.pushoo-hint b {
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.pushoo-hint ul {
+  padding-left: 18px;
+  margin: 6px 0;
+  list-style-type: disc;
+}
+
+.pushoo-hint li {
+  margin-bottom: 4px;
+}
+
+.pushoo-hint p {
+  margin: 8px 0 0;
+  font-style: italic;
 }
 </style>

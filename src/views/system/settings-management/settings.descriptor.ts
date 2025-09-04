@@ -965,8 +965,32 @@ const commentDescriptors: SettingDescriptor[] = [
     type: "string"
   },
   {
-    frontendPath: "frontDesk.comment.notifySpam",
-    backendKey: constant.KeyCommentNotifySpam,
+    frontendPath: "frontDesk.comment.notifyAdmin",
+    backendKey: constant.KeyCommentNotifyAdmin,
+    defaultValue: false,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.comment.notifyReply",
+    backendKey: constant.KeyCommentNotifyReply,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.comment.pushooChannel",
+    backendKey: constant.KeyPushooChannel,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.comment.pushooURL",
+    backendKey: constant.KeyPushooURL,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.comment.scMailNotify",
+    backendKey: constant.KeyScMailNotify,
     defaultValue: false,
     type: "boolean"
   },
