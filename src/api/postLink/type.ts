@@ -2,7 +2,7 @@
  * @Description: 友链相关类型定义
  * @Author: 安知鱼
  * @Date: 2025-08-18 16:10:00
- * @LastEditTime: 2025-08-30 15:35:40
+ * @LastEditTime: 2025-09-04 13:53:02
  * @LastEditors: 安知鱼
  */
 
@@ -43,7 +43,7 @@ export interface LinkItem {
   status: LinkStatus;
   siteshot: string;
   category: LinkCategory | null;
-  tags: LinkTag[] | null;
+  tag: LinkTag | null;
 }
 
 // --- API 请求体类型 (Request Body) ---
@@ -65,7 +65,7 @@ export interface CreateLinkRequest {
   description: string;
   siteshot: string;
   category_id: number;
-  tag_ids: number[];
+  tag_id: number | null; // 改为单个标签，可选
   status: LinkStatus;
 }
 

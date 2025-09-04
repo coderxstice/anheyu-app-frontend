@@ -2,7 +2,7 @@
  * @Description: 友链功能所有API
  * @Author: 安知鱼
  * @Date: 2025-08-18 16:06:49
- * @LastEditTime: 2025-08-19 16:32:20
+ * @LastEditTime: 2025-09-04 13:42:53
  * @LastEditors: 安知鱼
  */
 import { http } from "@/utils/http";
@@ -177,5 +177,21 @@ export const updateLinkTag = (
     "put",
     baseUrlApi(`links/tags/${id}`),
     { data }
+  );
+};
+
+/** @description [后台] 管理员删除友链分类 */
+export const deleteLinkCategory = (id: number): Promise<BaseResponse<null>> => {
+  return http.request<BaseResponse<null>>(
+    "delete",
+    baseUrlApi(`links/categories/${id}`)
+  );
+};
+
+/** @description [后台] 管理员删除友链标签 */
+export const deleteLinkTag = (id: number): Promise<BaseResponse<null>> => {
+  return http.request<BaseResponse<null>>(
+    "delete",
+    baseUrlApi(`links/tags/${id}`)
   );
 };

@@ -10,7 +10,7 @@
       ref="formRef"
       :model="formData[entityType]"
       :rules="formRules"
-      label-width="80px"
+      label-width="110px"
     >
       <template v-if="entityType === 'category'">
         <el-form-item label="分类名称" prop="name">
@@ -131,8 +131,17 @@ const handleSubmit = async () => {
           emit("success", res.data);
           dialogVisible.value = false;
         }
-      } catch (e) {
+      } catch (e: any) {
         console.error(e);
+        // 显示更友好的错误消息
+        let errorMessage = `创建${entityName.value}失败`;
+        if (e.response?.data?.message) {
+          errorMessage = e.response.data.message;
+        } else if (e.message) {
+          errorMessage = e.message;
+        }
+        loading.value = false;
+        ElMessage.error(errorMessage);
       } finally {
         loading.value = false;
       }
