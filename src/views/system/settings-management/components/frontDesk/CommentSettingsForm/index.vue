@@ -19,6 +19,8 @@ const handleCopy = (text: string) => {
       ElMessage.error("复制失败");
     });
 };
+
+const tip = `https://api.day.app/YOUR_KEY/{{.TITLE}}/{{.BODY}}?isArchive=1&sound=health&icon={{.SITE_URL}}/favicon.ico&group={{.SITE_NAME}}&url={{.POST_URL}}`;
 </script>
 
 <template>
@@ -131,7 +133,7 @@ const handleCopy = (text: string) => {
         <el-form-item label="推送URL">
           <el-input
             v-model="model.pushooURL"
-            placeholder="例如：https://api.day.app/YOUR_KEY"
+            placeholder="例如：https://api.day.app/YOUR_KEY/{{.TITLE}}/{{.BODY}}?isArchive=1&sound=health&icon={{.SITE_URL}}/favicon.ico&group={{.SITE_NAME}}&url={{.POST_URL}}"
           />
         </el-form-item>
       </el-col>
@@ -139,7 +141,11 @@ const handleCopy = (text: string) => {
     <div class="pushoo-hint">
       <b>推送平台说明:</b>
       <ul>
-        <li><b>Bark:</b> iOS推送服务，URL格式：https://api.day.app/YOUR_KEY</li>
+        <li>
+          <b>Bark:</b>
+          iOS推送服务，URL格式(示例)：
+          {{ tip }}
+        </li>
         <li><b>Webhook:</b> 自定义Webhook，将发送JSON格式的POST请求</li>
       </ul>
       <p>
