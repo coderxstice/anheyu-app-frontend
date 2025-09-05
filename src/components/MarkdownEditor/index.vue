@@ -420,6 +420,10 @@ defineExpose({
       padding: 0.2em 0.2em 0.2em 1.8em;
     }
 
+    .task-list-item::before {
+      display: none;
+    }
+
     ul > li:not(.tab)::before {
       top: 0.6em;
       width: 0.84em;
