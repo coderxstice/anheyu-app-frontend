@@ -2,7 +2,7 @@
  * @Description: 文件系统相关的 TypeScript 类型定义
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:36:58
- * @LastEditTime: 2025-08-08 15:06:39
+ * @LastEditTime: 2025-09-14 22:03:09
  * @LastEditors: 安知鱼
  */
 
@@ -371,7 +371,7 @@ export interface CreateDirectLinksRequest {
  */
 export interface DirectLinkItem {
   link: string; // 生成的公开直链 URL
-  file_url: string; // 文件的内部 URI，例如 "cloudreve://my/年度报告.docx"
+  file_url: string; // 文件的内部 URI，例如 "anzhiyu://my/年度报告.docx"
 }
 
 /**
