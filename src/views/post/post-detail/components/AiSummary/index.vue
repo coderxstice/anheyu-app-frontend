@@ -54,7 +54,7 @@ const refreshSummary = () => {
         />
       </el-tooltip>
 
-      <div id="ai-tag">AnZhiYu GPT</div>
+      <!-- <div id="ai-tag">AnZhiYu GPT</div> -->
     </div>
     <div class="ai-explanation" v-html="displayedSummary" />
   </div>

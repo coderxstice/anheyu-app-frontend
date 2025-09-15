@@ -156,7 +156,7 @@ const onSaveHandler = async (markdown: string, sanitizedHtml: string) => {
       ...form,
       content_md: markdown,
       content_html: sanitizedHtml,
-      summaries: form.summaries?.filter(s => s && s.trim() !== "")
+      summaries: form.summaries?.filter(s => s && s.trim() !== "") || []
     };
     if (isEditMode.value) {
       await updateArticle(articleId.value, dataToSubmit);
