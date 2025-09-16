@@ -55,7 +55,7 @@
       </div>
     </div>
 
-    <div id="toggle-menu">
+    <div id="toggle-menu" @click="toggleMobileMenu">
       <div class="site-page">
         <i class="anzhiyufont anzhiyu-icon-bars" />
       </div>
@@ -138,6 +138,12 @@ const scrollToTop = () => {
 const handleSearchClick = () => {
   // 触发自定义事件来打开搜索框
   window.dispatchEvent(new CustomEvent("frontend-open-search"));
+};
+
+// 移动端菜单控制
+const toggleMobileMenu = () => {
+  // 触发自定义事件来切换移动端菜单
+  window.dispatchEvent(new CustomEvent("toggle-mobile-menu"));
 };
 </script>
 
