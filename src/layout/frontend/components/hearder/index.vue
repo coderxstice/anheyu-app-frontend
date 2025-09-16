@@ -490,6 +490,10 @@ const scrollToTop = () => {
         }
       }
 
+      :deep(#toggle-menu) {
+        color: var(--anzhiyu-white);
+      }
+
       :deep(#center-console + label i) {
         background: var(--anzhiyu-white);
       }

@@ -54,6 +54,12 @@
         <span class="percent">{{ toTopText }}</span>
       </div>
     </div>
+
+    <div id="toggle-menu">
+      <div class="site-page">
+        <i class="anzhiyufont anzhiyu-icon-bars" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -293,6 +299,15 @@ const handleSearchClick = () => {
       background: var(--anzhiyu-lighttext);
     }
   }
+  #toggle-menu {
+    margin-left: 1rem;
+    display: none;
+    .site-page {
+      i {
+        font-size: 1.35rem;
+      }
+    }
+  }
 
   .nav-totop {
     width: 0;
@@ -395,6 +410,9 @@ const handleSearchClick = () => {
   #center-console,
   #center-console + label {
     display: none;
+  }
+  .header-right #toggle-menu {
+    display: block;
   }
 }
 </style>

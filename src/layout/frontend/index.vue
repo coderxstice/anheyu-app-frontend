@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-21 17:48:59
- * @LastEditTime: 2025-09-03 16:58:52
+ * @LastEditTime: 2025-09-16 13:16:34
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -20,6 +20,8 @@
     <RightMenu />
 
     <KeyboardTips :visible="showShortcutsPanel" :shortcuts="shortcuts" />
+
+    <MobileMenu />
   </div>
 </template>
 
@@ -35,6 +37,7 @@ import Footer from "./components/footer/index.vue";
 import SearchModal from "./components/SearchModal/index.vue";
 import RightMenu from "./components/RightMenu/index.vue";
 import KeyboardTips from "./components/KeyboardTips/index.vue";
+import MobileMenu from "./components/MobileMenu/index.vue";
 
 const { $storage } = useGlobal<GlobalPropertiesApi>();
 const route = useRoute();
