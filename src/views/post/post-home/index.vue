@@ -32,7 +32,12 @@ const showHomeTop = computed(() => {
 });
 
 const isDoubleColumn = computed(() => {
-  return siteConfigStore.getSiteConfig?.post?.default.double_column || true;
+  const doubleColumnSetting =
+    siteConfigStore.getSiteConfig?.post?.default.double_column;
+  console.log("doubleColumnSetting:", doubleColumnSetting);
+
+  // 如果配置项存在（不管是true还是false），使用配置值；否则默认为true
+  return doubleColumnSetting !== undefined ? doubleColumnSetting : true;
 });
 
 const articles = ref<Article[]>([]);
