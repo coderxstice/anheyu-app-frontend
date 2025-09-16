@@ -110,24 +110,6 @@ const handleSave = async () => {
     const originalValueRaw = get(originalSettings, desc.backendKey);
     const originalValueParsed = parseBackendValue(originalValueRaw, desc.type);
 
-    if (desc.frontendPath === "frontDesk.about.careers") {
-      console.log("--- 正在调试 生涯列表[careers] ---");
-      // 使用 JSON.stringify 来查看对象的快照，避免控制台显示实时引用
-      console.log(
-        "表单中的当前值 (currentValue):",
-        JSON.stringify(currentValue, null, 2)
-      );
-      console.log(
-        "Store中的原始值 (originalValueParsed):",
-        JSON.stringify(originalValueParsed, null, 2)
-      );
-      console.log(
-        "isEqual 的比较结果:",
-        isEqual(currentValue, originalValueParsed)
-      );
-      console.log("--- 调试结束 ---");
-    }
-
     // 使用 lodash.isEqual 进行深度比较，完美处理对象和数组
     if (!isEqual(currentValue, originalValueParsed)) {
       settingsToUpdate[desc.backendKey] = formatValueForSave(

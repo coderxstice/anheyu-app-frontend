@@ -281,7 +281,7 @@
     title="社交链接栏左侧列表"
     :columns="socialLinkColumns"
     :new-item-template="{ title: '', link: '', icon: '' }"
-    @update:model-value="updateFooterSocialBarLeft"
+    @update:model-value="updateFooterSocialBarLeft(JSON.parse($event || '[]'))"
     @item-deleted="syncDeleteRight"
   />
 

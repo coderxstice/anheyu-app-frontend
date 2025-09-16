@@ -186,8 +186,52 @@ export const useSiteConfigStore = defineStore("anheyu-site-config", {
           return Promise.reject(new Error(updateRes.message));
         }
 
-        const stateUpdatePayload = { ...settingsToUpdate };
-        // (JSON parsing logic could be here if needed)
+        const stateUpdatePayload: Record<string, any> = {};
+        // 只对已知的 JSON 类型配置项进行解析，确保 store 中存储的是正确的数据类型
+        const jsonConfigKeys = new Set([
+          "HOME_TOP",
+          "FOOTER_BADGE",
+          "FOOTER_SOCIAL_BAR_LEFT",
+          "FOOTER_SOCIAL_BAR_RIGHT",
+          "FOOTER_LIST",
+          "FOOTER_BAR_LINK_LIST",
+          "HEADER_MENU",
+          "HEADER_NAV_MENU",
+          "SIDEBAR_AUTHOR_SKILLS",
+          "SIDEBAR_AUTHOR_SOCIAL",
+          "SIDEBAR_TAGS_HIGHLIGHT",
+          "POST_EQUIPMENT_LIST",
+          "ABOUT_PAGE_AVATAR_SKILLS_LEFT",
+          "ABOUT_PAGE_AVATAR_SKILLS_RIGHT",
+          "ABOUT_PAGE_ABOUT_SITE_TIPS",
+          "ABOUT_PAGE_MAP",
+          "ABOUT_PAGE_SELF_INFO",
+          "ABOUT_PAGE_PERSONALITIES",
+          "ABOUT_PAGE_MAXIM",
+          "ABOUT_PAGE_BUFF",
+          "ABOUT_PAGE_GAME",
+          "ABOUT_PAGE_COMIC",
+          "ABOUT_PAGE_LIKE",
+          "ABOUT_PAGE_MUSIC",
+          "ABOUT_PAGE_CAREERS",
+          "ABOUT_PAGE_SKILLS_TIPS",
+          "FRIEND_LINK_APPLY_CONDITION"
+        ]);
+
+        for (const [key, value] of Object.entries(settingsToUpdate)) {
+          if (typeof value === "string" && jsonConfigKeys.has(key)) {
+            try {
+              // 只对已知的 JSON 配置项进行解析
+              const parsed = JSON.parse(value);
+              stateUpdatePayload[key] = parsed;
+            } catch {
+              // 解析失败，保持原字符串（可能是格式错误的 JSON）
+              stateUpdatePayload[key] = value;
+            }
+          } else {
+            stateUpdatePayload[key] = value;
+          }
+        }
 
         // 是扁平点路径对象，调用updateSettingsByDotKeys
         this.updateSettingsByDotKeys(stateUpdatePayload);
