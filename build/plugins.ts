@@ -51,23 +51,109 @@ export function getPluginsList(
       manifest: false,
       workbox: {
         maximumFileSizeToCacheInBytes: 10000000,
-        navigateFallbackDenylist: [/^\/api\/(.+)/, /^\/f\/(.+)/],
-        globIgnores: [
-          "**/monacoeditorwork/*.js",
-          "**/vendor-monaco-editor.*.js",
-          "index.html"
+        navigateFallbackDenylist: [
+          /^\/api\/(.+)/,
+          /^\/f\/(.+)/,
+          /^\/login/,
+          /^\/admin/
         ],
+        // 首屏优化：大幅减少预缓存文件数量，只缓存核心资源
+        globPatterns: [
+          // 只预缓存关键的入口文件和核心资源
+          "static/js/vendor-libs-*.js", // Vue核心库和基础依赖
+          "static/js/element-plus-*.js", // UI组件库
+          "static/js/utils-*.js", // 工具库
+          "static/css/index-*.css", // 主样式文件
+          "static/css/element-plus-*.css", // Element Plus样式
+          "favicon.ico",
+          "logo.svg",
+          "static/img/logo*.*" // Logo文件
+        ],
+        globIgnores: [
+          // 只排除特定的大文件，让其他文件通过 globPatterns 精确控制
+          "**/monacoeditorwork/*.js", // Monaco编辑器worker文件
+          "**/static/js/monaco-editor-*.js", // Monaco编辑器主文件
+          "**/static/js/markdown-*.js", // Markdown编辑器
+          "**/static/js/media-*.js", // 媒体库
+          "**/static/js/editor.main-*.js", // 代码编辑器主文件
+          "**/static/js/SearchModal-*.js", // 搜索模态框
+          "**/static/ttf/**", // 字体文件走运行时缓存
+          "**/static/woff/**", // 字体文件走运行时缓存
+          "**/static/woff2/**", // 字体文件走运行时缓存
+          "**/static/eot/**", // 字体文件走运行时缓存
+          "index.html" // HTML文件由服务器处理
+        ],
+        // 禁用导航回退，避免登录页面缓存问题
         navigateFallback: null,
+        skipWaiting: false, // 防止自动刷新
+        clientsClaim: false, // 防止立即激活新SW
         runtimeCaching: [
           {
+            // 1. 页面导航缓存（排除登录和管理页面）
+            urlPattern: ({ request, url }) => {
+              return (
+                request.mode === "navigate" &&
+                !url.pathname.startsWith("/login") &&
+                !url.pathname.startsWith("/admin")
+              );
+            },
             handler: "NetworkFirst",
-            urlPattern: ({ request }) => request.mode === "navigate",
             options: {
               cacheName: "anheyu-pages-cache",
-              networkTimeoutSeconds: 5, // 5秒网络超时后使用缓存
+              networkTimeoutSeconds: 2,
               expiration: {
                 maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 // 缓存1天
+              }
+            }
+          },
+          {
+            // 2. 动态导入的JS模块 - CacheFirst策略
+            urlPattern: /\/static\/js\/.*\.js$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "anheyu-js-cache",
+              expiration: {
+                maxEntries: 100, // 允许更多JS文件缓存
                 maxAgeSeconds: 60 * 60 * 24 * 7 // 缓存7天
+              }
+            }
+          },
+          {
+            // 3. 样式文件 - CacheFirst策略
+            urlPattern: /\/static\/css\/.*\.css$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "anheyu-css-cache",
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 缓存7天
+              }
+            }
+          },
+          {
+            // 4. 字体文件 - CacheFirst策略（字体文件很少变动）
+            urlPattern:
+              /\/static\/(woff|woff2|ttf|eot)\/.*\.(woff|woff2|ttf|eot)$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "anheyu-fonts-cache",
+              expiration: {
+                maxEntries: 30,
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 缓存30天
+              }
+            }
+          },
+          {
+            // 5. API请求 - NetworkFirst策略
+            urlPattern: /^\/api\/.*/,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "anheyu-api-cache",
+              networkTimeoutSeconds: 3,
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 5 // API缓存5分钟
               }
             }
           },
@@ -96,11 +182,15 @@ export function getPluginsList(
         ]
       },
       devOptions: {
-        enabled: true
-      }
+        enabled: true,
+        suppressWarnings: true // 抑制开发环境警告
+      },
+      // 稳定的文件缓存策略
+      includeAssets: ["favicon.ico", "logo.svg", "static/img/**/*"]
     }),
 
     // @ts-ignore
+    // Monaco Editor 按需加载配置，避免在登录页面预加载
     monacoEditorPlugin.default({
       languageWorkers: [
         "editorWorkerService",
@@ -108,6 +198,14 @@ export function getPluginsList(
         "html",
         "json",
         "typescript"
+      ],
+      // 禁用自动加载，改为按需加载
+      buildWorkerDefinition: false,
+      customWorkers: [
+        {
+          label: "editorWorkerService",
+          entry: "monaco-editor/esm/vs/editor/editor.worker"
+        }
       ]
     }),
 
