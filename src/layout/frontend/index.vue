@@ -62,7 +62,10 @@ const mainContentClass = computed(() => {
 });
 
 const navConfig = computed(() => siteConfigStore.getSiteConfig?.header?.nav);
-const menuConfig = computed(() => siteConfigStore.getSiteConfig?.header?.menu);
+const menuConfig = computed(() => {
+  const menu = siteConfigStore.getSiteConfig?.header?.menu;
+  return Array.isArray(menu) ? menu : [];
+});
 
 // 移动端菜单状态管理
 const isMobileMenuOpen = ref(false);
