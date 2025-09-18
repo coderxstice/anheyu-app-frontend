@@ -2,7 +2,7 @@
  * @Description: 移动端菜单组件
  * @Author: 安知鱼
  * @Date: 2025-09-16 13:16:41
- * @LastEditTime: 2025-09-16 16:08:32
+ * @LastEditTime: 2025-09-18 13:28:47
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -163,7 +163,11 @@ const props = defineProps<{
   };
   menuConfig?: Array<{
     title: string;
-    items: Array<{
+    type: "direct" | "dropdown";
+    path?: string;
+    icon?: string;
+    isExternal?: boolean;
+    items?: Array<{
       title: string;
       path: string;
       icon: string;
@@ -246,22 +250,48 @@ const quickMenuGroups = computed(() => {
 
 // 主菜单 - 使用真实的 menuConfig 数据
 const mainMenus = computed(() => {
-  if (!props.menuConfig || props.menuConfig.length === 0) {
+  if (
+    !props.menuConfig ||
+    !Array.isArray(props.menuConfig) ||
+    props.menuConfig.length === 0
+  ) {
     return [];
   }
 
-  return props.menuConfig.map(menuGroup => ({
-    name: menuGroup.title,
-    children: menuGroup.items.map(item => ({
-      name: item.title,
-      href: item.path,
-      icon: item.icon,
-      target: item.isExternal ? "_blank" : "_self",
-      rel: item.isExternal ? "noopener noreferrer" : undefined,
-      dataPjaxState: item.isExternal ? undefined : "",
-      isExternal: item.isExternal
-    }))
-  }));
+  return props.menuConfig.map(menuItem => {
+    // 如果没有type字段，根据数据特征判断类型
+    const itemType =
+      menuItem.type ||
+      (menuItem.items && menuItem.items.length > 0 ? "dropdown" : "direct");
+
+    if (itemType === "direct") {
+      // 一级菜单：直接跳转
+      return {
+        name: menuItem.title,
+        href: menuItem.path || "#",
+        icon: menuItem.icon || "anzhiyu-icon-link",
+        target: menuItem.isExternal ? "_blank" : "_self",
+        rel: menuItem.isExternal ? "noopener noreferrer" : undefined,
+        dataPjaxState: menuItem.isExternal ? undefined : "",
+        isExternal: menuItem.isExternal,
+        children: [] // 一级菜单没有子菜单
+      };
+    } else {
+      // 二级菜单：有子菜单的下拉菜单
+      return {
+        name: menuItem.title,
+        children: (menuItem.items || []).map(item => ({
+          name: item.title,
+          href: item.path,
+          icon: item.icon,
+          target: item.isExternal ? "_blank" : "_self",
+          rel: item.isExternal ? "noopener noreferrer" : undefined,
+          dataPjaxState: item.isExternal ? undefined : "",
+          isExternal: item.isExternal
+        }))
+      };
+    }
+  });
 });
 
 // 标签云数据 - 使用真实数据
