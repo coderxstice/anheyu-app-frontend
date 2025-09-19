@@ -989,6 +989,18 @@ const commentDescriptors: SettingDescriptor[] = [
     type: "string"
   },
   {
+    frontendPath: "frontDesk.comment.webhookRequestBody",
+    backendKey: constant.KeyWebhookRequestBody,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.comment.webhookHeaders",
+    backendKey: constant.KeyWebhookHeaders,
+    defaultValue: "",
+    type: "string"
+  },
+  {
     frontendPath: "frontDesk.comment.scMailNotify",
     backendKey: constant.KeyScMailNotify,
     defaultValue: false,

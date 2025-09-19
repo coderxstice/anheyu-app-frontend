@@ -322,6 +322,8 @@ export interface CommentSettingsInfo {
   notifyReply: boolean;
   pushooChannel: string;
   pushooURL: string;
+  webhookRequestBody: string;
+  webhookHeaders: string;
   scMailNotify: boolean;
   mailSubject: string;
   mailSubjectAdmin: string;
