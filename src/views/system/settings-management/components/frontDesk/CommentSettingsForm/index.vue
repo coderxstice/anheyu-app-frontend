@@ -138,6 +138,44 @@ const tip = `https://api.day.app/YOUR_KEY/{{.TITLE}}/{{.BODY}}?isArchive=1&sound
         </el-form-item>
       </el-col>
     </el-row>
+
+    <!-- Webhook高级配置 -->
+    <template v-if="model.pushooChannel === 'webhook'">
+      <el-divider content-position="left">Webhook 高级配置</el-divider>
+      <el-row :gutter="20">
+        <el-col :span="24">
+          <el-form-item label="自定义请求体模板">
+            <el-input
+              v-model="model.webhookRequestBody"
+              type="textarea"
+              :rows="6"
+              placeholder='{"title":"#{TITLE}","content":"#{BODY}","site_name":"#{SITE_NAME}","comment_author":"#{NICK}","comment_content":"#{COMMENT}","parent_author":"#{PARENT_NICK}","parent_content":"#{PARENT_COMMENT}","post_url":"#{POST_URL}","author_email":"#{MAIL}","author_ip":"#{IP}","time":"#{TIME}"}'
+            />
+            <div class="form-hint">
+              留空则发送 GET 请求，填入内容则发送 POST 请求。支持 JSON
+              格式，系统将自动设置 Content-Type。
+            </div>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="24">
+          <el-form-item label="自定义请求头">
+            <el-input
+              v-model="model.webhookHeaders"
+              type="textarea"
+              :rows="4"
+              placeholder="Authorization: Bearer YOUR_TOKEN
+X-Custom-Header: custom-value
+User-Agent: AnheyuBlog-Webhook/1.0"
+            />
+            <div class="form-hint">
+              可选配置，每行一个请求头，格式：Header-Name: Header-Value
+            </div>
+          </el-form-item>
+        </el-col>
+      </el-row>
+    </template>
     <div class="pushoo-hint">
       <b>推送平台说明:</b>
       <ul>
@@ -146,7 +184,10 @@ const tip = `https://api.day.app/YOUR_KEY/{{.TITLE}}/{{.BODY}}?isArchive=1&sound
           iOS推送服务，URL格式(示例)：
           {{ tip }}
         </li>
-        <li><b>Webhook:</b> 自定义Webhook，将发送JSON格式的POST请求</li>
+        <li>
+          <b>Webhook:</b>
+          自定义Webhook，支持灵活的请求体和请求头配置。可配置为GET或POST请求，支持JSON格式自动识别
+        </li>
       </ul>
       <p>
         <b>通知逻辑:</b>
@@ -154,7 +195,8 @@ const tip = `https://api.day.app/YOUR_KEY/{{.TITLE}}/{{.BODY}}?isArchive=1&sound
       </p>
     </div>
     <div class="template-hint">
-      <b>可用占位符 (点击可复制):</b>
+      <b>可用占位符:</b>
+      <p><strong>Bark URL 占位符 (Go模板格式，点击可复制):</strong></p>
       <ul>
         <li @click="handleCopy('{{.TITLE}}')">
           <code v-pre>{{.TITLE}}</code
@@ -195,6 +237,43 @@ const tip = `https://api.day.app/YOUR_KEY/{{.TITLE}}/{{.BODY}}?isArchive=1&sound
         <li @click="handleCopy('{{.TIME}}')">
           <code v-pre>{{.TIME}}</code
           >: 评论发表时间
+        </li>
+      </ul>
+
+      <p><strong>Webhook 占位符 (#{} 格式，点击可复制):</strong></p>
+      <ul>
+        <li @click="handleCopy('#{TITLE}')">
+          <code>#{TITLE}</code>: 推送的默认标题
+        </li>
+        <li @click="handleCopy('#{BODY}')">
+          <code>#{BODY}</code>: 推送的默认内容
+        </li>
+        <li @click="handleCopy('#{SITE_NAME}')">
+          <code>#{SITE_NAME}</code>: 网站名称
+        </li>
+        <li @click="handleCopy('#{POST_URL}')">
+          <code>#{POST_URL}</code>: 评论所在页面的链接
+        </li>
+        <li @click="handleCopy('#{NICK}')">
+          <code>#{NICK}</code>: 新评论者的昵称
+        </li>
+        <li @click="handleCopy('#{COMMENT}')">
+          <code>#{COMMENT}</code>: 新评论的内容 (纯文本)
+        </li>
+        <li @click="handleCopy('#{PARENT_NICK}')">
+          <code>#{PARENT_NICK}</code>: 被回复者的昵称 (仅在回复时有效)
+        </li>
+        <li @click="handleCopy('#{PARENT_COMMENT}')">
+          <code>#{PARENT_COMMENT}</code>: 被回复的评论内容 (仅在回复时有效)
+        </li>
+        <li @click="handleCopy('#{MAIL}')">
+          <code>#{MAIL}</code>: 新评论者的邮箱
+        </li>
+        <li @click="handleCopy('#{IP}')">
+          <code>#{IP}</code>: 新评论者的IP地址
+        </li>
+        <li @click="handleCopy('#{TIME}')">
+          <code>#{TIME}</code>: 评论发表时间
         </li>
       </ul>
     </div>
