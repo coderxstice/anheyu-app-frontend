@@ -63,13 +63,11 @@ export const useUserStore = defineStore("anheyu-user", () => {
     const response = await getLogin(data);
     if (response?.code === 200) {
       setToken(response.data);
-      console.log(response.data.userInfo);
-
       SET_USER_INFO(response.data.userInfo);
       return response.data;
     } else {
       message(response?.message || "登录失败，请重试");
-      return Promise.reject(response.data);
+      return Promise.reject(response);
     }
   }
 

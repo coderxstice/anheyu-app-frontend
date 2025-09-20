@@ -160,9 +160,13 @@ const apiHandlers = {
       email: form.email,
       password: form.password
     });
+
+    // 等待路由初始化
     await initRouter();
-    // 使用 replace 而不是 push，避免与路由守卫冲突
-    await router.replace(getTopMenu(true).path);
+
+    // 直接跳转到管理后台首页
+    await router.replace("/admin/dashboard");
+
     message("登录成功", { type: "success" });
   },
   register: async () => {
