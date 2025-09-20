@@ -161,7 +161,8 @@ const apiHandlers = {
       password: form.password
     });
     await initRouter();
-    await router.push(getTopMenu(true).path);
+    // 使用 replace 而不是 push，避免与路由守卫冲突
+    await router.replace(getTopMenu(true).path);
     message("登录成功", { type: "success" });
   },
   register: async () => {
@@ -273,7 +274,7 @@ onBeforeUnmount(() =>
     <div
       class="w-full max-w-sm p-8 space-y-6 bg-[--anzhiyu-card-bg] border border-[var(--anzhiyu-border-color)] rounded-xl shadow-sm mx-4"
     >
-      <div class="flex-c absolute right-5 top-3">
+      <div class="absolute flex-c right-5 top-3">
         <el-switch
           v-model="dataTheme"
           inline-prompt

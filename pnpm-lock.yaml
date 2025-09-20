@@ -258,9 +258,6 @@ importers:
       vite-plugin-fake-server:
         specifier: ^2.1.4
         version: 2.1.4
-      vite-plugin-monaco-editor:
-        specifier: ^1.1.0
-        version: 1.1.0(monaco-editor@0.52.2)
       vite-plugin-remove-console:
         specifier: ^2.2.0
         version: 2.2.0
@@ -4898,11 +4895,6 @@ packages:
 
   vite-plugin-fake-server@2.1.4:
     resolution: {integrity: sha512-NngGc5aBTHftIW64OkJfrlU9Xu0TVuXjn0KkUJEHSAbvCN0eVv6zs9l+odjvHhGwE7AV0HgGMtLIwP8SvLgwRQ==}
-
-  vite-plugin-monaco-editor@1.1.0:
-    resolution: {integrity: sha512-IvtUqZotrRoVqwT0PBBDIZPNraya3BxN/bfcNfnxZ5rkJiGcNtO5eAOWWSgT7zullIAEqQwxMU83yL9J5k7gww==}
-    peerDependencies:
-      monaco-editor: '>=0.33.0'
 
   vite-plugin-pwa@1.0.0:
     resolution: {integrity: sha512-X77jo0AOd5OcxmWj3WnVti8n7Kw2tBgV1c8MCXFclrSlDV23ePzv2eTDIALXI2Qo6nJ5pZJeZAuX0AawvRfoeA==}
@@ -10595,10 +10587,6 @@ snapshots:
       path-to-regexp: 8.2.0
       picocolors: 1.1.1
       tinyglobby: 0.2.10
-
-  vite-plugin-monaco-editor@1.1.0(monaco-editor@0.52.2):
-    dependencies:
-      monaco-editor: 0.52.2
 
   vite-plugin-pwa@1.0.0(vite@6.0.3(@types/node@20.17.9)(jiti@2.4.1)(sass@1.82.0)(terser@5.43.1)(yaml@2.6.1))(workbox-build@7.3.0)(workbox-window@7.3.0):
     dependencies:

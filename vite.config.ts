@@ -109,7 +109,7 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
               return "utils";
             }
 
-            // 4. Monaco编辑器 - 懒加载，单独分包
+            // 4. Monaco编辑器 - 动态导入时才加载，单独分包避免影响首屏
             if (id.includes("monaco-editor")) {
               return "monaco-editor";
             }

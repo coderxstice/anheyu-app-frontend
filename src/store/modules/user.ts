@@ -85,7 +85,8 @@ export const useUserStore = defineStore("anheyu-user", () => {
     removeToken();
     useMultiTagsStoreHook().handleTags("equal", [...routerArrays]);
     resetRouter();
-    router.push("/login");
+    // 使用 replace 避免在历史记录中留下痕迹
+    router.replace("/login");
   }
 
   /**
