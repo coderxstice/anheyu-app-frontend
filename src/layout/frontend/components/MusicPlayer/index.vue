@@ -301,6 +301,44 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 };
 
+// 处理来自右键菜单的音乐控制事件
+const handleMusicControlEvents = () => {
+  // 上一首
+  const handlePrevious = () => {
+    audioPlayer.previousSong();
+  };
+
+  // 下一首
+  const handleNext = () => {
+    audioPlayer.nextSong();
+  };
+
+  // 获取歌曲名称并复制
+  const handleGetSongName = () => {
+    const currentSong = audioPlayer.currentSong.value;
+    if (currentSong) {
+      // 触发一个自定义事件，将歌曲名称传递给右键菜单
+      window.dispatchEvent(
+        new CustomEvent("music-player-song-name-response", {
+          detail: { songName: currentSong.name, artist: currentSong.artist }
+        })
+      );
+    }
+  };
+
+  // 添加事件监听器
+  window.addEventListener("music-player-previous", handlePrevious);
+  window.addEventListener("music-player-next", handleNext);
+  window.addEventListener("music-player-get-song-name", handleGetSongName);
+
+  // 返回清理函数
+  return () => {
+    window.removeEventListener("music-player-previous", handlePrevious);
+    window.removeEventListener("music-player-next", handleNext);
+    window.removeEventListener("music-player-get-song-name", handleGetSongName);
+  };
+};
+
 // 监听播放状态变化，暂停时收起
 watch(
   () => audioPlayer.audioState.isPlaying,
@@ -333,6 +371,8 @@ watch(isExpanded, newExpanded => {
 });
 
 // 生命周期
+let cleanupMusicControlEvents: (() => void) | null = null;
+
 onMounted(async () => {
   try {
     const success = await initializePlayer();
@@ -351,6 +391,9 @@ onMounted(async () => {
 
     // 添加全局点击事件监听器，用于点击外部关闭播放列表
     document.addEventListener("click", handleClickOutside);
+
+    // 初始化音乐控制事件监听器
+    cleanupMusicControlEvents = handleMusicControlEvents();
   } catch (error) {
     console.error("音乐播放器初始化异常:", error);
     isVisible.value = false;
@@ -371,6 +414,11 @@ onBeforeUnmount(() => {
 
   // 移除全局点击事件监听器
   document.removeEventListener("click", handleClickOutside);
+
+  // 清理音乐控制事件监听器
+  if (cleanupMusicControlEvents) {
+    cleanupMusicControlEvents();
+  }
 
   // 清理 composables
   lyricsComposable.cleanup();

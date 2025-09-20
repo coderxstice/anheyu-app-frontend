@@ -4,7 +4,7 @@
  * @Date: 2025-09-20 15:20:00
 -->
 <template>
-  <div class="lyrics-container">
+  <div class="lyrics-container" :style="{ '--dominant-color': dominantColor }">
     <div
       class="lyrics-content"
       :style="{ transform: `translateY(${lyricsState.translateY}px)` }"
@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import type { LyricLine, LyricsState } from "../../types/music";
+import type { LyricLine, LyricsState } from "@/types/music";
 
 interface Props {
   lyrics: LyricLine[];
@@ -83,7 +83,7 @@ defineProps<Props>();
         background: linear-gradient(
           to right,
           transparent,
-          v-bind(dominantColor)
+          var(--dominant-color)
         );
         opacity: 0;
         pointer-events: none;

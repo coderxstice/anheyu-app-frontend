@@ -7,7 +7,10 @@
   <div
     class="music-capsule-container"
     :class="{ expanded: isExpanded, playing: isPlaying }"
-    :style="{ backgroundColor: isExpanded ? dominantColor : '' }"
+    :style="{
+      backgroundColor: isExpanded ? dominantColor : '',
+      '--dominant-color': dominantColor
+    }"
     @click="handleCapsuleClick"
   >
     <!-- 封面图片 -->
@@ -68,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Song, LyricLine, LyricsState } from "../../types/music";
+import type { Song, LyricLine, LyricsState } from "@/types/music";
 import AlbumCover from "./AlbumCover.vue";
 import LyricsDisplay from "./LyricsDisplay.vue";
 import PlayControls from "./PlayControls.vue";
@@ -129,7 +132,7 @@ const handleCapsuleClick = (event: MouseEvent) => {
   backdrop-filter: blur(20px);
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  background-color: var(--anzhiyu-white);
+  background-color: var(--anzhiyu-card-bg);
 
   &:hover {
     transform: scale(1.02);
@@ -137,7 +140,7 @@ const handleCapsuleClick = (event: MouseEvent) => {
 
     // 收起状态hover时显示主色调背景
     &:not(.expanded) {
-      background-color: v-bind(dominantColor) !important;
+      background-color: var(--dominant-color) !important;
     }
   }
 
