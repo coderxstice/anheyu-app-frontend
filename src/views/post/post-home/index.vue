@@ -214,9 +214,9 @@ onMounted(() => {
 
 .recent-posts {
   width: 100%;
-  min-height: 400px;
 
   &.double-column-container {
+    min-height: 400px;
     display: flex;
     flex-wrap: wrap;
     gap: 0.625rem;
@@ -228,6 +228,9 @@ onMounted(() => {
   .recent-post-item {
     flex-direction: row !important;
     width: 100% !important;
+  }
+  .recent-posts.double-column-container {
+    min-height: auto;
   }
 }
 

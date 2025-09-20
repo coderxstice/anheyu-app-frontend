@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-21 17:48:59
- * @LastEditTime: 2025-09-16 14:16:28
+ * @LastEditTime: 2025-09-20 15:30:27
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -21,13 +21,14 @@
 
     <KeyboardTips :visible="showShortcutsPanel" :shortcuts="shortcuts" />
 
+    <MusicPlayer />
+
     <MobileMenu
       :is-open="isMobileMenuOpen"
       :nav-config="navConfig"
       :menu-config="menuConfig"
     />
 
-    <!-- 移动端菜单遮罩层 -->
     <div
       v-if="isMobileMenuOpen"
       class="mobile-menu-overlay"
@@ -50,6 +51,7 @@ import SearchModal from "./components/SearchModal/index.vue";
 import RightMenu from "./components/RightMenu/index.vue";
 import KeyboardTips from "./components/KeyboardTips/index.vue";
 import MobileMenu from "./components/MobileMenu/index.vue";
+import MusicPlayer from "./components/MusicPlayer/index.vue";
 
 const { $storage } = useGlobal<GlobalPropertiesApi>();
 const route = useRoute();
