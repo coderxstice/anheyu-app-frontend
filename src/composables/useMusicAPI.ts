@@ -3,25 +3,77 @@
  * @Author: 安知鱼
  * @Date: 2025-09-20 15:05:00
  */
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import type {
   Song,
   MusicApiResponse,
   LyricApiResponse,
   HighQualityMusicData
 } from "../types/music";
+import { useSiteConfigStore } from "../store/modules/siteConfig";
 
 export function useMusicAPI() {
+  // 获取站点配置
+  const siteConfigStore = useSiteConfigStore();
+
   // API相关常量和配置
-  const PLAYLIST_API =
-    "https://meting.qjqq.cn/?server=netease&type=playlist&id=8152976493";
   const HIGH_QUALITY_MUSIC_API = "https://api.toubiec.cn/wyapi/getMusicUrl.php";
   const HIGH_QUALITY_LYRIC_API = "https://api.toubiec.cn/wyapi/getLyric.php";
   const MAX_RETRY_COUNT = 3;
   const RETRY_DELAY = 1000; // 1秒
 
+  // 从后端配置获取播放列表ID，如果没有则使用默认值
+  const playlistId = computed(() => {
+    return (
+      siteConfigStore.getSiteConfig.music?.player?.playlist_id ||
+      siteConfigStore.getSiteConfig["music.player.playlist_id"] ||
+      siteConfigStore.getSiteConfig["MUSIC_PLAYER_PLAYLIST_ID"] ||
+      "8152976493"
+    ); // 默认值作为后备
+  });
+
+  // 动态构建播放列表API URL
+  const PLAYLIST_API = computed(
+    () =>
+      `https://meting.qjqq.cn/?server=netease&type=playlist&id=${playlistId.value}`
+  );
+
   // 加载状态
   const isLoading = ref(false);
+
+  // 缓存机制：避免重复请求同一资源
+  const musicUrlCache = new Map<string, string>();
+  const lyricsCache = new Map<string, string>();
+  const CACHE_EXPIRE_TIME = 10 * 60 * 1000; // 10分钟缓存过期时间
+  const cacheTimestamps = new Map<string, number>();
+
+  // 检查缓存是否过期
+  const isCacheValid = (key: string): boolean => {
+    const timestamp = cacheTimestamps.get(key);
+    if (!timestamp) return false;
+    return Date.now() - timestamp < CACHE_EXPIRE_TIME;
+  };
+
+  // 设置缓存
+  const setCache = (type: "music" | "lyrics", key: string, value: string) => {
+    const cache = type === "music" ? musicUrlCache : lyricsCache;
+    cache.set(key, value);
+    cacheTimestamps.set(`${type}_${key}`, Date.now());
+  };
+
+  // 获取缓存
+  const getCache = (type: "music" | "lyrics", key: string): string | null => {
+    const cacheKey = `${type}_${key}`;
+    if (!isCacheValid(cacheKey)) {
+      // 清理过期缓存
+      const cache = type === "music" ? musicUrlCache : lyricsCache;
+      cache.delete(key);
+      cacheTimestamps.delete(cacheKey);
+      return null;
+    }
+    const cache = type === "music" ? musicUrlCache : lyricsCache;
+    return cache.get(key) || null;
+  };
 
   // 验证歌曲数据
   const isValidSong = (song: any): boolean => {
@@ -62,8 +114,9 @@ export function useMusicAPI() {
   const fetchPlaylist = async (): Promise<Song[]> => {
     try {
       isLoading.value = true;
+      console.log("🎵 使用播放列表ID:", playlistId.value);
       const response = await fetchWithRetry(
-        `${PLAYLIST_API}&r=${Math.random()}`
+        `${PLAYLIST_API.value}&r=${Math.random()}`
       );
       const data = await response.json();
 
@@ -155,7 +208,14 @@ export function useMusicAPI() {
     neteaseId: string
   ): Promise<string | null> => {
     try {
-      console.log("尝试获取高质量音频:", neteaseId);
+      // 检查缓存
+      const cachedUrl = getCache("music", neteaseId);
+      if (cachedUrl) {
+        console.log("🎵 使用缓存的高质量音频URL:", neteaseId);
+        return cachedUrl;
+      }
+
+      console.log("🎵 请求高质量音频API:", neteaseId);
       const url = `${HIGH_QUALITY_MUSIC_API}?id=${neteaseId}&level=lossless`;
       const response = await fetchWithRetry(url);
       const data: MusicApiResponse = await response.json();
@@ -170,6 +230,10 @@ export function useMusicAPI() {
             size: musicData.size,
             duration: musicData.duration
           });
+
+          // 缓存结果
+          setCache("music", neteaseId, musicData.url);
+
           return musicData.url;
         }
       }
@@ -187,7 +251,14 @@ export function useMusicAPI() {
     neteaseId: string
   ): Promise<string | null> => {
     try {
-      console.log("尝试获取高质量歌词:", neteaseId);
+      // 检查缓存
+      const cachedLyrics = getCache("lyrics", neteaseId);
+      if (cachedLyrics) {
+        console.log("🎤 使用缓存的高质量歌词:", neteaseId);
+        return cachedLyrics;
+      }
+
+      console.log("🎤 请求高质量歌词API:", neteaseId);
       const url = `${HIGH_QUALITY_LYRIC_API}?id=${neteaseId}`;
       const response = await fetchWithRetry(url);
       const data: LyricApiResponse = await response.json();
@@ -196,6 +267,10 @@ export function useMusicAPI() {
         const lrcText = data.data.lrc;
         if (lrcText && lrcText.trim().length > 0) {
           console.log("高质量歌词获取成功");
+
+          // 缓存结果
+          setCache("lyrics", neteaseId, lrcText);
+
           return lrcText;
         }
       }
@@ -208,6 +283,12 @@ export function useMusicAPI() {
     }
   };
 
+  // 请求去重：防止同时对同一首歌发起多个相同请求
+  const pendingRequests = new Map<
+    string,
+    Promise<{ audioUrl: string; lyricsText: string; usingHighQuality: boolean }>
+  >();
+
   // 获取歌曲的音频和歌词资源
   const fetchSongResources = async (
     song: Song
@@ -216,45 +297,72 @@ export function useMusicAPI() {
     lyricsText: string;
     usingHighQuality: boolean;
   }> => {
-    let finalAudioUrl = song.url;
-    let finalLyricsText = "";
-    let usingHighQuality = false;
+    const requestKey = `${song.neteaseId || song.id}_${song.name}`;
 
-    // 首先尝试使用新API获取高质量音频和歌词
-    if (song.neteaseId) {
-      console.log("✨ 尝试使用新API获取高质量资源");
-      console.log("🎵 歌曲:", song.name, "网易云ID:", song.neteaseId);
-
-      // 尝试获取高质量音频URL
-      const highQualityUrl = await fetchHighQualityMusicUrl(song.neteaseId);
-      if (highQualityUrl) {
-        finalAudioUrl = highQualityUrl;
-        usingHighQuality = true;
-        console.log("使用高质量音频URL");
-      } else {
-        console.log("高质量音频获取失败，使用原始URL");
-      }
-
-      // 尝试获取高质量歌词
-      const highQualityLyrics = await fetchHighQualityLyrics(song.neteaseId);
-      if (highQualityLyrics) {
-        finalLyricsText = highQualityLyrics;
-      } else if (song.lrc) {
-        console.log("高质量歌词获取失败，使用原始歌词URL");
-        finalLyricsText = await fetchLyrics(song.lrc);
-      }
-    } else {
-      console.log("没有网易云ID，直接使用原始资源");
-      if (song.lrc) {
-        finalLyricsText = await fetchLyrics(song.lrc);
-      }
+    // 检查是否已有相同的请求正在进行中
+    if (pendingRequests.has(requestKey)) {
+      console.log("🔄 检测到重复请求，使用正在进行的请求:", song.name);
+      return await pendingRequests.get(requestKey)!;
     }
 
-    return {
-      audioUrl: finalAudioUrl,
-      lyricsText: finalLyricsText,
-      usingHighQuality
-    };
+    // 创建新的请求
+    const resourcePromise = (async () => {
+      try {
+        let finalAudioUrl = song.url;
+        let finalLyricsText = "";
+        let usingHighQuality = false;
+
+        // 首先尝试使用新API获取高质量音频和歌词
+        if (song.neteaseId) {
+          console.log("✨ 获取高质量资源:", song.name, "ID:", song.neteaseId);
+
+          // 并行获取音频和歌词（而不是串行），提高效率
+          const [highQualityUrl, highQualityLyrics] = await Promise.allSettled([
+            fetchHighQualityMusicUrl(song.neteaseId),
+            fetchHighQualityLyrics(song.neteaseId)
+          ]);
+
+          // 处理音频结果
+          if (highQualityUrl.status === "fulfilled" && highQualityUrl.value) {
+            finalAudioUrl = highQualityUrl.value;
+            usingHighQuality = true;
+            console.log("✅ 高质量音频获取成功");
+          } else {
+            console.log("⚠️ 高质量音频获取失败，使用原始URL");
+          }
+
+          // 处理歌词结果
+          if (
+            highQualityLyrics.status === "fulfilled" &&
+            highQualityLyrics.value
+          ) {
+            finalLyricsText = highQualityLyrics.value;
+            console.log("✅ 高质量歌词获取成功");
+          } else if (song.lrc) {
+            console.log("⚠️ 高质量歌词获取失败，使用原始歌词URL");
+            finalLyricsText = await fetchLyrics(song.lrc);
+          }
+        } else {
+          console.log("ℹ️ 没有网易云ID，直接使用原始资源");
+          if (song.lrc) {
+            finalLyricsText = await fetchLyrics(song.lrc);
+          }
+        }
+
+        return {
+          audioUrl: finalAudioUrl,
+          lyricsText: finalLyricsText,
+          usingHighQuality
+        };
+      } finally {
+        // 请求完成后清理
+        pendingRequests.delete(requestKey);
+      }
+    })();
+
+    // 存储并返回请求
+    pendingRequests.set(requestKey, resourcePromise);
+    return await resourcePromise;
   };
 
   return {
