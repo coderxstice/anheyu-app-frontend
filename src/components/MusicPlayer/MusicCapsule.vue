@@ -128,7 +128,6 @@ const handleCapsuleClick = (event: MouseEvent) => {
   align-items: center;
   position: relative;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(20px);
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);

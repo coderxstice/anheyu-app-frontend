@@ -17,7 +17,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 import removeConsole from "vite-plugin-remove-console";
 // import { codeInspectorPlugin } from "code-inspector-plugin";
 import { VitePWA } from "vite-plugin-pwa";
-import monacoEditorPlugin from "vite-plugin-monaco-editor";
+// import monacoEditorPlugin from "vite-plugin-monaco-editor"; // 移除Monaco Editor插件，改用动态导入
 
 import { promises as fs } from "node:fs";
 import { resolve } from "node:path";
@@ -189,25 +189,8 @@ export function getPluginsList(
       includeAssets: ["favicon.ico", "logo.svg", "static/img/**/*"]
     }),
 
-    // @ts-ignore
-    // Monaco Editor 按需加载配置，避免在登录页面预加载
-    monacoEditorPlugin.default({
-      languageWorkers: [
-        "editorWorkerService",
-        "css",
-        "html",
-        "json",
-        "typescript"
-      ],
-      // 禁用自动加载，改为按需加载
-      buildWorkerDefinition: false,
-      customWorkers: [
-        {
-          label: "editorWorkerService",
-          entry: "monaco-editor/esm/vs/editor/editor.worker"
-        }
-      ]
-    }),
+    // Monaco Editor 已改为完全动态导入，不再需要插件预构建
+    // 在需要使用Monaco Editor的组件中通过 import("monaco-editor") 动态加载
 
     // 自定义插件 - 异步加载 CSS
     {
