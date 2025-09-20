@@ -2,7 +2,7 @@
  * @Description: 重构后的音乐胶囊播放器组件
  * @Author: 安知鱼
  * @Date: 2025-09-20 15:40:00
- * @LastEditTime: 2025-09-20 15:40:00
+ * @LastEditTime: 2025-09-20 17:17:40
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -77,17 +77,18 @@ import {
 } from "vue";
 
 // 导入composables
-import { useAudioPlayer } from "../../../../composables/useAudioPlayer";
-import { useLyrics } from "../../../../composables/useLyrics";
-import { useMusicAPI } from "../../../../composables/useMusicAPI";
-import { useColorExtraction } from "../../../../composables/useColorExtraction";
+import { useAudioPlayer } from "@/composables/useAudioPlayer";
+import { useLyrics } from "@/composables/useLyrics";
+import { useMusicAPI } from "@/composables/useMusicAPI";
+import { useColorExtraction } from "@/composables/useColorExtraction";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
 // 导入组件
-import MusicCapsule from "../../../../components/MusicPlayer/MusicCapsule.vue";
-import Playlist from "../../../../components/MusicPlayer/Playlist.vue";
+import MusicCapsule from "@/components/MusicPlayer/MusicCapsule.vue";
+import Playlist from "@/components/MusicPlayer/Playlist.vue";
 
 // 导入类型
-import type { Song } from "../../../../types/music";
+import type { Song } from "@/types/music";
 
 // 基本状态
 const isVisible = ref(false);
@@ -107,6 +108,7 @@ const audioElement = ref<HTMLAudioElement>();
 let footerObserver: IntersectionObserver | null = null;
 
 // 初始化 composables
+const siteConfigStore = useSiteConfigStore();
 const musicAPI = useMusicAPI();
 const audioPlayer = useAudioPlayer(playlist);
 const lyricsComposable = useLyrics(
@@ -225,6 +227,12 @@ const initializePlayer = async () => {
   try {
     console.log("音乐播放器初始化中...");
 
+    // 确保站点配置已加载
+    if (!siteConfigStore.isLoaded) {
+      console.log("正在等待站点配置加载...");
+      await siteConfigStore.fetchSiteConfig();
+    }
+
     // 获取歌单
     const playlistData = await musicAPI.fetchPlaylist();
     if (playlistData.length === 0) {
@@ -262,13 +270,19 @@ const initializePlayer = async () => {
       for (let i = 1; i < maxFallbackAttempts; i++) {
         const nextIndex = (randomIndex + i) % playlist.value.length;
         const nextSong = playlist.value[nextIndex];
+
+        console.log(
+          `尝试备选歌曲 ${i}/${maxFallbackAttempts - 1}: ${nextSong.name}`
+        );
         await loadSongWithResources(nextSong);
 
         const nextPlaySuccess = await audioPlayer.playSong(nextIndex);
         if (nextPlaySuccess) {
           isVisible.value = true;
-          console.log(`音乐播放器初始化完成（使用第${i + 1}个备选歌曲）`);
+          console.log(`✅ 音乐播放器初始化完成（使用第${i + 1}个备选歌曲）`);
           return true;
+        } else {
+          console.warn(`❌ 备选歌曲 ${i} 也无法播放: ${nextSong.name}`);
         }
       }
 
@@ -349,11 +363,19 @@ watch(
   }
 );
 
-// 监听当前歌曲变化，加载资源
+// 监听当前歌曲变化，加载资源 (优化: 避免初始化时重复加载)
+let isInitializing = true;
 watch(
   () => audioPlayer.currentSong.value,
   async (newSong, oldSong) => {
+    // 跳过初始化阶段的自动触发，避免重复加载
+    if (isInitializing) {
+      isInitializing = false;
+      return;
+    }
+
     if (newSong && newSong !== oldSong) {
+      console.log("歌曲切换，重新加载资源:", newSong.name);
       await loadSongWithResources(newSong);
     }
   }

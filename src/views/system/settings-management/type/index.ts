@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-24 17:29:16
- * @LastEditTime: 2025-09-18 10:10:48
+ * @LastEditTime: 2025-09-20 17:44:56
  * @LastEditors: 安知鱼
  */
 
@@ -279,6 +279,11 @@ export interface HomePageSettingsInfo {
   footerBarLinkList: FooterBarLinkItem[];
   menu: MainMenuItem[];
   navMenuItems: NavMenuGroup[];
+  music?: {
+    player?: {
+      playlist_id?: string;
+    };
+  };
 }
 
 /**

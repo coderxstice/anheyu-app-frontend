@@ -794,6 +794,12 @@ const frontDeskDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyHeaderNavMenu,
     defaultValue: [],
     type: "json"
+  },
+  {
+    frontendPath: "frontDesk.home.music.player.playlist_id",
+    backendKey: constant.KeyMusicPlayerPlaylistID,
+    defaultValue: "8152976493",
+    type: "string"
   }
 ];
 

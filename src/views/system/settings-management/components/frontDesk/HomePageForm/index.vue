@@ -556,6 +556,25 @@
       @update:model-value="updateFooterListRandomFriends"
     />
   </el-form-item>
+
+  <el-divider content-position="left">音乐播放器配置</el-divider>
+  <el-form-item label="播放列表ID">
+    <el-input
+      :model-value="model.music?.player?.playlist_id"
+      placeholder="例如：8152976493"
+      clearable
+      @update:model-value="updateMusicPlayerPlaylistId"
+    />
+    <div
+      style="
+        font-size: 12px;
+        color: var(--el-text-color-secondary);
+        margin-top: 8px;
+      "
+    >
+      网易云音乐歌单ID，用于前端音乐播放器获取歌曲列表
+    </div>
+  </el-form-item>
   <el-form-item label="底部栏作者链接">
     <el-input
       :model-value="model.footerBarAuthorLink"
@@ -673,7 +692,7 @@ import FooterLinkListEditor from "./FooterLinkListEditor.vue";
 import SubMenuEditor from "./SubMenuEditor.vue";
 import NavMenuItemsEditor from "./NavMenuItemsEditor.vue";
 
-const model = defineModel<Omit<HomePageSettingsInfo, "footerCustomText">>({
+const model = defineModel<HomePageSettingsInfo>({
   required: true
 });
 
@@ -1333,6 +1352,19 @@ const updateFooterSocialBarCenterImg = (newImg: string) => {
   model.value = {
     ...model.value,
     footerSocialBarCenterImg: newImg
+  };
+};
+
+const updateMusicPlayerPlaylistId = (newId: string) => {
+  model.value = {
+    ...model.value,
+    music: {
+      ...model.value.music,
+      player: {
+        ...model.value.music?.player,
+        playlist_id: newId
+      }
+    }
   };
 };
 </script>
