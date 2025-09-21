@@ -46,6 +46,9 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
     }
   };
 
+  // 当前加载状态标记，防止同时加载多个歌曲
+  let isLoadingSong = false;
+
   // 播放指定歌曲
   const playSong = async (index: number): Promise<boolean> => {
     if (index < 0 || index >= playlist.value.length) {
@@ -53,21 +56,33 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
       return false;
     }
 
-    currentSongIndex.value = index;
-    const song = currentSong.value;
-
-    if (!song.url) {
-      console.error("无法获取歌曲播放链接:", song);
+    // 防止同时加载多个歌曲
+    if (isLoadingSong) {
+      console.log("已有歌曲正在加载中，忽略此次请求");
       return false;
     }
 
+    isLoadingSong = true;
+
     try {
+      currentSongIndex.value = index;
+      const song = currentSong.value;
+
+      if (!song.url) {
+        console.error("无法获取歌曲播放链接:", song);
+        return false;
+      }
+
       console.log("开始加载歌曲:", song.name, "by", song.artist);
 
       if (audioRef.value) {
-        // 先停止当前播放
+        // 强制停止所有音频播放，防止多个音频同时播放
         audioRef.value.pause();
         audioRef.value.currentTime = 0;
+
+        // 清空当前源，防止后台继续加载
+        audioRef.value.src = "";
+        audioRef.value.load();
 
         // 创建Promise来监听音频加载结果
         const audioLoadPromise = new Promise<boolean>((resolve, reject) => {
@@ -147,6 +162,8 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
     } catch (error) {
       console.error("播放歌曲失败:", error);
       return false;
+    } finally {
+      isLoadingSong = false; // 无论成功还是失败，都要重置加载状态
     }
   };
 
@@ -399,22 +416,47 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
     }, 1000);
   };
 
+  // 存储事件监听器引用，用于清理
+  let playListener: (() => void) | null = null;
+  let pauseListener: (() => void) | null = null;
+
   // 监听播放状态
   watch(
     () => audioRef.value,
-    audio => {
-      if (audio) {
-        audio.addEventListener("play", () => {
-          audioState.isPlaying = true;
-        });
+    (audio, oldAudio) => {
+      // 清理旧的事件监听器
+      if (oldAudio && playListener && pauseListener) {
+        oldAudio.removeEventListener("play", playListener);
+        oldAudio.removeEventListener("pause", pauseListener);
+        console.log("已清理旧的音频事件监听器");
+      }
 
-        audio.addEventListener("pause", () => {
+      if (audio) {
+        // 创建新的事件监听器
+        playListener = () => {
+          audioState.isPlaying = true;
+        };
+
+        pauseListener = () => {
           audioState.isPlaying = false;
-        });
+        };
+
+        audio.addEventListener("play", playListener);
+        audio.addEventListener("pause", pauseListener);
+        console.log("已添加新的音频事件监听器");
       }
     },
     { immediate: true }
   );
+
+  // 清理函数
+  const cleanup = () => {
+    if (audioRef.value && playListener && pauseListener) {
+      audioRef.value.removeEventListener("play", playListener);
+      audioRef.value.removeEventListener("pause", pauseListener);
+      console.log("useAudioPlayer 事件监听器已清理");
+    }
+  };
 
   return {
     // 状态
@@ -443,6 +485,9 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
     onLoadedMetadata,
     onTimeUpdate,
     onEnded,
-    onError
+    onError,
+
+    // 清理方法
+    cleanup
   };
 }
