@@ -597,6 +597,12 @@ onBeforeUnmount(() => {
 
   // 收起动画状态
   &.collapsing {
+    // 立即隐藏音乐控制区域
+    :deep(.music-controls) {
+      opacity: 0;
+      transition: opacity 0.15s ease-out;
+    }
+
     :deep(.music-controls .control-btn.play-pause-btn) {
       animation: playButtonCollapse 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)
         forwards;
