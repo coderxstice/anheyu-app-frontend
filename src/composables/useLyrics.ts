@@ -143,13 +143,6 @@ export function useLyrics(currentTime: Ref<number>) {
       );
     });
 
-    if (process.env.NODE_ENV === "development") {
-      console.log(`歌词解析完成:
-        原始行数=${lines.length},
-        有效歌词=${uniqueResult.length},
-        时间范围=${uniqueResult.length > 0 ? `${uniqueResult[0].time.toFixed(1)}s - ${uniqueResult[uniqueResult.length - 1].time.toFixed(1)}s` : "无"}`);
-    }
-
     return uniqueResult;
   };
 
@@ -255,14 +248,6 @@ export function useLyrics(currentTime: Ref<number>) {
           const threshold = 10;
           const needsScroll = textWidth > containerWidth + threshold;
 
-          // 调试信息
-          if (process.env.NODE_ENV === "development") {
-            console.log(`当前歌词 ${currentIndex}: "${lyrics.value[currentIndex]?.text?.substring(0, 30)}..."
-            容器宽度: ${containerWidth}px,
-            文本宽度: ${textWidth}px,
-            需要滚动: ${needsScroll}`);
-          }
-
           lyricsState.shouldScroll[currentIndex] = needsScroll;
 
           // 如果当前歌词需要滚动，设置滚动动画
@@ -317,18 +302,6 @@ export function useLyrics(currentTime: Ref<number>) {
                 lyricEl.classList.add("text-scrolling");
               }
             }, startDelay * 1000);
-
-            // 调试信息
-            if (process.env.NODE_ENV === "development") {
-              console.log(
-                `当前歌词设置滚动:
-                文本长度=${textLength},
-                溢出比=${overflowRatio.toFixed(2)},
-                歌词持续时间=${lyricDuration.toFixed(1)}s,
-                滚动时间=${scrollDuration.toFixed(1)}s,
-                延迟启动=${startDelay.toFixed(1)}s`
-              );
-            }
           }
         }
       }

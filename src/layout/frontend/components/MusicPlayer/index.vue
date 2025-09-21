@@ -2,7 +2,7 @@
  * @Description: 重构后的音乐胶囊播放器组件
  * @Author: 安知鱼
  * @Date: 2025-09-20 15:40:00
- * @LastEditTime: 2025-09-20 17:17:40
+ * @LastEditTime: 2025-09-21 18:54:09
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -126,7 +126,6 @@ const initFooterObserver = () => {
   const footerElement = document.getElementById("footer-container");
 
   if (!footerElement) {
-    console.warn("未找到页脚元素 #footer-container");
     return;
   }
 
@@ -146,7 +145,6 @@ const initFooterObserver = () => {
   );
 
   footerObserver.observe(footerElement);
-  console.log("页脚区域观察器已初始化");
 };
 
 // 控制函数
@@ -209,15 +207,8 @@ const loadSongWithResources = async (song: Song) => {
       song.url = resources.audioUrl;
     }
 
-    console.log(
-      "歌曲资源加载完成:",
-      song.name,
-      resources.usingHighQuality ? "(使用高质量API)" : "(使用原始API)"
-    );
-
     return true;
   } catch (error) {
-    console.error("加载歌曲资源失败:", error);
     return false;
   }
 };
@@ -247,8 +238,6 @@ const initializePlayer = async () => {
   try {
     // 检查是否已经有播放器正在初始化或已初始化
     if (isPlayerInitializing()) {
-      console.log("音乐播放器正在其他实例中初始化，等待完成...");
-
       // 等待其他实例初始化完成
       let waitCount = 0;
       while (
@@ -261,40 +250,31 @@ const initializePlayer = async () => {
       }
 
       if (isPlayerInitialized()) {
-        console.log("音乐播放器已由其他实例初始化完成");
         return false; // 不需要重复初始化
       }
     }
 
     if (isPlayerInitialized()) {
-      console.log("音乐播放器已初始化，跳过重复初始化");
       return false;
     }
 
-    console.log("音乐播放器初始化中...");
     setPlayerInitializing(true);
 
     // 确保站点配置已加载
     if (!siteConfigStore.isLoaded) {
-      console.log("正在等待站点配置加载...");
       await siteConfigStore.fetchSiteConfig();
     }
 
     // 获取歌单
     const playlistData = await musicAPI.fetchPlaylist();
     if (playlistData.length === 0) {
-      console.error("歌单数据为空");
       return false;
     }
 
     playlist.value = playlistData;
-    console.log("歌单加载成功", playlist.value.length, "首歌曲");
 
     // 随机选择第一首歌曲
     const randomIndex = getRandomIndex(playlist.value.length);
-    console.log(
-      `随机选择第${randomIndex + 1}首歌曲: ${playlist.value[randomIndex].name}`
-    );
 
     // 设置音频引用
     audioPlayer.audioRef.value = audioElement.value;
@@ -309,38 +289,28 @@ const initializePlayer = async () => {
       // 完成加载后显示播放器
       isVisible.value = true;
       setPlayerInitialized(true);
-      console.log("音乐播放器初始化完成");
       return true;
     } else {
-      console.error("初始歌曲加载失败，尝试播放下一首");
       // 如果当前歌曲加载失败，尝试播放下一首（最多尝试5首）
       const maxFallbackAttempts = Math.min(5, playlist.value.length);
       for (let i = 1; i < maxFallbackAttempts; i++) {
         const nextIndex = (randomIndex + i) % playlist.value.length;
         const nextSong = playlist.value[nextIndex];
 
-        console.log(
-          `尝试备选歌曲 ${i}/${maxFallbackAttempts - 1}: ${nextSong.name}`
-        );
         await loadSongWithResources(nextSong);
 
         const nextPlaySuccess = await audioPlayer.playSong(nextIndex);
         if (nextPlaySuccess) {
           isVisible.value = true;
           setPlayerInitialized(true);
-          console.log(`✅ 音乐播放器初始化完成（使用第${i + 1}个备选歌曲）`);
           return true;
-        } else {
-          console.warn(`❌ 备选歌曲 ${i} 也无法播放: ${nextSong.name}`);
         }
       }
 
       // 所有歌曲都无法播放
-      console.error("所有歌曲都无法播放");
       return false;
     }
   } catch (error) {
-    console.error("初始化播放器失败:", error);
     return false;
   } finally {
     // 无论成功还是失败，都要重置初始化状态
@@ -380,11 +350,8 @@ const setGlobalListenersRegistered = (status: boolean) => {
 const handleMusicControlEvents = () => {
   // 如果全局监听器已经注册，直接返回空清理函数
   if (isGlobalListenersRegistered()) {
-    console.log("全局音乐控制事件监听器已存在，跳过注册");
     return () => {}; // 返回空的清理函数
   }
-
-  console.log("注册全局音乐控制事件监听器");
 
   // 播放/暂停切换
   const handleTogglePlay = () => {
@@ -446,7 +413,6 @@ const handleMusicControlEvents = () => {
 
     // 标记全局监听器已清理
     setGlobalListenersRegistered(false);
-    console.log("全局音乐控制事件监听器已清理");
   };
 };
 
@@ -476,24 +442,20 @@ watch(
     if (newSong && newSong !== oldSong) {
       // 如果有正在进行的歌曲加载操作，等待它完成
       if (currentSongChangePromise) {
-        console.log("等待之前的歌曲加载完成...");
         try {
           await currentSongChangePromise;
         } catch (error) {
-          console.warn("之前的歌曲加载操作出错，继续执行新的加载:", error);
+          // 操作出错，继续执行新的加载
         }
       }
-
-      console.log("歌曲切换，重新加载资源:", newSong.name);
 
       // 创建新的加载Promise
       currentSongChangePromise = loadSongWithResources(newSong).then(() => {});
 
       try {
         await currentSongChangePromise;
-        console.log("歌曲资源加载完成:", newSong.name);
       } catch (error) {
-        console.error("歌曲资源加载失败:", error);
+        // 歌曲资源加载失败
       } finally {
         currentSongChangePromise = null;
       }
@@ -519,7 +481,6 @@ onMounted(async () => {
   try {
     const success = await initializePlayer();
     if (!success) {
-      console.error("音乐播放器初始化失败");
       // 如果加载失败，可以选择显示错误状态或隐藏播放器
       setTimeout(() => {
         isVisible.value = false;
@@ -537,7 +498,6 @@ onMounted(async () => {
     // 初始化音乐控制事件监听器
     cleanupMusicControlEvents = handleMusicControlEvents();
   } catch (error) {
-    console.error("音乐播放器初始化异常:", error);
     isVisible.value = false;
   }
 });
@@ -570,8 +530,6 @@ onBeforeUnmount(() => {
   // 重置全局状态
   setPlayerInitialized(false);
   setPlayerInitializing(false);
-
-  console.log("音乐播放器资源已清理");
 });
 </script>
 
