@@ -214,14 +214,14 @@
             <p>正在加载访客记录...</p>
           </div>
           <div v-else class="visitor-table-wrapper">
+            <div class="list-header">
+              <span>UA</span>
+              <span>IP</span>
+              <span>城市</span>
+              <span>访问页面</span>
+              <span>停留时间</span>
+            </div>
             <div class="pages-list">
-              <div class="list-header">
-                <span>UA</span>
-                <span>IP</span>
-                <span>城市</span>
-                <span>访问页面</span>
-                <span>停留时间</span>
-              </div>
               <ul>
                 <li
                   v-for="item in visitorLogs"
@@ -562,7 +562,6 @@ onMounted(async () => {
 .welcome-dashboard {
   min-height: 100vh;
   color: var(--anzhiyu-fontcolor);
-  margin: 0;
 }
 
 .loading-overlay,
@@ -855,72 +854,88 @@ onMounted(async () => {
   font-weight: 500;
 }
 .visitor-table-wrapper {
-  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
 }
 
-.visitor-logs-section {
-  grid-column: 1 / -1;
-  margin-top: 1rem;
-}
-
-.visitor-logs-section .pages-list {
-  max-height: 70vh;
-  overflow-y: auto;
-  position: relative;
-  background: var(--anzhiyu-card-bg);
-  border-radius: 8px;
+.visitor-table-wrapper .list-header {
+  display: grid;
+  grid-template-columns:
+    minmax(200px, 1.5fr) 140px 120px minmax(200px, 1.5fr)
+    110px;
+  gap: 1rem;
+  font-size: 0.75rem;
+  color: var(--anzhiyu-secondtext);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1rem;
+  background: var(--anzhiyu-card-bg-grey);
+  border-radius: 8px 8px 0 0;
+  border-bottom: 1px solid var(--anzhiyu-card-border);
   border: var(--style-border);
+  min-width: 800px; /* 确保表格头有最小宽度 */
 }
 
-.visitor-logs-section .pages-list::-webkit-scrollbar {
+.visitor-table-wrapper .list-header > span:not(:first-child) {
+  text-align: left;
+}
+
+.visitor-table-wrapper .pages-list {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 60vh; /* 调整高度，因为头部现在是独立的 */
+  min-width: 800px; /* 确保表格有最小宽度，触发横向滚动 */
+  background: var(--anzhiyu-card-bg);
+  border: var(--style-border);
+  border-top: none; /* 因为头部已经有边框了 */
+  border-radius: 0 0 8px 8px;
+}
+
+.visitor-table-wrapper .pages-list::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
-.visitor-logs-section .pages-list::-webkit-scrollbar-track {
+.visitor-table-wrapper .pages-list::-webkit-scrollbar-track {
   background: var(--anzhiyu-card-bg-grey);
   border-radius: 3px;
 }
 
-.visitor-logs-section .pages-list::-webkit-scrollbar-thumb {
+.visitor-table-wrapper .pages-list::-webkit-scrollbar-thumb {
   background: var(--anzhiyu-theme-op);
   border-radius: 3px;
   transition: background var(--anzhiyu-transition-duration);
 }
 
-.visitor-logs-section .pages-list::-webkit-scrollbar-thumb:hover {
+.visitor-table-wrapper .pages-list::-webkit-scrollbar-thumb:hover {
   background: var(--anzhiyu-theme);
 }
 
-.visitor-logs-section .pages-list .list-header {
-  grid-template-columns:
-    minmax(200px, 1.5fr) 140px 120px minmax(200px, 1.5fr)
-    110px;
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: var(--anzhiyu-card-bg-grey);
-  margin: 0;
-  border-radius: 8px 8px 0 0;
-  border-bottom: 1px solid var(--anzhiyu-card-border);
+.visitor-logs-section {
+  grid-column: 1 / -1;
+  margin-top: 1rem;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden; /* 防止内容撑开卡片 */
 }
 
-.visitor-logs-section .pages-list li {
+.visitor-table-wrapper .pages-list li {
   grid-template-columns:
     minmax(200px, 1.5fr) 140px 120px minmax(200px, 1.5fr)
     110px;
 }
 
-.visitor-logs-section .ua-text,
-.visitor-logs-section .ip-text,
-.visitor-logs-section .city-text {
+.visitor-table-wrapper .ua-text,
+.visitor-table-wrapper .ip-text,
+.visitor-table-wrapper .city-text {
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
   color: var(--anzhiyu-secondtext);
 }
 
-.visitor-logs-section .ua-text {
+.visitor-table-wrapper .ua-text {
   color: var(--anzhiyu-fontcolor);
   font-weight: 500;
   word-break: break-all;
@@ -933,12 +948,12 @@ onMounted(async () => {
   -webkit-box-orient: vertical;
 }
 
-.visitor-logs-section .ip-text,
-.visitor-logs-section .city-text {
+.visitor-table-wrapper .ip-text,
+.visitor-table-wrapper .city-text {
   white-space: nowrap;
 }
 
-.visitor-logs-section .ip-text {
+.visitor-table-wrapper .ip-text {
   font-family: monospace;
   font-size: 0.8rem;
 }
@@ -1238,6 +1253,18 @@ onMounted(async () => {
     flex-direction: column;
     gap: 0.75rem;
     padding: 0.75rem;
+  }
+  .welcome-dashboard {
+    margin: 0rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .card.visitor-logs-section {
+    display: none;
+  }
+  .welcome-dashboard {
+    margin: 1rem;
   }
 }
 </style>
