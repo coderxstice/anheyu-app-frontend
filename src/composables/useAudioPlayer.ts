@@ -171,7 +171,7 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
           ) {
             console.log("检测到不支持的音频源或播放被阻止，自动切换到下一首");
             setTimeout(() => {
-              nextSong();
+              nextSong(true); // 强制播放下一首
             }, 500);
           }
         }
@@ -217,13 +217,13 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
   };
 
   // 下一首
-  const nextSong = async () => {
+  const nextSong = async (forcePlay: boolean = false) => {
     if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
       console.error("连续播放失败次数过多，停止自动切换");
       return;
     }
 
-    const wasPlaying = audioState.isPlaying;
+    const wasPlaying = audioState.isPlaying || forcePlay;
     let nextIndex = currentSongIndex.value + 1;
     if (nextIndex >= playlist.value.length) {
       nextIndex = 0;
@@ -237,7 +237,7 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
       );
 
       if (consecutiveFailures < MAX_CONSECUTIVE_FAILURES) {
-        setTimeout(() => nextSong(), 1000);
+        setTimeout(() => nextSong(forcePlay), 1000);
       }
     } else {
       consecutiveFailures = 0;
@@ -381,7 +381,9 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
   };
 
   const onEnded = () => {
-    nextSong();
+    console.log("歌曲播放结束，自动播放下一首");
+    // 歌曲结束时强制播放下一首，不依赖当前播放状态
+    nextSong(true);
   };
 
   const onError = (error: Event) => {
@@ -392,7 +394,7 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
     setTimeout(() => {
       if (playlist.value.length > 1) {
         console.log("由于播放错误，自动切换到下一首");
-        nextSong();
+        nextSong(true); // 强制播放下一首
       }
     }, 1000);
   };
