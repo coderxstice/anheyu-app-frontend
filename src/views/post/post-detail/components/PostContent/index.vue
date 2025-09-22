@@ -116,9 +116,23 @@ const handleContentClick = (event: Event) => {
       "details.md-editor-code"
     );
     if (container) {
+      const preElement = container.querySelector("pre");
+
       if (container.classList.contains("is-collapsed")) {
+        // 展开：移除内联样式限制
         container.open = true;
+        if (preElement) {
+          preElement.style.height = "";
+          preElement.style.overflow = "";
+        }
+      } else {
+        // 折叠：重新设置内联样式限制
+        if (preElement) {
+          preElement.style.height = collapsedHeight.value;
+          preElement.style.overflow = "hidden";
+        }
       }
+
       container.classList.toggle("is-collapsed");
       expandCodeButton.classList.toggle(
         "is-expanded",

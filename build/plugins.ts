@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-11 11:59:32
- * @LastEditTime: 2025-08-31 23:05:31
+ * @LastEditTime: 2025-09-22 00:51:15
  * @LastEditors: 安知鱼
  */
 import { cdn } from "./cdn";
@@ -57,18 +57,7 @@ export function getPluginsList(
           /^\/login/,
           /^\/admin/
         ],
-        // 首屏优化：大幅减少预缓存文件数量，只缓存核心资源
-        globPatterns: [
-          // 只预缓存关键的入口文件和核心资源
-          "static/js/vendor-libs-*.js", // Vue核心库和基础依赖
-          "static/js/element-plus-*.js", // UI组件库
-          "static/js/utils-*.js", // 工具库
-          "static/css/index-*.css", // 主样式文件
-          "static/css/element-plus-*.css", // Element Plus样式
-          "favicon.ico",
-          "logo.svg",
-          "static/img/logo*.*" // Logo文件
-        ],
+        globPatterns: ["favicon.ico", "logo.svg", "static/img/logo*.*"],
         globIgnores: [
           // 只排除特定的大文件，让其他文件通过 globPatterns 精确控制
           "**/monacoeditorwork/*.js", // Monaco编辑器worker文件
@@ -141,19 +130,6 @@ export function getPluginsList(
               expiration: {
                 maxEntries: 30,
                 maxAgeSeconds: 60 * 60 * 24 * 30 // 缓存30天
-              }
-            }
-          },
-          {
-            // 5. API请求 - NetworkFirst策略
-            urlPattern: /^\/api\/.*/,
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "anheyu-api-cache",
-              networkTimeoutSeconds: 3,
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 5 // API缓存5分钟
               }
             }
           },
