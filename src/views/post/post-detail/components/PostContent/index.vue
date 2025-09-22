@@ -5,8 +5,8 @@ import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useLazyLoading } from "@/composables/useLazyLoading";
 import "katex/dist/katex.min.css";
 
-import { Fancybox } from "@fancyapps/ui";
-import "@fancyapps/ui/dist/fancybox/fancybox.css";
+// Fancybox 懒加载，避免影响首屏性能
+let Fancybox: any = null;
 
 const props = defineProps({
   content: {
@@ -143,12 +143,19 @@ const handleContentClick = (event: Event) => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   if (postContentRef.value) {
     postContentRef.value.addEventListener("click", handleContentClick);
 
     // 初始化懒加载
     initLazyLoading(postContentRef.value);
+
+    // 懒加载 Fancybox
+    if (!Fancybox) {
+      const fancyboxModule = await import("@fancyapps/ui");
+      await import("@fancyapps/ui/dist/fancybox/fancybox.css");
+      Fancybox = fancyboxModule.Fancybox;
+    }
 
     Fancybox.bind(postContentRef.value, "img:not(a img)", {
       groupAll: true
@@ -159,8 +166,10 @@ onMounted(() => {
 onUnmounted(() => {
   if (postContentRef.value) {
     postContentRef.value.removeEventListener("click", handleContentClick);
-    Fancybox.unbind(postContentRef.value);
-    Fancybox.close(true);
+    if (Fancybox) {
+      Fancybox.unbind(postContentRef.value);
+      Fancybox.close(true);
+    }
   }
   // 清理懒加载资源
   cleanup();
@@ -176,10 +185,12 @@ watch(
         if (postContentRef.value) {
           reinitialize(postContentRef.value);
           // 重新绑定 Fancybox
-          Fancybox.unbind(postContentRef.value);
-          Fancybox.bind(postContentRef.value, "img:not(a img)", {
-            groupAll: true
-          });
+          if (Fancybox) {
+            Fancybox.unbind(postContentRef.value);
+            Fancybox.bind(postContentRef.value, "img:not(a img)", {
+              groupAll: true
+            });
+          }
         }
       }, 100);
     }

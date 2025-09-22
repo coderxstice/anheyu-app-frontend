@@ -5,13 +5,19 @@
  * @LastEditTime: 2025-09-14 23:04:49
  * @LastEditors: 安知鱼
  */
-import { config } from "md-editor-v3";
-import TabsPlugin from "./plugins/markdown-it-tabs-plugin";
+export async function installMarkdownEditorExtensions() {
+  try {
+    const [{ config }, TabsPlugin] = await Promise.all([
+      import("md-editor-v3"),
+      import("./plugins/markdown-it-tabs-plugin").then(m => m.default)
+    ]);
 
-export function installMarkdownEditorExtensions() {
-  config({
-    markdownItConfig(mdit) {
-      mdit.use(TabsPlugin);
-    }
-  });
+    config({
+      markdownItConfig(mdit) {
+        mdit.use(TabsPlugin);
+      }
+    });
+  } catch (error) {
+    console.error("Failed to install markdown editor extensions:", error);
+  }
 }
