@@ -61,6 +61,14 @@ export function useLazyLoading(options: LazyLoadingOptions = {}) {
       return;
     }
 
+    // 如果图片的 src 已经是目标 src，说明已经加载过了
+    if (img.src === src) {
+      loadedImages.value.add(img);
+      img.classList.remove("lazy-loading");
+      img.classList.add("lazy-loaded");
+      return;
+    }
+
     loadingImages.value.add(img);
 
     // 添加加载状态类
@@ -68,12 +76,11 @@ export function useLazyLoading(options: LazyLoadingOptions = {}) {
       img.classList.add("lazy-loading");
     }
 
-    // 创建新的图片对象来预加载
-    const imageLoader = new Image();
+    // 直接设置图片源，避免双重加载
+    img.src = src;
 
-    imageLoader.onload = () => {
-      // 图片加载成功
-      img.src = src;
+    // 监听实际img元素的加载事件
+    const handleLoad = () => {
       loadingImages.value.delete(img);
       loadedImages.value.add(img);
 
@@ -87,9 +94,13 @@ export function useLazyLoading(options: LazyLoadingOptions = {}) {
           detail: { src }
         })
       );
+
+      // 清理事件监听器
+      img.removeEventListener("load", handleLoad);
+      img.removeEventListener("error", handleError);
     };
 
-    imageLoader.onerror = () => {
+    const handleError = () => {
       // 图片加载失败
       loadingImages.value.delete(img);
       failedImages.value.add(img);
@@ -109,10 +120,26 @@ export function useLazyLoading(options: LazyLoadingOptions = {}) {
           detail: { src, error: "Failed to load image" }
         })
       );
+
+      // 清理事件监听器
+      img.removeEventListener("load", handleLoad);
+      img.removeEventListener("error", handleError);
     };
 
-    // 开始加载图片
-    imageLoader.src = src;
+    // 添加事件监听器
+    img.addEventListener("load", handleLoad);
+    img.addEventListener("error", handleError);
+
+    // 检查图片是否已经加载完成（从缓存中）
+    if (img.complete) {
+      if (img.naturalHeight !== 0) {
+        // 图片已成功加载
+        handleLoad();
+      } else {
+        // 图片加载失败
+        handleError();
+      }
+    }
   };
 
   /**
@@ -150,10 +177,11 @@ export function useLazyLoading(options: LazyLoadingOptions = {}) {
 
     // 如果图片已经有 data-src，说明是预设的懒加载图片
     if (img.hasAttribute("data-src")) {
-      // 确保 src 是占位符
+      // 确保 src 是占位符（只有在不是 data: URL 时才设置，避免重复设置）
       if (!img.src.startsWith("data:")) {
         img.src = placeholder;
       }
+      // 如果已经是正确的占位符或其他 data: URL，不需要额外处理
     } else {
       // 跳过没有 src 的图片或已经是 data: URL 的图片
       if (!img.src || img.src.startsWith("data:")) {

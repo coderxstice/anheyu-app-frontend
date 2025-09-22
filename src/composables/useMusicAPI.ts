@@ -1,206 +1,232 @@
 /**
  * @Description: 音乐API调用逻辑 composable
  * @Author: 安知鱼
- * @Date: 2025-09-20 15:05:00
+ * @Date: 2025-09-22 16:00:00
  */
-import { ref, computed } from "vue";
-import type {
-  Song,
-  MusicApiResponse,
-  LyricApiResponse,
-  HighQualityMusicData
-} from "../types/music";
-import { useSiteConfigStore } from "../store/modules/siteConfig";
+import { ref } from "vue";
+import type { Song } from "../types/music";
+import {
+  getPlaylistApi,
+  getSongResourcesApi,
+  getHighQualityMusicUrlApi,
+  getHighQualityLyricsApi,
+  getLyricsApi,
+  musicHealthCheckApi
+} from "../api/music";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import { get } from "lodash-es";
+
+// 播放列表缓存接口
+interface PlaylistCache {
+  data: Song[];
+  playlistId: string;
+  timestamp: number;
+  version: string;
+}
 
 export function useMusicAPI() {
-  // 获取站点配置
-  const siteConfigStore = useSiteConfigStore();
-
-  // API相关常量和配置
-  const HIGH_QUALITY_MUSIC_API = "https://api.toubiec.cn/wyapi/getMusicUrl.php";
-  const HIGH_QUALITY_LYRIC_API = "https://api.toubiec.cn/wyapi/getLyric.php";
-
-  // 从后端配置获取播放列表ID，如果没有则使用默认值
-  const playlistId = computed(() => {
-    return (
-      siteConfigStore.getSiteConfig.music?.player?.playlist_id ||
-      siteConfigStore.getSiteConfig["music.player.playlist_id"] ||
-      siteConfigStore.getSiteConfig["MUSIC_PLAYER_PLAYLIST_ID"] ||
-      "8152976493"
-    ); // 默认值作为后备
-  });
-
-  // 动态构建播放列表API URL
-  const PLAYLIST_API = computed(
-    () =>
-      `https://meting.qjqq.cn/?server=netease&type=playlist&id=${playlistId.value}`
-  );
-
   // 加载状态
   const isLoading = ref(false);
 
-  // 全局状态控制
-  const isHighQualityApiEnabled = ref(true); // 高质量API是否可用
+  // 获取站点配置 store
+  const siteConfigStore = useSiteConfigStore();
 
-  // 禁用高质量API
-  const disableHighQualityApi = (_reason: string) => {
-    if (isHighQualityApiEnabled.value) {
-      isHighQualityApiEnabled.value = false;
+  // 缓存配置
+  const CACHE_KEY = "anheyu-playlist-cache";
+  const CACHE_VERSION = "1.0.0";
+  const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7天缓存
+
+  // 从配置获取当前播放列表ID
+  const getCurrentPlaylistId = (): string => {
+    // 优先从 siteConfig 中获取设置值
+    const configId = get(
+      siteConfigStore.siteConfig,
+      "music.player.playlist_id"
+    );
+    if (configId) {
+      return configId;
+    }
+
+    // 备用：从 localStorage 获取
+    const localId = localStorage.getItem("music-playlist-id");
+    if (localId) {
+      return localId;
+    }
+
+    // 默认值
+    return "8152976493";
+  };
+
+  // 获取缓存
+  const getPlaylistCache = (): PlaylistCache | null => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (!cached) return null;
+
+      const cache: PlaylistCache = JSON.parse(cached);
+
+      // 检查缓存版本
+      if (cache.version !== CACHE_VERSION) {
+        console.log("[MUSIC_CACHE] 缓存版本不匹配，清除旧缓存");
+        localStorage.removeItem(CACHE_KEY);
+        return null;
+      }
+
+      // 检查缓存是否过期
+      const now = Date.now();
+      if (now - cache.timestamp > CACHE_DURATION) {
+        console.log("[MUSIC_CACHE] 缓存已过期，清除缓存");
+        localStorage.removeItem(CACHE_KEY);
+        return null;
+      }
+
+      // 检查播放列表ID是否改变
+      const currentId = getCurrentPlaylistId();
+      if (cache.playlistId !== currentId) {
+        console.log(
+          `[MUSIC_CACHE] 播放列表ID已改变 (${cache.playlistId} -> ${currentId})，清除缓存`
+        );
+        localStorage.removeItem(CACHE_KEY);
+        return null;
+      }
+
+      console.log(
+        `[MUSIC_CACHE] 使用缓存数据 - ID: ${cache.playlistId}, 歌曲数: ${cache.data.length}`
+      );
+      return cache;
+    } catch (error) {
+      console.error("[MUSIC_CACHE] 读取缓存失败:", error);
+      localStorage.removeItem(CACHE_KEY);
+      return null;
     }
   };
 
-  // 验证歌曲数据
-  const isValidSong = (song: any): boolean => {
-    return (
-      song &&
-      typeof song.name === "string" &&
-      typeof song.artist === "string" &&
-      typeof song.url === "string" &&
-      song.url.trim().length > 0
-    );
+  // 设置缓存
+  const setPlaylistCache = (data: Song[]): void => {
+    try {
+      const cache: PlaylistCache = {
+        data,
+        playlistId: getCurrentPlaylistId(),
+        timestamp: Date.now(),
+        version: CACHE_VERSION
+      };
+
+      localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+      console.log(
+        `[MUSIC_CACHE] 缓存播放列表 - ID: ${cache.playlistId}, 歌曲数: ${data.length}`
+      );
+    } catch (error) {
+      console.error("[MUSIC_CACHE] 设置缓存失败:", error);
+    }
+  };
+
+  // 清除缓存
+  const clearPlaylistCache = (): void => {
+    localStorage.removeItem(CACHE_KEY);
+    console.log("[MUSIC_CACHE] 清除播放列表缓存");
+  };
+
+  // 强制刷新播放列表（清除缓存后重新获取）
+  const refreshPlaylist = async (): Promise<Song[]> => {
+    console.log("[MUSIC_API] 强制刷新播放列表...");
+    clearPlaylistCache();
+    return await fetchPlaylist(true);
   };
 
   // 获取歌单数据
-  const fetchPlaylist = async (): Promise<Song[]> => {
+  const fetchPlaylist = async (forceRefresh = false): Promise<Song[]> => {
     try {
-      isLoading.value = true;
-      const response = await fetch(`${PLAYLIST_API.value}&r=${Math.random()}`);
-      const data = await response.json();
-
-      if (Array.isArray(data) && data.length > 0) {
-        // 验证和过滤有效歌曲
-        const validSongs = data.filter(isValidSong);
-
-        if (validSongs.length === 0) {
-          throw new Error("没有找到有效的歌曲数据");
+      // 如果不是强制刷新，先检查缓存
+      if (!forceRefresh) {
+        const cached = getPlaylistCache();
+        if (cached && cached.data.length > 0) {
+          return cached.data;
         }
+      }
 
-        const mappedPlaylist = validSongs.map((song: any, index: number) => {
-          // 从URL中提取网易云音乐ID
-          let neteaseId = "";
-          if (song.url) {
-            const urlMatch = song.url.match(/[?&]id=(\d+)/);
-            if (urlMatch) {
-              neteaseId = urlMatch[1];
-            }
-          }
-          // 如果URL中没有找到，尝试从歌词链接中提取
-          if (!neteaseId && song.lrc) {
-            const lrcMatch = song.lrc.match(/[?&]id=(\d+)/);
-            if (lrcMatch) {
-              neteaseId = lrcMatch[1];
-            }
-          }
+      isLoading.value = true;
+      console.log("[MUSIC_API] 从服务器获取播放列表...");
 
-          const mappedSong: Song = {
-            id: index.toString(),
-            neteaseId: neteaseId, // 网易云音乐ID，从URL中提取
-            name: song.name || "未知歌曲",
-            artist: song.artist || "未知艺术家",
-            url: song.url,
-            pic: song.pic || "",
-            lrc: song.lrc || ""
-          };
+      const response = await getPlaylistApi();
 
-          return mappedSong;
-        });
+      if (response.data && response.data.songs) {
+        const songs = response.data.songs;
 
-        return mappedPlaylist;
+        // 缓存结果
+        setPlaylistCache(songs);
+
+        return songs;
       } else {
+        console.warn("播放列表数据格式异常:", response);
         return [];
       }
-    } catch {
+    } catch (error) {
+      console.error("获取播放列表失败:", error);
       return [];
     } finally {
       isLoading.value = false;
     }
   };
 
-  // 获取歌词 - 原始API (返回纯LRC文本)
+  // 获取歌词 - 通过后端API
   const fetchLyrics = async (lrcUrl: string): Promise<string> => {
+    if (!lrcUrl) return "";
+
     try {
-      const response = await fetch(lrcUrl);
-      const lrcText = await response.text();
+      const response = await getLyricsApi(lrcUrl);
 
-      if (!lrcText || lrcText.trim().length === 0) {
+      if (response.data && response.data.available && response.data.lyrics) {
+        return response.data.lyrics;
+      } else {
         return "";
       }
-
-      // 验证是否为有效的LRC格式
-      const lrcLinePattern = /\[\d{1,2}:\d{2}[\.:]?\d{0,3}\]/;
-      if (!lrcLinePattern.test(lrcText)) {
-        return "";
-      }
-
-      return lrcText;
-    } catch {
+    } catch (error) {
+      console.error("获取歌词失败:", error);
       return "";
     }
   };
 
-  // 获取高质量音频URL
+  // 获取高质量音频URL - 通过后端API
   const fetchHighQualityMusicUrl = async (
     neteaseId: string
   ): Promise<string | null> => {
-    // 检查API是否已被禁用
-    if (!isHighQualityApiEnabled.value) {
-      return null;
-    }
+    if (!neteaseId) return null;
 
     try {
-      const url = `${HIGH_QUALITY_MUSIC_API}?id=${neteaseId}&level=lossless`;
-      const response = await fetch(url);
-      const data: MusicApiResponse = await response.json();
+      const response = await getHighQualityMusicUrlApi(neteaseId);
 
-      if (data.code === 200 && data.data && data.data.length > 0) {
-        const musicData = data.data[0] as HighQualityMusicData;
-        if (musicData.url && musicData.url.trim().length > 0) {
-          return musicData.url;
-        }
+      if (response.data && response.data.available && response.data.url) {
+        return response.data.url;
+      } else {
+        return null;
       }
-
-      return null;
-    } catch {
-      disableHighQualityApi("首次请求失败，禁用高质量API");
+    } catch (error) {
+      console.error("获取高质量音频URL失败:", error);
       return null;
     }
   };
 
-  // 获取高质量歌词 - 网易云API (返回JSON格式)
+  // 获取高质量歌词 - 通过后端API
   const fetchHighQualityLyrics = async (
     neteaseId: string
   ): Promise<string | null> => {
-    // 检查API是否已被禁用
-    if (!isHighQualityApiEnabled.value) {
-      return null;
-    }
+    if (!neteaseId) return null;
 
     try {
-      const url = `${HIGH_QUALITY_LYRIC_API}?id=${neteaseId}`;
-      const response = await fetch(url);
-      const data: LyricApiResponse = await response.json();
+      const response = await getHighQualityLyricsApi(neteaseId);
 
-      if (data.code === 200 && data.data && data.data.lrc) {
-        const lrcText = data.data.lrc;
-        if (lrcText && lrcText.trim().length > 0) {
-          // 验证是否为有效的LRC格式
-          const lrcLinePattern = /\[\d{1,2}:\d{2}[\.:]?\d{0,3}\]/;
-          if (!lrcLinePattern.test(lrcText)) {
-            return null;
-          }
-
-          return lrcText;
-        }
+      if (response.data && response.data.available && response.data.lyrics) {
+        return response.data.lyrics;
+      } else {
+        return null;
       }
-
-      return null;
-    } catch {
-      disableHighQualityApi("首次请求失败，禁用高质量API");
+    } catch (error) {
+      console.error("获取高质量歌词失败:", error);
       return null;
     }
   };
 
-  // 获取歌曲的音频和歌词资源
+  // 获取歌曲的音频和歌词资源 - 通过后端API
   const fetchSongResources = async (
     song: Song
   ): Promise<{
@@ -208,52 +234,51 @@ export function useMusicAPI() {
     lyricsText: string;
     usingHighQuality: boolean;
   }> => {
-    let finalAudioUrl = song.url;
-    let finalLyricsText = "";
-    let usingHighQuality = false;
+    try {
+      const response = await getSongResourcesApi({
+        id: song.id,
+        neteaseId: song.neteaseId,
+        name: song.name,
+        artist: song.artist,
+        url: song.url,
+        pic: song.pic,
+        lrc: song.lrc
+      });
 
-    // 首先尝试使用高质量API获取资源
-    if (song.neteaseId) {
-      if (!isHighQualityApiEnabled.value) {
-        if (song.lrc) {
-          finalLyricsText = await fetchLyrics(song.lrc);
-        }
+      if (response.data) {
+        return {
+          audioUrl: response.data.audioUrl,
+          lyricsText: response.data.lyricsText,
+          usingHighQuality: response.data.usingHighQuality
+        };
       } else {
-        // 先获取高质量音频
-        const highQualityUrl = await fetchHighQualityMusicUrl(song.neteaseId);
-
-        if (highQualityUrl) {
-          // 音频获取成功，使用高质量资源
-          finalAudioUrl = highQualityUrl;
-          usingHighQuality = true;
-
-          // 音频成功后才获取高质量歌词
-          const highQualityLyrics = await fetchHighQualityLyrics(
-            song.neteaseId
-          );
-          if (highQualityLyrics) {
-            finalLyricsText = highQualityLyrics;
-          } else if (song.lrc) {
-            finalLyricsText = await fetchLyrics(song.lrc);
-          }
-        } else {
-          // 音频获取失败，直接使用原始资源
-          if (song.lrc) {
-            finalLyricsText = await fetchLyrics(song.lrc);
-          }
-        }
+        // 降级到原始数据
+        return {
+          audioUrl: song.url,
+          lyricsText: "",
+          usingHighQuality: false
+        };
       }
-    } else {
-      if (song.lrc) {
-        finalLyricsText = await fetchLyrics(song.lrc);
-      }
+    } catch (error) {
+      console.error("获取歌曲资源失败:", error);
+      // 降级到原始数据
+      return {
+        audioUrl: song.url,
+        lyricsText: "",
+        usingHighQuality: false
+      };
     }
+  };
 
-    return {
-      audioUrl: finalAudioUrl,
-      lyricsText: finalLyricsText,
-      usingHighQuality
-    };
+  // 添加健康检查功能
+  const checkHealth = async (): Promise<boolean> => {
+    try {
+      const response = await musicHealthCheckApi();
+      return response.data?.status === "healthy";
+    } catch (error) {
+      console.error("音乐服务健康检查失败:", error);
+      return false;
+    }
   };
 
   return {
@@ -262,12 +287,17 @@ export function useMusicAPI() {
 
     // 方法
     fetchPlaylist,
+    refreshPlaylist,
     fetchLyrics,
     fetchHighQualityMusicUrl,
     fetchHighQualityLyrics,
     fetchSongResources,
 
+    // 缓存管理
+    clearPlaylistCache,
+    getCurrentPlaylistId,
+
     // 工具函数
-    isValidSong
+    checkHealth
   };
 }

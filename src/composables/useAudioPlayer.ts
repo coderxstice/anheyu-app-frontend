@@ -31,7 +31,10 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
   const MAX_CONSECUTIVE_FAILURES = 3;
 
   // 计算属性
-  const currentSong = computed(() => playlist.value[currentSongIndex.value]);
+  const currentSong = computed(() => {
+    const song = playlist.value[currentSongIndex.value];
+    return song;
+  });
   const playedPercentage = computed(() => {
     return audioState.duration > 0
       ? (audioState.currentTime / audioState.duration) * 100
@@ -49,8 +52,108 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
   // 当前加载状态标记，防止同时加载多个歌曲
   let isLoadingSong = false;
 
+  // 是否已加载音频
+  const isAudioLoaded = ref(false);
+
+  // 加载音频资源
+  const loadAudio = async (song: Song): Promise<boolean> => {
+    if (!audioRef.value || !song.url) {
+      return false;
+    }
+
+    try {
+      // 强制停止所有音频播放，防止多个音频同时播放
+      audioRef.value.pause();
+      audioRef.value.currentTime = 0;
+
+      // 清空当前源，防止后台继续加载
+      audioRef.value.src = "";
+      audioRef.value.load();
+
+      // 创建Promise来监听音频加载结果
+      const audioLoadPromise = new Promise<boolean>((resolve, reject) => {
+        const audio = audioRef.value;
+        if (!audio) {
+          reject(new Error("音频元素未初始化"));
+          return;
+        }
+
+        // 设置超时时间（10秒）
+        const timeout = setTimeout(() => {
+          reject(new Error("音频加载超时"));
+        }, 10000);
+
+        // 监听成功事件
+        const onCanPlay = () => {
+          clearTimeout(timeout);
+          cleanup();
+          resolve(true);
+        };
+
+        // 监听错误事件
+        const onError = (event: Event) => {
+          clearTimeout(timeout);
+          cleanup();
+          const error = (event.target as HTMLAudioElement)?.error;
+          let errorMessage = "音频加载失败";
+
+          if (error) {
+            switch (error.code) {
+              case MediaError.MEDIA_ERR_ABORTED:
+                errorMessage = "音频加载被中止";
+                break;
+              case MediaError.MEDIA_ERR_NETWORK:
+                errorMessage = "网络错误导致音频加载失败";
+                break;
+              case MediaError.MEDIA_ERR_DECODE:
+                errorMessage = "音频解码失败";
+                break;
+              case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                errorMessage = "不支持的音频格式或源";
+                break;
+              default:
+                errorMessage = `音频加载失败 (错误代码: ${error.code})`;
+            }
+          }
+
+          reject(new Error(errorMessage));
+        };
+
+        // 清理事件监听器
+        const cleanup = () => {
+          audio.removeEventListener("canplay", onCanPlay);
+          audio.removeEventListener("error", onError);
+        };
+
+        // 添加事件监听器
+        audio.addEventListener("canplay", onCanPlay);
+        audio.addEventListener("error", onError);
+
+        // 开始加载音频
+        audio.src = song.url;
+        safeSetVolume(audioState.volume);
+        audio.load();
+      });
+
+      // 等待音频加载完成
+      const success = await audioLoadPromise;
+      if (success) {
+        isAudioLoaded.value = true;
+        consecutiveFailures = 0; // 重置失败计数器
+        return true;
+      }
+
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
   // 播放指定歌曲
-  const playSong = async (index: number): Promise<boolean> => {
+  const playSong = async (
+    index: number,
+    shouldLoadAudio: boolean = false
+  ): Promise<boolean> => {
     if (index < 0 || index >= playlist.value.length) {
       return false;
     }
@@ -60,8 +163,6 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
       return false;
     }
 
-    isLoadingSong = true;
-
     try {
       currentSongIndex.value = index;
       const song = currentSong.value;
@@ -70,90 +171,20 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
         return false;
       }
 
-      if (audioRef.value) {
-        // 强制停止所有音频播放，防止多个音频同时播放
-        audioRef.value.pause();
-        audioRef.value.currentTime = 0;
-
-        // 清空当前源，防止后台继续加载
-        audioRef.value.src = "";
-        audioRef.value.load();
-
-        // 创建Promise来监听音频加载结果
-        const audioLoadPromise = new Promise<boolean>((resolve, reject) => {
-          const audio = audioRef.value;
-          if (!audio) {
-            reject(new Error("音频元素未初始化"));
-            return;
-          }
-
-          // 设置超时时间（10秒）
-          const timeout = setTimeout(() => {
-            reject(new Error("音频加载超时"));
-          }, 10000);
-
-          // 监听成功事件
-          const onCanPlay = () => {
-            clearTimeout(timeout);
-            cleanup();
-            resolve(true);
-          };
-
-          // 监听错误事件
-          const onError = (event: Event) => {
-            clearTimeout(timeout);
-            cleanup();
-            const error = (event.target as HTMLAudioElement)?.error;
-            let errorMessage = "音频加载失败";
-
-            if (error) {
-              switch (error.code) {
-                case MediaError.MEDIA_ERR_ABORTED:
-                  errorMessage = "音频加载被中止";
-                  break;
-                case MediaError.MEDIA_ERR_NETWORK:
-                  errorMessage = "网络错误导致音频加载失败";
-                  break;
-                case MediaError.MEDIA_ERR_DECODE:
-                  errorMessage = "音频解码失败";
-                  break;
-                case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
-                  errorMessage = "不支持的音频格式或源";
-                  break;
-                default:
-                  errorMessage = `音频加载失败 (错误代码: ${error.code})`;
-              }
-            }
-
-            reject(new Error(errorMessage));
-          };
-
-          // 清理事件监听器
-          const cleanup = () => {
-            audio.removeEventListener("canplay", onCanPlay);
-            audio.removeEventListener("error", onError);
-          };
-
-          // 添加事件监听器
-          audio.addEventListener("canplay", onCanPlay);
-          audio.addEventListener("error", onError);
-
-          // 开始加载音频
-          audio.src = song.url;
-          safeSetVolume(audioState.volume);
-          audio.load();
-        });
-
-        // 等待音频加载完成
-        const success = await audioLoadPromise;
-        if (success) {
-          consecutiveFailures = 0; // 重置失败计数器
-          return true;
+      // 如果需要立即加载音频（例如切换歌曲时正在播放）
+      if (shouldLoadAudio) {
+        isLoadingSong = true;
+        const success = await loadAudio(song);
+        if (!success) {
+          return false;
         }
+      } else {
+        // 只是切换歌曲，不加载音频
+        isAudioLoaded.value = false;
       }
 
-      return false;
-    } catch (error) {
+      return true;
+    } catch {
       return false;
     } finally {
       isLoadingSong = false; // 无论成功还是失败，都要重置加载状态
@@ -168,6 +199,21 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
       audioRef.value.pause();
     } else {
       try {
+        // 懒加载：如果音频还未加载，先加载再播放
+        if (!isAudioLoaded.value) {
+          isLoadingSong = true;
+          const loadSuccess = await loadAudio(currentSong.value);
+          isLoadingSong = false;
+
+          if (!loadSuccess) {
+            // 加载失败，尝试播放下一首
+            setTimeout(() => {
+              nextSong(true);
+            }, 500);
+            return;
+          }
+        }
+
         await audioRef.value.play();
       } catch (error) {
         // 处理不支持的音频格式或其他播放错误，自动切换到下一首
@@ -198,7 +244,8 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
       nextIndex = playlist.value.length - 1;
     }
 
-    const success = await playSong(nextIndex);
+    // 如果当前正在播放，需要立即加载音频
+    const success = await playSong(nextIndex, wasPlaying);
     if (!success) {
       consecutiveFailures++;
 
@@ -211,7 +258,7 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
       if (wasPlaying && audioRef.value) {
         try {
           await audioRef.value.play();
-        } catch (error) {
+        } catch {
           // 自动播放失败
         }
       }
@@ -230,7 +277,8 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
       nextIndex = 0;
     }
 
-    const success = await playSong(nextIndex);
+    // 如果当前正在播放或强制播放，需要立即加载音频
+    const success = await playSong(nextIndex, wasPlaying);
     if (!success) {
       consecutiveFailures++;
 
@@ -243,7 +291,7 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
       if (wasPlaying && audioRef.value) {
         try {
           await audioRef.value.play();
-        } catch (error) {
+        } catch {
           // 自动播放失败
         }
       }
@@ -287,12 +335,13 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
     const wasPlaying = audioState.isPlaying;
 
     try {
-      const success = await playSong(index);
+      // 如果当前正在播放，需要立即加载音频
+      const success = await playSong(index, wasPlaying);
       if (success) {
         if (wasPlaying && audioRef.value) {
           try {
             await audioRef.value.play();
-          } catch (error) {
+          } catch {
             // 自动播放失败
           }
         }
@@ -307,13 +356,13 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
           fallbackIndex < playlist.value.length
         ) {
           loadingPlaylistItem.value = fallbackIndex;
-          const fallbackSuccess = await playSong(fallbackIndex);
+          const fallbackSuccess = await playSong(fallbackIndex, wasPlaying);
 
           if (fallbackSuccess) {
             if (wasPlaying && audioRef.value) {
               try {
                 await audioRef.value.play();
-              } catch (error) {
+              } catch {
                 // 备选歌曲自动播放失败
               }
             }
@@ -328,7 +377,7 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
           // 所有备选歌曲都无法播放
         }
       }
-    } catch (error) {
+    } catch {
       // 播放列表点击处理失败
     } finally {
       loadingPlaylistItem.value = -1;
@@ -368,7 +417,7 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
     nextSong(true);
   };
 
-  const onError = (error: Event) => {
+  const onError = (_error: Event) => {
     audioState.isPlaying = false;
 
     // 错误处理：尝试播放下一首歌曲
@@ -425,6 +474,7 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
     audioState,
     loadedPercentage,
     loadingPlaylistItem,
+    isAudioLoaded,
 
     // 计算属性
     currentSong,
@@ -432,6 +482,7 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
 
     // 方法
     playSong,
+    loadAudio,
     togglePlay,
     previousSong,
     nextSong,
