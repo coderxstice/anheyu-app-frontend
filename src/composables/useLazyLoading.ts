@@ -143,21 +143,29 @@ export function useLazyLoading(options: LazyLoadingOptions = {}) {
       return;
     }
 
-    // 跳过没有 src 的图片或已经是 data: URL 的图片
-    if (!img.src || img.src.startsWith("data:")) {
-      return;
-    }
-
     // 跳过在 a 标签内的图片（避免影响 Fancybox）
     if (img.closest("a")) {
       return;
     }
 
-    // 将原始 src 保存到 data-src
-    img.setAttribute("data-src", img.src);
+    // 如果图片已经有 data-src，说明是预设的懒加载图片
+    if (img.hasAttribute("data-src")) {
+      // 确保 src 是占位符
+      if (!img.src.startsWith("data:")) {
+        img.src = placeholder;
+      }
+    } else {
+      // 跳过没有 src 的图片或已经是 data: URL 的图片
+      if (!img.src || img.src.startsWith("data:")) {
+        return;
+      }
 
-    // 设置占位符
-    img.src = placeholder;
+      // 将原始 src 保存到 data-src
+      img.setAttribute("data-src", img.src);
+
+      // 设置占位符
+      img.src = placeholder;
+    }
 
     // 添加懒加载相关的类
     img.classList.add("lazy-image");
