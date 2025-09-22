@@ -567,7 +567,7 @@
       style="
         font-size: 12px;
         color: var(--el-text-color-secondary);
-        margin-top: 8px;
+        margin-left: 8px;
       "
     >
       是否在前端页面显示音乐播放器组件

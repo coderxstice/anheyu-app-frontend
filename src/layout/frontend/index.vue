@@ -65,8 +65,8 @@ const mainContentClass = computed(() => {
 
 // 音乐播放器是否启用
 const isMusicPlayerEnabled = computed(() => {
-  const musicConfig = siteConfigStore.getSiteConfig?.["music.player.enable"];
-  return musicConfig === "true" || musicConfig === true;
+  const musicConfig = siteConfigStore.getSiteConfig?.music?.player?.enable;
+  return Boolean(musicConfig);
 });
 
 const navConfig = computed(() => siteConfigStore.getSiteConfig?.header?.nav);
