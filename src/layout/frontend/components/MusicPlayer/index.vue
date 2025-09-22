@@ -223,9 +223,13 @@ const waitForCoverLoad = (imageUrl?: string): Promise<boolean> => {
 
 // 加载歌曲并处理资源
 let loadResourcesCount = 0;
-const loadSongWithResources = async (song: Song) => {
+const loadSongWithResources = async (song: Song, caller = "unknown") => {
   loadResourcesCount++;
   const loadId = Date.now() + "-" + Math.random().toString(36).substr(2, 9);
+
+  console.log(
+    `[MUSIC_PLAYER] 开始加载歌曲资源 - 歌曲: ${song.name}, 调用者: ${caller}, 加载ID: ${loadId}, 总调用次数: ${loadResourcesCount}`
+  );
 
   try {
     // 获取歌曲资源（音频和歌词）
@@ -250,8 +254,15 @@ const loadSongWithResources = async (song: Song) => {
       song.url = resources.audioUrl;
     }
 
+    console.log(
+      `[MUSIC_PLAYER] 歌曲资源加载成功 - 歌曲: ${song.name}, 调用者: ${caller}, 加载ID: ${loadId}`
+    );
     return true;
   } catch (error) {
+    console.error(
+      `[MUSIC_PLAYER] 歌曲资源加载失败 - 歌曲: ${song.name}, 调用者: ${caller}, 加载ID: ${loadId}`,
+      error
+    );
     return false;
   }
 };
@@ -323,7 +334,10 @@ const initializePlayer = async () => {
     audioPlayer.audioRef.value = audioElement.value;
 
     // 先加载第一首歌的资源（包括封面），避免watch重复调用
-    const resourcesLoaded = await loadSongWithResources(firstSong);
+    const resourcesLoaded = await loadSongWithResources(
+      firstSong,
+      "initializePlayer"
+    );
     if (!resourcesLoaded) {
       console.warn(
         "Failed to load first song resources, but showing player anyway"
@@ -461,7 +475,8 @@ watch(
 // 监听当前歌曲变化，加载资源
 let currentSongChangePromise: Promise<void> | null = null;
 let watchTriggerCount = 0;
-let isInitializing = false; // 新增：标记是否正在初始化
+let isInitializing = false; // 标记是否正在初始化
+let isFirstSongLoaded = false; // 标记第一首歌是否已在初始化时加载过
 
 watch(
   () => audioPlayer.currentSong.value,
@@ -472,10 +487,26 @@ watch(
 
     // 如果正在初始化播放器，跳过watch的资源加载（避免重复调用）
     if (isInitializing) {
+      console.log(
+        `[MUSIC_PLAYER] 跳过watch资源加载，正在初始化中 - trigger: ${triggerId}`
+      );
+      return;
+    }
+
+    // 如果是第一首歌且已经在初始化时加载过，跳过
+    if (!isFirstSongLoaded && newSong) {
+      console.log(
+        `[MUSIC_PLAYER] 跳过第一首歌的watch加载，已在初始化时处理 - 歌曲: ${newSong.name}`
+      );
+      isFirstSongLoaded = true;
       return;
     }
 
     if (newSong && newSong !== oldSong) {
+      console.log(
+        `[MUSIC_PLAYER] watch触发资源加载 - 新歌曲: ${newSong.name}, trigger: ${triggerId}`
+      );
+
       // 如果有正在进行的歌曲加载操作，等待它完成
       if (currentSongChangePromise) {
         try {
@@ -484,15 +515,21 @@ watch(
       }
 
       // 创建新的加载Promise - 只加载歌词和封面色彩，不加载音频
-      currentSongChangePromise = loadSongWithResources(newSong).then(() => {});
+      currentSongChangePromise = loadSongWithResources(
+        newSong,
+        "watch:currentSong"
+      ).then(() => {});
 
       try {
         await currentSongChangePromise;
       } catch (error) {
+        console.error(
+          `[MUSIC_PLAYER] watch资源加载失败 - 歌曲: ${newSong.name}`,
+          error
+        );
       } finally {
         currentSongChangePromise = null;
       }
-    } else {
     }
   }
 );
