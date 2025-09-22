@@ -17,8 +17,8 @@ export function useMusicAPI() {
   const siteConfigStore = useSiteConfigStore();
 
   // API相关常量和配置
-  const HIGH_QUALITY_MUSIC_API = "https://api.toubiec.cn/wyapi/getMusicUrl.php";
-  const HIGH_QUALITY_LYRIC_API = "https://api.toubiec.cn/wyapi/getLyric.php";
+  const HIGH_QUALITY_MUSIC_API = "https://wyapi.toubiec.cn/api/music/url";
+  const HIGH_QUALITY_LYRIC_API = "https://wyapi.toubiec.cn/api/music/lyric";
 
   // 从后端配置获取播放列表ID，如果没有则使用默认值
   const playlistId = computed(() => {
@@ -148,8 +148,23 @@ export function useMusicAPI() {
     }
 
     try {
-      const url = `${HIGH_QUALITY_MUSIC_API}?id=${neteaseId}&level=lossless`;
-      const response = await fetch(url);
+      const response = await fetch(HIGH_QUALITY_MUSIC_API, {
+        method: "POST",
+        mode: "cors", // 明确指定跨域模式
+        credentials: "omit", // 不发送cookies，避免跨域认证问题
+        headers: {
+          Accept: "*/*",
+          "Accept-Language": "zh-CN,zh;q=0.9",
+          "Cache-Control": "no-cache",
+          "Content-Type": "application/json",
+          Pragma: "no-cache"
+        },
+        body: JSON.stringify({
+          id: neteaseId,
+          level: "lossless"
+        })
+      });
+
       const data: MusicApiResponse = await response.json();
 
       if (data.code === 200 && data.data && data.data.length > 0) {
@@ -176,8 +191,26 @@ export function useMusicAPI() {
     }
 
     try {
-      const url = `${HIGH_QUALITY_LYRIC_API}?id=${neteaseId}`;
-      const response = await fetch(url);
+      const response = await fetch(HIGH_QUALITY_LYRIC_API, {
+        method: "POST",
+        mode: "cors", // 明确指定跨域模式
+        credentials: "omit", // 不发送cookies，避免跨域认证问题
+        headers: {
+          Accept: "*/*",
+          "Accept-Language": "zh-CN,zh;q=0.9",
+          "Cache-Control": "no-cache",
+          "Content-Type": "application/json",
+          // 移除Origin和Referer，让浏览器自动处理
+          // Origin: "https://wyapi.toubiec.cn",
+          // Referer: "https://wyapi.toubiec.cn/",
+          Pragma: "no-cache"
+          // 移除User-Agent，浏览器会自动添加且不允许手动修改
+        },
+        body: JSON.stringify({
+          id: neteaseId
+        })
+      });
+
       const data: LyricApiResponse = await response.json();
 
       if (data.code === 200 && data.data && data.data.lrc) {
@@ -211,12 +244,15 @@ export function useMusicAPI() {
     let finalAudioUrl = song.url;
     let finalLyricsText = "";
     let usingHighQuality = false;
+    let lyricsAlreadyFetched = false; // 添加标记避免重复请求歌词
 
     // 首先尝试使用高质量API获取资源
     if (song.neteaseId) {
       if (!isHighQualityApiEnabled.value) {
+        // 高质量API已禁用，直接使用原始歌词
         if (song.lrc) {
           finalLyricsText = await fetchLyrics(song.lrc);
+          lyricsAlreadyFetched = true;
         }
       } else {
         // 先获取高质量音频
@@ -233,20 +269,17 @@ export function useMusicAPI() {
           );
           if (highQualityLyrics) {
             finalLyricsText = highQualityLyrics;
-          } else if (song.lrc) {
-            finalLyricsText = await fetchLyrics(song.lrc);
+            lyricsAlreadyFetched = true;
           }
-        } else {
-          // 音频获取失败，直接使用原始资源
-          if (song.lrc) {
-            finalLyricsText = await fetchLyrics(song.lrc);
-          }
+          // 如果高质量歌词获取失败，稍后统一处理原始歌词
         }
+        // 如果高质量音频获取失败，保持使用原始音频URL，稍后统一处理原始歌词
       }
-    } else {
-      if (song.lrc) {
-        finalLyricsText = await fetchLyrics(song.lrc);
-      }
+    }
+
+    // 统一处理原始歌词的获取（避免重复请求）
+    if (!lyricsAlreadyFetched && song.lrc) {
+      finalLyricsText = await fetchLyrics(song.lrc);
     }
 
     return {

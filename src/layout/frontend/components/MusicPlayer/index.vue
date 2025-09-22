@@ -2,7 +2,7 @@
  * @Description: 重构后的音乐胶囊播放器组件
  * @Author: 安知鱼
  * @Date: 2025-09-20 15:40:00
- * @LastEditTime: 2025-09-21 18:54:09
+ * @LastEditTime: 2025-09-22 14:51:50
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -56,7 +56,7 @@
     <!-- 音频元素 -->
     <audio
       ref="audioElement"
-      preload="metadata"
+      preload="none"
       @loadstart="audioPlayer.onLoadStart"
       @loadedmetadata="audioPlayer.onLoadedMetadata"
       @timeupdate="onTimeUpdate"
@@ -107,6 +107,13 @@ const audioElement = ref<HTMLAudioElement>();
 // 页脚区域观察器
 let footerObserver: IntersectionObserver | null = null;
 
+// 音乐播放器实例计数
+if (!(window as any).musicPlayerInstanceCount) {
+  (window as any).musicPlayerInstanceCount = 0;
+}
+(window as any).musicPlayerInstanceCount++;
+const instanceId = (window as any).musicPlayerInstanceCount;
+
 // 初始化 composables
 const siteConfigStore = useSiteConfigStore();
 const musicAPI = useMusicAPI();
@@ -118,7 +125,8 @@ const colorExtraction = useColorExtraction();
 
 // 获取随机索引
 const getRandomIndex = (max: number): number => {
-  return Math.floor(Math.random() * max);
+  const randomIndex = Math.floor(Math.random() * max);
+  return randomIndex;
 };
 
 // 初始化页脚区域观察器
@@ -182,8 +190,43 @@ const onTimeUpdate = () => {
   lyricsComposable.updateCurrentLyricIndex();
 };
 
+// 等待封面图片加载完成
+const waitForCoverLoad = (imageUrl?: string): Promise<boolean> => {
+  return new Promise(resolve => {
+    // 如果没有封面图片，直接返回成功
+    if (!imageUrl) {
+      resolve(true);
+      return;
+    }
+
+    const img = new Image();
+    const timeoutId = setTimeout(() => {
+      console.warn("Cover image load timeout, continuing anyway");
+      resolve(false);
+    }, 3000); // 3秒超时
+
+    img.onload = () => {
+      clearTimeout(timeoutId);
+      resolve(true);
+    };
+
+    img.onerror = () => {
+      clearTimeout(timeoutId);
+      console.warn("Failed to load cover image:", imageUrl);
+      resolve(false);
+    };
+
+    // 开始加载图片
+    img.src = imageUrl;
+  });
+};
+
 // 加载歌曲并处理资源
+let loadResourcesCount = 0;
 const loadSongWithResources = async (song: Song) => {
+  loadResourcesCount++;
+  const loadId = Date.now() + "-" + Math.random().toString(36).substr(2, 9);
+
   try {
     // 获取歌曲资源（音频和歌词）
     const resources = await musicAPI.fetchSongResources(song);
@@ -259,6 +302,7 @@ const initializePlayer = async () => {
     }
 
     setPlayerInitializing(true);
+    isInitializing = true; // 标记开始初始化，避免watch重复调用
 
     // 确保站点配置已加载
     if (!siteConfigStore.isLoaded) {
@@ -271,49 +315,37 @@ const initializePlayer = async () => {
       return false;
     }
 
-    playlist.value = playlistData;
-
     // 随机选择第一首歌曲
-    const randomIndex = getRandomIndex(playlist.value.length);
+    const randomIndex = getRandomIndex(playlistData.length);
+    const firstSong = playlistData[randomIndex];
 
     // 设置音频引用
     audioPlayer.audioRef.value = audioElement.value;
 
-    // 加载并播放随机选择的歌曲
-    const song = playlist.value[randomIndex];
-    await loadSongWithResources(song);
-
-    const playSuccess = await audioPlayer.playSong(randomIndex);
-
-    if (playSuccess) {
-      // 完成加载后显示播放器
-      isVisible.value = true;
-      setPlayerInitialized(true);
-      return true;
-    } else {
-      // 如果当前歌曲加载失败，尝试播放下一首（最多尝试5首）
-      const maxFallbackAttempts = Math.min(5, playlist.value.length);
-      for (let i = 1; i < maxFallbackAttempts; i++) {
-        const nextIndex = (randomIndex + i) % playlist.value.length;
-        const nextSong = playlist.value[nextIndex];
-
-        await loadSongWithResources(nextSong);
-
-        const nextPlaySuccess = await audioPlayer.playSong(nextIndex);
-        if (nextPlaySuccess) {
-          isVisible.value = true;
-          setPlayerInitialized(true);
-          return true;
-        }
-      }
-
-      // 所有歌曲都无法播放
-      return false;
+    // 先加载第一首歌的资源（包括封面），避免watch重复调用
+    const resourcesLoaded = await loadSongWithResources(firstSong);
+    if (!resourcesLoaded) {
+      console.warn(
+        "Failed to load first song resources, but showing player anyway"
+      );
     }
+
+    // 等待封面图片完全加载完成
+    await waitForCoverLoad(firstSong.pic);
+
+    // 资源加载完成后，设置播放列表和索引（此时watch不会触发重复调用）
+    audioPlayer.currentSongIndex.value = randomIndex;
+    playlist.value = playlistData;
+
+    // 完成所有资源加载后显示播放器
+    isVisible.value = true;
+    setPlayerInitialized(true);
+    return true;
   } catch (error) {
     return false;
   } finally {
     // 无论成功还是失败，都要重置初始化状态
+    isInitializing = false;
     setPlayerInitializing(false);
   }
 };
@@ -426,16 +458,20 @@ watch(
   }
 );
 
-// 监听当前歌曲变化，加载资源 (优化: 避免初始化时重复加载)
-let isInitializing = true;
+// 监听当前歌曲变化，加载资源
 let currentSongChangePromise: Promise<void> | null = null;
+let watchTriggerCount = 0;
+let isInitializing = false; // 新增：标记是否正在初始化
 
 watch(
   () => audioPlayer.currentSong.value,
   async (newSong, oldSong) => {
-    // 跳过初始化阶段的自动触发，避免重复加载
+    watchTriggerCount++;
+    const triggerId =
+      Date.now() + "-" + Math.random().toString(36).substr(2, 9);
+
+    // 如果正在初始化播放器，跳过watch的资源加载（避免重复调用）
     if (isInitializing) {
-      isInitializing = false;
       return;
     }
 
@@ -444,21 +480,19 @@ watch(
       if (currentSongChangePromise) {
         try {
           await currentSongChangePromise;
-        } catch (error) {
-          // 操作出错，继续执行新的加载
-        }
+        } catch (error) {}
       }
 
-      // 创建新的加载Promise
+      // 创建新的加载Promise - 只加载歌词和封面色彩，不加载音频
       currentSongChangePromise = loadSongWithResources(newSong).then(() => {});
 
       try {
         await currentSongChangePromise;
       } catch (error) {
-        // 歌曲资源加载失败
       } finally {
         currentSongChangePromise = null;
       }
+    } else {
     }
   }
 );
@@ -503,6 +537,8 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
+  (window as any).musicPlayerInstanceCount--;
+
   if (audioElement.value) {
     audioElement.value.pause();
     audioElement.value.src = "";
