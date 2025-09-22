@@ -2,22 +2,29 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-14 13:56:16
- * @LastEditTime: 2025-09-14 23:04:49
+ * @LastEditTime: 2025-09-22 20:07:49
  * @LastEditors: 安知鱼
  */
-export async function installMarkdownEditorExtensions() {
-  try {
-    const [{ config }, TabsPlugin] = await Promise.all([
-      import("md-editor-v3"),
-      import("./plugins/markdown-it-tabs-plugin").then(m => m.default)
-    ]);
+import { config } from "md-editor-v3";
+import TabsPlugin from "./plugins/markdown-it-tabs-plugin";
 
-    config({
-      markdownItConfig(mdit) {
+export function installMarkdownEditorExtensions() {
+  console.log("🔧 Installing markdown editor extensions...");
+
+  config({
+    markdownItConfig(mdit) {
+      console.log("⚙️ Configuring markdown-it with plugins...");
+
+      try {
         mdit.use(TabsPlugin);
+        console.log("✅ TabsPlugin registered");
+
+        console.log("🎉 All markdown plugins configured successfully!");
+      } catch (error) {
+        console.error("❌ Error configuring plugins:", error);
       }
-    });
-  } catch (error) {
-    console.error("Failed to install markdown editor extensions:", error);
-  }
+    }
+  });
+
+  console.log("✅ Markdown editor extensions installed");
 }
