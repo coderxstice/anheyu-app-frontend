@@ -145,6 +145,7 @@ const handleIconClick = (event: MouseEvent) => {
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   background-color: var(--anzhiyu-card-bg);
+  border: var(--style-border);
 
   &:hover {
     transform: scale(1.02);
