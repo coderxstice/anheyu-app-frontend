@@ -1,8 +1,8 @@
 <!--
- * @Description: 重构后的音乐胶囊播放器组件
+ * @Description: 音乐胶囊播放器组件
  * @Author: 安知鱼
  * @Date: 2025-09-20 15:40:00
- * @LastEditTime: 2025-09-22 14:51:50
+ * @LastEditTime: 2025-09-24 23:01:51
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -18,7 +18,6 @@
     }"
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
-    @click="handlePlayerClick"
   >
     <!-- 统一的音乐胶囊容器 -->
     <MusicCapsule
@@ -174,10 +173,6 @@ const toggleExpand = () => {
     isExpanded.value = true;
     isCollapsing.value = false;
   }
-};
-
-const handlePlayerClick = (event: MouseEvent) => {
-  // 空的处理函数，主要逻辑移到了MusicCapsule组件
 };
 
 const togglePlaylist = () => {
