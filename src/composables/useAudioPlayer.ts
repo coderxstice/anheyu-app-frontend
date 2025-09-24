@@ -83,6 +83,13 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
           reject(new Error("音频加载超时"));
         }, 10000);
 
+        // 监听元数据加载事件
+        const onLoadedMetadata = () => {
+          if (audio) {
+            audioState.duration = audio.duration || 0;
+          }
+        };
+
         // 监听成功事件
         const onCanPlay = () => {
           clearTimeout(timeout);
@@ -121,11 +128,13 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
 
         // 清理事件监听器
         const cleanup = () => {
+          audio.removeEventListener("loadedmetadata", onLoadedMetadata);
           audio.removeEventListener("canplay", onCanPlay);
           audio.removeEventListener("error", onError);
         };
 
         // 添加事件监听器
+        audio.addEventListener("loadedmetadata", onLoadedMetadata);
         audio.addEventListener("canplay", onCanPlay);
         audio.addEventListener("error", onError);
 
@@ -171,7 +180,14 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
         return false;
       }
 
-      // 如果需要立即加载音频（例如切换歌曲时正在播放）
+      if (audioRef.value) {
+        audioRef.value.pause();
+        audioRef.value.currentTime = 0;
+      }
+      audioState.currentTime = 0;
+      audioState.duration = 0;
+      console.log("🎵 [切换歌曲] 播放进度已重置到 0:00");
+
       if (shouldLoadAudio) {
         isLoadingSong = true;
         const success = await loadAudio(song);
@@ -244,8 +260,8 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
       nextIndex = playlist.value.length - 1;
     }
 
-    // 如果当前正在播放，需要立即加载音频
-    const success = await playSong(nextIndex, wasPlaying);
+    // 🎵 修复：即使不播放，也要加载音频来获取时长信息
+    const success = await playSong(nextIndex, true); // 始终加载音频来获取元数据
     if (!success) {
       consecutiveFailures++;
 
@@ -277,8 +293,8 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
       nextIndex = 0;
     }
 
-    // 如果当前正在播放或强制播放，需要立即加载音频
-    const success = await playSong(nextIndex, wasPlaying);
+    // 🎵 修复：即使不播放，也要加载音频来获取时长信息
+    const success = await playSong(nextIndex, true); // 始终加载音频来获取元数据
     if (!success) {
       consecutiveFailures++;
 
@@ -312,10 +328,11 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
   };
 
   // 进度控制
-  const seek = (percentage: number) => {
+  const seek = (time: number) => {
     if (!audioRef.value || !audioState.duration) return;
 
-    const targetTime = percentage * audioState.duration;
+    // 确保时间在有效范围内
+    const targetTime = Math.max(0, Math.min(time, audioState.duration));
     audioRef.value.currentTime = targetTime;
     audioState.currentTime = targetTime;
   };
