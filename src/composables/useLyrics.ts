@@ -7,8 +7,7 @@ import { ref, reactive, nextTick, shallowRef, watch, type Ref } from "vue";
 import type { LyricLine, LyricsState, LyricInput } from "../types/music";
 
 export function useLyrics(currentTime: Ref<number>, isDragging?: Ref<boolean>) {
-  // HeoMusic风格的歌词同步配置
-  const LYRIC_ADVANCE_TIME = 0.3; // 歌词提前显示时间（秒），HeoMusic风格
+  const LYRIC_ADVANCE_TIME = 0.3; // 歌词提前显示时间（秒）
   const DRAG_LYRIC_ADVANCE_TIME = 0.1; // 拖拽时使用更小的提前量
 
   // 歌词数据
@@ -217,14 +216,13 @@ export function useLyrics(currentTime: Ref<number>, isDragging?: Ref<boolean>) {
     });
   };
 
-  // 根据当前播放时间查找对应的歌词索引（HeoMusic风格）
+  // 根据当前播放时间查找对应的歌词索引
   const findCurrentLyricIndex = (): number => {
     if (lyrics.value.length === 0) {
       console.log("🎵 [查找歌词索引] 无歌词数据，返回 -1");
       return -1;
     }
 
-    // HeoMusic风格：拖拽时使用不同的提前量策略
     const advanceTime = isDragging?.value
       ? DRAG_LYRIC_ADVANCE_TIME
       : LYRIC_ADVANCE_TIME;

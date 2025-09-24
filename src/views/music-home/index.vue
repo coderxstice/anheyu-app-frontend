@@ -2,7 +2,7 @@
  * @Description: 音乐馆页面
  * @Author: 安知鱼
  * @Date: 2025-09-23 12:13:32
- * @LastEditTime: 2025-09-24 17:53:02
+ * @LastEditTime: 2025-09-24 18:26:32
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -120,8 +120,7 @@
 
       <!-- 播放控制 -->
       <div class="playback-controls">
-        <!-- 进度条 - HeoMusic风格 -->
-        <div class="progress-container heomusic-style">
+        <div class="progress-container anzhiyumusic-style">
           <span class="time-label">{{
             formatTime(audioPlayer.audioState.currentTime)
           }}</span>
@@ -129,14 +128,14 @@
             class="progress-track"
             :class="{
               dragging: isDragging,
-              'heomusic-progress': true
+              'anzhiyumusic-progress': true
             }"
             @click="handleProgressClick"
             @mouseenter="showProgressThumb = true"
             @mouseleave="showProgressThumb = false"
             @mousedown="handleProgressMouseDown"
           >
-            <!-- HeoMusic风格的缓冲进度条 -->
+            <!-- anzhiyumusic风格的缓冲进度条 -->
             <div
               class="progress-buffer"
               :style="{
@@ -145,7 +144,7 @@
             />
             <div
               class="progress-fill"
-              :class="{ 'heomusic-fill': true }"
+              :class="{ 'anzhiyumusic-fill': true }"
               :style="{
                 width: `${isDragging ? dragProgress : audioPlayer.playedPercentage.value}%`
               }"
@@ -154,7 +153,7 @@
               class="progress-thumb"
               :class="{
                 show: showProgressThumb || isDragging,
-                'heomusic-thumb': true
+                'anzhiyumusic-thumb': true
               }"
               :style="{ left: `${thumbPosition}%` }"
             />
@@ -164,7 +163,7 @@
           }}</span>
         </div>
 
-        <!-- HeoMusic 风格控制按钮 - 重新排列顺序 -->
+        <!-- anzhiyumusic 风格控制按钮 - 重新排列顺序 -->
         <div class="control-buttons">
           <!-- 1. 刷新缓存按钮 -->
           <button
@@ -183,7 +182,7 @@
             />
           </button>
 
-          <!-- 2. HeoMusic 风格的音量按钮 -->
+          <!-- 2. anzhiyumusic 风格的音量按钮 -->
           <div ref="volumeControlRef" class="volume-control-wrapper">
             <button
               class="control-btn secondary volume-toggle"
@@ -203,7 +202,7 @@
               />
             </button>
 
-            <!-- HeoMusic 风格垂直音量条 -->
+            <!-- anzhiyumusic 风格垂直音量条 -->
             <div
               class="vertical-volume-slider"
               :class="{ show: showVolumeSlider }"
@@ -451,7 +450,7 @@ const isDragging = ref(false);
 const dragProgress = ref(0); // 拖拽时的临时进度
 const thumbPosition = ref(0); // thumb的位置百分比
 
-// HeoMusic 风格音量控制状态
+// anzhiyumusic 风格音量控制状态
 const showVolumeSlider = ref(false);
 const volumeControlRef = ref<HTMLElement>();
 const isVolumeDragging = ref(false);
@@ -465,7 +464,7 @@ const cacheStatus = reactive({
   cacheKey: "music-playlist-cache"
 });
 
-// HeoMusic风格的拖拽性能优化
+// anzhiyumusic风格的拖拽性能优化
 const dragLyricIndex = ref(-1); // 拖拽时的歌词索引
 const lastLyricScrollTime = ref(0); // 上次歌词滚动时间
 const cachedProgressRect = ref<DOMRect | null>(null); // 缓存的进度条位置信息
@@ -536,11 +535,11 @@ const formatTime = (seconds: number): string => {
   return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 };
 
-// HeoMusic风格的歌词同步配置
+// anzhiyumusic风格的歌词同步配置
 const LYRIC_ADVANCE_TIME = 0.3; // 减少提前显示时间，更精准同步
 const DRAG_LYRIC_ADVANCE_TIME = 0.1; // 拖拽时的提前量更小，保证跟手感
 
-// 根据时间查找对应的歌词索引（HeoMusic风格）
+// 根据时间查找对应的歌词索引（anzhiyumusic风格）
 const findLyricIndexByTime = (time: number, isDragging = false): number => {
   const lyrics = lyricsComposable.lyrics.value;
   if (lyrics.length === 0) return -1;
@@ -549,7 +548,7 @@ const findLyricIndexByTime = (time: number, isDragging = false): number => {
   const advanceTime = isDragging ? DRAG_LYRIC_ADVANCE_TIME : LYRIC_ADVANCE_TIME;
   const adjustedTime = time + advanceTime;
 
-  // 优化的查找逻辑，模拟HeoMusic的精准定位
+  // 优化的查找逻辑，模拟anzhiyumusic的精准定位
   let result = -1;
   for (let i = lyrics.length - 1; i >= 0; i--) {
     if (adjustedTime >= lyrics[i].time) {
@@ -561,7 +560,7 @@ const findLyricIndexByTime = (time: number, isDragging = false): number => {
   return result;
 };
 
-// HeoMusic风格的实时歌词滚动（拖拽专用）
+// anzhiyumusic风格的实时歌词滚动（拖拽专用）
 const realtimeLyricScroll = (lyricIndex: number) => {
   const now = performance.now();
   // 优化节流时间，确保拖拽时的流畅体验
@@ -641,7 +640,7 @@ const handleVolumeChange = (event: Event) => {
   audioPlayer.setVolume(volume);
 };
 
-// HeoMusic 风格音量控制方法
+// anzhiyumusic 风格音量控制方法
 const toggleVolumeSlider = () => {
   showVolumeSlider.value = !showVolumeSlider.value;
   console.log("🔊 [音量控制] 切换垂直音量条显示:", {
@@ -728,7 +727,7 @@ const handleProgressMouseDown = (event: MouseEvent) => {
         // 只有歌词索引改变时才更新（避免重复滚动）
         if (currentLyricIndex !== dragLyricIndex.value) {
           dragLyricIndex.value = currentLyricIndex;
-          // 使用HeoMusic风格的实时歌词滚动
+          // 使用anzhiyumusic风格的实时歌词滚动
           realtimeLyricScroll(currentLyricIndex);
         }
       }
@@ -1293,7 +1292,7 @@ watch(
   { immediate: true }
 );
 
-// HeoMusic风格的键盘快捷键处理
+// anzhiyumusic风格的键盘快捷键处理
 const handleKeydown = (event: KeyboardEvent) => {
   // 只在没有输入框焦点时响应快捷键
   if (
@@ -1312,14 +1311,14 @@ const handleKeydown = (event: KeyboardEvent) => {
 
   switch (event.code) {
     case "Space":
-      // HeoMusic风格：空格键暂停/播放
+      // anzhiyumusic风格：空格键暂停/播放
       event.preventDefault();
       handlePlayPause();
       console.log("⌨️ [Space] 切换播放状态");
       break;
 
     case "ArrowUp":
-      // HeoMusic风格：上箭头增加音量
+      // anzhiyumusic风格：上箭头增加音量
       event.preventDefault();
       const newVolumeUp = Math.min(1, audioPlayer.audioState.volume + 0.1);
       audioPlayer.setVolume(newVolumeUp);
@@ -1327,7 +1326,7 @@ const handleKeydown = (event: KeyboardEvent) => {
       break;
 
     case "ArrowDown":
-      // HeoMusic风格：下箭头减少音量
+      // anzhiyumusic风格：下箭头减少音量
       event.preventDefault();
       const newVolumeDown = Math.max(0, audioPlayer.audioState.volume - 0.1);
       audioPlayer.setVolume(newVolumeDown);
@@ -1335,7 +1334,7 @@ const handleKeydown = (event: KeyboardEvent) => {
       break;
 
     case "ArrowLeft":
-      // HeoMusic风格：左箭头上一曲
+      // anzhiyumusic风格：左箭头上一曲
       event.preventDefault();
       if (hasPlaylist.value) {
         audioPlayer.previousSong();
@@ -1344,7 +1343,7 @@ const handleKeydown = (event: KeyboardEvent) => {
       break;
 
     case "ArrowRight":
-      // HeoMusic风格：右箭头下一曲
+      // anzhiyumusic风格：右箭头下一曲
       event.preventDefault();
       if (hasPlaylist.value) {
         audioPlayer.nextSong();
@@ -1392,13 +1391,13 @@ onMounted(async () => {
   // 默认不显示播放列表
   showPlaylist.value = false;
 
-  // 添加HeoMusic风格的键盘事件监听
+  // 添加anzhiyumusic风格的键盘事件监听
   document.addEventListener("keydown", handleKeydown);
 
   // 添加点击外部关闭音量条的事件监听
   document.addEventListener("click", handleClickOutside);
 
-  console.log("⌨️ [键盘快捷键] HeoMusic风格快捷键已启用:", {
+  console.log("⌨️ [键盘快捷键] anzhiyumusic风格快捷键已启用:", {
     shortcuts: [
       "Space - 播放/暂停",
       "↑ - 音量+",
@@ -1408,7 +1407,7 @@ onMounted(async () => {
     ]
   });
 
-  console.log("🔊 [音量控制] HeoMusic风格音量控制已启用");
+  console.log("🔊 [音量控制] anzhiyumusic风格音量控制已启用");
 
   console.log("🚀 [组件挂载] 音乐主页组件挂载完成:", {
     playlistLength: playlist.value.length,
@@ -1486,9 +1485,9 @@ onMounted(async () => {
       };
     },
 
-    // HeoMusic键盘快捷键说明
+    // anzhiyumusic键盘快捷键说明
     showKeyboardShortcuts: () => {
-      console.log("⌨️ [HeoMusic快捷键说明]:", {
+      console.log("⌨️ [anzhiyumusic快捷键说明]:", {
         Space: "播放/暂停音乐",
         "↑": "音量增加 10%",
         "↓": "音量减少 10%",
@@ -1513,7 +1512,7 @@ onMounted(async () => {
 
 // 组件卸载
 onBeforeUnmount(() => {
-  // 清理HeoMusic键盘事件监听
+  // 清理anzhiyumusic键盘事件监听
   document.removeEventListener("keydown", handleKeydown);
   // 清理音量控制点击外部事件监听
   document.removeEventListener("click", handleClickOutside);
@@ -2019,7 +2018,7 @@ onBeforeUnmount(() => {
       }
     }
 
-    // HeoMusic 风格音量控制容器
+    // anzhiyumusic 风格音量控制容器
     .volume-control-wrapper {
       position: relative;
       display: flex;
@@ -2028,7 +2027,7 @@ onBeforeUnmount(() => {
 
       // volume-toggle 继承 .control-btn.secondary 样式，无需额外定义
 
-      // HeoMusic 风格垂直音量条
+      // anzhiyumusic 风格垂直音量条
       .vertical-volume-slider {
         position: absolute;
         bottom: 70px;
@@ -2130,7 +2129,7 @@ onBeforeUnmount(() => {
           }
         }
 
-        // HeoMusic 风格的小箭头指示器
+        // anzhiyumusic 风格的小箭头指示器
         &::before {
           content: "";
           position: absolute;
@@ -2147,9 +2146,9 @@ onBeforeUnmount(() => {
     }
   }
 
-  // HeoMusic 风格音量控制 - 已移动到 control-buttons 内，隐藏原有控制
+  // anzhiyumusic 风格音量控制 - 已移动到 control-buttons 内，隐藏原有控制
   .volume-controls {
-    display: none; // 现在使用 HeoMusic 风格的垂直音量条
+    display: none; // 现在使用 anzhiyumusic 风格的垂直音量条
 
     .volume-btn {
       background: none;

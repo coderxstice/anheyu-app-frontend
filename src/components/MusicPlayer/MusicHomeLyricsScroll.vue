@@ -258,9 +258,8 @@ const handleWheel = (event: WheelEvent) => {
     userScrollResetTimer = null;
   }
 
-  // HeoMusic风格：4秒后恢复自动滚动（模拟HeoMusic的行为）
   userScrollResetTimer = window.setTimeout(() => {
-    console.log("🖱️ [鼠标滚轮] 4秒后重置用户滚动状态 (HeoMusic风格):", {
+    console.log("🖱️ [鼠标滚轮] 4秒后重置用户滚动状态:", {
       currentIndex: props.lyricsState.currentIndex,
       currentLyric:
         props.lyrics[props.lyricsState.currentIndex]?.text?.substring(0, 30) +
@@ -274,13 +273,12 @@ const handleWheel = (event: WheelEvent) => {
     userScrolling.value = false;
     userScrollResetTimer = null;
 
-    // 恢复到当前播放的歌词位置，使用HeoMusic风格的缓动
     const currentIndex = props.lyricsState.currentIndex;
     if (currentIndex >= 0) {
-      console.log("🖱️ [鼠标滚轮] 恢复自动滚动到当前播放位置 (HeoMusic风格)");
+      console.log("🖱️ [鼠标滚轮] 恢复自动滚动到当前播放位置");
       scrollToCurrentLyricCenter(currentIndex);
     }
-  }, 4000); // 从2秒改为4秒，模拟HeoMusic的行为
+  }, 4000);
 };
 
 // 处理滚动事件 - 优化后只在真正需要时才处理
@@ -315,18 +313,15 @@ const handleScroll = () => {
         userScrollResetTimer = null;
       }
 
-      // HeoMusic风格：4秒后重置用户滚动状态
       userScrollResetTimer = window.setTimeout(() => {
-        console.log("📜 [滚动事件] 4秒后重置用户滚动状态 (HeoMusic风格)");
         userScrolling.value = false;
         userScrollResetTimer = null;
 
-        // 恢复到当前播放的歌词位置，使用HeoMusic风格的滚动
         const currentIndex = props.lyricsState.currentIndex;
         if (currentIndex >= 0) {
           scrollToCurrentLyricCenter(currentIndex);
         }
-      }, 4000); // 从2秒改为4秒，模拟HeoMusic
+      }, 4000);
     }
   }, 100);
 };
@@ -516,18 +511,11 @@ const scrollToLyricIndexSmooth = async (targetIndex: number) => {
   // 计算滚动距离
   const scrollDistance = Math.abs(targetScrollTop - currentScrollTop);
 
-  // 🚀 HeoMusic风格：拖拽时使用短动画而非即时跳转，保持流畅感
   if (props.isDragging) {
-    console.log("⚡ [HeoMusic拖拽优化] 使用快速动画，保持拖拽流畅感", {
-      targetIndex,
-      scrollDistance: Math.round(scrollDistance)
-    });
-
-    // HeoMusic风格：拖拽时使用快速动画（100ms），而不是即时跳转
     const quickAnimationDuration = Math.min(100, scrollDistance / 10);
     smoothScrollTo(
       targetScrollTop,
-      `HeoMusic拖拽快速滚动到歌词${targetIndex}`,
+      `拖拽快速滚动到歌词${targetIndex}`,
       quickAnimationDuration
     );
     return;
@@ -811,27 +799,22 @@ const easeLinear = (t: number): number => {
   return t;
 };
 
-// HeoMusic风格的缓动函数选择 - 模拟HeoMusic的滚动感觉
 const selectEasingFunction = (distance: number) => {
-  // 🚀 拖拽时使用流畅的缓动，而不是生硬的线性
   if (props.isDragging) {
-    return { func: easeInOutQuad, name: "HeoMusic拖拽滚动" };
+    return { func: easeInOutQuad, name: "拖拽滚动" };
   }
 
   if (distance <= 200) {
     // 短距离：使用二次缓动，更顺滑
-    return { func: easeInOutQuad, name: "HeoMusic短距离滚动" };
+    return { func: easeInOutQuad, name: "短距离滚动" };
   } else if (distance <= 500) {
     // 中距离：使用三次缓动，平衡流畅度和速度
-    return { func: easeInOutCubic, name: "HeoMusic中距离滚动" };
+    return { func: easeInOutCubic, name: "中距离滚动" };
   } else {
-    // 长距离：使用四次缓出，模拟HeoMusic的长距离滚动
-    return { func: easeOutQuart, name: "HeoMusic长距离滚动" };
+    // 长距离：使用四次缓出，模拟的长距离滚动
+    return { func: easeOutQuart, name: "长距离滚动" };
   }
 };
-
-// 移除复杂的基于时间的滚动位置计算 - 不再需要
-// 只在歌词索引变化时滚动到居中位置即可
 
 // 滚动到当前歌词的居中位置（基于索引）- 智能调整动画时间
 const scrollToCurrentLyricCenter = (currentIndex: number) => {
@@ -865,9 +848,9 @@ const scrollToCurrentLyricCenter = (currentIndex: number) => {
   // 计算滚动距离
   const scrollDistance = Math.abs(targetScrollTop - currentScrollTop);
 
-  // 🚀 HeoMusic风格：拖拽时也使用快速动画
+  // 🚀 风格：拖拽时也使用快速动画
   if (props.isDragging) {
-    console.log("⚡ [HeoMusic拖拽优化] 当前歌词滚动使用快速动画", {
+    console.log("⚡ [拖拽优化] 当前歌词滚动使用快速动画", {
       currentIndex,
       scrollDistance: Math.round(scrollDistance)
     });
@@ -876,32 +859,32 @@ const scrollToCurrentLyricCenter = (currentIndex: number) => {
     const ultraFastDuration = Math.min(80, scrollDistance / 15);
     smoothScrollTo(
       targetScrollTop,
-      `HeoMusic拖拽到当前歌词${currentIndex}`,
+      `拖拽到当前歌词${currentIndex}`,
       ultraFastDuration
     );
     return;
   }
 
-  // HeoMusic风格的动画时长策略 - 精确模拟HeoMusic的滚动时长
+  // 风格的动画时长策略 - 精确模拟的滚动时长
   let animationDuration: number;
   let animationStrategy: string;
 
   if (scrollDistance <= 80) {
-    // 极短距离：快速响应，HeoMusic风格
+    // 极短距离：快速响应，风格
     animationDuration = 200;
-    animationStrategy = "HeoMusic快速滚动";
+    animationStrategy = "快速滚动";
   } else if (scrollDistance <= 300) {
-    // 短距离：流畅自然，模拟HeoMusic的短距离滚动
+    // 短距离：流畅自然，模拟的短距离滚动
     animationDuration = 400;
-    animationStrategy = "HeoMusic自然滚动";
+    animationStrategy = "自然滚动";
   } else if (scrollDistance <= 800) {
     // 中等距离：平衡速度和流畅度
     animationDuration = 600;
-    animationStrategy = "HeoMusic平衡滚动";
+    animationStrategy = "平衡滚动";
   } else {
-    // 长距离：有明显的缓动感，类似HeoMusic的长距离滚动
+    // 长距离：有明显的缓动感，类似的长距离滚动
     animationDuration = 800;
-    animationStrategy = "HeoMusic长距离滚动";
+    animationStrategy = "长距离滚动";
   }
 
   console.log("🎯 [原生滚动] 滚动策略:", {
@@ -1437,7 +1420,7 @@ defineExpose({
       }
     }
 
-    // 当前播放状态 - HeoMusic风格
+    // 当前播放状态 - 风格
     &.is-current {
       .lyric-text {
         color: #ffffff;
@@ -1471,7 +1454,7 @@ defineExpose({
       }
     }
 
-    // 歌词文本样式 - HeoMusic风格
+    // 歌词文本样式 - 风格
     .lyric-text {
       width: 100%;
       line-height: 1.6;
