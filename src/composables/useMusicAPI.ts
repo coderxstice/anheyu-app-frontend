@@ -5,14 +5,7 @@
  */
 import { ref } from "vue";
 import type { Song } from "../types/music";
-import {
-  getPlaylistApi,
-  getSongResourcesApi,
-  getHighQualityMusicUrlApi,
-  getHighQualityLyricsApi,
-  getLyricsApi,
-  musicHealthCheckApi
-} from "../api/music";
+import { getPlaylistApi, getSongResourcesApi } from "../api/music";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { get } from "lodash-es";
 
@@ -168,116 +161,39 @@ export function useMusicAPI() {
     }
   };
 
-  // 获取歌词 - 通过后端API
-  const fetchLyrics = async (lrcUrl: string): Promise<string> => {
-    if (!lrcUrl) return "";
-
-    try {
-      const response = await getLyricsApi(lrcUrl);
-
-      if (response.data && response.data.available && response.data.lyrics) {
-        return response.data.lyrics;
-      } else {
-        return "";
-      }
-    } catch (error) {
-      console.error("获取歌词失败:", error);
-      return "";
-    }
-  };
-
-  // 获取高质量音频URL - 通过后端API
-  const fetchHighQualityMusicUrl = async (
-    neteaseId: string
-  ): Promise<string | null> => {
-    if (!neteaseId) return null;
-
-    try {
-      const response = await getHighQualityMusicUrlApi(neteaseId);
-
-      if (response.data && response.data.available && response.data.url) {
-        return response.data.url;
-      } else {
-        return null;
-      }
-    } catch (error) {
-      console.error("获取高质量音频URL失败:", error);
-      return null;
-    }
-  };
-
-  // 获取高质量歌词 - 通过后端API
-  const fetchHighQualityLyrics = async (
-    neteaseId: string
-  ): Promise<string | null> => {
-    if (!neteaseId) return null;
-
-    try {
-      const response = await getHighQualityLyricsApi(neteaseId);
-
-      if (response.data && response.data.available && response.data.lyrics) {
-        return response.data.lyrics;
-      } else {
-        return null;
-      }
-    } catch (error) {
-      console.error("获取高质量歌词失败:", error);
-      return null;
-    }
-  };
-
   // 获取歌曲的音频和歌词资源 - 通过后端API
   const fetchSongResources = async (
     song: Song
   ): Promise<{
     audioUrl: string;
     lyricsText: string;
-    usingHighQuality: boolean;
   }> => {
+    // 检查是否有网易云ID
+    if (!song.neteaseId) {
+      throw new Error("歌曲缺少网易云ID，无法获取高质量资源");
+    }
+
+    console.log("🎵 [高质量API] 获取高质量资源 - 网易云ID:", song.neteaseId);
+
     try {
-      const response = await getSongResourcesApi({
-        id: song.id,
-        neteaseId: song.neteaseId,
-        name: song.name,
-        artist: song.artist,
-        url: song.url,
-        pic: song.pic,
-        lrc: song.lrc
+      const response = await getSongResourcesApi(song.neteaseId);
+
+      if (!response.data || !response.data.audioUrl) {
+        throw new Error("服务器未返回有效的音频资源");
+      }
+
+      console.log("🎵 [高质量API] 成功获取高质量资源:", {
+        hasAudio: !!response.data.audioUrl,
+        hasLyrics: !!response.data.lyricsText
       });
 
-      if (response.data) {
-        return {
-          audioUrl: response.data.audioUrl,
-          lyricsText: response.data.lyricsText,
-          usingHighQuality: response.data.usingHighQuality
-        };
-      } else {
-        // 降级到原始数据
-        return {
-          audioUrl: song.url,
-          lyricsText: "",
-          usingHighQuality: false
-        };
-      }
-    } catch (error) {
-      console.error("获取歌曲资源失败:", error);
-      // 降级到原始数据
       return {
-        audioUrl: song.url,
-        lyricsText: "",
-        usingHighQuality: false
+        audioUrl: response.data.audioUrl,
+        lyricsText: response.data.lyricsText || ""
       };
-    }
-  };
-
-  // 添加健康检查功能
-  const checkHealth = async (): Promise<boolean> => {
-    try {
-      const response = await musicHealthCheckApi();
-      return response.data?.status === "healthy";
     } catch (error) {
-      console.error("音乐服务健康检查失败:", error);
-      return false;
+      console.error("🎵 [高质量API] 获取失败:", error);
+      throw error; // 直接抛出错误，不做降级处理
     }
   };
 
@@ -288,16 +204,10 @@ export function useMusicAPI() {
     // 方法
     fetchPlaylist,
     refreshPlaylist,
-    fetchLyrics,
-    fetchHighQualityMusicUrl,
-    fetchHighQualityLyrics,
     fetchSongResources,
 
     // 缓存管理
     clearPlaylistCache,
-    getCurrentPlaylistId,
-
-    // 工具函数
-    checkHealth
+    getCurrentPlaylistId
   };
 }

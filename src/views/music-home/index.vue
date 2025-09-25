@@ -2,7 +2,7 @@
  * @Description: 音乐馆页面
  * @Author: 安知鱼
  * @Date: 2025-09-23 12:13:32
- * @LastEditTime: 2025-09-24 18:26:32
+ * @LastEditTime: 2025-09-25 10:16:20
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -287,10 +287,9 @@
 
     <!-- 播放列表 - 现代化设计 -->
     <div
-      v-show="showPlaylist"
+      v-if="showPlaylist"
       ref="playlistContainer"
       class="playlist-container"
-      :style="{ pointerEvents: showPlaylist ? 'auto' : 'none' }"
       @click="handlePlaylistBackdropClick"
     >
       <!-- 遮罩层 -->
@@ -354,9 +353,6 @@
                 <div class="song-meta">
                   <h4 class="song-title">{{ song.name }}</h4>
                   <p class="song-artist">{{ song.artist || "未知歌手" }}</p>
-                </div>
-                <div class="song-duration">
-                  {{ formatTime((song as any).duration || 0) }}
                 </div>
               </div>
 
@@ -1255,37 +1251,38 @@ watch(
       colorExtraction.resetToDefaultColor();
     }
 
-    // 加载歌词
-    if (newSong) {
-      console.log("🎵 [歌曲变化] 开始加载新歌曲的歌词");
-      try {
-        const resources = await musicAPI.fetchSongResources(newSong);
+    // 注意：歌曲资源获取（高质量音频和歌词）现在由 useAudioPlayer.loadSongWithResources 处理
+    // 这样可以确保先获取资源再加载音频，避免时序问题
+    console.log("🎵 [歌曲变化] UI处理完成，音频和歌词由音频播放器内部处理");
+  },
+  { immediate: true }
+);
 
-        if (resources.lyricsText) {
-          console.log("🎵 [歌曲变化] 歌词加载成功，设置新歌词");
-          lyricsComposable.setLyrics(resources.lyricsText);
+// 监听音频播放器的歌词变化
+watch(
+  () => audioPlayer.currentLyricsText.value,
+  newLyricsText => {
+    if (newLyricsText) {
+      console.log(
+        "🎵 [歌词变化] 音频播放器提供新歌词，长度:",
+        newLyricsText.length
+      );
+      lyricsComposable.setLyrics(newLyricsText);
 
-          // 歌词加载完成后，延迟触发滚动计算，确保歌词组件已经渲染完成
-          await nextTick();
-          console.log("🎵 [歌曲变化] DOM更新完成，800ms后触发歌词居中滚动");
-          setTimeout(() => {
-            if (lyricsScrollRef.value?.calculateCenterScroll) {
-              console.log("🎵 [歌曲变化] 执行歌词居中滚动");
-              lyricsScrollRef.value.calculateCenterScroll();
-            } else {
-              console.warn("🎵 [歌曲变化] 歌词滚动组件引用不存在");
-            }
-          }, 800);
-        } else {
-          console.log("🎵 [歌曲变化] 无歌词数据，清空歌词");
-          lyricsComposable.clearLyrics();
-        }
-      } catch (error) {
-        console.error("🎵 [歌曲变化] 加载歌词失败:", error);
-        lyricsComposable.clearLyrics();
-      }
+      // 歌词设置完成后，延迟触发滚动计算
+      nextTick().then(() => {
+        console.log("🎵 [歌词变化] DOM更新完成，800ms后触发歌词居中滚动");
+        setTimeout(() => {
+          if (lyricsScrollRef.value?.calculateCenterScroll) {
+            console.log("🎵 [歌词变化] 执行歌词居中滚动");
+            lyricsScrollRef.value.calculateCenterScroll();
+          } else {
+            console.warn("🎵 [歌词变化] 歌词滚动组件引用不存在");
+          }
+        }, 800);
+      });
     } else {
-      console.log("🎵 [歌曲变化] 无当前歌曲，清空歌词");
+      console.log("🎵 [歌词变化] 清空歌词");
       lyricsComposable.clearLyrics();
     }
   },
@@ -1869,6 +1866,7 @@ onBeforeUnmount(() => {
 
 // Playback controls
 .playback-controls {
+  padding: 0 20px;
   .progress-container {
     display: flex;
     align-items: center;
@@ -2568,14 +2566,6 @@ onBeforeUnmount(() => {
       overflow: hidden;
       text-overflow: ellipsis;
     }
-  }
-
-  .song-duration {
-    font-size: 12px;
-    color: var(--anzhiyu-secondtext);
-    font-weight: 500;
-    margin-left: 12px;
-    font-family: "SF Mono", "Monaco", "Menlo", monospace;
   }
 }
 
