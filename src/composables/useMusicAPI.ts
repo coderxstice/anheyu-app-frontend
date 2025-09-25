@@ -167,49 +167,33 @@ export function useMusicAPI() {
   ): Promise<{
     audioUrl: string;
     lyricsText: string;
-    usingHighQuality: boolean;
   }> => {
-    try {
-      // 检查是否有网易云ID
-      if (!song.neteaseId) {
-        console.warn("歌曲缺少网易云ID，无法获取资源");
-        // 如果有原始URL，可以作为降级方案
-        if (song.url) {
-          return {
-            audioUrl: song.url,
-            lyricsText: "",
-            usingHighQuality: false
-          };
-        }
-        throw new Error("歌曲缺少网易云ID且没有备用URL");
-      }
+    // 检查是否有网易云ID
+    if (!song.neteaseId) {
+      throw new Error("歌曲缺少网易云ID，无法获取高质量资源");
+    }
 
+    console.log("🎵 [高质量API] 获取高质量资源 - 网易云ID:", song.neteaseId);
+
+    try {
       const response = await getSongResourcesApi(song.neteaseId);
 
-      if (response.data && response.data.audioUrl) {
-        return {
-          audioUrl: response.data.audioUrl,
-          lyricsText: response.data.lyricsText || "",
-          usingHighQuality: response.data.usingHighQuality || false
-        };
-      } else {
+      if (!response.data || !response.data.audioUrl) {
         throw new Error("服务器未返回有效的音频资源");
       }
+
+      console.log("🎵 [高质量API] 成功获取高质量资源:", {
+        hasAudio: !!response.data.audioUrl,
+        hasLyrics: !!response.data.lyricsText
+      });
+
+      return {
+        audioUrl: response.data.audioUrl,
+        lyricsText: response.data.lyricsText || ""
+      };
     } catch (error) {
-      console.error("获取歌曲资源失败:", error);
-
-      // 如果有原始URL，尝试降级
-      if (song.url) {
-        console.warn("降级使用原始音频URL");
-        return {
-          audioUrl: song.url,
-          lyricsText: "",
-          usingHighQuality: false
-        };
-      }
-
-      // 没有任何可用资源，抛出错误
-      throw error;
+      console.error("🎵 [高质量API] 获取失败:", error);
+      throw error; // 直接抛出错误，不做降级处理
     }
   };
 

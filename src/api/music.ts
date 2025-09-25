@@ -19,7 +19,6 @@ export interface PlaylistResponse {
 export interface SongResourceResponse {
   audioUrl: string;
   lyricsText: string;
-  usingHighQuality: boolean;
 }
 
 /**

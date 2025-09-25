@@ -252,98 +252,208 @@ export function useAudioPlayer(playlist: Ref<Song[]>) {
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
-  // 获取歌曲资源并加载音频 - 后端处理所有降级逻辑
+  // 智能加载歌曲资源 - 优先高质量，失败时降级到基础资源
   const loadSongWithResources = async (
     song: Song,
     loadFullAudio: boolean = false,
     forceReload: boolean = false
-  ): Promise<{ success: boolean; lyricsText?: string }> => {
-    if (!song?.neteaseId) {
-      console.error("🎵 [资源加载] 歌曲缺少网易云ID，无法获取资源");
-      return { success: false };
+  ): Promise<{
+    success: boolean;
+    usingHighQuality: boolean;
+    lyricsText?: string;
+  }> => {
+    if (!song) {
+      console.error("🎵 [智能加载] 歌曲对象为空");
+      return { success: false, usingHighQuality: false };
     }
 
     // 检查是否已经获取过资源（除非强制重新加载）
-    const songKey = `${song.neteaseId}`;
+    const songKey = `${song.neteaseId || song.id}`;
     if (!forceReload && resourcesLoadedSongs.has(songKey)) {
       console.log(
-        "🎵 [资源加载] 歌曲资源已存在，跳过重复获取 - 网易云ID:",
+        "🎵 [智能加载] 歌曲资源已存在，跳过重复获取 - 歌曲:",
+        song.name
+      );
+      return { success: true, usingHighQuality: true }; // 假设已缓存的是高质量资源
+    }
+
+    let finalAudioUrl = "";
+    let finalLyricsText = "";
+    let usingHighQuality = false;
+
+    // 第一步：尝试获取高质量资源（带超时机制）
+    if (song.neteaseId) {
+      console.log(
+        "🎵 [智能加载] 尝试获取高质量资源 - 网易云ID:",
         song.neteaseId
       );
-      return { success: true }; // 资源已存在，返回成功
+      try {
+        // 设置8秒超时，音质优先但不让用户等待太久
+        const timeout = 8000;
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("高质量资源获取超时")), timeout)
+        );
+
+        console.log(`🎵 [智能加载] 设置${timeout / 1000}秒超时机制`);
+
+        const highQualityResources = await Promise.race([
+          musicAPI.fetchSongResources(song),
+          timeoutPromise
+        ]);
+
+        if (highQualityResources.audioUrl) {
+          finalAudioUrl = highQualityResources.audioUrl;
+          finalLyricsText = highQualityResources.lyricsText || "";
+          usingHighQuality = true;
+          console.log("🎵 [智能加载] ✅ 成功获取高质量资源:", {
+            hasAudio: !!finalAudioUrl,
+            hasLyrics: !!finalLyricsText,
+            timeoutUsed: false
+          });
+        }
+      } catch (error) {
+        const isTimeout =
+          error instanceof Error && error.message.includes("超时");
+        console.warn(
+          `🎵 [智能加载] ⚠️ 高质量资源获取${isTimeout ? "超时" : "失败"}:`,
+          error
+        );
+        if (isTimeout) {
+          console.log("🎵 [智能加载] 网络较慢，自动降级到基础资源");
+        }
+      }
+    } else {
+      console.log("🎵 [智能加载] 跳过高质量资源获取（无网易云ID）");
     }
 
-    try {
-      console.log("🎵 [资源加载] 获取歌曲资源 - 网易云ID:", song.neteaseId);
+    // 第二步：如果高质量资源失败，使用基础资源（meting数据）
+    if (!finalAudioUrl && song.url) {
+      console.log("🎵 [智能加载] 降级使用基础资源 - 音频URL:", song.url);
+      finalAudioUrl = song.url;
+      usingHighQuality = false;
 
-      // 从后端获取资源（后端负责所有降级逻辑）
-      const resources = await musicAPI.fetchSongResources(song);
+      // 处理基础歌词：检查是否为URL格式
+      if (song.lrc) {
+        if (song.lrc.startsWith("http")) {
+          console.log(
+            "🎵 [智能加载] 检测到歌词URL，尝试获取歌词内容:",
+            song.lrc
+          );
+          try {
+            // 为基础歌词获取设置5秒超时
+            const lyricsTimeout = 5000;
+            const timeoutPromise = new Promise<never>((_, reject) =>
+              setTimeout(
+                () => reject(new Error("基础歌词获取超时")),
+                lyricsTimeout
+              )
+            );
 
-      if (!resources.audioUrl) {
-        console.error("🎵 [资源加载] 后端未返回有效的音频URL");
-        return { success: false };
-      }
+            console.log(
+              `🎵 [智能加载] 基础歌词请求设置${lyricsTimeout / 1000}秒超时`
+            );
 
-      console.log("🎵 [资源加载] 后端返回资源:", {
-        audioUrl: resources.audioUrl,
-        hasLyrics: !!resources.lyricsText,
-        usingHighQuality: resources.usingHighQuality
-      });
+            const lyricsResponse = await Promise.race([
+              fetch(song.lrc),
+              timeoutPromise
+            ]);
 
-      // 创建临时歌曲对象用于加载
-      const songWithResources: Song = {
-        ...song,
-        url: resources.audioUrl // 使用后端返回的音频URL
-      };
-
-      // 根据需要加载音频或只加载元数据
-      let success = false;
-      if (loadFullAudio) {
-        console.log("🎵 [资源加载] 完全加载音频");
-        success = await loadAudio(songWithResources);
+            if (lyricsResponse.ok) {
+              finalLyricsText = await lyricsResponse.text();
+              console.log(
+                "🎵 [智能加载] ✅ 成功获取基础歌词，长度:",
+                finalLyricsText.length
+              );
+            } else {
+              console.warn(
+                "🎵 [智能加载] ⚠️ 基础歌词URL请求失败:",
+                lyricsResponse.status
+              );
+              finalLyricsText = "";
+            }
+          } catch (error) {
+            const isTimeout =
+              error instanceof Error && error.message.includes("超时");
+            console.warn(
+              `🎵 [智能加载] ⚠️ 获取基础歌词${isTimeout ? "超时" : "失败"}:`,
+              error
+            );
+            finalLyricsText = "";
+          }
+        } else {
+          // 直接是歌词内容
+          finalLyricsText = song.lrc;
+          console.log(
+            "🎵 [智能加载] 使用基础歌词内容，长度:",
+            finalLyricsText.length
+          );
+        }
       } else {
-        console.log("🎵 [资源加载] 只加载元数据");
-        success = await loadAudioMetadata(songWithResources);
+        finalLyricsText = "";
+        console.log("🎵 [智能加载] 无基础歌词数据");
       }
+    }
 
-      // 如果音频加载成功，更新播放列表中的URL
-      if (success) {
+    // 第三步：检查是否有可用资源
+    if (!finalAudioUrl) {
+      console.error("🎵 [智能加载] ❌ 无任何可用音频资源 - 歌曲:", song.name);
+      return { success: false, usingHighQuality: false };
+    }
+
+    // 第四步：加载音频
+    console.log("🎵 [智能加载] 开始加载音频:", {
+      audioUrl: finalAudioUrl,
+      quality: usingHighQuality ? "高质量" : "基础",
+      loadFullAudio
+    });
+
+    const songWithResources: Song = {
+      ...song,
+      url: finalAudioUrl
+    };
+
+    let success = false;
+    if (loadFullAudio) {
+      success = await loadAudio(songWithResources);
+    } else {
+      success = await loadAudioMetadata(songWithResources);
+    }
+
+    // 第五步：更新状态和缓存
+    if (success) {
+      // 更新播放列表中的URL（如果使用的是高质量资源）
+      if (usingHighQuality) {
         const songIndex = playlist.value.findIndex(
-          s => s.neteaseId === song.neteaseId
+          s => s.neteaseId === song.neteaseId || s.id === song.id
         );
         if (songIndex !== -1) {
-          playlist.value[songIndex].url = resources.audioUrl;
-          console.log("🎵 [资源加载] 已更新播放列表中的音频URL");
+          playlist.value[songIndex].url = finalAudioUrl;
+          console.log("🎵 [智能加载] 已更新播放列表中的高质量音频URL");
         }
-
-        // 更新当前歌词
-        if (resources.lyricsText) {
-          currentLyricsText.value = resources.lyricsText;
-          console.log(
-            "🎵 [资源加载] 已更新歌词，长度:",
-            resources.lyricsText.length
-          );
-        } else {
-          currentLyricsText.value = "";
-          console.log("🎵 [资源加载] 清空歌词");
-        }
-
-        // 标记该歌曲资源已获取
-        resourcesLoadedSongs.add(songKey);
-        console.log(
-          "🎵 [资源加载] 已标记歌曲资源为已获取 - 网易云ID:",
-          song.neteaseId
-        );
       }
 
-      return {
-        success,
-        lyricsText: resources.lyricsText || undefined
-      };
-    } catch (error) {
-      console.error("🎵 [资源加载] 获取歌曲资源失败:", error);
-      return { success: false };
+      // 更新当前歌词
+      currentLyricsText.value = finalLyricsText;
+      console.log("🎵 [智能加载] 歌词更新:", {
+        hasLyrics: !!finalLyricsText,
+        length: finalLyricsText.length,
+        quality: usingHighQuality ? "高质量" : "基础"
+      });
+
+      // 标记该歌曲资源已获取
+      resourcesLoadedSongs.add(songKey);
+      console.log("🎵 [智能加载] ✅ 资源加载完成:", {
+        song: song.name,
+        quality: usingHighQuality ? "高质量" : "基础",
+        hasLyrics: !!finalLyricsText
+      });
     }
+
+    return {
+      success,
+      usingHighQuality,
+      lyricsText: finalLyricsText || undefined
+    };
   };
 
   // 播放指定歌曲
