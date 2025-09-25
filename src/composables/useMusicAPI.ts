@@ -170,38 +170,46 @@ export function useMusicAPI() {
     usingHighQuality: boolean;
   }> => {
     try {
-      const response = await getSongResourcesApi({
-        id: song.id,
-        neteaseId: song.neteaseId,
-        name: song.name,
-        artist: song.artist,
-        url: song.url,
-        pic: song.pic,
-        lrc: song.lrc
-      });
+      // 检查是否有网易云ID
+      if (!song.neteaseId) {
+        console.warn("歌曲缺少网易云ID，无法获取资源");
+        // 如果有原始URL，可以作为降级方案
+        if (song.url) {
+          return {
+            audioUrl: song.url,
+            lyricsText: "",
+            usingHighQuality: false
+          };
+        }
+        throw new Error("歌曲缺少网易云ID且没有备用URL");
+      }
 
-      if (response.data) {
+      const response = await getSongResourcesApi(song.neteaseId);
+
+      if (response.data && response.data.audioUrl) {
         return {
           audioUrl: response.data.audioUrl,
-          lyricsText: response.data.lyricsText,
-          usingHighQuality: response.data.usingHighQuality
+          lyricsText: response.data.lyricsText || "",
+          usingHighQuality: response.data.usingHighQuality || false
         };
       } else {
-        // 降级到原始数据
+        throw new Error("服务器未返回有效的音频资源");
+      }
+    } catch (error) {
+      console.error("获取歌曲资源失败:", error);
+
+      // 如果有原始URL，尝试降级
+      if (song.url) {
+        console.warn("降级使用原始音频URL");
         return {
           audioUrl: song.url,
           lyricsText: "",
           usingHighQuality: false
         };
       }
-    } catch (error) {
-      console.error("获取歌曲资源失败:", error);
-      // 降级到原始数据
-      return {
-        audioUrl: song.url,
-        lyricsText: "",
-        usingHighQuality: false
-      };
+
+      // 没有任何可用资源，抛出错误
+      throw error;
     }
   };
 

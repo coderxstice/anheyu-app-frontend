@@ -22,17 +22,6 @@ export interface SongResourceResponse {
   usingHighQuality: boolean;
 }
 
-// 获取歌曲资源请求接口
-export interface GetSongResourcesRequest {
-  id?: string;
-  neteaseId?: string;
-  name: string;
-  artist: string;
-  url: string;
-  pic?: string;
-  lrc?: string;
-}
-
 /**
  * 获取播放列表
  */
@@ -45,14 +34,14 @@ export const getPlaylistApi = () => {
 
 /**
  * 获取歌曲资源（音频和歌词）
- * @param song 歌曲信息
+ * @param neteaseId 网易云歌曲ID
  */
-export const getSongResourcesApi = (song: GetSongResourcesRequest) => {
+export const getSongResourcesApi = (neteaseId: string) => {
   return http.request<BaseResponse<SongResourceResponse>>(
     "post",
     baseUrlApi("public/music/song-resources"),
     {
-      data: song
+      data: { neteaseId }
     }
   );
 };
