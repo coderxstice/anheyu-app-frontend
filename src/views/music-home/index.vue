@@ -2,7 +2,7 @@
  * @Description: 音乐馆页面
  * @Author: 安知鱼
  * @Date: 2025-09-23 12:13:32
- * @LastEditTime: 2025-09-24 18:26:32
+ * @LastEditTime: 2025-09-25 09:53:33
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -287,10 +287,9 @@
 
     <!-- 播放列表 - 现代化设计 -->
     <div
-      v-show="showPlaylist"
+      v-if="showPlaylist"
       ref="playlistContainer"
       class="playlist-container"
-      :style="{ pointerEvents: showPlaylist ? 'auto' : 'none' }"
       @click="handlePlaylistBackdropClick"
     >
       <!-- 遮罩层 -->
@@ -1869,6 +1868,7 @@ onBeforeUnmount(() => {
 
 // Playback controls
 .playback-controls {
+  padding: 0 20px;
   .progress-container {
     display: flex;
     align-items: center;

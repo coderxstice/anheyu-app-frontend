@@ -181,12 +181,7 @@ class AnHttp {
           "public/theme/static-mode",
           // 音乐API（公开接口）
           "public/music/playlist",
-          "public/music/song-resources",
-          "public/music/high-quality-url",
-          "public/music/high-quality-lyrics",
-          "public/music/lyrics",
-          "public/music/config",
-          "public/music/health"
+          "public/music/song-resources"
         ];
         if (whiteList.some(url => config.url?.endsWith(url))) {
           return config;

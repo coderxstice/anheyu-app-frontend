@@ -5,14 +5,7 @@
  */
 import { ref } from "vue";
 import type { Song } from "../types/music";
-import {
-  getPlaylistApi,
-  getSongResourcesApi,
-  getHighQualityMusicUrlApi,
-  getHighQualityLyricsApi,
-  getLyricsApi,
-  musicHealthCheckApi
-} from "../api/music";
+import { getPlaylistApi, getSongResourcesApi } from "../api/music";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { get } from "lodash-es";
 
@@ -168,64 +161,6 @@ export function useMusicAPI() {
     }
   };
 
-  // 获取歌词 - 通过后端API
-  const fetchLyrics = async (lrcUrl: string): Promise<string> => {
-    if (!lrcUrl) return "";
-
-    try {
-      const response = await getLyricsApi(lrcUrl);
-
-      if (response.data && response.data.available && response.data.lyrics) {
-        return response.data.lyrics;
-      } else {
-        return "";
-      }
-    } catch (error) {
-      console.error("获取歌词失败:", error);
-      return "";
-    }
-  };
-
-  // 获取高质量音频URL - 通过后端API
-  const fetchHighQualityMusicUrl = async (
-    neteaseId: string
-  ): Promise<string | null> => {
-    if (!neteaseId) return null;
-
-    try {
-      const response = await getHighQualityMusicUrlApi(neteaseId);
-
-      if (response.data && response.data.available && response.data.url) {
-        return response.data.url;
-      } else {
-        return null;
-      }
-    } catch (error) {
-      console.error("获取高质量音频URL失败:", error);
-      return null;
-    }
-  };
-
-  // 获取高质量歌词 - 通过后端API
-  const fetchHighQualityLyrics = async (
-    neteaseId: string
-  ): Promise<string | null> => {
-    if (!neteaseId) return null;
-
-    try {
-      const response = await getHighQualityLyricsApi(neteaseId);
-
-      if (response.data && response.data.available && response.data.lyrics) {
-        return response.data.lyrics;
-      } else {
-        return null;
-      }
-    } catch (error) {
-      console.error("获取高质量歌词失败:", error);
-      return null;
-    }
-  };
-
   // 获取歌曲的音频和歌词资源 - 通过后端API
   const fetchSongResources = async (
     song: Song
@@ -270,17 +205,6 @@ export function useMusicAPI() {
     }
   };
 
-  // 添加健康检查功能
-  const checkHealth = async (): Promise<boolean> => {
-    try {
-      const response = await musicHealthCheckApi();
-      return response.data?.status === "healthy";
-    } catch (error) {
-      console.error("音乐服务健康检查失败:", error);
-      return false;
-    }
-  };
-
   return {
     // 状态
     isLoading,
@@ -288,16 +212,10 @@ export function useMusicAPI() {
     // 方法
     fetchPlaylist,
     refreshPlaylist,
-    fetchLyrics,
-    fetchHighQualityMusicUrl,
-    fetchHighQualityLyrics,
     fetchSongResources,
 
     // 缓存管理
     clearPlaylistCache,
-    getCurrentPlaylistId,
-
-    // 工具函数
-    checkHealth
+    getCurrentPlaylistId
   };
 }

@@ -33,27 +33,6 @@ export interface GetSongResourcesRequest {
   lrc?: string;
 }
 
-// 高质量资源响应接口
-export interface HighQualityResourceResponse {
-  url?: string;
-  lyrics?: string;
-  available: boolean;
-}
-
-// 音乐配置响应接口
-export interface MusicConfigResponse {
-  highQualityApiEnabled: boolean;
-  supportedFormats: string[];
-  maxConcurrentRequests: number;
-}
-
-// 健康检查响应接口
-export interface HealthCheckResponse {
-  status: string;
-  service: string;
-  timestamp: string;
-}
-
 /**
  * 获取播放列表
  */
@@ -75,67 +54,5 @@ export const getSongResourcesApi = (song: GetSongResourcesRequest) => {
     {
       data: song
     }
-  );
-};
-
-/**
- * 获取高质量音频URL
- * @param neteaseId 网易云音乐ID
- */
-export const getHighQualityMusicUrlApi = (neteaseId: string) => {
-  return http.request<BaseResponse<HighQualityResourceResponse>>(
-    "get",
-    baseUrlApi("public/music/high-quality-url"),
-    {
-      params: { neteaseId }
-    }
-  );
-};
-
-/**
- * 获取高质量歌词
- * @param neteaseId 网易云音乐ID
- */
-export const getHighQualityLyricsApi = (neteaseId: string) => {
-  return http.request<BaseResponse<HighQualityResourceResponse>>(
-    "get",
-    baseUrlApi("public/music/high-quality-lyrics"),
-    {
-      params: { neteaseId }
-    }
-  );
-};
-
-/**
- * 获取歌词
- * @param url 歌词URL
- */
-export const getLyricsApi = (url: string) => {
-  return http.request<BaseResponse<HighQualityResourceResponse>>(
-    "get",
-    baseUrlApi("public/music/lyrics"),
-    {
-      params: { url }
-    }
-  );
-};
-
-/**
- * 获取音乐配置
- */
-export const getMusicConfigApi = () => {
-  return http.request<BaseResponse<MusicConfigResponse>>(
-    "get",
-    baseUrlApi("public/music/config")
-  );
-};
-
-/**
- * 音乐服务健康检查
- */
-export const musicHealthCheckApi = () => {
-  return http.request<BaseResponse<HealthCheckResponse>>(
-    "get",
-    baseUrlApi("public/music/health")
   );
 };
