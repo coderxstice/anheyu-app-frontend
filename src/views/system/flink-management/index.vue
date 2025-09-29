@@ -34,6 +34,9 @@
           <el-button type="primary" :icon="Setting" @click="handleManage">
             管理分类标签
           </el-button>
+          <el-button type="warning" :icon="Upload" @click="handleImport">
+            批量导入
+          </el-button>
           <el-button type="success" :icon="Plus" @click="handleCreate">
             新建友链
           </el-button>
@@ -171,6 +174,9 @@
 
     <!-- 5. 分类和标签管理器 -->
     <CategoryTagManager v-model="manager.visible" @refresh="getLinkList" />
+
+    <!-- 6. 批量导入对话框 -->
+    <ImportDialog v-model="importDialog.visible" @success="getLinkList" />
   </div>
 </template>
 
@@ -182,7 +188,8 @@ import {
   Plus,
   Edit,
   Delete,
-  Setting
+  Setting,
+  Upload
 } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getAdminLinkList, deleteLink, reviewLink } from "@/api/postLink";
@@ -193,6 +200,7 @@ import type {
 } from "@/api/postLink/type";
 import LinkDrawer from "./components/LinkDrawer.vue";
 import CategoryTagManager from "./components/CategoryTagManager.vue";
+import ImportDialog from "./components/ImportDialog.vue";
 
 defineOptions({
   name: "FlinkManagement"
@@ -307,6 +315,10 @@ const manager = reactive({
   visible: false
 });
 
+const importDialog = reactive({
+  visible: false
+});
+
 const handleCreate = () => {
   drawer.isEdit = false;
   drawer.data = null;
@@ -321,6 +333,10 @@ const handleEdit = (row: LinkItem) => {
 
 const handleManage = () => {
   manager.visible = true;
+};
+
+const handleImport = () => {
+  importDialog.visible = true;
 };
 
 onMounted(() => {
