@@ -2,7 +2,7 @@
  * @Description: 友链功能所有API
  * @Author: 安知鱼
  * @Date: 2025-08-18 16:06:49
- * @LastEditTime: 2025-09-04 13:42:53
+ * @LastEditTime: 2025-09-29 17:21:26
  * @LastEditors: 安知鱼
  */
 import { http } from "@/utils/http";
@@ -23,7 +23,9 @@ import type {
   LinkTag,
   CreateTagRequest,
   UpdateTagRequest,
-  GetRandomLinksParams
+  GetRandomLinksParams,
+  ImportLinksRequest,
+  ImportLinksResponse
 } from "./type";
 
 // ------------------ 前台公开接口 ------------------
@@ -193,5 +195,16 @@ export const deleteLinkTag = (id: number): Promise<BaseResponse<null>> => {
   return http.request<BaseResponse<null>>(
     "delete",
     baseUrlApi(`links/tags/${id}`)
+  );
+};
+
+/** @description [后台] 批量导入友链 */
+export const importLinks = (
+  data: ImportLinksRequest
+): Promise<BaseResponse<ImportLinksResponse>> => {
+  return http.request<BaseResponse<ImportLinksResponse>>(
+    "post",
+    baseUrlApi("links/import"),
+    { data }
   );
 };

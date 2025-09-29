@@ -130,3 +130,49 @@ export interface PublicLinkListResponse {
   page: number;
   pageSize: number;
 }
+
+// --- 导入功能相关类型 ---
+
+/** 导入友链的单个数据项 */
+export interface ImportLinkItem {
+  name: string;
+  url: string;
+  logo?: string;
+  description?: string;
+  siteshot?: string;
+  category_name?: string; // 分类名称
+  tag_name?: string; // 标签名称
+  status?: LinkStatus; // 状态，默认为 PENDING
+}
+
+/** [后台] 批量导入友链的请求 */
+export interface ImportLinksRequest {
+  links: ImportLinkItem[];
+  skip_duplicates?: boolean; // 是否跳过重复的友链（基于URL判断）
+  create_categories?: boolean; // 是否自动创建不存在的分类
+  create_tags?: boolean; // 是否自动创建不存在的标签
+  default_category_id?: number; // 如果分类不存在且不允许创建时使用的默认分类ID
+}
+
+/** 导入失败的友链信息 */
+export interface ImportLinkFailure {
+  link: ImportLinkItem;
+  reason: string;
+}
+
+/** 跳过的友链信息 */
+export interface ImportLinkSkipped {
+  link: ImportLinkItem;
+  reason: string;
+}
+
+/** 批量导入友链的响应 */
+export interface ImportLinksResponse {
+  total: number; // 总共尝试导入的数量
+  success: number; // 成功导入的数量
+  failed: number; // 失败的数量
+  skipped: number; // 跳过的数量（重复）
+  success_list: LinkItem[]; // 成功导入的友链列表
+  failed_list: ImportLinkFailure[]; // 失败的友链及原因
+  skipped_list: ImportLinkSkipped[]; // 跳过的友链及原因
+}
