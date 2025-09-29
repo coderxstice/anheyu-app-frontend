@@ -9,38 +9,47 @@
   <view />
 </template>
 <script setup lang="ts">
-import { useRegisterSW } from "virtual:pwa-register/vue";
-import { watch } from "vue";
-import { ElMessageBox, ElNotification } from "element-plus";
+import { onMounted } from "vue";
+import { ElNotification } from "element-plus";
 
-const { offlineReady, needRefresh, updateServiceWorker } = useRegisterSW();
+// 🔧 PWA状态检查：开发环境禁用，生产环境保守策略
+onMounted(() => {
+  if (import.meta.env.DEV) {
+    console.log("🔍 开发环境：PWA已禁用，避免干扰登录流程");
+  } else {
+    // 生产环境：检查Service Worker是否可用
+    if ("serviceWorker" in navigator) {
+      console.log("🔍 生产环境：PWA可用，采用保守更新策略");
 
-// 监听 `needRefresh` 状态的变化
-watch(needRefresh, newValue => {
-  if (newValue) {
-    // 当有新内容可用时，弹出确认对话框
-    ElMessageBox.confirm("应用有新版本可用，请刷新以体验新功能。", "更新提示", {
-      confirmButtonText: "立即刷新",
-      cancelButtonText: "稍后提醒",
-      type: "info",
-      center: true
-    }).then(() => {
-      // 用户点击“立即刷新”
-      updateServiceWorker();
-      localStorage.removeItem("site_config_cache");
-    });
-  }
-});
+      // 监听Service Worker的状态变化
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        console.log("🔄 Service Worker已更新，建议刷新页面获取最新版本");
 
-// 这是一个锦上添花的功能：当应用首次被缓存，可以离线使用时，给出一个提示。
-watch(offlineReady, newValue => {
-  if (newValue) {
-    ElNotification({
-      title: "应用已就绪",
-      message: "当前应用已可在离线状态下使用。",
-      type: "success",
-      duration: 3000
-    });
+        // 显示温和的更新提示，不强制刷新
+        ElNotification({
+          title: "应用已更新",
+          message: "新版本已就绪，建议刷新页面以获取最新功能。",
+          type: "info",
+          duration: 5000
+        });
+      });
+
+      // 检查是否有Service Worker已注册
+      navigator.serviceWorker.ready
+        .then(() => {
+          ElNotification({
+            title: "应用已就绪",
+            message: "当前应用已可在离线状态下使用。",
+            type: "success",
+            duration: 3000
+          });
+        })
+        .catch(() => {
+          console.log("📱 PWA未完全就绪，使用标准浏览器模式");
+        });
+    } else {
+      console.log("📱 当前浏览器不支持Service Worker");
+    }
   }
 });
 </script>
