@@ -281,6 +281,20 @@ class AnHttp {
           return Promise.reject(error);
         }
 
+        // 音乐资源相关接口的错误处理
+        const isMusicResourceRequest = config.url?.endsWith(
+          "/music/song-resources"
+        );
+        if (isMusicResourceRequest) {
+          // 对于音乐资源相关的错误，直接将原始错误抛出
+          // 让音乐API的 .catch 去处理，实现静默降级而不显示错误提示
+          console.warn(
+            "检测到音乐资源接口错误，将错误传递到业务层处理静默降级:",
+            response?.data?.message || "未知错误"
+          );
+          return Promise.reject(error);
+        }
+
         // 对于404错误，直接抛出到业务层，让业务层决定如何处理
         if (response?.status === 404) {
           return Promise.reject(error);
