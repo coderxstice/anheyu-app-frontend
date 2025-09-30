@@ -338,9 +338,9 @@
       // 2. 着重号（中文特有）
       .inline-emphasis-mark {
         text-emphasis: filled circle;
-        text-emphasis-position: under;
+        text-emphasis-position: under left;
         -webkit-text-emphasis: filled circle;
-        -webkit-text-emphasis-position: under;
+        -webkit-text-emphasis-position: under left;
         text-decoration-color: var(--anzhiyu-main);
       }
 
