@@ -304,6 +304,77 @@
         }
       }
 
+      // 行内文本样式插件
+      // 1. 下划线
+      .inline-underline {
+        text-decoration: underline;
+        text-underline-offset: 4px;
+        text-decoration-color: var(--anzhiyu-main);
+      }
+
+      // 2. 着重号（中文特有）
+      .inline-emphasis-mark {
+        text-emphasis: filled circle;
+        text-emphasis-position: under;
+        -webkit-text-emphasis: filled circle;
+        -webkit-text-emphasis-position: under;
+        text-decoration-color: var(--anzhiyu-main);
+      }
+
+      // 3. 波浪线
+      .inline-wavy {
+        text-decoration: underline wavy;
+        text-decoration-color: var(--anzhiyu-main);
+        text-underline-offset: 3px;
+      }
+
+      // 4. 删除线（自定义样式）
+      .inline-delete {
+        text-decoration: line-through;
+        text-decoration-thickness: 2px;
+        opacity: 0.7;
+      }
+
+      // 5. 键盘样式
+      .inline-kbd {
+        display: inline-block;
+        padding: 2px 6px;
+        font-family: "Monaco", "Menlo", "Consolas", monospace;
+        font-size: 0.85em;
+        line-height: 1.4;
+        color: var(--anzhiyu-fontcolor);
+        background: var(--anzhiyu-secondbg);
+        border: 1px solid var(--anzhiyu-gray-op);
+        border-radius: 4px;
+        box-shadow:
+          0 1px 0 rgba(0, 0, 0, 0.2),
+          inset 0 0 0 2px var(--anzhiyu-card-bg);
+
+        kbd {
+          padding: 0;
+          font-size: inherit;
+          background: transparent;
+          border: none;
+          box-shadow: none;
+        }
+      }
+
+      // 6. 密码样式
+      .inline-password {
+        padding: 2px 4px;
+        color: transparent;
+        background: rgb(161, 161, 161);
+        border-radius: 2px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        user-select: none;
+
+        &:hover {
+          color: var(--anzhiyu-fontcolor);
+          background: none;
+        }
+      }
+
       ul {
         counter-reset: li 0;
       }
