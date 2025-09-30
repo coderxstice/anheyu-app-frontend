@@ -373,7 +373,7 @@ onUnmounted(() => {
     flex: 1;
   }
 
-  @media (max-width: 768px) {
+  @media screen and (width <= 768px) {
     gap: 10px;
 
     .el-button {
@@ -474,7 +474,7 @@ onUnmounted(() => {
 }
 
 // 移动端适配
-@media (max-width: 768px) {
+@media screen and (width <= 768px) {
   :deep(.el-drawer__body) {
     padding: 20px 16px;
   }
@@ -535,7 +535,7 @@ onUnmounted(() => {
   }
 }
 
-@media (max-width: 576px) {
+@media screen and (width <= 576px) {
   :deep(.el-drawer__header) {
     .el-drawer__title {
       font-size: 18px;

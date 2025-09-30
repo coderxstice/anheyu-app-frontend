@@ -895,7 +895,7 @@ onUnmounted(() => {
 }
 
 // 响应式
-@media (max-width: 768px) {
+@media screen and (width <= 768px) {
   :deep(.el-drawer__body) {
     padding: 16px;
   }
@@ -1031,7 +1031,7 @@ onUnmounted(() => {
   }
 }
 
-@media (max-width: 576px) {
+@media screen and (width <= 576px) {
   :deep(.el-drawer__header) {
     .el-drawer__title {
       font-size: 17px;

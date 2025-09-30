@@ -375,8 +375,8 @@ onUnmounted(() => {
 .flink-management {
   padding: 20px;
 
-  @media (max-width: 768px) {
-    padding: 0px;
+  @media screen and (width <= 768px) {
+    padding: 0;
     margin: 1rem;
   }
 }
@@ -384,7 +384,7 @@ onUnmounted(() => {
 .header-card {
   margin-bottom: 20px;
 
-  @media (max-width: 768px) {
+  @media screen and (width <= 768px) {
     margin-bottom: 16px;
 
     :deep(.el-card__body) {
@@ -403,7 +403,7 @@ onUnmounted(() => {
       gap: 10px;
       margin-bottom: 16px;
 
-      @media (max-width: 768px) {
+      @media screen and (width <= 768px) {
         flex-direction: column;
         gap: 0;
         margin-bottom: 20px;
@@ -455,7 +455,7 @@ onUnmounted(() => {
       flex-wrap: wrap;
       gap: 10px;
 
-      @media (max-width: 768px) {
+      @media screen and (width <= 768px) {
         flex-direction: column;
         gap: 12px;
 
@@ -472,7 +472,7 @@ onUnmounted(() => {
         }
       }
 
-      @media (max-width: 480px) {
+      @media screen and (width <= 480px) {
         .el-button {
           height: 42px;
 
@@ -489,7 +489,7 @@ onUnmounted(() => {
   min-height: 400px;
 
   :deep(.el-row) {
-    @media (max-width: 768px) {
+    @media screen and (width <= 768px) {
       margin-left: 0 !important;
       margin-right: 0 !important;
 
@@ -504,7 +504,7 @@ onUnmounted(() => {
 .link-card {
   margin-bottom: 20px;
 
-  @media (max-width: 768px) {
+  @media screen and (width <= 768px) {
     margin-bottom: 16px;
   }
 
@@ -513,7 +513,7 @@ onUnmounted(() => {
     align-items: center;
     margin-bottom: 15px;
 
-    @media (max-width: 768px) {
+    @media screen and (width <= 768px) {
       margin-bottom: 12px;
     }
   }
@@ -523,7 +523,7 @@ onUnmounted(() => {
     overflow: hidden;
     flex: 1;
 
-    @media (max-width: 768px) {
+    @media screen and (width <= 768px) {
       margin-left: 12px;
     }
   }
@@ -536,7 +536,7 @@ onUnmounted(() => {
     text-overflow: ellipsis;
     white-space: nowrap;
 
-    @media (max-width: 768px) {
+    @media screen and (width <= 768px) {
       font-size: 15px;
     }
   }
@@ -562,7 +562,7 @@ onUnmounted(() => {
     line-clamp: 2;
     -webkit-box-orient: vertical;
 
-    @media (max-width: 768px) {
+    @media screen and (width <= 768px) {
       font-size: 13px;
       min-height: 38px;
       margin-bottom: 8px;
@@ -575,13 +575,13 @@ onUnmounted(() => {
     flex-wrap: wrap;
     gap: 6px;
 
-    @media (max-width: 768px) {
+    @media screen and (width <= 768px) {
       margin-bottom: 8px;
       gap: 8px;
     }
 
     .el-tag {
-      @media (max-width: 768px) {
+      @media screen and (width <= 768px) {
         font-size: 12px;
         height: 24px;
         padding: 0 8px;
@@ -601,7 +601,7 @@ onUnmounted(() => {
   .el-divider {
     margin: 12px 0;
 
-    @media (max-width: 768px) {
+    @media screen and (width <= 768px) {
       margin: 10px 0;
     }
   }
@@ -613,7 +613,7 @@ onUnmounted(() => {
     flex-wrap: wrap;
     gap: 8px;
 
-    @media (max-width: 768px) {
+    @media screen and (width <= 768px) {
       gap: 10px;
     }
 
@@ -627,7 +627,7 @@ onUnmounted(() => {
     align-items: center;
     gap: 4px;
 
-    @media (max-width: 768px) {
+    @media screen and (width <= 768px) {
       gap: 8px;
 
       .el-button {
@@ -648,7 +648,7 @@ onUnmounted(() => {
   justify-content: flex-end;
   margin-top: 20px;
 
-  @media (max-width: 768px) {
+  @media screen and (width <= 768px) {
     justify-content: center;
     margin-top: 16px;
   }

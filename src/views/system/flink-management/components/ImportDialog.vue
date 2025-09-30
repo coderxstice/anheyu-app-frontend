@@ -711,7 +711,7 @@ onMounted(() => {
 }
 
 // 响应式设计
-@media (max-width: 768px) {
+@media screen and (width <= 768px) {
   .import-dialog {
     :deep(.el-dialog) {
       width: 95vw !important;
@@ -888,7 +888,7 @@ onMounted(() => {
   }
 }
 
-@media (max-width: 576px) {
+@media screen and (width <= 576px) {
   .import-dialog {
     :deep(.el-dialog) {
       width: 100vw !important;
