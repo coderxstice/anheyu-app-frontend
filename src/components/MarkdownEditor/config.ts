@@ -8,6 +8,7 @@
 import { config } from "md-editor-v3";
 import TabsPlugin from "./plugins/markdown-it-tabs-plugin";
 import FoldingPlugin from "./plugins/markdown-it-folding-plugin";
+import HiddenPlugin from "./plugins/markdown-it-hidden-plugin";
 
 export function installMarkdownEditorExtensions() {
   console.log("🔧 Installing markdown editor extensions...");
@@ -22,6 +23,9 @@ export function installMarkdownEditorExtensions() {
 
         mdit.use(FoldingPlugin);
         console.log("✅ FoldingPlugin registered");
+
+        mdit.use(HiddenPlugin);
+        console.log("✅ HiddenPlugin registered");
 
         console.log("🎉 All markdown plugins configured successfully!");
       } catch (error) {
