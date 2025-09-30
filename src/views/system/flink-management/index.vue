@@ -2,45 +2,47 @@
   <div class="flink-management">
     <!-- 1. 顶部操作与筛选栏 -->
     <el-card shadow="never" class="header-card">
-      <el-form :inline="true" :model="queryParams">
-        <el-form-item label="关键词">
-          <el-input
-            v-model="queryParams.name"
-            placeholder="搜索网站名称或描述"
-            clearable
-            @keyup.enter="handleQuery"
-          />
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-select
-            v-model="queryParams.status"
-            placeholder="全部状态"
-            clearable
-            style="width: 120px"
-            @change="handleQuery"
-          >
-            <el-option label="待审核" value="PENDING" />
-            <el-option label="已通过" value="APPROVED" />
-            <el-option label="已拒绝" value="REJECTED" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" :icon="Search" @click="handleQuery">
-            搜索
-          </el-button>
-          <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
-        </el-form-item>
-        <el-form-item class="add-button">
+      <el-form :inline="true" :model="queryParams" class="filter-form">
+        <div class="filter-row">
+          <el-form-item label="关键词">
+            <el-input
+              v-model="queryParams.name"
+              placeholder="搜索网站名称或描述"
+              clearable
+              @keyup.enter="handleQuery"
+            />
+          </el-form-item>
+          <el-form-item label="状态">
+            <el-select
+              v-model="queryParams.status"
+              placeholder="全部状态"
+              clearable
+              style="width: 120px"
+              @change="handleQuery"
+            >
+              <el-option label="待审核" value="PENDING" />
+              <el-option label="已通过" value="APPROVED" />
+              <el-option label="已拒绝" value="REJECTED" />
+            </el-select>
+          </el-form-item>
+          <el-form-item class="search-buttons">
+            <el-button type="primary" :icon="Search" @click="handleQuery">
+              搜索
+            </el-button>
+            <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
+          </el-form-item>
+        </div>
+        <div class="action-row">
           <el-button type="primary" :icon="Setting" @click="handleManage">
-            管理分类标签
+            <span class="button-text">管理分类标签</span>
           </el-button>
           <el-button type="warning" :icon="Upload" @click="handleImport">
-            批量导入
+            <span class="button-text">批量导入</span>
           </el-button>
           <el-button type="success" :icon="Plus" @click="handleCreate">
-            新建友链
+            <span class="button-text">新建友链</span>
           </el-button>
-        </el-form-item>
+        </div>
       </el-form>
     </el-card>
 
@@ -159,7 +161,8 @@
       :page-sizes="[12, 24, 36, 48]"
       :total="total"
       background
-      layout="total, sizes, prev, pager, next, jumper"
+      :layout="paginationLayout"
+      :small="isMobile"
       @size-change="getLinkList"
       @current-change="getLinkList"
     />
@@ -181,7 +184,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive } from "vue";
+import { ref, onMounted, reactive, computed, onUnmounted } from "vue";
 import {
   Search,
   Refresh,
@@ -209,6 +212,20 @@ defineOptions({
 const loading = ref(true);
 const linkList = ref<LinkItem[]>([]);
 const total = ref(0);
+
+// 移动端检测
+const windowWidth = ref(window.innerWidth);
+const isMobile = computed(() => windowWidth.value < 768);
+
+// 分页布局（移动端简化）
+const paginationLayout = computed(() => {
+  if (windowWidth.value < 576) {
+    return "prev, pager, next";
+  } else if (windowWidth.value < 768) {
+    return "total, prev, pager, next";
+  }
+  return "total, sizes, prev, pager, next, jumper";
+});
 
 const queryParams = ref<GetAdminLinksParams>({
   page: 1,
@@ -339,46 +356,176 @@ const handleImport = () => {
   importDialog.visible = true;
 };
 
+// 监听窗口大小变化
+const handleResize = () => {
+  windowWidth.value = window.innerWidth;
+};
+
 onMounted(() => {
   getLinkList();
+  window.addEventListener("resize", handleResize);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", handleResize);
 });
 </script>
 
 <style lang="scss" scoped>
 .flink-management {
   padding: 20px;
+
+  @media (max-width: 768px) {
+    padding: 0px;
+    margin: 1rem;
+  }
 }
 
 .header-card {
   margin-bottom: 20px;
 
-  .el-form {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+  @media (max-width: 768px) {
+    margin-bottom: 16px;
+
+    :deep(.el-card__body) {
+      padding: 16px;
+    }
   }
 
-  .add-button {
-    margin-left: auto;
+  .filter-form {
+    :deep(.el-form-item) {
+      margin-bottom: 0;
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 0;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #ebeef5;
+
+        .el-form-item {
+          width: 100%;
+          margin-right: 0 !important;
+          margin-bottom: 16px;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+
+          :deep(.el-form-item__label) {
+            font-weight: 500;
+            font-size: 14px;
+          }
+
+          :deep(.el-form-item__content) {
+            width: 100%;
+
+            .el-input,
+            .el-select {
+              width: 100% !important;
+            }
+          }
+        }
+
+        .search-buttons {
+          margin-top: 4px;
+
+          :deep(.el-form-item__content) {
+            display: flex;
+            gap: 12px;
+
+            .el-button {
+              flex: 1;
+              height: 40px;
+            }
+          }
+        }
+      }
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 12px;
+
+        .el-button {
+          width: 100%;
+          height: 44px;
+          margin-left: 0 !important;
+          font-size: 15px;
+          font-weight: 500;
+
+          :deep(.el-icon) {
+            font-size: 18px;
+          }
+        }
+      }
+
+      @media (max-width: 480px) {
+        .el-button {
+          height: 42px;
+
+          :deep(.el-icon) {
+            font-size: 20px;
+          }
+        }
+      }
+    }
   }
 }
 
 .link-list {
   min-height: 400px;
+
+  :deep(.el-row) {
+    @media (max-width: 768px) {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+
+      .el-col {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+      }
+    }
+  }
 }
 
 .link-card {
   margin-bottom: 20px;
 
+  @media (max-width: 768px) {
+    margin-bottom: 16px;
+  }
+
   .card-header {
     display: flex;
     align-items: center;
     margin-bottom: 15px;
+
+    @media (max-width: 768px) {
+      margin-bottom: 12px;
+    }
   }
 
   .site-info {
     margin-left: 15px;
     overflow: hidden;
+    flex: 1;
+
+    @media (max-width: 768px) {
+      margin-left: 12px;
+    }
   }
 
   .site-name {
@@ -388,6 +535,10 @@ onMounted(() => {
     font-weight: bold;
     text-overflow: ellipsis;
     white-space: nowrap;
+
+    @media (max-width: 768px) {
+      font-size: 15px;
+    }
   }
 
   .site-url {
@@ -396,6 +547,7 @@ onMounted(() => {
     font-size: 12px;
     text-overflow: ellipsis;
     white-space: nowrap;
+    margin-top: 2px;
   }
 
   .description {
@@ -405,16 +557,40 @@ onMounted(() => {
     overflow: hidden;
     font-size: 14px;
     color: #606266;
+    line-height: 1.6;
     -webkit-line-clamp: 2;
     line-clamp: 2;
     -webkit-box-orient: vertical;
+
+    @media (max-width: 768px) {
+      font-size: 13px;
+      min-height: 38px;
+      margin-bottom: 8px;
+    }
   }
 
   .meta-info {
     margin-bottom: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    @media (max-width: 768px) {
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .el-tag {
+      @media (max-width: 768px) {
+        font-size: 12px;
+        height: 24px;
+        padding: 0 8px;
+        line-height: 22px;
+      }
+    }
 
     .tag-item {
-      margin-left: 5px;
+      margin-left: 0;
       color: white !important;
       border: none !important;
       border-radius: 12px 0;
@@ -424,22 +600,57 @@ onMounted(() => {
 
   .el-divider {
     margin: 12px 0;
+
+    @media (max-width: 768px) {
+      margin: 10px 0;
+    }
   }
 
   .card-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    @media (max-width: 768px) {
+      gap: 10px;
+    }
+
+    .el-tag {
+      flex-shrink: 0;
+    }
   }
 
   .actions {
     display: flex;
     align-items: center;
+    gap: 4px;
+
+    @media (max-width: 768px) {
+      gap: 8px;
+
+      .el-button {
+        &:not(.el-button--small) {
+          padding: 8px 12px;
+          font-size: 14px;
+        }
+
+        &.el-button--small {
+          min-width: 64px;
+        }
+      }
+    }
   }
 }
 
 .el-pagination {
   justify-content: flex-end;
   margin-top: 20px;
+
+  @media (max-width: 768px) {
+    justify-content: center;
+    margin-top: 16px;
+  }
 }
 </style>

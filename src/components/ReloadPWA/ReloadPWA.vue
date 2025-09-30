@@ -11,6 +11,7 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import { ElNotification } from "element-plus";
+import { onPWAUpdated } from "@/utils/versionManager";
 
 // 🔧 PWA状态检查：开发环境禁用，生产环境保守策略
 onMounted(() => {
@@ -22,13 +23,16 @@ onMounted(() => {
       console.log("🔍 生产环境：PWA可用，采用保守更新策略");
 
       // 监听Service Worker的状态变化
-      navigator.serviceWorker.addEventListener("controllerchange", () => {
-        console.log("🔄 Service Worker已更新，建议刷新页面获取最新版本");
+      navigator.serviceWorker.addEventListener("controllerchange", async () => {
+        console.log("🔄 Service Worker已更新，正在刷新版本信息...");
+
+        // PWA 更新时刷新版本缓存
+        await onPWAUpdated();
 
         // 显示温和的更新提示，不强制刷新
         ElNotification({
-          title: "应用已就绪",
-          message: "当前应用已可在离线状态下使用。",
+          title: "应用已更新",
+          message: "应用已更新到最新版本，可离线使用。",
           type: "success",
           duration: 3000
         });

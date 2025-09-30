@@ -715,27 +715,200 @@ onMounted(() => {
   .import-dialog {
     :deep(.el-dialog) {
       width: 95vw !important;
-      height: 90vh !important;
+      height: auto !important;
       max-height: 90vh !important;
       margin: 5vh auto !important;
+    }
+
+    :deep(.el-dialog__body) {
+      padding: 20px 16px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    :deep(.el-dialog__footer) {
+      padding: 16px;
+      border-top: 1px solid var(--el-border-color-lighter);
+    }
+
+    :deep(.el-dialog__header) {
+      padding: 16px;
     }
   }
 
   .import-content {
-    max-height: 50vh;
+    max-height: none;
+    padding-right: 0;
+
+    .mb-4 {
+      margin-bottom: 14px;
+    }
+
+    .alert-content {
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .example-card {
+      .example-code {
+        font-size: 11px;
+        padding: 12px;
+      }
+    }
+
+    .json-input {
+      :deep(.el-textarea__inner) {
+        font-size: 13px;
+        min-height: 200px !important;
+      }
+    }
   }
 
   .options-content {
     .el-row {
       .el-col {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
         margin-bottom: 16px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    .el-checkbox {
+      :deep(.el-checkbox__label) {
+        font-size: 15px;
+      }
+    }
+
+    .option-desc {
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    .default-category {
+      .category-label {
+        font-size: 15px;
+        margin-bottom: 10px;
+      }
+
+      .el-select {
+        :deep(.el-input__inner) {
+          height: 44px;
+          line-height: 44px;
+          font-size: 15px;
+        }
       }
     }
   }
 
   .result-content {
+    .result-summary {
+      margin-bottom: 20px;
+
+      :deep(.el-result__title) {
+        font-size: 16px;
+      }
+
+      :deep(.el-result__subtitle) {
+        font-size: 13px;
+      }
+
+      .result-stats {
+        flex-wrap: wrap;
+        gap: 8px;
+
+        .el-tag {
+          font-size: 13px;
+          padding: 0 10px;
+          height: 28px;
+          line-height: 26px;
+        }
+      }
+    }
+
     .result-list {
-      max-height: 200px;
+      max-height: 300px;
+      padding-right: 0;
+
+      .link-result-card {
+        margin-bottom: 10px;
+
+        :deep(.el-card__body) {
+          padding: 12px;
+        }
+
+        .link-info {
+          gap: 10px;
+
+          .el-avatar {
+            width: 36px !important;
+            height: 36px !important;
+          }
+
+          .link-details {
+            .link-name {
+              font-size: 14px;
+              margin-bottom: 4px;
+            }
+
+            .el-link {
+              font-size: 12px;
+            }
+
+            .link-reason {
+              font-size: 12px;
+            }
+          }
+
+          .el-tag {
+            font-size: 11px;
+            height: 22px;
+            line-height: 20px;
+            padding: 0 6px;
+          }
+        }
+      }
+    }
+  }
+
+  .dialog-footer {
+    flex-direction: column;
+    gap: 10px;
+
+    .el-button {
+      width: 100%;
+      height: 44px;
+      font-size: 15px;
+      margin: 0 !important;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .import-dialog {
+    :deep(.el-dialog) {
+      width: 100vw !important;
+      max-height: 100vh !important;
+      margin: 0 !important;
+      border-radius: 0;
+    }
+
+    :deep(.el-dialog__header) {
+      .el-dialog__title {
+        font-size: 17px;
+      }
+    }
+  }
+
+  .import-content {
+    .json-input {
+      :deep(.el-textarea__inner) {
+        min-height: 180px !important;
+      }
     }
   }
 }

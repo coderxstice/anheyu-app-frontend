@@ -3,7 +3,7 @@
     v-model="drawerVisible"
     :title="isEditMode ? '编辑友链' : '新建友链'"
     direction="rtl"
-    size="500px"
+    :size="drawerSize"
     @close="handleClose"
   >
     <el-form
@@ -167,7 +167,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, reactive, onMounted, computed } from "vue";
+import { ref, watch, reactive, onMounted, computed, onUnmounted } from "vue";
 import { Plus, Setting } from "@element-plus/icons-vue";
 import type { FormInstance, FormRules } from "element-plus";
 import { ElMessage } from "element-plus";
@@ -196,6 +196,18 @@ const emit = defineEmits(["update:modelValue", "success"]);
 const drawerVisible = ref(props.modelValue);
 const submitLoading = ref(false);
 const formRef = ref<FormInstance>();
+
+// 移动端检测
+const windowWidth = ref(window.innerWidth);
+const isMobile = computed(() => windowWidth.value < 768);
+const drawerSize = computed(() => {
+  if (windowWidth.value < 576) {
+    return "100%";
+  } else if (windowWidth.value < 768) {
+    return "90%";
+  }
+  return "500px";
+});
 
 // 数据源
 const allCategories = ref<LinkCategory[]>([]);
@@ -334,9 +346,19 @@ const handleSubmit = async () => {
   });
 };
 
+// 监听窗口大小变化
+const handleResize = () => {
+  windowWidth.value = window.innerWidth;
+};
+
 onMounted(() => {
   fetchCategories();
   fetchTags();
+  window.addEventListener("resize", handleResize);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", handleResize);
 });
 </script>
 
@@ -349,6 +371,21 @@ onMounted(() => {
 
   .selector-main {
     flex: 1;
+  }
+
+  @media (max-width: 768px) {
+    gap: 10px;
+
+    .el-button {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      padding: 8px;
+
+      :deep(.el-icon) {
+        font-size: 18px;
+      }
+    }
   }
 }
 
@@ -433,6 +470,76 @@ onMounted(() => {
   }
   100% {
     left: 100%;
+  }
+}
+
+// 移动端适配
+@media (max-width: 768px) {
+  :deep(.el-drawer__body) {
+    padding: 20px 16px;
+  }
+
+  :deep(.el-drawer__header) {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  :deep(.el-form) {
+    .el-form-item {
+      margin-bottom: 20px;
+
+      .el-form-item__label {
+        font-size: 15px;
+        font-weight: 500;
+        margin-bottom: 8px;
+      }
+
+      .el-input__inner,
+      .el-textarea__inner,
+      .el-select .el-input__inner {
+        font-size: 16px; // 防止 iOS Safari 自动缩放
+        height: 44px;
+        line-height: 44px;
+      }
+
+      .el-textarea__inner {
+        min-height: 88px !important;
+        line-height: 1.5;
+        padding: 12px;
+      }
+
+      .el-select {
+        width: 100%;
+      }
+    }
+  }
+
+  :deep(.el-drawer__footer) {
+    padding: 16px;
+    border-top: 1px solid var(--el-border-color-lighter);
+
+    .el-button {
+      height: 44px;
+      font-size: 15px;
+      flex: 1;
+
+      &:first-child {
+        margin-right: 12px;
+      }
+    }
+  }
+
+  .form-tip {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+}
+
+@media (max-width: 576px) {
+  :deep(.el-drawer__header) {
+    .el-drawer__title {
+      font-size: 18px;
+    }
   }
 }
 </style>
