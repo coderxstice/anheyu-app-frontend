@@ -25,7 +25,8 @@ import type {
   UpdateTagRequest,
   GetRandomLinksParams,
   ImportLinksRequest,
-  ImportLinksResponse
+  ImportLinksResponse,
+  LinkHealthCheckResponse
 } from "./type";
 
 // ------------------ 前台公开接口 ------------------
@@ -206,5 +207,15 @@ export const importLinks = (
     "post",
     baseUrlApi("links/import"),
     { data }
+  );
+};
+
+/** @description [后台] 手动触发友链健康检查 */
+export const checkLinksHealth = (): Promise<
+  BaseResponse<LinkHealthCheckResponse>
+> => {
+  return http.request<BaseResponse<LinkHealthCheckResponse>>(
+    "post",
+    baseUrlApi("links/health-check")
   );
 };
