@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-10 11:28:27
- * @LastEditTime: 2025-08-19 10:36:54
+ * @LastEditTime: 2025-09-30 10:44:39
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -27,26 +27,12 @@ onMounted(() => {
 
         // 显示温和的更新提示，不强制刷新
         ElNotification({
-          title: "应用已更新",
-          message: "新版本已就绪，建议刷新页面以获取最新功能。",
-          type: "info",
-          duration: 5000
+          title: "应用已就绪",
+          message: "当前应用已可在离线状态下使用。",
+          type: "success",
+          duration: 3000
         });
       });
-
-      // 检查是否有Service Worker已注册
-      navigator.serviceWorker.ready
-        .then(() => {
-          ElNotification({
-            title: "应用已就绪",
-            message: "当前应用已可在离线状态下使用。",
-            type: "success",
-            duration: 3000
-          });
-        })
-        .catch(() => {
-          console.log("📱 PWA未完全就绪，使用标准浏览器模式");
-        });
     } else {
       console.log("📱 当前浏览器不支持Service Worker");
     }
