@@ -88,13 +88,13 @@ defineProps<{
         min-width: calc(100% - 20px);
 
         .flink-item-name {
-          color: var(--anzhiyu-card-bg);
+          color: var(--anzhiyu-white);
         }
 
         .flink-item-desc {
           width: 100%;
           overflow: hidden;
-          color: var(--anzhiyu-card-bg);
+          color: var(--anzhiyu-white);
         }
       }
     }

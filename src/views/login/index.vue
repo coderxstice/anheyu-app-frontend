@@ -221,14 +221,19 @@ const apiHandlers = {
 
 // 事件处理器
 const eventHandlers = {
-  onNextStep: () =>
-    handleSubmit(
-      () => formRef.value?.validateField("email"),
-      async () => {
-        const exists = await apiHandlers.checkEmailExists(form.email);
-        switchStep(exists ? "login-password" : "register-prompt", "next");
-      }
-    ),
+  onNextStep: async () => {
+    try {
+      await formRef.value?.validateField("email");
+      loading.value = true;
+      const exists = await apiHandlers.checkEmailExists(form.email);
+      switchStep(exists ? "login-password" : "register-prompt", "next");
+    } catch (err: any) {
+      // 验证失败，不执行任何操作
+      console.log("验证失败", err);
+    } finally {
+      loading.value = false;
+    }
+  },
   onLogin: () =>
     handleSubmit(() => formRef.value!.validate(), apiHandlers.login),
   onRegister: () =>
@@ -246,8 +251,13 @@ const eventHandlers = {
 };
 
 // 键盘与生命周期
-const onkeypress = ({ code }: KeyboardEvent) => {
+const onKeyDown = (event: KeyboardEvent) => {
+  const { code } = event;
   if (!["Enter", "NumpadEnter"].includes(code)) return;
+
+  // 阻止表单默认提交行为
+  event.preventDefault();
+
   const handlerMap = {
     "check-email": eventHandlers.onNextStep,
     "login-password": eventHandlers.onLogin,
@@ -264,12 +274,12 @@ onMounted(() => {
     form.resetToken.secret = route.query.secret as string;
     step.value = "reset-password";
   }
-  window.document.addEventListener("keypress", onkeypress);
+  window.document.addEventListener("keydown", onKeyDown);
   handleFocus();
 });
 
 onBeforeUnmount(() =>
-  window.document.removeEventListener("keypress", onkeypress)
+  window.document.removeEventListener("keydown", onKeyDown)
 );
 </script>
 

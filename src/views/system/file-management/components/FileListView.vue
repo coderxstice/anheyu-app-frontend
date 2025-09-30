@@ -116,7 +116,6 @@
             :style="getColumnStyle(col)"
             :class="['column', `column-${columnTypeMap[col.type].key}`]"
           >
-            <!-- ...模板内容不变... -->
             <template v-if="columnTypeMap[col.type].key === 'name'">
               <div class="column-name-content">
                 <Transition name="icon-swap" mode="out-in">
