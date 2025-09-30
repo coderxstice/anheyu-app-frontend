@@ -421,6 +421,10 @@ watch(
       .code-expand-btn i {
         animation: 1.2s ease 0s infinite normal none running code-expand-key;
       }
+
+      pre {
+        padding-bottom: 0 !important;
+      }
     }
 
     .code-expand-btn {
@@ -459,6 +463,13 @@ watch(
       }
     }
 
+    // 展开时给 pre 添加底部内边距，避免被按钮遮挡
+    &.is-collapsible:not(.is-collapsed) {
+      pre {
+        padding-bottom: 32px !important;
+      }
+    }
+
     &[open] {
       .md-editor-code-head {
         border-bottom: var(--style-border-always);
@@ -469,7 +480,7 @@ watch(
       }
 
       pre {
-        max-height: 1000px;
+        max-height: 50000px;
       }
     }
 
@@ -484,7 +495,6 @@ watch(
       code {
         position: relative;
         display: block;
-        padding-left: 3.6rem;
         margin: 0;
         overflow: auto;
         font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
@@ -494,6 +504,9 @@ watch(
         color: var(--hlnumber-color);
         background: var(--anzhiyu-card-bg);
         border-radius: 0;
+        display: flex;
+        flex-direction: row-reverse;
+        padding: 0;
       }
     }
 
@@ -507,28 +520,33 @@ watch(
     }
 
     span[rn-wrapper] {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 3em;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      align-items: flex-end;
+      width: auto !important;
+      min-width: fit-content;
       height: 100%;
-      font-size: 100%;
-      letter-spacing: -1px;
-      pointer-events: none;
-      counter-reset: linenumber;
-      user-select: none;
+      padding: 10px 8px 10px 12px;
       background: var(--anzhiyu-secondbg);
       border-right: var(--style-border-always);
+      font-size: 1rem;
 
-      & > span {
+      span {
         display: block;
+        line-height: 1.6;
+        color: var(--hlnumber-color);
+        white-space: nowrap;
+        transform: none !important;
         pointer-events: none;
         counter-increment: linenumber;
-
         &::before {
+          color: #999;
           display: block;
           padding-right: 0.5em;
-          color: #999;
           text-align: right;
           content: counter(linenumber);
         }
@@ -542,6 +560,12 @@ watch(
         padding-right: 1rem;
         color: var(--hlnumber-color);
       }
+    }
+    .md-editor-code-block {
+      flex: 1;
+      min-width: 0;
+      padding: 10px 0;
+      overflow-x: auto;
     }
 
     .md-editor-code-head {
@@ -585,6 +609,442 @@ watch(
         cursor: pointer;
         transition: color 0.2s;
       }
+    }
+  }
+
+  details.folding-tag {
+    display: block;
+    padding: 16px;
+    margin: 1em 0;
+    font-size: 1rem;
+    transition: border 0s ease;
+  }
+  details .content > :nth-child(1) {
+    margin-top: 0 !important;
+  }
+  details[open] {
+    background: var(--anzhiyu-card-bg);
+  }
+  details.folding-tag:not(.custom-color)[open] {
+    border-radius: 15px;
+    border-color: var(--anzhiyu-main);
+    border: 1px solid var(--anzhiyu-main);
+  }
+  details.folding-tag.custom-color[open] {
+    border-radius: 15px;
+    border: 1px solid;
+  }
+  details.folding-tag summary {
+    cursor: pointer;
+    padding: 16px;
+    margin: -16px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    position: relative;
+    line-height: normal;
+  }
+  details.folding-tag > summary {
+    border: var(--style-border) !important;
+    background: var(--anzhiyu-card-bg);
+    border-radius: 14px !important;
+    box-shadow: var(--anzhiyu-shadow-border);
+    color: var(--font-color) !important;
+    user-select: none;
+  }
+  details.folding-tag:not(.custom-color)[open] > summary {
+    color: var(--anzhiyu-white) !important;
+    background: var(--anzhiyu-main);
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    margin-bottom: 0;
+  }
+  details.folding-tag.custom-color[open] > summary {
+    color: var(--anzhiyu-white) !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    margin-bottom: 0;
+  }
+  details.folding-tag[open] > summary::marker {
+    color: var(--anzhiyu-white);
+    font-size: 16px;
+  }
+  details.folding-tag > summary::before {
+    content: " ";
+    margin-right: 2px;
+  }
+  details.folding-tag[open] > summary:hover:after {
+    content: "-";
+  }
+  details.folding-tag > summary:hover:after {
+    content: "+";
+  }
+  details.folding-tag summary:hover:after {
+    position: absolute;
+    content: "+";
+    text-align: center;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 16px;
+  }
+
+  details.folding-tag[open] > div.content {
+    border-radius: 0 0 16px 16px;
+  }
+
+  details.folding-tag:not(.custom-color) summary:hover {
+    cursor: pointer;
+    background: var(--anzhiyu-main);
+    color: var(--anzhiyu-white) !important;
+    transition: 0.3s;
+    box-shadow: var(--anzhiyu-shadow-main);
+  }
+  details.folding-tag.custom-color summary:hover {
+    cursor: pointer;
+    color: var(--anzhiyu-white) !important;
+    transition: 0.3s;
+    box-shadow: var(--anzhiyu-shadow-main);
+  }
+
+  details.folding-tag[open] > div.content {
+    padding: 16px;
+    margin: -16px;
+    margin-top: 0;
+  }
+
+  // 隐藏内容样式 - 块级
+  .hide-block {
+    margin: 1rem 0;
+
+    .hide-button {
+      display: inline-block;
+      padding: 8px 16px !important;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--anzhiyu-white);
+      cursor: pointer;
+      background: var(--anzhiyu-main);
+      border: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      user-select: none;
+
+      &:hover {
+        background: var(--anzhiyu-main-op-deep);
+        box-shadow: var(--anzhiyu-shadow-main);
+      }
+    }
+
+    .hide-content {
+      margin-top: 1rem;
+
+      > :first-child {
+        margin-top: 0 !important;
+      }
+
+      > :last-child {
+        margin-bottom: 0 !important;
+      }
+    }
+  }
+
+  // 隐藏内容样式 - 行内
+  .hide-inline {
+    .hide-button {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--anzhiyu-white);
+      cursor: pointer;
+      background: var(--anzhiyu-main);
+      border: none;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+      user-select: none;
+      vertical-align: baseline;
+
+      &:hover {
+        background: var(--anzhiyu-main-op-deep);
+        box-shadow: var(--anzhiyu-shadow-main);
+      }
+    }
+
+    .hide-content {
+      display: inline;
+    }
+  }
+
+  // 行内文本样式插件
+  // 1. 下划线
+  .inline-underline {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-color: var(--anzhiyu-main);
+  }
+
+  // 2. 着重号（中文特有）
+  .inline-emphasis-mark {
+    text-emphasis: filled circle;
+    text-emphasis-position: under left;
+    -webkit-text-emphasis: filled circle;
+    -webkit-text-emphasis-position: under left;
+    text-decoration-color: var(--anzhiyu-main);
+  }
+
+  // 3. 波浪线
+  .inline-wavy {
+    text-decoration: underline wavy;
+    text-decoration-color: var(--anzhiyu-main);
+    text-underline-offset: 3px;
+  }
+
+  // 4. 删除线（自定义样式）
+  .inline-delete {
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+    opacity: 0.7;
+  }
+
+  // 5. 键盘样式
+  .inline-kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    font-family: "Monaco", "Menlo", "Consolas", monospace;
+    font-size: 0.85em;
+    line-height: 1.4;
+    color: var(--anzhiyu-fontcolor);
+    background: var(--anzhiyu-secondbg);
+    border: 1px solid var(--anzhiyu-gray-op);
+    border-radius: 4px;
+    box-shadow:
+      0 1px 0 rgba(0, 0, 0, 0.2),
+      inset 0 0 0 2px var(--anzhiyu-card-bg);
+
+    kbd {
+      padding: 0;
+      font-size: inherit;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
+  }
+
+  // 6. 密码样式
+  .inline-password {
+    padding: 2px 4px;
+    color: transparent;
+    background: rgb(161, 161, 161);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+      color: var(--anzhiyu-fontcolor);
+      background: none;
+    }
+  }
+
+  // 按钮样式插件
+  .btn-anzhiyu {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px !important;
+    margin: 4px 8px 4px 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--anzhiyu-white);
+    text-decoration: none;
+    cursor: pointer;
+    background: var(--anzhiyu-main);
+    border: 2px solid var(--anzhiyu-main);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    i {
+      font-size: 1em;
+      transition: transform 0.3s ease;
+    }
+
+    &:hover {
+      background: var(--anzhiyu-main-op-deep);
+      border-color: var(--anzhiyu-main-op-deep);
+      box-shadow: var(--anzhiyu-shadow-main);
+      transform: translateY(-2px);
+      border-radius: 8px !important;
+
+      i {
+        transform: translateX(4px);
+      }
+    }
+
+    // 颜色变体
+    &.btn-blue {
+      background: #409eff;
+      border-color: #409eff;
+
+      &:hover {
+        background: #66b1ff;
+        border-color: #66b1ff;
+      }
+    }
+
+    &.btn-pink {
+      background: #ff69b4;
+      border-color: #ff69b4;
+
+      &:hover {
+        background: #ff85c0;
+        border-color: #ff85c0;
+      }
+    }
+
+    &.btn-red {
+      background: #f56c6c;
+      border-color: #f56c6c;
+
+      &:hover {
+        background: #f78989;
+        border-color: #f78989;
+      }
+    }
+
+    &.btn-purple {
+      background: #9d5cff;
+      border-color: #9d5cff;
+
+      &:hover {
+        background: #b37bff;
+        border-color: #b37bff;
+      }
+    }
+
+    &.btn-orange {
+      background: #ff9800;
+      border-color: #ff9800;
+
+      &:hover {
+        background: #ffad33;
+        border-color: #ffad33;
+      }
+    }
+
+    &.btn-green {
+      background: #67c23a;
+      border-color: #67c23a;
+
+      &:hover {
+        background: #85ce61;
+        border-color: #85ce61;
+      }
+    }
+
+    // outline 样式
+    &.btn-outline {
+      color: var(--anzhiyu-main);
+      background: transparent;
+
+      &:hover {
+        color: var(--anzhiyu-white);
+        background: var(--anzhiyu-main);
+      }
+
+      &.btn-blue {
+        color: #409eff;
+        background: transparent;
+
+        &:hover {
+          color: var(--anzhiyu-white);
+          background: #409eff;
+        }
+      }
+
+      &.btn-pink {
+        color: #ff69b4;
+        background: transparent;
+
+        &:hover {
+          color: var(--anzhiyu-white);
+          background: #ff69b4;
+        }
+      }
+
+      &.btn-red {
+        color: #f56c6c;
+        background: transparent;
+
+        &:hover {
+          color: var(--anzhiyu-white);
+          background: #f56c6c;
+        }
+      }
+
+      &.btn-purple {
+        color: #9d5cff;
+        background: transparent;
+
+        &:hover {
+          color: var(--anzhiyu-white);
+          background: #9d5cff;
+        }
+      }
+
+      &.btn-orange {
+        color: #ff9800;
+        background: transparent;
+
+        &:hover {
+          color: var(--anzhiyu-white);
+          background: #ff9800;
+        }
+      }
+
+      &.btn-green {
+        color: #67c23a;
+        background: transparent;
+
+        &:hover {
+          color: var(--anzhiyu-white);
+          background: #67c23a;
+        }
+      }
+    }
+
+    // 大尺寸
+    &.btn-larger {
+      padding: 12px 24px;
+      font-size: 1.1rem;
+
+      i {
+        font-size: 1.2em;
+      }
+    }
+  }
+
+  // 按钮容器（块级布局）
+  .btn-container {
+    display: flex;
+    width: 100%;
+    margin: 8px 0;
+    justify-content: flex-start;
+
+    &.btn-container-center {
+      justify-content: center;
+    }
+
+    &.btn-container-right {
+      justify-content: flex-end;
+    }
+
+    .btn-anzhiyu {
+      margin: 0;
     }
   }
 
@@ -962,7 +1422,7 @@ watch(
     line-height: 1.25rem;
     color: var(--anzhiyu-fontcolor);
     text-decoration: none;
-    border-bottom: dotted 2px var(--anzhiyu-lighttext) !important;
+    border-bottom: dotted 2px var(--anzhiyu-lighttext);
     transition: all 0.2s ease 0s !important;
 
     &:hover {
@@ -1037,6 +1497,11 @@ watch(
       transition-delay: 0.25s;
       transform: rotate(40deg);
     }
+  }
+  .md-editor-code-block {
+    font-size: 1rem !important;
+    line-height: 1.6;
+    padding-left: 8px !important;
   }
 
   .table-container {
