@@ -247,7 +247,7 @@
 
         .hide-button {
           display: inline-block;
-          padding: 8px 16px;
+          padding: 8px 16px !important;
           font-size: 0.9rem;
           font-weight: 500;
           color: var(--anzhiyu-white);
@@ -375,6 +375,203 @@
         }
       }
 
+      // 按钮样式插件
+      .btn-anzhiyu {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px !important;
+        margin: 4px 8px 4px 0;
+        font-size: 0.9rem;
+        font-weight: 500;
+        line-height: 1.5;
+        color: var(--anzhiyu-white);
+        text-decoration: none;
+        cursor: pointer;
+        background: var(--anzhiyu-main);
+        border: 2px solid var(--anzhiyu-main);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        i {
+          font-size: 1em;
+          transition: transform 0.3s ease;
+        }
+
+        &:hover {
+          background: var(--anzhiyu-main-op-deep);
+          border-color: var(--anzhiyu-main-op-deep);
+          box-shadow: var(--anzhiyu-shadow-main);
+          transform: translateY(-2px);
+          border-radius: 8px !important;
+
+          i {
+            transform: translateX(4px);
+          }
+        }
+
+        // 颜色变体
+        &.btn-blue {
+          background: #409eff;
+          border-color: #409eff;
+
+          &:hover {
+            background: #66b1ff;
+            border-color: #66b1ff;
+          }
+        }
+
+        &.btn-pink {
+          background: #ff69b4;
+          border-color: #ff69b4;
+
+          &:hover {
+            background: #ff85c0;
+            border-color: #ff85c0;
+          }
+        }
+
+        &.btn-red {
+          background: #f56c6c;
+          border-color: #f56c6c;
+
+          &:hover {
+            background: #f78989;
+            border-color: #f78989;
+          }
+        }
+
+        &.btn-purple {
+          background: #9d5cff;
+          border-color: #9d5cff;
+
+          &:hover {
+            background: #b37bff;
+            border-color: #b37bff;
+          }
+        }
+
+        &.btn-orange {
+          background: #ff9800;
+          border-color: #ff9800;
+
+          &:hover {
+            background: #ffad33;
+            border-color: #ffad33;
+          }
+        }
+
+        &.btn-green {
+          background: #67c23a;
+          border-color: #67c23a;
+
+          &:hover {
+            background: #85ce61;
+            border-color: #85ce61;
+          }
+        }
+
+        // outline 样式
+        &.btn-outline {
+          color: var(--anzhiyu-main);
+          background: transparent;
+
+          &:hover {
+            color: var(--anzhiyu-white);
+            background: var(--anzhiyu-main);
+          }
+
+          &.btn-blue {
+            color: #409eff;
+            background: transparent;
+
+            &:hover {
+              color: var(--anzhiyu-white);
+              background: #409eff;
+            }
+          }
+
+          &.btn-pink {
+            color: #ff69b4;
+            background: transparent;
+
+            &:hover {
+              color: var(--anzhiyu-white);
+              background: #ff69b4;
+            }
+          }
+
+          &.btn-red {
+            color: #f56c6c;
+            background: transparent;
+
+            &:hover {
+              color: var(--anzhiyu-white);
+              background: #f56c6c;
+            }
+          }
+
+          &.btn-purple {
+            color: #9d5cff;
+            background: transparent;
+
+            &:hover {
+              color: var(--anzhiyu-white);
+              background: #9d5cff;
+            }
+          }
+
+          &.btn-orange {
+            color: #ff9800;
+            background: transparent;
+
+            &:hover {
+              color: var(--anzhiyu-white);
+              background: #ff9800;
+            }
+          }
+
+          &.btn-green {
+            color: #67c23a;
+            background: transparent;
+
+            &:hover {
+              color: var(--anzhiyu-white);
+              background: #67c23a;
+            }
+          }
+        }
+
+        // 大尺寸
+        &.btn-larger {
+          padding: 12px 24px;
+          font-size: 1.1rem;
+
+          i {
+            font-size: 1.2em;
+          }
+        }
+      }
+
+      // 按钮容器（块级布局）
+      .btn-container {
+        display: flex;
+        width: 100%;
+        margin: 8px 0;
+        justify-content: flex-start;
+
+        &.btn-container-center {
+          justify-content: center;
+        }
+
+        &.btn-container-right {
+          justify-content: flex-end;
+        }
+
+        .btn-anzhiyu {
+          margin: 0;
+        }
+      }
+
       ul {
         counter-reset: li 0;
       }
@@ -448,7 +645,7 @@
         line-height: 1.25rem;
         color: var(--anzhiyu-fontcolor);
         text-decoration: none;
-        border-bottom: dotted 2px var(--anzhiyu-lighttext) !important;
+        border-bottom: dotted 2px var(--anzhiyu-lighttext);
         transition: all 0.2s ease 0s !important;
 
         &:hover {

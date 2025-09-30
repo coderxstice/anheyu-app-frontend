@@ -10,6 +10,7 @@ import TabsPlugin from "./plugins/markdown-it-tabs-plugin";
 import FoldingPlugin from "./plugins/markdown-it-folding-plugin";
 import HiddenPlugin from "./plugins/markdown-it-hidden-plugin";
 import InlineStylesPlugin from "./plugins/markdown-it-inline-styles-plugin";
+import ButtonPlugin from "./plugins/markdown-it-button-plugin";
 
 export function installMarkdownEditorExtensions() {
   console.log("🔧 Installing markdown editor extensions...");
@@ -30,6 +31,9 @@ export function installMarkdownEditorExtensions() {
 
         mdit.use(InlineStylesPlugin);
         console.log("✅ InlineStylesPlugin registered");
+
+        mdit.use(ButtonPlugin);
+        console.log("✅ ButtonPlugin registered");
 
         console.log("🎉 All markdown plugins configured successfully!");
       } catch (error) {
