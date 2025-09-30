@@ -2,11 +2,12 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-14 13:56:16
- * @LastEditTime: 2025-09-22 20:07:49
+ * @LastEditTime: 2025-09-30 16:56:09
  * @LastEditors: 安知鱼
  */
 import { config } from "md-editor-v3";
 import TabsPlugin from "./plugins/markdown-it-tabs-plugin";
+import FoldingPlugin from "./plugins/markdown-it-folding-plugin";
 
 export function installMarkdownEditorExtensions() {
   console.log("🔧 Installing markdown editor extensions...");
@@ -18,6 +19,9 @@ export function installMarkdownEditorExtensions() {
       try {
         mdit.use(TabsPlugin);
         console.log("✅ TabsPlugin registered");
+
+        mdit.use(FoldingPlugin);
+        console.log("✅ FoldingPlugin registered");
 
         console.log("🎉 All markdown plugins configured successfully!");
       } catch (error) {

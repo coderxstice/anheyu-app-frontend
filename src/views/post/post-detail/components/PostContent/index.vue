@@ -588,6 +588,111 @@ watch(
     }
   }
 
+  details.folding-tag {
+    display: block;
+    padding: 16px;
+    margin: 1em 0;
+    font-size: 1rem;
+    transition: border 0s ease;
+  }
+  details .content > :nth-child(1) {
+    margin-top: 0 !important;
+  }
+  details[open] {
+    background: var(--anzhiyu-card-bg);
+  }
+  details.folding-tag:not(.custom-color)[open] {
+    border-radius: 15px;
+    border-color: var(--anzhiyu-main);
+    border: 1px solid var(--anzhiyu-main);
+  }
+  details.folding-tag.custom-color[open] {
+    border-radius: 15px;
+    border: 1px solid;
+  }
+  details.folding-tag summary {
+    cursor: pointer;
+    padding: 16px;
+    margin: -16px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    position: relative;
+    line-height: normal;
+  }
+  details.folding-tag > summary {
+    border: var(--style-border) !important;
+    background: var(--anzhiyu-card-bg);
+    border-radius: 14px !important;
+    box-shadow: var(--anzhiyu-shadow-border);
+    color: var(--font-color) !important;
+    user-select: none;
+  }
+  details.folding-tag:not(.custom-color)[open] > summary {
+    color: var(--anzhiyu-white) !important;
+    background: var(--anzhiyu-main);
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    margin-bottom: 0;
+  }
+  details.folding-tag.custom-color[open] > summary {
+    color: var(--anzhiyu-white) !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    margin-bottom: 0;
+  }
+  details.folding-tag[open] > summary::marker {
+    color: var(--anzhiyu-white);
+    font-size: 16px;
+  }
+  details.folding-tag > summary::before {
+    content: " ";
+    margin-right: 2px;
+  }
+  details.folding-tag[open] > summary:hover:after {
+    content: "-";
+  }
+  details.folding-tag > summary:hover:after {
+    content: "+";
+  }
+  details.folding-tag summary:hover:after {
+    position: absolute;
+    content: "+";
+    text-align: center;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 16px;
+  }
+
+  details.folding-tag[open] > div.content {
+    border-radius: 0 0 16px 16px;
+  }
+
+  details.folding-tag:not(.custom-color) summary:hover {
+    cursor: pointer;
+    background: var(--anzhiyu-main);
+    color: var(--anzhiyu-white) !important;
+    transition: 0.3s;
+    box-shadow: var(--anzhiyu-shadow-main);
+  }
+  details.folding-tag.custom-color summary:hover {
+    cursor: pointer;
+    color: var(--anzhiyu-white) !important;
+    transition: 0.3s;
+    box-shadow: var(--anzhiyu-shadow-main);
+  }
+
+  details.folding-tag[open] > div.content {
+    padding: 16px;
+    margin: -16px;
+    margin-top: 0;
+  }
+
   .tabs {
     position: relative;
     padding: 8px;
