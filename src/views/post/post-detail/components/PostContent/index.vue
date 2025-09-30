@@ -480,7 +480,7 @@ watch(
       }
 
       pre {
-        max-height: 1000px;
+        max-height: 50000px;
       }
     }
 
@@ -495,7 +495,6 @@ watch(
       code {
         position: relative;
         display: block;
-        padding-left: 3.6rem;
         margin: 0;
         overflow: auto;
         font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
@@ -505,6 +504,9 @@ watch(
         color: var(--hlnumber-color);
         background: var(--anzhiyu-card-bg);
         border-radius: 0;
+        display: flex;
+        flex-direction: row-reverse;
+        padding: 0;
       }
     }
 
@@ -518,28 +520,33 @@ watch(
     }
 
     span[rn-wrapper] {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 3em;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      align-items: flex-end;
+      width: auto !important;
+      min-width: fit-content;
       height: 100%;
-      font-size: 100%;
-      letter-spacing: -1px;
-      pointer-events: none;
-      counter-reset: linenumber;
-      user-select: none;
+      padding: 10px 8px 10px 12px;
       background: var(--anzhiyu-secondbg);
       border-right: var(--style-border-always);
+      font-size: 1rem;
 
-      & > span {
+      span {
         display: block;
+        line-height: 1.6;
+        color: var(--hlnumber-color);
+        white-space: nowrap;
+        transform: none !important;
         pointer-events: none;
         counter-increment: linenumber;
-
         &::before {
+          color: #999;
           display: block;
           padding-right: 0.5em;
-          color: #999;
           text-align: right;
           content: counter(linenumber);
         }
@@ -553,6 +560,12 @@ watch(
         padding-right: 1rem;
         color: var(--hlnumber-color);
       }
+    }
+    .md-editor-code-block {
+      flex: 1;
+      min-width: 0;
+      padding: 10px 0;
+      overflow-x: auto;
     }
 
     .md-editor-code-head {
@@ -1484,6 +1497,11 @@ watch(
       transition-delay: 0.25s;
       transform: rotate(40deg);
     }
+  }
+  .md-editor-code-block {
+    font-size: 1rem !important;
+    line-height: 1.6;
+    padding-left: 8px !important;
   }
 
   .table-container {
