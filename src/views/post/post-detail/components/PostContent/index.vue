@@ -421,6 +421,10 @@ watch(
       .code-expand-btn i {
         animation: 1.2s ease 0s infinite normal none running code-expand-key;
       }
+
+      pre {
+        padding-bottom: 0 !important;
+      }
     }
 
     .code-expand-btn {
@@ -456,6 +460,13 @@ watch(
 
       &.is-expanded i {
         transform: rotate(180deg);
+      }
+    }
+
+    // 展开时给 pre 添加底部内边距，避免被按钮遮挡
+    &.is-collapsible:not(.is-collapsed) {
+      pre {
+        padding-bottom: 32px !important;
       }
     }
 

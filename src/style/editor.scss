@@ -29,6 +29,10 @@
         .code-expand-btn i {
           animation: 1.2s ease 0s infinite normal none running code-expand-key;
         }
+
+        pre {
+          padding-bottom: 0 !important;
+        }
       }
 
       .code-expand-btn {
@@ -67,6 +71,13 @@
         }
       }
 
+      // 只在可折叠且已展开时给 pre 添加底部内边距，避免被按钮遮挡
+      &.is-collapsible:not(.is-collapsed) {
+        pre {
+          padding-bottom: 32px !important;
+        }
+      }
+
       &[open] {
         .md-editor-code-head {
           border-bottom: var(--style-border-always);
@@ -77,7 +88,7 @@
         }
 
         pre {
-          max-height: 1000px;
+          max-height: 50000px;
           transition: max-height 0.35s ease-in-out;
         }
       }
@@ -664,6 +675,16 @@
         background-color: var(--anzhiyu-secondbg);
         border: var(--style-border-always);
         border-radius: 8px;
+      }
+
+      code {
+        padding: 0.2rem 0.4rem;
+        padding: 2px 4px;
+        line-height: 2;
+        color: #fff;
+        background: var(--anzhiyu-code-stress);
+        border-radius: 4px;
+        box-shadow: var(--anzhiyu-shadow-border);
       }
 
       .md-editor-code pre code {
