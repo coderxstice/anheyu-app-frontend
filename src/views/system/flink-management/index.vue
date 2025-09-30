@@ -39,6 +39,9 @@
           <el-button type="warning" :icon="Upload" @click="handleImport">
             <span class="button-text">批量导入</span>
           </el-button>
+          <el-button type="info" :icon="Monitor" @click="handleHealthCheck">
+            <span class="button-text">健康检查</span>
+          </el-button>
           <el-button type="success" :icon="Plus" @click="handleCreate">
             <span class="button-text">新建友链</span>
           </el-button>
@@ -192,10 +195,16 @@ import {
   Edit,
   Delete,
   Setting,
-  Upload
+  Upload,
+  Monitor
 } from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
-import { getAdminLinkList, deleteLink, reviewLink } from "@/api/postLink";
+import { ElMessage, ElMessageBox, ElLoading } from "element-plus";
+import {
+  getAdminLinkList,
+  deleteLink,
+  reviewLink,
+  checkLinksHealth
+} from "@/api/postLink";
 import type {
   LinkItem,
   GetAdminLinksParams,
@@ -354,6 +363,49 @@ const handleManage = () => {
 
 const handleImport = () => {
   importDialog.visible = true;
+};
+
+const handleHealthCheck = async () => {
+  try {
+    await ElMessageBox.confirm(
+      "此操作将检查所有已审核通过的友链是否可访问，无法访问的友链将被标记为失联状态。是否继续？",
+      "友链健康检查",
+      {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }
+    );
+
+    const loadingInstance = ElLoading.service({
+      lock: true,
+      text: "正在检查友链健康状态，请稍候...",
+      background: "rgba(0, 0, 0, 0.7)"
+    });
+
+    try {
+      const res = await checkLinksHealth();
+      loadingInstance.close();
+
+      if (res.code === 200) {
+        const { total, healthy, unhealthy } = res.data;
+        ElMessage.success(
+          `健康检查完成！共检查 ${total} 个友链，健康 ${healthy} 个，失联 ${unhealthy} 个`
+        );
+        getLinkList();
+      } else {
+        ElMessage.error("健康检查失败：" + res.message);
+      }
+    } catch (error) {
+      loadingInstance.close();
+      console.error("健康检查失败", error);
+      ElMessage.error("健康检查失败");
+    }
+  } catch (error) {
+    if (error !== "cancel") {
+      console.error("操作取消或出错", error);
+    }
+  }
 };
 
 // 监听窗口大小变化

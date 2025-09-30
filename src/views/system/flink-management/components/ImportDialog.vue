@@ -307,7 +307,7 @@ const exampleJson = `{
     {
       "name": "安知鱼",
       "url": "https://blog.anheyu.com",
-      "logo": "https://blog.anheyu.com/logo.png",
+      "logo": "https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg",
       "description": "生活明朗，万物可爱",
       "siteshot": "https://blog.anheyu.com/screenshot.png",
       "category_name": "好友",

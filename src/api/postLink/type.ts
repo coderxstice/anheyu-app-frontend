@@ -176,3 +176,13 @@ export interface ImportLinksResponse {
   failed_list: ImportLinkFailure[]; // 失败的友链及原因
   skipped_list: ImportLinkSkipped[]; // 跳过的友链及原因
 }
+
+// --- 友链健康检查相关类型 ---
+
+/** 友链健康检查响应 */
+export interface LinkHealthCheckResponse {
+  total: number; // 总共检查的友链数量
+  healthy: number; // 健康的友链数量
+  unhealthy: number; // 失联的友链数量
+  unhealthy_ids: number[]; // 失联的友链ID列表
+}
