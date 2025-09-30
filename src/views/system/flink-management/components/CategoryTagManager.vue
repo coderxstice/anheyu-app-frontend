@@ -698,7 +698,6 @@ onMounted(() => {
   }
 
   &.is-protected {
-    background: linear-gradient(135deg, #fff9e6 0%, #fff 100%);
     border-color: var(--el-color-warning-light-5);
   }
 
