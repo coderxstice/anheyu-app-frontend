@@ -161,8 +161,21 @@ const handleSave = async (markdown: string, html: string) => {
   model.value.friendLinkApplyCustomCode = markdown;
   // 保存渲染后的 HTML（用于前台展示）
   model.value.friendLinkApplyCustomCodeHtml = html;
-  ElMessage.success("内容已更新");
 };
+
+// 在表单提交前同步更新 HTML 内容
+const syncEditorContent = async () => {
+  if (editorRef.value?.triggerSave) {
+    editorRef.value.triggerSave();
+    // 等待一小段时间确保 handleSave 被调用
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+};
+
+// 暴露方法给父组件调用
+defineExpose({
+  syncEditorContent
+});
 
 onMounted(() => {
   fetchCategories();

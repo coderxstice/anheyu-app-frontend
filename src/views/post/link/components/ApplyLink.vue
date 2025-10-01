@@ -2,7 +2,7 @@
  * @Description: 友情链接申请面板
  * @Author: 安知鱼
  * @Date: 2025-08-19 10:19:23
- * @LastEditTime: 2025-08-30 15:08:17
+ * @LastEditTime: 2025-10-01 19:45:11
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -120,7 +120,7 @@ watch(allChecked, isAllChecked => {
 <template>
   <div class="apply-link-container">
     <!-- 自定义内容区域 - 展示渲染后的 HTML -->
-    <el-card
+    <div
       v-if="friendLinkApplyCustomCodeHtml"
       shadow="never"
       class="custom-content-card"
@@ -129,7 +129,7 @@ watch(allChecked, isAllChecked => {
         class="custom-content-wrapper post-content"
         v-html="friendLinkApplyCustomCodeHtml"
       />
-    </el-card>
+    </div>
 
     <el-card shadow="never" :class="{ 'mt-20': friendLinkApplyCustomCodeHtml }">
       <template #header>

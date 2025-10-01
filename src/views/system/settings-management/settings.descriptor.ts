@@ -1157,6 +1157,12 @@ const fLinkDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyFriendLinkApplyCustomCode,
     defaultValue: "",
     type: "string"
+  },
+  {
+    frontendPath: "frontDesk.fLink.friendLinkApplyCustomCodeHtml",
+    backendKey: constant.KeyFriendLinkApplyCustomCodeHtml,
+    defaultValue: "",
+    type: "string"
   }
 ];
 
