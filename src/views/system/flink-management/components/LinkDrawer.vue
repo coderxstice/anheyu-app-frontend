@@ -56,6 +56,19 @@
         </div>
       </el-form-item>
 
+      <el-form-item label="跳过健康检查" prop="skip_health_check">
+        <el-switch
+          v-model="formData.skip_health_check"
+          active-text="是"
+          inactive-text="否"
+        />
+        <div class="form-tip">
+          <small
+            >某些网站可能因为防护机制无法通过健康检查，启用此选项将不再对该友链进行健康检查</small
+          >
+        </div>
+      </el-form-item>
+
       <!-- 现代化的分类选择器 -->
       <el-form-item label="分类" prop="category_id">
         <div class="modern-selector">
@@ -247,7 +260,8 @@ const initialFormData: CreateLinkRequest = {
   category_id: null,
   tag_id: null,
   status: "PENDING",
-  sort_order: 0
+  sort_order: 0,
+  skip_health_check: false
 };
 const formData = ref<CreateLinkRequest>({ ...initialFormData });
 
@@ -325,7 +339,8 @@ watch(
           category_id: props.data.category?.id || null,
           tag_id: props.data.tag?.id || null,
           status: props.data.status,
-          sort_order: props.data.sort_order || 0
+          sort_order: props.data.sort_order || 0,
+          skip_health_check: props.data.skip_health_check || false
         };
       } else {
         formData.value = { ...initialFormData };

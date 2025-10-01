@@ -43,6 +43,7 @@ export interface LinkItem {
   status: LinkStatus;
   siteshot: string;
   sort_order: number;
+  skip_health_check: boolean;
   category: LinkCategory | null;
   tag: LinkTag | null;
 }
@@ -69,6 +70,7 @@ export interface CreateLinkRequest {
   tag_id: number | null; // 改为单个标签，可选
   status: LinkStatus;
   sort_order: number;
+  skip_health_check: boolean;
 }
 
 /** [后台] 更新友链 */
