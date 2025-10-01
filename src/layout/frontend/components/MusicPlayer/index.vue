@@ -10,7 +10,8 @@
     id="nav-music"
     :class="{
       'music-player': true,
-      'music-hidden': !isVisible || musicAPI.isLoading.value,
+      'music-hidden':
+        !isVisible || musicAPI.isLoading.value || !isMusicPlayerVisible,
       'in-footer-area': isInFooterArea,
       expanded: isExpanded,
       hovered: isHovered,
@@ -81,6 +82,8 @@ import { useLyrics } from "@/composables/useLyrics";
 import { useMusicAPI } from "@/composables/useMusicAPI";
 import { useColorExtraction } from "@/composables/useColorExtraction";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import { useUiStore } from "@/store/modules/uiStore";
+import { storeToRefs } from "pinia";
 
 // 导入组件
 import MusicCapsule from "@/components/MusicPlayer/MusicCapsule.vue";
@@ -115,6 +118,8 @@ const instanceId = (window as any).musicPlayerInstanceCount;
 
 // 初始化 composables
 const siteConfigStore = useSiteConfigStore();
+const uiStore = useUiStore();
+const { isMusicPlayerVisible } = storeToRefs(uiStore);
 const musicAPI = useMusicAPI();
 const audioPlayer = useAudioPlayer(playlist);
 const lyricsComposable = useLyrics(
