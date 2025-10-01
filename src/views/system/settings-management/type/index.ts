@@ -276,6 +276,7 @@ export interface HomePageSettingsInfo {
   navClock: boolean;
   homeTop: HomeTopInfo;
 
+  footerBadgesEnable: boolean;
   footerBadges: BadgeItem[];
   footerSocialBarLeft: SocialLinkItem[];
   footerSocialBarRight: SocialLinkItem[];

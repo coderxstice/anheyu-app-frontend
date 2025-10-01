@@ -778,6 +778,12 @@ const frontDeskDescriptors: SettingDescriptor[] = [
     type: "json"
   },
   {
+    frontendPath: "frontDesk.home.footerBadgesEnable",
+    backendKey: constant.KeyFooterBadgeEnable,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
     frontendPath: "frontDesk.home.footerBadges",
     backendKey: constant.KeyFooterBadge,
     defaultValue: [],

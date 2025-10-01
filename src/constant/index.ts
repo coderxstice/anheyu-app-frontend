@@ -98,6 +98,7 @@ const KeyFooterSocialBarCenterImg: SettingKey = "footer.socialBar.centerImg";
 const KeyFooterListRandomFriends: SettingKey = "footer.list.randomFriends";
 const KeyFooterBarAuthorLink: SettingKey = "footer.bar.authorLink";
 const KeyFooterBarCCLink: SettingKey = "footer.bar.cc.link";
+const KeyFooterBadgeEnable: SettingKey = "footer.badge.enable";
 const KeyFooterBadge: SettingKey = "footer.badge.list";
 const KeyFooterSocialBarLeft: SettingKey = "footer.socialBar.left";
 const KeyFooterSocialBarRight: SettingKey = "footer.socialBar.right";
@@ -313,6 +314,7 @@ export const constant = {
   KeyFooterListRandomFriends,
   KeyFooterBarAuthorLink,
   KeyFooterBarCCLink,
+  KeyFooterBadgeEnable,
   KeyFooterBadge,
   KeyFooterSocialBarLeft,
   KeyFooterSocialBarRight,
