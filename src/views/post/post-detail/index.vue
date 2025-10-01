@@ -85,6 +85,17 @@ const commentBarrageConfig = computed(() => {
     defaultGravatarType: siteConfig.DEFAULT_GRAVATAR_TYPE
   };
 });
+
+const siteConfig = siteConfigStore.getSiteConfig;
+
+const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
+
+const authorInfoConfig = computed(() => {
+  return {
+    ownerName: siteConfig.frontDesk.siteOwner.name
+  };
+});
+
 const { isConsoleOpen } = storeToRefs(appStore);
 
 const { isCommentBarrageVisible } = storeToRefs(uiStore);
@@ -342,6 +353,15 @@ watch(
       </main>
       <Sidebar />
     </div>
+
+    <div id="anzhiyu-footer-bar">
+      <div class="footer-logo">{{ siteName }}</div>
+      <div class="footer-bar-description">
+        来自 {{ authorInfoConfig?.ownerName }} 最新设计与科技的文章
+      </div>
+      <div class="footer-bar-link" href="/archives">查看全部</div>
+    </div>
+
     <CommentBarrage
       v-if="article && commentBarrageConfig"
       v-show="isCommentBarrageVisible && !isConsoleOpen"
@@ -360,6 +380,56 @@ watch(
     background-color: #18171d;
   }
 }
+
+div#anzhiyu-footer-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 16px;
+  height: 140px;
+  justify-content: center;
+  @media screen and (width <= 768px) {
+    position: relative;
+    z-index: 999;
+    background: var(--anzhiyu-card-bg);
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .footer-logo {
+    padding: 0 5px;
+    font-size: 1.6rem;
+    font-weight: 900;
+    line-height: 3rem;
+    letter-spacing: normal;
+    transition:
+      all 0.3s,
+      color 0s,
+      opacity 0.3s;
+  }
+  .footer-bar-description {
+    color: var(--anzhiyu-secondtext);
+    font-weight: 700;
+  }
+  .footer-bar-link {
+    padding: 4px 16px;
+    background: var(--anzhiyu-secondbg);
+    border-radius: 20px;
+    margin-top: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    border: var(--style-border-always);
+    transition: all 0.3s ease-out 0s;
+    &:hover {
+      background: var(--anzhiyu-main);
+      color: var(--anzhiyu-white);
+      transform: scale(1.1);
+      border-color: var(--anzhiyu-main);
+    }
+  }
+}
+
 .post-content-inner {
   width: calc(100% - 300px);
   transition: width 0.3s ease;
@@ -385,6 +455,9 @@ watch(
   flex-direction: column;
   gap: 0.625rem;
   transition: all 0.3s ease 0s;
+  @media screen and (width <= 768px) {
+    box-shadow: none;
+  }
 }
 
 .layout {
