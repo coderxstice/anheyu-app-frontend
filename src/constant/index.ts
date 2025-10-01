@@ -36,7 +36,11 @@ const KeyDefaultBigParam: SettingKey = "DEFAULT_BIG_PARAM";
 const KeyGravatarURL: SettingKey = "GRAVATAR_URL";
 const KeyThemeColor: SettingKey = "THEME_COLOR";
 const KeySiteAnnouncement: SettingKey = "SITE_ANNOUNCEMENT";
-const KeyFooterCode: SettingKey = "FOOTER_CODE";
+const KeyCustomHeaderHTML: SettingKey = "CUSTOM_HEADER_HTML";
+const KeyCustomFooterHTML: SettingKey = "CUSTOM_FOOTER_HTML";
+const KeyCustomCSS: SettingKey = "CUSTOM_CSS";
+const KeyCustomJS: SettingKey = "CUSTOM_JS";
+const KeyCustomSidebar: SettingKey = "CUSTOM_SIDEBAR";
 const KeyUploadAllowedExtensions: SettingKey = "UPLOAD_ALLOWED_EXTENSIONS";
 const KeyUploadDeniedExtensions: SettingKey = "UPLOAD_DENIED_EXTENSIONS";
 
@@ -74,6 +78,8 @@ const KeyFriendLinkDefaultCategory: SettingKey = "FRIEND_LINK_DEFAULTCATEGORY";
 const KeyFriendLinkApplyCondition: SettingKey = "FRIEND_LINK_APPLY_CONDITION";
 const KeyFriendLinkApplyCustomCode: SettingKey =
   "FRIEND_LINK_APPLY_CUSTOM_CODE";
+const KeyFriendLinkApplyCustomCodeHtml: SettingKey =
+  "FRIEND_LINK_APPLY_CUSTOM_CODE_HTML";
 
 // --- 前台及页脚配置 ---
 const KeyFrontDeskSiteOwnerName: SettingKey = "frontDesk.siteOwner.name";
@@ -259,7 +265,11 @@ export const constant = {
   KeyGravatarURL,
   KeyThemeColor,
   KeySiteAnnouncement,
-  KeyFooterCode,
+  KeyCustomHeaderHTML,
+  KeyCustomFooterHTML,
+  KeyCustomCSS,
+  KeyCustomJS,
+  KeyCustomSidebar,
   KeyUploadAllowedExtensions,
   KeyUploadDeniedExtensions,
 
@@ -313,6 +323,7 @@ export const constant = {
   KeyFriendLinkDefaultCategory,
   KeyFriendLinkApplyCondition,
   KeyFriendLinkApplyCustomCode,
+  KeyFriendLinkApplyCustomCodeHtml,
 
   // --- 文章配置 ---
   KeyDefaultCover,

@@ -14,7 +14,6 @@ export interface SiteInfo {
   subTitle: string;
   siteDescription: string;
   primaryUrl: string;
-  footerCode: string;
   announcement: string;
   logoDay: string;
   logoNight: string;
@@ -31,6 +30,11 @@ export interface PageSittingInfo {
   albumApiURL: string;
   defaultThumbParam?: string;
   defaultBigParam?: string;
+  customHeaderHTML: string;
+  customFooterHTML: string;
+  customCSS: string;
+  customJS: string;
+  customSidebar: string;
 }
 
 /**
@@ -372,7 +376,8 @@ export interface FLinkCategory {
 export interface FLinkSettingsInfo {
   friendLinkDefaultCategory: number;
   friendLinkApplyCondition: string[];
-  friendLinkApplyCustomCode: string;
+  friendLinkApplyCustomCode: string; // Markdown 内容（用于编辑）
+  friendLinkApplyCustomCodeHtml: string; // 渲染后的 HTML（用于前台展示）
 }
 
 /**
