@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, watch } from "vue";
-import { useSnackbar } from "@/composables/useSnackbar";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useLazyLoading } from "@/composables/useLazyLoading";
 import "katex/dist/katex.min.css";
@@ -15,7 +14,6 @@ const props = defineProps({
   }
 });
 
-const { showSnackbar } = useSnackbar();
 const siteConfigStore = useSiteConfigStore();
 
 // 初始化懒加载
@@ -37,110 +35,11 @@ const collapsedHeight = computed(() => {
   return `${height}px`;
 });
 
+// 文章内容点击事件处理 - 现在大部分逻辑已内置到 HTML 中
+// 这里保留是为了未来可能需要的额外处理
 const handleContentClick = (event: Event) => {
-  const target = event.target as HTMLElement;
-
-  const tabButton = target.closest(".tabs .nav-tabs .tab");
-  if (tabButton && tabButton instanceof HTMLButtonElement) {
-    event.preventDefault();
-    if (tabButton.classList.contains("active")) {
-      return;
-    }
-    const tabsContainer = tabButton.closest(".tabs");
-    if (!tabsContainer) return;
-    const targetId = tabButton.dataset.href;
-    if (!targetId) return;
-
-    tabsContainer.querySelectorAll(".nav-tabs .tab").forEach(btn => {
-      btn.classList.remove("active");
-    });
-    tabsContainer.querySelectorAll(".tab-item-content").forEach(content => {
-      content.classList.remove("active");
-    });
-
-    tabButton.classList.add("active");
-    const targetContent = tabsContainer.querySelector(`#${targetId}`);
-    if (targetContent) {
-      targetContent.classList.add("active");
-    }
-    return;
-  }
-
-  const scrollToTopButton = target.closest(".tab-to-top button");
-  if (scrollToTopButton) {
-    event.preventDefault();
-    const tabsContainer = scrollToTopButton.closest(".tabs");
-    if (tabsContainer) {
-      tabsContainer.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
-    }
-    return;
-  }
-
-  const copyButton = target.closest(".copy-button");
-  if (copyButton) {
-    event.preventDefault();
-    event.stopPropagation();
-    const codeContainer = copyButton.closest(".md-editor-code");
-    const codeElement = codeContainer?.querySelector("pre code");
-    if (codeElement) {
-      navigator.clipboard
-        .writeText(codeElement.textContent || "")
-        .then(() => {
-          showSnackbar("复制成功，复制和转载请标注本文地址");
-        })
-        .catch(() => {
-          showSnackbar("复制失败，请手动复制");
-        });
-    }
-    return;
-  }
-
-  const expandButton = target.closest(".expand");
-  if (expandButton) {
-    const detailsElement = expandButton.closest(".md-editor-code");
-    event.preventDefault();
-    if (detailsElement) {
-      detailsElement.hasAttribute("open")
-        ? detailsElement.removeAttribute("open")
-        : detailsElement.setAttribute("open", "");
-    }
-    return;
-  }
-
-  const expandCodeButton = target.closest(".code-expand-btn");
-  if (expandCodeButton) {
-    const container = expandCodeButton.closest<HTMLDetailsElement>(
-      "details.md-editor-code"
-    );
-    if (container) {
-      const preElement = container.querySelector("pre");
-
-      if (container.classList.contains("is-collapsed")) {
-        // 展开：移除内联样式限制
-        container.open = true;
-        if (preElement) {
-          preElement.style.height = "";
-          preElement.style.overflow = "";
-        }
-      } else {
-        // 折叠：重新设置内联样式限制
-        if (preElement) {
-          preElement.style.height = collapsedHeight.value;
-          preElement.style.overflow = "hidden";
-        }
-      }
-
-      container.classList.toggle("is-collapsed");
-      expandCodeButton.classList.toggle(
-        "is-expanded",
-        !container.classList.contains("is-collapsed")
-      );
-    }
-    return;
-  }
+  // 所有交互逻辑已经通过 onclick 内联事件处理器实现
+  // 如果未来需要添加额外的全局处理逻辑，可以在这里扩展
 };
 
 onMounted(async () => {

@@ -24,16 +24,18 @@
     />
 
     <el-form-item label="申请友链自定义内容">
-      <div class="markdown-editor-wrapper">
-        <MarkdownEditor
-          ref="editorRef"
-          v-model="model.friendLinkApplyCustomCode"
-          :on-upload-img="handleImageUpload"
-          @onSave="handleSave"
-        />
-      </div>
-      <div class="editor-tip">
-        支持 Markdown 语法和富文本编辑，内容将显示在申请条件的上方
+      <div class="flink-editor-container">
+        <div class="markdown-editor-wrapper">
+          <MarkdownEditor
+            ref="editorRef"
+            v-model="model.friendLinkApplyCustomCode"
+            :on-upload-img="handleImageUpload"
+            @onSave="handleSave"
+          />
+        </div>
+        <div class="editor-tip">
+          支持 Markdown 语法和富文本编辑，内容将显示在申请条件的上方
+        </div>
       </div>
     </el-form-item>
   </div>
@@ -155,7 +157,10 @@ const handleImageUpload = async (
 
 // 处理保存（当用户按 Ctrl+S 时）
 const handleSave = async (markdown: string, html: string) => {
+  // 保存 Markdown（用于编辑器再次编辑）
   model.value.friendLinkApplyCustomCode = markdown;
+  // 保存渲染后的 HTML（用于前台展示）
+  model.value.friendLinkApplyCustomCodeHtml = html;
   ElMessage.success("内容已更新");
 };
 
@@ -164,13 +169,42 @@ onMounted(() => {
 });
 </script>
 
+<style lang="scss">
+// 引入文章内容基础样式
+@use "@/style/article-content-base.scss" as *;
+
+// 友链编辑器容器 - 应用与文章编辑器相同的样式
+.flink-editor-container {
+  .markdown-editor-wrapper {
+    .md-editor-container {
+      height: 100%;
+
+      // 应用所有文章内容基础样式
+      @include article-content-base;
+    }
+
+    .md-editor-fullscreen {
+      z-index: 2100;
+    }
+  }
+}
+</style>
+
 <style scoped lang="scss">
+.flink-editor-container {
+  width: 100%;
+}
+
 .markdown-editor-wrapper {
   width: 100%;
   height: 400px;
   border: 1px solid var(--el-border-color-light);
   border-radius: 4px;
   overflow: hidden;
+
+  :deep(.md-editor-container) {
+    height: 100%;
+  }
 }
 
 .editor-tip {

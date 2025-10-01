@@ -27,6 +27,7 @@ defineOptions({
 
 const props = defineProps<{
   friendLinkApplyCondition: string[];
+  friendLinkApplyCustomCodeHtml?: string; // 渲染后的 HTML 内容
 }>();
 
 const checkedStates = ref(
@@ -118,7 +119,19 @@ watch(allChecked, isAllChecked => {
 
 <template>
   <div class="apply-link-container">
-    <el-card shadow="never">
+    <!-- 自定义内容区域 - 展示渲染后的 HTML -->
+    <el-card
+      v-if="friendLinkApplyCustomCodeHtml"
+      shadow="never"
+      class="custom-content-card"
+    >
+      <div
+        class="custom-content-wrapper post-content"
+        v-html="friendLinkApplyCustomCodeHtml"
+      />
+    </el-card>
+
+    <el-card shadow="never" :class="{ 'mt-20': friendLinkApplyCustomCodeHtml }">
       <template #header>
         <div class="card-header">
           <span>申请条件</span>
@@ -211,9 +224,30 @@ watch(allChecked, isAllChecked => {
   </div>
 </template>
 
+<style lang="scss">
+// 引入文章内容样式，用于渲染自定义 Markdown 内容
+@use "@/style/post-content.scss";
+@use "@/views/post/post-detail/components/PostContent/editor-code.scss";
+</style>
+
 <style lang="scss" scoped>
 .apply-link-container {
   width: 100%;
+}
+
+.custom-content-card {
+  margin-bottom: 20px;
+}
+
+.custom-content-wrapper {
+  // 应用文章内容样式
+  :deep(.post-content) {
+    padding: 0;
+  }
+}
+
+.mt-20 {
+  margin-top: 20px;
 }
 
 .card-header {

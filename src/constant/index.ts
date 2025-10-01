@@ -74,6 +74,8 @@ const KeyFriendLinkDefaultCategory: SettingKey = "FRIEND_LINK_DEFAULTCATEGORY";
 const KeyFriendLinkApplyCondition: SettingKey = "FRIEND_LINK_APPLY_CONDITION";
 const KeyFriendLinkApplyCustomCode: SettingKey =
   "FRIEND_LINK_APPLY_CUSTOM_CODE";
+const KeyFriendLinkApplyCustomCodeHtml: SettingKey =
+  "FRIEND_LINK_APPLY_CUSTOM_CODE_HTML";
 
 // --- 前台及页脚配置 ---
 const KeyFrontDeskSiteOwnerName: SettingKey = "frontDesk.siteOwner.name";
@@ -313,6 +315,7 @@ export const constant = {
   KeyFriendLinkDefaultCategory,
   KeyFriendLinkApplyCondition,
   KeyFriendLinkApplyCustomCode,
+  KeyFriendLinkApplyCustomCodeHtml,
 
   // --- 文章配置 ---
   KeyDefaultCover,

@@ -372,7 +372,8 @@ export interface FLinkCategory {
 export interface FLinkSettingsInfo {
   friendLinkDefaultCategory: number;
   friendLinkApplyCondition: string[];
-  friendLinkApplyCustomCode: string;
+  friendLinkApplyCustomCode: string; // Markdown 内容（用于编辑）
+  friendLinkApplyCustomCodeHtml: string; // 渲染后的 HTML（用于前台展示）
 }
 
 /**

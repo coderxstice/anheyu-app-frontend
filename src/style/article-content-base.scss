@@ -802,6 +802,7 @@
   ul > li:not(.tab)::before {
     border: 0.21em solid var(--anzhiyu-lighttext);
     background: var(--anzhiyu-lighttext);
+    border-radius: 50px;
   }
 
   ol,

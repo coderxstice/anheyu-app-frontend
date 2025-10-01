@@ -181,7 +181,20 @@ export default function customTabsPlugin(md: MarkdownIt): void {
       const isActive = index === activeIndex;
       const tabId = `${tabsId}-${index + 1}`;
 
-      navHtml += `<button type="button" class="tab${isActive ? " active" : ""}" data-href="${tabId}">${tab.caption}</button>`;
+      // 内置 Tab 切换逻辑
+      const tabClickHandler = `
+        event.preventDefault();
+        if(this.classList.contains('active')) return;
+        const container = this.closest('.tabs');
+        container.querySelectorAll('.nav-tabs .tab').forEach(btn => btn.classList.remove('active'));
+        container.querySelectorAll('.tab-item-content').forEach(content => content.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById('${tabId}').classList.add('active');
+      `
+        .replace(/\s+/g, " ")
+        .trim();
+
+      navHtml += `<button type="button" class="tab${isActive ? " active" : ""}" data-href="${tabId}" onclick="${tabClickHandler}">${tab.caption}</button>`;
 
       const renderedContent = md.render(tab.content.trim());
       contentHtml += `<div class="tab-item-content${isActive ? " active" : ""}" id="${tabId}">${renderedContent}</div>`;
@@ -190,7 +203,15 @@ export default function customTabsPlugin(md: MarkdownIt): void {
     navHtml += "</ul>";
     contentHtml += "</div>";
 
-    const finalHtml = `<div class="tabs" id="${tabsId}">${navHtml}${contentHtml}<div class="tab-to-top"><button type="button" aria-label="scroll to top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div>`;
+    // 内置滚动到顶部逻辑
+    const scrollToTopHandler = `
+      event.preventDefault();
+      this.closest('.tabs').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    `
+      .replace(/\s+/g, " ")
+      .trim();
+
+    const finalHtml = `<div class="tabs" id="${tabsId}">${navHtml}${contentHtml}<div class="tab-to-top"><button type="button" aria-label="scroll to top" onclick="${scrollToTopHandler}"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div>`;
 
     const token = state.push("html_block", "", 0);
     token.content = finalHtml;
