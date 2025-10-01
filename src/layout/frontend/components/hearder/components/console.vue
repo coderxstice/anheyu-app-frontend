@@ -393,6 +393,9 @@ onMounted(() => {
       font-size: 14px;
       flex-shrink: 0;
       min-height: 48px;
+      :deep(p) {
+        margin: 0;
+      }
     }
     .comment-title {
       font-size: 12px;
