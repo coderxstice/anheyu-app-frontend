@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:36:57
- * @LastEditTime: 2025-10-01 22:34:34
+ * @LastEditTime: 2025-10-02 03:21:01
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -114,6 +114,40 @@
       &lt;script&gt; 标签）。<br />
       此内容将显示在文章详情页和列表页的侧边栏顶部，可用于添加广告、公告、自定义小工具等。<br />
       示例：<code>&lt;p&gt;欢迎来到小站～&lt;/p&gt;</code>
+    </div>
+  </el-form-item>
+
+  <el-divider content-position="left">
+    <h3>文章页面自定义代码</h3>
+  </el-divider>
+
+  <el-form-item label="自定义文章顶部 HTML">
+    <el-input
+      v-model="formData.customPostTopHTML"
+      type="textarea"
+      :rows="6"
+      placeholder="请填写文章顶部自定义HTML内容"
+    />
+    <div class="form-item-help">
+      自定义文章顶部 HTML 代码，将插入到文章内容区域的最顶部（在 AI
+      摘要之前）。<br />
+      可用于添加广告位、提示信息、特殊公告等。支持完整的 HTML 代码（包括
+      &lt;style&gt; 和 &lt;script&gt; 标签）。
+    </div>
+  </el-form-item>
+
+  <el-form-item label="自定义文章底部 HTML">
+    <el-input
+      v-model="formData.customPostBottomHTML"
+      type="textarea"
+      :rows="6"
+      placeholder="请填写文章底部自定义HTML内容"
+    />
+    <div class="form-item-help">
+      自定义文章底部 HTML
+      代码，将插入到文章内容区域的最底部（在评论区之前）。<br />
+      可用于添加版权声明、相关推荐、打赏信息等。支持完整的 HTML 代码（包括
+      &lt;style&gt; 和 &lt;script&gt; 标签）。
     </div>
   </el-form-item>
 </template>

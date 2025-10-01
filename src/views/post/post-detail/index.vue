@@ -37,6 +37,7 @@ import Sidebar from "../components/Sidebar/index.vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useUiStore } from "@/store/modules/uiStore";
 import { storeToRefs } from "pinia";
+import { usePostCustomCode } from "@/composables/usePostCustomCode";
 
 defineOptions({
   name: "PostDetail"
@@ -87,6 +88,9 @@ const commentBarrageConfig = computed(() => {
 const { isConsoleOpen } = storeToRefs(appStore);
 
 const { isCommentBarrageVisible } = storeToRefs(uiStore);
+
+// 获取文章页面自定义代码
+const { postTopHTML, postBottomHTML } = usePostCustomCode();
 
 const headingTocItems = ref<{ id: string }[]>([]);
 const commentIds = ref<string[]>([]);
@@ -299,6 +303,12 @@ watch(
       >
         <div v-if="article" class="post-detail-content">
           <!-- 自定义文章顶部HTML -->
+          <!-- eslint-disable-next-line vue/html-self-closing -->
+          <div
+            v-if="postTopHTML"
+            class="custom-post-top"
+            v-html="postTopHTML"
+          ></div>
 
           <AiSummary
             v-if="article.summaries && article.summaries.length > 0"
@@ -314,6 +324,15 @@ watch(
           />
           <!-- 相关文章可以直接在文章详情中获取，最近文章才需要从文章列表获取，这里是相关文章，最近文章数据才通过provide传递 -->
           <RelatedPosts :posts="article.related_articles" />
+
+          <!-- 自定义文章底部HTML -->
+          <!-- eslint-disable-next-line vue/html-self-closing -->
+          <div
+            v-if="postBottomHTML"
+            class="custom-post-bottom"
+            v-html="postBottomHTML"
+          ></div>
+
           <PostComment
             ref="commentRef"
             :target-path="route.path"
