@@ -471,22 +471,38 @@ const handleLoadMoreChildren = async () => {
 
 .comment-meta {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   align-items: center;
   margin-top: 0.75rem;
   font-size: 0.8rem;
   color: var(--anzhiyu-fontcolor);
+
+  @media screen and (width <= 768px) {
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+  }
 }
 
 .meta-item {
   display: flex;
   gap: 0.3rem;
   align-items: center;
+
+  @media screen and (width <= 768px) {
+    gap: 0.25rem;
+  }
 }
 
 :deep(.meta-item svg) {
   width: 14px;
   height: 14px;
+
+  @media screen and (width <= 768px) {
+    width: 12px;
+    height: 12px;
+  }
 }
 
 .comment-children {

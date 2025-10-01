@@ -133,6 +133,18 @@ const pageDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyCustomSidebar,
     defaultValue: "",
     type: "string"
+  },
+  {
+    frontendPath: "page.customPostTopHTML",
+    backendKey: constant.KeyCustomPostTopHTML,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "page.customPostBottomHTML",
+    backendKey: constant.KeyCustomPostBottomHTML,
+    defaultValue: "",
+    type: "string"
   }
 ];
 

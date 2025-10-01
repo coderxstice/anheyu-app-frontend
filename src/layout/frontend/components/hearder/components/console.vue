@@ -89,35 +89,83 @@
         </div>
       </div>
       <div class="button-group">
-        <div class="console-btn-item" :class="{ on: dataTheme }">
-          <button
-            class="darkmode_switch_button"
-            title="显示模式切换"
-            @click="handleThemeToggle"
-          >
-            <i class="anzhiyufont anzhiyu-icon-moon" />
-          </button>
-        </div>
-        <div
-          class="console-btn-item"
-          :class="{ on: isCommentBarrageVisible }"
-          title="热评开关"
+        <el-tooltip
+          content="显示模式切换"
+          placement="top"
+          :show-arrow="false"
+          :offset="12"
+          popper-class="custom-tooltip"
         >
-          <button class="commentBarrage" @click="toggleCommentBarrage()">
-            <i class="anzhiyufont anzhiyu-icon-message" />
-          </button>
-        </div>
+          <div class="console-btn-item" :class="{ on: dataTheme }">
+            <button class="darkmode_switch_button" @click="handleThemeToggle">
+              <i class="anzhiyufont anzhiyu-icon-moon" />
+            </button>
+          </div>
+        </el-tooltip>
 
-        <div
-          id="consoleKeyboard"
-          class="console-btn-item"
-          :class="{ on: isShortcutsEnabled }"
-          title="快捷键开关"
+        <el-tooltip
+          content="热评开关"
+          placement="top"
+          :show-arrow="false"
+          :offset="12"
+          popper-class="custom-tooltip"
         >
-          <button class="keyboard-switch" @click="toggleShortcuts()">
-            <i class="anzhiyufont anzhiyu-icon-keyboard" />
-          </button>
-        </div>
+          <div
+            class="console-btn-item"
+            :class="{ on: isCommentBarrageVisible }"
+          >
+            <button class="commentBarrage" @click="toggleCommentBarrage()">
+              <i class="anzhiyufont anzhiyu-icon-message" />
+            </button>
+          </div>
+        </el-tooltip>
+
+        <el-tooltip
+          content="快捷键开关"
+          placement="top"
+          :show-arrow="false"
+          :offset="12"
+          popper-class="custom-tooltip"
+        >
+          <div
+            id="consoleKeyboard"
+            class="console-btn-item"
+            :class="{ on: isShortcutsEnabled }"
+          >
+            <button class="keyboard-switch" @click="toggleShortcuts()">
+              <i class="anzhiyufont anzhiyu-icon-keyboard" />
+            </button>
+          </div>
+        </el-tooltip>
+
+        <el-tooltip
+          v-if="siteConfig?.music?.player?.enable"
+          content="音乐胶囊开关"
+          placement="top"
+          :show-arrow="false"
+          :offset="12"
+          popper-class="custom-tooltip"
+        >
+          <div class="console-btn-item" :class="{ on: isMusicPlayerVisible }">
+            <button class="music-player-switch" @click="toggleMusicPlayer()">
+              <i class="anzhiyufont anzhiyu-icon-music" />
+            </button>
+          </div>
+        </el-tooltip>
+
+        <el-tooltip
+          content="侧边栏开关"
+          placement="top"
+          :show-arrow="false"
+          :offset="12"
+          popper-class="custom-tooltip"
+        >
+          <div class="console-btn-item" :class="{ on: isSidebarVisible }">
+            <button class="sidebar-switch" @click="toggleSidebar()">
+              <i class="anzhiyufont anzhiyu-icon-arrows-left-right" />
+            </button>
+          </div>
+        </el-tooltip>
       </div>
     </div>
     <div class="console-mask" @click="appStore.toggleConsole(false)" />
@@ -144,8 +192,18 @@ const commentStore = useCommentStore();
 const router = useRouter();
 const uiStore = useUiStore();
 
-const { isCommentBarrageVisible, isShortcutsEnabled } = storeToRefs(uiStore);
-const { toggleCommentBarrage, toggleShortcuts } = uiStore;
+const {
+  isCommentBarrageVisible,
+  isShortcutsEnabled,
+  isMusicPlayerVisible,
+  isSidebarVisible
+} = storeToRefs(uiStore);
+const {
+  toggleCommentBarrage,
+  toggleShortcuts,
+  toggleMusicPlayer,
+  toggleSidebar
+} = uiStore;
 
 const siteConfigStore = useSiteConfigStore();
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);
@@ -393,6 +451,9 @@ onMounted(() => {
       font-size: 14px;
       flex-shrink: 0;
       min-height: 48px;
+      :deep(p) {
+        margin: 0;
+      }
     }
     .comment-title {
       font-size: 12px;

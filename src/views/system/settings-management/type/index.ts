@@ -35,6 +35,8 @@ export interface PageSittingInfo {
   customCSS: string;
   customJS: string;
   customSidebar: string;
+  customPostTopHTML: string;
+  customPostBottomHTML: string;
 }
 
 /**

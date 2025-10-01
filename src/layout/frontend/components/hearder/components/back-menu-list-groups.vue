@@ -172,7 +172,6 @@ const props = defineProps<{
 .back-menu-item-icon {
   width: 24px;
   height: 24px;
-  background: var(--anzhiyu-secondbg);
   border-radius: 50%;
 }
 

@@ -82,6 +82,7 @@ const owoContainerRef = ref<HTMLElement | null>(null);
 const emojiPreviewRef = ref<HTMLElement | null>(null);
 const fileInputRef = ref<HTMLInputElement | null>(null);
 const isUploading = ref(false);
+const isSubmitting = ref(false);
 
 const showEmojiPicker = ref(false);
 const isPreviewVisible = ref(false);
@@ -122,6 +123,7 @@ const formRules = reactive<FormRules>({
 });
 
 const isSubmitDisabled = computed(() => {
+  if (isSubmitting.value) return true;
   if (commentInfoConfig.value.login_required) {
     return !form.content.trim();
   }
@@ -141,6 +143,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async valid => {
     if (valid) {
+      isSubmitting.value = true;
       const { nickname, email, content, website } = form;
 
       let finalContent = content;
@@ -170,6 +173,8 @@ const submitForm = async (formEl: FormInstance | undefined) => {
       } catch (error) {
         console.error("评论发布失败:", error);
         ElMessage.error("评论发布失败，请稍后再试。");
+      } finally {
+        isSubmitting.value = false;
       }
     }
   });
@@ -513,6 +518,7 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
             <el-button
               type="primary"
               class="submit-button"
+              :loading="isSubmitting"
               :disabled="isSubmitDisabled"
               @click="submitForm(formRef)"
             >
@@ -908,6 +914,7 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
     gap: 0.5rem;
 
     .submit-button {
+      min-width: 112px;
       padding: 0 2rem;
       font-weight: 600;
       color: var(--anzhiyu-background);
