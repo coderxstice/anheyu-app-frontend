@@ -23,6 +23,7 @@
               <el-option label="待审核" value="PENDING" />
               <el-option label="已通过" value="APPROVED" />
               <el-option label="已拒绝" value="REJECTED" />
+              <el-option label="失联" value="INVALID" />
             </el-select>
           </el-form-item>
           <el-form-item class="search-buttons">
@@ -323,7 +324,7 @@ const statusMap: Record<
   APPROVED: { text: "已通过", type: "success" },
   PENDING: { text: "待审核", type: "warning" },
   REJECTED: { text: "已拒绝", type: "danger" },
-  INVALID: { text: "已失效", type: "info" }
+  INVALID: { text: "失联", type: "info" }
 };
 
 const getLinkList = async () => {
