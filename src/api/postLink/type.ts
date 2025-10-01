@@ -42,6 +42,7 @@ export interface LinkItem {
   description: string;
   status: LinkStatus;
   siteshot: string;
+  sort_order: number;
   category: LinkCategory | null;
   tag: LinkTag | null;
 }
@@ -67,6 +68,7 @@ export interface CreateLinkRequest {
   category_id: number;
   tag_id: number | null; // 改为单个标签，可选
   status: LinkStatus;
+  sort_order: number;
 }
 
 /** [后台] 更新友链 */
@@ -194,4 +196,17 @@ export interface LinkHealthCheckResponse {
   end_time?: string; // 结束时间
   result?: LinkHealthCheckResult; // 检查结果
   error?: string; // 错误信息
+}
+
+// --- 友链排序相关类型 ---
+
+/** 单个友链排序项 */
+export interface LinkSortItem {
+  id: number;
+  sort_order: number;
+}
+
+/** 批量更新友链排序请求 */
+export interface BatchUpdateLinkSortRequest {
+  items: LinkSortItem[];
 }

@@ -26,7 +26,8 @@ import type {
   GetRandomLinksParams,
   ImportLinksRequest,
   ImportLinksResponse,
-  LinkHealthCheckResponse
+  LinkHealthCheckResponse,
+  BatchUpdateLinkSortRequest
 } from "./type";
 
 // ------------------ 前台公开接口 ------------------
@@ -228,4 +229,13 @@ export const getHealthCheckStatus = (): Promise<
     "get",
     baseUrlApi("links/health-check/status")
   );
+};
+
+/** @description [后台] 批量更新友链排序 */
+export const batchUpdateLinkSort = (
+  data: BatchUpdateLinkSortRequest
+): Promise<BaseResponse<null>> => {
+  return http.request<BaseResponse<null>>("put", baseUrlApi("links/sort"), {
+    data
+  });
 };
