@@ -36,7 +36,10 @@ const KeyDefaultBigParam: SettingKey = "DEFAULT_BIG_PARAM";
 const KeyGravatarURL: SettingKey = "GRAVATAR_URL";
 const KeyThemeColor: SettingKey = "THEME_COLOR";
 const KeySiteAnnouncement: SettingKey = "SITE_ANNOUNCEMENT";
-const KeyFooterCode: SettingKey = "FOOTER_CODE";
+const KeyCustomHeaderHTML: SettingKey = "CUSTOM_HEADER_HTML";
+const KeyCustomFooterHTML: SettingKey = "CUSTOM_FOOTER_HTML";
+const KeyCustomCSS: SettingKey = "CUSTOM_CSS";
+const KeyCustomJS: SettingKey = "CUSTOM_JS";
 const KeyUploadAllowedExtensions: SettingKey = "UPLOAD_ALLOWED_EXTENSIONS";
 const KeyUploadDeniedExtensions: SettingKey = "UPLOAD_DENIED_EXTENSIONS";
 
@@ -261,7 +264,10 @@ export const constant = {
   KeyGravatarURL,
   KeyThemeColor,
   KeySiteAnnouncement,
-  KeyFooterCode,
+  KeyCustomHeaderHTML,
+  KeyCustomFooterHTML,
+  KeyCustomCSS,
+  KeyCustomJS,
   KeyUploadAllowedExtensions,
   KeyUploadDeniedExtensions,
 

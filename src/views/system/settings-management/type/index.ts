@@ -14,7 +14,6 @@ export interface SiteInfo {
   subTitle: string;
   siteDescription: string;
   primaryUrl: string;
-  footerCode: string;
   announcement: string;
   logoDay: string;
   logoNight: string;
@@ -31,6 +30,10 @@ export interface PageSittingInfo {
   albumApiURL: string;
   defaultThumbParam?: string;
   defaultBigParam?: string;
+  customHeaderHTML: string;
+  customFooterHTML: string;
+  customCSS: string;
+  customJS: string;
 }
 
 /**

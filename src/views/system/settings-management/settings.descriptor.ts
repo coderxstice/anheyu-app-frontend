@@ -42,12 +42,6 @@ const siteDescriptors: SettingDescriptor[] = [
     type: "string"
   },
   {
-    frontendPath: "site.footerCode",
-    backendKey: constant.KeyFooterCode,
-    defaultValue: "",
-    type: "string"
-  },
-  {
     frontendPath: "site.announcement",
     backendKey: constant.KeySiteAnnouncement,
     defaultValue: "",
@@ -107,6 +101,30 @@ const pageDescriptors: SettingDescriptor[] = [
   {
     frontendPath: "page.defaultBigParam",
     backendKey: constant.KeyDefaultBigParam,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "page.customHeaderHTML",
+    backendKey: constant.KeyCustomHeaderHTML,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "page.customFooterHTML",
+    backendKey: constant.KeyCustomFooterHTML,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "page.customCSS",
+    backendKey: constant.KeyCustomCSS,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "page.customJS",
+    backendKey: constant.KeyCustomJS,
     defaultValue: "",
     type: "string"
   }
