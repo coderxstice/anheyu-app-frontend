@@ -39,8 +39,16 @@
           <el-button type="warning" :icon="Upload" @click="handleImport">
             <span class="button-text">批量导入</span>
           </el-button>
-          <el-button type="info" :icon="Monitor" @click="handleHealthCheck">
-            <span class="button-text">健康检查</span>
+          <el-button
+            type="info"
+            :icon="Monitor"
+            :loading="healthCheckRunning"
+            :disabled="healthCheckRunning"
+            @click="handleHealthCheck"
+          >
+            <span class="button-text">{{
+              healthCheckRunning ? "检查中..." : "健康检查"
+            }}</span>
           </el-button>
           <el-button type="success" :icon="Plus" @click="handleCreate">
             <span class="button-text">新建友链</span>
@@ -198,12 +206,13 @@ import {
   Upload,
   Monitor
 } from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox, ElLoading } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import {
   getAdminLinkList,
   deleteLink,
   reviewLink,
-  checkLinksHealth
+  checkLinksHealth,
+  getHealthCheckStatus
 } from "@/api/postLink";
 import type {
   LinkItem,
@@ -221,6 +230,10 @@ defineOptions({
 const loading = ref(true);
 const linkList = ref<LinkItem[]>([]);
 const total = ref(0);
+
+// 健康检查状态
+const healthCheckRunning = ref(false);
+let healthCheckTimer: ReturnType<typeof setInterval> | null = null;
 
 // 移动端检测
 const windowWidth = ref(window.innerWidth);
@@ -365,10 +378,61 @@ const handleImport = () => {
   importDialog.visible = true;
 };
 
+// 轮询健康检查状态
+const pollHealthCheckStatus = async () => {
+  try {
+    const res = await getHealthCheckStatus();
+    if (res.code === 200 && res.data) {
+      healthCheckRunning.value = res.data.is_running;
+
+      // 如果检查完成
+      if (!res.data.is_running && res.data.result) {
+        // 停止轮询
+        if (healthCheckTimer) {
+          clearInterval(healthCheckTimer);
+          healthCheckTimer = null;
+        }
+
+        // 显示结果
+        const { total, healthy, unhealthy } = res.data.result;
+        ElMessage.success({
+          message: `健康检查完成！共检查 ${total} 个友链，健康 ${healthy} 个，失联 ${unhealthy} 个`,
+          duration: 5000
+        });
+
+        // 刷新列表
+        getLinkList();
+      } else if (!res.data.is_running && res.data.error) {
+        // 检查失败
+        if (healthCheckTimer) {
+          clearInterval(healthCheckTimer);
+          healthCheckTimer = null;
+        }
+        ElMessage.error("健康检查失败：" + res.data.error);
+      }
+    }
+  } catch (error) {
+    console.error("获取健康检查状态失败", error);
+  }
+};
+
+// 启动轮询
+const startHealthCheckPolling = () => {
+  healthCheckRunning.value = true;
+
+  // 立即检查一次
+  pollHealthCheckStatus();
+
+  // 每3秒轮询一次
+  healthCheckTimer = setInterval(() => {
+    pollHealthCheckStatus();
+  }, 3000);
+};
+
 const handleHealthCheck = async () => {
   try {
     await ElMessageBox.confirm(
-      "此操作将检查所有已审核通过的友链是否可访问，无法访问的友链将被标记为失联状态。是否继续？",
+      "此操作将在后台检查所有友链的健康状态，无法访问的友链将被自动标记为失联状态。检查过程可能需要几分钟时间。是否继续？",
       "友链健康检查",
       {
         confirmButtonText: "确定",
@@ -377,29 +441,23 @@ const handleHealthCheck = async () => {
       }
     );
 
-    const loadingInstance = ElLoading.service({
-      lock: true,
-      text: "正在检查友链健康状态，请稍候...",
-      background: "rgba(0, 0, 0, 0.7)"
-    });
-
     try {
       const res = await checkLinksHealth();
-      loadingInstance.close();
 
       if (res.code === 200) {
-        const { total, healthy, unhealthy } = res.data;
-        ElMessage.success(
-          `健康检查完成！共检查 ${total} 个友链，健康 ${healthy} 个，失联 ${unhealthy} 个`
-        );
-        getLinkList();
+        ElMessage.success({
+          message: "友链健康检查任务已启动，正在后台执行中...",
+          duration: 3000
+        });
+
+        // 开始轮询状态
+        startHealthCheckPolling();
       } else {
-        ElMessage.error("健康检查失败：" + res.message);
+        ElMessage.error("启动健康检查失败：" + res.message);
       }
     } catch (error) {
-      loadingInstance.close();
       console.error("健康检查失败", error);
-      ElMessage.error("健康检查失败");
+      ElMessage.error("启动健康检查失败");
     }
   } catch (error) {
     if (error !== "cancel") {
@@ -413,13 +471,30 @@ const handleResize = () => {
   windowWidth.value = window.innerWidth;
 };
 
-onMounted(() => {
+onMounted(async () => {
   getLinkList();
   window.addEventListener("resize", handleResize);
+
+  // 检查是否有正在进行的健康检查
+  try {
+    const res = await getHealthCheckStatus();
+    if (res.code === 200 && res.data && res.data.is_running) {
+      ElMessage.info("检测到正在进行的健康检查任务，将继续监控...");
+      startHealthCheckPolling();
+    }
+  } catch (error) {
+    console.error("获取健康检查状态失败", error);
+  }
 });
 
 onUnmounted(() => {
   window.removeEventListener("resize", handleResize);
+
+  // 清理定时器
+  if (healthCheckTimer) {
+    clearInterval(healthCheckTimer);
+    healthCheckTimer = null;
+  }
 });
 </script>
 

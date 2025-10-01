@@ -219,3 +219,13 @@ export const checkLinksHealth = (): Promise<
     baseUrlApi("links/health-check")
   );
 };
+
+/** @description [后台] 获取友链健康检查状态 */
+export const getHealthCheckStatus = (): Promise<
+  BaseResponse<LinkHealthCheckResponse>
+> => {
+  return http.request<BaseResponse<LinkHealthCheckResponse>>(
+    "get",
+    baseUrlApi("links/health-check/status")
+  );
+};
