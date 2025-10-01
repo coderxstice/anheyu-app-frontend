@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:36:57
- * @LastEditTime: 2025-10-01 21:52:54
+ * @LastEditTime: 2025-10-01 22:34:34
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -99,6 +99,21 @@
     <div class="form-item-help">
       请填写自定义 JavaScript 内容（例如网站统计等），填写时无需填写
       &lt;script&gt; 标签。
+    </div>
+  </el-form-item>
+
+  <el-form-item label="自定义侧边栏">
+    <el-input
+      v-model="formData.customSidebar"
+      type="textarea"
+      :rows="8"
+      placeholder="请填写自定义侧边栏HTML内容"
+    />
+    <div class="form-item-help">
+      自定义侧边栏内容，支持完整的 HTML 代码（包括 &lt;style&gt; 和
+      &lt;script&gt; 标签）。<br />
+      此内容将显示在文章详情页和列表页的侧边栏顶部，可用于添加广告、公告、自定义小工具等。<br />
+      示例：<code>&lt;p&gt;欢迎来到小站～&lt;/p&gt;</code>
     </div>
   </el-form-item>
 </template>

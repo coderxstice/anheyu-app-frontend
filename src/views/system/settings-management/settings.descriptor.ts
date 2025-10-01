@@ -127,6 +127,12 @@ const pageDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyCustomJS,
     defaultValue: "",
     type: "string"
+  },
+  {
+    frontendPath: "page.customSidebar",
+    backendKey: constant.KeyCustomSidebar,
+    defaultValue: "",
+    type: "string"
   }
 ];
 

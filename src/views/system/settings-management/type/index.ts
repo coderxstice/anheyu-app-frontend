@@ -34,6 +34,7 @@ export interface PageSittingInfo {
   customFooterHTML: string;
   customCSS: string;
   customJS: string;
+  customSidebar: string;
 }
 
 /**
