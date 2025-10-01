@@ -152,6 +152,20 @@
             </button>
           </div>
         </el-tooltip>
+
+        <el-tooltip
+          content="侧边栏开关"
+          placement="top"
+          :show-arrow="false"
+          :offset="12"
+          popper-class="custom-tooltip"
+        >
+          <div class="console-btn-item" :class="{ on: isSidebarVisible }">
+            <button class="sidebar-switch" @click="toggleSidebar()">
+              <i class="anzhiyufont anzhiyu-icon-arrows-left-right" />
+            </button>
+          </div>
+        </el-tooltip>
       </div>
     </div>
     <div class="console-mask" @click="appStore.toggleConsole(false)" />
@@ -178,9 +192,18 @@ const commentStore = useCommentStore();
 const router = useRouter();
 const uiStore = useUiStore();
 
-const { isCommentBarrageVisible, isShortcutsEnabled, isMusicPlayerVisible } =
-  storeToRefs(uiStore);
-const { toggleCommentBarrage, toggleShortcuts, toggleMusicPlayer } = uiStore;
+const {
+  isCommentBarrageVisible,
+  isShortcutsEnabled,
+  isMusicPlayerVisible,
+  isSidebarVisible
+} = storeToRefs(uiStore);
+const {
+  toggleCommentBarrage,
+  toggleShortcuts,
+  toggleMusicPlayer,
+  toggleSidebar
+} = uiStore;
 
 const siteConfigStore = useSiteConfigStore();
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);

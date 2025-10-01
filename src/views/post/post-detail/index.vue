@@ -56,6 +56,7 @@ const loadingStore = useLoadingStore();
 const commentStore = useCommentStore();
 const articleStore = useArticleStore();
 const uiStore = useUiStore();
+const { isSidebarVisible } = storeToRefs(uiStore);
 const appStore = useAppStore();
 
 // --- 计算属性 ---
@@ -292,8 +293,13 @@ watch(
     />
 
     <div class="layout">
-      <main class="post-content-inner">
+      <main
+        class="post-content-inner"
+        :class="{ 'full-width': !isSidebarVisible }"
+      >
         <div v-if="article" class="post-detail-content">
+          <!-- 自定义文章顶部HTML -->
+
           <AiSummary
             v-if="article.summaries && article.summaries.length > 0"
             :summary="article.summaries"
@@ -337,9 +343,13 @@ watch(
 }
 .post-content-inner {
   width: calc(100% - 300px);
+  transition: width 0.3s ease;
   &::selection {
     background-color: var(--anzhiyu-main);
     color: var(--anzhiyu-white);
+  }
+  &.full-width {
+    width: 100%;
   }
 }
 .post-detail-content {

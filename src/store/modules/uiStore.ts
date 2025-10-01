@@ -117,6 +117,32 @@ export const useUiStore = defineStore("ui", () => {
     { immediate: false }
   );
 
+  // 控制侧边栏是否可见的状态，默认为 true (可见)
+  const isSidebarVisible = ref(
+    Storage.getData("isSidebarVisible", nameSpace) ?? true
+  );
+
+  // 切换侧边栏可见状态的 action
+  function toggleSidebar(value?: boolean) {
+    if (typeof value === "boolean") {
+      isSidebarVisible.value = value;
+    } else {
+      isSidebarVisible.value = !isSidebarVisible.value;
+    }
+  }
+
+  // 监听状态变化，自动保存到存储
+  watch(
+    isSidebarVisible,
+    newValue => {
+      localStorage.setItem(
+        `${nameSpace}isSidebarVisible`,
+        JSON.stringify(newValue)
+      );
+    },
+    { immediate: false }
+  );
+
   return {
     isCommentBarrageVisible,
     toggleCommentBarrage,
@@ -125,6 +151,8 @@ export const useUiStore = defineStore("ui", () => {
     useCustomContextMenu,
     toggleContextMenuMode,
     isMusicPlayerVisible,
-    toggleMusicPlayer
+    toggleMusicPlayer,
+    isSidebarVisible,
+    toggleSidebar
   };
 });
