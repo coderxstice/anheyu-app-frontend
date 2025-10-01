@@ -121,8 +121,8 @@ export default function customFoldingPlugin(md: MarkdownIt): void {
       }
       detailsStyle = ` style="border-color: ${color};"`;
       // 添加 toggle 事件处理器（处理点击展开/收起）
-      // 关闭时，如果鼠标还在 summary 上（hover 状态），保持背景色
-      detailsEvents = ` ontoggle="var s=this.querySelector('summary');if(this.open){s.style.backgroundColor='${color}'}else{if(!s.matches(':hover')){s.style.backgroundColor=''}}"`;
+      // 展开时设置背景色，关闭时延迟检查 hover 状态
+      detailsEvents = ` ontoggle="var s=this.querySelector('summary');if(this.open){s.style.backgroundColor='${color}'}else{setTimeout(function(){if(!s.matches(':hover')){s.style.backgroundColor=''}},10)}"`;
       // 添加 hover 事件处理器
       summaryEvents = ` onmouseover="this.style.backgroundColor='${color}'" onmouseout="if(!this.parentElement.open){this.style.backgroundColor=''}"`;
     }
