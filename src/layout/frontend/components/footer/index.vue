@@ -138,7 +138,10 @@
         v-html="footerConfig.custom_text"
       />
 
-      <p v-if="footerConfig.badge?.list?.length" class="footer-badges">
+      <p
+        v-if="footerConfig.badge?.enable && footerConfig.badge?.list?.length"
+        class="footer-badges"
+      >
         <el-tooltip
           v-for="badge in footerConfig.badge.list"
           :key="badge.shields"
@@ -322,7 +325,7 @@ onMounted(() => {
 .footer-wrap {
   position: relative;
   max-width: 1200px;
-  min-height: 20.875rem;
+  min-height: 17.875rem;
   margin: 0 auto;
 }
 

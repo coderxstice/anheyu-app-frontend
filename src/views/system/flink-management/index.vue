@@ -23,6 +23,7 @@
               <el-option label="待审核" value="PENDING" />
               <el-option label="已通过" value="APPROVED" />
               <el-option label="已拒绝" value="REJECTED" />
+              <el-option label="失联" value="INVALID" />
             </el-select>
           </el-form-item>
           <el-form-item class="search-buttons">
@@ -39,10 +40,40 @@
           <el-button type="warning" :icon="Upload" @click="handleImport">
             <span class="button-text">批量导入</span>
           </el-button>
-          <el-button type="info" :icon="Monitor" @click="handleHealthCheck">
-            <span class="button-text">健康检查</span>
+          <el-button
+            type="info"
+            :icon="Monitor"
+            :loading="healthCheckRunning"
+            :disabled="healthCheckRunning"
+            @click="handleHealthCheck"
+          >
+            <span class="button-text">{{
+              healthCheckRunning ? "检查中..." : "健康检查"
+            }}</span>
           </el-button>
-          <el-button type="success" :icon="Plus" @click="handleCreate">
+          <el-button
+            v-if="!sortMode"
+            type="primary"
+            plain
+            :icon="Setting"
+            @click="enterSortMode"
+          >
+            <span class="button-text">排序模式</span>
+          </el-button>
+          <template v-if="sortMode">
+            <el-button type="success" :icon="Check" @click="saveSortOrder">
+              <span class="button-text">保存排序</span>
+            </el-button>
+            <el-button :icon="Close" @click="cancelSortMode">
+              <span class="button-text">取消</span>
+            </el-button>
+          </template>
+          <el-button
+            v-if="!sortMode"
+            type="success"
+            :icon="Plus"
+            @click="handleCreate"
+          >
             <span class="button-text">新建友链</span>
           </el-button>
         </div>
@@ -51,107 +82,132 @@
 
     <!-- 2. 友链卡片列表 -->
     <div v-loading="loading" class="link-list">
+      <div v-if="sortMode && linkList.length > 0" class="sort-tip">
+        <el-alert
+          type="info"
+          :closable="false"
+          show-icon
+          title="拖拽卡片调整排序，完成后点击【保存排序】按钮"
+        />
+      </div>
       <el-row v-if="linkList.length > 0" :gutter="20">
-        <el-col
-          v-for="link in linkList"
-          :key="link.id"
-          :xs="24"
-          :sm="12"
-          :md="8"
-          :lg="6"
+        <draggable
+          v-model="linkList"
+          item-key="id"
+          :disabled="!sortMode"
+          class="draggable-row"
+          :animation="200"
+          ghost-class="ghost"
         >
-          <el-card class="link-card" shadow="hover">
-            <div class="card-header">
-              <el-avatar :size="50" :src="link.logo" @error="() => true">
-                <img
-                  src="https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png"
-                />
-              </el-avatar>
-              <div class="site-info">
-                <p class="site-name">{{ link.name }}</p>
-                <el-link
-                  :href="link.url"
-                  target="_blank"
-                  type="primary"
-                  :underline="false"
-                  class="site-url"
-                >
-                  {{ link.url }}
-                </el-link>
-              </div>
-            </div>
-            <p class="description">{{ link.description || "暂无描述" }}</p>
-
-            <div v-if="link.category || link.tag" class="meta-info">
-              <el-tag
-                v-if="link.category && link.category.style"
-                size="small"
-                class="mr-2"
-                :type="link.category.style === 'card' ? 'primary' : 'success'"
+          <template #item="{ element: link, index }">
+            <el-col :xs="24" :sm="12" :md="8" :lg="6">
+              <el-card
+                class="link-card"
+                :class="{ 'sort-mode': sortMode, draggable: sortMode }"
+                shadow="hover"
               >
-                样式: {{ link.category.style === "card" ? "卡片" : "列表" }}
-              </el-tag>
-              <el-tag v-if="link.category" size="small" type="info">{{
-                link.category.name
-              }}</el-tag>
-              <el-tag
-                v-if="link.tag"
-                size="small"
-                :color="link.tag.color"
-                class="tag-item"
-                :style="{
-                  color: 'white !important',
-                  background: link.tag.color
-                }"
-                >{{ link.tag.name }}</el-tag
-              >
-            </div>
+                <div v-if="sortMode" class="sort-badge">
+                  <el-tag type="warning" size="small">{{ index + 1 }}</el-tag>
+                </div>
+                <div class="card-header">
+                  <el-avatar :size="50" :src="link.logo" @error="() => true">
+                    <img
+                      src="https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png"
+                    />
+                  </el-avatar>
+                  <div class="site-info">
+                    <p class="site-name">{{ link.name }}</p>
+                    <el-link
+                      :href="link.url"
+                      target="_blank"
+                      type="primary"
+                      :underline="false"
+                      class="site-url"
+                    >
+                      {{ link.url }}
+                    </el-link>
+                  </div>
+                </div>
+                <p class="description">
+                  {{ link.description || "暂无描述" }}
+                </p>
 
-            <el-divider />
+                <div v-if="link.category || link.tag" class="meta-info">
+                  <el-tag
+                    v-if="link.category && link.category.style"
+                    size="small"
+                    class="mr-2"
+                    :type="
+                      link.category.style === 'card' ? 'primary' : 'success'
+                    "
+                  >
+                    样式: {{ link.category.style === "card" ? "卡片" : "列表" }}
+                  </el-tag>
+                  <el-tag v-if="link.category" size="small" type="info">{{
+                    link.category.name
+                  }}</el-tag>
+                  <el-tag
+                    v-if="link.tag"
+                    size="small"
+                    :color="link.tag.color"
+                    class="tag-item"
+                    :style="{
+                      color: 'white !important',
+                      background: link.tag.color
+                    }"
+                    >{{ link.tag.name }}</el-tag
+                  >
+                </div>
 
-            <div class="card-footer">
-              <el-tag :type="statusMap[link.status].type" effect="light">
-                {{ statusMap[link.status].text }}
-              </el-tag>
-              <div class="actions">
-                <!-- 待审核的特殊操作 -->
-                <template v-if="link.status === 'PENDING'">
-                  <el-button
-                    type="success"
-                    size="small"
-                    plain
-                    @click="handleReview(link.id, 'APPROVED')"
-                  >
-                    通过
-                  </el-button>
-                  <el-button
-                    type="danger"
-                    size="small"
-                    plain
-                    @click="handleReview(link.id, 'REJECTED')"
-                  >
-                    拒绝
-                  </el-button>
-                </template>
-                <!-- 通用操作 -->
-                <el-button
-                  link
-                  type="primary"
-                  :icon="Edit"
-                  @click="handleEdit(link)"
-                />
-                <el-popconfirm
-                  title="确定要删除这个友链吗？"
-                  @confirm="handleDelete(link.id)"
-                >
-                  <template #reference>
-                    <el-button link type="danger" :icon="Delete" />
-                  </template>
-                </el-popconfirm>
-              </div>
-            </div>
-          </el-card>
-        </el-col>
+                <el-divider />
+
+                <div class="card-footer">
+                  <el-tag :type="statusMap[link.status].type" effect="light">
+                    {{ statusMap[link.status].text }}
+                  </el-tag>
+                  <div class="actions">
+                    <!-- 待审核的特殊操作 -->
+                    <template v-if="link.status === 'PENDING'">
+                      <el-button
+                        type="success"
+                        size="small"
+                        plain
+                        @click="handleReview(link.id, 'APPROVED')"
+                      >
+                        通过
+                      </el-button>
+                      <el-button
+                        type="danger"
+                        size="small"
+                        plain
+                        @click="handleReview(link.id, 'REJECTED')"
+                      >
+                        拒绝
+                      </el-button>
+                    </template>
+                    <!-- 通用操作 -->
+                    <el-button
+                      v-if="!sortMode"
+                      link
+                      type="primary"
+                      :icon="Edit"
+                      @click="handleEdit(link)"
+                    />
+                    <el-popconfirm
+                      v-if="!sortMode"
+                      title="确定要删除这个友链吗？"
+                      @confirm="handleDelete(link.id)"
+                    >
+                      <template #reference>
+                        <el-button link type="danger" :icon="Delete" />
+                      </template>
+                    </el-popconfirm>
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+          </template>
+        </draggable>
       </el-row>
       <el-empty v-else description="暂无友链数据，快去新建一个吧！" />
     </div>
@@ -196,14 +252,19 @@ import {
   Delete,
   Setting,
   Upload,
-  Monitor
+  Monitor,
+  Check,
+  Close
 } from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox, ElLoading } from "element-plus";
+import draggable from "vuedraggable";
+import { ElMessage, ElMessageBox } from "element-plus";
 import {
   getAdminLinkList,
   deleteLink,
   reviewLink,
-  checkLinksHealth
+  checkLinksHealth,
+  getHealthCheckStatus,
+  batchUpdateLinkSort
 } from "@/api/postLink";
 import type {
   LinkItem,
@@ -221,6 +282,14 @@ defineOptions({
 const loading = ref(true);
 const linkList = ref<LinkItem[]>([]);
 const total = ref(0);
+
+// 健康检查状态
+const healthCheckRunning = ref(false);
+let healthCheckTimer: ReturnType<typeof setInterval> | null = null;
+
+// 排序模式
+const sortMode = ref(false);
+const originalLinkList = ref<LinkItem[]>([]);
 
 // 移动端检测
 const windowWidth = ref(window.innerWidth);
@@ -255,7 +324,7 @@ const statusMap: Record<
   APPROVED: { text: "已通过", type: "success" },
   PENDING: { text: "待审核", type: "warning" },
   REJECTED: { text: "已拒绝", type: "danger" },
-  INVALID: { text: "已失效", type: "info" }
+  INVALID: { text: "失联", type: "info" }
 };
 
 const getLinkList = async () => {
@@ -365,10 +434,61 @@ const handleImport = () => {
   importDialog.visible = true;
 };
 
+// 轮询健康检查状态
+const pollHealthCheckStatus = async () => {
+  try {
+    const res = await getHealthCheckStatus();
+    if (res.code === 200 && res.data) {
+      healthCheckRunning.value = res.data.is_running;
+
+      // 如果检查完成
+      if (!res.data.is_running && res.data.result) {
+        // 停止轮询
+        if (healthCheckTimer) {
+          clearInterval(healthCheckTimer);
+          healthCheckTimer = null;
+        }
+
+        // 显示结果
+        const { total, healthy, unhealthy } = res.data.result;
+        ElMessage.success({
+          message: `健康检查完成！共检查 ${total} 个友链，健康 ${healthy} 个，失联 ${unhealthy} 个`,
+          duration: 5000
+        });
+
+        // 刷新列表
+        getLinkList();
+      } else if (!res.data.is_running && res.data.error) {
+        // 检查失败
+        if (healthCheckTimer) {
+          clearInterval(healthCheckTimer);
+          healthCheckTimer = null;
+        }
+        ElMessage.error("健康检查失败：" + res.data.error);
+      }
+    }
+  } catch (error) {
+    console.error("获取健康检查状态失败", error);
+  }
+};
+
+// 启动轮询
+const startHealthCheckPolling = () => {
+  healthCheckRunning.value = true;
+
+  // 立即检查一次
+  pollHealthCheckStatus();
+
+  // 每3秒轮询一次
+  healthCheckTimer = setInterval(() => {
+    pollHealthCheckStatus();
+  }, 3000);
+};
+
 const handleHealthCheck = async () => {
   try {
     await ElMessageBox.confirm(
-      "此操作将检查所有已审核通过的友链是否可访问，无法访问的友链将被标记为失联状态。是否继续？",
+      "此操作将在后台检查所有友链的健康状态，无法访问的友链将被自动标记为失联状态。检查过程可能需要几分钟时间。是否继续？",
       "友链健康检查",
       {
         confirmButtonText: "确定",
@@ -377,29 +497,23 @@ const handleHealthCheck = async () => {
       }
     );
 
-    const loadingInstance = ElLoading.service({
-      lock: true,
-      text: "正在检查友链健康状态，请稍候...",
-      background: "rgba(0, 0, 0, 0.7)"
-    });
-
     try {
       const res = await checkLinksHealth();
-      loadingInstance.close();
 
       if (res.code === 200) {
-        const { total, healthy, unhealthy } = res.data;
-        ElMessage.success(
-          `健康检查完成！共检查 ${total} 个友链，健康 ${healthy} 个，失联 ${unhealthy} 个`
-        );
-        getLinkList();
+        ElMessage.success({
+          message: "友链健康检查任务已启动，正在后台执行中...",
+          duration: 3000
+        });
+
+        // 开始轮询状态
+        startHealthCheckPolling();
       } else {
-        ElMessage.error("健康检查失败：" + res.message);
+        ElMessage.error("启动健康检查失败：" + res.message);
       }
     } catch (error) {
-      loadingInstance.close();
       console.error("健康检查失败", error);
-      ElMessage.error("健康检查失败");
+      ElMessage.error("启动健康检查失败");
     }
   } catch (error) {
     if (error !== "cancel") {
@@ -413,13 +527,72 @@ const handleResize = () => {
   windowWidth.value = window.innerWidth;
 };
 
-onMounted(() => {
+// 进入排序模式
+const enterSortMode = () => {
+  if (pagination.page !== 1) {
+    ElMessage.warning("请在第一页进行排序操作");
+    return;
+  }
+  sortMode.value = true;
+  originalLinkList.value = JSON.parse(JSON.stringify(linkList.value));
+  ElMessage.info("已进入排序模式，拖拽卡片调整顺序");
+};
+
+// 取消排序
+const cancelSortMode = () => {
+  linkList.value = JSON.parse(JSON.stringify(originalLinkList.value));
+  sortMode.value = false;
+  originalLinkList.value = [];
+  ElMessage.info("已取消排序");
+};
+
+// 保存排序
+const saveSortOrder = async () => {
+  try {
+    // 构建排序数据（降序：第一个位置数字最大）
+    const items = linkList.value.map((link, index) => ({
+      id: link.id,
+      sort_order: linkList.value.length - index
+    }));
+
+    await batchUpdateLinkSort({ items });
+
+    sortMode.value = false;
+    originalLinkList.value = [];
+    ElMessage.success("排序保存成功");
+
+    // 刷新列表
+    await getLinkList();
+  } catch (error) {
+    console.error("保存排序失败", error);
+    ElMessage.error("保存排序失败");
+  }
+};
+
+onMounted(async () => {
   getLinkList();
   window.addEventListener("resize", handleResize);
+
+  // 检查是否有正在进行的健康检查
+  try {
+    const res = await getHealthCheckStatus();
+    if (res.code === 200 && res.data && res.data.is_running) {
+      ElMessage.info("检测到正在进行的健康检查任务，将继续监控...");
+      startHealthCheckPolling();
+    }
+  } catch (error) {
+    console.error("获取健康检查状态失败", error);
+  }
 });
 
 onUnmounted(() => {
   window.removeEventListener("resize", handleResize);
+
+  // 清理定时器
+  if (healthCheckTimer) {
+    clearInterval(healthCheckTimer);
+    healthCheckTimer = null;
+  }
 });
 </script>
 
@@ -431,6 +604,18 @@ onUnmounted(() => {
     padding: 0;
     margin: 1rem;
   }
+}
+
+.sort-tip {
+  margin-bottom: 20px;
+}
+
+.draggable-row {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-left: -10px;
+  margin-right: -10px;
 }
 
 .header-card {
@@ -554,10 +739,37 @@ onUnmounted(() => {
 }
 
 .link-card {
+  position: relative;
   margin-bottom: 20px;
+  transition: all 0.3s ease;
 
   @media screen and (width <= 768px) {
     margin-bottom: 16px;
+  }
+
+  &.sort-mode {
+    cursor: move;
+    user-select: none;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  &.draggable {
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  .sort-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
   }
 
   .card-header {
@@ -704,5 +916,12 @@ onUnmounted(() => {
     justify-content: center;
     margin-top: 16px;
   }
+}
+
+// 拖拽时的占位样式
+.ghost {
+  opacity: 0.5;
+  background: #f0f0f0;
+  border: 2px dashed var(--el-color-primary);
 }
 </style>

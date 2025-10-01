@@ -42,6 +42,8 @@ export interface LinkItem {
   description: string;
   status: LinkStatus;
   siteshot: string;
+  sort_order: number;
+  skip_health_check: boolean;
   category: LinkCategory | null;
   tag: LinkTag | null;
 }
@@ -67,6 +69,8 @@ export interface CreateLinkRequest {
   category_id: number;
   tag_id: number | null; // 改为单个标签，可选
   status: LinkStatus;
+  sort_order: number;
+  skip_health_check: boolean;
 }
 
 /** [后台] 更新友链 */
@@ -179,10 +183,32 @@ export interface ImportLinksResponse {
 
 // --- 友链健康检查相关类型 ---
 
-/** 友链健康检查响应 */
-export interface LinkHealthCheckResponse {
+/** 友链健康检查结果 */
+export interface LinkHealthCheckResult {
   total: number; // 总共检查的友链数量
   healthy: number; // 健康的友链数量
   unhealthy: number; // 失联的友链数量
   unhealthy_ids: number[]; // 失联的友链ID列表
+}
+
+/** 友链健康检查状态响应 */
+export interface LinkHealthCheckResponse {
+  is_running: boolean; // 是否正在运行
+  start_time?: string; // 开始时间
+  end_time?: string; // 结束时间
+  result?: LinkHealthCheckResult; // 检查结果
+  error?: string; // 错误信息
+}
+
+// --- 友链排序相关类型 ---
+
+/** 单个友链排序项 */
+export interface LinkSortItem {
+  id: number;
+  sort_order: number;
+}
+
+/** 批量更新友链排序请求 */
+export interface BatchUpdateLinkSortRequest {
+  items: LinkSortItem[];
 }
