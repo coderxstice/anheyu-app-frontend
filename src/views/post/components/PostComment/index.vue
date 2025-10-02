@@ -195,7 +195,7 @@ defineExpose({
     <div class="main-comment-form-container">
       <div class="comment-head">
         <div class="form-title">
-          <IconifyIconOffline icon="ri:chat-1-fill" />
+          <IconifyIconOffline icon="ri:chat-1-fill" class="w-6 h-6" />
           评论
           <span
             v-if="!isLoading && totalComments > 0"

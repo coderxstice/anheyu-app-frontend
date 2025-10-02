@@ -88,7 +88,7 @@
         class="rightMenu-item"
         @click.stop="handleToggleCommentBarrage"
       >
-        <i class="anzhiyufont anzhiyu-icon-message" />
+        <IconifyIconOffline icon="ri:chat-1-fill" class="!w-5 !h-5" />
         <span class="menu-commentBarrage-text">{{
           isCommentBarrageVisible ? "隐藏热评" : "显示热评"
         }}</span>
@@ -115,6 +115,7 @@ import { useSnackbar } from "@/composables/useSnackbar";
 import { useUiStore } from "@/store/modules/uiStore";
 import { storeToRefs } from "pinia";
 import gsap from "gsap";
+import IconifyIconOffline from "@/components/ReIcon/src/iconifyIconOffline";
 
 const rightMenuRef = ref<HTMLElement | null>(null);
 const isVisible = ref(false);
@@ -171,6 +172,9 @@ const handleContextMenu = (event: MouseEvent) => {
   if (isClickOnMusicPlayer.value) {
     window.dispatchEvent(new CustomEvent("music-player-get-play-status"));
   }
+
+  // 每次打开右键菜单时重新检查评论区域是否存在
+  checkCommentSection();
 
   // 修改：在菜单显示时就捕获选中的文本
   if (isTextSelected.value && selection) {
@@ -497,7 +501,8 @@ onUnmounted(() => {
     background-color 0.2s ease,
     color 0.2s ease;
 
-  i {
+  i,
+  svg {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -505,6 +510,9 @@ onUnmounted(() => {
     height: 1em;
     margin-right: 8px;
     font-size: 1rem;
+  }
+  svg {
+    margin-right: 5px;
   }
 
   &:hover {
@@ -519,7 +527,8 @@ onUnmounted(() => {
   height: 32px;
   padding: 0;
 
-  i {
+  i,
+  svg {
     margin-right: 0;
   }
 }

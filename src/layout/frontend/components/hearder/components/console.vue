@@ -115,7 +115,7 @@
             :class="{ on: isCommentBarrageVisible }"
           >
             <button class="commentBarrage" @click="toggleCommentBarrage()">
-              <i class="anzhiyufont anzhiyu-icon-message" />
+              <IconifyIconOffline icon="ri:chat-1-fill" class="w-6 h-6" />
             </button>
           </div>
         </el-tooltip>
@@ -162,7 +162,21 @@
         >
           <div class="console-btn-item" :class="{ on: isSidebarVisible }">
             <button class="sidebar-switch" @click="toggleSidebar()">
-              <i class="anzhiyufont anzhiyu-icon-arrows-left-right" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="28"
+                viewBox="0 0 24 24"
+              >
+                <g fill="currentColor">
+                  <path d="M17 22h2a4 4 0 0 0 4-4V6a4 4 0 0 0-4-4h-2z" />
+                  <path
+                    fill-rule="evenodd"
+                    d="M15 2H5a4 4 0 0 0-4 4v12a4 4 0 0 0 4 4h10zm-6.707 8.707a1 1 0 0 1 1.414-1.414l2 2a1 1 0 0 1 0 1.414l-2 2a1 1 0 0 1-1.414-1.414L9.586 12z"
+                    clip-rule="evenodd"
+                  />
+                </g>
+              </svg>
             </button>
           </div>
         </el-tooltip>
@@ -183,6 +197,7 @@ import { useCommentStore } from "@/store/modules/commentStore";
 import type { Comment } from "@/api/comment/type";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 import { useUiStore } from "@/store/modules/uiStore";
+import IconifyIconOffline from "@/components/ReIcon/src/iconifyIconOffline";
 
 const { dataTheme, dataThemeChange } = useDataThemeChange();
 
