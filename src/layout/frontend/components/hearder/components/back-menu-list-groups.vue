@@ -20,7 +20,7 @@ const props = defineProps<{
 
 <template>
   <div v-if="navConfig?.menu.length > 0" class="back-home-button">
-    <IconifyIconOffline icon="ri:apps-fill" />
+    <IconifyIconOffline icon="ri:apps-fill" class="w-[1.375rem] h-[1.375rem]" />
     <div class="back-menu-list-groups">
       <div
         v-for="group in navConfig.menu"

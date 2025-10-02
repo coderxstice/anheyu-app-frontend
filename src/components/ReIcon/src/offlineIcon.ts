@@ -18,6 +18,8 @@ addIcon("ep:home-filled", HomeFilled);
 import Search from "@iconify-icons/ri/search-line";
 import InformationLine from "@iconify-icons/ri/information-line";
 import AppsFill from "@iconify-icons/ri/apps-fill";
+import Chat1Fill from "@iconify-icons/ri/chat-1-fill";
 addIcon("ri:search-line", Search);
 addIcon("ri:information-line", InformationLine);
 addIcon("ri:apps-fill", AppsFill);
+addIcon("ri:chat-1-fill", Chat1Fill);

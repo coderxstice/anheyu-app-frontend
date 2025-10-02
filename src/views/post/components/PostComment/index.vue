@@ -193,13 +193,40 @@ defineExpose({
 <template>
   <div id="post-comment">
     <div class="main-comment-form-container">
-      <h3 class="form-title">
-        <i class="anzhiyufont anzhiyu-icon-comments" />
-        评论
-        <span v-if="!isLoading && totalComments > 0">
-          {{ `(${totalComments})` }}
-        </span>
-      </h3>
+      <div class="comment-head">
+        <div class="form-title">
+          <IconifyIconOffline icon="ri:chat-1-fill" class="w-6 h-6" />
+          评论
+          <span
+            v-if="!isLoading && totalComments > 0"
+            class="comment-count-number"
+          >
+            {{ totalComments }}
+          </span>
+        </div>
+        <div class="comment-tools">
+          <el-tooltip
+            content="匿名身份评论将无法收到回复"
+            placement="top"
+            :show-arrow="false"
+          >
+            <div class="comment-randomInfo">
+              <div class="comment-randomInfo-text">匿名评论</div>
+            </div>
+          </el-tooltip>
+
+          <el-tooltip
+            content="查看评论信息的隐私政策"
+            placement="top"
+            :show-arrow="false"
+          >
+            <div class="comment-randomInfo">
+              <router-link to="/privacy">隐私政策</router-link>
+            </div>
+          </el-tooltip>
+        </div>
+      </div>
+
       <CommentForm
         :target-path="props.targetPath"
         :placeholder="commentInfoConfig.placeholder"
@@ -260,17 +287,50 @@ defineExpose({
 }
 
 .main-comment-form-container {
+  .comment-tools {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
   .form-title {
     display: flex;
     gap: 0.5rem;
     align-items: center;
-    margin-bottom: 1.5rem;
     font-size: 1.5rem;
     font-weight: 600;
 
     i {
       font-size: 1.5rem;
     }
+  }
+  .comment-randomInfo {
+    cursor: pointer;
+    &:hover {
+      color: var(--anzhiyu-main);
+    }
+  }
+}
+
+.comment-head {
+  font-size: 0.8rem;
+  margin-bottom: 0.625rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  .form-title {
+    position: relative;
+  }
+  .comment-count-number {
+    font-size: 12px;
+    padding: 3px 6px;
+    border-radius: 20px;
+    background-color: var(--anzhiyu-fontcolor);
+    color: var(--anzhiyu-card-bg);
+    line-height: 1;
+    position: absolute;
+    top: 8px;
+    right: -25px;
   }
 }
 
