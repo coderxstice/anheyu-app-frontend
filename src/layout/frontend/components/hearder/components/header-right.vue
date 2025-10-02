@@ -1,7 +1,7 @@
 <template>
   <div class="header-right">
     <el-tooltip
-      v-if="navConfig?.travelling"
+      v-if="navConfig?.travelling && isHomePage"
       content="随机前往一个开往项目网站"
       placement="top"
       :show-arrow="false"
@@ -66,6 +66,7 @@
 <script setup lang="ts">
 import { computed, type PropType } from "vue";
 import { storeToRefs } from "pinia";
+import { useRoute } from "vue-router";
 import { useSnackbar } from "@/composables/useSnackbar";
 import { useArticleStore } from "@/store/modules/articleStore";
 import { useAppStore } from "@/store/modules/app";
@@ -94,10 +95,14 @@ const props = defineProps({
   }
 });
 
+const route = useRoute();
 const articleStore = useArticleStore();
 const appStore = useAppStore();
 const { isConsoleOpen } = storeToRefs(appStore);
 const { showSnackbar } = useSnackbar();
+
+// 判断是否在首页
+const isHomePage = computed(() => route.path === "/");
 
 let travellingsTimer: ReturnType<typeof setTimeout> | null = null;
 const handleTravelClick = () => {
