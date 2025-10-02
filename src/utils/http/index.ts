@@ -147,8 +147,8 @@ class AnHttp {
   private httpInterceptorsRequest(): void {
     AnHttp.axiosInstance.interceptors.request.use(
       (config: AnHttpRequestConfig) => {
-        // 白名单内的请求直接放行，无需Token
-        const whiteList = [
+        // 强制不需要Token的白名单（即使有Token也不携带）
+        const strictWhiteList = [
           "/auth/refresh-token",
           "/auth/login",
           "auth/check-email",
@@ -163,9 +163,7 @@ class AnHttp {
           "public/links",
           "public/links/random",
           "public/link-categories",
-          // 评论（前台）
-          "public/comments",
-          "public/comments/upload",
+          // 评论查询（前台）- 只读操作不需要token
           "public/comments/like",
           "public/comments/unlike",
           "public/comments/children",
@@ -183,11 +181,13 @@ class AnHttp {
           "public/music/playlist",
           "public/music/song-resources"
         ];
-        if (whiteList.some(url => config.url?.endsWith(url))) {
+
+        // 检查是否在强制白名单中
+        if (strictWhiteList.some(url => config.url?.endsWith(url))) {
           return config;
         }
 
-        // 为非白名单的请求附上AccessToken
+        // 为所有其他请求（包括可选Token的接口）附上AccessToken（如果存在）
         const tokenData = getToken();
         if (tokenData?.accessToken) {
           config.headers["Authorization"] = formatToken(tokenData.accessToken);
