@@ -286,7 +286,7 @@ const scrollToTop = () => {
             padding: 0 5px;
             font-size: 1.2rem;
             font-weight: 700;
-            line-height: 2rem;
+            line-height: 2;
             letter-spacing: normal;
             cursor: pointer;
             transition:
