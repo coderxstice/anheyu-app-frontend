@@ -331,6 +331,50 @@ watch(
   }
 );
 
+// 实时保存用户信息到 localStorage
+watch(
+  [() => form.nickname, () => form.email, () => form.website],
+  ([nickname, email, website]) => {
+    // 如果至少有一个字段有值，就保存
+    if (nickname || email || website) {
+      const userInfo = {
+        nickname: nickname || "",
+        email: email || "",
+        website: website || ""
+      };
+      localStorage.setItem("comment-user-info", JSON.stringify(userInfo));
+    }
+  },
+  { deep: false }
+);
+
+const loadUserInfo = () => {
+  const userInfo = localStorage.getItem("comment-user-info");
+  if (userInfo) {
+    try {
+      const { nickname, email, website } = JSON.parse(userInfo);
+      if (nickname) form.nickname = nickname;
+      if (email) form.email = email;
+      if (website) form.website = website;
+    } catch (error) {
+      console.error("Failed to parse user info from localStorage:", error);
+    }
+  }
+};
+
+watch(
+  () => props.showCancelButton,
+  newValue => {
+    if (newValue) {
+      // 当打开回复框时，自动填充用户信息
+      loadUserInfo();
+      nextTick(() => {
+        textareaRef.value?.focus();
+      });
+    }
+  }
+);
+
 watch(
   () => props.quoteText,
   newQuoteText => {
@@ -366,13 +410,7 @@ watch(activeEmojiPackageIndex, () => {
 
 onMounted(() => {
   fetchEmojis();
-  const userInfo = localStorage.getItem("comment-user-info");
-  if (userInfo) {
-    const { nickname, email, website } = JSON.parse(userInfo);
-    form.nickname = nickname;
-    form.email = email;
-    form.website = website;
-  }
+  loadUserInfo();
   nextTick(() => {
     if (props.showCancelButton) {
       textareaRef.value?.focus();
@@ -973,6 +1011,23 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
     }
   }
 
+  .form-meta-actions.is-reply {
+    .meta-inputs {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .buttons-wrapper {
+      width: 100%;
+
+      .cancel-button,
+      .submit-button {
+        flex: 1;
+        width: auto;
+      }
+    }
+  }
+
   .OwO-body {
     width: calc(100vw - 2rem - 32px);
     min-width: auto !important;
@@ -983,11 +1038,14 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
   }
 
   .form-meta-actions {
-    gap: 0;
     margin-top: 1rem;
 
     .meta-inputs {
-      gap: 0;
+      gap: 0.75rem;
+
+      :deep(.el-form-item) {
+        margin-bottom: 0;
+      }
     }
   }
 }
