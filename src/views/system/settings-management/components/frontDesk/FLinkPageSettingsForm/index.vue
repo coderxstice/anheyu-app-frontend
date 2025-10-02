@@ -38,6 +38,9 @@
         </div>
       </div>
     </el-form-item>
+
+    <!-- 友链申请通知设置 -->
+    <FLinkNotifySettings v-model="model" />
   </div>
 </template>
 
@@ -49,6 +52,7 @@ import JsonEditorTable from "../components/JsonEditorTable.vue";
 import { getLinkCategories } from "@/api/postLink";
 import type { LinkCategory } from "@/api/postLink/type";
 import { uploadArticleImage } from "@/api/post";
+import FLinkNotifySettings from "./FLinkNotifySettings.vue";
 
 // 懒加载 Markdown 编辑器
 const MarkdownEditor = defineAsyncComponent(

@@ -381,6 +381,14 @@ export interface FLinkSettingsInfo {
   friendLinkApplyCondition: string[];
   friendLinkApplyCustomCode: string; // Markdown 内容（用于编辑）
   friendLinkApplyCustomCodeHtml: string; // 渲染后的 HTML（用于前台展示）
+  notifyAdmin: boolean; // 是否通知站长
+  pushooChannel: string; // 推送渠道
+  pushooURL: string; // 推送URL
+  webhookRequestBody: string | object; // Webhook请求体
+  webhookHeaders: string; // Webhook请求头
+  scMailNotify: boolean; // 是否同时通过邮件和IM通知
+  mailSubjectAdmin: string; // 博主收到新友链申请的邮件主题
+  mailTemplateAdmin: string; // 博主收到新友链申请的邮件内容模板
 }
 
 /**
