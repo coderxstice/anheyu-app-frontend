@@ -118,7 +118,9 @@ const isDev = computed(() => {
 
 const isBlogger = computed(() => !!props.comment.is_admin_comment);
 
-const isReplyFormVisible = ref(false);
+const isReplyFormVisible = computed(
+  () => commentStore.activeReplyCommentId === props.comment.id
+);
 
 const gravatarSrc = computed(() => {
   const url = new URL(props.config.gravatar_url);
@@ -174,14 +176,14 @@ const onAvatarError = (e: Event) => {
 };
 
 const handleReplyClick = () => {
-  isReplyFormVisible.value = !isReplyFormVisible.value;
+  commentStore.toggleReplyForm(props.comment.id);
 };
 const handleReplySubmitted = () => {
-  isReplyFormVisible.value = false;
+  commentStore.setActiveReplyCommentId(null);
   emit("comment-submitted");
 };
 const handleCancelReply = () => {
-  isReplyFormVisible.value = false;
+  commentStore.setActiveReplyCommentId(null);
 };
 
 // 加载更多子评论
