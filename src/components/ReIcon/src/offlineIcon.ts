@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-06-15 11:31:00
+ * @LastEditTime: 2025-10-02 12:54:36
+ * @LastEditors: 安知鱼
+ */
 // 这里存放本地图标，在 src/layout/index.vue 文件中加载，避免在首启动加载
 import { addIcon } from "@iconify/vue/dist/offline";
 
@@ -10,5 +17,7 @@ addIcon("ep:home-filled", HomeFilled);
 // @iconify-icons/ri
 import Search from "@iconify-icons/ri/search-line";
 import InformationLine from "@iconify-icons/ri/information-line";
+import AppsFill from "@iconify-icons/ri/apps-fill";
 addIcon("ri:search-line", Search);
 addIcon("ri:information-line", InformationLine);
+addIcon("ri:apps-fill", AppsFill);
