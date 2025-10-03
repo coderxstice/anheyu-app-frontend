@@ -389,23 +389,32 @@ watch(
     border-radius: 12px;
     transition: all 0.3s;
 
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
     &.btn-secondary {
       color: var(--anzhiyu-fontcolor);
       background: var(--anzhiyu-secondbg);
+
+      &:hover {
+        background: var(--anzhiyu-card-bg);
+      }
     }
 
     &.btn-primary {
       color: var(--anzhiyu-white);
-      background: var(--anzhiyu-main);
+      background: var(--anzhiyu-fontcolor);
 
       &:hover:not(:disabled) {
-        opacity: 0.9;
-        transform: translateY(-2px);
+        filter: brightness(1.1);
+      }
+
+      &:active:not(:disabled) {
+        filter: brightness(0.95);
+      }
+
+      &:disabled {
+        background: var(--anzhiyu-secondbg);
+        color: var(--anzhiyu-secondtext);
+        cursor: not-allowed;
+        opacity: 0.6;
       }
     }
   }

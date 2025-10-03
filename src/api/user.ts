@@ -36,6 +36,7 @@ export type UserInfo = {
   nickname: string;
   avatar: string;
   email: string;
+  website: string;
   lastLoginAt: string;
   userGroupID: number;
   userGroup: UserGroup;

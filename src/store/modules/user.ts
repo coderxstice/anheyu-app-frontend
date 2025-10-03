@@ -27,6 +27,7 @@ export const useUserStore = defineStore("anheyu-user", () => {
   const username = ref<string>(userInfo?.username ?? "");
   const nickname = ref<string>(userInfo?.nickname ?? "");
   const email = ref<string>(userInfo?.email ?? "");
+  const website = ref<string>(userInfo?.website ?? "");
   const roles = ref<string[]>(
     initialTokenData?.roles?.length ? initialTokenData.roles : []
   );
@@ -42,6 +43,7 @@ export const useUserStore = defineStore("anheyu-user", () => {
     username.value = info.username;
     nickname.value = info.nickname;
     email.value = info.email;
+    website.value = info.website || "";
     roles.value = info.userGroupID ? [String(info.userGroupID)] : [];
   }
 
@@ -83,6 +85,7 @@ export const useUserStore = defineStore("anheyu-user", () => {
     nickname.value = "";
     avatar.value = "";
     email.value = "";
+    website.value = "";
     roles.value = [];
     removeToken();
     useMultiTagsStoreHook().handleTags("equal", [...routerArrays]);
@@ -170,6 +173,7 @@ export const useUserStore = defineStore("anheyu-user", () => {
     username,
     nickname,
     email,
+    website,
     roles,
     isRemembered,
     loginDay,

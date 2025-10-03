@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 import type { Comment } from "@/api/comment/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useCommentStore } from "@/store/modules/commentStore";
+import { useUserStoreHook } from "@/store/modules/user";
 import { storeToRefs } from "pinia";
 import { ElSkeleton, ElEmpty, ElButton } from "element-plus";
 import CommentItem from "./components/CommentItem.vue";
@@ -21,12 +22,18 @@ const emit = defineEmits(["comment-ids-loaded"]);
 const route = useRoute();
 const siteConfigStore = useSiteConfigStore();
 const commentStore = useCommentStore();
+const userStore = useUserStoreHook();
 const { comments, totalComments, isLoading, isLoadingMore, hasMore } =
   storeToRefs(commentStore);
 
 const quoteText = ref("");
 const commentFormRef = ref();
 const isAnonymousMode = ref(false);
+
+// 检查用户是否已登录
+const isLoggedIn = computed(() => {
+  return !!userStore.username && userStore.roles.length > 0;
+});
 
 // 滚动加载相关
 const commentListRef = ref<HTMLElement | null>(null);
@@ -220,7 +227,7 @@ defineExpose({
         </div>
         <div class="comment-tools">
           <el-tooltip
-            v-if="!commentInfoConfig.login_required"
+            v-if="!commentInfoConfig.login_required && !isLoggedIn"
             :content="
               isAnonymousMode ? '点击关闭匿名评论模式' : '点击开启匿名评论模式'
             "

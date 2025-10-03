@@ -1,80 +1,17 @@
 <script setup lang="ts">
-import { ref, reactive, nextTick, watch, computed } from "vue";
-import type { FormInstance, FormRules } from "element-plus";
-import { ElMessage } from "element-plus";
+import { ref, nextTick, watch } from "vue";
 import { gsap } from "gsap";
-import { updateUserProfile } from "@/api/user-center";
 
-defineOptions({ name: "UserProfileDialog" });
+defineOptions({ name: "AnonymousConfirmDialog" });
 
 const props = defineProps({
-  modelValue: { type: Boolean, default: false },
-  userInfo: {
-    type: Object as () => { nickname: string; email: string; website: string },
-    required: true
-  }
+  modelValue: { type: Boolean, default: false }
 });
 
-const emit = defineEmits(["update:modelValue", "success"]);
+const emit = defineEmits(["update:modelValue", "confirm"]);
 
 const dialogRef = ref<HTMLElement>();
 const overlayRef = ref<HTMLElement>();
-const formRef = ref<FormInstance>();
-const isSubmitting = ref(false);
-
-const form = reactive({
-  nickname: "",
-  email: "",
-  website: ""
-});
-
-const rules = reactive<FormRules>({
-  nickname: [
-    { required: true, message: "请输入昵称", trigger: "blur" },
-    { min: 2, max: 50, message: "昵称长度在 2 到 50 个字符", trigger: "blur" }
-  ],
-  email: [
-    { required: true, message: "请输入邮箱", trigger: "blur" },
-    { type: "email", message: "请输入有效的邮箱地址", trigger: "blur" }
-  ],
-  website: [{ type: "url", message: "请输入有效的网址", trigger: "blur" }]
-});
-
-// 检查表单是否可以提交
-const isFormValid = computed(() => {
-  // 昵称必填且长度在 2-50 之间
-  const trimmedNickname = form.nickname?.trim() || "";
-  const isNicknameValid =
-    trimmedNickname.length >= 2 && trimmedNickname.length <= 50;
-
-  // 邮箱字段是禁用的，不需要验证
-  return isNicknameValid;
-});
-
-const handleSubmit = async () => {
-  if (!formRef.value) return;
-
-  await formRef.value.validate(async valid => {
-    if (valid) {
-      isSubmitting.value = true;
-      try {
-        await updateUserProfile({
-          nickname: form.nickname,
-          website: form.website || undefined
-        });
-
-        ElMessage.success("保存成功");
-        emit("success");
-        closeDialog();
-      } catch (error: any) {
-        console.error("保存失败:", error);
-        ElMessage.error(error?.message || "保存失败，请稍后再试");
-      } finally {
-        isSubmitting.value = false;
-      }
-    }
-  });
-};
 
 const openDialog = () => {
   if (!dialogRef.value || !overlayRef.value) return;
@@ -147,6 +84,11 @@ const handleOverlayClick = (event: MouseEvent) => {
   }
 };
 
+const handleConfirm = () => {
+  emit("confirm");
+  closeDialog();
+};
+
 const onKeyDown = (event: KeyboardEvent) => {
   const { code } = event;
   if (code === "Escape") {
@@ -155,7 +97,7 @@ const onKeyDown = (event: KeyboardEvent) => {
   }
   if (["Enter", "NumpadEnter"].includes(code)) {
     event.preventDefault();
-    handleSubmit();
+    handleConfirm();
   }
 };
 
@@ -163,15 +105,6 @@ watch(
   () => props.modelValue,
   newVal => {
     if (newVal) {
-      // 检查昵称是否是默认的邮箱前缀
-      const emailPrefix = props.userInfo.email.split("@")[0] || "";
-      const isDefaultNickname = props.userInfo.nickname === emailPrefix;
-
-      // 如果昵称是默认的，清空昵称字段，提示用户需要填写
-      form.nickname = isDefaultNickname ? "" : props.userInfo.nickname;
-      form.email = props.userInfo.email;
-      form.website = props.userInfo.website;
-
       nextTick(() => {
         openDialog();
       });
@@ -185,7 +118,7 @@ watch(
 
 <template>
   <Teleport to="body">
-    <div v-if="modelValue" class="user-dialog-wrapper">
+    <div v-if="modelValue" class="anonymous-dialog-wrapper">
       <div ref="overlayRef" class="dialog-overlay" @click="handleOverlayClick">
         <div ref="dialogRef" class="dialog-container" @click.stop>
           <button class="close-btn" @click="closeDialog">
@@ -201,51 +134,36 @@ watch(
           </button>
 
           <div class="dialog-header">
-            <IconifyIconOffline icon="ri:edit-fill" class="header-icon" />
-            <h2>编辑资料</h2>
+            <svg
+              class="header-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+              />
+              <line x1="1" y1="1" x2="23" y2="23" />
+            </svg>
+            <h2>开启匿名评论</h2>
           </div>
 
           <div class="dialog-content">
-            <el-form
-              ref="formRef"
-              :model="form"
-              :rules="rules"
-              label-position="top"
-            >
-              <el-form-item label="昵称" prop="nickname">
-                <el-input
-                  v-model="form.nickname"
-                  placeholder="请设置一个个性化的昵称"
-                  maxlength="50"
-                  show-word-limit
-                />
-              </el-form-item>
-              <el-form-item label="邮箱" prop="email">
-                <el-input
-                  v-model="form.email"
-                  placeholder="请输入邮箱"
-                  type="email"
-                  disabled
-                />
-                <span class="form-tip">邮箱暂不支持修改</span>
-              </el-form-item>
-              <el-form-item label="个人网站" prop="website">
-                <el-input
-                  v-model="form.website"
-                  placeholder="请输入个人网站地址（选填）"
-                />
-              </el-form-item>
-            </el-form>
+            <p class="description">
+              开启匿名评论后，任何人将无法回复你的评论（包括博主）
+            </p>
           </div>
 
           <div class="dialog-footer">
             <button class="btn btn-secondary" @click="closeDialog">取消</button>
-            <button
-              class="btn btn-primary"
-              :disabled="isSubmitting || !isFormValid"
-              @click="handleSubmit"
-            >
-              {{ isSubmitting ? "保存中..." : "保存" }}
+            <button class="btn btn-primary" @click="handleConfirm">
+              确认开启
             </button>
           </div>
         </div>
@@ -255,7 +173,7 @@ watch(
 </template>
 
 <style lang="scss" scoped>
-.user-dialog-wrapper {
+.anonymous-dialog-wrapper {
   position: fixed;
   inset: 0;
   z-index: 2000;
@@ -312,14 +230,16 @@ watch(
 
 .dialog-header {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 0.75rem;
-  padding: 2rem 2rem 1.5rem;
+  padding: 2.5rem 2rem 1.5rem;
+  text-align: center;
   border-bottom: 1px solid var(--anzhiyu-card-border);
 
   .header-icon {
-    font-size: 1.75rem;
     color: var(--anzhiyu-main);
+    filter: drop-shadow(0 4px 12px var(--anzhiyu-theme-op));
   }
 
   h2 {
@@ -332,11 +252,12 @@ watch(
 
 .dialog-content {
   padding: 2rem;
+  text-align: center;
 
-  .form-tip {
-    display: block;
-    margin-top: 0.5rem;
-    font-size: 0.85rem;
+  .description {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
     color: var(--anzhiyu-secondtext);
   }
 }
@@ -371,19 +292,12 @@ watch(
       color: var(--anzhiyu-white);
       background: var(--anzhiyu-fontcolor);
 
-      &:hover:not(:disabled) {
+      &:hover {
         filter: brightness(1.1);
       }
 
-      &:active:not(:disabled) {
+      &:active {
         filter: brightness(0.95);
-      }
-
-      &:disabled {
-        background: var(--anzhiyu-secondbg);
-        color: var(--anzhiyu-secondtext);
-        cursor: not-allowed;
-        opacity: 0.6;
       }
     }
   }
@@ -399,6 +313,25 @@ watch(
   .dialog-footer {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
+  }
+
+  .dialog-header {
+    padding-top: 2rem;
+
+    .header-icon {
+      width: 44px;
+      height: 44px;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+    }
+  }
+
+  .dialog-content {
+    .description {
+      font-size: 0.9rem;
+    }
   }
 }
 </style>
