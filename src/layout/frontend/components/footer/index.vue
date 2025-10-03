@@ -373,10 +373,14 @@ a {
   cursor: pointer;
   object-fit: cover;
   border-radius: 50%;
-  transition: cubic-bezier(0, 0, 0, 1.29) 0.5s;
+  transition: cubic-bezier(0, 0, 0, 1.29) 0.5s !important;
 
   &:hover {
-    transform: rotate(360deg);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+    transform: scale(1.2);
   }
 }
 
