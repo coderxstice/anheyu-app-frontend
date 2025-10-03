@@ -958,6 +958,12 @@ const sidebarDescriptors: SettingDescriptor[] = [
 
 const commentDescriptors: SettingDescriptor[] = [
   {
+    frontendPath: "frontDesk.comment.enable",
+    backendKey: constant.KeyCommentEnable,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
     frontendPath: "frontDesk.comment.loginRequired",
     backendKey: constant.KeyCommentLoginRequired,
     defaultValue: false,

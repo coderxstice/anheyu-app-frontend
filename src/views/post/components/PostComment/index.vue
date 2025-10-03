@@ -42,6 +42,7 @@ const isLoadingScroll = ref(false);
 const commentInfoConfig = computed(() => {
   const config = siteConfigStore.getSiteConfig.comment;
   return {
+    enable: config.enable,
     blogger_email: config.blogger_email,
     master_tag: config.master_tag,
     page_size: config.page_size,
@@ -52,6 +53,11 @@ const commentInfoConfig = computed(() => {
     gravatar_url: siteConfigStore.getSiteConfig.GRAVATAR_URL,
     default_gravatar_type: siteConfigStore.getSiteConfig.DEFAULT_GRAVATAR_TYPE
   };
+});
+
+// 检查评论功能是否启用
+const isCommentEnabled = computed(() => {
+  return commentInfoConfig.value?.enable === true;
 });
 
 const fancyboxOptions = {
@@ -83,6 +89,11 @@ const handleHashChange = (hash: string) => {
 };
 
 onMounted(() => {
+  // 检查评论功能是否启用，未启用则不加载评论数据
+  if (!isCommentEnabled.value) {
+    return;
+  }
+
   const pageSize = commentInfoConfig.value.page_size || 10;
   commentStore.initComments(props.targetPath, pageSize);
 
@@ -212,7 +223,7 @@ defineExpose({
 </script>
 
 <template>
-  <div id="post-comment">
+  <div v-if="isCommentEnabled" id="post-comment">
     <div class="main-comment-form-container">
       <div class="comment-head">
         <div class="form-title">

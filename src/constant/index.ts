@@ -163,6 +163,7 @@ const KeyMusicPlayerPlaylistID: SettingKey = "music.player.playlist_id";
 const KeyMusicPlayerCustomPlaylist: SettingKey = "music.player.custom_playlist";
 
 // --- 评论配置 ---
+const KeyCommentEnable: SettingKey = "comment.enable";
 const KeyCommentLoginRequired: SettingKey = "comment.login_required";
 const KeyCommentPageSize: SettingKey = "comment.page_size";
 const KeyCommentMasterTag: SettingKey = "comment.master_tag";
@@ -380,6 +381,7 @@ export const constant = {
   KeyMusicPlayerCustomPlaylist,
 
   // --- 评论配置 ---
+  KeyCommentEnable,
   KeyCommentLoginRequired,
   KeyCommentPageSize,
   KeyCommentMasterTag,

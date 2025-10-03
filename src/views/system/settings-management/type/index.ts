@@ -321,6 +321,7 @@ export interface SidebarPageSettingsInfo {
  * @description: 评论配置表单接口
  */
 export interface CommentSettingsInfo {
+  enable: boolean;
   loginRequired: boolean;
   pageSize: number;
   masterTag: string;
