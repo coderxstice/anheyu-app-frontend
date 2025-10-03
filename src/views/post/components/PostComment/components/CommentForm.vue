@@ -11,18 +11,13 @@ import {
 import { useCommentStore } from "@/store/modules/commentStore";
 import type { CreateCommentPayload } from "@/api/comment/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
-import {
-  ElForm,
-  ElFormItem,
-  ElInput,
-  ElButton,
-  ElAlert,
-  ElMessage
-} from "element-plus";
+import { useUserStoreHook } from "@/store/modules/user";
+import { ElForm, ElFormItem, ElInput, ElButton, ElMessage } from "element-plus";
 import type { FormInstance, FormRules } from "element-plus";
 
 import IconEmoji from "../icon/IconEmoji.vue";
 import IconImage from "../icon/IconImage.vue";
+import LoginDialog from "@/components/LoginDialog/index.vue";
 import { gsap } from "gsap";
 import { uploadCommentImage } from "@/api/comment";
 
@@ -76,6 +71,7 @@ const emit = defineEmits(["submitted", "cancel", "cancel-quote"]);
 
 const siteConfigStore = useSiteConfigStore();
 const commentStore = useCommentStore();
+const userStore = useUserStoreHook();
 const formRef = ref<FormInstance>();
 const textareaRef = ref();
 const owoContainerRef = ref<HTMLElement | null>(null);
@@ -90,6 +86,10 @@ const previewEmojiUrl = ref("");
 const emojiData = ref<EmojiPackage[] | null>(null);
 const activeEmojiPackageIndex = ref(0);
 const isEmailValid = ref(true);
+const showLoginDialog = ref(false);
+const loginDialogInitialStep = ref<"check-email" | "register-form">(
+  "check-email"
+);
 
 const commentInfoConfig = computed(() => {
   const config = siteConfigStore.getSiteConfig.comment;
@@ -98,6 +98,16 @@ const commentInfoConfig = computed(() => {
     limit_length: config.limit_length,
     login_required: config.login_required
   };
+});
+
+// 检查用户是否已登录
+const isLoggedIn = computed(() => {
+  return !!userStore.username && userStore.roles.length > 0;
+});
+
+// 是否显示评论表单（输入框等）
+const shouldShowCommentForm = computed(() => {
+  return !commentInfoConfig.value.login_required || isLoggedIn.value;
 });
 
 const form = reactive<
@@ -137,6 +147,18 @@ const isSubmitDisabled = computed(() => {
 
 const handleValidate = (prop: string, isValid: boolean) => {
   if (prop === "email") isEmailValid.value = isValid;
+};
+
+const openLoginDialog = (
+  step: "check-email" | "register-form" = "check-email"
+) => {
+  loginDialogInitialStep.value = step;
+  showLoginDialog.value = true;
+};
+
+const handleLoginSuccess = () => {
+  // 登录成功后，刷新页面或重新加载评论
+  window.location.reload();
 };
 
 const submitForm = async (formEl: FormInstance | undefined) => {
@@ -446,7 +468,7 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
       :rules="formRules"
       @validate="handleValidate"
     >
-      <div class="textarea-container">
+      <div v-if="shouldShowCommentForm" class="textarea-container">
         <el-form-item prop="content">
           <div class="textarea-wrapper">
             <el-input
@@ -524,7 +546,7 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
           </div>
         </el-form-item>
       </div>
-      <div v-if="!commentInfoConfig.login_required">
+      <div v-if="shouldShowCommentForm">
         <div
           :class="['form-meta-actions', { 'is-reply': props.showCancelButton }]"
         >
@@ -566,17 +588,56 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
         </div>
       </div>
       <div v-else>
-        <el-alert
-          title="需要登录后才能发表评论"
-          type="info"
-          show-icon
-          :closable="false"
-        />
+        <div class="login-required-wrapper">
+          <div class="login-required-content">
+            <svg
+              class="login-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            <h3 class="login-title">请登录后发表评论</h3>
+            <div class="login-actions">
+              <el-button
+                type="primary"
+                size="large"
+                class="login-button"
+                @click="openLoginDialog('check-email')"
+              >
+                登录
+              </el-button>
+              <el-button
+                size="large"
+                class="register-button"
+                @click="openLoginDialog('register-form')"
+              >
+                注册
+              </el-button>
+            </div>
+          </div>
+        </div>
       </div>
     </el-form>
     <div v-if="isPreviewVisible" ref="emojiPreviewRef" class="emoji-preview">
       <img :src="previewEmojiUrl" alt="emoji-preview" />
     </div>
+
+    <!-- 登录弹窗 -->
+    <LoginDialog
+      v-model="showLoginDialog"
+      :initial-step="loginDialogInitialStep"
+      :hide-theme-switch="true"
+      @login-success="handleLoginSuccess"
+    />
   </div>
 </template>
 
@@ -989,6 +1050,130 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
     .buttons-wrapper {
       align-self: flex-end;
       margin-top: 0.5rem;
+    }
+  }
+}
+
+.login-required-wrapper {
+  position: relative;
+  padding: 2rem;
+  background: var(--anzhiyu-secondbg);
+  border: var(--style-border-always);
+  border-radius: 1.25rem;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes rotateGradient {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.login-required-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  gap: 0.25rem;
+}
+
+.login-icon {
+  filter: drop-shadow(0 4px 12px var(--anzhiyu-theme-op));
+  animation: iconFloat 3.5s ease-in-out infinite;
+  transition: all 0.3s ease;
+
+  .login-required-wrapper:hover & {
+    transform: scale(1.08) translateY(-2px);
+  }
+}
+
+@keyframes iconFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-8px) rotate(-2deg);
+  }
+  75% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+}
+
+.login-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.login-actions {
+  display: flex;
+  gap: 0.875rem;
+  width: 100%;
+  max-width: 22rem;
+
+  .el-button {
+    flex: 1;
+    height: 3rem;
+    font-size: 1rem;
+    border: var(--style-border-always);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .login-button {
+    background: var(--anzhiyu-fontcolor);
+  }
+
+  .register-button {
+    background: var(--anzhiyu-card-bg);
+    margin: 0;
+  }
+}
+
+// 移动端适配
+@media (max-width: 768px) {
+  .login-required-wrapper {
+    padding: 2.5rem 1.5rem;
+    border-radius: 1rem;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  .login-icon {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 1rem;
+  }
+
+  .login-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .login-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 100%;
+
+    .el-button {
+      width: 100%;
+      height: 2.75rem;
+      font-size: 0.9375rem;
+
+      &:hover {
+        transform: translateY(-2px) scale(1.01);
+      }
     }
   }
 }
