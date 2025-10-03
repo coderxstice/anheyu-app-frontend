@@ -11,6 +11,41 @@
         <i class="anzhiyufont anzhiyu-icon-train" />
       </a>
     </el-tooltip>
+    <!-- 用户中心/登录注册 -->
+    <el-dropdown
+      v-if="!isLoggedIn && !isHomePage"
+      trigger="hover"
+      placement="bottom"
+      :hide-on-click="true"
+      popper-class="user-center-dropdown"
+    >
+      <div class="nav-button">
+        <IconifyIconOffline icon="ri:user-fill" class="w-[1.4rem] h-[1.4rem]" />
+      </div>
+      <template #dropdown>
+        <el-dropdown-menu>
+          <el-dropdown-item @click="openLoginDialog('check-email')">
+            <i class="anzhiyufont anzhiyu-icon-sign-in-alt" />
+            登录
+          </el-dropdown-item>
+          <el-dropdown-item @click="openLoginDialog('register-form')">
+            <i class="anzhiyufont anzhiyu-icon-user-plus" />
+            注册
+          </el-dropdown-item>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
+    <el-tooltip
+      v-else-if="isLoggedIn && !isHomePage"
+      content="用户中心"
+      placement="top"
+      :show-arrow="false"
+      :offset="8"
+    >
+      <a class="nav-button" @click="goToUserCenter">
+        <IconifyIconOffline icon="ri:user-fill" class="w-[1.4rem] h-[1.4rem]" />
+      </a>
+    </el-tooltip>
     <el-tooltip
       content="随机前往一个文章"
       placement="top"
@@ -60,17 +95,27 @@
         <i class="anzhiyufont anzhiyu-icon-bars" />
       </div>
     </div>
+
+    <!-- 登录弹窗 -->
+    <LoginDialog
+      v-model="showLoginDialog"
+      :initial-step="loginDialogInitialStep"
+      :hide-theme-switch="false"
+      @login-success="handleLoginSuccess"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, type PropType } from "vue";
+import { computed, ref, type PropType } from "vue";
 import { storeToRefs } from "pinia";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useSnackbar } from "@/composables/useSnackbar";
 import { useArticleStore } from "@/store/modules/articleStore";
 import { useAppStore } from "@/store/modules/app";
+import { useUserStoreHook } from "@/store/modules/user";
 import Console from "./console.vue";
+import LoginDialog from "@/components/LoginDialog/index.vue";
 
 defineOptions({
   name: "HeaderRight"
@@ -96,13 +141,26 @@ const props = defineProps({
 });
 
 const route = useRoute();
+const router = useRouter();
 const articleStore = useArticleStore();
 const appStore = useAppStore();
+const userStore = useUserStoreHook();
 const { isConsoleOpen } = storeToRefs(appStore);
 const { showSnackbar } = useSnackbar();
 
+// 登录弹窗控制
+const showLoginDialog = ref(false);
+const loginDialogInitialStep = ref<"check-email" | "register-form">(
+  "check-email"
+);
+
 // 判断是否在首页
 const isHomePage = computed(() => route.path === "/");
+
+// 检查用户是否已登录
+const isLoggedIn = computed(() => {
+  return !!userStore.username && userStore.roles.length > 0;
+});
 
 let travellingsTimer: ReturnType<typeof setTimeout> | null = null;
 const handleTravelClick = () => {
@@ -143,6 +201,26 @@ const scrollToTop = () => {
 const handleSearchClick = () => {
   // 触发自定义事件来打开搜索框
   window.dispatchEvent(new CustomEvent("frontend-open-search"));
+};
+
+// 打开登录弹窗
+const openLoginDialog = (
+  step: "check-email" | "register-form" = "check-email"
+) => {
+  loginDialogInitialStep.value = step;
+  showLoginDialog.value = true;
+};
+
+// 登录成功后的处理
+const handleLoginSuccess = () => {
+  showLoginDialog.value = false;
+  // 刷新页面以更新用户状态
+  window.location.reload();
+};
+
+// 跳转到用户中心
+const goToUserCenter = () => {
+  router.push("/user-center");
 };
 
 // 移动端菜单控制
@@ -431,6 +509,42 @@ const toggleMobileMenu = () => {
 
   .header-right #toggle-menu {
     display: block;
+  }
+}
+
+// 用户中心下拉菜单样式
+:global(.user-center-dropdown) {
+  .el-dropdown-menu {
+    min-width: 120px;
+    padding: 8px 0;
+    background: var(--anzhiyu-card-bg);
+    backdrop-filter: saturate(180%) blur(10px);
+    border: var(--style-border-always);
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgb(0 0 0 / 10%);
+  }
+
+  .el-dropdown-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: var(--anzhiyu-fontcolor);
+    transition: all 0.3s;
+
+    i {
+      font-size: 16px;
+    }
+
+    &:hover {
+      color: var(--anzhiyu-white);
+      background: var(--anzhiyu-main);
+    }
+
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--anzhiyu-card-border, rgb(0 0 0 / 5%));
+    }
   }
 }
 </style>

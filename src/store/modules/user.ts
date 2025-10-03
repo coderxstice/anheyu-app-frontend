@@ -21,6 +21,7 @@ export const useUserStore = defineStore("anheyu-user", () => {
   const initialTokenData = getToken();
   const userInfo = initialTokenData?.userInfo;
 
+  const id = ref<number>(userInfo?.id ?? 0);
   const avatar = ref<string>(userInfo?.avatar ?? "");
   const username = ref<string>(userInfo?.username ?? "");
   const nickname = ref<string>(userInfo?.nickname ?? "");
@@ -35,6 +36,7 @@ export const useUserStore = defineStore("anheyu-user", () => {
    * @description 统一更新用户信息
    */
   function SET_USER_INFO(info: UserInfo) {
+    id.value = info.id;
     avatar.value = info.avatar;
     username.value = info.username;
     nickname.value = info.nickname;
@@ -75,6 +77,7 @@ export const useUserStore = defineStore("anheyu-user", () => {
    * @description 前端登出（不调用接口）
    */
   function logOut() {
+    id.value = 0;
     username.value = "";
     nickname.value = "";
     avatar.value = "";
@@ -136,6 +139,7 @@ export const useUserStore = defineStore("anheyu-user", () => {
   }
 
   return {
+    id,
     avatar,
     username,
     nickname,
