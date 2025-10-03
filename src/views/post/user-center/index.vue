@@ -2,7 +2,7 @@
  * @Description: 用户中心页面
  * @Author: 安知鱼
  * @Date: 2025-10-03 18:26:16
- * @LastEditTime: 2025-10-03 21:18:17
+ * @LastEditTime: 2025-10-04 03:45:23
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -55,7 +55,7 @@
             </p>
             <div class="user-badges">
               <span v-for="role in userStore.roles" :key="role" class="badge">
-                {{ role === "1" ? "管理员" : "注册用户" }}
+                {{ role === "1" ? "管理员" : "普通用户" }}
               </span>
             </div>
           </div>
