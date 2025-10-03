@@ -378,3 +378,8 @@ div.el-textarea__inner {
 .el-fade-in-linear-leave-to {
   opacity: 0;
 }
+
+// 全局隐藏 tooltip 箭头
+.el-popper > .el-popper__arrow {
+  display: none !important;
+}
