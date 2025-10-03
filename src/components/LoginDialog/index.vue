@@ -150,7 +150,10 @@ const apiHandlers = {
       email: form.email,
       password: form.password
     });
+    // 初始化路由（仅供管理员使用，普通用户不需要）
     await initRouter();
+    // 获取最新的用户信息
+    await useUserStoreHook().fetchUserInfo();
     message("登录成功", { type: "success" });
     emit("login-success");
     closeDialog();
@@ -243,9 +246,10 @@ const openDialog = () => {
   // 初始状态
   gsap.set(overlay, { opacity: 0 });
   gsap.set(dialog, {
-    scale: 0,
+    scale: 0.95,
+    y: 10,
     opacity: 0,
-    transformOrigin: "center center"
+    force3D: true
   });
 
   // 动画时间线
@@ -253,17 +257,19 @@ const openDialog = () => {
 
   tl.to(overlay, {
     opacity: 1,
-    duration: 0.15,
+    duration: 0.2,
     ease: "power2.out"
   }).to(
     dialog,
     {
       scale: 1,
+      y: 0,
       opacity: 1,
-      duration: 0.2,
-      ease: "back.out(1.7)"
+      duration: 0.25,
+      ease: "power2.out",
+      force3D: true
     },
-    "-=0.05"
+    "-=0.1"
   );
 };
 
@@ -280,18 +286,20 @@ const closeDialog = () => {
   });
 
   tl.to(dialog, {
-    scale: 0,
+    scale: 0.95,
+    y: 10,
     opacity: 0,
-    duration: 0.15,
-    ease: "back.in(1.7)"
+    duration: 0.2,
+    ease: "power2.in",
+    force3D: true
   }).to(
     overlay,
     {
       opacity: 0,
-      duration: 0.1,
+      duration: 0.15,
       ease: "power2.in"
     },
-    "-=0.05"
+    "-=0.1"
   );
 };
 

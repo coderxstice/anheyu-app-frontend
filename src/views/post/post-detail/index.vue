@@ -100,6 +100,11 @@ const { isConsoleOpen } = storeToRefs(appStore);
 
 const { isCommentBarrageVisible } = storeToRefs(uiStore);
 
+// 检查评论功能是否启用
+const isCommentEnabled = computed(() => {
+  return siteConfigStore.getSiteConfig?.comment?.enable === true;
+});
+
 // 获取文章页面自定义代码
 const { postTopHTML, postBottomHTML } = usePostCustomCode();
 
@@ -363,7 +368,7 @@ watch(
     </div>
 
     <CommentBarrage
-      v-if="article && commentBarrageConfig"
+      v-if="article && commentBarrageConfig && isCommentEnabled"
       v-show="isCommentBarrageVisible && !isConsoleOpen"
       :gravatar-url="commentBarrageConfig.gravatarUrl"
       :default-gravatar-type="commentBarrageConfig.defaultGravatarType"

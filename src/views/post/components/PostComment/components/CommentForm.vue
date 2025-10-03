@@ -12,12 +12,21 @@ import { useCommentStore } from "@/store/modules/commentStore";
 import type { CreateCommentPayload } from "@/api/comment/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useUserStoreHook } from "@/store/modules/user";
-import { ElForm, ElFormItem, ElInput, ElButton, ElMessage } from "element-plus";
+import {
+  ElForm,
+  ElFormItem,
+  ElInput,
+  ElButton,
+  ElMessage,
+  ElTooltip
+} from "element-plus";
 import type { FormInstance, FormRules } from "element-plus";
 
 import IconEmoji from "../icon/IconEmoji.vue";
 import IconImage from "../icon/IconImage.vue";
 import LoginDialog from "@/components/LoginDialog/index.vue";
+import UserProfileDialog from "@/components/UserProfileDialog/index.vue";
+import AnonymousConfirmDialog from "@/components/AnonymousConfirmDialog/index.vue";
 import { gsap } from "gsap";
 import { uploadCommentImage } from "@/api/comment";
 
@@ -67,7 +76,12 @@ const props = defineProps({
   quoteText: { type: String, default: "" }
 });
 
-const emit = defineEmits(["submitted", "cancel", "cancel-quote"]);
+const emit = defineEmits([
+  "submitted",
+  "cancel",
+  "cancel-quote",
+  "anonymous-state-change"
+]);
 
 const siteConfigStore = useSiteConfigStore();
 const commentStore = useCommentStore();
@@ -79,6 +93,7 @@ const emojiPreviewRef = ref<HTMLElement | null>(null);
 const fileInputRef = ref<HTMLInputElement | null>(null);
 const isUploading = ref(false);
 const isSubmitting = ref(false);
+const isAnonymous = ref(false);
 
 const showEmojiPicker = ref(false);
 const isPreviewVisible = ref(false);
@@ -90,20 +105,40 @@ const showLoginDialog = ref(false);
 const loginDialogInitialStep = ref<"check-email" | "register-form">(
   "check-email"
 );
+const showAnonymousConfirmDialog = ref(false);
+const showProfileDialog = ref(false);
 
 const commentInfoConfig = computed(() => {
   const config = siteConfigStore.getSiteConfig.comment;
   return {
     emoji_cdn: config.emoji_cdn,
     limit_length: config.limit_length,
-    login_required: config.login_required
+    login_required: config.login_required,
+    anonymous_email: config.anonymous_email || ""
   };
+});
+
+// 获取匿名评论使用的邮箱
+const getAnonymousEmail = computed(() => {
+  const anonymousEmail = commentInfoConfig.value.anonymous_email;
+  if (anonymousEmail && anonymousEmail.trim()) {
+    return anonymousEmail;
+  }
+  // 如果为空，使用前台网站拥有者邮箱
+  return siteConfigStore.getSiteConfig.frontDesk?.siteOwner?.email || "";
 });
 
 // 检查用户是否已登录
 const isLoggedIn = computed(() => {
   return !!userStore.username && userStore.roles.length > 0;
 });
+
+// 获取用户信息
+const userInfo = computed(() => ({
+  nickname: userStore.nickname || userStore.username || "",
+  email: userStore.email || "",
+  website: userStore.website || ""
+}));
 
 // 是否显示评论表单（输入框等）
 const shouldShowCommentForm = computed(() => {
@@ -157,20 +192,137 @@ const openLoginDialog = (
 };
 
 const handleLoginSuccess = () => {
-  // 登录成功后，刷新页面或重新加载评论
+  // 登录成功后，检查并填充用户信息
+  fillUserInfoFromStore();
+  // 刷新页面重新加载评论
   window.location.reload();
+};
+
+const handleProfileUpdateSuccess = () => {
+  // 用户资料更新成功后，重新加载用户信息
+  userStore.fetchUserInfo();
+  ElMessage.success("个人信息已更新，现在可以发表评论了");
+};
+
+// 生成随机名称
+const generateRandomName = () => {
+  const adjectives = [
+    "快乐的",
+    "勇敢的",
+    "聪明的",
+    "可爱的",
+    "温柔的",
+    "活泼的",
+    "安静的",
+    "神秘的"
+  ];
+  const nouns = [
+    "小熊",
+    "小兔",
+    "小鸟",
+    "小鱼",
+    "小猫",
+    "小狗",
+    "小鹿",
+    "小狐"
+  ];
+  const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const noun = nouns[Math.floor(Math.random() * nouns.length)];
+  const num = Math.floor(Math.random() * 999) + 1;
+  return `${adj}${noun}${num}`;
+};
+
+// 显示匿名确认弹窗或关闭匿名模式
+const showAnonymousDialog = () => {
+  if (!isAnonymous.value) {
+    // 未开启匿名，显示确认弹窗
+    showAnonymousConfirmDialog.value = true;
+    return false; // 返回当前状态（未开启）
+  } else {
+    // 已开启匿名，直接关闭匿名模式
+    isAnonymous.value = false;
+    loadUserInfo();
+    emit("anonymous-state-change", false);
+    ElMessage.success({
+      message: "已关闭匿名评论模式",
+      duration: 2000
+    });
+    return false; // 返回新状态（已关闭）
+  }
+};
+
+// 处理匿名评论切换
+const handleAnonymousToggle = () => {
+  if (!isAnonymous.value) {
+    isAnonymous.value = true;
+    // 生成随机名称和使用匿名邮箱
+    form.nickname = generateRandomName();
+    form.email = getAnonymousEmail.value;
+    showAnonymousConfirmDialog.value = false;
+    emit("anonymous-state-change", true);
+    ElMessage.success({
+      message: "已开启匿名评论模式",
+      duration: 2000
+    });
+  } else {
+    // 关闭匿名评论，恢复之前的信息
+    isAnonymous.value = false;
+    loadUserInfo();
+    emit("anonymous-state-change", false);
+  }
+};
+
+// 检查用户信息是否需要完善
+const checkUserProfileComplete = (): boolean => {
+  if (!isLoggedIn.value) return true; // 未登录用户不需要检查
+  if (isAnonymous.value) return true; // 匿名评论不需要检查
+
+  const nickname = userStore.nickname || userStore.username || "";
+  const email = userStore.email || "";
+  const website = userStore.website || "";
+
+  // 提取邮箱前缀（@ 之前的部分）
+  const emailPrefix = email.split("@")[0] || "";
+
+  // 条件1：没有填写过个人网站
+  const hasNoWebsite = !website || website.trim() === "";
+
+  // 条件2：昵称是邮箱的前缀
+  const isDefaultNickname = nickname === emailPrefix;
+
+  // 两个条件同时满足才需要完善信息
+  return !(hasNoWebsite && isDefaultNickname);
 };
 
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
+
+  // 检查是否需要完善用户信息
+  if (!checkUserProfileComplete()) {
+    ElMessage.warning("请先完善您的个人信息");
+    showProfileDialog.value = true;
+    return;
+  }
+
   await formEl.validate(async valid => {
     if (valid) {
       isSubmitting.value = true;
-      const { nickname, email, content, website } = form;
 
-      let finalContent = content;
+      // 如果用户已登录，使用 userStore 中的信息
+      let nickname, email, website;
+      if (isLoggedIn.value) {
+        nickname = userStore.nickname || userStore.username || "";
+        email = userStore.email || "";
+        website = form.website || ""; // 登录用户仍然可以填写网址（如果有的话）
+      } else {
+        nickname = form.nickname;
+        email = form.email;
+        website = form.website;
+      }
+
+      let finalContent = form.content;
       if (props.quoteText && props.quoteText.trim()) {
-        finalContent = `> ${props.quoteText}\n\n${content}`;
+        finalContent = `> ${props.quoteText}\n\n${form.content}`;
       }
 
       const payload: CreateCommentPayload = {
@@ -179,17 +331,21 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         content: finalContent,
         target_path: props.targetPath,
         target_title: document.title,
-        parent_id: props.parentId
+        parent_id: props.parentId,
+        is_anonymous: isAnonymous.value // 明确告诉后端这是匿名评论
       };
       if (website && website.trim() !== "") payload.website = website;
 
       try {
         await commentStore.postComment(payload);
 
-        localStorage.setItem(
-          "comment-user-info",
-          JSON.stringify({ nickname, email, website })
-        );
+        // 仅在未登录时保存用户信息到 localStorage
+        if (!isLoggedIn.value) {
+          localStorage.setItem(
+            "comment-user-info",
+            JSON.stringify({ nickname, email, website })
+          );
+        }
         emit("submitted");
         form.content = "";
       } catch (error) {
@@ -384,6 +540,21 @@ const loadUserInfo = () => {
   }
 };
 
+// 从 userStore 中填充用户信息（用于登录后自动填充）
+const fillUserInfoFromStore = () => {
+  // 如果用户已登录，检查表单字段是否为空
+  if (isLoggedIn.value) {
+    // 如果昵称为空，使用 userStore 中的昵称或用户名
+    if (!form.nickname.trim()) {
+      form.nickname = userStore.nickname || userStore.username || "";
+    }
+    // 如果邮箱为空，使用 userStore 中的邮箱
+    if (!form.email.trim()) {
+      form.email = userStore.email || "";
+    }
+  }
+};
+
 watch(
   () => props.showCancelButton,
   newValue => {
@@ -433,6 +604,8 @@ watch(activeEmojiPackageIndex, () => {
 onMounted(() => {
   fetchEmojis();
   loadUserInfo();
+  // 如果用户已登录且表单为空，使用用户信息填充
+  fillUserInfoFromStore();
   nextTick(() => {
     if (props.showCancelButton) {
       textareaRef.value?.focus();
@@ -441,6 +614,10 @@ onMounted(() => {
 });
 
 onUnmounted(() => document.removeEventListener("click", handleClickOutside));
+
+defineExpose({
+  showAnonymousDialog
+});
 </script>
 
 <template>
@@ -470,7 +647,7 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
     >
       <div v-if="shouldShowCommentForm" class="textarea-container">
         <el-form-item prop="content">
-          <div class="textarea-wrapper">
+          <div :class="['textarea-wrapper', { 'is-logged-in': isLoggedIn }]">
             <el-input
               ref="textareaRef"
               v-model="form.content"
@@ -543,21 +720,50 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
                 @change="handleFileChange"
               />
             </div>
+            <!-- 登录后显示的发送按钮 -->
+            <div v-if="isLoggedIn" class="logged-in-submit-wrapper">
+              <el-button
+                v-if="props.showCancelButton"
+                class="cancel-button"
+                size="small"
+                @click="$emit('cancel')"
+              >
+                取消
+              </el-button>
+              <el-button
+                type="primary"
+                class="logged-in-submit-button"
+                size="small"
+                :loading="isSubmitting"
+                :disabled="isSubmitDisabled"
+                @click="submitForm(formRef)"
+              >
+                发送
+              </el-button>
+            </div>
           </div>
         </el-form-item>
       </div>
-      <div v-if="shouldShowCommentForm">
+      <div v-if="shouldShowCommentForm && !isLoggedIn">
         <div
           :class="['form-meta-actions', { 'is-reply': props.showCancelButton }]"
         >
           <div class="meta-inputs">
             <el-form-item prop="nickname">
-              <el-input v-model="form.nickname" placeholder="必填">
+              <el-input
+                v-model="form.nickname"
+                placeholder="必填"
+                :disabled="isAnonymous"
+              >
                 <template #prepend>昵称</template>
               </el-input>
             </el-form-item>
             <el-form-item prop="email">
-              <el-input v-model="form.email" placeholder="必填">
+              <el-input
+                v-model="form.email"
+                placeholder="必填"
+                :disabled="isAnonymous"
+              >
                 <template #prepend>邮箱</template>
               </el-input>
             </el-form-item>
@@ -587,7 +793,7 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
           </div>
         </div>
       </div>
-      <div v-else>
+      <div v-else-if="!shouldShowCommentForm">
         <div class="login-required-wrapper">
           <div class="login-required-content">
             <svg
@@ -637,6 +843,19 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
       :initial-step="loginDialogInitialStep"
       :hide-theme-switch="true"
       @login-success="handleLoginSuccess"
+    />
+
+    <!-- 用户资料编辑弹窗 -->
+    <UserProfileDialog
+      v-model="showProfileDialog"
+      :user-info="userInfo"
+      @success="handleProfileUpdateSuccess"
+    />
+
+    <!-- 匿名评论确认弹窗 -->
+    <AnonymousConfirmDialog
+      v-model="showAnonymousConfirmDialog"
+      @confirm="handleAnonymousToggle"
     />
   </div>
 </template>
@@ -775,6 +994,7 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
     z-index: 2;
     display: flex;
     gap: 8px;
+    margin-top: 0.875rem;
 
     .OwO {
       position: relative;
@@ -923,6 +1143,52 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
     user-select: none;
     background: transparent;
   }
+
+  // 登录后隐藏字符计数
+  &.is-logged-in {
+    :deep(.el-input__count) {
+      display: none;
+    }
+  }
+
+  // 登录后的发送按钮容器
+  .logged-in-submit-wrapper {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    z-index: 3;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
+    .logged-in-submit-button {
+      min-width: 80px;
+      font-weight: 600;
+      color: var(--anzhiyu-background);
+      background-color: var(--anzhiyu-fontcolor);
+      border: 0 solid var(--anzhiyu-main);
+      transition: all 0.3s;
+
+      &:hover {
+        opacity: 0.85;
+      }
+
+      &.is-disabled {
+        opacity: 0.2;
+      }
+    }
+
+    .cancel-button {
+      color: var(--anzhiyu-fontcolor);
+      background: var(--anzhiyu-secondbg);
+      border: 1px solid var(--anzhiyu-card-border);
+
+      &:hover {
+        color: var(--anzhiyu-white);
+        background: var(--anzhiyu-lighttext);
+      }
+    }
+  }
 }
 
 .form-meta-actions {
@@ -1011,6 +1277,7 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
   .buttons-wrapper {
     display: flex;
     gap: 0.5rem;
+    align-items: center;
 
     .submit-button {
       min-width: 112px;

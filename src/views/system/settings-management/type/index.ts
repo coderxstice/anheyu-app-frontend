@@ -321,12 +321,14 @@ export interface SidebarPageSettingsInfo {
  * @description: 评论配置表单接口
  */
 export interface CommentSettingsInfo {
+  enable: boolean;
   loginRequired: boolean;
   pageSize: number;
   masterTag: string;
   placeholder: string;
   emojiCDN: string;
   bloggerEmail: string;
+  anonymousEmail: string;
   showUA: boolean;
   showRegion: boolean;
   limitPerMinute: number;

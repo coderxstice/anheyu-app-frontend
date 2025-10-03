@@ -164,8 +164,17 @@ const apiHandlers = {
     // 等待路由初始化
     await initRouter();
 
-    // 直接跳转到管理后台首页
-    await router.replace("/admin/dashboard");
+    // 根据用户角色决定跳转位置
+    const userStore = useUserStoreHook();
+    const isAdmin = userStore.roles.includes("1"); // 1 是管理员组ID
+
+    if (isAdmin) {
+      // 管理员跳转到后台首页
+      await router.replace("/admin/dashboard");
+    } else {
+      // 普通用户跳转到前台首页
+      await router.replace("/");
+    }
 
     message("登录成功", { type: "success" });
   },

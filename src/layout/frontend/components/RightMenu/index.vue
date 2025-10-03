@@ -113,6 +113,7 @@ import { useCopyToClipboard } from "@pureadmin/utils";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 import { useSnackbar } from "@/composables/useSnackbar";
 import { useUiStore } from "@/store/modules/uiStore";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { storeToRefs } from "pinia";
 import gsap from "gsap";
 import IconifyIconOffline from "@/components/ReIcon/src/iconifyIconOffline";
@@ -134,6 +135,7 @@ const { copied, update } = useCopyToClipboard();
 const { dataTheme, dataThemeChange } = useDataThemeChange();
 const { showSnackbar } = useSnackbar();
 const uiStore = useUiStore();
+const siteConfigStore = useSiteConfigStore();
 
 const { isCommentBarrageVisible, useCustomContextMenu } = storeToRefs(uiStore);
 const { toggleCommentBarrage } = uiStore;
@@ -209,9 +211,13 @@ const handleContextMenu = (event: MouseEvent) => {
 
 /**
  * 检查页面是否存在评论区域
+ * 同时检查评论功能是否启用
  */
 const checkCommentSection = () => {
-  hasCommentSection.value = !!document.getElementById("post-comment");
+  const commentEnabled =
+    siteConfigStore.getSiteConfig?.comment?.enable === true;
+  const commentElementExists = !!document.getElementById("post-comment");
+  hasCommentSection.value = commentEnabled && commentElementExists;
 };
 
 /**

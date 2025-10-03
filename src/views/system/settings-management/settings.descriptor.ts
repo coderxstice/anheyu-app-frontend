@@ -958,6 +958,12 @@ const sidebarDescriptors: SettingDescriptor[] = [
 
 const commentDescriptors: SettingDescriptor[] = [
   {
+    frontendPath: "frontDesk.comment.enable",
+    backendKey: constant.KeyCommentEnable,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
     frontendPath: "frontDesk.comment.loginRequired",
     backendKey: constant.KeyCommentLoginRequired,
     defaultValue: false,
@@ -991,6 +997,12 @@ const commentDescriptors: SettingDescriptor[] = [
   {
     frontendPath: "frontDesk.comment.bloggerEmail",
     backendKey: constant.KeyCommentBloggerEmail,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.comment.anonymousEmail",
+    backendKey: constant.KeyCommentAnonymousEmail,
     defaultValue: "",
     type: "string"
   },

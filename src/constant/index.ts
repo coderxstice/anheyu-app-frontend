@@ -163,12 +163,14 @@ const KeyMusicPlayerPlaylistID: SettingKey = "music.player.playlist_id";
 const KeyMusicPlayerCustomPlaylist: SettingKey = "music.player.custom_playlist";
 
 // --- 评论配置 ---
+const KeyCommentEnable: SettingKey = "comment.enable";
 const KeyCommentLoginRequired: SettingKey = "comment.login_required";
 const KeyCommentPageSize: SettingKey = "comment.page_size";
 const KeyCommentMasterTag: SettingKey = "comment.master_tag";
 const KeyCommentPlaceholder: SettingKey = "comment.placeholder";
 const KeyCommentEmojiCDN: SettingKey = "comment.emoji_cdn";
 const KeyCommentBloggerEmail: SettingKey = "comment.blogger_email";
+const KeyCommentAnonymousEmail: SettingKey = "comment.anonymous_email";
 const KeyCommentShowUA: SettingKey = "comment.show_ua";
 const KeyCommentShowRegion: SettingKey = "comment.show_region";
 const KeyCommentLimitPerMinute: SettingKey = "comment.limit_per_minute";
@@ -379,12 +381,14 @@ export const constant = {
   KeyMusicPlayerCustomPlaylist,
 
   // --- 评论配置 ---
+  KeyCommentEnable,
   KeyCommentLoginRequired,
   KeyCommentPageSize,
   KeyCommentMasterTag,
   KeyCommentPlaceholder,
   KeyCommentEmojiCDN,
   KeyCommentBloggerEmail,
+  KeyCommentAnonymousEmail,
   KeyCommentShowUA,
   KeyCommentShowRegion,
   KeyCommentLimitPerMinute,

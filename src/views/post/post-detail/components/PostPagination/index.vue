@@ -73,7 +73,7 @@ defineProps({
     top: 0;
     bottom: 0;
     width: 1px;
-    background: var(--style-border-always);
+    background: var(--anzhiyu-card-border);
     transform: translateX(-50%);
     z-index: 1;
   }
