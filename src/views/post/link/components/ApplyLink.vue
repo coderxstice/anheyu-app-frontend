@@ -2,7 +2,7 @@
  * @Description: 友情链接申请面板
  * @Author: 安知鱼
  * @Date: 2025-08-19 10:19:23
- * @LastEditTime: 2025-10-01 19:45:11
+ * @LastEditTime: 2025-10-03 14:55:18
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -94,9 +94,11 @@ const handleSubmit = async (formEl: FormInstance | undefined) => {
 };
 
 const formCardRef = ref<InstanceType<typeof ElCard> | null>(null);
+const isInitialLoad = ref(true);
 
 watch(allChecked, isAllChecked => {
-  if (isAllChecked) {
+  // 忽略初始加载时的自动滚动，只在用户主动勾选时触发
+  if (isAllChecked && !isInitialLoad.value) {
     nextTick(() => {
       if (formCardRef.value?.$el) {
         const offset = 80;
@@ -113,6 +115,11 @@ watch(allChecked, isAllChecked => {
         });
       }
     });
+  }
+
+  // 首次 watch 触发后，标记初始加载完成
+  if (isInitialLoad.value) {
+    isInitialLoad.value = false;
   }
 });
 </script>
