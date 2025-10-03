@@ -995,6 +995,12 @@ const commentDescriptors: SettingDescriptor[] = [
     type: "string"
   },
   {
+    frontendPath: "frontDesk.comment.anonymousEmail",
+    backendKey: constant.KeyCommentAnonymousEmail,
+    defaultValue: "",
+    type: "string"
+  },
+  {
     frontendPath: "frontDesk.comment.showUA",
     backendKey: constant.KeyCommentShowUA,
     defaultValue: true,

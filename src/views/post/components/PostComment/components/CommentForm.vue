@@ -12,7 +12,14 @@ import { useCommentStore } from "@/store/modules/commentStore";
 import type { CreateCommentPayload } from "@/api/comment/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useUserStoreHook } from "@/store/modules/user";
-import { ElForm, ElFormItem, ElInput, ElButton, ElMessage } from "element-plus";
+import {
+  ElForm,
+  ElFormItem,
+  ElInput,
+  ElButton,
+  ElMessage,
+  ElTooltip
+} from "element-plus";
 import type { FormInstance, FormRules } from "element-plus";
 
 import IconEmoji from "../icon/IconEmoji.vue";
@@ -67,7 +74,12 @@ const props = defineProps({
   quoteText: { type: String, default: "" }
 });
 
-const emit = defineEmits(["submitted", "cancel", "cancel-quote"]);
+const emit = defineEmits([
+  "submitted",
+  "cancel",
+  "cancel-quote",
+  "anonymous-state-change"
+]);
 
 const siteConfigStore = useSiteConfigStore();
 const commentStore = useCommentStore();
@@ -79,6 +91,7 @@ const emojiPreviewRef = ref<HTMLElement | null>(null);
 const fileInputRef = ref<HTMLInputElement | null>(null);
 const isUploading = ref(false);
 const isSubmitting = ref(false);
+const isAnonymous = ref(false);
 
 const showEmojiPicker = ref(false);
 const isPreviewVisible = ref(false);
@@ -90,14 +103,26 @@ const showLoginDialog = ref(false);
 const loginDialogInitialStep = ref<"check-email" | "register-form">(
   "check-email"
 );
+const showAnonymousConfirmDialog = ref(false);
 
 const commentInfoConfig = computed(() => {
   const config = siteConfigStore.getSiteConfig.comment;
   return {
     emoji_cdn: config.emoji_cdn,
     limit_length: config.limit_length,
-    login_required: config.login_required
+    login_required: config.login_required,
+    anonymous_email: config.anonymous_email || ""
   };
+});
+
+// 获取匿名评论使用的邮箱
+const getAnonymousEmail = computed(() => {
+  const anonymousEmail = commentInfoConfig.value.anonymous_email;
+  if (anonymousEmail && anonymousEmail.trim()) {
+    return anonymousEmail;
+  }
+  // 如果为空，使用前台网站拥有者邮箱
+  return siteConfigStore.getSiteConfig.frontDesk?.siteOwner?.email || "";
 });
 
 // 检查用户是否已登录
@@ -161,6 +186,74 @@ const handleLoginSuccess = () => {
   fillUserInfoFromStore();
   // 刷新页面重新加载评论
   window.location.reload();
+};
+
+// 生成随机名称
+const generateRandomName = () => {
+  const adjectives = [
+    "快乐的",
+    "勇敢的",
+    "聪明的",
+    "可爱的",
+    "温柔的",
+    "活泼的",
+    "安静的",
+    "神秘的"
+  ];
+  const nouns = [
+    "小熊",
+    "小兔",
+    "小鸟",
+    "小鱼",
+    "小猫",
+    "小狗",
+    "小鹿",
+    "小狐"
+  ];
+  const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const noun = nouns[Math.floor(Math.random() * nouns.length)];
+  const num = Math.floor(Math.random() * 999) + 1;
+  return `${adj}${noun}${num}`;
+};
+
+// 显示匿名确认弹窗或关闭匿名模式
+const showAnonymousDialog = () => {
+  if (!isAnonymous.value) {
+    // 未开启匿名，显示确认弹窗
+    showAnonymousConfirmDialog.value = true;
+    return false; // 返回当前状态（未开启）
+  } else {
+    // 已开启匿名，直接关闭匿名模式
+    isAnonymous.value = false;
+    loadUserInfo();
+    emit("anonymous-state-change", false);
+    ElMessage.success({
+      message: "已关闭匿名评论模式",
+      duration: 2000
+    });
+    return false; // 返回新状态（已关闭）
+  }
+};
+
+// 处理匿名评论切换
+const handleAnonymousToggle = () => {
+  if (!isAnonymous.value) {
+    isAnonymous.value = true;
+    // 生成随机名称和使用匿名邮箱
+    form.nickname = generateRandomName();
+    form.email = getAnonymousEmail.value;
+    showAnonymousConfirmDialog.value = false;
+    emit("anonymous-state-change", true);
+    ElMessage.success({
+      message: "已开启匿名评论模式",
+      duration: 2000
+    });
+  } else {
+    // 关闭匿名评论，恢复之前的信息
+    isAnonymous.value = false;
+    loadUserInfo();
+    emit("anonymous-state-change", false);
+  }
 };
 
 const submitForm = async (formEl: FormInstance | undefined) => {
@@ -474,6 +567,10 @@ onMounted(() => {
 });
 
 onUnmounted(() => document.removeEventListener("click", handleClickOutside));
+
+defineExpose({
+  showAnonymousDialog
+});
 </script>
 
 <template>
@@ -606,12 +703,20 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
         >
           <div class="meta-inputs">
             <el-form-item prop="nickname">
-              <el-input v-model="form.nickname" placeholder="必填">
+              <el-input
+                v-model="form.nickname"
+                placeholder="必填"
+                :disabled="isAnonymous"
+              >
                 <template #prepend>昵称</template>
               </el-input>
             </el-form-item>
             <el-form-item prop="email">
-              <el-input v-model="form.email" placeholder="必填">
+              <el-input
+                v-model="form.email"
+                placeholder="必填"
+                :disabled="isAnonymous"
+              >
                 <template #prepend>邮箱</template>
               </el-input>
             </el-form-item>
@@ -641,7 +746,7 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
           </div>
         </div>
       </div>
-      <div v-else>
+      <div v-else-if="!shouldShowCommentForm">
         <div class="login-required-wrapper">
           <div class="login-required-content">
             <svg
@@ -692,6 +797,57 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
       :hide-theme-switch="true"
       @login-success="handleLoginSuccess"
     />
+
+    <!-- 匿名评论确认弹窗 -->
+    <el-dialog
+      v-model="showAnonymousConfirmDialog"
+      :show-close="false"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      width="28rem"
+      class="anonymous-confirm-dialog"
+    >
+      <div class="anonymous-confirm-content">
+        <svg
+          class="anonymous-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+          />
+          <line x1="1" y1="1" x2="23" y2="23" />
+        </svg>
+        <h3 class="anonymous-title">开启匿名评论</h3>
+        <p class="anonymous-description">
+          开启匿名评论后，任何人将无法回复你的评论（包括博主）
+        </p>
+        <div class="anonymous-actions">
+          <el-button
+            size="large"
+            class="cancel-button"
+            @click="showAnonymousConfirmDialog = false"
+          >
+            取消
+          </el-button>
+          <el-button
+            type="primary"
+            size="large"
+            class="confirm-button"
+            @click="handleAnonymousToggle"
+          >
+            确认开启
+          </el-button>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -1006,7 +1162,6 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
 
       &:hover {
         opacity: 0.85;
-        transform: translateY(-1px);
       }
 
       &.is-disabled {
@@ -1113,6 +1268,7 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
   .buttons-wrapper {
     display: flex;
     gap: 0.5rem;
+    align-items: center;
 
     .submit-button {
       min-width: 112px;
@@ -1333,6 +1489,127 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
       :deep(.el-form-item) {
         margin-bottom: 0;
       }
+    }
+  }
+}
+
+// 匿名评论确认弹窗样式
+:deep(.anonymous-confirm-dialog) {
+  .el-dialog__header {
+    display: none;
+  }
+
+  .el-dialog__body {
+    padding: 0;
+  }
+
+  .el-dialog {
+    border-radius: 1.25rem;
+    overflow: hidden;
+  }
+}
+
+.anonymous-confirm-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  background: var(--anzhiyu-card-bg);
+}
+
+.anonymous-icon {
+  margin-bottom: 1rem;
+  color: var(--anzhiyu-main);
+  filter: drop-shadow(0 4px 12px var(--anzhiyu-theme-op));
+  animation: iconFloat 3.5s ease-in-out infinite;
+  transition: all 0.3s ease;
+}
+
+.anonymous-title {
+  margin-bottom: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--anzhiyu-fontcolor);
+  letter-spacing: -0.02em;
+}
+
+.anonymous-description {
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--anzhiyu-secondtext);
+  max-width: 22rem;
+}
+
+.anonymous-actions {
+  display: flex;
+  gap: 0.875rem;
+  width: 100%;
+  max-width: 22rem;
+
+  .el-button {
+    flex: 1;
+    height: 3rem;
+    font-size: 1rem;
+    border: var(--style-border-always);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .confirm-button {
+    background: var(--anzhiyu-fontcolor);
+    color: var(--anzhiyu-background);
+
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+
+  .cancel-button {
+    background: var(--anzhiyu-secondbg);
+    color: var(--anzhiyu-fontcolor);
+
+    &:hover {
+      background: var(--anzhiyu-lighttext);
+      color: var(--anzhiyu-white);
+    }
+  }
+}
+
+// 移动端适配
+@media (max-width: 768px) {
+  :deep(.anonymous-confirm-dialog) {
+    .el-dialog {
+      width: 90% !important;
+      max-width: 400px;
+    }
+  }
+
+  .anonymous-confirm-content {
+    padding: 2rem 1.5rem;
+  }
+
+  .anonymous-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .anonymous-title {
+    font-size: 1.25rem;
+  }
+
+  .anonymous-description {
+    font-size: 0.9rem;
+  }
+
+  .anonymous-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .el-button {
+      width: 100%;
+      height: 2.75rem;
+      font-size: 0.9375rem;
     }
   }
 }

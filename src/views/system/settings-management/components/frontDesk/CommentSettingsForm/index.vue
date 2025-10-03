@@ -146,6 +146,14 @@ const formatJson = () => {
         </el-form-item>
       </el-col>
       <el-col :span="12">
+        <el-form-item label="匿名评论邮箱 (为空则使用网站拥有者邮箱)">
+          <el-input
+            v-model="model.anonymousEmail"
+            placeholder="留空则使用前台网站拥有者邮箱"
+          />
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
         <el-form-item label="表情 CDN 链接 (.json)">
           <el-input v-model="model.emojiCDN" placeholder="输入表情包json链接" />
         </el-form-item>

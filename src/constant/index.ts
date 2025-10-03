@@ -169,6 +169,7 @@ const KeyCommentMasterTag: SettingKey = "comment.master_tag";
 const KeyCommentPlaceholder: SettingKey = "comment.placeholder";
 const KeyCommentEmojiCDN: SettingKey = "comment.emoji_cdn";
 const KeyCommentBloggerEmail: SettingKey = "comment.blogger_email";
+const KeyCommentAnonymousEmail: SettingKey = "comment.anonymous_email";
 const KeyCommentShowUA: SettingKey = "comment.show_ua";
 const KeyCommentShowRegion: SettingKey = "comment.show_region";
 const KeyCommentLimitPerMinute: SettingKey = "comment.limit_per_minute";
@@ -385,6 +386,7 @@ export const constant = {
   KeyCommentPlaceholder,
   KeyCommentEmojiCDN,
   KeyCommentBloggerEmail,
+  KeyCommentAnonymousEmail,
   KeyCommentShowUA,
   KeyCommentShowRegion,
   KeyCommentLimitPerMinute,

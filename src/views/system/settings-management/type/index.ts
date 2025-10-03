@@ -327,6 +327,7 @@ export interface CommentSettingsInfo {
   placeholder: string;
   emojiCDN: string;
   bloggerEmail: string;
+  anonymousEmail: string;
   showUA: boolean;
   showRegion: boolean;
   limitPerMinute: number;

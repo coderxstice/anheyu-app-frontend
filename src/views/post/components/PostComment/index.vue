@@ -25,6 +25,8 @@ const { comments, totalComments, isLoading, isLoadingMore, hasMore } =
   storeToRefs(commentStore);
 
 const quoteText = ref("");
+const commentFormRef = ref();
+const isAnonymousMode = ref(false);
 
 // 滚动加载相关
 const commentListRef = ref<HTMLElement | null>(null);
@@ -39,6 +41,7 @@ const commentInfoConfig = computed(() => {
     placeholder: config.placeholder,
     show_region: config.show_region,
     show_ua: config.show_ua,
+    login_required: config.login_required,
     gravatar_url: siteConfigStore.getSiteConfig.GRAVATAR_URL,
     default_gravatar_type: siteConfigStore.getSiteConfig.DEFAULT_GRAVATAR_TYPE
   };
@@ -148,6 +151,17 @@ const handleCancelQuote = () => {
   quoteText.value = "";
 };
 
+const handleAnonymousClick = () => {
+  const newState = commentFormRef.value?.showAnonymousDialog();
+  if (newState !== undefined) {
+    isAnonymousMode.value = newState;
+  }
+};
+
+const handleAnonymousStateChange = (state: boolean) => {
+  isAnonymousMode.value = state;
+};
+
 // 滚动加载相关函数
 const setupScrollListener = () => {
   const handleScroll = async () => {
@@ -206,12 +220,23 @@ defineExpose({
         </div>
         <div class="comment-tools">
           <el-tooltip
-            content="匿名身份评论将无法收到回复"
+            v-if="!commentInfoConfig.login_required"
+            :content="
+              isAnonymousMode ? '点击关闭匿名评论模式' : '点击开启匿名评论模式'
+            "
             placement="top"
             :show-arrow="false"
           >
-            <div class="comment-randomInfo">
-              <div class="comment-randomInfo-text">匿名评论</div>
+            <div
+              :class="[
+                'comment-randomInfo',
+                { 'comment-randomInfo--active': isAnonymousMode }
+              ]"
+              @click="handleAnonymousClick"
+            >
+              <div class="comment-randomInfo-text">
+                {{ isAnonymousMode ? "匿名中" : "匿名评论" }}
+              </div>
             </div>
           </el-tooltip>
 
@@ -228,11 +253,13 @@ defineExpose({
       </div>
 
       <CommentForm
+        ref="commentFormRef"
         :target-path="props.targetPath"
         :placeholder="commentInfoConfig.placeholder"
         :quote-text="quoteText"
         @submitted="handleCommentSubmitted"
         @cancel-quote="handleCancelQuote"
+        @anonymous-state-change="handleAnonymousStateChange"
       />
     </div>
 
@@ -305,8 +332,30 @@ defineExpose({
   }
   .comment-randomInfo {
     cursor: pointer;
+    transition: all 0.3s;
+
     &:hover {
       color: var(--anzhiyu-main);
+    }
+
+    &--active {
+      color: var(--anzhiyu-main);
+      font-weight: 600;
+
+      .comment-randomInfo-text {
+        position: relative;
+
+        &::after {
+          position: absolute;
+          bottom: -2px;
+          left: 0;
+          width: 100%;
+          height: 2px;
+          content: "";
+          background: var(--anzhiyu-main);
+          border-radius: 1px;
+        }
+      }
     }
   }
 }
