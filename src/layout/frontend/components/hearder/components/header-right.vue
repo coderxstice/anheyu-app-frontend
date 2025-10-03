@@ -12,29 +12,36 @@
       </a>
     </el-tooltip>
     <!-- 用户中心/登录注册 -->
-    <el-dropdown
+    <div
       v-if="!isLoggedIn && !isHomePage"
-      trigger="hover"
-      placement="bottom"
-      :hide-on-click="true"
-      popper-class="user-center-dropdown"
+      class="user-dropdown-wrapper"
+      @mouseenter="showUserDropdown = true"
+      @mouseleave="showUserDropdown = false"
     >
-      <div class="nav-button">
+      <div class="!ml-0 nav-button">
         <IconifyIconOffline icon="ri:user-fill" class="w-[1.4rem] h-[1.4rem]" />
       </div>
-      <template #dropdown>
-        <el-dropdown-menu>
-          <el-dropdown-item @click="openLoginDialog('check-email')">
+      <!-- 桥接区域，填补按钮和下拉菜单之间的空隙 -->
+      <div v-if="showUserDropdown" class="dropdown-bridge" />
+      <Transition name="dropdown-fade">
+        <div v-show="showUserDropdown" class="user-dropdown-menu">
+          <div
+            class="dropdown-item"
+            @click="handleDropdownItemClick('check-email')"
+          >
             <i class="anzhiyufont anzhiyu-icon-sign-in-alt" />
-            登录
-          </el-dropdown-item>
-          <el-dropdown-item @click="openLoginDialog('register-form')">
+            <span>登录</span>
+          </div>
+          <div
+            class="dropdown-item"
+            @click="handleDropdownItemClick('register-form')"
+          >
             <i class="anzhiyufont anzhiyu-icon-user-plus" />
-            注册
-          </el-dropdown-item>
-        </el-dropdown-menu>
-      </template>
-    </el-dropdown>
+            <span>注册</span>
+          </div>
+        </div>
+      </Transition>
+    </div>
     <el-tooltip
       v-else-if="isLoggedIn && !isHomePage"
       content="用户中心"
@@ -100,7 +107,7 @@
     <LoginDialog
       v-model="showLoginDialog"
       :initial-step="loginDialogInitialStep"
-      :hide-theme-switch="false"
+      :hide-theme-switch="true"
       @login-success="handleLoginSuccess"
     />
   </div>
@@ -153,6 +160,9 @@ const showLoginDialog = ref(false);
 const loginDialogInitialStep = ref<"check-email" | "register-form">(
   "check-email"
 );
+
+// 用户下拉菜单控制
+const showUserDropdown = ref(false);
 
 // 判断是否在首页
 const isHomePage = computed(() => route.path === "/");
@@ -209,6 +219,12 @@ const openLoginDialog = (
 ) => {
   loginDialogInitialStep.value = step;
   showLoginDialog.value = true;
+};
+
+// 处理下拉菜单项点击
+const handleDropdownItemClick = (step: "check-email" | "register-form") => {
+  showUserDropdown.value = false;
+  openLoginDialog(step);
 };
 
 // 登录成功后的处理
@@ -512,39 +528,107 @@ const toggleMobileMenu = () => {
   }
 }
 
-// 用户中心下拉菜单样式
-:global(.user-center-dropdown) {
-  .el-dropdown-menu {
-    min-width: 120px;
-    padding: 8px 0;
-    background: var(--anzhiyu-card-bg);
-    backdrop-filter: saturate(180%) blur(10px);
-    border: var(--style-border-always);
-    border-radius: 12px;
-    box-shadow: 0 8px 16px rgb(0 0 0 / 10%);
-  }
+// 用户下拉菜单
+.user-dropdown-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
 
-  .el-dropdown-menu__item {
+// 桥接区域，填补按钮和下拉菜单之间的空隙
+.dropdown-bridge {
+  position: absolute;
+  top: 100%;
+  width: 140px;
+  height: 8px;
+  pointer-events: auto;
+}
+
+.user-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  z-index: 1000;
+  min-width: 140px;
+  background: var(--anzhiyu-card-bg);
+  backdrop-filter: saturate(180%) blur(20px);
+  border: var(--style-border-always);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+
+  .dropdown-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
+    gap: 10px;
+    padding: 12px 18px;
     font-size: 14px;
     color: var(--anzhiyu-fontcolor);
-    transition: all 0.3s;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     i {
       font-size: 16px;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    span {
+      font-weight: 500;
     }
 
     &:hover {
       color: var(--anzhiyu-white);
       background: var(--anzhiyu-main);
+
+      i {
+        transform: scale(1.1);
+      }
     }
 
     &:not(:last-child) {
       border-bottom: 1px solid var(--anzhiyu-card-border, rgb(0 0 0 / 5%));
     }
+
+    &:first-child {
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+
+    &:last-child {
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+    }
+  }
+}
+
+// 下拉菜单动画
+.dropdown-fade-enter-active {
+  animation: dropdown-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dropdown-fade-leave-active {
+  animation: dropdown-out 0.2s cubic-bezier(0.4, 0, 1, 1);
+}
+
+@keyframes dropdown-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.9);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dropdown-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
   }
 }
 </style>
