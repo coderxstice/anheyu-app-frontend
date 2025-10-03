@@ -157,7 +157,9 @@ const openLoginDialog = (
 };
 
 const handleLoginSuccess = () => {
-  // 登录成功后，刷新页面或重新加载评论
+  // 登录成功后，检查并填充用户信息
+  fillUserInfoFromStore();
+  // 刷新页面重新加载评论
   window.location.reload();
 };
 
@@ -384,6 +386,21 @@ const loadUserInfo = () => {
   }
 };
 
+// 从 userStore 中填充用户信息（用于登录后自动填充）
+const fillUserInfoFromStore = () => {
+  // 如果用户已登录，检查表单字段是否为空
+  if (isLoggedIn.value) {
+    // 如果昵称为空，使用 userStore 中的昵称或用户名
+    if (!form.nickname.trim()) {
+      form.nickname = userStore.nickname || userStore.username || "";
+    }
+    // 如果邮箱为空，使用 userStore 中的邮箱
+    if (!form.email.trim()) {
+      form.email = userStore.email || "";
+    }
+  }
+};
+
 watch(
   () => props.showCancelButton,
   newValue => {
@@ -433,6 +450,8 @@ watch(activeEmojiPackageIndex, () => {
 onMounted(() => {
   fetchEmojis();
   loadUserInfo();
+  // 如果用户已登录且表单为空，使用用户信息填充
+  fillUserInfoFromStore();
   nextTick(() => {
     if (props.showCancelButton) {
       textareaRef.value?.focus();
