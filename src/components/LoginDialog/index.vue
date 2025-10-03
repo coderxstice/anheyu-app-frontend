@@ -150,7 +150,10 @@ const apiHandlers = {
       email: form.email,
       password: form.password
     });
+    // 初始化路由（仅供管理员使用，普通用户不需要）
     await initRouter();
+    // 获取最新的用户信息
+    await useUserStoreHook().fetchUserInfo();
     message("登录成功", { type: "success" });
     emit("login-success");
     closeDialog();

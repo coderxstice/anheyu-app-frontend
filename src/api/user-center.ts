@@ -1,7 +1,9 @@
-/**
- * @Description: 用户中心相关 API
+/*
+ * @Description:
  * @Author: 安知鱼
- * @Date: 2025-10-03
+ * @Date: 2025-10-03 19:29:54
+ * @LastEditTime: 2025-10-03 22:23:08
+ * @LastEditors: 安知鱼
  */
 
 import { http } from "@/utils/http";
@@ -34,19 +36,15 @@ export type CommonResponse = {
 
 /**
  * 更新用户信息（昵称、网站等）
- * TODO: 等待后端实现 PUT /user/profile 或 PATCH /user/profile 接口
- */
+ * */
 export const updateUserProfile = (data: UpdateUserProfileRequest) => {
-  return http.request<CommonResponse>(
-    "put",
-    baseUrlApi("user/profile"), // 或使用 "patch"
-    { data }
-  );
+  return http.request<CommonResponse>("put", baseUrlApi("user/profile"), {
+    data
+  });
 };
 
 /**
  * 修改用户密码
- * 对接后端接口：POST /user/update-password
  */
 export const updateUserPassword = (data: UpdatePasswordRequest) => {
   return http.request<CommonResponse>(

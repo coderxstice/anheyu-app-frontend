@@ -184,9 +184,13 @@ const goToHome = () => {
 };
 
 // 资料更新成功
-const handleProfileUpdateSuccess = () => {
-  // TODO: 刷新用户信息或从后端重新获取
-  // location.reload();
+const handleProfileUpdateSuccess = async () => {
+  try {
+    // 重新获取用户信息以更新页面显示
+    await userStore.fetchUserInfo();
+  } catch (error) {
+    console.error("刷新用户信息失败:", error);
+  }
 };
 
 // 点击头像，显示 Cravatar 说明

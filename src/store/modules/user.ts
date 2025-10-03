@@ -11,7 +11,8 @@ import {
   getLogin,
   refreshTokenApi,
   checkEmailExistsApi,
-  registerUserApi
+  registerUserApi,
+  getUserInfo
 } from "@/api/user";
 import { useMultiTagsStoreHook } from "./multiTags";
 import { getToken, setToken, removeToken } from "@/utils/auth";
@@ -21,7 +22,7 @@ export const useUserStore = defineStore("anheyu-user", () => {
   const initialTokenData = getToken();
   const userInfo = initialTokenData?.userInfo;
 
-  const id = ref<number>(userInfo?.id ?? 0);
+  const id = ref<string>(userInfo?.id ?? "");
   const avatar = ref<string>(userInfo?.avatar ?? "");
   const username = ref<string>(userInfo?.username ?? "");
   const nickname = ref<string>(userInfo?.nickname ?? "");
@@ -41,7 +42,7 @@ export const useUserStore = defineStore("anheyu-user", () => {
     username.value = info.username;
     nickname.value = info.nickname;
     email.value = info.email;
-    roles.value = info.userGroup ? [info.userGroup.name] : [];
+    roles.value = info.userGroupID ? [String(info.userGroupID)] : [];
   }
 
   /**
@@ -77,7 +78,7 @@ export const useUserStore = defineStore("anheyu-user", () => {
    * @description 前端登出（不调用接口）
    */
   function logOut() {
-    id.value = 0;
+    id.value = "";
     username.value = "";
     nickname.value = "";
     avatar.value = "";
@@ -138,6 +139,31 @@ export const useUserStore = defineStore("anheyu-user", () => {
     });
   }
 
+  /**
+   * @description 获取并更新用户信息
+   */
+  async function fetchUserInfo() {
+    try {
+      const response = await getUserInfo();
+      if (response?.code === 200) {
+        SET_USER_INFO(response.data);
+        // 同时更新 token 中的 userInfo
+        const tokenData = getToken();
+        if (tokenData) {
+          tokenData.userInfo = response.data;
+          setToken(tokenData);
+        }
+        return response.data;
+      } else {
+        message(response?.message || "获取用户信息失败");
+        return Promise.reject(response);
+      }
+    } catch (error) {
+      console.error("获取用户信息失败:", error);
+      return Promise.reject(error);
+    }
+  }
+
   return {
     id,
     avatar,
@@ -156,7 +182,8 @@ export const useUserStore = defineStore("anheyu-user", () => {
     checkEmailRegistered,
     registeredUser,
     sendPasswordResetEmail,
-    resetPassword
+    resetPassword,
+    fetchUserInfo
   };
 });
 

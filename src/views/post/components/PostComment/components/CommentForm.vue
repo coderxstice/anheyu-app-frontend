@@ -168,11 +168,22 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async valid => {
     if (valid) {
       isSubmitting.value = true;
-      const { nickname, email, content, website } = form;
 
-      let finalContent = content;
+      // 如果用户已登录，使用 userStore 中的信息
+      let nickname, email, website;
+      if (isLoggedIn.value) {
+        nickname = userStore.nickname || userStore.username || "";
+        email = userStore.email || "";
+        website = form.website || ""; // 登录用户仍然可以填写网址（如果有的话）
+      } else {
+        nickname = form.nickname;
+        email = form.email;
+        website = form.website;
+      }
+
+      let finalContent = form.content;
       if (props.quoteText && props.quoteText.trim()) {
-        finalContent = `> ${props.quoteText}\n\n${content}`;
+        finalContent = `> ${props.quoteText}\n\n${form.content}`;
       }
 
       const payload: CreateCommentPayload = {
@@ -188,10 +199,13 @@ const submitForm = async (formEl: FormInstance | undefined) => {
       try {
         await commentStore.postComment(payload);
 
-        localStorage.setItem(
-          "comment-user-info",
-          JSON.stringify({ nickname, email, website })
-        );
+        // 仅在未登录时保存用户信息到 localStorage
+        if (!isLoggedIn.value) {
+          localStorage.setItem(
+            "comment-user-info",
+            JSON.stringify({ nickname, email, website })
+          );
+        }
         emit("submitted");
         form.content = "";
       } catch (error) {
@@ -569,7 +583,7 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
         <div
           :class="['form-meta-actions', { 'is-reply': props.showCancelButton }]"
         >
-          <div class="meta-inputs">
+          <div v-if="!isLoggedIn" class="meta-inputs">
             <el-form-item prop="nickname">
               <el-input v-model="form.nickname" placeholder="必填">
                 <template #prepend>昵称</template>

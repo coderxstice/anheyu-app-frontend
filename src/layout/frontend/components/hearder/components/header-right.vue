@@ -114,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, type PropType } from "vue";
+import { computed, ref, nextTick, type PropType } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 import { useSnackbar } from "@/composables/useSnackbar";
@@ -228,10 +228,11 @@ const handleDropdownItemClick = (step: "check-email" | "register-form") => {
 };
 
 // 登录成功后的处理
-const handleLoginSuccess = () => {
+const handleLoginSuccess = async () => {
   showLoginDialog.value = false;
-  // 刷新页面以更新用户状态
-  window.location.reload();
+  // 不再刷新整个页面，用户状态已经在 LoginDialog 中更新
+  // 只需要等待一小段时间让状态传播，然后 UI 会自动响应
+  await nextTick();
 };
 
 // 跳转到用户中心
