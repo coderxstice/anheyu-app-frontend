@@ -681,6 +681,115 @@
   }
 }
 
+// 混入：链接卡片样式
+@mixin link-card-styles {
+  .anzhiyu-tag-link {
+    display: block;
+    margin: 1rem 0;
+    animation: fadeIn 0.3s ease;
+
+    .tag-Link {
+      background: var(--anzhiyu-secondbg);
+      border-radius: 8px !important;
+      display: flex;
+      border: var(--style-border);
+      flex-direction: column;
+      padding: 0.5rem 1rem !important;
+      margin: 1rem 0;
+      &::after {
+        display: none;
+      }
+
+      &:hover {
+        color: var(--anzhiyu-white);
+        background: var(--anzhiyu-main);
+
+        .tag-link-left i {
+          color: var(--anzhiyu-main);
+          transform: scale(1.1);
+        }
+
+        .tag-link-bottom > i {
+          color: var(--anzhiyu-white);
+        }
+
+        .tag-link-sitename {
+          color: var(--anzhiyu-white);
+        }
+      }
+    }
+
+    .tag-link-tips {
+      border-bottom: var(--style-border);
+      padding-bottom: 4px;
+      font-size: 12px;
+      font-weight: 400;
+      width: 100%;
+    }
+
+    .tag-link-bottom {
+      display: flex;
+      margin-top: 0.5rem;
+      align-items: center;
+      justify-content: space-around;
+      width: 100%;
+
+      > i {
+        margin-left: auto;
+        font-size: 1.2rem;
+        color: var(--anzhiyu-fontcolor);
+        opacity: 0.5;
+        transition: all 0.3s ease;
+      }
+    }
+
+    .tag-link-left {
+      width: 60px;
+      min-width: 60px;
+      height: 60px;
+      background-size: cover;
+      border-radius: 8px;
+      background-color: var(--anzhiyu-card-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      i {
+        margin: 0;
+        padding: 0;
+        margin: auto;
+        font-size: 24px;
+        color: var(--anzhiyu-fontcolor);
+        transition: all 0.3s ease;
+      }
+    }
+
+    .tag-link-right {
+      margin-left: 1rem;
+      max-width: calc(100% - 76px - 1rem);
+    }
+
+    .tag-link-title {
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.4;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .tag-link-sitename {
+      font-size: 0.7rem;
+      color: var(--anzhiyu-gray);
+      font-weight: 400;
+      margin-top: 4px;
+    }
+  }
+}
+
 // 混入：标签页样式
 @mixin tabs-styles {
   .tabs {
@@ -1362,6 +1471,7 @@
   @include hide-content-styles;
   @include inline-text-styles;
   @include button-styles;
+  @include link-card-styles;
   @include tabs-styles;
   @include list-styles;
   @include table-styles;
