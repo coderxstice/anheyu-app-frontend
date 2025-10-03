@@ -503,7 +503,7 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
     >
       <div v-if="shouldShowCommentForm" class="textarea-container">
         <el-form-item prop="content">
-          <div class="textarea-wrapper">
+          <div :class="['textarea-wrapper', { 'is-logged-in': isLoggedIn }]">
             <el-input
               ref="textareaRef"
               v-model="form.content"
@@ -576,14 +576,35 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
                 @change="handleFileChange"
               />
             </div>
+            <!-- 登录后显示的发送按钮 -->
+            <div v-if="isLoggedIn" class="logged-in-submit-wrapper">
+              <el-button
+                v-if="props.showCancelButton"
+                class="cancel-button"
+                size="small"
+                @click="$emit('cancel')"
+              >
+                取消
+              </el-button>
+              <el-button
+                type="primary"
+                class="logged-in-submit-button"
+                size="small"
+                :loading="isSubmitting"
+                :disabled="isSubmitDisabled"
+                @click="submitForm(formRef)"
+              >
+                发送
+              </el-button>
+            </div>
           </div>
         </el-form-item>
       </div>
-      <div v-if="shouldShowCommentForm">
+      <div v-if="shouldShowCommentForm && !isLoggedIn">
         <div
           :class="['form-meta-actions', { 'is-reply': props.showCancelButton }]"
         >
-          <div v-if="!isLoggedIn" class="meta-inputs">
+          <div class="meta-inputs">
             <el-form-item prop="nickname">
               <el-input v-model="form.nickname" placeholder="必填">
                 <template #prepend>昵称</template>
@@ -808,6 +829,7 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
     z-index: 2;
     display: flex;
     gap: 8px;
+    margin-top: 0.875rem;
 
     .OwO {
       position: relative;
@@ -955,6 +977,53 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
     color: var(--anzhiyu-secondtext);
     user-select: none;
     background: transparent;
+  }
+
+  // 登录后隐藏字符计数
+  &.is-logged-in {
+    :deep(.el-input__count) {
+      display: none;
+    }
+  }
+
+  // 登录后的发送按钮容器
+  .logged-in-submit-wrapper {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    z-index: 3;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
+    .logged-in-submit-button {
+      min-width: 80px;
+      font-weight: 600;
+      color: var(--anzhiyu-background);
+      background-color: var(--anzhiyu-fontcolor);
+      border: 0 solid var(--anzhiyu-main);
+      transition: all 0.3s;
+
+      &:hover {
+        opacity: 0.85;
+        transform: translateY(-1px);
+      }
+
+      &.is-disabled {
+        opacity: 0.2;
+      }
+    }
+
+    .cancel-button {
+      color: var(--anzhiyu-fontcolor);
+      background: var(--anzhiyu-secondbg);
+      border: 1px solid var(--anzhiyu-card-border);
+
+      &:hover {
+        color: var(--anzhiyu-white);
+        background: var(--anzhiyu-lighttext);
+      }
+    }
   }
 }
 
