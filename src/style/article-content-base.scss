@@ -870,25 +870,28 @@
   }
 
   ol > li::before {
-    margin-top: 0.45em;
-    width: 1.45em;
-    height: 1.45em;
-    border-radius: 0.725em;
+    margin-top: 0.25em;
+    width: 1.5em;
+    height: 1.5em;
+    border-radius: 0.75em;
     content: counter(li);
     counter-increment: li 1;
     text-align: center;
     font-size: 0.85em;
-    line-height: 1.45em;
+    line-height: 1.5em;
   }
 
   ol li:not(.tab),
   ul li:not(.tab) {
     position: relative;
-    margin: 0.2rem 0;
+    margin: 0.3rem 0;
+    font-size: 17px;
+    line-height: 1.7;
+    font-weight: 400;
   }
 
   ol > li:not(.tab) {
-    padding: 0.2em 0.2em 0.2em 1.8em;
+    padding: 0.2em 0.2em 0.2em 2em;
   }
 
   .task-list-item::before {
@@ -896,22 +899,21 @@
   }
 
   ul > li:not(.tab)::before {
-    top: 0.6em;
-    width: 0.54em;
-    height: 0.54em;
-    border-radius: 0.42em;
+    top: 0.65em;
+    width: 0.42rem;
+    height: 0.42rem;
+    border-radius: 50%;
     content: "";
-    line-height: 0.42em;
+    box-sizing: content-box;
   }
 
   ul > li:not(.tab) {
-    padding: 0.2em 0.2em 0.2em 1.4em;
+    padding: 0.2em 0.2em 0.2em 1.5em;
   }
 
   ul > li:not(.tab)::before {
-    border: 0.21em solid var(--anzhiyu-lighttext);
-    background: var(--anzhiyu-lighttext);
-    border-radius: 50px;
+    border: 0.2081rem solid var(--anzhiyu-main);
+    background: 0;
   }
 
   ol,
