@@ -61,6 +61,16 @@
             />
           </el-form-item>
         </el-col>
+        <el-col :span="8">
+          <el-form-item label="显示评论" prop="show_comment">
+            <el-switch
+              v-model="form.show_comment"
+              active-text="显示"
+              inactive-text="隐藏"
+            />
+            <div class="form-item-tip">需要在系统设置中开启评论功能后生效</div>
+          </el-form-item>
+        </el-col>
       </el-row>
 
       <el-form-item label="页面内容" prop="content">
@@ -145,6 +155,7 @@ const form = reactive<CreatePageData>({
   content: "",
   description: "",
   is_published: true,
+  show_comment: false,
   sort: 0
 });
 
@@ -207,6 +218,7 @@ watch(
         content: newData.content,
         description: newData.description || "",
         is_published: newData.is_published,
+        show_comment: newData.show_comment,
         sort: newData.sort
       });
     } else {
@@ -217,6 +229,7 @@ watch(
         content: "",
         description: "",
         is_published: true,
+        show_comment: false,
         sort: 0
       });
     }
@@ -334,6 +347,7 @@ const handleSave = async () => {
         content: form.content,
         description: form.description,
         is_published: form.is_published,
+        show_comment: form.show_comment,
         sort: form.sort
       };
       response = await updatePage(props.pageData.id.toString(), updateData);
@@ -442,6 +456,13 @@ onUnmounted(() => {
       padding: 15px 20px;
     }
   }
+}
+
+.form-item-tip {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  line-height: 1.4;
 }
 
 // 移动端适配
