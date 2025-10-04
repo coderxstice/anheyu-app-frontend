@@ -27,7 +27,16 @@
         </template>
       </el-result>
     </div>
-    <div v-else class="page-content" v-html="pageContent" />
+    <div v-else>
+      <div class="page-content" v-html="pageContent" />
+      <!-- 评论组件 -->
+      <PostComment
+        v-if="showComment"
+        ref="commentRef"
+        :target-path="currentPath"
+        class="page-comment"
+      />
+    </div>
   </div>
 </template>
 
@@ -36,12 +45,14 @@ import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { getCustomPage } from "@/api/custom-page";
+import PostComment from "@/views/post/components/PostComment/index.vue";
 
 const route = useRoute();
 const router = useRouter();
 const loading = ref(true);
 const error = ref("");
 const pageData = ref<any>(null);
+const commentRef = ref<InstanceType<typeof PostComment> | null>(null);
 
 // 计算当前页面路径
 const currentPath = computed(() => {
@@ -56,6 +67,11 @@ const currentPath = computed(() => {
 const pageContent = computed(() => {
   if (!pageData.value) return "";
   return pageData.value.content || "";
+});
+
+// 是否显示评论
+const showComment = computed(() => {
+  return pageData.value?.show_comment === true;
 });
 
 // 加载页面数据
@@ -125,6 +141,7 @@ onMounted(() => {
 .page-content {
   width: 100%;
   padding: 1rem;
+  margin-bottom: 1rem;
   background: var(--anzhiyu-card-bg);
   border: var(--style-border);
   border-radius: 12px;
@@ -211,5 +228,13 @@ onMounted(() => {
       background: none;
     }
   }
+}
+
+.page-comment {
+  width: 100%;
+  padding: 1rem;
+  background: var(--anzhiyu-card-bg);
+  border: var(--style-border);
+  border-radius: 12px;
 }
 </style>

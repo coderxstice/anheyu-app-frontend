@@ -16,6 +16,7 @@ export interface PageData {
   content: string;
   description: string;
   is_published: boolean;
+  show_comment: boolean;
   sort: number;
   created_at: string;
   updated_at: string;
@@ -27,6 +28,7 @@ export interface CreatePageData {
   content: string;
   description?: string;
   is_published?: boolean;
+  show_comment?: boolean;
   sort?: number;
 }
 
@@ -36,6 +38,7 @@ export interface UpdatePageData {
   content?: string;
   description?: string;
   is_published?: boolean;
+  show_comment?: boolean;
   sort?: number;
 }
 
