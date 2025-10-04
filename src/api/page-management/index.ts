@@ -14,6 +14,7 @@ export interface PageData {
   title: string;
   path: string;
   content: string;
+  markdown_content: string;
   description: string;
   is_published: boolean;
   show_comment: boolean;
@@ -26,6 +27,7 @@ export interface CreatePageData {
   title: string;
   path: string;
   content: string;
+  markdown_content?: string;
   description?: string;
   is_published?: boolean;
   show_comment?: boolean;
@@ -36,6 +38,7 @@ export interface UpdatePageData {
   title?: string;
   path?: string;
   content?: string;
+  markdown_content?: string;
   description?: string;
   is_published?: boolean;
   show_comment?: boolean;
