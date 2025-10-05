@@ -164,6 +164,7 @@ class AnHttp {
           "public/links/random",
           "public/link-categories",
           // 评论查询（前台）- 只读操作不需要token
+          "public/comments",
           "public/comments/like",
           "public/comments/unlike",
           "public/comments/children",
