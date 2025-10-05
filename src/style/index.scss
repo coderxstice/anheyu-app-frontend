@@ -183,3 +183,8 @@
     margin-top: 0 !important;
   }
 }
+
+html.with-fancybox[data-theme] body.hide-scrollbar {
+  overflow: auto !important;
+  margin-right: auto;
+}

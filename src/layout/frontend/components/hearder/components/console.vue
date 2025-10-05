@@ -13,7 +13,8 @@
                   href="/recentcomments"
                   title="最近评论"
                 >
-                  <i class="anzhiyufont anzhiyu-icon-circle-arrow-right"
+                  <i
+                    class="anzhiyufont anzhiyu-icon-circle-arrow-right !text-[22px]"
                 /></a>
               </div>
             </div>
