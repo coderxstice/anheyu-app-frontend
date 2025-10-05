@@ -34,7 +34,6 @@ export interface PageSittingInfo {
   customFooterHTML: string;
   customCSS: string;
   customJS: string;
-  customSidebar: string;
   customPostTopHTML: string;
   customPostBottomHTML: string;
 }
@@ -315,6 +314,7 @@ export interface SidebarPageSettingsInfo {
   siteInfoRuntimeEnable: boolean;
   siteInfoTotalWordCount: number;
   archiveDisplayMonths: number;
+  customSidebar: string;
 }
 
 /**
