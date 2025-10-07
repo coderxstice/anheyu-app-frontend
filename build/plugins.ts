@@ -43,7 +43,7 @@ export function getPluginsList(
       ? visualizer({ open: true, brotliSize: true, filename: "report.html" })
       : (null as any),
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt", // 改为 prompt 模式，让用户决定何时更新
       injectRegister: "auto",
       manifest: false,
       workbox: {
