@@ -68,6 +68,24 @@ if (import.meta.env.DEV) {
   console.log("📱 当前浏览器不支持Service Worker");
 }
 
+// 清除所有缓存
+async function clearAllCaches() {
+  if ("caches" in window) {
+    try {
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames.map(cacheName => {
+          console.log("🗑️ 清除缓存:", cacheName);
+          return caches.delete(cacheName);
+        })
+      );
+      console.log("✅ 所有缓存已清除");
+    } catch (error) {
+      console.error("❌ 清除缓存失败:", error);
+    }
+  }
+}
+
 // 显示更新提示弹窗
 function showUpdatePrompt(updateServiceWorker: () => Promise<void>) {
   ElMessageBox.confirm(
@@ -83,9 +101,15 @@ function showUpdatePrompt(updateServiceWorker: () => Promise<void>) {
     }
   )
     .then(async () => {
-      // 用户点击刷新
+      console.log("🔄 用户确认更新，开始清除缓存并刷新...");
+
+      // 1. 清除所有缓存
+      await clearAllCaches();
+
+      // 2. 激活新的 Service Worker
       await updateServiceWorker();
-      // 刷新页面
+
+      // 3. 强制刷新页面（跳过缓存）
       window.location.reload();
     })
     .catch(() => {

@@ -81,10 +81,13 @@ export function getPluginsList(
             handler: "NetworkFirst",
             options: {
               cacheName: "anheyu-pages-cache",
-              networkTimeoutSeconds: 2,
+              networkTimeoutSeconds: 3,
               expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 // 缓存1天
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 2 // 缓存2小时，减少缓存时间
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
               }
             }
           }
