@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-21 17:48:59
- * @LastEditTime: 2025-09-20 15:30:27
+ * @LastEditTime: 2025-10-08 23:07:05
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -112,11 +112,14 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
-.frontend-layout {
+.frontendLayout {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   min-height: 100vh;
+}
+
+.frontend-main {
+  flex: 1;
 }
 
 /* 移动端菜单遮罩层 */
