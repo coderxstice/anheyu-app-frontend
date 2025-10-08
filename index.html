@@ -31,6 +31,9 @@
     <meta name="msapplication-TileImage" content="{{.favicon}}" />
     <link rel="icon" href="{{.favicon}}" />
 
+    <!-- 预加载关键配置文件，减少关键请求链延迟 -->
+    <link rel="preload" href="/platform-config.json" as="fetch" crossorigin />
+
     <!-- Canonical URL for SEO -->
     <link rel="canonical" href="{{.ogUrl}}" />
 
@@ -82,56 +85,58 @@
       {{end}}
     </div>
 
-    <!-- JSON-LD Structured Data for SEO -->
-    {{if .articlePublishedTime}}
-    <!-- Article Schema for Blog Posts -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "Article",
-        "headline": "{{.ogTitle}}",
-        "description": "{{.ogDescription}}",
-        "image": "{{.ogImage}}",
-        "author": {
-          "@type": "Person",
-          "name": "{{.articleAuthor}}"
-        },
-        "publisher": {
-          "@type": "Organization",
-          "name": "{{.ogSiteName}}",
-          "logo": {
-            "@type": "ImageObject",
-            "url": "{{.favicon}}"
-          }
-        },
-        "datePublished": "{{.articlePublishedTime}}",
-        "dateModified": "{{.articleModifiedTime}}",
-        "mainEntityOfPage": {
-          "@type": "WebPage",
-          "@id": "{{.ogUrl}}"
-        }
-      }
-    </script>
-    {{else}}
-    <!-- WebSite Schema for Homepage and Other Pages -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "{{.ogSiteName}}",
-        "url": "{{.ogUrl}}",
-        "description": "{{.pageDescription}}",
-        "publisher": {
-          "@type": "Organization",
-          "name": "{{.ogSiteName}}",
-          "logo": {
-            "@type": "ImageObject",
-            "url": "{{.favicon}}"
+    <div style="display: none">
+      <!-- JSON-LD Structured Data for SEO -->
+      {{if .articlePublishedTime}}
+      <!-- Article Schema for Blog Posts -->
+      <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "Article",
+          "headline": "{{.ogTitle}}",
+          "description": "{{.ogDescription}}",
+          "image": "{{.ogImage}}",
+          "author": {
+            "@type": "Person",
+            "name": "{{.articleAuthor}}"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "{{.ogSiteName}}",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "{{.favicon}}"
+            }
+          },
+          "datePublished": "{{.articlePublishedTime}}",
+          "dateModified": "{{.articleModifiedTime}}",
+          "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "{{.ogUrl}}"
           }
         }
-      }
-    </script>
-    {{end}}
+      </script>
+      {{else}}
+      <!-- WebSite Schema for Homepage and Other Pages -->
+      <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "{{.ogSiteName}}",
+          "url": "{{.ogUrl}}",
+          "description": "{{.pageDescription}}",
+          "publisher": {
+            "@type": "Organization",
+            "name": "{{.ogSiteName}}",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "{{.favicon}}"
+            }
+          }
+        }
+      </script>
+      {{end}}
+    </div>
 
     <script>
       window.process = {};
