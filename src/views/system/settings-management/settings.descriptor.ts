@@ -129,12 +129,6 @@ const pageDescriptors: SettingDescriptor[] = [
     type: "string"
   },
   {
-    frontendPath: "page.customSidebar",
-    backendKey: constant.KeyCustomSidebar,
-    defaultValue: "",
-    type: "string"
-  },
-  {
     frontendPath: "page.customPostTopHTML",
     backendKey: constant.KeyCustomPostTopHTML,
     defaultValue: "",
@@ -953,6 +947,12 @@ const sidebarDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeySidebarArchiveDisplayMonths,
     defaultValue: 6,
     type: "number"
+  },
+  {
+    frontendPath: "frontDesk.sidebar.customSidebar",
+    backendKey: constant.KeyCustomSidebar,
+    defaultValue: "",
+    type: "string"
   }
 ];
 
