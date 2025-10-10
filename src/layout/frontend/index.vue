@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-21 17:48:59
- * @LastEditTime: 2025-10-08 23:07:05
+ * @LastEditTime: 2025-10-10 13:31:30
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -130,8 +130,8 @@ onUnmounted(() => {
   z-index: 1008;
   width: 100vw;
   height: 100vh;
-  background: rgb(0 0 0 / 50%);
-  backdrop-filter: blur(2px);
-  transition: all 0.3s ease;
+  background: var(--anzhiyu-maskbg);
+  backdrop-filter: saturate(180%) blur(20px);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>
