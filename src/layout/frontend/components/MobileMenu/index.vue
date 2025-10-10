@@ -2,7 +2,7 @@
  * @Description: 移动端菜单组件
  * @Author: 安知鱼
  * @Date: 2025-09-16 13:16:41
- * @LastEditTime: 2025-09-30 19:40:43
+ * @LastEditTime: 2025-10-10 13:26:46
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -437,19 +437,23 @@ onMounted(() => {
 <style scoped lang="scss">
 #sidebar-menus {
   position: fixed;
-  top: 0;
+  top: 2vh;
   right: -100%;
   width: 300px;
-  height: 100vh;
+  height: 96vh;
   background: var(--anzhiyu-card-bg);
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
-  transition: right 0.3s ease;
+  transition: right 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1010;
   overflow-y: auto;
   padding: 20px 15px;
+  border-radius: 10px;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   &.open {
-    right: 0;
+    right: 10px;
   }
 
   /* 滚动条样式 */
@@ -470,9 +474,12 @@ onMounted(() => {
 /* 站点数据统计 */
 .site-data {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
   margin-bottom: 20px;
+  background: var(--anzhiyu-card-bg);
+  border-radius: 8px;
+  border: var(--style-border-always);
 
   .data-item {
     text-align: center;
@@ -489,12 +496,9 @@ onMounted(() => {
       a {
         display: block;
         padding: 15px 10px;
-        background: var(--anzhiyu-background);
-        border-radius: 12px;
         color: var(--anzhiyu-fontcolor);
         text-decoration: none;
         transition: all 0.3s ease;
-        border: var(--style-border);
 
         &:hover {
           transform: translateY(-2px);
@@ -508,8 +512,10 @@ onMounted(() => {
         }
 
         .length-num {
-          font-size: 18px;
+          color: var(--anzhiyu-fontcolor);
+          font-size: 20px;
           font-weight: 700;
+          line-height: 1;
         }
       }
     }
@@ -553,7 +559,7 @@ hr {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 15px;
+    padding: 6px 15px;
     background: var(--anzhiyu-background);
     border-radius: 8px;
     color: var(--anzhiyu-fontcolor);
@@ -562,17 +568,9 @@ hr {
     cursor: pointer;
     border: var(--style-border);
 
-    &:hover {
-      color: var(--anzhiyu-theme);
-    }
-
     &.is-dark {
-      color: var(--anzhiyu-theme);
-
-      &:hover {
-        background: var(--anzhiyu-theme);
-        color: var(--anzhiyu-white);
-      }
+      color: var(--anzhiyu-white);
+      background: var(--anzhiyu-orange);
     }
 
     i {
@@ -844,7 +842,6 @@ hr {
   }
 
   .site-data {
-    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
 
     .data-item .data-item-link a {
@@ -884,10 +881,6 @@ hr {
   #sidebar-menus {
     background: var(--anzhiyu-card-bg);
     box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
-  }
-
-  .site-data .data-item .data-item-link a {
-    background: var(--anzhiyu-theme);
   }
 
   .card-tag-cloud a {

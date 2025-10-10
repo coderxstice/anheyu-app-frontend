@@ -2,7 +2,7 @@
  * @Description: 音乐馆页面
  * @Author: 安知鱼
  * @Date: 2025-09-23 12:13:32
- * @LastEditTime: 2025-10-07 22:31:10
+ * @LastEditTime: 2025-10-10 13:20:56
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -3529,8 +3529,8 @@ onBeforeUnmount(() => {
   z-index: 1008;
   width: 100vw;
   height: 100vh;
-  background: rgb(0 0 0 / 50%);
-  backdrop-filter: blur(2px);
+  background: var(--anzhiyu-maskbg);
+  backdrop-filter: saturate(180%) blur(20px);
   transition: all 0.3s ease;
 }
 </style>

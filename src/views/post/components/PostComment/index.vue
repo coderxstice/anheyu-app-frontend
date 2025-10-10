@@ -457,7 +457,6 @@ defineExpose({
 .comment-list-container {
   width: 100%;
   margin-top: 3rem;
-  overflow: hidden;
 
   .comment-list-placeholder {
     min-height: 200px;
@@ -545,11 +544,8 @@ defineExpose({
       .comment-thread-item {
         margin-top: 0 !important;
         margin-bottom: 0.5rem !important;
-        padding: 1rem;
         background: var(--anzhiyu-card-bg);
-        border: var(--style-border-always);
         border-radius: 12px;
-        box-shadow: var(--anzhiyu-shadow-border);
         transition: 0.3s;
       }
     }

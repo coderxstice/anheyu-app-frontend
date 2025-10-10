@@ -584,6 +584,7 @@ const goToTag = (tagName: string) => {
   .post-header-container {
     height: 30rem;
     background-color: var(--anzhiyu-main);
+    z-index: 1;
 
     &::before {
       display: none;
