@@ -315,6 +315,7 @@ export interface SidebarPageSettingsInfo {
   siteInfoTotalWordCount: number;
   archiveDisplayMonths: number;
   customSidebar: string;
+  customShowInPost: boolean;
 }
 
 /**
