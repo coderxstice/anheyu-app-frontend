@@ -120,6 +120,8 @@ const onAvatarError = (e: Event) => {
 };
 
 const handleReplyClick = () => {
+  // 如果是匿名评论，不允许回复
+  if (props.comment.is_anonymous) return;
   commentStore.toggleReplyForm(props.comment.id);
 };
 const handleReplySubmitted = () => {
@@ -128,6 +130,13 @@ const handleReplySubmitted = () => {
 };
 const handleCancelReply = () => {
   commentStore.setActiveReplyCommentId(null);
+};
+
+// 点击评论内容区域触发回复
+const handleContentClick = () => {
+  // 如果是匿名评论，不允许回复
+  if (props.comment.is_anonymous) return;
+  commentStore.setActiveReplyCommentId(props.comment.id);
 };
 
 const scrollToParent = () => {
@@ -218,7 +227,12 @@ const scrollToParent = () => {
           :
         </div>
 
-        <div class="comment-content" v-html="contentWithFancybox" />
+        <div
+          class="comment-content"
+          :class="{ 'can-reply': !comment.is_anonymous }"
+          @click="handleContentClick"
+          v-html="contentWithFancybox"
+        />
 
         <div class="comment-meta">
           <span
@@ -392,6 +406,15 @@ const scrollToParent = () => {
   font-size: 0.95rem;
   line-height: 1.6;
   color: var(--anzhiyu-fontcolor);
+  transition: opacity 0.2s;
+
+  &.can-reply {
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.7;
+    }
+  }
 
   a {
     border-bottom: none;
