@@ -953,6 +953,12 @@ const sidebarDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyCustomSidebar,
     defaultValue: "",
     type: "string"
+  },
+  {
+    frontendPath: "frontDesk.sidebar.customShowInPost",
+    backendKey: constant.KeySidebarCustomShowInPost,
+    defaultValue: false,
+    type: "boolean"
   }
 ];
 

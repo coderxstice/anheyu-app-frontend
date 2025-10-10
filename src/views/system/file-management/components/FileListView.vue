@@ -615,6 +615,9 @@ const handleKeyDown = (event: KeyboardEvent) => {
   &:hover {
     color: var(--anzhiyu-white);
     background-color: var(--anzhiyu-main);
+    .sort-indicator.active {
+      color: var(--anzhiyu-white);
+    }
   }
 }
 

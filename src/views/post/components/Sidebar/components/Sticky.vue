@@ -56,6 +56,22 @@ const customSidebar = computed(() => {
   return siteConfigStore.siteConfig?.CUSTOM_SIDEBAR || "";
 });
 
+// 获取自定义侧边栏在文章页显示的配置
+const customShowInPost = computed(() => {
+  return siteConfigStore.siteConfig?.sidebar?.custom?.showInPost ?? false;
+});
+
+// 判断是否应该显示自定义侧边栏
+const shouldShowCustomSidebar = computed(() => {
+  if (!customSidebar.value) return false;
+  // 如果是文章详情页，需要检查配置
+  if (isPostDetailPage.value) {
+    return customShowInPost.value;
+  }
+  // 非文章详情页，始终显示
+  return true;
+});
+
 // 自定义侧边栏容器引用
 const customSidebarRef = ref<HTMLDivElement | null>(null);
 
@@ -124,9 +140,9 @@ const executeScripts = () => {
   });
 };
 
-// 监听自定义侧边栏内容变化
-watch(customSidebar, async () => {
-  if (customSidebar.value) {
+// 监听自定义侧边栏内容变化和显示状态变化
+watch(shouldShowCustomSidebar, async newValue => {
+  if (newValue) {
     await nextTick();
     executeScripts();
   }
@@ -134,7 +150,7 @@ watch(customSidebar, async () => {
 
 // 组件挂载时执行一次
 onMounted(async () => {
-  if (customSidebar.value) {
+  if (shouldShowCustomSidebar.value) {
     await nextTick();
     executeScripts();
   }
@@ -148,7 +164,7 @@ defineOptions({
 <template>
   <div class="sticky-container">
     <!-- 自定义侧边栏 -->
-    <div v-if="customSidebar" class="card-widget">
+    <div v-if="shouldShowCustomSidebar" class="card-widget">
       <div ref="customSidebarRef" v-html="customSidebar" />
     </div>
 
