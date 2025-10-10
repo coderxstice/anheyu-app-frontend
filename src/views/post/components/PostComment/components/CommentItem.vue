@@ -348,7 +348,7 @@ const handleLoadMoreChildren = async () => {
 <style lang="scss" scoped>
 .comment-item {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .comment-avatar {
@@ -396,7 +396,7 @@ const handleLoadMoreChildren = async () => {
   font-size: 0.7rem;
   font-weight: bold;
   color: #fff;
-  background-color: var(--el-color-primary);
+  background-color: var(--anzhiyu-red);
   border-radius: 4px;
 }
 
@@ -550,6 +550,7 @@ const handleLoadMoreChildren = async () => {
   .reply-item-container {
     padding: 1.25rem;
     border-top: var(--style-border-dashed);
+    padding-left: calc(40px + 0.5rem);
   }
 }
 

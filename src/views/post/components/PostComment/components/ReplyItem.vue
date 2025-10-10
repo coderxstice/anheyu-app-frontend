@@ -261,7 +261,7 @@ const scrollToParent = () => {
 
 .comment-item {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .comment-avatar {
@@ -312,7 +312,7 @@ const scrollToParent = () => {
   font-size: 0.7rem;
   font-weight: bold;
   color: #fff;
-  background-color: var(--el-color-primary);
+  background-color: var(--anzhiyu-red);
   border-radius: 4px;
 }
 
