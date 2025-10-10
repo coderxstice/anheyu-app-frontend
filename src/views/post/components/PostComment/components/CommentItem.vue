@@ -551,6 +551,7 @@ const handleLoadMoreChildren = async () => {
     padding: 1.25rem;
     border-top: var(--style-border-dashed);
     padding-left: calc(40px + 0.5rem);
+    padding-right: 0;
   }
 }
 

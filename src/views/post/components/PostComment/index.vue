@@ -457,7 +457,6 @@ defineExpose({
 .comment-list-container {
   width: 100%;
   margin-top: 3rem;
-  overflow: hidden;
 
   .comment-list-placeholder {
     min-height: 200px;
