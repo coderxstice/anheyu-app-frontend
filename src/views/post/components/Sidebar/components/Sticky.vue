@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-05 18:31:42
- * @LastEditTime: 2025-10-10 10:59:44
+ * @LastEditTime: 2025-10-10 11:16:47
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -94,6 +94,27 @@ const executeScripts = () => {
         /document\.addEventListener\s*\(\s*['"]DOMContentLoaded['"]\s*,\s*\(\s*\)\s*=>\s*\{([\s\S]*?)\}\s*\)\s*;?/g,
         "(function(){$1})();"
       );
+
+      // 将脚本内容包装在 IIFE 中，避免重复声明冲突
+      // 只有已经是 IIFE 的脚本才不包装
+      const isAlreadyIIFE =
+        scriptContent.trim().startsWith("(function") ||
+        scriptContent.trim().startsWith("(()") ||
+        scriptContent.trim().startsWith("!function") ||
+        scriptContent.trim().startsWith("+function");
+
+      if (!isAlreadyIIFE && scriptContent.trim().length > 0) {
+        // 自动将普通函数声明转换为 window 属性，使其可以被全局访问
+        // 匹配 function functionName(...) {...} 但不匹配已有 window. 的
+        scriptContent = scriptContent.replace(
+          /(?<!window\.)function\s+(\w+)\s*\(/g,
+          "window.$1 = function("
+        );
+
+        // 包装在 IIFE 中，内部的 const/let 变量不会污染全局
+        // 但通过 window.xxx = 赋值的函数会暴露到全局
+        scriptContent = `(function(){\n${scriptContent}\n})();`;
+      }
 
       newScript.textContent = scriptContent;
     }
