@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import editForm from "../form.vue";
+import batchImportForm from "../batch-import-form.vue";
 import { message } from "@/utils/message";
 import {
   getWallpapertList,
@@ -12,6 +13,7 @@ import { reactive, ref, onMounted, h } from "vue";
 import type { FormItemProps } from "./types";
 import { deviceDetection } from "@pureadmin/utils";
 import type { PaginationProps, LoadingConfig } from "@pureadmin/table";
+import { ElProgress } from "element-plus";
 
 export function useAlbum() {
   const form = reactive({
@@ -383,6 +385,165 @@ export function useAlbum() {
     });
   }
 
+  /**
+   * 批量导入图片
+   */
+  function openBatchImportDialog() {
+    const batchFormRef = ref();
+    addDialog({
+      title: "批量导入图片",
+      props: {
+        formInline: {
+          urls: "",
+          thumbParam: "",
+          bigParam: "",
+          tags: [],
+          displayOrder: 0
+        }
+      },
+      top: "10vh",
+      width: "80vw",
+      draggable: true,
+      fullscreen: deviceDetection(),
+      fullscreenIcon: true,
+      closeOnClickModal: false,
+      sureBtnLoading: true,
+      contentRenderer: () =>
+        h(batchImportForm, { ref: batchFormRef, formInline: null }),
+      beforeSure: async (done, { options, closeLoading }) => {
+        const FormRef = batchFormRef.value.getRef();
+        const curData = options.props.formInline;
+
+        FormRef.validate(async valid => {
+          if (valid) {
+            // 解析URL列表
+            const urls = curData.urls
+              .split("\n")
+              .map(line => line.trim())
+              .filter(Boolean);
+
+            if (urls.length === 0) {
+              message("请输入至少一个图片链接", { type: "error" });
+              closeLoading();
+              return;
+            }
+
+            if (urls.length > 100) {
+              message("单次最多导入100张图片", { type: "error" });
+              closeLoading();
+              return;
+            }
+
+            // 创建进度提示的弹窗
+            let progressDialogContent = ref(
+              h("div", { style: "padding: 20px" }, [
+                h("p", { style: "margin-bottom: 16px" }, [
+                  `正在导入图片... (0/${urls.length})`
+                ]),
+                h(ElProgress, { percentage: 0, status: "active" as any })
+              ])
+            );
+
+            addDialog({
+              title: "批量导入进度",
+              width: "500px",
+              closeOnClickModal: false,
+              closeOnPressEscape: false,
+              showClose: false,
+              hideFooter: true,
+              contentRenderer: () => progressDialogContent.value
+            });
+
+            let successCount = 0;
+            let failCount = 0;
+            const errors: string[] = [];
+
+            // 批量处理图片
+            for (let i = 0; i < urls.length; i++) {
+              const url = urls[i];
+              const displayOrder = curData.displayOrder + i;
+
+              try {
+                // 获取图片元数据
+                const imageInfo = await getImageMeta(url);
+
+                // 添加图片
+                const res = await addWallpapert({
+                  imageUrl: url,
+                  bigImageUrl: url,
+                  downloadUrl: url,
+                  thumbParam: curData.thumbParam,
+                  bigParam: curData.bigParam,
+                  tags: curData.tags,
+                  viewCount: 1,
+                  downloadCount: 0,
+                  displayOrder: displayOrder,
+                  ...imageInfo
+                });
+
+                if (res.code === 200) {
+                  successCount++;
+                } else {
+                  failCount++;
+                  errors.push(`${url}: ${res.message}`);
+                }
+              } catch (error) {
+                failCount++;
+                errors.push(`${url}: ${error.message || "未知错误"}`);
+              }
+
+              // 更新进度
+              const progress = Math.round(((i + 1) / urls.length) * 100);
+              progressDialogContent.value = h(
+                "div",
+                { style: "padding: 20px" },
+                [
+                  h("p", { style: "margin-bottom: 16px" }, [
+                    `正在导入图片... (${i + 1}/${urls.length})`
+                  ]),
+                  h(ElProgress, {
+                    percentage: progress,
+                    status:
+                      progress === 100 ? ("success" as any) : ("active" as any)
+                  }),
+                  h(
+                    "div",
+                    { style: "margin-top: 16px; color: var(--el-color-info)" },
+                    [
+                      h("p", `成功: ${successCount} 张`),
+                      h("p", `失败: ${failCount} 张`)
+                    ]
+                  )
+                ]
+              );
+            }
+
+            // 等待进度显示完成
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            // 显示结果
+            if (failCount > 0) {
+              message(
+                `导入完成！成功 ${successCount} 张，失败 ${failCount} 张。部分图片导入失败，请检查控制台查看详情。`,
+                { type: "warning" }
+              );
+              console.error("批量导入错误详情：", errors);
+            } else {
+              message(`批量导入成功！共导入 ${successCount} 张图片`, {
+                type: "success"
+              });
+            }
+
+            done(); // 关闭弹框
+            onSearch(); // 刷新表格数据
+          } else {
+            closeLoading();
+          }
+        });
+      }
+    });
+  }
+
   /** 分页配置 */
   const pagination = reactive<PaginationProps>({
     pageSize: 10,
@@ -431,6 +592,7 @@ export function useAlbum() {
     onSearch,
     resetForm,
     openDialog,
-    handleDelete
+    handleDelete,
+    openBatchImportDialog
   };
 }
