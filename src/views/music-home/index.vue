@@ -1,8 +1,15 @@
 <!--
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-10-12 01:15:21
+ * @LastEditTime: 2025-10-12 01:15:40
+ * @LastEditors: 安知鱼
+-->
+<!--
  * @Description: 音乐馆页面
  * @Author: 安知鱼
  * @Date: 2025-09-23 12:13:32
- * @LastEditTime: 2025-10-10 13:20:56
+ * @LastEditTime: 2025-10-12 01:09:43
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -430,6 +437,7 @@
       :is-open="isMobileMenuOpen"
       :nav-config="navConfig"
       :menu-config="menuConfig"
+      @close="closeMobileMenu"
     />
 
     <!-- 移动端菜单遮罩层 -->
