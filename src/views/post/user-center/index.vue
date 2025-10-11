@@ -134,6 +134,7 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStoreHook } from "@/store/modules/user";
 import { ElMessageBox } from "element-plus";
+import { formatRelativeTime } from "@/utils/format";
 import UserProfileDialog from "@/components/UserProfileDialog/index.vue";
 import ChangePasswordDialog from "@/components/ChangePasswordDialog/index.vue";
 import UserNotificationSettings from "@/components/UserNotificationSettings/index.vue";
@@ -163,35 +164,10 @@ const userAvatar = computed(() => {
   );
 });
 
-// 计算相对时间
-const getRelativeTime = (timestamp: string) => {
-  if (!timestamp) return "未知";
-
-  const now = new Date().getTime();
-  const past = new Date(timestamp).getTime();
-  const diff = now - past;
-
-  const seconds = Math.floor(diff / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-  const months = Math.floor(days / 30);
-  const years = Math.floor(days / 365);
-
-  if (years > 0) return `${years} 年前`;
-  if (months > 0) return `${months} 个月前`;
-  if (days > 0) return `${days} 天前`;
-  if (hours > 0) return `${hours} 小时前`;
-  if (minutes > 0) return `${minutes} 分钟前`;
-  if (seconds > 0) return `${seconds} 秒前`;
-  return "刚刚";
-};
-
 // 加入时间文本
 const joinTimeText = computed(() => {
-  // TODO: 从 userStore 获取用户创建时间
-  // return getRelativeTime(userStore.createdAt);
-  return "30 天前"; // 临时数据
+  if (!userStore.createdAt) return "未知";
+  return formatRelativeTime(userStore.createdAt);
 });
 
 // 返回首页
