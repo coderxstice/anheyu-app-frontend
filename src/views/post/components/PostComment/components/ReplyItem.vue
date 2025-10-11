@@ -256,7 +256,7 @@ const scrollToParent = () => {
     <div v-if="isReplyFormVisible" class="reply-form-wrapper">
       <CommentForm
         :target-path="comment.target_path"
-        :parent-id="comment.id"
+        :parent-id="comment.parent_id || comment.id"
         :placeholder="`回复 @${comment.nickname}`"
         show-cancel-button
         @submitted="handleReplySubmitted"
