@@ -793,16 +793,6 @@ const handleKeyDown = (event: KeyboardEvent) => {
   animation: spin 1.5s linear infinite;
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .uploading-indicator {
   margin-left: 8px;
   animation: spin 1.5s linear infinite;
