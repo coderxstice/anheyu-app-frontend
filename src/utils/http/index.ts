@@ -239,6 +239,13 @@ class AnHttp {
           config.url?.endsWith("/auth/login");
         if (isAuthRequest && response?.status === 401) {
           removeToken();
+          // 如果是登录接口返回401，不调用logOut()以避免跳转到登录页
+          // 因为用户可能在弹窗中登录，跳转会破坏用户体验
+          if (config.url?.endsWith("/auth/login")) {
+            // 只清除token，不跳转，让登录组件处理错误显示
+            return Promise.reject(response.data);
+          }
+          // 刷新token失败才需要调用logOut跳转
           useUserStoreHook().logOut();
           return Promise.reject(response.data);
         }
