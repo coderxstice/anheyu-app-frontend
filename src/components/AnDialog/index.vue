@@ -234,16 +234,6 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
-// 移动端适配
-@media (width <= 768px) {
-  .dialog-header,
-  .dialog-content,
-  .dialog-footer {
-    padding-right: 1rem;
-    padding-left: 1rem;
-  }
-}
-
 .an-dialog-wrapper {
   position: fixed;
   inset: 0;
@@ -331,6 +321,16 @@ defineExpose({
   :deep(.confirm-btn) {
     min-width: 80px;
     transition: all 0.3s ease;
+  }
+}
+
+// 移动端适配
+@media (width <= 768px) {
+  .dialog-header,
+  .dialog-content,
+  .dialog-footer {
+    padding-right: 1rem;
+    padding-left: 1rem;
   }
 }
 </style>
