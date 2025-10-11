@@ -2848,16 +2848,6 @@ onBeforeUnmount(() => {
   }
 }
 
-// 旋转动画（用于加载图标）
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 // Responsive design
 @media (max-width: 1024px) {
   .music-container {

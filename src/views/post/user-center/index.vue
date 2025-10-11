@@ -264,12 +264,6 @@ onMounted(() => {
   }
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .not-logged-in {
   display: flex;
   align-items: center;

@@ -509,16 +509,6 @@ defineExpose({
     text-align: center;
   }
 
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
   .scroll-loading-spinner {
     display: inline-flex;
     gap: 0.5rem;
