@@ -6,6 +6,7 @@ import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { IconifyIconOffline } from "@/components/ReIcon";
 import { createPolicy, type StoragePolicy } from "@/api/sys-policy";
 import { message } from "@/utils/message";
+import AnDialog from "@/components/AnDialog";
 
 import Delete from "@iconify-icons/ep/delete";
 import EditPen from "@iconify-icons/ep/edit-pen";
@@ -332,11 +333,11 @@ function getFlagDisplayName(flag: string): string {
       />
     </div>
 
-    <el-dialog
+    <AnDialog
       v-model="chooseTypeDialogVisible"
       title="选择存储方式"
       width="600px"
-      append-to-body
+      hide-footer
     >
       <div class="storage-type-grid">
         <div
@@ -362,116 +363,81 @@ function getFlagDisplayName(flag: string): string {
           <span>{{ st.name }}</span>
         </div>
       </div>
-    </el-dialog>
+    </AnDialog>
 
-    <el-dialog
+    <AnDialog
       v-model="oneDriveCreateDialogVisible"
       title="添加 OneDrive 存储策略"
       width="650px"
       :close-on-click-modal="false"
-      append-to-body
-      class="scrollable-dialog"
+      show-footer
+      confirm-text="创建"
+      :confirm-loading="isCreating"
+      content-class="scrollable-dialog-content"
+      @confirm="confirmOneDriveCreate"
     >
       <OneDriveCreateForm
         ref="oneDriveFormRef"
         @submit="handleOneDriveCreateSubmit"
       />
-      <template #footer>
-        <el-button @click="oneDriveCreateDialogVisible = false">取消</el-button>
-        <el-button
-          type="primary"
-          :loading="isCreating"
-          @click="confirmOneDriveCreate"
-        >
-          创建
-        </el-button>
-      </template>
-    </el-dialog>
+    </AnDialog>
 
-    <el-dialog
+    <AnDialog
       v-model="tencentCosCreateDialogVisible"
       title="添加腾讯云COS存储策略"
       width="650px"
-      top="5vh"
       :close-on-click-modal="false"
-      append-to-body
-      class="tencent-cos-dialog"
+      show-footer
+      confirm-text="创建"
+      :confirm-loading="isCreating"
+      container-class="tencent-cos-dialog"
+      @confirm="confirmTencentCosCreate"
     >
       <TencentCosCreateForm
         ref="tencentCosFormRef"
         @submit="handleTencentCosCreateSubmit"
       />
-      <template #footer>
-        <el-button @click="tencentCosCreateDialogVisible = false"
-          >取消</el-button
-        >
-        <el-button
-          type="primary"
-          :loading="isCreating"
-          @click="confirmTencentCosCreate"
-        >
-          创建
-        </el-button>
-      </template>
-    </el-dialog>
+    </AnDialog>
 
-    <el-dialog
+    <AnDialog
       v-model="aliyunOssCreateDialogVisible"
       title="添加阿里云OSS存储策略"
       width="650px"
-      top="5vh"
       :close-on-click-modal="false"
-      append-to-body
-      class="aliyun-oss-dialog"
+      show-footer
+      confirm-text="创建"
+      :confirm-loading="isCreating"
+      container-class="aliyun-oss-dialog"
+      @confirm="confirmAliyunOssCreate"
     >
       <AliyunOssCreateForm
         ref="aliyunOssFormRef"
         @submit="handleAliyunOssCreateSubmit"
       />
-      <template #footer>
-        <el-button @click="aliyunOssCreateDialogVisible = false"
-          >取消</el-button
-        >
-        <el-button
-          type="primary"
-          :loading="isCreating"
-          @click="confirmAliyunOssCreate"
-        >
-          创建
-        </el-button>
-      </template>
-    </el-dialog>
+    </AnDialog>
 
-    <el-dialog
+    <AnDialog
       v-model="awsS3CreateDialogVisible"
       title="添加AWS S3存储策略"
       width="650px"
-      top="5vh"
       :close-on-click-modal="false"
-      append-to-body
-      class="aws-s3-dialog"
+      show-footer
+      confirm-text="创建"
+      :confirm-loading="isCreating"
+      container-class="aws-s3-dialog"
+      @confirm="confirmAwsS3Create"
     >
       <AwsS3CreateForm ref="awsS3FormRef" @submit="handleAwsS3CreateSubmit" />
-      <template #footer>
-        <el-button @click="awsS3CreateDialogVisible = false">取消</el-button>
-        <el-button
-          type="primary"
-          :loading="isCreating"
-          @click="confirmAwsS3Create"
-        >
-          创建
-        </el-button>
-      </template>
-    </el-dialog>
+    </AnDialog>
 
     <!-- CORS策略创建成功弹窗 -->
-    <el-dialog
+    <AnDialog
       v-model="corsSuccessDialogVisible"
       :title="`🎉 ${createdPolicyType}存储策略创建成功`"
       width="550px"
       :close-on-click-modal="false"
-      append-to-body
-      class="cors-success-dialog"
+      hide-header
+      container-class="cors-success-dialog"
     >
       <div class="success-content">
         <div class="success-header">
@@ -535,7 +501,7 @@ function getFlagDisplayName(flag: string): string {
           我知道了
         </el-button>
       </template>
-    </el-dialog>
+    </AnDialog>
   </div>
 </template>
 
@@ -702,48 +668,27 @@ function getFlagDisplayName(flag: string): string {
 }
 
 /* 弹窗内滚动条样式 */
-:deep(.scrollable-dialog) {
-  .el-dialog__body {
-    max-height: 60vh;
-    padding: 20px 24px;
-    overflow-y: auto;
+:deep(.scrollable-dialog-content) {
+  max-height: 60vh;
+  overflow-y: auto;
 
-    /* 自定义滚动条样式 */
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: var(--el-fill-color-light);
-      border-radius: 3px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: var(--el-color-info-light-5);
-      border-radius: 3px;
-
-      &:hover {
-        background: var(--el-color-info-light-3);
-      }
-    }
+  /* 自定义滚动条样式 */
+  &::-webkit-scrollbar {
+    width: 6px;
   }
 
-  /* 确保弹窗在屏幕范围内 */
-  .el-dialog {
-    max-height: 90vh;
-    margin-top: 5vh !important;
-    margin-bottom: 5vh;
+  &::-webkit-scrollbar-track {
+    background: var(--el-fill-color-light);
+    border-radius: 3px;
   }
 
-  /* 调整弹窗头部和底部的样式 */
-  .el-dialog__header {
-    padding: 16px 24px 12px;
-    border-bottom: 1px solid var(--el-border-color-lighter);
-  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--el-color-info-light-5);
+    border-radius: 3px;
 
-  .el-dialog__footer {
-    padding: 12px 24px 16px;
-    border-top: 1px solid var(--el-border-color-lighter);
+    &:hover {
+      background: var(--el-color-info-light-3);
+    }
   }
 }
 
@@ -857,23 +802,9 @@ function getFlagDisplayName(flag: string): string {
 :deep(.tencent-cos-dialog),
 :deep(.aliyun-oss-dialog),
 :deep(.aws-s3-dialog) {
-  .el-dialog__body {
+  .dialog-content {
     padding: 0 !important;
     overflow: hidden;
-  }
-
-  .el-dialog {
-    max-height: 85vh;
-  }
-
-  .el-dialog__header {
-    padding: 16px 24px 12px;
-    border-bottom: 1px solid var(--el-border-color-lighter);
-  }
-
-  .el-dialog__footer {
-    padding: 12px 24px 16px;
-    border-top: 1px solid var(--el-border-color-lighter);
   }
 }
 </style>
