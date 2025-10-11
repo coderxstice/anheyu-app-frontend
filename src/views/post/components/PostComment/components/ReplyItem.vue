@@ -267,12 +267,6 @@ const scrollToParent = () => {
 </template>
 
 <style lang="scss" scoped>
-@media (width <= 768px) {
-  .reply-form-wrapper {
-    margin-left: 0;
-  }
-}
-
 .comment-item {
   display: flex;
   gap: 0.5rem;
@@ -480,5 +474,11 @@ const scrollToParent = () => {
 .reply-form-wrapper {
   margin-top: 1rem;
   margin-left: 48px;
+}
+
+@media (width <= 768px) {
+  .reply-form-wrapper {
+    margin-left: 0;
+  }
 }
 </style>

@@ -158,8 +158,7 @@ const handleReply = (comment: AdminComment) => {
         nickname: siteOwner.value.name,
         email: siteOwner.value.email,
         website: siteUrl.value,
-        content: value,
-        allow_notification: false
+        content: value
       };
 
       try {

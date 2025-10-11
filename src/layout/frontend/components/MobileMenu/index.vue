@@ -2,7 +2,7 @@
  * @Description: 移动端菜单组件
  * @Author: 安知鱼
  * @Date: 2025-09-16 13:16:41
- * @LastEditTime: 2025-10-10 13:26:46
+ * @LastEditTime: 2025-10-12 01:01:58
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -15,7 +15,11 @@
         class="data-item is-center"
       >
         <div class="data-item-link">
-          <a :href="item.link" data-pjax-state="">
+          <a
+            :href="item.link"
+            data-pjax-state=""
+            @click="handleInternalLinkClick"
+          >
             <div class="headline">{{ item.name }}</div>
             <div class="length-num" :class="item.class">{{ item.count }}</div>
           </a>
@@ -62,6 +66,7 @@
             :target="item.target"
             :data-pjax-state="item.dataPjaxState"
             class="back-menu-item"
+            @click="item.target === '_self' ? handleInternalLinkClick() : null"
           >
             <img
               :alt="`${item.name}图标`"
@@ -99,7 +104,12 @@
               <i :class="['anzhiyufont', child.icon]" />
               <span>{{ child.name }}</span>
             </a>
-            <router-link v-else :to="child.href" class="menu-group-item">
+            <router-link
+              v-else
+              :to="child.href"
+              class="menu-group-item"
+              @click="handleInternalLinkClick"
+            >
               <i :class="['anzhiyufont', child.icon]" />
               <span>{{ child.name }}</span>
             </router-link>
@@ -112,7 +122,12 @@
     <span class="sidebar-menu-item-title">标签</span>
     <div class="card-widget card-tags">
       <div v-if="tags.length > 0" class="card-tag-cloud">
-        <a v-for="tag in tags" :key="tag.name" :href="tag.href">
+        <a
+          v-for="tag in tags"
+          :key="tag.name"
+          :href="tag.href"
+          @click="handleInternalLinkClick"
+        >
           {{ tag.name }}<sup>{{ tag.count }}</sup>
         </a>
       </div>
@@ -146,6 +161,11 @@ import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 defineOptions({
   name: "MobileMenu"
 });
+
+// 定义 emits
+const emit = defineEmits<{
+  close: [];
+}>();
 
 // 定义 props
 const props = defineProps<{
@@ -417,11 +437,17 @@ const toggleSubmenu = (menuName: string) => {
 
 const handleTreasureLinkClick = () => {
   navigateToRandomLink();
+  emit("close");
 };
 
 const switchDarkMode = () => {
   const newTheme = dataTheme.value ? "light" : "dark";
   dataThemeChange(newTheme);
+};
+
+// 处理内部链接点击，关闭侧边栏
+const handleInternalLinkClick = () => {
+  emit("close");
 };
 
 // 组件挂载时获取数据

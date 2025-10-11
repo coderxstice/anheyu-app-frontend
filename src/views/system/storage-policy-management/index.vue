@@ -506,12 +506,6 @@ function getFlagDisplayName(flag: string): string {
 </template>
 
 <style lang="scss" scoped>
-@media screen and (width <= 768px) {
-  .card-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  }
-}
-
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -807,4 +801,11 @@ function getFlagDisplayName(flag: string): string {
     overflow: hidden;
   }
 }
+
+@media screen and (width <= 768px) {
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
 </style>

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-21 17:48:59
- * @LastEditTime: 2025-10-10 13:31:30
+ * @LastEditTime: 2025-10-12 01:04:08
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -27,6 +27,7 @@
       :is-open="isMobileMenuOpen"
       :nav-config="navConfig"
       :menu-config="menuConfig"
+      @close="closeMobileMenu"
     />
 
     <div
