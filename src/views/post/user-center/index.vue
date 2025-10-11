@@ -2,7 +2,7 @@
  * @Description: 用户中心页面
  * @Author: 安知鱼
  * @Date: 2025-10-03 18:26:16
- * @LastEditTime: 2025-10-04 03:45:23
+ * @LastEditTime: 2025-10-12 02:54:18
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -86,6 +86,17 @@
           <i class="anzhiyufont anzhiyu-icon-chevron-right action-arrow" />
         </div>
 
+        <div class="action-card" @click="showNotificationDialog = true">
+          <div class="action-icon">
+            <IconifyIconOffline icon="ri:notification-3-fill" />
+          </div>
+          <div class="action-content">
+            <h3>通知设置</h3>
+            <p>管理通知偏好</p>
+          </div>
+          <i class="anzhiyufont anzhiyu-icon-chevron-right action-arrow" />
+        </div>
+
         <div class="action-card danger" @click="handleLogout">
           <div class="action-icon">
             <IconifyIconOffline icon="ri:contract-right-line" />
@@ -112,6 +123,9 @@
 
     <!-- 修改密码弹窗 -->
     <ChangePasswordDialog v-model="showChangePasswordDialog" />
+
+    <!-- 通知设置弹窗 -->
+    <UserNotificationSettings v-model="showNotificationDialog" />
   </div>
 </template>
 
@@ -122,6 +136,7 @@ import { useUserStoreHook } from "@/store/modules/user";
 import { ElMessageBox } from "element-plus";
 import UserProfileDialog from "@/components/UserProfileDialog/index.vue";
 import ChangePasswordDialog from "@/components/ChangePasswordDialog/index.vue";
+import UserNotificationSettings from "@/components/UserNotificationSettings/index.vue";
 
 defineOptions({
   name: "UserCenter"
@@ -133,6 +148,7 @@ const userStore = useUserStoreHook();
 const isLoading = ref(false);
 const showEditDialog = ref(false);
 const showChangePasswordDialog = ref(false);
+const showNotificationDialog = ref(false);
 
 // 检查用户是否已登录
 const isLoggedIn = computed(() => {

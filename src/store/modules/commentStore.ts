@@ -162,7 +162,7 @@ export const useCommentStore = defineStore("comment", () => {
           if (!topLevelParent.children) {
             topLevelParent.children = [];
           }
-          topLevelParent.children.push(newComment);
+          topLevelParent.children.unshift(newComment);
         } else {
           console.warn(
             "Parent comment's thread not found, falling back to a refresh."
