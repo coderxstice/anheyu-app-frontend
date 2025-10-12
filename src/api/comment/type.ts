@@ -50,7 +50,8 @@ export interface Comment {
  */
 export interface CommentListResponse {
   list: Comment[];
-  total: number;
+  total: number; // 根评论总数（用于分页）
+  total_with_children: number; // 包含所有子评论的总数（用于显示）
   page: number;
   pageSize: number;
 }
