@@ -450,7 +450,7 @@ defineExpose({
     line-height: 1;
     position: absolute;
     top: 8px;
-    right: -25px;
+    left: calc(100% + 5px); /* 相对于父元素右边再偏移5px */
   }
 }
 
