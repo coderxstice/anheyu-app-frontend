@@ -83,6 +83,7 @@ export const addWallpapert = (data: any) => {
 
 // 批量导入相册图片
 export const batchImportAlbums = (data: {
+  categoryId?: number | null;
   urls: string[];
   thumbParam?: string;
   bigParam?: string;
@@ -124,4 +125,22 @@ export const updateWallpaperStat = (params: { id: string; type: string }) => {
       type: params.type
     }
   });
+};
+
+// 获取公开的相册分类列表
+export const getPublicAlbumCategories = () => {
+  const requestUrl = getDynamicApiUrl("public/album-categories");
+
+  console.log(`请求公开相册分类列表: ${requestUrl}`);
+  return http.request<{
+    success: boolean;
+    data: Array<{
+      id: number;
+      name: string;
+      description?: string;
+      coverImage?: string;
+      displayOrder?: number;
+    }>;
+    code: number;
+  }>("get", requestUrl);
 };

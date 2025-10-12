@@ -5,22 +5,26 @@ import { useWindowSize } from "@vueuse/core";
 
 interface BatchImportFormProps {
   formInline?: {
+    categoryId?: number | null;
     urls: string;
     thumbParam: string;
     bigParam: string;
     tags: string[];
     displayOrder: number;
   };
+  categories?: Array<{ id: number; name: string }>;
 }
 
 const props = withDefaults(defineProps<BatchImportFormProps>(), {
   formInline: () => ({
+    categoryId: null,
     urls: "",
     thumbParam: "",
     bigParam: "",
     tags: [],
     displayOrder: 0
-  })
+  }),
+  categories: () => []
 });
 
 const ruleFormRef = ref();
@@ -100,6 +104,24 @@ defineExpose({ getRef });
       </el-alert>
 
       <el-row :gutter="30">
+        <re-col :value="12" :xs="24" :sm="24">
+          <el-form-item label="分类" prop="categoryId">
+            <el-select
+              v-model="newFormInline.categoryId"
+              placeholder="请选择分类（可选）"
+              clearable
+              class="w-full!"
+            >
+              <el-option
+                v-for="category in categories"
+                :key="category.id"
+                :label="category.name"
+                :value="category.id"
+              />
+            </el-select>
+          </el-form-item>
+        </re-col>
+
         <re-col :value="24" :xs="24" :sm="24">
           <el-form-item label="图片链接" prop="urls">
             <el-input

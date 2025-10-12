@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useAlbumStore } from "@/store/modules/album";
 import { useRouter } from "vue-router";
@@ -12,7 +12,7 @@ const router = useRouter();
 const siteConfigStore = useSiteConfigStore();
 
 const albumStore = useAlbumStore();
-const { sortOrder } = storeToRefs(albumStore);
+const { sortOrder, categoryId, categories } = storeToRefs(albumStore);
 
 // 计算属性，从 Pinia Store 获取站点配置
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);
@@ -34,6 +34,15 @@ const goLogin = () => {
 const handleSortChange = (newOrder: string) => {
   albumStore.setSortOrder(newOrder);
 };
+
+const handleCategoryChange = (newCategoryId: number | null) => {
+  albumStore.setCategoryId(newCategoryId);
+};
+
+// 组件挂载时获取分类列表
+onMounted(() => {
+  albumStore.fetchCategories();
+});
 </script>
 
 <template>
@@ -57,11 +66,36 @@ const handleSortChange = (newOrder: string) => {
     </div>
     <nav>
       <ul class="nav_links">
+        <li v-if="categories.length > 0" class="nav-item">
+          <a style="cursor: pointer">分类</a>
+          <div class="nav-item-child">
+            <ul>
+              <li class="mb-1 category-parent category-level-0">
+                <a
+                  :class="{ active: categoryId === null }"
+                  @click="handleCategoryChange(null)"
+                  >全部
+                </a>
+              </li>
+              <li
+                v-for="category in categories"
+                :key="category.id"
+                class="mb-1 category-parent category-level-0"
+              >
+                <a
+                  :class="{ active: categoryId === category.id }"
+                  @click="handleCategoryChange(category.id)"
+                  >{{ category.name }}
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
         <li class="nav-item">
           <a style="cursor: pointer">排序</a>
           <div class="nav-item-child">
             <ul>
-              <li class="category-parent category-level-0 mb-1">
+              <li class="mb-1 category-parent category-level-0">
                 <a
                   :class="{ active: sortOrder === 'display_order_asc' }"
                   @click="handleSortChange('display_order_asc')"

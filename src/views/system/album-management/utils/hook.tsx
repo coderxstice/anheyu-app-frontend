@@ -9,6 +9,10 @@ import {
   deleteWallpaper,
   batchImportAlbums
 } from "@/api/album-home";
+import {
+  getAlbumCategoryList,
+  type AlbumCategoryDTO
+} from "@/api/album-category";
 import { addDialog } from "@/components/ReDialog";
 import { reactive, ref, onMounted, h } from "vue";
 import type { FormItemProps } from "./types";
@@ -23,9 +27,12 @@ import {
 
 export function useAlbum() {
   const form = reactive({
+    categoryId: null,
     created_at: null,
     sort: "display_order_asc"
   });
+
+  const categories = ref<AlbumCategoryDTO[]>([]);
 
   const formRef = ref();
   const dataList = ref([]);
@@ -36,6 +43,16 @@ export function useAlbum() {
       label: "id",
       prop: "id",
       minWidth: 70
+    },
+    {
+      label: "分类",
+      prop: "categoryId",
+      minWidth: 100,
+      cellRenderer: ({ row }) => {
+        if (!row.categoryId) return "未分类";
+        const category = categories.value.find(c => c.id === row.categoryId);
+        return category?.name || "未知分类";
+      }
     },
     {
       label: "图片URL",
@@ -144,9 +161,21 @@ export function useAlbum() {
   function resetForm(formEl) {
     if (!formEl) return;
     formEl.resetFields();
+    form.categoryId = null;
     form.created_at = null;
     form.sort = "display_order_asc";
     onSearch();
+  }
+
+  async function loadCategories() {
+    try {
+      const { data } = await getAlbumCategoryList();
+      if (data) {
+        categories.value = data;
+      }
+    } catch (error) {
+      console.error("加载分类列表失败:", error);
+    }
   }
 
   async function onSearch() {
@@ -155,6 +184,7 @@ export function useAlbum() {
     const { data } = await getWallpapertList({
       page: currentPage,
       pageSize: pageSize,
+      categoryId: form.categoryId,
       created_at: form.created_at,
       sort: form.sort
     });
@@ -301,6 +331,7 @@ export function useAlbum() {
         formInline: {
           id: row?.id ?? 0,
           title: title,
+          categoryId: row?.categoryId ?? null,
           imageUrl: row?.imageUrl ?? "",
           bigImageUrl: row?.bigImageUrl ?? "",
           downloadUrl: row?.downloadUrl ?? "",
@@ -323,15 +354,22 @@ export function useAlbum() {
           widthAndHeight: row?.widthAndHeight ?? "",
           fileSize: row?.fileSize ?? 0,
           displayOrder: row?.displayOrder ?? 0
-        }
+        },
+        categories: categories.value
       },
+      top: "10vh",
       width: "80vw",
       draggable: true,
       fullscreen: deviceDetection(),
       fullscreenIcon: true,
       closeOnClickModal: false,
       sureBtnLoading: true,
-      contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
+      contentRenderer: () =>
+        h(editForm, {
+          ref: formRef,
+          formInline: null,
+          categories: categories.value
+        }),
       beforeSure: (done, { options, closeLoading }) => {
         const FormRef = formRef.value.getRef();
         const curData = options.props.formInline as FormItemProps;
@@ -813,12 +851,14 @@ export function useAlbum() {
       title: "批量导入图片",
       props: {
         formInline: {
+          categoryId: null,
           urls: "",
           thumbParam: "",
           bigParam: "",
           tags: [],
           displayOrder: 0
-        }
+        },
+        categories: categories.value
       },
       top: "10vh",
       width: "80vw",
@@ -828,7 +868,11 @@ export function useAlbum() {
       closeOnClickModal: false,
       sureBtnLoading: true,
       contentRenderer: () =>
-        h(batchImportForm, { ref: batchFormRef, formInline: null }),
+        h(batchImportForm, {
+          ref: batchFormRef,
+          formInline: null,
+          categories: categories.value
+        }),
       beforeSure: async (done, { options, closeLoading }) => {
         const FormRef = batchFormRef.value.getRef();
         const curData = options.props.formInline;
@@ -898,6 +942,7 @@ export function useAlbum() {
               // 调用后端批量导入接口
               const startTime = Date.now();
               const res = await batchImportAlbums({
+                categoryId: curData.categoryId,
                 urls: validUrls,
                 thumbParam: curData.thumbParam,
                 bigParam: curData.bigParam,
@@ -1003,11 +1048,13 @@ export function useAlbum() {
   }
 
   onMounted(() => {
+    loadCategories();
     onSearch();
   });
 
   return {
     form,
+    categories,
     loading,
     columns,
     dataList,
@@ -1019,6 +1066,7 @@ export function useAlbum() {
     resetForm,
     openDialog,
     handleDelete,
-    openBatchImportDialog
+    openBatchImportDialog,
+    loadCategories
   };
 }
