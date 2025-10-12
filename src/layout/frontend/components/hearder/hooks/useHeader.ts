@@ -40,6 +40,9 @@ export function useHeader(isPostDetailPage: boolean = false) {
           const articleColor = getCurrentArticlePrimaryColor();
           if (articleColor) {
             updateMetaThemeColorDynamic(articleColor);
+          } else {
+            // 如果没有获取到文章主色，使用背景色作为备用方案
+            updateMetaThemeColorDynamic("var(--anzhiyu-background)");
           }
         } else {
           // 首页顶部：使用背景色
