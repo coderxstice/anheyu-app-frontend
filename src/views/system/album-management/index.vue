@@ -132,7 +132,7 @@ function onFullscreen() {
         <pure-table
           ref="tableRef"
           adaptive
-          :adaptiveConfig="{ offsetBottom: 180 }"
+          :adaptiveConfig="{ offsetBottom: 130 }"
           align-whole="center"
           row-key="id"
           showOverflowTooltip
@@ -289,11 +289,15 @@ function onFullscreen() {
 }
 
 :deep(.table-bar) {
-  & > div > p {
-    display: none;
-  }
-  & > div > div > svg {
-    display: none;
+  @media (width <= 768px) {
+    & > div > p {
+      display: none;
+    }
+    & > div > div > svg,
+    & > div > div > .el-divider,
+    & > div > div > .el-dropdown {
+      display: none;
+    }
   }
 }
 

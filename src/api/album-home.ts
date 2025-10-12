@@ -81,6 +81,29 @@ export const addWallpapert = (data: any) => {
   return http.request<addResult>("post", baseUrlApi("albums/add"), { data });
 };
 
+// 批量导入相册图片
+export const batchImportAlbums = (data: {
+  urls: string[];
+  thumbParam?: string;
+  bigParam?: string;
+  tags?: string[];
+  displayOrder?: number;
+}) => {
+  return http.request<{
+    success: boolean;
+    message: string;
+    code: number;
+    data: {
+      successCount: number;
+      failCount: number;
+      skipCount: number;
+      total: number;
+      errors?: Array<{ url: string; reason: string }>;
+      duplicates?: string[];
+    };
+  }>("post", baseUrlApi("albums/batch-import"), { data });
+};
+
 // 获取公共相册图片列表
 export const publicWallpapert = (params: any) => {
   const requestUrl = getDynamicApiUrl("public/albums");

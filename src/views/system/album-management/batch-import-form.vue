@@ -171,7 +171,7 @@ defineExpose({ getRef });
 
 <style scoped lang="scss">
 .batch-import-container {
-  max-height: 65vh;
+  max-height: 67vh;
   overflow: auto;
   padding-right: 1rem;
 
