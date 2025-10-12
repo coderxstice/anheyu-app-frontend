@@ -27,6 +27,7 @@
       :is-hovered="isHovered"
       :is-playing="audioPlayer.audioState.isPlaying"
       :is-muted="audioPlayer.audioState.isMuted"
+      :is-loading="audioPlayer.audioLoadingState.value.isLoading"
       :volume="audioPlayer.audioState.volume"
       :current-song="audioPlayer.currentSong.value"
       :lyrics="lyricsComposable.lyrics.value"
