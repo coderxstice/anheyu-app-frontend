@@ -13,6 +13,7 @@ export interface SiteInfo {
   siteName: string;
   subTitle: string;
   siteDescription: string;
+  siteKeywords: string;
   primaryUrl: string;
   announcement: string;
   logoDay: string;

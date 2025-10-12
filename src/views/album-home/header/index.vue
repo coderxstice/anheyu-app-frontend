@@ -26,9 +26,9 @@ const aboutLink = computed(() => siteConfig.value?.ABOUT_LINK || "#");
 // 动态获取 ICP 备案号
 const icpNumber = computed(() => siteConfig.value?.ICP_NUMBER || "");
 
-// 前往登录页
-const goLogin = () => {
-  router.push({ name: "Login" });
+// 前往首页
+const goHome = () => {
+  router.push("/");
 };
 
 const handleSortChange = (newOrder: string) => {
@@ -47,7 +47,7 @@ onMounted(() => {
 
 <template>
   <header id="header">
-    <div class="flex items-center justify-center" @click="goLogin">
+    <div class="flex items-center justify-center" @click="goHome">
       <a style="cursor: pointer">
         <img
           class="site-logo"

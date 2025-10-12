@@ -36,6 +36,12 @@ const siteDescriptors: SettingDescriptor[] = [
     type: "string"
   },
   {
+    frontendPath: "site.siteKeywords",
+    backendKey: constant.KeySiteKeywords,
+    defaultValue: "",
+    type: "string"
+  },
+  {
     frontendPath: "site.primaryUrl",
     backendKey: constant.KeySiteURL,
     defaultValue: "",
