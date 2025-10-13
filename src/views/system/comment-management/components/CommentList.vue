@@ -166,7 +166,7 @@ const handleAvatarError = (event: Event, comment: AdminComment) => {
               </el-tooltip>
             </div>
           </div>
-          <div class="comment-content" v-html="comment.content" />
+          <div class="comment-content" v-html="comment.content_html" />
           <div class="comment-footer">
             <div class="meta-info">
               <el-tooltip placement="top" :show-arrow="false">

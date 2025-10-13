@@ -60,12 +60,11 @@ export interface CommentListResponse {
 /**
  * @description 管理员评论对象 (V2)
  */
-export interface AdminComment extends Omit<Comment, "contentHTML"> {
+export interface AdminComment extends Comment {
   email: string;
   ip_address: string;
   content: string;
   status: number;
-  pinned_at: string | null;
 }
 
 /**

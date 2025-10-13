@@ -270,7 +270,9 @@ class AnHttp {
         }
 
         // 我们需要它抛出到业务层，以便对单个上传任务进行状态管理
-        const isUploadRequest = config.url?.includes("/file/upload");
+        const isUploadRequest =
+          config.url?.includes("/file/upload") ||
+          config.url?.includes("/comments/upload");
         if (isUploadRequest) {
           // 对于上传相关的错误，直接将原始错误抛出
           // 让 Uploader 类和 useFileUploader 的 .catch 去处理
