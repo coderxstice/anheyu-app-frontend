@@ -45,7 +45,82 @@ function insertCustomFooterHTML(html: string) {
 
   // 遍历所有子节点并插入到 body
   Array.from(tempDiv.childNodes).forEach(node => {
-    document.body.appendChild(node.cloneNode(true));
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const element = node as Element;
+
+      // 特殊处理 script 标签
+      if (element.tagName.toLowerCase() === "script") {
+        const newScript = document.createElement("script");
+
+        // 复制所有属性
+        Array.from(element.attributes).forEach(attr => {
+          newScript.setAttribute(attr.name, attr.value);
+        });
+
+        // 添加标识，便于后续清理
+        newScript.setAttribute("data-custom-footer", "true");
+
+        // 自动处理跨域：如果是外部脚本且没有设置crossorigin，则自动添加
+        const src = newScript.getAttribute("src");
+        if (src && !newScript.hasAttribute("crossorigin")) {
+          try {
+            const url = new URL(src, window.location.href);
+            // 如果是外部域名，自动添加crossorigin
+            if (url.origin !== window.location.origin) {
+              newScript.setAttribute("crossorigin", "anonymous");
+            }
+          } catch {
+            // URL解析失败，保持原样
+            console.warn("Failed to parse script src URL:", src);
+          }
+        }
+
+        // 复制脚本内容
+        if (element.textContent) {
+          newScript.textContent = element.textContent;
+        }
+
+        document.body.appendChild(newScript);
+      } else {
+        // 对于非 script 标签，递归处理其中的 script 子标签
+        const clonedNode = node.cloneNode(true) as Element;
+        document.body.appendChild(clonedNode);
+
+        // 处理克隆节点中的 script 标签
+        const scripts = clonedNode.querySelectorAll("script");
+        scripts.forEach(oldScript => {
+          const newScript = document.createElement("script");
+          Array.from(oldScript.attributes).forEach(attr => {
+            newScript.setAttribute(attr.name, attr.value);
+          });
+          // 添加标识，便于后续清理
+          newScript.setAttribute("data-custom-footer", "true");
+
+          // 自动处理跨域：如果是外部脚本且没有设置crossorigin，则自动添加
+          const src = newScript.getAttribute("src");
+          if (src && !newScript.hasAttribute("crossorigin")) {
+            try {
+              const url = new URL(src, window.location.href);
+              // 如果是外部域名，自动添加crossorigin
+              if (url.origin !== window.location.origin) {
+                newScript.setAttribute("crossorigin", "anonymous");
+              }
+            } catch {
+              // URL解析失败，保持原样
+              console.warn("Failed to parse script src URL:", src);
+            }
+          }
+
+          if (oldScript.textContent) {
+            newScript.textContent = oldScript.textContent;
+          }
+          oldScript.parentNode?.replaceChild(newScript, oldScript);
+        });
+      }
+    } else {
+      // 文本节点或其他类型节点直接插入
+      document.body.appendChild(node.cloneNode(true));
+    }
   });
 }
 
@@ -73,6 +148,10 @@ function removeCustomCode() {
   // 移除自定义 JS
   document
     .querySelectorAll('script[data-custom="true"]')
+    .forEach(el => el.remove());
+  // 移除通过自定义底部HTML插入的script标签
+  document
+    .querySelectorAll('script[data-custom-footer="true"]')
     .forEach(el => el.remove());
 }
 

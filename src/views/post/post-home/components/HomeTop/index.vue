@@ -125,7 +125,23 @@ const creativityPairs = computed(() => {
             :to="item.path"
           >
             <span class="category-button-text">{{ item.name }}</span>
-            <i :class="['anzhiyufont', item.icon]" />
+            <!-- 支持HTTP链接图标 -->
+            <img
+              v-if="
+                item.icon &&
+                (item.icon.startsWith('http://') ||
+                  item.icon.startsWith('https://'))
+              "
+              :src="item.icon"
+              :alt="item.name"
+              class="category-icon category-icon-img"
+            />
+            <!-- 字体图标 -->
+            <i
+              v-else-if="item.icon"
+              :class="['anzhiyufont', item.icon]"
+              class="category-icon"
+            />
           </router-link>
         </div>
       </div>
@@ -358,12 +374,22 @@ const creativityPairs = computed(() => {
   transition: all 0.8s cubic-bezier(0.65, 0.15, 0.37, 1.19);
   &:hover {
     flex: 2;
-    .category-button i {
+    .category-button .category-icon {
       opacity: 0.8;
       transition: 0.8s;
       transition-delay: 0.15s;
       transform: scale(1.03);
       font-size: 2.5rem;
+      filter: blur(0);
+    }
+
+    .category-button .category-icon-img {
+      opacity: 0.8;
+      transition: 0.8s;
+      transition-delay: 0.15s;
+      transform: scale(1.03);
+      width: 2.5rem;
+      height: 2.5rem;
       filter: blur(0);
     }
   }
@@ -383,7 +409,7 @@ const creativityPairs = computed(() => {
   font-size: 1.2rem;
   font-weight: bold;
 }
-.category-group .category-item .category-button i {
+.category-group .category-item .category-button .category-icon {
   font-size: 5rem;
   opacity: 0.2;
   position: absolute;
@@ -391,6 +417,18 @@ const creativityPairs = computed(() => {
   transition: 0.3s;
   width: 100px;
   text-align: center;
+  filter: blur(2px);
+  transform: scale(1) rotate(15deg);
+}
+
+.category-group .category-item .category-button .category-icon-img {
+  width: 5rem;
+  height: 5rem;
+  object-fit: contain;
+  opacity: 0.2;
+  position: absolute;
+  right: 0;
+  transition: 0.3s;
   filter: blur(2px);
   transform: scale(1) rotate(15deg);
 }

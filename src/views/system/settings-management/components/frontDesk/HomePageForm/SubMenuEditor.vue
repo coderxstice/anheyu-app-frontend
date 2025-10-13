@@ -22,7 +22,19 @@
 
       <el-table-column label="图标" prop="icon" width="160">
         <template #default="{ row }">
-          <el-input v-model="row.icon" placeholder="例如：anzhiyu-icon-tag" />
+          <el-input v-model="row.icon" placeholder="字体图标或HTTP链接">
+            <template #suffix>
+              <el-tooltip
+                content="支持字体图标类名（如：anzhiyu-icon-tag）或HTTP图标链接（如：https://example.com/icon.png）"
+                placement="top"
+                :show-arrow="false"
+              >
+                <el-icon class="icon-help">
+                  <QuestionFilled />
+                </el-icon>
+              </el-tooltip>
+            </template>
+          </el-input>
         </template>
       </el-table-column>
 
@@ -78,7 +90,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
-import { Delete, Plus } from "@element-plus/icons-vue";
+import { Delete, Plus, QuestionFilled } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import type { SubMenuItem } from "../../../type";
 
@@ -170,5 +182,14 @@ const handleCancel = () => {
   font-size: 12px;
   line-height: 1;
   color: var(--el-color-danger);
+}
+
+.icon-help {
+  color: var(--el-color-info);
+  cursor: help;
+
+  &:hover {
+    color: var(--el-color-primary);
+  }
 }
 </style>
