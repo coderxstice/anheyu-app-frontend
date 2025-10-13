@@ -132,7 +132,6 @@ defineExpose({ submitForm });
   padding: 12px 16px;
   margin-bottom: 16px;
   background: var(--el-fill-color-extra-light);
-  border-left: 4px solid var(--el-color-primary);
   border-radius: 6px;
 
   h3 {
