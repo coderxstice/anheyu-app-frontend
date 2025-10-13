@@ -124,11 +124,23 @@
                 <el-form-item label="图标类名">
                   <el-input
                     :model-value="category.icon"
-                    placeholder="例如：anzhiyu-icon-dove"
+                    placeholder="字体图标或HTTP链接"
                     @update:model-value="
                       updateCategoryField(index, 'icon', $event)
                     "
-                  />
+                  >
+                    <template #suffix>
+                      <el-tooltip
+                        content="支持字体图标类名（如：anzhiyu-icon-dove）或HTTP图标链接（如：https://example.com/icon.png）"
+                        placement="top"
+                        :show-arrow="false"
+                      >
+                        <el-icon class="icon-help">
+                          <QuestionFilled />
+                        </el-icon>
+                      </el-tooltip>
+                    </template>
+                  </el-input>
                 </el-form-item>
               </el-col>
             </el-row>
@@ -419,14 +431,27 @@
             <el-form-item label="图标样式">
               <el-input
                 :model-value="currentEditingMenu.icon || ''"
-                placeholder="anzhiyu-icon-home"
+                placeholder="字体图标或HTTP链接"
                 @update:model-value="updateCurrentMenuField('icon', $event)"
               >
                 <template #prefix>
                   <el-icon><DCaret /></el-icon>
                 </template>
+                <template #suffix>
+                  <el-tooltip
+                    content="支持字体图标类名（如：anzhiyu-icon-home）或HTTP图标链接（如：https://example.com/icon.png）"
+                    placement="top"
+                    :show-arrow="false"
+                  >
+                    <el-icon class="icon-help">
+                      <QuestionFilled />
+                    </el-icon>
+                  </el-tooltip>
+                </template>
               </el-input>
-              <div class="hint-text">图标CSS类名，可选填</div>
+              <div class="hint-text">
+                支持字体图标类名或HTTP图标链接，可选填
+              </div>
             </el-form-item>
 
             <el-form-item label="打开方式">
@@ -747,7 +772,8 @@ import {
   Menu,
   Setting,
   Warning,
-  CircleCheck
+  CircleCheck,
+  QuestionFilled
 } from "@element-plus/icons-vue";
 import type {
   HomePageSettingsInfo,
@@ -1838,6 +1864,15 @@ const updateMusicPlayerCustomPlaylist = (newPlaylist: string) => {
         font-size: 14px;
       }
     }
+  }
+}
+
+.icon-help {
+  color: var(--el-color-info);
+  cursor: help;
+
+  &:hover {
+    color: var(--el-color-primary);
   }
 }
 

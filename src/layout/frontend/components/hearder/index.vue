@@ -72,8 +72,20 @@
                     : null
                 "
               >
+                <!-- 支持HTTP链接图标 -->
+                <img
+                  v-if="
+                    menuItem.icon &&
+                    (menuItem.icon.startsWith('http://') ||
+                      menuItem.icon.startsWith('https://'))
+                  "
+                  :src="menuItem.icon"
+                  :alt="menuItem.title"
+                  class="menu-icon menu-icon-img"
+                />
+                <!-- 字体图标 -->
                 <i
-                  v-if="menuItem.icon"
+                  v-else-if="menuItem.icon"
                   :class="['anzhiyufont', menuItem.icon]"
                   class="menu-icon"
                 />
@@ -100,7 +112,22 @@
                       rel="noopener noreferrer"
                       class="site-page"
                     >
-                      <i :class="['anzhiyufont', item.icon]" />
+                      <!-- 支持HTTP链接图标 -->
+                      <img
+                        v-if="
+                          item.icon &&
+                          (item.icon.startsWith('http://') ||
+                            item.icon.startsWith('https://'))
+                        "
+                        :src="item.icon"
+                        :alt="item.title"
+                        class="menu-icon menu-icon-img"
+                      />
+                      <!-- 字体图标 -->
+                      <i
+                        v-else-if="item.icon"
+                        :class="['anzhiyufont', item.icon]"
+                      />
                       <span>{{ item.title }}</span>
                     </a>
                     <a
@@ -109,11 +136,41 @@
                       class="site-page"
                       @click.prevent="handleTreasureLinkClick"
                     >
-                      <i :class="['anzhiyufont', item.icon]" />
+                      <!-- 支持HTTP链接图标 -->
+                      <img
+                        v-if="
+                          item.icon &&
+                          (item.icon.startsWith('http://') ||
+                            item.icon.startsWith('https://'))
+                        "
+                        :src="item.icon"
+                        :alt="item.title"
+                        class="menu-icon menu-icon-img"
+                      />
+                      <!-- 字体图标 -->
+                      <i
+                        v-else-if="item.icon"
+                        :class="['anzhiyufont', item.icon]"
+                      />
                       <span>{{ item.title }}</span>
                     </a>
                     <router-link v-else :to="item.path" class="site-page">
-                      <i :class="['anzhiyufont', item.icon]" />
+                      <!-- 支持HTTP链接图标 -->
+                      <img
+                        v-if="
+                          item.icon &&
+                          (item.icon.startsWith('http://') ||
+                            item.icon.startsWith('https://'))
+                        "
+                        :src="item.icon"
+                        :alt="item.title"
+                        class="menu-icon menu-icon-img"
+                      />
+                      <!-- 字体图标 -->
+                      <i
+                        v-else-if="item.icon"
+                        :class="['anzhiyufont', item.icon]"
+                      />
                       <span>{{ item.title }}</span>
                     </router-link>
                   </li>
@@ -663,6 +720,12 @@ const scrollToTop = () => {
 
   .menu-icon {
     font-size: 14px;
+  }
+
+  .menu-icon-img {
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
   }
 }
 </style>
