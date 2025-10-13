@@ -125,6 +125,7 @@ defineProps<{ links: LinkItem[] }>();
       .img {
         height: 80px;
         background: var(--anzhiyu-lighttext);
+        border: 0;
 
         img {
           filter: brightness(0.3);
