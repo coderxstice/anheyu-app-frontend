@@ -37,7 +37,7 @@
 
     &.md-editor-scrn {
       line-height: 1.6;
-      code {
+      code[language] {
         padding-left: 0 !important;
       }
     }
