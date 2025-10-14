@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import { useSnackbar } from "@/composables/useSnackbar";
 
 // 动态导入类型定义
 type MdEditor = any;
@@ -19,6 +20,7 @@ const emit = defineEmits<{
 }>();
 
 const siteConfigStore = useSiteConfigStore();
+const { showSnackbar } = useSnackbar();
 
 // 动态导入的编辑器组件和加载状态
 const MdEditorComponent = ref<any>(null);
@@ -40,6 +42,20 @@ const collapsedHeight = computed(() => {
   return `${height}px`;
 });
 
+// 全局复制处理函数
+const handleCodeCopy = (codeElement: HTMLElement) => {
+  if (codeElement) {
+    navigator.clipboard
+      .writeText(codeElement.textContent || "")
+      .then(() => {
+        showSnackbar("复制成功，复制和转载请标注本文地址");
+      })
+      .catch(() => {
+        showSnackbar("复制失败，请手动复制");
+      });
+  }
+};
+
 const sanitize = (html: string): string => {
   const doc = new DOMParser().parseFromString(html, "text/html");
 
@@ -59,22 +75,8 @@ const sanitize = (html: string): string => {
         event.preventDefault();
         event.stopPropagation();
         const code = this.closest('.md-editor-code').querySelector('pre code');
-        if(code) {
-          navigator.clipboard.writeText(code.textContent || '').then(() => {
-            const msg = document.createElement('div');
-            msg.className = 'copy-success-toast';
-            msg.textContent = '复制成功，复制和转载请标注本文地址';
-            msg.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#67c23a;color:white;padding:12px 20px;border-radius:4px;z-index:9999;box-shadow:0 2px 12px rgba(0,0,0,0.15);';
-            document.body.appendChild(msg);
-            setTimeout(() => msg.remove(), 2000);
-          }).catch(() => {
-            const msg = document.createElement('div');
-            msg.className = 'copy-error-toast';
-            msg.textContent = '复制失败，请手动复制';
-            msg.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#f56c6c;color:white;padding:12px 20px;border-radius:4px;z-index:9999;box-shadow:0 2px 12px rgba(0,0,0,0.15);';
-            document.body.appendChild(msg);
-            setTimeout(() => msg.remove(), 2000);
-          });
+        if(code && window.__markdownEditorCopyHandler) {
+          window.__markdownEditorCopyHandler(code);
         }
       `
         .replace(/\s+/g, " ")
@@ -247,6 +249,9 @@ onMounted(async () => {
     MdEditorComponent.value = MdEditor;
     isEditorLoading.value = false;
 
+    // 将复制处理函数暴露到全局作用域
+    (window as any).__markdownEditorCopyHandler = handleCodeCopy;
+
     // 初始化主题和监听器
     theme.value = document.documentElement.classList.contains("dark")
       ? "dark"
@@ -267,6 +272,8 @@ onUnmounted(() => {
   if (containerRef.value) {
     containerRef.value.removeEventListener("click", handlePreviewClick);
   }
+  // 清理全局函数
+  delete (window as any).__markdownEditorCopyHandler;
 });
 
 defineExpose({
