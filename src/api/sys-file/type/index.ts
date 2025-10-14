@@ -401,8 +401,15 @@ export interface ThumbnailCredential {
  */
 export type GetThumbnailCredentialResponse = BaseResponse<ThumbnailCredential>;
 
+export interface PreviewURLItem {
+  url: string;
+  file_id: string;
+  file_name: string;
+  file_size: number;
+}
+
 export interface FilePreviewUrlsData {
-  urls: string[];
+  urls: PreviewURLItem[];
   initialIndex: number;
 }
 
