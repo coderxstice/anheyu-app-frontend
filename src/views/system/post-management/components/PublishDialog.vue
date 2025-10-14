@@ -11,7 +11,12 @@ import {
 import { computed, ref, watch, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import ImageUpload from "@/components/ImageUpload/index.vue";
-import { updateCategory, deleteCategory, createCategory } from "@/api/post";
+import {
+  updateCategory,
+  deleteCategory,
+  createCategory,
+  getPrimaryColor
+} from "@/api/post";
 import AnDialog from "@/components/AnDialog/index.vue";
 
 const props = defineProps<{
@@ -46,6 +51,7 @@ const isCreating = ref(false);
 const editingCategoryId = ref<string | null>(null);
 const editingCategoryName = ref("");
 const loadingStates = ref<Record<string, boolean>>({}); // 用于跟踪每行的加载状态
+const isFetchingColor = ref(false); // 用于跟踪主色调获取状态
 
 const isVisible = computed({
   get: () => props.modelValue,
@@ -232,6 +238,40 @@ const removeSummaryInput = (index: number) => {
 const handleConfirm = () => {
   internalForm.copyright = true;
   emit("confirm-publish");
+};
+
+// 手动获取主色调
+const handleFetchPrimaryColor = async () => {
+  const imageUrl = internalForm.top_img_url || internalForm.cover_url;
+
+  if (!imageUrl) {
+    ElMessage.warning("请先上传封面图或顶部大图");
+    return;
+  }
+
+  console.log("[PublishDialog] 开始获取主色调，图片URL:", imageUrl);
+  isFetchingColor.value = true;
+
+  try {
+    const response = await getPrimaryColor(imageUrl);
+    console.log("[PublishDialog] 主色调响应:", response);
+
+    if (response?.data?.primary_color) {
+      internalForm.primary_color = response.data.primary_color;
+      ElMessage.success(`主色调获取成功: ${response.data.primary_color}`);
+    } else {
+      console.error("[PublishDialog] 响应格式异常:", response);
+      ElMessage.error("主色调获取失败：响应格式异常");
+    }
+  } catch (error: any) {
+    console.error("[PublishDialog] 主色调获取失败:", error);
+    const errorMsg =
+      error?.response?.data?.message || error?.message || "主色调获取失败";
+    ElMessage.error(errorMsg);
+  } finally {
+    isFetchingColor.value = false;
+    console.log("[PublishDialog] 主色调获取完成");
+  }
 };
 </script>
 
@@ -470,7 +510,25 @@ const handleConfirm = () => {
                   label="主色调"
                   prop="primary_color"
                 >
-                  <el-color-picker v-model="internalForm.primary_color" />
+                  <div>
+                    <div class="primary-color-controls">
+                      <el-color-picker v-model="internalForm.primary_color" />
+                      <el-button
+                        type="primary"
+                        size="small"
+                        :loading="isFetchingColor"
+                        :disabled="
+                          !internalForm.cover_url && !internalForm.top_img_url
+                        "
+                        @click="handleFetchPrimaryColor"
+                      >
+                        {{ isFetchingColor ? "获取中..." : "从图片获取" }}
+                      </el-button>
+                    </div>
+                    <div class="form-item-help">
+                      可以从封面图或顶部大图自动提取主色调
+                    </div>
+                  </div>
                 </el-form-item>
                 <el-form-item
                   v-else-if="
@@ -635,6 +693,12 @@ const handleConfirm = () => {
   font-size: 12px;
   line-height: 1.5;
   color: var(--el-text-color-secondary);
+}
+
+.primary-color-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .summary-item {

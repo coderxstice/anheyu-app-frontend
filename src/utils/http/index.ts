@@ -320,6 +320,18 @@ class AnHttp {
           return Promise.reject(error);
         }
 
+        // 主色调获取接口的错误处理
+        const isPrimaryColorRequest = config.url?.endsWith(
+          "/articles/primary-color"
+        );
+        if (isPrimaryColorRequest) {
+          console.warn(
+            "检测到主色调获取接口错误，将错误传递到业务层处理:",
+            response?.data?.message || "未知错误"
+          );
+          return Promise.reject(error);
+        }
+
         // 对于404错误，直接抛出到业务层，让业务层决定如何处理
         if (response?.status === 404) {
           return Promise.reject(error);
