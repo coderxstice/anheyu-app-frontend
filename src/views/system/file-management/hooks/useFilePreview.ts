@@ -5,7 +5,6 @@ import { getFilePreviewUrlsApi } from "@/api/sys-file/sys-file";
 import type AzImagePreview from "@/components/AzImagePreview";
 import type AzVideoPreview from "@/components/AzVideoPreview";
 import type AzTextPreview from "@/components/AzTextPreview";
-import { useFileStore } from "@/store/modules/fileStore";
 import { createFullScreenLoading } from "../utils/loadingService";
 
 /**
@@ -15,8 +14,6 @@ import { createFullScreenLoading } from "../utils/loadingService";
  * @returns {{ previewFile: Function }}
  */
 export function useFilePreview() {
-  const fileStore = useFileStore();
-
   // 辅助函数，用于判断文件类型
   const isImageFile = (fileName: string): boolean => {
     const imageExtensions = /\.(jpg|jpeg|png|gif|bmp|webp|svg|avif)$/i;
@@ -71,35 +68,28 @@ export function useFilePreview() {
       return ElMessage.error("图片预览组件不可用。");
     }
 
-    const allImageFilesInDir = fileStore.sortedFiles.filter(f =>
-      isImageFile(f.name)
-    );
-    if (allImageFilesInDir.length === 0) return;
-
     const loadingInstance = createFullScreenLoading("正在准备图片预览...");
     try {
       const res = await getFilePreviewUrlsApi(item.id);
-      const { urls } = res.data ?? {};
+      const { urls, initialIndex } = res.data ?? {};
       if (res.code === 200 && urls) {
-        const imageListForPreview = urls.map((url, index) => {
-          const correspondingFile = allImageFilesInDir[index];
+        // 使用后端返回的文件信息构建预览列表
+        const imageListForPreview = urls.map(urlItem => {
           return {
-            imageUrl: url,
-            downloadUrl: url,
-            fileSize: correspondingFile?.size ?? 0,
-            createTime: correspondingFile?.created_at ?? new Date(),
+            imageUrl: urlItem.url,
+            downloadUrl: urlItem.url,
+            fileSize: urlItem.file_size,
+            createTime: new Date(),
             viewCount: 0,
             downloadCount: 0
           };
         });
-        const finalInitialIndex = allImageFilesInDir.findIndex(
-          f => f.id === item.id
-        );
 
         if (imagePreviewRef.value) {
+          // 使用后端返回的initialIndex
           imagePreviewRef.value.open(
             imageListForPreview,
-            finalInitialIndex >= 0 ? finalInitialIndex : 0
+            initialIndex >= 0 ? initialIndex : 0
           );
         }
       } else {
@@ -126,7 +116,7 @@ export function useFilePreview() {
     try {
       const res = await getFilePreviewUrlsApi(item.id);
       if (res.code === 200 && res.data.urls.length > 0) {
-        const videoUrl = res.data.urls[res.data.initialIndex];
+        const videoUrl = res.data.urls[res.data.initialIndex].url;
         if (videoPreviewRef.value) {
           videoPreviewRef.value.open(videoUrl);
         }
@@ -158,7 +148,7 @@ export function useFilePreview() {
     try {
       const res = await getFilePreviewUrlsApi(item.id);
       if (res.code === 200 && res.data?.urls?.length > 0) {
-        const textUrl = res.data.urls[res.data.initialIndex];
+        const textUrl = res.data.urls[res.data.initialIndex].url;
         if (textPreviewRef.value) {
           textPreviewRef.value.open(item, textUrl, onSave);
         }
