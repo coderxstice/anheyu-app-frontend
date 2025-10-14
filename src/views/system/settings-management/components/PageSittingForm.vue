@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:36:57
- * @LastEditTime: 2025-10-13 18:49:45
+ * @LastEditTime: 2025-10-14 10:25:13
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -52,12 +52,14 @@
     <el-input
       v-model="formData.customHeaderHTML"
       type="textarea"
-      :rows="4"
-      placeholder="此处代码将插入到 <head> 标签内"
+      :rows="6"
+      placeholder="此处代码将插入到 </head> 标签前"
     />
     <div class="form-item-help">
-      在页面头部 &lt;head&gt; 标签内插入的自定义 HTML 代码，可用于添加 meta
-      标签、预加载资源等。
+      在页面头部 &lt;/head&gt; 标签前插入的自定义 HTML 代码。<br />
+      可以包含 &lt;style&gt;、&lt;script&gt;、&lt;link&gt;、&lt;meta&gt;
+      等任何标签。<br />
+      例如：<code>&lt;style&gt;body { --theme: #ff6800; }&lt;/style&gt;</code>
     </div>
   </el-form-item>
 
@@ -65,40 +67,13 @@
     <el-input
       v-model="formData.customFooterHTML"
       type="textarea"
-      :rows="4"
+      :rows="6"
       placeholder="此处代码将插入到 </body> 标签前"
     />
     <div class="form-item-help">
-      在页面底部 &lt;/body&gt; 标签前插入的自定义 HTML
-      代码，可用于添加网站统计代码等。
-    </div>
-  </el-form-item>
-
-  <el-form-item label="自定义 CSS">
-    <el-input
-      v-model="formData.customCSS"
-      type="textarea"
-      :rows="6"
-      placeholder="请填写自定义CSS内容，无需填写 <style> 标签"
-    />
-    <div class="form-item-help">
-      请填写自定义 CSS 内容，填写时无需填写 &lt;style&gt; 标签。<br />
-      例如：修改主题色、卡片透明度等：<code
-        >body { --theme: #ff6800; --background: rgba(255,255,255,0.85); }</code
-      >
-    </div>
-  </el-form-item>
-
-  <el-form-item label="自定义 JS">
-    <el-input
-      v-model="formData.customJS"
-      type="textarea"
-      :rows="6"
-      placeholder="请填写自定义JavaScript内容，无需填写 <script> 标签"
-    />
-    <div class="form-item-help">
-      请填写自定义 JavaScript 内容（例如网站统计等），填写时无需填写
-      &lt;script&gt; 标签。
+      在页面底部 &lt;/body&gt; 标签前插入的自定义 HTML 代码。<br />
+      可以包含 &lt;script&gt; 等任何标签，适合添加网站统计、聊天插件等。<br />
+      例如：<code>&lt;script src="..."&gt;&lt;/script&gt;</code>
     </div>
   </el-form-item>
 

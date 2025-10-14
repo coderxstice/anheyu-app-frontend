@@ -20,7 +20,6 @@ import { ReDialog } from "@/components/ReDialog";
 import zhCn from "element-plus/es/locale/lang/zh-cn";
 import GlobalLoading from "@/components/GlobalLoading/index.vue";
 import { useGlobalStatistics } from "@/composables/useGlobalStatistics";
-import { useCustomCode } from "@/composables/useCustomCode";
 import { printConsoleWelcome } from "@/utils/consolePrinter";
 
 export default defineComponent({
@@ -34,8 +33,7 @@ export default defineComponent({
     // 初始化全局访问统计（处理页面生命周期事件）
     useGlobalStatistics();
 
-    // 初始化自定义代码加载（在站点配置加载完成后自动插入）
-    useCustomCode();
+    // 注意：自定义HTML/CSS/JS现在通过Go模板在服务端渲染，不再需要前端动态插入
 
     // 在组件挂载后显示控制台欢迎信息
     onMounted(() => {

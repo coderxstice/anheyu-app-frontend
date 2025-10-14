@@ -138,6 +138,12 @@
       {{end}}
     </div>
 
+    {{if .customHeaderHTML}}
+    <!--  -->
+    {{.customHeaderHTML}}
+    <!--  -->
+    {{end}}
+
     <script>
       window.process = {};
     </script>
@@ -797,5 +803,11 @@
       window.__INITIAL_DATA__ = {{json .initialData}};
     </script>
     <script type="module" src="/src/main.ts"></script>
+
+    {{if .customFooterHTML}}
+    <!-- -->
+    {{.customFooterHTML}}
+    <!--  -->
+    {{end}}
   </body>
 </html>
