@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, reactive, ref } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useArticleStore } from "@/store/modules/articleStore";
 
@@ -38,6 +38,14 @@ const collapseTopGroup = () => {
 
 onMounted(() => {
   articleStore.fetchHomeArticles();
+  // 初始化封面图片懒加载
+  initializeCoverLazyLoading();
+});
+
+onUnmounted(() => {
+  if (observer) {
+    observer.disconnect();
+  }
 });
 
 const creativityList = computed(() => {
@@ -56,6 +64,74 @@ const creativityPairs = computed(() => {
   }
   return pairs;
 });
+
+// 图片懒加载状态
+const coverImageRef = ref<HTMLImageElement>();
+const coverState = reactive({
+  imageLoaded: false,
+  imageSrc: ""
+});
+
+// Observer 实例
+let observer: IntersectionObserver | null = null;
+
+// 初始化图片懒加载
+const initializeCoverLazyLoading = () => {
+  if (!coverImageRef.value) return;
+
+  observer = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !coverState.imageLoaded) {
+          loadCoverImage();
+          observer?.unobserve(entry.target);
+        }
+      });
+    },
+    {
+      threshold: 0.1,
+      rootMargin: "100px"
+    }
+  );
+
+  observer.observe(coverImageRef.value);
+};
+
+// 图片加载函数
+const loadCoverImage = async () => {
+  const targetSrc = homeTopConfig.value?.banner?.image;
+
+  if (!targetSrc || coverState.imageLoaded || coverState.imageSrc) return;
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const img = new Image();
+
+      const timeout = setTimeout(() => {
+        reject(new Error("Image load timeout"));
+      }, 10000);
+
+      img.onload = () => {
+        clearTimeout(timeout);
+        coverState.imageSrc = targetSrc;
+        coverState.imageLoaded = true;
+        resolve();
+      };
+
+      img.onerror = () => {
+        clearTimeout(timeout);
+        reject(new Error("Image load failed"));
+      };
+
+      img.src = targetSrc;
+    });
+  } catch (error) {
+    console.warn("Cover image load failed:", error);
+    // 如果加载失败，仍然显示原图片
+    coverState.imageSrc = targetSrc || "";
+    coverState.imageLoaded = true;
+  }
+};
 </script>
 
 <template>
@@ -192,12 +268,18 @@ const creativityPairs = computed(() => {
             <div class="todayCard-tips">{{ homeTopConfig.banner.tips }}</div>
             <div class="todayCard-title">{{ homeTopConfig.banner.title }}</div>
           </div>
+          <!-- 懒加载占位符 -->
+          <div
+            v-if="!coverState.imageLoaded"
+            ref="coverImageRef"
+            class="todayCard-cover lazy-loading"
+          />
+          <!-- 实际图片 -->
           <img
-            class="todayCard-cover"
-            :src="homeTopConfig.banner.image"
+            v-if="coverState.imageLoaded && coverState.imageSrc"
+            class="todayCard-cover lazy-loaded"
+            :src="coverState.imageSrc"
             alt="封面"
-            fetchpriority="high"
-            loading="eager"
           />
           <div class="banner-button-group">
             <div class="banner-button" @click="handleMoreClick">
@@ -496,6 +578,22 @@ const creativityPairs = computed(() => {
   object-fit: cover;
   z-index: 0;
   transition: transform 0.3s ease-in-out;
+
+  // CSS 图片动画优化
+  &:not([src]),
+  &[src=""] {
+    opacity: 0;
+  }
+
+  &.lazy-loading {
+    background: var(--anzhiyu-secondbg);
+    opacity: 0.3;
+  }
+
+  &.lazy-loaded {
+    opacity: 1;
+    animation: imageFadeIn 0.4s ease-out forwards;
+  }
 }
 
 .topGroup .banner-button-group {
@@ -713,6 +811,16 @@ const creativityPairs = computed(() => {
   }
   .topGroup .todayCard {
     display: none;
+  }
+}
+
+// 图片淡入动画
+@keyframes imageFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }
 

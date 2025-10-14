@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, type PropType } from "vue";
+import { ref, reactive, onMounted, onUnmounted, type PropType } from "vue";
 import type { Article } from "@/api/post/type";
 import { useArticleStore } from "@/store/modules/articleStore";
 import { formatRelativeTime } from "@/utils/format";
@@ -26,13 +26,90 @@ const props = defineProps({
 const READ_ARTICLES_KEY = "read_articles";
 const isRead = ref(false);
 
+// 图片懒加载状态
+const imageRef = ref<HTMLImageElement>();
+const state = reactive({
+  imageLoaded: false,
+  imageSrc: ""
+});
+
+// Observer 实例
+let observer: IntersectionObserver | null = null;
+
+// 初始化图片懒加载
+const initializeLazyLoading = () => {
+  if (!imageRef.value) return;
+
+  observer = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !state.imageLoaded) {
+          loadImage();
+          observer?.unobserve(entry.target);
+        }
+      });
+    },
+    {
+      threshold: 0.1,
+      rootMargin: "100px"
+    }
+  );
+
+  observer.observe(imageRef.value);
+};
+
+// 图片加载函数
+const loadImage = async () => {
+  const targetSrc = props.article.cover_url || articleStore.defaultCover;
+
+  if (state.imageLoaded || state.imageSrc) return;
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const img = new Image();
+
+      const timeout = setTimeout(() => {
+        reject(new Error("Image load timeout"));
+      }, 10000);
+
+      img.onload = () => {
+        clearTimeout(timeout);
+        state.imageSrc = targetSrc;
+        state.imageLoaded = true;
+        resolve();
+      };
+
+      img.onerror = () => {
+        clearTimeout(timeout);
+        reject(new Error("Image load failed"));
+      };
+
+      img.src = targetSrc;
+    });
+  } catch (error) {
+    console.warn("Image load failed, using default cover:", error);
+    state.imageSrc = articleStore.defaultCover;
+    state.imageLoaded = true;
+  }
+};
+
 onMounted(() => {
+  // 检查已读状态
   const readArticlesStr = localStorage.getItem(READ_ARTICLES_KEY);
   if (readArticlesStr) {
     const readArticles: string[] = JSON.parse(readArticlesStr);
     if (readArticles.includes(props.article.id)) {
       isRead.value = true;
     }
+  }
+
+  // 初始化懒加载
+  initializeLazyLoading();
+});
+
+onUnmounted(() => {
+  if (observer) {
+    observer.disconnect();
   }
 });
 
@@ -69,16 +146,17 @@ const goToTagPage = (tagName: string) => {
   >
     <div class="post_cover">
       <div :title="article.title" class="w-full h-full">
-        <img
-          v-if="article.cover_url"
-          class="post_bg"
-          :src="article.cover_url"
-          :alt="article.title"
+        <!-- 懒加载占位符 -->
+        <div
+          v-if="!state.imageLoaded"
+          ref="imageRef"
+          class="post_bg lazy-loading"
         />
+        <!-- 实际图片 -->
         <img
-          v-else
-          class="post_bg"
-          :src="articleStore.defaultCover"
+          v-if="state.imageLoaded && state.imageSrc"
+          class="post_bg lazy-loaded"
+          :src="state.imageSrc"
           :alt="article.title"
         />
       </div>
@@ -143,7 +221,19 @@ const goToTagPage = (tagName: string) => {
   background: var(--anzhiyu-card-bg);
   border: var(--style-border);
   border-radius: 12px;
-  transition: all 0.3s;
+  transition: all 0.3s ease-in-out;
+
+  // CSS 视口动画 - 使用 CSS 动画代替 JavaScript
+  opacity: 0;
+  transform: translateY(30px);
+  animation: slideInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation-delay: calc(var(--animation-order, 0) * 0.1s);
+
+  // 硬件加速优化
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
 
   &.double-column-item {
     height: 18em;
@@ -194,6 +284,22 @@ const goToTagPage = (tagName: string) => {
     .post_bg {
       border-radius: 0;
       transition: all 0.6s ease;
+
+      // CSS 图片动画优化
+      &:not([src]),
+      &[src=""] {
+        opacity: 0;
+      }
+
+      &.lazy-loading {
+        background: var(--anzhiyu-secondbg);
+        opacity: 0.3;
+      }
+
+      &.lazy-loaded {
+        opacity: 1;
+        animation: imageFadeIn 0.4s ease-out forwards;
+      }
     }
   }
 
@@ -362,6 +468,27 @@ const goToTagPage = (tagName: string) => {
       width: 60%;
       height: 100%;
     }
+  }
+}
+
+// CSS 动画关键帧
+@keyframes slideInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes imageFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, watch } from "vue";
+import { useSnackbar } from "@/composables/useSnackbar";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useLazyLoading } from "@/composables/useLazyLoading";
 import "katex/dist/katex.min.css";
@@ -14,6 +15,7 @@ const props = defineProps({
   }
 });
 
+const { showSnackbar } = useSnackbar();
 const siteConfigStore = useSiteConfigStore();
 
 // 初始化懒加载
@@ -35,6 +37,20 @@ const collapsedHeight = computed(() => {
   return `${height}px`;
 });
 
+// 全局复制处理函数 - 用于已发布文章中的代码复制
+const handleCodeCopy = (codeElement: HTMLElement) => {
+  if (codeElement) {
+    navigator.clipboard
+      .writeText(codeElement.textContent || "")
+      .then(() => {
+        showSnackbar("复制成功，复制和转载请标注本文地址");
+      })
+      .catch(() => {
+        showSnackbar("复制失败，请手动复制");
+      });
+  }
+};
+
 // 文章内容点击事件处理 - 现在大部分逻辑已内置到 HTML 中
 // 这里保留是为了未来可能需要的额外处理
 const handleContentClick = (event: Event) => {
@@ -43,6 +59,9 @@ const handleContentClick = (event: Event) => {
 };
 
 onMounted(async () => {
+  // 将复制处理函数暴露到全局作用域，供已发布文章中的内联事件使用
+  (window as any).__markdownEditorCopyHandler = handleCodeCopy;
+
   if (postContentRef.value) {
     postContentRef.value.addEventListener("click", handleContentClick);
 
@@ -72,6 +91,8 @@ onUnmounted(() => {
   }
   // 清理懒加载资源
   cleanup();
+  // 清理全局函数
+  delete (window as any).__markdownEditorCopyHandler;
 });
 
 // 监听内容变化，重新初始化懒加载

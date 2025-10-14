@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { type PropType, computed, onMounted, onUnmounted } from "vue";
+import {
+  type PropType,
+  computed,
+  reactive,
+  ref,
+  onMounted,
+  onUnmounted
+} from "vue";
 import type { Article } from "@/api/post/type";
 import { useRouter } from "vue-router";
 import { useArticleStore } from "@/store/modules/articleStore";
@@ -39,6 +46,9 @@ const isCommentEnabled = computed(() => {
 });
 
 onMounted(() => {
+  // 初始化封面图片懒加载
+  initializeCoverLazyLoading();
+
   ctx = gsap.context(() => {
     // 使用 ScrollTrigger.matchMedia 来创建响应式动画
     ScrollTrigger.matchMedia({
@@ -96,6 +106,9 @@ onMounted(() => {
 
 onUnmounted(() => {
   ctx.revert();
+  if (imageObserver) {
+    imageObserver.disconnect();
+  }
 });
 
 const { isDark } = useDark();
@@ -103,6 +116,74 @@ const { isDark } = useDark();
 const topCoverUrl = computed(() => {
   return props.article.top_img_url || articleStore.defaultCover;
 });
+
+// 图片懒加载状态
+const coverImageRef = ref<HTMLImageElement>();
+const coverState = reactive({
+  imageLoaded: false,
+  imageSrc: ""
+});
+
+// Observer 实例
+let imageObserver: IntersectionObserver | null = null;
+
+// 初始化图片懒加载
+const initializeCoverLazyLoading = () => {
+  if (!coverImageRef.value) return;
+
+  imageObserver = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !coverState.imageLoaded) {
+          loadCoverImage();
+          imageObserver?.unobserve(entry.target);
+        }
+      });
+    },
+    {
+      threshold: 0.1,
+      rootMargin: "100px"
+    }
+  );
+
+  imageObserver.observe(coverImageRef.value);
+};
+
+// 图片加载函数
+const loadCoverImage = async () => {
+  const targetSrc = topCoverUrl.value;
+
+  if (!targetSrc || coverState.imageLoaded || coverState.imageSrc) return;
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const img = new Image();
+
+      const timeout = setTimeout(() => {
+        reject(new Error("Image load timeout"));
+      }, 10000);
+
+      img.onload = () => {
+        clearTimeout(timeout);
+        coverState.imageSrc = targetSrc;
+        coverState.imageLoaded = true;
+        resolve();
+      };
+
+      img.onerror = () => {
+        clearTimeout(timeout);
+        reject(new Error("Image load failed"));
+      };
+
+      img.src = targetSrc;
+    });
+  } catch (error) {
+    console.warn("Post cover image load failed:", error);
+    // 如果加载失败，仍然显示原图片
+    coverState.imageSrc = targetSrc || "";
+    coverState.imageLoaded = true;
+  }
+};
 
 const dynamicStyles = computed(() => {
   if (isDark.value) {
@@ -221,12 +302,18 @@ const goToTag = (tagName: string) => {
       </div>
     </div>
     <div class="post-top-cover">
+      <!-- 懒加载占位符 -->
+      <div
+        v-if="!coverState.imageLoaded"
+        ref="coverImageRef"
+        class="post-top-bg lazy-loading"
+      />
+      <!-- 实际图片 -->
       <img
-        class="post-top-bg"
-        :src="topCoverUrl"
+        v-if="coverState.imageLoaded && coverState.imageSrc"
+        class="post-top-bg lazy-loaded"
+        :src="coverState.imageSrc"
         :alt="article.title"
-        fetchpriority="high"
-        loading="eager"
       />
     </div>
     <section class="main-hero-waves-area waves-area">
@@ -320,6 +407,22 @@ const goToTag = (tagName: string) => {
   object-fit: cover;
   opacity: 0.8;
   transition: 0s;
+
+  // CSS 图片动画优化
+  &:not([src]),
+  &[src=""] {
+    opacity: 0;
+  }
+
+  &.lazy-loading {
+    background: var(--anzhiyu-secondbg);
+    opacity: 0.3;
+  }
+
+  &.lazy-loaded {
+    opacity: 0.8;
+    animation: imageFadeIn 0.4s ease-out forwards;
+  }
 
   &::after {
     position: absolute;
@@ -582,13 +685,23 @@ const goToTag = (tagName: string) => {
   }
 
   .post-header-container {
+    z-index: 1;
     height: 30rem;
     background-color: var(--anzhiyu-main);
-    z-index: 1;
 
     &::before {
       display: none;
     }
+  }
+}
+
+// 图片淡入动画
+@keyframes imageFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0.8;
   }
 }
 </style>
