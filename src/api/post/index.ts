@@ -242,3 +242,16 @@ export function uploadArticleImage(file: File) {
     }
   );
 }
+
+/** @description 获取图片主色调 */
+export const getPrimaryColor = (
+  imageUrl: string
+): Promise<BaseResponse<{ primary_color: string }>> => {
+  return http.request<BaseResponse<{ primary_color: string }>>(
+    "post",
+    baseUrlApi("articles/primary-color"),
+    {
+      data: { image_url: imageUrl }
+    }
+  );
+};
