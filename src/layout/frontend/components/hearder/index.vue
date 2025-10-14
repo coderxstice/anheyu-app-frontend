@@ -14,7 +14,9 @@
           <BackMenuListGroups :navConfig="navConfig" />
 
           <router-link to="/" class="site-name-link" accesskey="h">
+            <!-- 桌面端显示 tooltip -->
             <el-tooltip
+              v-if="!isMobile"
               content="返回主页"
               placement="bottom"
               :show-arrow="false"
@@ -35,15 +37,41 @@
                 </svg>
               </div>
             </el-tooltip>
+            <!-- 移动端不显示 tooltip -->
+            <div v-else>
+              <span class="site-title">{{ siteName }}</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+              >
+                <path
+                  fill="currentColor"
+                  fill-rule="evenodd"
+                  d="M5.37 1.8a1 1 0 0 1 1.26 0l3.814 2.8A1.5 1.5 0 0 1 11 5.7V10a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V5.7a1.5 1.5 0 0 1 .556-1zM5 7.2a.5.5 0 0 0-.5.5v1.3a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5V7.7a.5.5 0 0 0-.5-.5z"
+                />
+              </svg>
+            </div>
           </router-link>
         </div>
 
         <div class="page-name-mask">
-          <el-tooltip content="返回顶部" placement="bottom" :showArrow="false">
+          <!-- 桌面端显示 tooltip -->
+          <el-tooltip
+            v-if="!isMobile"
+            content="返回顶部"
+            placement="bottom"
+            :showArrow="false"
+          >
             <div class="page-name-container" @click="scrollToTop">
               <span class="page-name">{{ currentPageTitle }}</span>
             </div>
           </el-tooltip>
+          <!-- 移动端不显示 tooltip -->
+          <div v-else class="page-name-container" @click="scrollToTop">
+            <span class="page-name">{{ currentPageTitle }}</span>
+          </div>
         </div>
 
         <nav class="main-nav">
@@ -192,7 +220,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from "vue";
+import { computed, watch, onMounted, onUnmounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useArticleStore } from "@/store/modules/articleStore";
@@ -209,6 +237,22 @@ const siteConfigStore = useSiteConfigStore();
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);
 const route = useRoute();
 const articleStore = useArticleStore();
+
+// 移动端检测
+const isMobile = ref(false);
+
+const checkMobile = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
+
+onMounted(() => {
+  checkMobile();
+  window.addEventListener("resize", checkMobile);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", checkMobile);
+});
 
 const isPostDetailPage = computed(() => route.name === "PostDetail");
 const isMusicPage = computed(() => route.name === "MusicHome");
@@ -693,6 +737,32 @@ const scrollToTop = () => {
 
   .frontend-header .header-wrapper .header-content {
     padding: 0 1rem;
+  }
+
+  // 移动端禁用 site-name-link 的 hover 效果
+  .header-left .site-name-link {
+    &:hover {
+      color: inherit !important;
+      background: transparent !important;
+
+      svg {
+        color: inherit !important;
+        opacity: 0 !important;
+      }
+
+      .site-title {
+        opacity: 1 !important;
+      }
+    }
+  }
+
+  // 禁用透明状态下的 hover 效果
+  .header-wrapper.text-is-white
+    .header-content
+    .header-left
+    .site-name-link:hover {
+    color: var(--anzhiyu-white) !important;
+    background: transparent !important;
   }
 }
 
