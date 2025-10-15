@@ -149,8 +149,10 @@ defineProps<{ links: LinkItem[] }>();
           color: var(--anzhiyu-white);
         }
 
-        .desc {
+        .site-card-text .desc {
           color: var(--anzhiyu-white);
+          -webkit-line-clamp: 4 !important;
+          line-clamp: 4 !important;
         }
       }
 
@@ -299,10 +301,12 @@ defineProps<{ links: LinkItem[] }>();
       }
 
       .desc {
+        display: -webkit-box;
         overflow: hidden;
         font-size: 0.875rem;
         line-height: 1.2;
         text-align: left;
+        text-overflow: ellipsis;
         -webkit-line-clamp: 2;
         line-clamp: 2;
         overflow-wrap: break-word;
