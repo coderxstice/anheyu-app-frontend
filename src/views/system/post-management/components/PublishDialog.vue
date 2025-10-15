@@ -6,7 +6,8 @@ import {
   Setting,
   InfoFilled,
   Edit,
-  Delete
+  Delete,
+  Link
 } from "@element-plus/icons-vue";
 import { computed, ref, watch, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -375,11 +376,29 @@ const handleFetchPrimaryColor = async () => {
               <el-col :span="12">
                 <el-form-item label="封面图" prop="cover_url">
                   <ImageUpload v-model="internalForm.cover_url" />
+                  <el-input
+                    v-model="internalForm.cover_url"
+                    placeholder="或直接输入图片URL"
+                    style="margin-top: 8px"
+                  >
+                    <template #prefix>
+                      <el-icon><Link /></el-icon>
+                    </template>
+                  </el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item label="顶部大图 (可选)" prop="top_img_url">
                   <ImageUpload v-model="internalForm.top_img_url" />
+                  <el-input
+                    v-model="internalForm.top_img_url"
+                    placeholder="或直接输入图片URL"
+                    style="margin-top: 8px"
+                  >
+                    <template #prefix>
+                      <el-icon><Link /></el-icon>
+                    </template>
+                  </el-input>
                   <div class="form-item-help">若不填, 将自动使用封面图URL</div>
                 </el-form-item>
               </el-col>
