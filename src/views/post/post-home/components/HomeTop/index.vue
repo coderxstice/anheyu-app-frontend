@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, reactive, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useArticleStore } from "@/store/modules/articleStore";
+import { initLazyLoad, destroyLazyLoad } from "@/utils/lazyload";
 
 defineOptions({
   name: "HomeTop"
@@ -36,16 +37,22 @@ const collapseTopGroup = () => {
   isTopGroupExpanded.value = false;
 };
 
+let observer: IntersectionObserver | null = null;
+
 onMounted(() => {
   articleStore.fetchHomeArticles();
   // 初始化封面图片懒加载
-  initializeCoverLazyLoading();
+  observer = initLazyLoad(document, {
+    selector: "img[data-src]",
+    threshold: 0.1,
+    rootMargin: "100px",
+    loadedClass: "lazy-loaded",
+    loadingClass: "lazy-loading"
+  });
 });
 
 onUnmounted(() => {
-  if (observer) {
-    observer.disconnect();
-  }
+  destroyLazyLoad(observer);
 });
 
 const creativityList = computed(() => {
@@ -64,74 +71,6 @@ const creativityPairs = computed(() => {
   }
   return pairs;
 });
-
-// 图片懒加载状态
-const coverImageRef = ref<HTMLImageElement>();
-const coverState = reactive({
-  imageLoaded: false,
-  imageSrc: ""
-});
-
-// Observer 实例
-let observer: IntersectionObserver | null = null;
-
-// 初始化图片懒加载
-const initializeCoverLazyLoading = () => {
-  if (!coverImageRef.value) return;
-
-  observer = new IntersectionObserver(
-    entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && !coverState.imageLoaded) {
-          loadCoverImage();
-          observer?.unobserve(entry.target);
-        }
-      });
-    },
-    {
-      threshold: 0.1,
-      rootMargin: "100px"
-    }
-  );
-
-  observer.observe(coverImageRef.value);
-};
-
-// 图片加载函数
-const loadCoverImage = async () => {
-  const targetSrc = homeTopConfig.value?.banner?.image;
-
-  if (!targetSrc || coverState.imageLoaded || coverState.imageSrc) return;
-
-  try {
-    await new Promise<void>((resolve, reject) => {
-      const img = new Image();
-
-      const timeout = setTimeout(() => {
-        reject(new Error("Image load timeout"));
-      }, 10000);
-
-      img.onload = () => {
-        clearTimeout(timeout);
-        coverState.imageSrc = targetSrc;
-        coverState.imageLoaded = true;
-        resolve();
-      };
-
-      img.onerror = () => {
-        clearTimeout(timeout);
-        reject(new Error("Image load failed"));
-      };
-
-      img.src = targetSrc;
-    });
-  } catch (error) {
-    console.warn("Cover image load failed:", error);
-    // 如果加载失败，仍然显示原图片
-    coverState.imageSrc = targetSrc || "";
-    coverState.imageLoaded = true;
-  }
-};
 </script>
 
 <template>
@@ -268,17 +207,9 @@ const loadCoverImage = async () => {
             <div class="todayCard-tips">{{ homeTopConfig.banner.tips }}</div>
             <div class="todayCard-title">{{ homeTopConfig.banner.title }}</div>
           </div>
-          <!-- 懒加载占位符 -->
-          <div
-            v-if="!coverState.imageLoaded"
-            ref="coverImageRef"
-            class="todayCard-cover lazy-loading"
-          />
-          <!-- 实际图片 -->
           <img
-            v-if="coverState.imageLoaded && coverState.imageSrc"
-            class="todayCard-cover lazy-loaded"
-            :src="coverState.imageSrc"
+            class="todayCard-cover lazy-loading"
+            :data-src="homeTopConfig?.banner?.image"
             alt="封面"
           />
           <div class="banner-button-group">

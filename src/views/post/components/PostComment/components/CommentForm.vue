@@ -694,7 +694,11 @@ defineExpose({
                         @mouseenter="handleEmojiEnter($event, emoji)"
                         @mouseleave="handleEmojiLeave"
                       >
-                        <img v-lazy="{ url: emoji.icon }" :alt="emoji.text" />
+                        <img
+                          :data-src="emoji.icon"
+                          :alt="emoji.text"
+                          class="lazy-loading"
+                        />
                       </li>
                     </ul>
                     <div class="OwO-bar">

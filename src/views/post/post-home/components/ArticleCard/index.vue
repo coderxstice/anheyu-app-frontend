@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted, type PropType } from "vue";
+import { ref, onMounted, onUnmounted, type PropType, computed } from "vue";
 import type { Article } from "@/api/post/type";
 import { useArticleStore } from "@/store/modules/articleStore";
 import { formatRelativeTime } from "@/utils/format";
 import { useRouter } from "vue-router";
+import { initLazyLoad, destroyLazyLoad } from "@/utils/lazyload";
 
 const articleStore = useArticleStore();
 const router = useRouter();
@@ -26,72 +27,12 @@ const props = defineProps({
 const READ_ARTICLES_KEY = "read_articles";
 const isRead = ref(false);
 
-// 图片懒加载状态
-const imageRef = ref<HTMLImageElement>();
-const state = reactive({
-  imageLoaded: false,
-  imageSrc: ""
+const coverUrl = computed(() => {
+  return props.article.cover_url || articleStore.defaultCover;
 });
 
 // Observer 实例
 let observer: IntersectionObserver | null = null;
-
-// 初始化图片懒加载
-const initializeLazyLoading = () => {
-  if (!imageRef.value) return;
-
-  observer = new IntersectionObserver(
-    entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && !state.imageLoaded) {
-          loadImage();
-          observer?.unobserve(entry.target);
-        }
-      });
-    },
-    {
-      threshold: 0.1,
-      rootMargin: "100px"
-    }
-  );
-
-  observer.observe(imageRef.value);
-};
-
-// 图片加载函数
-const loadImage = async () => {
-  const targetSrc = props.article.cover_url || articleStore.defaultCover;
-
-  if (state.imageLoaded || state.imageSrc) return;
-
-  try {
-    await new Promise<void>((resolve, reject) => {
-      const img = new Image();
-
-      const timeout = setTimeout(() => {
-        reject(new Error("Image load timeout"));
-      }, 10000);
-
-      img.onload = () => {
-        clearTimeout(timeout);
-        state.imageSrc = targetSrc;
-        state.imageLoaded = true;
-        resolve();
-      };
-
-      img.onerror = () => {
-        clearTimeout(timeout);
-        reject(new Error("Image load failed"));
-      };
-
-      img.src = targetSrc;
-    });
-  } catch (error) {
-    console.warn("Image load failed, using default cover:", error);
-    state.imageSrc = articleStore.defaultCover;
-    state.imageLoaded = true;
-  }
-};
 
 onMounted(() => {
   // 检查已读状态
@@ -104,13 +45,17 @@ onMounted(() => {
   }
 
   // 初始化懒加载
-  initializeLazyLoading();
+  observer = initLazyLoad(document, {
+    selector: "img[data-src]",
+    threshold: 0.1,
+    rootMargin: "100px",
+    loadedClass: "lazy-loaded",
+    loadingClass: "lazy-loading"
+  });
 });
 
 onUnmounted(() => {
-  if (observer) {
-    observer.disconnect();
-  }
+  destroyLazyLoad(observer);
 });
 
 const goPost = (id: string) => {
@@ -146,17 +91,9 @@ const goToTagPage = (tagName: string) => {
   >
     <div class="post_cover">
       <div :title="article.title" class="w-full h-full">
-        <!-- 懒加载占位符 -->
-        <div
-          v-if="!state.imageLoaded"
-          ref="imageRef"
-          class="post_bg lazy-loading"
-        />
-        <!-- 实际图片 -->
         <img
-          v-if="state.imageLoaded && state.imageSrc"
-          class="post_bg lazy-loaded"
-          :src="state.imageSrc"
+          class="post_bg lazy-loading"
+          :data-src="coverUrl"
           :alt="article.title"
         />
       </div>

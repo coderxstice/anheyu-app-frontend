@@ -1,12 +1,5 @@
 <script setup lang="ts">
-import {
-  type PropType,
-  computed,
-  reactive,
-  ref,
-  onMounted,
-  onUnmounted
-} from "vue";
+import { type PropType, computed, ref, onMounted, onUnmounted } from "vue";
 import type { Article } from "@/api/post/type";
 import { useRouter } from "vue-router";
 import { useArticleStore } from "@/store/modules/articleStore";
@@ -14,6 +7,7 @@ import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useDark } from "@pureadmin/utils";
+import { initLazyLoad, destroyLazyLoad } from "@/utils/lazyload";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -28,6 +22,7 @@ const router = useRouter();
 const articleStore = useArticleStore();
 const siteConfigStore = useSiteConfigStore();
 let ctx: gsap.Context;
+let observer: IntersectionObserver | null = null;
 
 const articleType = computed(() => {
   const siteOwnerName = siteConfigStore.siteConfig?.frontDesk?.siteOwner?.name;
@@ -47,7 +42,13 @@ const isCommentEnabled = computed(() => {
 
 onMounted(() => {
   // 初始化封面图片懒加载
-  initializeCoverLazyLoading();
+  observer = initLazyLoad(document, {
+    selector: "img[data-src]",
+    threshold: 0.1,
+    rootMargin: "100px",
+    loadedClass: "lazy-loaded",
+    loadingClass: "lazy-loading"
+  });
 
   ctx = gsap.context(() => {
     // 使用 ScrollTrigger.matchMedia 来创建响应式动画
@@ -106,9 +107,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   ctx.revert();
-  if (imageObserver) {
-    imageObserver.disconnect();
-  }
+  destroyLazyLoad(observer);
 });
 
 const { isDark } = useDark();
@@ -116,74 +115,6 @@ const { isDark } = useDark();
 const topCoverUrl = computed(() => {
   return props.article.top_img_url || articleStore.defaultCover;
 });
-
-// 图片懒加载状态
-const coverImageRef = ref<HTMLImageElement>();
-const coverState = reactive({
-  imageLoaded: false,
-  imageSrc: ""
-});
-
-// Observer 实例
-let imageObserver: IntersectionObserver | null = null;
-
-// 初始化图片懒加载
-const initializeCoverLazyLoading = () => {
-  if (!coverImageRef.value) return;
-
-  imageObserver = new IntersectionObserver(
-    entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && !coverState.imageLoaded) {
-          loadCoverImage();
-          imageObserver?.unobserve(entry.target);
-        }
-      });
-    },
-    {
-      threshold: 0.1,
-      rootMargin: "100px"
-    }
-  );
-
-  imageObserver.observe(coverImageRef.value);
-};
-
-// 图片加载函数
-const loadCoverImage = async () => {
-  const targetSrc = topCoverUrl.value;
-
-  if (!targetSrc || coverState.imageLoaded || coverState.imageSrc) return;
-
-  try {
-    await new Promise<void>((resolve, reject) => {
-      const img = new Image();
-
-      const timeout = setTimeout(() => {
-        reject(new Error("Image load timeout"));
-      }, 10000);
-
-      img.onload = () => {
-        clearTimeout(timeout);
-        coverState.imageSrc = targetSrc;
-        coverState.imageLoaded = true;
-        resolve();
-      };
-
-      img.onerror = () => {
-        clearTimeout(timeout);
-        reject(new Error("Image load failed"));
-      };
-
-      img.src = targetSrc;
-    });
-  } catch (error) {
-    console.warn("Post cover image load failed:", error);
-    // 如果加载失败，仍然显示原图片
-    coverState.imageSrc = targetSrc || "";
-    coverState.imageLoaded = true;
-  }
-};
 
 const dynamicStyles = computed(() => {
   if (isDark.value) {
@@ -302,17 +233,9 @@ const goToTag = (tagName: string) => {
       </div>
     </div>
     <div class="post-top-cover">
-      <!-- 懒加载占位符 -->
-      <div
-        v-if="!coverState.imageLoaded"
-        ref="coverImageRef"
-        class="post-top-bg lazy-loading"
-      />
-      <!-- 实际图片 -->
       <img
-        v-if="coverState.imageLoaded && coverState.imageSrc"
-        class="post-top-bg lazy-loaded"
-        :src="coverState.imageSrc"
+        class="post-top-bg lazy-loading"
+        :data-src="topCoverUrl"
         :alt="article.title"
       />
     </div>
