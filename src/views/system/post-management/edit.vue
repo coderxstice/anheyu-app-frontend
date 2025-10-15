@@ -370,6 +370,8 @@ onUnmounted(() => {
           :is-submitting="isSubmitting"
           :is-edit-mode="isEditMode"
           :status="form.status"
+          :post-id="articleId"
+          :post-slug="form.abbrlink"
           @save="handleSubmit(false)"
           @publish="handleOpenPublishDialog"
         />
