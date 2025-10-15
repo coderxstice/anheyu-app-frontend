@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted } from "vue";
 import type { LinkItem } from "@/api/postLink/type";
+import { initLazyLoad, destroyLazyLoad } from "@/utils/lazyload";
 
 defineOptions({
   name: "FlinkList"
@@ -8,6 +10,38 @@ defineOptions({
 defineProps<{
   links: LinkItem[];
 }>();
+
+// Observer 实例
+let observer: IntersectionObserver | null = null;
+
+onMounted(() => {
+  console.log("[FlinkList] 组件已挂载，准备初始化懒加载");
+
+  // 延迟初始化以确保DOM已渲染
+  setTimeout(() => {
+    console.log("[FlinkList] 开始初始化懒加载");
+
+    // 检查DOM中是否有图片元素
+    const images = document.querySelectorAll(".flink-list img[data-src]");
+    console.log(
+      `[FlinkList] .flink-list中找到 ${images.length} 个带data-src的图片`
+    );
+
+    observer = initLazyLoad(document, {
+      threshold: 0.1,
+      rootMargin: "100px",
+      selector: "img[data-src]",
+      loadedClass: "lazy-loaded",
+      loadingClass: "lazy-loading"
+    });
+
+    console.log("[FlinkList] 懒加载初始化完成", observer);
+  }, 100);
+});
+
+onUnmounted(() => {
+  destroyLazyLoad(observer);
+});
 </script>
 
 <template>
@@ -28,7 +62,11 @@ defineProps<{
           :title="link.name"
           target="_blank"
         >
-          <img class="flink-avatar" :src="link.logo" :alt="link.name" />
+          <img
+            class="flink-avatar lazy-loading"
+            :data-src="link.logo"
+            :alt="link.name"
+          />
           <div class="flink-item-info">
             <span class="flink-item-name">{{ link.name }}</span>
             <span class="flink-item-desc" :title="link.description">{{
@@ -166,6 +204,17 @@ defineProps<{
       background: var(--anzhiyu-background);
       border-radius: 32px;
       transition: 0.3s;
+
+      // CSS 图片懒加载优化
+      &[data-src] {
+        background: var(--anzhiyu-secondbg);
+        opacity: 0;
+      }
+
+      &.lazy-loaded {
+        opacity: 1;
+        animation: imageFadeIn 0.4s ease-out forwards;
+      }
     }
 
     .flink-item-info {
@@ -285,6 +334,16 @@ defineProps<{
   .link-tag {
     padding: 3px 6px;
     font-size: 0.5rem;
+  }
+}
+
+// 图片淡入动画
+@keyframes imageFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }
 </style>

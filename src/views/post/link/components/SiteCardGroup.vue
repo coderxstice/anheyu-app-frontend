@@ -1,6 +1,52 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted } from "vue";
 import type { LinkItem } from "@/api/postLink/type";
+import { initLazyLoad, destroyLazyLoad } from "@/utils/lazyload";
+
 defineProps<{ links: LinkItem[] }>();
+
+// Observer 实例
+let observer: IntersectionObserver | null = null;
+
+onMounted(() => {
+  console.log("[SiteCardGroup] 组件已挂载，准备初始化懒加载");
+
+  // 延迟初始化以确保DOM已渲染
+  setTimeout(() => {
+    console.log("[SiteCardGroup] 开始初始化懒加载");
+
+    // 检查DOM中是否有图片元素
+    const images = document.querySelectorAll("img[data-src]");
+    console.log(
+      `[SiteCardGroup] DOM中找到 ${images.length} 个带data-src的图片`
+    );
+
+    // 检查.site-card-group容器
+    const container = document.querySelector(".site-card-group");
+    if (container) {
+      const containerImages = container.querySelectorAll("img[data-src]");
+      console.log(
+        `[SiteCardGroup] .site-card-group容器中找到 ${containerImages.length} 个图片`
+      );
+    } else {
+      console.warn("[SiteCardGroup] 未找到.site-card-group容器");
+    }
+
+    observer = initLazyLoad(document, {
+      threshold: 0.1,
+      rootMargin: "100px",
+      selector: "img[data-src]",
+      loadedClass: "lazy-loaded",
+      loadingClass: "lazy-loading"
+    });
+
+    console.log("[SiteCardGroup] 懒加载初始化完成", observer);
+  }, 100);
+});
+
+onUnmounted(() => {
+  destroyLazyLoad(observer);
+});
 </script>
 
 <template>
@@ -20,7 +66,11 @@ defineProps<{ links: LinkItem[] }>();
         :href="link.url"
         rel="external nofollow"
       >
-        <img class="flink-avatar" :src="link.siteshot" :alt="link.name" />
+        <img
+          class="flink-avatar lazy-loading"
+          :data-src="link.siteshot"
+          :alt="link.name"
+        />
       </a>
       <a
         class="info"
@@ -30,7 +80,11 @@ defineProps<{ links: LinkItem[] }>();
         rel="external nofollow"
       >
         <div class="site-card-avatar">
-          <img class="flink-avatar" :src="link.logo" :alt="link.name" />
+          <img
+            class="flink-avatar lazy-loading"
+            :data-src="link.logo"
+            :alt="link.name"
+          />
         </div>
         <div class="site-card-text">
           <span class="title">{{ link.name }}</span>
@@ -226,6 +280,17 @@ defineProps<{ links: LinkItem[] }>();
       transition: 0.3s;
       transform: scale(1.03);
     }
+
+    // CSS 图片懒加载优化
+    img[data-src] {
+      background: var(--anzhiyu-secondbg);
+      opacity: 0;
+    }
+
+    img.lazy-loaded {
+      opacity: 1;
+      animation: imageFadeIn 0.4s ease-out forwards;
+    }
   }
 
   a.img:hover img {
@@ -273,6 +338,17 @@ defineProps<{ links: LinkItem[] }>();
         background: var(--anzhiyu-secondbg);
         border-radius: 32px;
         transition: 0.3s ease-out;
+      }
+
+      // CSS 图片懒加载优化
+      img[data-src] {
+        background: var(--anzhiyu-secondbg);
+        opacity: 0;
+      }
+
+      img.lazy-loaded {
+        opacity: 1;
+        animation: imageFadeIn 0.4s ease-out forwards;
       }
     }
 
@@ -341,6 +417,16 @@ defineProps<{ links: LinkItem[] }>();
       rgb(255 255 255 / 0%)
     );
     animation: 4s ease 0s infinite normal both running light_tag;
+  }
+}
+
+// 图片淡入动画
+@keyframes imageFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }
 </style>
