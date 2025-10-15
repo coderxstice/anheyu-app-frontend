@@ -1038,6 +1038,9 @@
     background-color: var(--anzhiyu-secondbg);
     border: var(--style-border-always);
     border-radius: 8px;
+    p {
+      margin: 0.5rem;
+    }
   }
 
   code {
