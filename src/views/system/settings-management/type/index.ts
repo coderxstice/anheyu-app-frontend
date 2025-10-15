@@ -134,6 +134,15 @@ export interface PostSettingsInfo {
   codeBlock: {
     codeMaxLines: number;
   };
+  cdn: {
+    enable: boolean;
+    provider: string;
+    secretID: string;
+    secretKey: string;
+    region: string;
+    domain: string;
+    zoneID: string;
+  };
 }
 
 /**

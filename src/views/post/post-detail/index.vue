@@ -180,27 +180,41 @@ const updateArticleMetaTags = () => {
  * @param id - 文章ID
  */
 const fetchRequiredData = async (id: string) => {
+  // 检查是否有SSR数据且数据是新鲜的
   if (window && window.__INITIAL_DATA__) {
-    article.value = window.__INITIAL_DATA__;
-    loading.value = false;
-    delete window.__INITIAL_DATA__;
+    const initialData = window.__INITIAL_DATA__;
 
-    nextTick(() => {
-      loadingStore.stopLoading();
-      // 更新meta标签
-      updateArticleMetaTags();
-    });
+    // 检查数据新鲜度（如果数据超过5分钟，重新获取）
+    const dataTimestamp = initialData.__timestamp__;
+    const isDataFresh =
+      dataTimestamp && Date.now() - dataTimestamp < 5 * 60 * 1000;
 
-    getPublicArticles({ page: 1, pageSize: 5 }).then(res => {
-      recentArticles.value = res.data.list.map(p => ({
-        id: p.id,
-        title: p.title,
-        cover_url: p.cover_url,
-        abbrlink: p.abbrlink || "",
-        created_at: p.created_at
-      }));
-    });
-    return;
+    if (isDataFresh) {
+      article.value = initialData.data || initialData; // 兼容新旧数据格式
+      loading.value = false;
+      delete window.__INITIAL_DATA__;
+
+      nextTick(() => {
+        loadingStore.stopLoading();
+        // 更新meta标签
+        updateArticleMetaTags();
+      });
+
+      getPublicArticles({ page: 1, pageSize: 5 }).then(res => {
+        recentArticles.value = res.data.list.map(p => ({
+          id: p.id,
+          title: p.title,
+          cover_url: p.cover_url,
+          abbrlink: p.abbrlink || "",
+          created_at: p.created_at
+        }));
+      });
+      return;
+    } else {
+      // 数据过期，清除并重新获取
+      delete window.__INITIAL_DATA__;
+      console.log("SSR数据已过期，重新获取最新数据");
+    }
   }
 
   if (!article.value) {

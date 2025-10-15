@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-02 18:04:48
- * @LastEditTime: 2025-09-03 17:41:07
+ * @LastEditTime: 2025-10-15 18:15:40
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -108,6 +108,97 @@
     />
     <div class="form-item-help">
       代码块超过此行数时将显示滚动条，默认为10行。
+    </div>
+  </el-form-item>
+
+  <el-divider content-position="left">
+    <h3>CDN 缓存刷新配置</h3>
+  </el-divider>
+
+  <el-form-item label="启用 CDN 缓存刷新">
+    <div>
+      <el-switch v-model="formData.cdn.enable" placeholder="例如：true" />
+      <div class="form-item-help">
+        启用后，文章更新或相关配置修改时会自动清除 CDN
+        缓存，确保用户看到最新内容。
+      </div>
+    </div>
+  </el-form-item>
+
+  <el-form-item label="CDN 提供商">
+    <div>
+      <el-select
+        v-model="formData.cdn.provider"
+        placeholder="请选择 CDN 提供商"
+        style="width: 200px"
+      >
+        <el-option label="腾讯云 CDN" value="tencent" />
+        <el-option label="EdgeOne" value="edgeone" />
+      </el-select>
+      <div class="form-item-help">
+        选择您使用的 CDN 服务提供商。目前支持腾讯云 CDN 和 EdgeOne。
+      </div>
+    </div>
+  </el-form-item>
+
+  <el-form-item label="腾讯云 API 密钥 ID">
+    <el-input
+      v-model="formData.cdn.secretID"
+      placeholder="请输入 SecretId"
+      show-password
+    />
+    <div class="form-item-help">
+      腾讯云 API 密钥的 SecretId。<br />
+      <strong>
+        可在腾讯云控制台的"访问管理 > 访问密钥 > API密钥管理"中获取。
+      </strong>
+    </div>
+  </el-form-item>
+
+  <el-form-item label="腾讯云 API 密钥 Key">
+    <el-input
+      v-model="formData.cdn.secretKey"
+      placeholder="请输入 SecretKey"
+      show-password
+    />
+    <div class="form-item-help">
+      腾讯云 API 密钥的 SecretKey。<br />
+      <strong>请妥善保管，不要泄露给他人。</strong>
+    </div>
+  </el-form-item>
+
+  <el-form-item label="腾讯云地域">
+    <el-input v-model="formData.cdn.region" placeholder="例如：ap-beijing" />
+    <div class="form-item-help">
+      腾讯云服务地域标识。<br />
+      常用地域：ap-beijing（北京）、ap-shanghai（上海）、ap-guangzhou（广州）、ap-singapore（新加坡）。<br />
+      <strong>EdgeOne 默认使用 ap-singapore。</strong>
+    </div>
+  </el-form-item>
+
+  <el-form-item v-if="formData.cdn.provider === 'tencent'" label="CDN 加速域名">
+    <el-input
+      v-model="formData.cdn.domain"
+      placeholder="例如：blog.example.com"
+    />
+    <div class="form-item-help">
+      腾讯云 CDN 的加速域名（不含 http:// 或 https://）。<br />
+      <strong>仅腾讯云 CDN 需要配置此项。</strong>
+    </div>
+  </el-form-item>
+
+  <el-form-item
+    v-if="formData.cdn.provider === 'edgeone'"
+    label="EdgeOne 站点 ID"
+  >
+    <el-input
+      v-model="formData.cdn.zoneID"
+      placeholder="例如：zone-xxxxxxxxxxxx"
+    />
+    <div class="form-item-help">
+      EdgeOne 站点的 Zone ID。<br />
+      可在 EdgeOne 控制台的"站点列表"中查看。<br />
+      <strong>仅 EdgeOne 需要配置此项。</strong>
     </div>
   </el-form-item>
 </template>

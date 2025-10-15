@@ -391,6 +391,48 @@ const postDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyPostCodeBlockCodeMaxLines,
     defaultValue: 10,
     type: "number"
+  },
+  {
+    frontendPath: "post.cdn.enable",
+    backendKey: constant.KeyCDNEnable,
+    defaultValue: false,
+    type: "boolean"
+  },
+  {
+    frontendPath: "post.cdn.provider",
+    backendKey: constant.KeyCDNProvider,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "post.cdn.secretID",
+    backendKey: constant.KeyCDNSecretID,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "post.cdn.secretKey",
+    backendKey: constant.KeyCDNSecretKey,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "post.cdn.region",
+    backendKey: constant.KeyCDNRegion,
+    defaultValue: "ap-beijing",
+    type: "string"
+  },
+  {
+    frontendPath: "post.cdn.domain",
+    backendKey: constant.KeyCDNDomain,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "post.cdn.zoneID",
+    backendKey: constant.KeyCDNZoneID,
+    defaultValue: "",
+    type: "string"
   }
 ];
 
