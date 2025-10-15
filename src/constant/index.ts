@@ -255,6 +255,15 @@ const KeySmtpForceSSL: SettingKey = "SMTP_FORCE_SSL";
 const KeyIPAPI: SettingKey = "IP_API";
 const KeyIPAPIToKen: SettingKey = "IP_API_TOKEN";
 
+// --- CDN缓存清除配置 ---
+const KeyCDNEnable: SettingKey = "cdn.enable";
+const KeyCDNProvider: SettingKey = "cdn.provider";
+const KeyCDNSecretID: SettingKey = "cdn.secret_id";
+const KeyCDNSecretKey: SettingKey = "cdn.secret_key";
+const KeyCDNRegion: SettingKey = "cdn.region";
+const KeyCDNDomain: SettingKey = "cdn.domain";
+const KeyCDNZoneID: SettingKey = "cdn.zone_id";
+
 const DEFAULT_CHUNK_SIZE = 50 * 1024 * 1024;
 
 /**
@@ -479,6 +488,15 @@ export const constant = {
   KeySmtpForceSSL,
   KeyIPAPI,
   KeyIPAPIToKen,
+
+  // --- CDN缓存清除配置 ---
+  KeyCDNEnable,
+  KeyCDNProvider,
+  KeyCDNSecretID,
+  KeyCDNSecretKey,
+  KeyCDNRegion,
+  KeyCDNDomain,
+  KeyCDNZoneID,
 
   // --- 其他 ---
   DEFAULT_CHUNK_SIZE
