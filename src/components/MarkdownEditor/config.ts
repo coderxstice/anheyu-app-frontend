@@ -11,6 +11,7 @@ import FoldingPlugin from "./plugins/markdown-it-folding-plugin";
 import HiddenPlugin from "./plugins/markdown-it-hidden-plugin";
 import InlineStylesPlugin from "./plugins/markdown-it-inline-styles-plugin";
 import ButtonPlugin from "./plugins/markdown-it-button-plugin";
+import BtnsPlugin from "./plugins/markdown-it-btns-plugin";
 import LinkCardPlugin from "./plugins/markdown-it-link-card-plugin";
 
 export function installMarkdownEditorExtensions() {
@@ -35,6 +36,9 @@ export function installMarkdownEditorExtensions() {
 
         mdit.use(ButtonPlugin);
         console.log("✅ ButtonPlugin registered");
+
+        mdit.use(BtnsPlugin);
+        console.log("✅ BtnsPlugin registered");
 
         mdit.use(LinkCardPlugin);
         console.log("✅ LinkCardPlugin registered");
