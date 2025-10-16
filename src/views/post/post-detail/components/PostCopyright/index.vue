@@ -61,7 +61,7 @@ const goRss = () => {
 };
 
 const goRewardPage = () => {
-  router.push({ path: "/about/#about-reward" });
+  router.push({ path: "/about" });
 };
 </script>
 

@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-02 18:04:48
- * @LastEditTime: 2025-10-15 18:15:40
+ * @LastEditTime: 2025-10-16 10:22:03
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -134,40 +134,73 @@
       >
         <el-option label="腾讯云 CDN" value="tencent" />
         <el-option label="EdgeOne" value="edgeone" />
+        <el-option label="阿里云 ESA" value="aliyun-esa" />
       </el-select>
       <div class="form-item-help">
-        选择您使用的 CDN 服务提供商。目前支持腾讯云 CDN 和 EdgeOne。
+        选择您使用的 CDN 服务提供商。目前支持腾讯云 CDN、EdgeOne 和阿里云 ESA。
       </div>
     </div>
   </el-form-item>
 
-  <el-form-item label="腾讯云 API 密钥 ID">
+  <el-form-item
+    :label="
+      formData.cdn.provider === 'aliyun-esa'
+        ? 'AccessKey ID'
+        : '腾讯云 API 密钥 ID'
+    "
+  >
     <el-input
       v-model="formData.cdn.secretID"
-      placeholder="请输入 SecretId"
+      :placeholder="
+        formData.cdn.provider === 'aliyun-esa'
+          ? '请输入 AccessKey ID'
+          : '请输入 SecretId'
+      "
       show-password
     />
     <div class="form-item-help">
-      腾讯云 API 密钥的 SecretId。<br />
-      <strong>
-        可在腾讯云控制台的"访问管理 > 访问密钥 > API密钥管理"中获取。
-      </strong>
+      <template v-if="formData.cdn.provider === 'aliyun-esa'">
+        阿里云 API 密钥的 AccessKey ID。<br />
+        <strong> 可在阿里云控制台的"AccessKey 管理"中创建和获取。 </strong>
+      </template>
+      <template v-else>
+        腾讯云 API 密钥的 SecretId。<br />
+        <strong>
+          可在腾讯云控制台的"访问管理 > 访问密钥 > API密钥管理"中获取。
+        </strong>
+      </template>
     </div>
   </el-form-item>
 
-  <el-form-item label="腾讯云 API 密钥 Key">
+  <el-form-item
+    :label="
+      formData.cdn.provider === 'aliyun-esa'
+        ? 'AccessKey Secret'
+        : '腾讯云 API 密钥 Key'
+    "
+  >
     <el-input
       v-model="formData.cdn.secretKey"
-      placeholder="请输入 SecretKey"
+      :placeholder="
+        formData.cdn.provider === 'aliyun-esa'
+          ? '请输入 AccessKey Secret'
+          : '请输入 SecretKey'
+      "
       show-password
     />
     <div class="form-item-help">
-      腾讯云 API 密钥的 SecretKey。<br />
+      <template v-if="formData.cdn.provider === 'aliyun-esa'">
+        阿里云 API 密钥的 AccessKey Secret。<br />
+      </template>
+      <template v-else> 腾讯云 API 密钥的 SecretKey。<br /> </template>
       <strong>请妥善保管，不要泄露给他人。</strong>
     </div>
   </el-form-item>
 
-  <el-form-item label="腾讯云地域">
+  <el-form-item
+    v-if="formData.cdn.provider !== 'aliyun-esa'"
+    label="腾讯云地域"
+  >
     <el-input v-model="formData.cdn.region" placeholder="例如：ap-beijing" />
     <div class="form-item-help">
       腾讯云服务地域标识。<br />
@@ -199,6 +232,18 @@
       EdgeOne 站点的 Zone ID。<br />
       可在 EdgeOne 控制台的"站点列表"中查看。<br />
       <strong>仅 EdgeOne 需要配置此项。</strong>
+    </div>
+  </el-form-item>
+
+  <el-form-item
+    v-if="formData.cdn.provider === 'aliyun-esa'"
+    label="阿里云 ESA 站点 ID"
+  >
+    <el-input v-model="formData.cdn.zoneID" placeholder="例如：123456789" />
+    <div class="form-item-help">
+      阿里云 ESA 的站点 ID（Site ID）。<br />
+      可在阿里云 ESA 控制台的"站点管理"中查看。<br />
+      <strong>仅阿里云 ESA 需要配置此项。</strong>
     </div>
   </el-form-item>
 </template>
