@@ -680,6 +680,275 @@
   }
 }
 
+// 混入：按钮组样式
+@mixin btns-styles {
+  .btns-container {
+    display: grid;
+    gap: 16px;
+    margin: 1.5rem 0;
+
+    // 列数配置
+    &.btns-cols-1 {
+      grid-template-columns: repeat(1, 1fr);
+    }
+
+    &.btns-cols-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    &.btns-cols-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    &.btns-cols-4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    &.btns-cols-5 {
+      grid-template-columns: repeat(5, 1fr);
+    }
+
+    &.btns-cols-6 {
+      grid-template-columns: repeat(6, 1fr);
+    }
+
+    // 响应式布局
+    @media screen and (max-width: 768px) {
+      &.btns-cols-4,
+      &.btns-cols-5,
+      &.btns-cols-6 {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media screen and (max-width: 500px) {
+      &.btns-cols-3,
+      &.btns-cols-4,
+      &.btns-cols-5,
+      &.btns-cols-6 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .btn-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px !important;
+      text-decoration: none;
+      background: var(--anzhiyu-secondbg);
+      border-radius: 12px;
+      border: var(--style-border);
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: var(--anzhiyu-card-bg);
+        border-color: var(--anzhiyu-main);
+        border-radius: 12px !important;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      }
+      &::after {
+        display: none;
+      }
+
+      .btn-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        margin-bottom: 12px;
+        background: var(--anzhiyu-card-bg);
+        border: 3px solid var(--anzhiyu-white);
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        overflow: hidden;
+
+        i {
+          font-size: 32px;
+          color: var(--anzhiyu-fontcolor);
+          transition: all 0.3s ease;
+        }
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: all 0.3s ease;
+        }
+      }
+
+      .btn-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--anzhiyu-fontcolor);
+        text-align: center;
+        word-break: break-word;
+        transition: color 0.3s ease;
+      }
+
+      // 颜色主题
+      &.btn-color-blue {
+        .btn-icon {
+          border-color: #409eff;
+          background: rgba(64, 158, 255, 0.1);
+
+          i {
+            color: #409eff;
+          }
+        }
+
+        &:hover {
+          border-color: #409eff;
+
+          .btn-icon {
+            background: #409eff;
+            transform: scale(1.1);
+
+            i {
+              color: var(--anzhiyu-white);
+            }
+          }
+        }
+      }
+
+      &.btn-color-pink {
+        .btn-icon {
+          border-color: #ff69b4;
+          background: rgba(255, 105, 180, 0.1);
+
+          i {
+            color: #ff69b4;
+          }
+        }
+
+        &:hover {
+          border-color: #ff69b4;
+
+          .btn-icon {
+            background: #ff69b4;
+            transform: scale(1.1);
+
+            i {
+              color: var(--anzhiyu-white);
+            }
+          }
+        }
+      }
+
+      &.btn-color-red {
+        .btn-icon {
+          border-color: #f56c6c;
+          background: rgba(245, 108, 108, 0.1);
+
+          i {
+            color: #f56c6c;
+          }
+        }
+
+        &:hover {
+          border-color: #f56c6c;
+
+          .btn-icon {
+            background: #f56c6c;
+            transform: scale(1.1);
+
+            i {
+              color: var(--anzhiyu-white);
+            }
+          }
+        }
+      }
+
+      &.btn-color-purple {
+        .btn-icon {
+          border-color: #9d5cff;
+          background: rgba(157, 92, 255, 0.1);
+
+          i {
+            color: #9d5cff;
+          }
+        }
+
+        &:hover {
+          border-color: #9d5cff;
+
+          .btn-icon {
+            background: #9d5cff;
+            transform: scale(1.1);
+
+            i {
+              color: var(--anzhiyu-white);
+            }
+          }
+        }
+      }
+
+      &.btn-color-orange {
+        .btn-icon {
+          border-color: #ff9800;
+          background: rgba(255, 152, 0, 0.1);
+
+          i {
+            color: #ff9800;
+          }
+        }
+
+        &:hover {
+          border-color: #ff9800;
+
+          .btn-icon {
+            background: #ff9800;
+            transform: scale(1.1);
+
+            i {
+              color: var(--anzhiyu-white);
+            }
+          }
+        }
+      }
+
+      &.btn-color-green {
+        .btn-icon {
+          border-color: #67c23a;
+          background: rgba(103, 194, 58, 0.1);
+
+          i {
+            color: #67c23a;
+          }
+        }
+
+        &:hover {
+          border-color: #67c23a;
+
+          .btn-icon {
+            background: #67c23a;
+            transform: scale(1.1);
+
+            i {
+              color: var(--anzhiyu-white);
+            }
+          }
+        }
+      }
+
+      // 无颜色时的默认悬停效果
+      &:not([class*="btn-color-"]):hover {
+        .btn-icon {
+          border-color: var(--anzhiyu-main);
+          background: var(--anzhiyu-main);
+          transform: scale(1.1);
+
+          i {
+            color: var(--anzhiyu-white);
+          }
+        }
+      }
+    }
+  }
+}
+
 // 混入：链接卡片样式
 @mixin link-card-styles {
   .anzhiyu-tag-link {
@@ -1475,6 +1744,7 @@
   @include hide-content-styles;
   @include inline-text-styles;
   @include button-styles;
+  @include btns-styles;
   @include link-card-styles;
   @include tabs-styles;
   @include list-styles;
