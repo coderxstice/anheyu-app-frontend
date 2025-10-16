@@ -338,6 +338,7 @@ export function useFileManager() {
     onActionRename,
     onActionDelete,
     onActionShare,
+    onActionGetDirectLink: directLinks.onActionGetLinks,
     onActionCopy: modals.onActionCopy,
     onActionMove: modals.onActionMove,
     onActionRegenerateDirectoryThumbnails

@@ -23,7 +23,7 @@
         key="selection-toolbar"
         class="selection-toolbar"
       >
-        <el-button-group class="action-group">
+        <el-button-group class="action-group cancel-group">
           <!-- 通过 emit 发出清空选择的意图 -->
           <el-button
             :icon="Close"
@@ -41,10 +41,20 @@
           <el-tooltip content="下载" placement="bottom" :show-arrow="false">
             <el-button :icon="Download" @click="emit('download')" />
           </el-tooltip>
-          <el-tooltip content="复制" placement="bottom" :show-arrow="false">
+          <el-tooltip
+            content="复制"
+            placement="bottom"
+            :show-arrow="false"
+            class="mobile-hidden"
+          >
             <el-button :icon="CopyDocument" @click="emit('copy')" />
           </el-tooltip>
-          <el-tooltip content="移动" placement="bottom" :show-arrow="false">
+          <el-tooltip
+            content="移动"
+            placement="bottom"
+            :show-arrow="false"
+            class="mobile-hidden"
+          >
             <el-button :icon="Folder" @click="emit('move')" />
           </el-tooltip>
 
@@ -55,6 +65,13 @@
             </el-tooltip>
             <el-tooltip content="分享" placement="bottom" :show-arrow="false">
               <el-button :icon="Share" @click="emit('share')" />
+            </el-tooltip>
+            <el-tooltip
+              content="获取直链"
+              placement="bottom"
+              :show-arrow="false"
+            >
+              <el-button :icon="Link" @click="emit('get-direct-link')" />
             </el-tooltip>
           </template>
 
@@ -80,7 +97,8 @@ import {
   Folder,
   Share,
   Delete,
-  EditPen
+  EditPen,
+  Link
 } from "@element-plus/icons-vue";
 
 // 1. 定义 Props 和 Emits
@@ -99,6 +117,7 @@ const emit = defineEmits<{
   (e: "move"): void;
   (e: "rename"): void;
   (e: "share"): void;
+  (e: "get-direct-link"): void;
   (e: "delete"): void;
 }>();
 
@@ -129,7 +148,7 @@ const onToolbarLeave = (el: HTMLElement, done: () => void) => {
 .file-heard-actions {
   display: flex;
   align-items: center;
-  height: 40px;
+  min-height: 40px;
   gap: 8px;
 
   .new-btn {
@@ -142,6 +161,11 @@ const onToolbarLeave = (el: HTMLElement, done: () => void) => {
       padding: 0 12px;
     }
   }
+
+  // 移动端允许换行
+  @media (max-width: 640px) {
+    flex-wrap: wrap;
+  }
 }
 
 .selection-toolbar {
@@ -149,6 +173,7 @@ const onToolbarLeave = (el: HTMLElement, done: () => void) => {
   align-items: center;
   gap: 8px;
   flex: 1;
+  min-height: 40px;
   overflow-x: auto;
   overflow-y: hidden;
 
@@ -166,6 +191,10 @@ const onToolbarLeave = (el: HTMLElement, done: () => void) => {
     border: 1px solid var(--el-border-color);
     border-radius: var(--el-border-radius-base);
     flex-shrink: 0;
+    min-height: 40px;
+    @media (width <= 768px) {
+      margin-bottom: 0 !important;
+    }
 
     .el-button {
       border-top: none;
@@ -173,6 +202,7 @@ const onToolbarLeave = (el: HTMLElement, done: () => void) => {
       border-bottom: none;
       border-left: 1px solid var(--el-border-color-lighter);
       border-radius: 0;
+      height: 40px;
 
       &:first-child {
         border-left: none;
@@ -182,6 +212,7 @@ const onToolbarLeave = (el: HTMLElement, done: () => void) => {
       @media (max-width: 640px) {
         padding: 8px 10px;
         font-size: 14px;
+        min-height: 40px;
 
         :deep(.el-icon) {
           font-size: 16px;
@@ -193,9 +224,11 @@ const onToolbarLeave = (el: HTMLElement, done: () => void) => {
   // 移动端优化
   @media (max-width: 640px) {
     gap: 4px;
+  }
 
+  @media (max-width: 768px) {
     .ml-2 {
-      margin-left: 4px !important;
+      margin-left: 0 !important;
     }
   }
 }
@@ -206,9 +239,20 @@ const onToolbarLeave = (el: HTMLElement, done: () => void) => {
   background-color: transparent !important;
   border-left: 1px solid var(--el-border-color-lighter) !important;
 
-  @media (max-width: 640px) {
-    font-size: 12px;
-    padding: 8px 8px !important;
+  @media (max-width: 768px) {
+    display: none !important;
+  }
+}
+
+.cancel-group {
+  @media (max-width: 768px) {
+    display: none !important;
+  }
+}
+
+.mobile-hidden {
+  @media (max-width: 768px) {
+    display: none !important;
   }
 }
 </style>

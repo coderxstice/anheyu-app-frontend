@@ -21,6 +21,7 @@
       @delete="onActionDelete"
       @download="onActionDownload"
       @share="onActionShare"
+      @get-direct-link="onActionGetDirectLink"
       @copy="onActionCopy"
       @move="onActionMove"
     />
@@ -235,6 +236,7 @@ const {
   onActionRename,
   onActionDelete,
   onActionShare,
+  onActionGetDirectLink,
   onActionCopy,
   onActionMove,
   handleActionSuccess,
