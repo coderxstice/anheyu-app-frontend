@@ -362,6 +362,8 @@ const handleLoadMoreChildren = async () => {
 </template>
 
 <style lang="scss" scoped>
+@use "@/style/article-content-base.scss" as *;
+
 .comment-item {
   display: flex;
   gap: 0.5rem;
@@ -482,6 +484,9 @@ const handleLoadMoreChildren = async () => {
 }
 
 :deep(.comment-content) {
+  // 应用文章内容基础样式
+  @include article-content-base;
+
   font-size: 0.95rem;
   line-height: 1.6;
   color: var(--anzhiyu-fontcolor);
@@ -493,12 +498,20 @@ const handleLoadMoreChildren = async () => {
     }
   }
 
-  a {
-    border-bottom: none;
-  }
-
+  // 覆盖文章样式中的部分规则以适应评论区
   p {
     margin: 0.5rem 0;
+  }
+
+  // 排除 fancybox 图片链接的样式
+  a[data-fancybox] {
+    padding: 0 !important;
+    border-bottom: none !important;
+
+    &:hover {
+      background: transparent !important;
+      box-shadow: none !important;
+    }
   }
 
   img {
@@ -515,15 +528,6 @@ const handleLoadMoreChildren = async () => {
   .anzhiyu-owo-emotion {
     width: 3rem;
     height: auto;
-  }
-
-  blockquote {
-    padding: 0.5rem 0.8rem;
-    margin: 1rem 0;
-    color: var(--anzhiyu-secondtext);
-    background-color: var(--anzhiyu-secondbg);
-    border: var(--style-border-always);
-    border-radius: 8px;
   }
 }
 
