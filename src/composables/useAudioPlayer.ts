@@ -375,68 +375,76 @@ export function useAudioPlayer(
       let usingHighQuality = false;
 
       try {
-        // 第一步：尝试获取高质量资源（带超时机制）
+        // 第一步：调用统一后端API获取资源
+        // 注意：后端已实现音质自动降级（exhigh → standard），无需前端处理
         if (song.neteaseId) {
           console.log(
-            "🎵 [智能加载] 尝试获取高质量资源 - 网易云ID:",
-            song.neteaseId
+            "🎵 [智能加载] 调用统一API获取资源 - 网易云ID:",
+            song.neteaseId,
+            "（后端已支持音质自动降级）"
           );
 
           // 更新进度：开始获取资源
           audioLoadingState.value.progress = 10;
 
           try {
-            // 设置8秒超时，音质优先但不让用户等待太久
-            const timeout = 8000;
+            // 设置5秒超时（后端已有内部降级机制，响应会更快）
+            const timeout = 5000;
             const timeoutPromise = new Promise<never>((_, reject) =>
-              setTimeout(() => reject(new Error("高质量资源获取超时")), timeout)
+              setTimeout(() => reject(new Error("资源获取超时")), timeout)
             );
 
-            console.log(`🎵 [智能加载] 设置${timeout / 1000}秒超时机制`);
+            console.log(
+              `🎵 [智能加载] 设置${timeout / 1000}秒超时（后端内部已有音质降级）`
+            );
 
-            const highQualityResources = await Promise.race([
+            const resources = await Promise.race([
               musicAPI.fetchSongResources(song),
               timeoutPromise
             ]);
 
-            if (highQualityResources.audioUrl) {
-              finalAudioUrl = highQualityResources.audioUrl;
-              finalLyricsText = highQualityResources.lyricsText || "";
+            if (resources.audioUrl) {
+              finalAudioUrl = resources.audioUrl;
+              finalLyricsText = resources.lyricsText || "";
               usingHighQuality = true;
 
               // 更新进度：资源获取成功
               audioLoadingState.value.progress = 50;
 
-              console.log("🎵 [智能加载] ✅ 成功获取高质量资源:", {
-                hasAudio: !!finalAudioUrl,
-                hasLyrics: !!finalLyricsText,
-                timeoutUsed: false
-              });
+              console.log(
+                "🎵 [智能加载] ✅ 成功获取资源（后端已返回最佳可用音质）:",
+                {
+                  hasAudio: !!finalAudioUrl,
+                  hasLyrics: !!finalLyricsText
+                }
+              );
             } else {
-              // 静默降级 - 继续使用基础资源，用户无感知
-              console.log("🎵 [智能加载] 降级到基础资源");
+              // 后端未返回资源，降级到播放列表中的基础资源
+              console.log(
+                "🎵 [智能加载] 后端未返回资源，降级到播放列表基础资源"
+              );
 
               // 如果有歌词数据，仍然使用
-              if (highQualityResources.lyricsText) {
-                finalLyricsText = highQualityResources.lyricsText;
+              if (resources.lyricsText) {
+                finalLyricsText = resources.lyricsText;
               }
             }
           } catch (error) {
             const isTimeout =
               error instanceof Error && error.message.includes("超时");
             console.warn(
-              `🎵 [智能加载] ⚠️ 高质量资源获取${isTimeout ? "超时" : "失败"}:`,
+              `🎵 [智能加载] ⚠️ 资源获取${isTimeout ? "超时" : "失败"}:`,
               error
             );
             if (isTimeout) {
-              console.log("🎵 [智能加载] 网络较慢，自动降级到基础资源");
+              console.log("🎵 [智能加载] 网络较慢，自动降级到播放列表基础资源");
             }
 
-            // 更新进度：高质量资源获取失败，准备降级
+            // 更新进度：资源获取失败，准备降级
             audioLoadingState.value.progress = 25;
           }
         } else {
-          console.log("🎵 [智能加载] 跳过高质量资源获取（无网易云ID）");
+          console.log("🎵 [智能加载] 无网易云ID，直接使用播放列表基础资源");
           audioLoadingState.value.progress = 25;
         }
 
