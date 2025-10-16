@@ -132,10 +132,12 @@ const handleCancelReply = () => {
   commentStore.setActiveReplyCommentId(null);
 };
 
-// 点击评论内容区域触发回复
+// 点击评论内容区域触发回复（仅移动端）
 const handleContentClick = () => {
   // 如果是匿名评论，不允许回复
   if (props.comment.is_anonymous) return;
+  // 只在移动端才触发回复功能
+  if (window.innerWidth > 768) return;
   commentStore.setActiveReplyCommentId(props.comment.id);
 };
 
@@ -403,10 +405,8 @@ const scrollToParent = () => {
   transition: opacity 0.2s;
 
   &.can-reply {
-    cursor: pointer;
-
-    &:hover {
-      opacity: 0.7;
+    @media screen and (width <= 768px) {
+      cursor: pointer;
     }
   }
 
