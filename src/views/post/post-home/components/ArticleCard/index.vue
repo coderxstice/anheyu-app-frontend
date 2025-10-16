@@ -220,22 +220,20 @@ const goToTagPage = (tagName: string) => {
 
     .post_bg {
       border-radius: 0;
-      transition: all 0.6s ease;
+      transition:
+        opacity 0.6s ease,
+        transform 0.6s ease,
+        filter 0.6s ease;
+      opacity: 0; // 默认透明度为 0
 
       // CSS 图片动画优化
-      &:not([src]),
-      &[src=""] {
+      &.lazy-loading {
+        background: var(--anzhiyu-secondbg);
         opacity: 0;
       }
 
-      &.lazy-loading {
-        background: var(--anzhiyu-secondbg);
-        opacity: 0.3;
-      }
-
       &.lazy-loaded {
-        opacity: 1;
-        animation: imageFadeIn 0.4s ease-out forwards;
+        opacity: 1; // 加载完成后显示
       }
     }
   }
@@ -417,15 +415,6 @@ const goToTagPage = (tagName: string) => {
   100% {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes imageFadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
   }
 }
 

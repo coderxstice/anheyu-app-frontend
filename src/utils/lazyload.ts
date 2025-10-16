@@ -2,7 +2,7 @@
  * @Description: 图片懒加载工具
  * @Author: 安知鱼
  * @Date: 2025-10-15 10:32:18
- * @LastEditTime: 2025-10-15 10:33:00
+ * @LastEditTime: 2025-10-16 10:59:50
  * @LastEditors: 安知鱼
  */
 /**
@@ -77,16 +77,30 @@ export function initLazyLoad(
           if (src && !img.src) {
             console.log(`[LazyLoad] 开始加载图片:`, src);
 
-            // 加载图片
-            img.src = src;
+            // 先移除 loading 类，但保持透明度为 0
             img.classList.remove(loadingClass);
-            img.classList.add(loadedClass);
+
+            // 设置图片源
+            img.src = src;
             img.removeAttribute("data-src");
 
-            console.log(`[LazyLoad] 图片加载完成:`, {
-              src,
-              classList: Array.from(img.classList)
-            });
+            // 监听图片加载完成事件，加载完成后再添加 loaded 类触发过渡动画
+            img.onload = () => {
+              // 使用 requestAnimationFrame 确保浏览器已经渲染了图片
+              requestAnimationFrame(() => {
+                img.classList.add(loadedClass);
+                console.log(`[LazyLoad] 图片加载完成:`, {
+                  src,
+                  classList: Array.from(img.classList)
+                });
+              });
+            };
+
+            // 如果图片加载失败，也添加 loaded 类（可以根据需求调整）
+            img.onerror = () => {
+              img.classList.add(loadedClass);
+              console.error(`[LazyLoad] 图片加载失败:`, src);
+            };
 
             // 停止观察已加载的图片
             observer.unobserve(img);
@@ -139,8 +153,19 @@ export function loadImage(
 ): void {
   const src = img.dataset.src;
   if (src && !img.src) {
+    // 设置图片源
     img.src = src;
-    img.classList.add(loadedClass);
     img.removeAttribute("data-src");
+
+    // 监听图片加载完成事件
+    img.onload = () => {
+      requestAnimationFrame(() => {
+        img.classList.add(loadedClass);
+      });
+    };
+
+    img.onerror = () => {
+      img.classList.add(loadedClass);
+    };
   }
 }
