@@ -269,6 +269,8 @@ const scrollToParent = () => {
 </template>
 
 <style lang="scss" scoped>
+@use "@/style/article-content-base.scss" as *;
+
 .comment-item {
   display: flex;
   gap: 0.5rem;
@@ -399,6 +401,9 @@ const scrollToParent = () => {
 }
 
 :deep(.comment-content) {
+  // 应用文章内容基础样式
+  @include article-content-base;
+
   font-size: 0.95rem;
   line-height: 1.6;
   color: var(--anzhiyu-fontcolor);
@@ -410,12 +415,20 @@ const scrollToParent = () => {
     }
   }
 
-  a {
-    border-bottom: none;
+  // 覆盖文章样式中的部分规则以适应评论区
+  p {
+    margin: 0.5rem 0;
   }
 
-  p {
-    margin: 0;
+  // 排除 fancybox 图片链接的样式
+  a[data-fancybox] {
+    padding: 0 !important;
+    border-bottom: none !important;
+
+    &:hover {
+      background: transparent !important;
+      box-shadow: none !important;
+    }
   }
 
   img {

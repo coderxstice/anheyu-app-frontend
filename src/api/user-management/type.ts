@@ -71,7 +71,6 @@ export type CreateUserData = {
   password: string;
   email: string;
   nickname?: string;
-  avatar?: string;
   website?: string;
   userGroupID: string;
   status?: number;
@@ -84,7 +83,6 @@ export type UpdateUserData = {
   username?: string;
   email?: string;
   nickname?: string;
-  avatar?: string;
   website?: string;
   userGroupID?: string;
   status?: number;
