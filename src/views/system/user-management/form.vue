@@ -12,7 +12,6 @@ const props = withDefaults(defineProps<FormProps>(), {
     email: "",
     password: "",
     nickname: "",
-    avatar: "",
     website: "",
     userGroupID: "",
     status: 1
@@ -82,16 +81,6 @@ defineExpose({ getRef });
             v-model="newFormInline.nickname"
             clearable
             placeholder="请输入昵称"
-          />
-        </el-form-item>
-      </re-col>
-
-      <re-col :value="12" :xs="24" :sm="24">
-        <el-form-item label="头像URL" prop="avatar">
-          <el-input
-            v-model="newFormInline.avatar"
-            clearable
-            placeholder="请输入头像URL"
           />
         </el-form-item>
       </re-col>
