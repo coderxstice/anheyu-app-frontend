@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
 import type { LinkItem } from "@/api/postLink/type";
 import { initLazyLoad, destroyLazyLoad } from "@/utils/lazyload";
 
@@ -7,46 +7,146 @@ defineOptions({
   name: "FlinkList"
 });
 
-defineProps<{
+const props = defineProps<{
   links: LinkItem[];
 }>();
+
+// 容器引用
+const flinkListRef = ref<HTMLElement | null>(null);
 
 // Observer 实例
 let observer: IntersectionObserver | null = null;
 
-onMounted(() => {
-  console.log("[FlinkList] 组件已挂载，准备初始化懒加载");
+// 定时器引用，用于清理
+let initTimer: number | null = null;
 
-  // 延迟初始化以确保DOM已渲染
-  setTimeout(() => {
-    console.log("[FlinkList] 开始初始化懒加载");
+// 防抖计数器
+let debounceTimer: number | null = null;
 
-    // 检查DOM中是否有图片元素
-    const images = document.querySelectorAll(".flink-list img[data-src]");
-    console.log(
-      `[FlinkList] .flink-list中找到 ${images.length} 个带data-src的图片`
-    );
+// 是否正在初始化
+let isInitializing = false;
 
-    observer = initLazyLoad(document, {
-      threshold: 0.1,
-      rootMargin: "100px",
-      selector: "img[data-src]",
-      loadedClass: "lazy-loaded",
-      loadingClass: "lazy-loading"
-    });
+// 初始化懒加载
+const initLazy = async () => {
+  // 如果正在初始化，跳过
+  if (isInitializing) {
+    console.log("[FlinkList] 正在初始化中，跳过重复调用");
+    return;
+  }
 
-    console.log("[FlinkList] 懒加载初始化完成", observer);
+  // 清除之前的定时器
+  if (initTimer) {
+    clearTimeout(initTimer);
+    initTimer = null;
+  }
+
+  // 等待Vue的DOM更新完成
+  await nextTick();
+
+  // 检查容器是否存在
+  if (!flinkListRef.value) {
+    console.warn("[FlinkList] 容器未找到");
+    return;
+  }
+
+  isInitializing = true;
+
+  // 额外延迟以等待TransitionGroup的enter动画完成
+  initTimer = window.setTimeout(() => {
+    if (!flinkListRef.value) {
+      isInitializing = false;
+      return;
+    }
+
+    console.log("[FlinkList] 初始化懒加载");
+
+    // 清理旧的observer
+    destroyLazyLoad(observer);
+
+    // 在容器内查找图片元素
+    const images = flinkListRef.value.querySelectorAll("img[data-src]");
+    console.log(`[FlinkList] 找到 ${images.length} 个待加载图片`);
+
+    if (images.length > 0) {
+      // 创建新的observer，使用容器作为根元素
+      observer = initLazyLoad(flinkListRef.value as unknown as Document, {
+        threshold: 0.1,
+        rootMargin: "100px",
+        selector: "img[data-src]",
+        loadedClass: "lazy-loaded",
+        loadingClass: "lazy-loading"
+      });
+    }
+
+    isInitializing = false;
+    initTimer = null;
+  }, 600);
+};
+
+// 防抖的初始化函数
+const debouncedInitLazy = () => {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+  }
+
+  debounceTimer = window.setTimeout(() => {
+    initLazy();
+    debounceTimer = null;
   }, 100);
+};
+
+// TransitionGroup 的 after-enter 事件处理
+const handleAfterEnter = () => {
+  // 当有新元素进入完成后，重新扫描懒加载图片
+  nextTick(() => {
+    if (flinkListRef.value && observer) {
+      const newImages = flinkListRef.value.querySelectorAll("img[data-src]");
+      if (newImages.length > 0) {
+        console.log(`[FlinkList] 检测到 ${newImages.length} 个新图片`);
+        // 不需要完全重新初始化，只需要让现有observer观察新图片
+        // 但由于initLazyLoad会重新查找，我们简化为重新初始化
+        debouncedInitLazy();
+      }
+    }
+  });
+};
+
+// 组件挂载后初始化
+onMounted(() => {
+  console.log("[FlinkList] 组件已挂载");
+  initLazy();
 });
 
+// 监听links变化，使用防抖的重新初始化
+watch(
+  () => props.links,
+  () => {
+    console.log("[FlinkList] 友链列表变化");
+    debouncedInitLazy();
+  }
+);
+
+// 组件卸载时清理
 onUnmounted(() => {
+  // 清理定时器
+  if (initTimer) {
+    clearTimeout(initTimer);
+    initTimer = null;
+  }
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+  }
+
+  // 清理observer
   destroyLazyLoad(observer);
+  observer = null;
 });
 </script>
 
 <template>
-  <div class="flink-list">
-    <TransitionGroup name="flink-item">
+  <div ref="flinkListRef" class="flink-list">
+    <TransitionGroup name="flink-item" @after-enter="handleAfterEnter">
       <div v-for="link in links" :key="link.id" class="flink-list-item">
         <template v-if="link.tag">
           <span class="link-tag" :style="{ background: link.tag.color }">
