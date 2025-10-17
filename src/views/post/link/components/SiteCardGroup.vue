@@ -1,48 +1,88 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, watch, ref, nextTick } from "vue";
 import type { LinkItem } from "@/api/postLink/type";
 import { initLazyLoad, destroyLazyLoad } from "@/utils/lazyload";
 
-defineProps<{ links: LinkItem[] }>();
+const props = defineProps<{ links: LinkItem[] }>();
 
 // Observer 实例
 let observer: IntersectionObserver | null = null;
+const containerRef = ref<HTMLElement | null>(null);
+
+// 初始化懒加载的函数
+const setupLazyLoad = async () => {
+  // 等待 DOM 更新完成
+  await nextTick();
+
+  console.log("[SiteCardGroup] 开始初始化懒加载");
+
+  // 销毁旧的 observer
+  if (observer) {
+    destroyLazyLoad(observer);
+    observer = null;
+  }
+
+  // 再次等待，确保 DOM 完全渲染
+  await new Promise(resolve => setTimeout(resolve, 50));
+
+  // 使用容器引用查找图片
+  if (!containerRef.value) {
+    console.warn("[SiteCardGroup] 容器引用未找到");
+    return;
+  }
+
+  const images = containerRef.value.querySelectorAll("img[data-src]");
+  console.log(`[SiteCardGroup] 容器中找到 ${images.length} 个带data-src的图片`);
+
+  // 检查是否有图片没有 data-src 但有 src
+  const invalidImages = containerRef.value.querySelectorAll(
+    "img.flink-avatar:not([data-src])[src]"
+  );
+  if (invalidImages.length > 0) {
+    console.warn(
+      `[SiteCardGroup] 发现 ${invalidImages.length} 个图片没有data-src但有src`,
+      Array.from(invalidImages).map(img => ({
+        src: (img as HTMLImageElement).src,
+        alt: (img as HTMLImageElement).alt
+      }))
+    );
+  }
+
+  if (images.length === 0) {
+    console.warn("[SiteCardGroup] 未找到需要懒加载的图片");
+    return;
+  }
+
+  observer = initLazyLoad(containerRef.value, {
+    threshold: 0.1,
+    rootMargin: "100px",
+    selector: "img[data-src]",
+    loadedClass: "lazy-loaded",
+    loadingClass: "lazy-loading"
+  });
+
+  console.log("[SiteCardGroup] 懒加载初始化完成", observer);
+};
 
 onMounted(() => {
   console.log("[SiteCardGroup] 组件已挂载，准备初始化懒加载");
-
-  // 延迟初始化以确保DOM已渲染
-  setTimeout(() => {
-    console.log("[SiteCardGroup] 开始初始化懒加载");
-
-    // 检查DOM中是否有图片元素
-    const images = document.querySelectorAll("img[data-src]");
-    console.log(
-      `[SiteCardGroup] DOM中找到 ${images.length} 个带data-src的图片`
-    );
-
-    // 检查.site-card-group容器
-    const container = document.querySelector(".site-card-group");
-    if (container) {
-      const containerImages = container.querySelectorAll("img[data-src]");
-      console.log(
-        `[SiteCardGroup] .site-card-group容器中找到 ${containerImages.length} 个图片`
-      );
-    } else {
-      console.warn("[SiteCardGroup] 未找到.site-card-group容器");
-    }
-
-    observer = initLazyLoad(document, {
-      threshold: 0.1,
-      rootMargin: "100px",
-      selector: "img[data-src]",
-      loadedClass: "lazy-loaded",
-      loadingClass: "lazy-loading"
-    });
-
-    console.log("[SiteCardGroup] 懒加载初始化完成", observer);
-  }, 100);
+  setupLazyLoad();
 });
+
+// 监听 links 变化，重新初始化懒加载
+watch(
+  () => props.links,
+  (newLinks, oldLinks) => {
+    console.log("[SiteCardGroup] links 数据变化", {
+      oldCount: oldLinks?.length || 0,
+      newCount: newLinks?.length || 0
+    });
+    if (newLinks && newLinks.length > 0) {
+      setupLazyLoad();
+    }
+  },
+  { deep: true }
+);
 
 onUnmounted(() => {
   destroyLazyLoad(observer);
@@ -50,7 +90,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="site-card-group">
+  <div ref="containerRef" class="site-card-group">
     <div v-for="link in links" :key="link.id" class="site-card">
       <template v-if="link.tag">
         <span class="link-tag" :style="{ background: link.tag.color }">
@@ -68,6 +108,7 @@ onUnmounted(() => {
       >
         <img
           class="flink-avatar lazy-loading"
+          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
           :data-src="link.siteshot"
           :alt="link.name"
         />
@@ -82,6 +123,7 @@ onUnmounted(() => {
         <div class="site-card-avatar">
           <img
             class="flink-avatar lazy-loading"
+            src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
             :data-src="link.logo"
             :alt="link.name"
           />
