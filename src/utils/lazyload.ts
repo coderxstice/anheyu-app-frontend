@@ -74,7 +74,8 @@ export function initLazyLoad(
         });
 
         if (entry.isIntersecting) {
-          if (src && !img.src) {
+          // 判断是否需要加载：有 data-src 且当前 src 不等于 data-src（避免重复加载）
+          if (src && img.src !== src) {
             console.log(`[LazyLoad] 开始加载图片:`, src);
 
             // 先移除 loading 类，但保持透明度为 0
@@ -106,7 +107,7 @@ export function initLazyLoad(
             observer.unobserve(img);
           } else {
             console.warn(`[LazyLoad] 跳过加载:`, {
-              reason: !src ? "没有data-src" : "已有src",
+              reason: !src ? "没有data-src" : "src已经是目标地址",
               dataSrc: src,
               currentSrc: img.src
             });
@@ -152,7 +153,7 @@ export function loadImage(
   loadedClass = "lazy-loaded"
 ): void {
   const src = img.dataset.src;
-  if (src && !img.src) {
+  if (src && img.src !== src) {
     // 设置图片源
     img.src = src;
     img.removeAttribute("data-src");
