@@ -19,7 +19,8 @@ import { useAppStore } from "@/store/modules/app";
 import {
   saveOriginalThemeColors,
   restoreOriginalThemeColors,
-  setArticleTheme
+  setArticleTheme,
+  resetThemeToDefault
 } from "@/utils/themeManager";
 import { setArticleMetaTags, clearArticleMetaTags } from "@/utils/metaManager";
 
@@ -136,16 +137,29 @@ provide("updateHeadingTocItems", (items: { id: string }[]) => {
 const useArticleTheme = (articleRef: Ref<Article | null>) => {
   watch(
     () => articleRef.value?.primary_color,
-    newColor => {
-      setArticleTheme(newColor || "");
+    (newColor, oldColor) => {
+      // 如果新颜色为空，重置到默认主题色（而不是恢复到"原始颜色"）
+      if (!newColor) {
+        console.log("🎨 [主题色] 文章无自定义主色，重置到默认主题色");
+        resetThemeToDefault();
+      } else {
+        console.log("🎨 [主题色] 设置文章主色:", newColor);
+        setArticleTheme(newColor);
+      }
     },
     { immediate: true }
   );
 
-  onMounted(saveOriginalThemeColors);
+  onMounted(() => {
+    // 在mounted时立即保存当前的主题色作为原始颜色
+    // 这样即使从其他文章过来，也能正确保存当前状态
+    saveOriginalThemeColors();
+  });
+
   onUnmounted(() => {
     commentStore.resetStore();
-    restoreOriginalThemeColors();
+    // 离开文章页时，重置到默认主题色
+    resetThemeToDefault();
     clearArticleMetaTags();
   });
 };

@@ -404,10 +404,13 @@ const scrollToParent = () => {
   // 应用文章内容基础样式
   @include article-content-base;
 
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: var(--anzhiyu-fontcolor);
-  transition: opacity 0.2s;
+  // 使用 & {} 包装在 mixin 之后的普通声明，符合 Sass 新规范
+  & {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--anzhiyu-fontcolor);
+    transition: opacity 0.2s;
+  }
 
   &.can-reply {
     @media screen and (width <= 768px) {
