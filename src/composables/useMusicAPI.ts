@@ -5,8 +5,7 @@
  */
 import { ref } from "vue";
 import type { Song } from "../types/music";
-// 注意：已改为前端直接调用外部API，不再使用后端代理
-// import { getPlaylistApi, getSongResourcesApi } from "../api/music";
+import { getPlaylistApi } from "../api/music";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { get } from "lodash-es";
 
@@ -367,101 +366,35 @@ export function useMusicAPI() {
         }
       }
 
-      // 前端直接调用 Meting API (主接口 - 包含完整数据)
-      console.log(
-        "[MUSIC_API] 前端直接调用 Meting API 获取播放列表（含基础音频和歌词）..."
-      );
-      const playlistId = "8152976493"; // 播放列表ID
-
+      // 第二优先级：调用后端API获取播放列表
+      console.log("[MUSIC_API] 📡 调用后端API获取播放列表...");
       try {
-        // 主接口: 标准 Meting API (返回完整数据，包括基础音频URL和歌词URL)
-        const metingUrl = `https://api.injahow.cn/meting/?server=netease&type=playlist&id=${playlistId}`;
-        console.log(`[MUSIC_API] 尝试主接口: ${metingUrl}`);
+        const response = await getPlaylistApi();
 
-        const response = await fetch(metingUrl);
+        if (response.code === 200 && response.data && response.data.songs) {
+          const songs = response.data.songs;
+          console.log(`[MUSIC_API] ✅ 后端API成功返回 ${songs.length} 首歌曲`);
 
-        if (response.ok) {
-          const songs = await response.json();
-
-          if (Array.isArray(songs) && songs.length > 0) {
-            console.log(
-              `[MUSIC_API] ✅ 主接口成功获取 ${songs.length} 首歌曲（含基础音频和歌词）`
-            );
-
-            // 转换为统一格式
-            const formattedSongs: Song[] = songs.map((song: any) => ({
-              id: song.id?.toString() || "",
-              name: song.name || "未知歌曲",
-              artist: song.artist || "未知歌手",
-              url: song.url || "", // ✅ 主接口提供基础音频URL (128kbps)
-              pic: song.pic || song.cover || "",
-              cover: song.pic || song.cover || "",
-              lrc: song.lrc || "", // ✅ 主接口提供歌词URL或内容
-              theme: "#000000",
-              neteaseId: song.id?.toString() || ""
-            }));
-
-            // 缓存结果
-            setPlaylistCache(formattedSongs);
-            return formattedSongs;
-          }
-        }
-
-        console.warn("[MUSIC_API] ⚠️ 主接口失败，尝试备选接口...");
-      } catch (error) {
-        console.warn("[MUSIC_API] ⚠️ 主接口异常，尝试备选接口:", error);
-      }
-
-      // 备选接口: Playlist API (只有基础信息，无音频URL和歌词)
-      console.log("[MUSIC_API] 使用备选接口: Playlist API（仅基础信息）");
-      try {
-        const fallbackUrl = `https://metings.qjqq.cn/Playlist?id=${playlistId}`;
-        const response = await fetch(fallbackUrl, {
-          headers: {
-            Accept: "application/json, text/javascript, */*; q=0.01",
-            "X-Requested-With": "XMLHttpRequest"
-          }
-        });
-
-        if (!response.ok) {
-          console.error(
-            `[MUSIC_API] ❌ 备选接口也失败 - 状态码: ${response.status}`
-          );
-          return [];
-        }
-
-        const data = await response.json();
-
-        // 解析嵌套的响应结构: data.playlist.tracks
-        if (data.data && data.data.playlist && data.data.playlist.tracks) {
-          const tracks = data.data.playlist.tracks;
-
-          // 转换为 Song 格式
-          const songs: Song[] = tracks.map((track: any) => ({
-            id: track.id?.toString() || "",
-            name: track.name || "未知歌曲",
-            artist: track.artists || "未知歌手",
-            url: "", // ❌ 备选接口不提供，需要通过 Song_V1 API 获取
-            pic: track.picUrl || "",
-            cover: track.picUrl || "",
-            lrc: "", // ❌ 备选接口不提供，需要通过 Song_V1 API 获取
-            theme: "#000000",
-            neteaseId: track.id?.toString() || ""
+          // 转换为统一格式（如果需要）
+          const formattedSongs: Song[] = songs.map((song: any) => ({
+            id: song.id || song.neteaseId || "",
+            name: song.name || "未知歌曲",
+            artist: song.artist || "未知歌手",
+            url: song.url || "",
+            pic: song.pic || "",
+            lrc: song.lrc || "",
+            neteaseId: song.neteaseId || song.id || ""
           }));
 
-          console.log(
-            `[MUSIC_API] ⚠️ 备选接口返回 ${songs.length} 首歌曲（仅基础信息，需Song_V1获取音频）`
-          );
-
           // 缓存结果
-          setPlaylistCache(songs);
-          return songs;
+          setPlaylistCache(formattedSongs);
+          return formattedSongs;
         } else {
-          console.error("[MUSIC_API] ❌ 备选接口数据格式异常:", data);
+          console.error("[MUSIC_API] ❌ 后端API返回异常:", response);
           return [];
         }
-      } catch (fallbackError) {
-        console.error("[MUSIC_API] ❌ 备选接口也异常:", fallbackError);
+      } catch (error) {
+        console.error("[MUSIC_API] ❌ 后端API调用失败:", error);
         return [];
       }
     } catch (error) {
@@ -494,9 +427,7 @@ export function useMusicAPI() {
       const response = await fetch("https://metings.qjqq.cn/Song_V1", {
         method: "POST",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-          Accept: "application/json, text/javascript, */*; q=0.01",
-          "X-Requested-With": "XMLHttpRequest"
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
         },
         body: formData
       });
