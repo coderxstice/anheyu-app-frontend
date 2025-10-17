@@ -427,7 +427,7 @@ export function useMusicAPI() {
       const response = await fetch("https://metings.qjqq.cn/Song_V1", {
         method: "POST",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+          "Content-Type": "application/x-www-form-urlencoded"
         },
         body: formData
       });

@@ -130,6 +130,9 @@ provide("updateHeadingTocItems", (items: { id: string }[]) => {
 
 // --- 方法与逻辑 ---
 
+// 组件初始化时立即重置主题色，确保不会残留上一篇文章的主色
+resetThemeToDefault();
+
 /**
  * @description 管理文章主色调主题的逻辑
  * @param articleRef - 文章数据的 ref
@@ -140,10 +143,8 @@ const useArticleTheme = (articleRef: Ref<Article | null>) => {
     (newColor, oldColor) => {
       // 如果新颜色为空，重置到默认主题色（而不是恢复到"原始颜色"）
       if (!newColor) {
-        console.log("🎨 [主题色] 文章无自定义主色，重置到默认主题色");
         resetThemeToDefault();
       } else {
-        console.log("🎨 [主题色] 设置文章主色:", newColor);
         setArticleTheme(newColor);
       }
     },
@@ -208,6 +209,13 @@ const fetchRequiredData = async (id: string) => {
       loading.value = false;
       delete window.__INITIAL_DATA__;
 
+      // 显式处理主题色，确保在文章切换时正确更新
+      if (article.value.primary_color) {
+        setArticleTheme(article.value.primary_color);
+      } else {
+        resetThemeToDefault();
+      }
+
       nextTick(() => {
         loadingStore.stopLoading();
         // 更新meta标签
@@ -246,6 +254,13 @@ const fetchRequiredData = async (id: string) => {
 
     // 更新meta标签
     updateArticleMetaTags();
+
+    // 显式处理主题色，确保在文章切换时正确更新
+    if (article.value.primary_color) {
+      setArticleTheme(article.value.primary_color);
+    } else {
+      resetThemeToDefault();
+    }
 
     recentArticles.value = recentArticlesResponse.data.list.map(p => ({
       id: p.id,
