@@ -201,25 +201,8 @@ export function useLazyLoading(options: LazyLoadingOptions = {}) {
     // 标记为已处理
     img.setAttribute("data-lazy-processed", "true");
 
-    // 设置初始样式
-    if (showLoading) {
-      img.style.filter = "blur(5px)";
-      img.style.transition = "filter 0.3s ease";
-    }
-
     // 开始观察
     observer.value?.observe(img);
-
-    // 监听加载完成事件，移除模糊效果
-    if (showLoading) {
-      img.addEventListener(
-        "lazyloaded",
-        () => {
-          img.style.filter = "none";
-        },
-        { once: true }
-      );
-    }
   };
 
   /**
