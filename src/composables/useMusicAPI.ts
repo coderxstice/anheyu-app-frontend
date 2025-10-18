@@ -9,6 +9,19 @@ import { getPlaylistApi } from "../api/music";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { get } from "lodash-es";
 
+/**
+ * 确保URL使用HTTPS协议，避免Mixed Content警告
+ * @param url 原始URL
+ * @returns HTTPS URL
+ */
+const ensureHttps = (url: string): string => {
+  if (!url) return url;
+  if (url.startsWith("http://")) {
+    return url.replace("http://", "https://");
+  }
+  return url;
+};
+
 // 播放列表缓存接口
 interface PlaylistCache {
   data: Song[];
@@ -265,8 +278,8 @@ export function useMusicAPI() {
           id: item.id || `custom-${index}`,
           name: songName,
           artist: item.artist || "未知艺术家",
-          url: item.url || "",
-          pic: item.cover || item.pic || "", // cover -> pic 字段映射
+          url: ensureHttps(item.url || ""),
+          pic: ensureHttps(item.cover || item.pic || ""), // cover -> pic 字段映射，确保HTTPS
           lrc: lrcContent // 存储实际的歌词内容，而不是URL
         };
 
@@ -375,13 +388,13 @@ export function useMusicAPI() {
           const songs = response.data.songs;
           console.log(`[MUSIC_API] ✅ 后端API成功返回 ${songs.length} 首歌曲`);
 
-          // 转换为统一格式（如果需要）
+          // 转换为统一格式（如果需要），确保所有URL使用HTTPS
           const formattedSongs: Song[] = songs.map((song: any) => ({
             id: song.id || song.neteaseId || "",
             name: song.name || "未知歌曲",
             artist: song.artist || "未知歌手",
-            url: song.url || "",
-            pic: song.pic || "",
+            url: ensureHttps(song.url || ""),
+            pic: ensureHttps(song.pic || ""),
             lrc: song.lrc || "",
             neteaseId: song.neteaseId || song.id || ""
           }));
@@ -478,7 +491,7 @@ export function useMusicAPI() {
       );
 
       return {
-        url: data.data.url || "",
+        url: ensureHttps(data.data.url || ""),
         lyric: data.data.lyric || "",
         level: data.data.level,
         size: data.data.size
