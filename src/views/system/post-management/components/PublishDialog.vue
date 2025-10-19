@@ -582,6 +582,36 @@ const handleFetchPrimaryColor = async () => {
                   />
                 </el-form-item>
               </el-col>
+              <el-col :span="12">
+                <el-form-item label="自定义发布时间 (可选)">
+                  <el-date-picker
+                    v-model="internalForm.custom_published_at"
+                    type="datetime"
+                    placeholder="选择发布时间"
+                    style="width: 100%"
+                    format="YYYY-MM-DD HH:mm:ss"
+                    value-format="YYYY-MM-DDTHH:mm:ssZ"
+                  />
+                  <div class="form-item-help">
+                    留空则使用当前时间，可用于定时发布或回溯发布
+                  </div>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="自定义更新时间 (可选)">
+                  <el-date-picker
+                    v-model="internalForm.custom_updated_at"
+                    type="datetime"
+                    placeholder="选择更新时间"
+                    style="width: 100%"
+                    format="YYYY-MM-DD HH:mm:ss"
+                    value-format="YYYY-MM-DDTHH:mm:ssZ"
+                  />
+                  <div class="form-item-help">
+                    留空则使用当前时间，可用于手动调整更新时间
+                  </div>
+                </el-form-item>
+              </el-col>
             </el-row>
           </el-form>
         </el-tab-pane>

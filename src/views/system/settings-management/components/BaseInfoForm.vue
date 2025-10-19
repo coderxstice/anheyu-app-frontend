@@ -1,5 +1,15 @@
 <template>
-  <h1>基本信息</h1>
+  <div class="base-info-header">
+    <h1>基本信息</h1>
+    <div class="config-actions">
+      <el-button type="primary" :icon="Upload" @click="handleExportConfig">
+        导出配置
+      </el-button>
+      <el-button type="success" :icon="Download" @click="handleImportConfig">
+        导入配置
+      </el-button>
+    </div>
+  </div>
 
   <el-form-item label="站点名称">
     <el-input v-model="formData.siteName" placeholder="请输入站点名称" />
@@ -74,7 +84,9 @@ import type { SiteInfo } from "../type";
 import type { ElInput, FormItemInstance } from "element-plus";
 // [NEW] 引入 store 和 ElMessageBox
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
-import { ElMessageBox } from "element-plus";
+import { ElMessageBox, ElMessage } from "element-plus";
+import { Upload, Download } from "@element-plus/icons-vue";
+import { exportConfig, importConfig } from "@/api/config";
 
 const props = defineProps<{ modelValue: SiteInfo }>();
 const emit = defineEmits(["update:modelValue"]);
@@ -149,9 +161,98 @@ onMounted(() => {
   // 当组件挂载时，执行检查
   checkAndFocusUrl();
 });
+
+// 导出配置
+const handleExportConfig = async () => {
+  try {
+    ElMessage.info("正在导出配置数据...");
+    const response = await exportConfig();
+
+    // 创建下载链接
+    const blob = new Blob([response], { type: "application/json" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `anheyu-settings-${new Date().getTime()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    ElMessage.success("配置数据导出成功");
+  } catch (error: any) {
+    console.error("导出配置失败:", error);
+    ElMessage.error(`导出配置失败: ${error.message || "未知错误"}`);
+  }
+};
+
+// 导入配置
+const handleImportConfig = () => {
+  ElMessageBox.confirm(
+    "导入新配置将会覆盖数据库中的配置数据，此操作会立即生效。确定要导入配置吗？",
+    "导入配置确认",
+    {
+      confirmButtonText: "确定导入",
+      cancelButtonText: "取消",
+      type: "warning"
+    }
+  )
+    .then(() => {
+      // 创建文件选择器
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".json";
+      input.onchange = async (e: Event) => {
+        const target = e.target as HTMLInputElement;
+        const file = target.files?.[0];
+        if (!file) return;
+
+        // 验证文件类型
+        if (!file.name.endsWith(".json")) {
+          ElMessage.error("请选择 .json 格式的配置文件");
+          return;
+        }
+
+        try {
+          ElMessage.info("正在导入配置数据...");
+          await importConfig(file);
+          ElMessage.success("配置数据导入成功！请刷新页面查看最新配置");
+          // 3秒后刷新页面
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000);
+        } catch (error: any) {
+          console.error("导入配置失败:", error);
+          ElMessage.error(
+            `导入配置失败: ${error.response?.data?.message || error.message || "未知错误"}`
+          );
+        }
+      };
+      input.click();
+    })
+    .catch(() => {
+      // 用户取消
+    });
+};
 </script>
 
 <style scoped lang="scss">
+.base-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0;
+  }
+
+  .config-actions {
+    display: flex;
+    gap: 12px;
+  }
+}
+
 .el-form-item {
   margin-bottom: 24px;
   transition: background-color 0.5s ease;

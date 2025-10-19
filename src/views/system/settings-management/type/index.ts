@@ -342,6 +342,7 @@ export interface CommentSettingsInfo {
   anonymousEmail: string;
   showUA: boolean;
   showRegion: boolean;
+  allowImageUpload: boolean;
   limitPerMinute: number;
   limitLength: number;
   forbiddenWords: string;

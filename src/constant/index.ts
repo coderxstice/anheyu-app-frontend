@@ -186,6 +186,7 @@ const KeyCommentBloggerEmail: SettingKey = "comment.blogger_email";
 const KeyCommentAnonymousEmail: SettingKey = "comment.anonymous_email";
 const KeyCommentShowUA: SettingKey = "comment.show_ua";
 const KeyCommentShowRegion: SettingKey = "comment.show_region";
+const KeyCommentAllowImageUpload: SettingKey = "comment.allow_image_upload";
 const KeyCommentLimitPerMinute: SettingKey = "comment.limit_per_minute";
 const KeyCommentLimitLength: SettingKey = "comment.limit_length";
 const KeyCommentForbiddenWords: SettingKey = "comment.forbidden_words";
@@ -422,6 +423,7 @@ export const constant = {
   KeyCommentAnonymousEmail,
   KeyCommentShowUA,
   KeyCommentShowRegion,
+  KeyCommentAllowImageUpload,
   KeyCommentLimitPerMinute,
   KeyCommentLimitLength,
   KeyCommentForbiddenWords,
