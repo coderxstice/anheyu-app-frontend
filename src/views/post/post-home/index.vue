@@ -247,6 +247,7 @@ onMounted(() => {
   .recent-post-item {
     flex-direction: row !important;
     width: 100% !important;
+    height: 200px !important;
   }
 
   .recent-posts.double-column-container {
