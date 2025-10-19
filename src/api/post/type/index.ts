@@ -146,6 +146,8 @@ export interface ArticleForm {
   copyright_author?: string;
   copyright_author_href?: string;
   copyright_url?: string;
+  custom_published_at?: string;
+  custom_updated_at?: string;
 }
 
 export type ArticleResponse = Article;
