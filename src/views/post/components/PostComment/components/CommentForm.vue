@@ -114,7 +114,8 @@ const commentInfoConfig = computed(() => {
     emoji_cdn: config.emoji_cdn,
     limit_length: config.limit_length,
     login_required: config.login_required,
-    anonymous_email: config.anonymous_email || ""
+    anonymous_email: config.anonymous_email || "",
+    allow_image_upload: config.allow_image_upload !== false // 默认允许上传
   };
 });
 
@@ -720,6 +721,7 @@ defineExpose({
                 </transition>
               </div>
               <button
+                v-if="commentInfoConfig.allow_image_upload"
                 class="action-icon"
                 type="button"
                 :disabled="isUploading"
@@ -729,6 +731,7 @@ defineExpose({
                 <IconImage />
               </button>
               <input
+                v-if="commentInfoConfig.allow_image_upload"
                 ref="fileInputRef"
                 type="file"
                 style="display: none"

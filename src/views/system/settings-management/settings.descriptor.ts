@@ -1073,6 +1073,12 @@ const commentDescriptors: SettingDescriptor[] = [
     type: "boolean"
   },
   {
+    frontendPath: "frontDesk.comment.allowImageUpload",
+    backendKey: constant.KeyCommentAllowImageUpload,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
     frontendPath: "frontDesk.comment.limitPerMinute",
     backendKey: constant.KeyCommentLimitPerMinute,
     defaultValue: 5,

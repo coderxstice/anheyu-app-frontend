@@ -135,6 +135,11 @@ const formatJson = () => {
           <el-switch v-model="model.showRegion" />
         </el-form-item>
       </el-col>
+      <el-col :span="8">
+        <el-form-item label="允许上传图片">
+          <el-switch v-model="model.allowImageUpload" />
+        </el-form-item>
+      </el-col>
       <el-col :span="12">
         <el-form-item label="评论每页数量">
           <el-input-number v-model="model.pageSize" :min="1" />
