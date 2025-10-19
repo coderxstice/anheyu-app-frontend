@@ -299,7 +299,8 @@ const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
 
 const currentPageTitle = computed(() => {
   if (route.name === "PostDetail" && articleStore.currentArticleTitle) {
-    return articleStore.currentArticleTitle;
+    // 文章详情页：标题格式为 "文章标题"
+    return `${articleStore.currentArticleTitle}`;
   }
 
   const title = route.meta.title;
@@ -318,9 +319,28 @@ const handleDirectMenuTravelClick = (event: Event) => {
   articleStore.navigateToRandomLink();
 };
 
+// SSR 场景：记录是否是首次执行
+let isFirstExecution = true;
+
 watch(
   currentPageTitle,
   newTitle => {
+    // SSR 场景：如果是首次执行且有服务端渲染的标题且有初始数据，跳过标题更新
+    if (isFirstExecution) {
+      const hasInitialData =
+        window.__INITIAL_DATA__ && window.__INITIAL_DATA__.data;
+      const hasServerTitle = document.title && document.title !== "";
+
+      // 如果是 SSR 场景（有初始数据且有服务端标题），保留服务端标题
+      if (hasInitialData && hasServerTitle) {
+        isFirstExecution = false;
+        return;
+      }
+
+      isFirstExecution = false;
+    }
+
+    // 正常更新标题
     if (newTitle) {
       document.title = newTitle;
     }

@@ -4,7 +4,7 @@
  * 这个模块依赖 store，必须在 Pinia 初始化后才能调用其函数。
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-07-22 11:26:57
+ * @LastEditTime: 2025-10-19 23:04:13
  * @LastEditors: 安知鱼
  */
 
@@ -65,7 +65,15 @@ export const initializeConfigs = async (app: App): Promise<void> => {
     // 6. 使用最终的配置来动态更新页面元信息（标题、Favicon等）
     const finalConfig = getConfig();
     if (finalConfig) {
-      document.title = finalConfig.APP_NAME || finalConfig.title || "安和鱼";
+      // SSR场景：如果是直接访问（非SPA导航）且有初始数据，保留服务端渲染的标题
+      const hasInitialData =
+        window.__INITIAL_DATA__ && window.__INITIAL_DATA__.data;
+      const isFirstLoad = !window.history.state; // 首次加载时 history.state 为 null
+
+      // 只有在非SSR场景或后续的客户端导航时才更新标题
+      if (!hasInitialData || !isFirstLoad) {
+        document.title = finalConfig.APP_NAME || finalConfig.title || "安和鱼";
+      }
 
       // 更新 Favicon
       let faviconLink = document.querySelector(
