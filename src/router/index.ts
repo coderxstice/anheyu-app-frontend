@@ -158,20 +158,28 @@ router.beforeEach((to: ToRouteType, _from, next) => {
 
   // 2. 设置页面标题
   if (!externalLink) {
-    to.matched.some(item => {
-      if (!item.meta.title) return "";
+    // SSR场景：如果是首次加载且有服务端渲染的标题，跳过标题更新
+    const hasInitialData =
+      window.__INITIAL_DATA__ && window.__INITIAL_DATA__.data;
+    const isFirstNavigation = _from.name === undefined && _from.path === "/";
 
-      let titleText: string;
-      if (typeof item.meta.title === "function") {
-        titleText = item.meta.title();
-      } else {
-        titleText = item.meta.title as string;
-      }
+    // 只有在非SSR首次加载或后续客户端导航时才更新标题
+    if (!hasInitialData || !isFirstNavigation) {
+      to.matched.some(item => {
+        if (!item.meta.title) return "";
 
-      const Title = getConfig().Title;
-      if (Title) document.title = `${titleText} | ${Title}`;
-      else document.title = titleText;
-    });
+        let titleText: string;
+        if (typeof item.meta.title === "function") {
+          titleText = item.meta.title();
+        } else {
+          titleText = item.meta.title as string;
+        }
+
+        const Title = getConfig().Title;
+        if (Title) document.title = `${titleText} | ${Title}`;
+        else document.title = titleText;
+      });
+    }
   }
 
   // 3. 清理Article meta标签（如果不是文章页面）

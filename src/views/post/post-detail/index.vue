@@ -209,6 +209,9 @@ const fetchRequiredData = async (id: string) => {
       loading.value = false;
       delete window.__INITIAL_DATA__;
 
+      // SSR场景：设置文章标题到store（与非SSR路径保持一致）
+      articleStore.setCurrentArticleTitle(article.value.title);
+
       // 显式处理主题色，确保在文章切换时正确更新
       if (article.value.primary_color) {
         setArticleTheme(article.value.primary_color);
