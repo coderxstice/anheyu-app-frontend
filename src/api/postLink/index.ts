@@ -27,7 +27,9 @@ import type {
   ImportLinksRequest,
   ImportLinksResponse,
   LinkHealthCheckResponse,
-  BatchUpdateLinkSortRequest
+  BatchUpdateLinkSortRequest,
+  ExportLinksParams,
+  ExportLinksResponse
 } from "./type";
 
 // ------------------ 前台公开接口 ------------------
@@ -208,6 +210,17 @@ export const importLinks = (
     "post",
     baseUrlApi("links/import"),
     { data }
+  );
+};
+
+/** @description [后台] 导出友链 */
+export const exportLinks = (
+  params?: ExportLinksParams
+): Promise<BaseResponse<ExportLinksResponse>> => {
+  return http.request<BaseResponse<ExportLinksResponse>>(
+    "get",
+    baseUrlApi("links/export"),
+    { params }
   );
 };
 

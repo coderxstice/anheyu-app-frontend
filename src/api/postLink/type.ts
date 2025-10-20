@@ -214,3 +214,21 @@ export interface LinkSortItem {
 export interface BatchUpdateLinkSortRequest {
   items: LinkSortItem[];
 }
+
+// --- 友链导出相关类型 ---
+
+/** [后台] 导出友链的查询参数 */
+export interface ExportLinksParams {
+  name?: string;
+  url?: string;
+  description?: string;
+  status?: LinkStatus;
+  category_id?: number;
+  tag_id?: number;
+}
+
+/** 导出友链的响应 */
+export interface ExportLinksResponse {
+  links: ImportLinkItem[];
+  total: number;
+}
