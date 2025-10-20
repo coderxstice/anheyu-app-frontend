@@ -25,11 +25,9 @@
 @keyframes fadeInImage {
   from {
     opacity: 0;
-    transform: scale(0.98);
   }
   to {
     opacity: 1;
-    transform: scale(1);
   }
 }
 
@@ -49,55 +47,15 @@
   // 前台特有：懒加载图片样式
   .lazy-image {
     background-color: var(--anzhiyu-secondbg);
-    background-image: linear-gradient(
-      90deg,
-      var(--anzhiyu-secondbg) 0%,
-      var(--anzhiyu-background) 50%,
-      var(--anzhiyu-secondbg) 100%
-    );
-    background-size: 200% 100%;
-    animation: skeleton-loading 1.2s ease-in-out infinite;
 
     &.lazy-loading {
       position: relative;
-
-      &::before {
-        content: "加载中...";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        color: var(--anzhiyu-fontcolor);
-        font-size: 14px;
-        background: var(--anzhiyu-card-bg);
-        padding: 4px 8px;
-        border-radius: 4px;
-        opacity: 0.8;
-        white-space: nowrap;
-        z-index: 1;
-      }
-
-      &::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 20px;
-        height: 20px;
-        margin-top: -10px;
-        margin-left: -10px;
-        border: 2px solid var(--anzhiyu-main);
-        border-top-color: transparent;
-        border-radius: 50%;
-        animation: lazy-loading-spinner 0.8s linear infinite;
-        z-index: 2;
-      }
+      opacity: 0.6;
     }
 
     &.lazy-loaded {
-      animation: none;
       background: transparent;
-      animation: fadeInImage 0.5s ease-in-out;
+      animation: fadeInImage 0.3s ease-out;
     }
 
     &.lazy-error {
