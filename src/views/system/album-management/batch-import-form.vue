@@ -128,7 +128,7 @@ defineExpose({ getRef });
               v-model="newFormInline.urls"
               type="textarea"
               :rows="10"
-              placeholder="请输入图片链接，每行一个URL&#10;例如：&#10;https://example.com/image1.jpg&#10;https://example.com/image2.jpg&#10;https://example.com/image3.jpg"
+              placeholder="请输入图片链接，每行一个URL&#10;例如：&#10;https://upload-bbs.miyoushe.com/upload/2025/10/20/125766904/d9bd6eaa4bd95b4a3822697d2a02b9fe_3838888873972014349.jpg&#10;https://example.com/image2.jpg&#10;https://example.com/image3.jpg"
               clearable
               class="url-textarea"
             />

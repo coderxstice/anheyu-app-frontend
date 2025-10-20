@@ -13,6 +13,7 @@ import InlineStylesPlugin from "./plugins/markdown-it-inline-styles-plugin";
 import ButtonPlugin from "./plugins/markdown-it-button-plugin";
 import BtnsPlugin from "./plugins/markdown-it-btns-plugin";
 import LinkCardPlugin from "./plugins/markdown-it-link-card-plugin";
+import GalleryPlugin from "./plugins/markdown-it-gallery-plugin";
 
 export function installMarkdownEditorExtensions() {
   console.log("🔧 Installing markdown editor extensions...");
@@ -42,6 +43,9 @@ export function installMarkdownEditorExtensions() {
 
         mdit.use(LinkCardPlugin);
         console.log("✅ LinkCardPlugin registered");
+
+        mdit.use(GalleryPlugin);
+        console.log("✅ GalleryPlugin registered");
 
         console.log("🎉 All markdown plugins configured successfully!");
       } catch (error) {
