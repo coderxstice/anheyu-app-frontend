@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-21 17:48:59
- * @LastEditTime: 2025-10-01 16:22:17
+ * @LastEditTime: 2025-10-20 11:56:04
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -28,6 +28,32 @@ const friendLinkApplyCondition = computed(
 // 前台展示使用渲染后的 HTML
 const friendLinkApplyCustomCodeHtml = computed(
   () => siteConfigStore.getSiteConfig?.FRIEND_LINK_APPLY_CUSTOM_CODE_HTML
+);
+// 友链申请表单 placeholder 配置
+const placeholderName = computed(
+  () =>
+    siteConfigStore.getSiteConfig?.FRIEND_LINK_PLACEHOLDER_NAME ||
+    "例如：安知鱼"
+);
+const placeholderURL = computed(
+  () =>
+    siteConfigStore.getSiteConfig?.FRIEND_LINK_PLACEHOLDER_URL ||
+    "https://blog.anheyu.com/"
+);
+const placeholderLogo = computed(
+  () =>
+    siteConfigStore.getSiteConfig?.FRIEND_LINK_PLACEHOLDER_LOGO ||
+    "https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"
+);
+const placeholderDescription = computed(
+  () =>
+    siteConfigStore.getSiteConfig?.FRIEND_LINK_PLACEHOLDER_DESCRIPTION ||
+    "生活明朗，万物可爱"
+);
+const placeholderSiteshot = computed(
+  () =>
+    siteConfigStore.getSiteConfig?.FRIEND_LINK_PLACEHOLDER_SITESHOT ||
+    "https://example.com/siteshot.png (可选)"
 );
 
 onMounted(() => {
@@ -62,6 +88,11 @@ const handleScrollToApply = () => {
       <ApplyLink
         :friendLinkApplyCondition="friendLinkApplyCondition"
         :friendLinkApplyCustomCodeHtml="friendLinkApplyCustomCodeHtml"
+        :placeholderName="placeholderName"
+        :placeholderURL="placeholderURL"
+        :placeholderLogo="placeholderLogo"
+        :placeholderDescription="placeholderDescription"
+        :placeholderSiteshot="placeholderSiteshot"
       />
     </div>
 

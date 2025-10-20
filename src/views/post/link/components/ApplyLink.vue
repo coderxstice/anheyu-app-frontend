@@ -2,7 +2,7 @@
  * @Description: 友情链接申请面板
  * @Author: 安知鱼
  * @Date: 2025-08-19 10:19:23
- * @LastEditTime: 2025-10-03 14:55:18
+ * @LastEditTime: 2025-10-20 11:54:15
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -28,6 +28,11 @@ defineOptions({
 const props = defineProps<{
   friendLinkApplyCondition: string[];
   friendLinkApplyCustomCodeHtml?: string; // 渲染后的 HTML 内容
+  placeholderName?: string; // 网站名称输入框提示文字
+  placeholderURL?: string; // 网站链接输入框提示文字
+  placeholderLogo?: string; // 网站LOGO输入框提示文字
+  placeholderDescription?: string; // 网站描述输入框提示文字
+  placeholderSiteshot?: string; // 网站快照输入框提示文字
 }>();
 
 const checkedStates = ref(
@@ -188,15 +193,24 @@ watch(allChecked, isAllChecked => {
         @submit.prevent
       >
         <el-form-item label="网站名称" prop="name">
-          <el-input v-model="form.name" placeholder="例如：安知鱼" />
+          <el-input
+            v-model="form.name"
+            :placeholder="placeholderName || '例如：安知鱼'"
+          />
         </el-form-item>
         <el-form-item label="网站链接" prop="url">
-          <el-input v-model="form.url" placeholder="https://blog.anheyu.com/" />
+          <el-input
+            v-model="form.url"
+            :placeholder="placeholderURL || 'https://blog.anheyu.com/'"
+          />
         </el-form-item>
         <el-form-item label="网站 LOGO" prop="logo">
           <el-input
             v-model="form.logo"
-            placeholder="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"
+            :placeholder="
+              placeholderLogo ||
+              'https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg'
+            "
           />
         </el-form-item>
         <el-form-item label="网站描述" prop="description">
@@ -204,13 +218,15 @@ watch(allChecked, isAllChecked => {
             v-model="form.description"
             type="textarea"
             :rows="3"
-            placeholder="生活明朗，万物可爱"
+            :placeholder="placeholderDescription || '生活明朗，万物可爱'"
           />
         </el-form-item>
         <el-form-item label="网站快照" prop="siteshot">
           <el-input
             v-model="form.siteshot"
-            placeholder="https://example.com/siteshot.png (可选)"
+            :placeholder="
+              placeholderSiteshot || 'https://example.com/siteshot.png (可选)'
+            "
           />
           <div class="form-tip">
             <small>网站快照是您网站的截图，用于在友链页面展示。</small>
