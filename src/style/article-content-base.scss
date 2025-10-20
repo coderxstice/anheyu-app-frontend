@@ -29,6 +29,12 @@
 // 混入：编辑器预览容器样式（重要！）
 @mixin editor-preview-styles {
   .md-editor-preview {
+    figure {
+      margin: 0 !important;
+      img {
+        margin: 0 !important;
+      }
+    }
     .md-editor-code-block {
       font-size: 1rem !important;
       line-height: 1.6;
