@@ -13,6 +13,15 @@
               @keyup.enter="handleQuery"
             />
           </el-form-item>
+          <el-form-item label="网址">
+            <el-input
+              v-model="queryParams.url"
+              placeholder="网站网址"
+              clearable
+              style="width: 220px"
+              @keyup.enter="handleQuery"
+            />
+          </el-form-item>
           <el-form-item label="状态">
             <el-select
               v-model="queryParams.status"
@@ -350,6 +359,7 @@ const queryParams = ref<GetAdminLinksParams>({
   page: 1,
   pageSize: 12,
   name: "",
+  url: "",
   status: undefined,
   category_id: undefined,
   tag_id: undefined
@@ -398,6 +408,7 @@ const handleQuery = () => {
 
 const resetQuery = () => {
   queryParams.value.name = "";
+  queryParams.value.url = "";
   queryParams.value.status = undefined;
   queryParams.value.category_id = undefined;
   queryParams.value.tag_id = undefined;
