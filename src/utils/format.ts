@@ -53,13 +53,35 @@ export const formatDateTime = (
 };
 
 /**
+ * 格式化为日期字符串（仅日期，不含时间）
+ * @param isoString - 后端返回的日期字符串
+ * @returns 'YYYY-MM-DD' 格式的字符串
+ */
+export const formatDate = (isoString: string | undefined | null): string => {
+  if (!isoString) return "未知";
+  try {
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) {
+      return isoString;
+    }
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  } catch (error) {
+    console.error("日期格式化错误:", error);
+    return isoString;
+  }
+};
+
+/**
  * 格式化为动态的相对时间
  * - 1 分钟内: "刚刚", "xx 秒前"
  * - 1 小时内: "xx 分钟前"
  * - 24 小时内: "xx 小时前"
  * - 昨天/前天
  * - 7 天内: "xx 天前"
- * - 超过 7 天: 显示绝对时间 "YYYY/MM/DD HH:mm"
+ * - 超过 7 天: 显示绝对日期 "YYYY-MM-DD"
  * @param dateStr - ISO 8601 格式的日期字符串
  * @returns 格式化后的时间字符串
  */
@@ -113,5 +135,6 @@ export const formatRelativeTime = (dateStr: string): string => {
     return `${Math.floor(diffInSeconds / oneDay)} 天前`;
   }
 
-  return formatDateTime(dateStr);
+  // 超过 7 天，显示日期（不含时间）
+  return formatDate(dateStr);
 };

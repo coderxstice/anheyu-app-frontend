@@ -104,6 +104,7 @@ export interface Article {
   copyright_author?: string;
   copyright_author_href?: string;
   copyright_url?: string;
+  keywords?: string;
   prev_article: ArticleLink | null;
   next_article: ArticleLink | null;
   related_articles: ArticleLink[];
@@ -148,6 +149,7 @@ export interface ArticleForm {
   copyright_url?: string;
   custom_published_at?: string;
   custom_updated_at?: string;
+  keywords?: string;
 }
 
 export type ArticleResponse = Article;

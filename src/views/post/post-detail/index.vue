@@ -184,7 +184,8 @@ const updateArticleMetaTags = () => {
     publishedTime: article.value.created_at,
     modifiedTime: article.value.updated_at,
     author: article.value.copyright_author || undefined,
-    tags: article.value.post_tags?.map(tag => tag.name) || []
+    tags: article.value.post_tags?.map(tag => tag.name) || [],
+    keywords: article.value.keywords || undefined
   };
 
   setArticleMetaTags(metaData);
