@@ -176,9 +176,22 @@ const onSaveHandler = async (markdown: string, sanitizedHtml: string) => {
       ElMessage.success("更新成功");
     } else {
       const res = await createArticle(dataToSubmit);
+      console.log("📦 创建文章API响应:", res);
+      console.log("📦 响应数据 res.data:", res.data);
+      console.log("📦 文章ID res.data.id:", res.data?.id);
+      const newArticleId = res.data?.id;
+      console.log("✅ 文章创建成功，ID:", newArticleId);
       ElMessage.success("创建成功");
       localStorage.removeItem(getDraftKey());
-      router.push({ name: "PostEdit", params: { id: res.data.id } });
+      // 立即更新 articleId，避免后续操作认为还在新增模式
+      articleId.value = newArticleId;
+      console.log(
+        "🔄 准备跳转到编辑页面:",
+        `/admin/post-management/edit/${newArticleId}`
+      );
+      // 使用 replace 而不是 push，确保路由真正改变
+      await router.replace({ name: "PostEdit", params: { id: newArticleId } });
+      console.log("✅ 路由跳转完成");
     }
     localStorage.removeItem(getDraftKey());
     updateInitialState();
@@ -309,6 +322,16 @@ watch(
     localStorage.setItem(getDraftKey(), JSON.stringify(draft));
   }, 2000),
   { deep: true }
+);
+
+// 监听路由参数变化，当从新增模式切换到编辑模式时重新加载
+watch(
+  () => route.params.id,
+  async (newId, oldId) => {
+    if (newId && newId !== oldId && newId !== "new") {
+      await initPage();
+    }
+  }
 );
 onMounted(async () => {
   await initPage();

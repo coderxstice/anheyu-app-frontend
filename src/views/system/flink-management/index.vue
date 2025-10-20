@@ -13,6 +13,15 @@
               @keyup.enter="handleQuery"
             />
           </el-form-item>
+          <el-form-item label="网址">
+            <el-input
+              v-model="queryParams.url"
+              placeholder="网站网址"
+              clearable
+              style="width: 220px"
+              @keyup.enter="handleQuery"
+            />
+          </el-form-item>
           <el-form-item label="状态">
             <el-select
               v-model="queryParams.status"
@@ -72,6 +81,9 @@
           </el-button>
           <el-button type="warning" :icon="Upload" @click="handleImport">
             <span class="button-text">批量导入</span>
+          </el-button>
+          <el-button type="success" :icon="Download" @click="handleExport">
+            <span class="button-text">导出友链</span>
           </el-button>
           <el-button
             type="info"
@@ -285,6 +297,7 @@ import {
   Delete,
   Setting,
   Upload,
+  Download,
   Monitor,
   Check,
   Close
@@ -299,7 +312,8 @@ import {
   getHealthCheckStatus,
   batchUpdateLinkSort,
   getLinkCategories,
-  getLinkTags
+  getLinkTags,
+  exportLinks
 } from "@/api/postLink";
 import type {
   LinkItem,
@@ -350,6 +364,7 @@ const queryParams = ref<GetAdminLinksParams>({
   page: 1,
   pageSize: 12,
   name: "",
+  url: "",
   status: undefined,
   category_id: undefined,
   tag_id: undefined
@@ -398,6 +413,7 @@ const handleQuery = () => {
 
 const resetQuery = () => {
   queryParams.value.name = "";
+  queryParams.value.url = "";
   queryParams.value.status = undefined;
   queryParams.value.category_id = undefined;
   queryParams.value.tag_id = undefined;
@@ -477,6 +493,57 @@ const handleManage = () => {
 
 const handleImport = () => {
   importDialog.visible = true;
+};
+
+// 导出友链
+const handleExport = async () => {
+  try {
+    ElMessage.info("正在导出友链数据...");
+
+    // 调用导出接口，传入当前的筛选条件
+    const res = await exportLinks({
+      name: queryParams.value.name,
+      url: queryParams.value.url,
+      status: queryParams.value.status,
+      category_id: queryParams.value.category_id,
+      tag_id: queryParams.value.tag_id
+    });
+
+    if (res.code === 200 && res.data) {
+      // 将数据转换为 JSON 字符串
+      const jsonData = JSON.stringify(res.data.links, null, 2);
+
+      // 创建 Blob 对象
+      const blob = new Blob([jsonData], { type: "application/json" });
+
+      // 创建下载链接
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+
+      // 生成文件名（包含时间戳）
+      const timestamp = new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace(/:/g, "-");
+      link.download = `友链导出_${timestamp}.json`;
+
+      // 触发下载
+      document.body.appendChild(link);
+      link.click();
+
+      // 清理
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      ElMessage.success(`成功导出 ${res.data.total} 个友链`);
+    } else {
+      ElMessage.error(res.message || "导出失败");
+    }
+  } catch (error) {
+    console.error("导出友链失败", error);
+    ElMessage.error("导出友链失败");
+  }
 };
 
 // 轮询健康检查状态
