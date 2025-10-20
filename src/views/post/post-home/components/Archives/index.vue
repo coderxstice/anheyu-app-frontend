@@ -37,6 +37,13 @@ const groupedArticles = computed(() => {
   return groups;
 });
 
+// 获取排序后的年份数组（从新到旧）
+const sortedYears = computed(() => {
+  return Object.keys(groupedArticles.value).sort(
+    (a, b) => parseInt(b) - parseInt(a)
+  );
+});
+
 // 格式化日期，只显示 月-日
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -62,10 +69,10 @@ const goToTag = (tagName: string) => {
       文章<sup>{{ total }}</sup>
     </div>
     <div class="article-sort">
-      <template v-for="(articlesInYear, year) in groupedArticles" :key="year">
+      <template v-for="year in sortedYears" :key="year">
         <div class="article-sort-item-year">{{ year }}</div>
         <div
-          v-for="article in articlesInYear"
+          v-for="article in groupedArticles[year]"
           :key="article.id"
           class="article-sort-item"
           @click="goToPost(article.id)"
