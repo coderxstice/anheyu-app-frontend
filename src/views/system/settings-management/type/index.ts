@@ -395,6 +395,11 @@ export interface FLinkSettingsInfo {
   friendLinkApplyCondition: string[];
   friendLinkApplyCustomCode: string; // Markdown 内容（用于编辑）
   friendLinkApplyCustomCodeHtml: string; // 渲染后的 HTML（用于前台展示）
+  placeholderName: string; // 网站名称输入框提示文字
+  placeholderURL: string; // 网站链接输入框提示文字
+  placeholderLogo: string; // 网站LOGO输入框提示文字
+  placeholderDescription: string; // 网站描述输入框提示文字
+  placeholderSiteshot: string; // 网站快照输入框提示文字
   notifyAdmin: boolean; // 是否通知站长
   pushooChannel: string; // 推送渠道
   pushooURL: string; // 推送URL

@@ -39,6 +39,41 @@
       </div>
     </el-form-item>
 
+    <!-- 友链申请表单 Placeholder 配置 -->
+    <el-divider content-position="left">表单输入框提示文字</el-divider>
+
+    <el-form-item label="网站名称提示">
+      <el-input v-model="model.placeholderName" placeholder="例如：安知鱼" />
+    </el-form-item>
+
+    <el-form-item label="网站链接提示">
+      <el-input
+        v-model="model.placeholderURL"
+        placeholder="https://blog.anheyu.com/"
+      />
+    </el-form-item>
+
+    <el-form-item label="网站LOGO提示">
+      <el-input
+        v-model="model.placeholderLogo"
+        placeholder="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"
+      />
+    </el-form-item>
+
+    <el-form-item label="网站描述提示">
+      <el-input
+        v-model="model.placeholderDescription"
+        placeholder="生活明朗，万物可爱"
+      />
+    </el-form-item>
+
+    <el-form-item label="网站快照提示">
+      <el-input
+        v-model="model.placeholderSiteshot"
+        placeholder="https://example.com/siteshot.png (可选)"
+      />
+    </el-form-item>
+
     <!-- 友链申请通知设置 -->
     <FLinkNotifySettings
       :model-value="model"

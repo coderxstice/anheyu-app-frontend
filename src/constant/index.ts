@@ -83,6 +83,14 @@ const KeyFriendLinkApplyCustomCode: SettingKey =
   "FRIEND_LINK_APPLY_CUSTOM_CODE";
 const KeyFriendLinkApplyCustomCodeHtml: SettingKey =
   "FRIEND_LINK_APPLY_CUSTOM_CODE_HTML";
+// 友链申请表单 placeholder 配置
+const KeyFriendLinkPlaceholderName: SettingKey = "FRIEND_LINK_PLACEHOLDER_NAME";
+const KeyFriendLinkPlaceholderURL: SettingKey = "FRIEND_LINK_PLACEHOLDER_URL";
+const KeyFriendLinkPlaceholderLogo: SettingKey = "FRIEND_LINK_PLACEHOLDER_LOGO";
+const KeyFriendLinkPlaceholderDescription: SettingKey =
+  "FRIEND_LINK_PLACEHOLDER_DESCRIPTION";
+const KeyFriendLinkPlaceholderSiteshot: SettingKey =
+  "FRIEND_LINK_PLACEHOLDER_SITESHOT";
 // 友链通知配置
 const KeyFriendLinkNotifyAdmin: SettingKey = "FRIEND_LINK_NOTIFY_ADMIN";
 const KeyFriendLinkPushooChannel: SettingKey = "FRIEND_LINK_PUSHOO_CHANNEL";
@@ -356,6 +364,11 @@ export const constant = {
   KeyFriendLinkApplyCondition,
   KeyFriendLinkApplyCustomCode,
   KeyFriendLinkApplyCustomCodeHtml,
+  KeyFriendLinkPlaceholderName,
+  KeyFriendLinkPlaceholderURL,
+  KeyFriendLinkPlaceholderLogo,
+  KeyFriendLinkPlaceholderDescription,
+  KeyFriendLinkPlaceholderSiteshot,
   KeyFriendLinkNotifyAdmin,
   KeyFriendLinkPushooChannel,
   KeyFriendLinkPushooURL,

@@ -1278,6 +1278,38 @@ const fLinkDescriptors: SettingDescriptor[] = [
     defaultValue: "",
     type: "string"
   },
+  // 友链申请表单 placeholder 配置
+  {
+    frontendPath: "frontDesk.fLink.placeholderName",
+    backendKey: constant.KeyFriendLinkPlaceholderName,
+    defaultValue: "例如：安知鱼",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.fLink.placeholderURL",
+    backendKey: constant.KeyFriendLinkPlaceholderURL,
+    defaultValue: "https://blog.anheyu.com/",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.fLink.placeholderLogo",
+    backendKey: constant.KeyFriendLinkPlaceholderLogo,
+    defaultValue:
+      "https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.fLink.placeholderDescription",
+    backendKey: constant.KeyFriendLinkPlaceholderDescription,
+    defaultValue: "生活明朗，万物可爱",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.fLink.placeholderSiteshot",
+    backendKey: constant.KeyFriendLinkPlaceholderSiteshot,
+    defaultValue: "https://example.com/siteshot.png (可选)",
+    type: "string"
+  },
   // 友链通知配置
   {
     frontendPath: "frontDesk.fLink.notifyAdmin",
