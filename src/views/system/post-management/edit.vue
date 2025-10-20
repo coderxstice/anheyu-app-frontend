@@ -71,7 +71,8 @@ const form = reactive<ArticleForm>({
   copyright: true,
   copyright_author: "",
   copyright_author_href: "",
-  copyright_url: ""
+  copyright_url: "",
+  keywords: ""
 });
 
 const initialFormState = reactive({

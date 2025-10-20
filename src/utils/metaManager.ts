@@ -8,6 +8,7 @@ export interface ArticleMetaData {
   modifiedTime?: string;
   author?: string;
   tags?: string[];
+  keywords?: string;
 }
 
 // 存储之前添加的meta标签，用于清理
@@ -57,6 +58,32 @@ function removeMetaTag(property: string): void {
 }
 
 /**
+ * 设置name类型的meta标签
+ * @param name - meta标签的name属性
+ * @param content - meta标签的content内容
+ */
+function setMetaTagByName(name: string, content: string): void {
+  // 查找是否已存在相同name的meta标签
+  let metaElement = document.querySelector(
+    `meta[name="${name}"]`
+  ) as HTMLMetaElement;
+
+  if (metaElement) {
+    // 如果存在，更新content
+    metaElement.content = content;
+  } else {
+    // 如果不存在，创建新的meta标签
+    metaElement = document.createElement("meta");
+    metaElement.setAttribute("name", name);
+    metaElement.content = content;
+    document.head.appendChild(metaElement);
+
+    // 记录新添加的标签，用于后续清理
+    addedMetaTags.push(metaElement);
+  }
+}
+
+/**
  * 设置article相关的meta标签
  * @param articleMeta - 文章meta数据
  */
@@ -85,6 +112,11 @@ export function setArticleMetaTags(articleMeta: ArticleMetaData): void {
     articleMeta.tags.forEach(tag => {
       setMetaTag("article:tag", tag);
     });
+  }
+
+  // 设置关键词（用于SEO）
+  if (articleMeta.keywords) {
+    setMetaTagByName("keywords", articleMeta.keywords);
   }
 }
 

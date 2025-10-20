@@ -54,6 +54,9 @@ const editingCategoryName = ref("");
 const loadingStates = ref<Record<string, boolean>>({}); // 用于跟踪每行的加载状态
 const isFetchingColor = ref(false); // 用于跟踪主色调获取状态
 
+// === 关键词标签相关状态 ===
+const keywordTags = ref<string[]>([]);
+
 const isVisible = computed({
   get: () => props.modelValue,
   set: val => emit("update:modelValue", val)
@@ -87,6 +90,15 @@ watch(
       copyrightType.value = props.form.copyright_author
         ? "reprint"
         : "original";
+      // 初始化关键词标签
+      if (internalForm.keywords) {
+        keywordTags.value = internalForm.keywords
+          .split(",")
+          .map(k => k.trim())
+          .filter(k => k !== "");
+      } else {
+        keywordTags.value = [];
+      }
     }
   }
 );
@@ -238,6 +250,8 @@ const removeSummaryInput = (index: number) => {
 
 const handleConfirm = () => {
   internalForm.copyright = true;
+  // 将关键词标签数组转换为逗号分隔的字符串
+  internalForm.keywords = keywordTags.value.join(", ");
   emit("confirm-publish");
 };
 
@@ -490,6 +504,19 @@ const handleFetchPrimaryColor = async () => {
                     v-model="internalForm.ip_location"
                     placeholder="留空则自动获取"
                   />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="关键词 (可选)" prop="keywords">
+                  <el-input-tag
+                    v-model="keywordTags"
+                    tag-type="primary"
+                    tag-effect="light"
+                    placeholder="输入关键词后按回车添加"
+                  />
+                  <div class="form-item-help">
+                    用于SEO优化，建议添加3-5个关键词
+                  </div>
                 </el-form-item>
               </el-col>
               <el-col :span="12">

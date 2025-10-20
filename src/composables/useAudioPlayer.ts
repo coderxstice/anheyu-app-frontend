@@ -760,8 +760,9 @@ export function useAudioPlayer(
     // 更新随机播放历史
     updateShuffleHistory(prevIndex);
 
-    if (!newSong?.url) {
-      console.warn("🎵 [上一首] 歌曲没有有效的URL");
+    // 检查歌曲是否有可用的资源（url 或 neteaseId）
+    if (!newSong?.url && !newSong?.neteaseId) {
+      console.warn("🎵 [上一首] 歌曲没有有效的URL或网易云ID");
       return;
     }
 
@@ -833,8 +834,9 @@ export function useAudioPlayer(
     // 更新随机播放历史
     updateShuffleHistory(nextIndex);
 
-    if (!newSong?.url) {
-      console.warn("🎵 [下一首] 歌曲没有有效的URL");
+    // 检查歌曲是否有可用的资源（url 或 neteaseId）
+    if (!newSong?.url && !newSong?.neteaseId) {
+      console.warn("🎵 [下一首] 歌曲没有有效的URL或网易云ID");
       return;
     }
 
@@ -901,8 +903,9 @@ export function useAudioPlayer(
       currentSongIndex.value = index;
       const newSong = currentSong.value;
 
-      if (!newSong?.url) {
-        console.warn("🎵 [歌曲切换] 歌曲没有有效的URL");
+      // 检查歌曲是否有可用的资源（url 或 neteaseId）
+      if (!newSong?.url && !newSong?.neteaseId) {
+        console.warn("🎵 [歌曲切换] 歌曲没有有效的URL或网易云ID");
         return;
       }
 
