@@ -324,9 +324,11 @@ const handleAvatarError = (event: Event, comment: AdminComment) => {
     }
   }
 
-  :deep(.tanzhiyu-owo-emotion) {
+  :deep(.anzhiyu-owo-emotion) {
     width: 3rem;
     height: auto;
+    margin: 0;
+    display: inline;
   }
 }
 
