@@ -224,22 +224,43 @@ onMounted(() => {
   max-width: 1400px;
   padding: 0.5rem 1.5rem 1rem;
   margin: 0 auto;
+  /* 防止布局偏移：预留最小高度 */
+  min-height: 600px;
+  /* 隔离布局计算 */
+  contain: layout style;
 }
 
 .main-content {
   flex: 1;
   min-width: 0;
+  /* 防止内容加载时的布局偏移 */
+  contain: layout;
 }
 
 .recent-posts {
   width: 100%;
+  /* 防止布局偏移：固定最小高度 */
+  min-height: 400px;
 
   &.double-column-container {
     display: flex;
     flex-wrap: wrap;
     gap: 0.625rem;
     justify-content: space-between;
-    min-height: 400px;
+  }
+
+  /* 优化 Element Plus loading 样式，避免布局偏移 */
+  :deep(.el-loading-mask) {
+    position: absolute;
+    background-color: var(--anzhiyu-card-bg);
+  }
+
+  :deep(.el-loading-spinner) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
   }
 }
 

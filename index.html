@@ -270,21 +270,69 @@
         }
 
         body {
-          display: flex;
-          align-items: center;
-          justify-content: center;
           min-height: 100vh;
           margin: 0;
           background: var(--background);
           transition: background-color 0.3s ease;
         }
 
-        #app {
+        /* 加载状态：覆盖整个视口的固定层 */
+        #app::before {
+          content: "";
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
           display: flex;
-          flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 20px;
+          background: var(--background);
+          z-index: 9999;
+          pointer-events: none;
+          opacity: 1;
+          transition: opacity 0.3s ease-out;
+        }
+
+        /* Vue 挂载后隐藏加载层 */
+        #app[data-loaded="true"]::before {
+          opacity: 0;
+        }
+
+        /* 初始加载时隐藏实际内容 */
+        #app > :not(.loader):not(small) {
+          opacity: 0;
+          transition: opacity 0.3s ease-in;
+        }
+
+        /* Vue 挂载后显示实际内容 */
+        #app[data-loaded="true"] > :not(.loader):not(small) {
+          opacity: 1;
+        }
+
+        /* 加载器容器 - 固定在视口中心 */
+        #app {
+          min-height: 100vh;
+        }
+
+        #app > .loader,
+        #app > small {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 10000;
+        }
+
+        #app > small {
+          top: calc(50% + 60px);
+          transform: translateX(-50%);
+        }
+
+        /* Vue 挂载后隐藏加载器 */
+        #app[data-loaded="true"] > .loader,
+        #app[data-loaded="true"] > small {
+          display: none;
         }
 
         .loader {

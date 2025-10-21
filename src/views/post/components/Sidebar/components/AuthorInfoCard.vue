@@ -54,9 +54,23 @@ onMounted(() => {
         {{ currentGreeting }}
       </div>
       <div class="author-info-avatar">
-        <img class="avatar-img" :src="config.userAvatar" alt="avatar" />
+        <img
+          class="avatar-img"
+          :src="config.userAvatar"
+          alt="avatar"
+          width="118"
+          height="118"
+          loading="lazy"
+        />
         <div class="author-status">
-          <img class="g-status" :src="config.statusImg" alt="status" />
+          <img
+            class="g-status"
+            :src="config.statusImg"
+            alt="status"
+            width="26"
+            height="26"
+            loading="lazy"
+          />
         </div>
       </div>
       <div class="author-info__description" v-html="config.description" />
@@ -106,6 +120,8 @@ onMounted(() => {
 .card-info {
   padding: 0;
   border: none;
+  /* 预留固定高度，防止布局偏移 */
+  contain: layout;
 
   &::before {
     position: absolute;
@@ -122,12 +138,16 @@ onMounted(() => {
       var(--anzhiyu-main-op-deep)
     );
     background-size: 400%;
+    /* 延迟动画启动，避免初始渲染时的性能影响 */
     animation: gradient 15s ease infinite;
+    will-change: background-position;
   }
 
   .card-content {
     position: relative;
+    /* 固定最小高度，防止内容加载时的布局偏移 */
     min-height: 320px;
+    height: 320px;
     padding: 1rem 1.2rem;
   }
 

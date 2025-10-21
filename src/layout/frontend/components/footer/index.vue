@@ -42,6 +42,9 @@
             alt="返回顶部"
             :data-src="footerConfig.socialBar.centerImg"
             src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB2aWV3Qm94PSIwIDAgMSAxIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSJ0cmFuc3BhcmVudCIvPgo8L3N2Zz4="
+            width="50"
+            height="50"
+            loading="lazy"
             @click="scrollToTop"
           />
         </el-tooltip>
@@ -320,13 +323,18 @@ onMounted(() => {
     var(--anzhiyu-card-bg-none) 0,
     var(--anzhiyu-card-bg) 25%
   );
+  /* 防止布局偏移：隔离布局计算 */
+  contain: layout style;
 }
 
 .footer-wrap {
   position: relative;
   max-width: 1200px;
+  /* 固定高度防止布局偏移 */
   min-height: 17.875rem;
   margin: 0 auto;
+  /* 隔离内容布局 */
+  contain: layout;
 }
 
 a {
@@ -374,6 +382,9 @@ a {
   object-fit: cover;
   border-radius: 50%;
   transition: cubic-bezier(0, 0, 0, 1.29) 0.5s !important;
+  /* 防止图片加载导致的布局偏移 */
+  display: inline-block;
+  vertical-align: middle;
 
   &:hover {
     -webkit-backface-visibility: hidden;
