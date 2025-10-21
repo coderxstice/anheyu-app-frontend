@@ -105,12 +105,6 @@ export function initLazyLoad(
 
             // 停止观察已加载的图片
             observer.unobserve(img);
-          } else {
-            console.warn(`[LazyLoad] 跳过加载:`, {
-              reason: !src ? "没有data-src" : "src已经是目标地址",
-              dataSrc: src,
-              currentSrc: img.src
-            });
           }
         }
       });

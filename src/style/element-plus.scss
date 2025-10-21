@@ -208,7 +208,7 @@ button.el-button {
   border-radius: 10px !important;
 }
 
-.el-popper {
+.el-popper:not(.el-picker__popper) {
   overflow: hidden !important;
   color: var(--anzhiyu-fontcolor) !important;
   background: var(--anzhiyu-maskbgdeep) !important;
