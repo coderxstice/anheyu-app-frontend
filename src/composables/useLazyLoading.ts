@@ -188,6 +188,14 @@ export function useLazyLoading(options: LazyLoadingOptions = {}) {
         return;
       }
 
+      // 检查图片是否已经加载或正在加载
+      // 如果图片已经完成加载，说明浏览器已经加载过了，不再进行懒加载处理
+      if (img.complete && img.naturalHeight !== 0) {
+        // 图片已经成功加载，跳过懒加载处理
+        console.log("[LazyLoad] 跳过已加载的图片:", img.src);
+        return;
+      }
+
       // 将原始 src 保存到 data-src
       img.setAttribute("data-src", img.src);
 
