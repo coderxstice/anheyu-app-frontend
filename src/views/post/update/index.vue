@@ -860,18 +860,6 @@ onBeforeUnmount(() => {
   }
 }
 
-// 动画定义
-@keyframes slide-in {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 // 响应式设计
 @media (max-width: 768px) {
   .update-page {

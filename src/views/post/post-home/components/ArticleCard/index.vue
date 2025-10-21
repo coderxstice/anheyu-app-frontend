@@ -406,18 +406,6 @@ const goToTagPage = (tagName: string) => {
   }
 }
 
-// CSS 动画关键帧
-@keyframes slideInUp {
-  0% {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @media (width <= 768px) {
   .recent-post-item,
   .recent-post-item.double-column-item {
