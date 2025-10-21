@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-10-12 01:15:21
- * @LastEditTime: 2025-10-12 01:15:40
+ * @LastEditTime: 2025-10-21 13:35:29
  * @LastEditors: 安知鱼
 -->
 <!--
@@ -2454,24 +2454,28 @@ onBeforeUnmount(() => {
 // 音乐背景流动动画
 @keyframes musicBackgroundFlow {
   0% {
-    transform: scale(1.1) rotate(0deg);
     filter: blur(60px) brightness(0.4) saturate(1.2);
+    transform: scale(1.1) rotate(0deg);
   }
+
   25% {
-    transform: scale(1.15) rotate(0.5deg);
     filter: blur(65px) brightness(0.3) saturate(1.4);
+    transform: scale(1.15) rotate(0.5deg);
   }
+
   50% {
-    transform: scale(1.2) rotate(-0.3deg);
     filter: blur(70px) brightness(0.5) saturate(1.1);
+    transform: scale(1.2) rotate(-0.3deg);
   }
+
   75% {
-    transform: scale(1.15) rotate(0.2deg);
     filter: blur(62px) brightness(0.35) saturate(1.3);
+    transform: scale(1.15) rotate(0.2deg);
   }
+
   100% {
-    transform: scale(1.1) rotate(0deg);
     filter: blur(60px) brightness(0.4) saturate(1.2);
+    transform: scale(1.1) rotate(0deg);
   }
 }
 

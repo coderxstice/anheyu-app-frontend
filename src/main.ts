@@ -94,6 +94,14 @@ initializeConfigs(app)
 
     app.use(MotionPlugin).use(useElementPlus).use(Table);
     app.mount("#app");
+
+    // 标记应用已加载，移除加载动画，防止布局偏移
+    requestAnimationFrame(() => {
+      const appElement = document.getElementById("app");
+      if (appElement) {
+        appElement.setAttribute("data-loaded", "true");
+      }
+    });
   })
   .catch(error => {
     console.error("应用程序初始化失败:", error);

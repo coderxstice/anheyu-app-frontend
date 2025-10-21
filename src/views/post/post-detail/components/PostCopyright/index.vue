@@ -472,15 +472,4 @@ const goRewardPage = () => {
 .fade-leave-to {
   opacity: 0;
 }
-
-// 从底部升起的抽屉动画（移动端）
-@keyframes slide-up {
-  0% {
-    transform: translateY(100%);
-  }
-
-  100% {
-    transform: translateY(0);
-  }
-}
 </style>

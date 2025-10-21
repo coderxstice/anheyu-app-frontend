@@ -234,13 +234,5 @@ const creativityPairs = computed(() => {
   }
 }
 
-// 添加旋转动画
-@keyframes rowup {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
+// rowup 动画已在 animation.scss 中定义
 </style>

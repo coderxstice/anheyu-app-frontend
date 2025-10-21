@@ -876,17 +876,7 @@ defineExpose({
 </template>
 
 <style lang="scss" scoped>
-@keyframes owoIn {
-  from {
-    opacity: 0;
-    transform: translateY(0) scale(0.8);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(-10px) scale(1);
-  }
-}
+// owoIn 动画已在 animation.scss 中定义
 
 .emoji-preview {
   position: fixed;

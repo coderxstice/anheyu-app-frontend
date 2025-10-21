@@ -379,17 +379,6 @@ const emit = defineEmits<{
 }
 
 // 动画效果
-@keyframes playlistSlideIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.9) translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
 @keyframes playIndicatorPulse {
   0%,
   100% {
