@@ -143,7 +143,9 @@ onUnmounted(() => {
   border: var(--style-border);
   border-radius: 12px;
   transition: all 0.3s ease 0s;
-  animation: slide-in 0.6s 0.3s backwards;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: slideInUp 0.6s 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
 .catalog-bar {

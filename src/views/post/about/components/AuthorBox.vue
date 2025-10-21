@@ -100,7 +100,7 @@ defineProps<Props>();
     border-radius: 40px;
     box-shadow: var(--anzhiyu-shadow-lightblack);
     transform: translate(0, -4px);
-    animation: 6s ease-in-out 0s infinite normal none running floating;
+    animation: 6s ease-in-out 0s infinite normal none running aboutFloating;
 
     &:nth-child(1) {
       animation-delay: 0s;

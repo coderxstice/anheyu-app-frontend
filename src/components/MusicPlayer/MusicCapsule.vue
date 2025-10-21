@@ -152,15 +152,7 @@ const handleIconClick = (event: MouseEvent) => {
   }
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
+// spin 动画已在 animation.scss 中定义
 
 .music-capsule-container {
   max-width: 240px;
@@ -381,17 +373,5 @@ const handleIconClick = (event: MouseEvent) => {
   transition: width 0.3s ease;
   pointer-events: none;
   z-index: 1;
-}
-
-// 动画效果
-@keyframes pulse {
-  from {
-    opacity: 1;
-    transform: scaleY(1);
-  }
-  to {
-    opacity: 0.5;
-    transform: scaleY(0.3);
-  }
 }
 </style>

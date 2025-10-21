@@ -344,7 +344,7 @@ const goToTag = (tagName: string) => {
 
   &.lazy-loaded {
     opacity: 0.8;
-    animation: imageFadeIn 0.4s ease-out forwards;
+    animation: imagePartialFadeIn 0.4s ease-out forwards;
   }
 
   &::after {
@@ -618,8 +618,8 @@ const goToTag = (tagName: string) => {
   }
 }
 
-// 图片淡入动画
-@keyframes imageFadeIn {
+// 图片淡入动画（半透明）
+@keyframes imagePartialFadeIn {
   0% {
     opacity: 0;
   }

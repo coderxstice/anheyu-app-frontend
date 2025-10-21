@@ -286,7 +286,6 @@ const creativityPairs = computed(() => {
   top: 2.9rem;
   left: 3rem;
   z-index: 2;
-  animation: slide-in 0.6s 0.3s backwards;
   margin-bottom: 0.5rem;
 }
 #random-banner .banners-title .banners-title-big {
