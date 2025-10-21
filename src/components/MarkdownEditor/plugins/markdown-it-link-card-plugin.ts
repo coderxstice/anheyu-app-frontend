@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-10-03 13:57:18
- * @LastEditTime: 2025-10-13 18:35:47
+ * @LastEditTime: 2025-10-21 09:55:44
  * @LastEditors: 安知鱼
  */
 import type MarkdownIt from "markdown-it";
@@ -115,7 +115,7 @@ export default function linkCardPlugin(md: MarkdownIt): void {
     const isHttpIcon =
       icon.startsWith("http://") || icon.startsWith("https://");
     const iconHtml = isHttpIcon
-      ? `<img src="${md.utils.escapeHtml(icon)}" alt="icon" style="width: 20px; height: 20px; object-fit: cover; border-radius: 4px; margin: 0; padding: 0; display: block;">`
+      ? `<img src="${md.utils.escapeHtml(icon)}" alt="icon" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin: 0; padding: 0; display: block;">`
       : `<i class="anzhiyufont ${md.utils.escapeHtml(icon)}"></i>`;
 
     // 生成链接卡片 HTML
@@ -201,7 +201,7 @@ export default function linkCardPlugin(md: MarkdownIt): void {
     const iconHtml = isHttpIcon
       ? `<img src="${md.utils.escapeHtml(
           icon
-        )}" alt="icon" style="width: 20px; height: 20px; object-fit: cover; border-radius: 4px; margin: 0; padding: 0; display: block;">`
+        )}" alt="icon" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin: 0; padding: 0; display: block;">`
       : `<i class="anzhiyufont ${md.utils.escapeHtml(icon)}"></i>`;
 
     const html = `<div class="anzhiyu-tag-link"><a class="tag-Link" target="_blank" href="${md.utils.escapeHtml(
