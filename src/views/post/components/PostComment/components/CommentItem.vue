@@ -531,6 +531,8 @@ const handleLoadMoreChildren = async () => {
   .anzhiyu-owo-emotion {
     width: 3rem;
     height: auto;
+    margin: 0;
+    display: inline;
   }
 }
 
