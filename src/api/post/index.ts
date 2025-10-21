@@ -2,7 +2,7 @@
  * @Description: 文章管理模块 API 统一出口 (文章、标签、分类)
  * @Author: 安知鱼
  * @Date: 2025-07-25 18:05:00
- * @LastEditTime: 2025-08-19 15:57:00
+ * @LastEditTime: 2025-10-21 10:24:07
  * @LastEditors: 安知鱼
  */
 
@@ -26,7 +26,10 @@ import type {
   PostCategoryResponse,
   PostCategoryForm,
   ArchiveSummaryResponse,
-  SuccessResponseUploadImage
+  SuccessResponseUploadImage,
+  // 导入导出
+  ImportArticleOptions,
+  ImportArticleResult
 } from "./type";
 
 // ===================================
@@ -252,6 +255,63 @@ export const getPrimaryColor = (
     baseUrlApi("articles/primary-color"),
     {
       data: { image_url: imageUrl }
+    }
+  );
+};
+
+// ===================================
+//          文章导入导出功能
+// ===================================
+
+/**
+ * @description 导出文章为 ZIP 文件
+ * @param articleIds 要导出的文章ID列表
+ * @returns Blob 对象（ZIP 文件）
+ */
+export const exportArticles = (articleIds: string[]): Promise<Blob> => {
+  return http.request("post", baseUrlApi("articles/export"), {
+    data: { article_ids: articleIds },
+    responseType: "blob"
+  });
+};
+
+/**
+ * @description 导入文章
+ * @param file 导入的文件（JSON 或 ZIP）
+ * @param options 导入选项
+ * @returns 导入结果
+ */
+export const importArticles = (
+  file: File,
+  options?: ImportArticleOptions
+): Promise<BaseResponse<ImportArticleResult>> => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  if (options) {
+    if (options.create_categories !== undefined) {
+      formData.append("create_categories", String(options.create_categories));
+    }
+    if (options.create_tags !== undefined) {
+      formData.append("create_tags", String(options.create_tags));
+    }
+    if (options.skip_existing !== undefined) {
+      formData.append("skip_existing", String(options.skip_existing));
+    }
+    if (options.default_status) {
+      formData.append("default_status", options.default_status);
+    }
+  }
+
+  return http.request<BaseResponse<ImportArticleResult>>(
+    "post",
+    baseUrlApi("articles/import"),
+    {
+      data: formData,
+      headers: {
+        "Content-Type": "multipart/form-data"
+      },
+      timeout: 300000 // 5分钟超时（导入可能需要较长时间）
     }
   );
 };

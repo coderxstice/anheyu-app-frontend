@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, onMounted, toRefs } from "vue";
+import { reactive, onMounted, toRefs, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox, ElDivider } from "element-plus";
 import { getArticleList, deleteArticle } from "@/api/post";
@@ -9,9 +9,12 @@ import {
   Refresh,
   Plus,
   EditPen,
-  Delete
+  Delete,
+  Upload,
+  Download
 } from "@element-plus/icons-vue";
 import { useArticleStore } from "@/store/modules/articleStore";
+import ImportExportDialog from "./components/ImportExportDialog.vue";
 
 const articleStore = useArticleStore();
 
@@ -36,6 +39,11 @@ const state = reactive({
 });
 
 const { loading, tableData, pagination, searchParams } = toRefs(state);
+
+// 导入导出相关
+const showImportExportDialog = ref(false);
+const selectedArticles = ref<string[]>([]);
+const selectionMode = ref(false);
 
 const statusOptions = [
   { value: "", label: "全部状态" },
@@ -129,6 +137,45 @@ const getStatusInfo = (status: string) => {
   return statusOptions.find(s => s.value === status);
 };
 
+// 导入导出功能
+const toggleSelectionMode = () => {
+  selectionMode.value = !selectionMode.value;
+  if (!selectionMode.value) {
+    selectedArticles.value = [];
+  }
+};
+
+const toggleArticleSelection = (articleId: string) => {
+  const index = selectedArticles.value.indexOf(articleId);
+  if (index > -1) {
+    selectedArticles.value.splice(index, 1);
+  } else {
+    selectedArticles.value.push(articleId);
+  }
+};
+
+const isArticleSelected = (articleId: string) => {
+  return selectedArticles.value.includes(articleId);
+};
+
+const selectAllArticles = () => {
+  selectedArticles.value = state.tableData.map(article => article.id);
+};
+
+const clearSelection = () => {
+  selectedArticles.value = [];
+};
+
+const handleOpenImportExport = () => {
+  showImportExportDialog.value = true;
+};
+
+const handleImportExportSuccess = () => {
+  fetchData();
+  selectedArticles.value = [];
+  selectionMode.value = false;
+};
+
 onMounted(() => {
   fetchData();
 });
@@ -189,6 +236,50 @@ onMounted(() => {
       </div>
       <div class="action-area">
         <el-button
+          v-if="!selectionMode"
+          class="action-btn"
+          :icon="Download"
+          @click="toggleSelectionMode"
+        >
+          批量操作
+        </el-button>
+        <template v-else>
+          <el-button
+            v-if="selectedArticles.length > 0"
+            class="action-btn"
+            :icon="Download"
+            @click="handleOpenImportExport"
+          >
+            导出 ({{ selectedArticles.length }})
+          </el-button>
+          <el-button
+            v-if="selectedArticles.length < tableData.length"
+            class="action-btn"
+            @click="selectAllArticles"
+          >
+            全选
+          </el-button>
+          <el-button
+            v-if="selectedArticles.length > 0"
+            class="action-btn"
+            @click="clearSelection"
+          >
+            清空
+          </el-button>
+          <el-button class="action-btn" @click="toggleSelectionMode">
+            取消
+          </el-button>
+        </template>
+        <el-button
+          v-if="!selectionMode"
+          class="action-btn"
+          :icon="Upload"
+          @click="handleOpenImportExport"
+        >
+          导入
+        </el-button>
+        <el-button
+          v-if="!selectionMode"
           v-ripple
           type="primary"
           class="new-post-btn"
@@ -208,7 +299,17 @@ onMounted(() => {
           v-for="article in tableData"
           :key="article.id"
           class="article-item"
+          :class="{ 'is-selected': isArticleSelected(article.id) }"
         >
+          <!-- 选择框 -->
+          <div
+            v-if="selectionMode"
+            class="item-checkbox"
+            @click="toggleArticleSelection(article.id)"
+          >
+            <el-checkbox :model-value="isArticleSelected(article.id)" />
+          </div>
+
           <!-- 封面缩略图 -->
           <a :href="`/posts/${article.id}`" target="_blank" class="item-cover">
             <el-image
@@ -380,6 +481,13 @@ onMounted(() => {
         @current-change="handleCurrentChange"
       />
     </div>
+
+    <!-- 导入导出对话框 -->
+    <ImportExportDialog
+      v-model="showImportExportDialog"
+      :selectedIds="selectedArticles"
+      @success="handleImportExportSuccess"
+    />
   </div>
 </template>
 
@@ -556,6 +664,11 @@ onMounted(() => {
   box-shadow: var(--anzhiyu-shadow-border);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
+  &.is-selected {
+    border-color: var(--anzhiyu-main);
+    background: var(--anzhiyu-main-op-light);
+  }
+
   &:hover {
     box-shadow: var(--anzhiyu-shadow-blackdeep);
     border-color: var(--anzhiyu-main-op);
@@ -573,6 +686,24 @@ onMounted(() => {
     flex-direction: column;
     gap: 12px;
     padding: 12px;
+  }
+}
+
+// 选择框
+.item-checkbox {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  cursor: pointer;
+  user-select: none;
+
+  :deep(.el-checkbox) {
+    .el-checkbox__inner {
+      width: 20px;
+      height: 20px;
+    }
   }
 }
 

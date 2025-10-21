@@ -185,3 +185,29 @@ export interface SuccessResponseUploadImage {
     url: string;
   };
 }
+
+// ===================================
+//         文章导入导出功能
+// ===================================
+
+/**
+ * @description 导入文章选项
+ */
+export interface ImportArticleOptions {
+  create_categories?: boolean; // 是否自动创建不存在的分类
+  create_tags?: boolean; // 是否自动创建不存在的标签
+  skip_existing?: boolean; // 是否跳过已存在的文章
+  default_status?: string; // 默认文章状态
+}
+
+/**
+ * @description 导入文章结果
+ */
+export interface ImportArticleResult {
+  total_count: number;
+  success_count: number;
+  failed_count: number;
+  skipped_count: number;
+  created_ids: string[];
+  error_messages: string[];
+}
