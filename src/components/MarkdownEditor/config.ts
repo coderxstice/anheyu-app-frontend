@@ -14,6 +14,7 @@ import ButtonPlugin from "./plugins/markdown-it-button-plugin";
 import BtnsPlugin from "./plugins/markdown-it-btns-plugin";
 import LinkCardPlugin from "./plugins/markdown-it-link-card-plugin";
 import GalleryPlugin from "./plugins/markdown-it-gallery-plugin";
+import VideoGalleryPlugin from "./plugins/markdown-it-video-gallery-plugin";
 
 export function installMarkdownEditorExtensions() {
   console.log("🔧 Installing markdown editor extensions...");
@@ -46,6 +47,9 @@ export function installMarkdownEditorExtensions() {
 
         mdit.use(GalleryPlugin);
         console.log("✅ GalleryPlugin registered");
+
+        mdit.use(VideoGalleryPlugin);
+        console.log("✅ VideoGalleryPlugin registered");
 
         console.log("🎉 All markdown plugins configured successfully!");
       } catch (error) {
