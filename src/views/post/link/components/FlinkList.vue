@@ -30,7 +30,6 @@ let isInitializing = false;
 const initLazy = async () => {
   // 如果正在初始化，跳过
   if (isInitializing) {
-    console.log("[FlinkList] 正在初始化中，跳过重复调用");
     return;
   }
 
@@ -45,7 +44,6 @@ const initLazy = async () => {
 
   // 检查容器是否存在
   if (!flinkListRef.value) {
-    console.warn("[FlinkList] 容器未找到");
     return;
   }
 
@@ -58,14 +56,14 @@ const initLazy = async () => {
       return;
     }
 
-    console.log("[FlinkList] 初始化懒加载");
-
     // 清理旧的observer
-    destroyLazyLoad(observer);
+    if (observer) {
+      destroyLazyLoad(observer);
+      observer = null;
+    }
 
     // 在容器内查找图片元素
     const images = flinkListRef.value.querySelectorAll("img[data-src]");
-    console.log(`[FlinkList] 找到 ${images.length} 个待加载图片`);
 
     if (images.length > 0) {
       // 创建新的observer，使用容器作为根元素
@@ -80,7 +78,7 @@ const initLazy = async () => {
 
     isInitializing = false;
     initTimer = null;
-  }, 600);
+  }, 300);
 };
 
 // 防抖的初始化函数
@@ -99,21 +97,37 @@ const debouncedInitLazy = () => {
 const handleAfterEnter = () => {
   // 当有新元素进入完成后，重新扫描懒加载图片
   nextTick(() => {
-    if (flinkListRef.value && observer) {
-      const newImages = flinkListRef.value.querySelectorAll("img[data-src]");
-      if (newImages.length > 0) {
-        console.log(`[FlinkList] 检测到 ${newImages.length} 个新图片`);
-        // 不需要完全重新初始化，只需要让现有observer观察新图片
-        // 但由于initLazyLoad会重新查找，我们简化为重新初始化
-        debouncedInitLazy();
+    if (!flinkListRef.value) {
+      return;
+    }
+
+    const newImages = flinkListRef.value.querySelectorAll("img[data-src]");
+
+    // 只要有新图片需要加载，就触发初始化（无论 observer 是否存在）
+    if (newImages.length > 0) {
+      // 如果正在初始化中，取消当前定时器
+      if (isInitializing && initTimer) {
+        clearTimeout(initTimer);
+        initTimer = null;
+        isInitializing = false;
       }
+
+      // 清除防抖定时器
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+
+      // after-enter 事件触发时，动画已经完成，使用更短的延迟（50ms）
+      debounceTimer = window.setTimeout(() => {
+        initLazy();
+        debounceTimer = null;
+      }, 50);
     }
   });
 };
 
 // 组件挂载后初始化
 onMounted(() => {
-  console.log("[FlinkList] 组件已挂载");
   initLazy();
 });
 
@@ -121,7 +135,6 @@ onMounted(() => {
 watch(
   () => props.links,
   () => {
-    console.log("[FlinkList] 友链列表变化");
     debouncedInitLazy();
   }
 );

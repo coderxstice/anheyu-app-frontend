@@ -63,6 +63,19 @@ const wechatConfig = computed(() => {
   gap: 0.625rem;
   width: 300px;
   transition: all 0.3s;
+  opacity: 0;
+  animation: fadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  /* 防止布局偏移：保持空间占用 */
+  visibility: visible;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @media (width <= 992px) {

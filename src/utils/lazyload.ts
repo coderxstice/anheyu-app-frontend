@@ -44,40 +44,15 @@ export function initLazyLoad(
   // 选择所有带有 data-src 的图片
   const lazyImages = container.querySelectorAll(selector);
 
-  console.log(`[LazyLoad] 初始化懒加载，找到 ${lazyImages.length} 个图片元素`, {
-    selector,
-    threshold,
-    rootMargin,
-    images: Array.from(lazyImages).map(img => ({
-      src: (img as HTMLImageElement).src,
-      dataSrc: (img as HTMLImageElement).dataset.src,
-      alt: (img as HTMLImageElement).alt
-    }))
-  });
-
   const observer = new IntersectionObserver(
     entries => {
-      console.log(`[LazyLoad] 收到 ${entries.length} 个交叉观察回调`);
-
       entries.forEach(entry => {
         const img = entry.target as HTMLImageElement;
         const src = img.dataset.src;
 
-        console.log(`[LazyLoad] 图片状态:`, {
-          alt: img.alt,
-          isIntersecting: entry.isIntersecting,
-          intersectionRatio: entry.intersectionRatio,
-          dataSrc: src,
-          currentSrc: img.src,
-          hasDataSrc: !!src,
-          hasSrc: !!img.src
-        });
-
         if (entry.isIntersecting) {
           // 判断是否需要加载：有 data-src 且当前 src 不等于 data-src（避免重复加载）
           if (src && img.src !== src) {
-            console.log(`[LazyLoad] 开始加载图片:`, src);
-
             // 先移除 loading 类，但保持透明度为 0
             img.classList.remove(loadingClass);
 
@@ -90,17 +65,12 @@ export function initLazyLoad(
               // 使用 requestAnimationFrame 确保浏览器已经渲染了图片
               requestAnimationFrame(() => {
                 img.classList.add(loadedClass);
-                console.log(`[LazyLoad] 图片加载完成:`, {
-                  src,
-                  classList: Array.from(img.classList)
-                });
               });
             };
 
             // 如果图片加载失败，也添加 loaded 类（可以根据需求调整）
             img.onerror = () => {
               img.classList.add(loadedClass);
-              console.error(`[LazyLoad] 图片加载失败:`, src);
             };
 
             // 停止观察已加载的图片
@@ -118,10 +88,6 @@ export function initLazyLoad(
   // 观察所有懒加载图片
   lazyImages.forEach(img => {
     observer.observe(img);
-    console.log(`[LazyLoad] 开始观察图片:`, {
-      alt: (img as HTMLImageElement).alt,
-      dataSrc: (img as HTMLImageElement).dataset.src
-    });
   });
 
   return observer;

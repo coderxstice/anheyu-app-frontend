@@ -206,6 +206,24 @@ onMounted(() => {
     object-fit: cover;
     border: var(--style-border-avatar);
     border-radius: 50%;
+    /* 图片加载过渡效果 */
+    opacity: 0;
+    background: var(--anzhiyu-secondbg);
+    transition: opacity 0.6s ease;
+
+    /* 图片加载完成后显示 */
+    &[src] {
+      animation: avatarFadeIn 0.6s ease forwards;
+    }
+  }
+
+  @keyframes avatarFadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   .author-status {
@@ -227,6 +245,23 @@ onMounted(() => {
       width: 26px;
       height: 26px;
       border-radius: 0;
+      /* 图片加载过渡效果 */
+      opacity: 0;
+      transition: opacity 0.6s ease;
+
+      /* 图片加载完成后显示 */
+      &[src] {
+        animation: statusFadeIn 0.6s ease 0.2s forwards;
+      }
+    }
+
+    @keyframes statusFadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
     }
   }
 }

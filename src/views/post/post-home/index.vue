@@ -238,9 +238,12 @@ onMounted(() => {
 }
 
 .recent-posts {
+  position: relative;
   width: 100%;
   /* 防止布局偏移：固定最小高度 */
   min-height: 400px;
+  /* 防止动画导致的布局偏移 */
+  will-change: auto;
 
   &.double-column-container {
     display: flex;
@@ -252,14 +255,18 @@ onMounted(() => {
   /* 优化 Element Plus loading 样式，避免布局偏移 */
   :deep(.el-loading-mask) {
     position: absolute;
-    background-color: var(--anzhiyu-card-bg);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
   }
 
   :deep(.el-loading-spinner) {
     position: absolute;
-    top: 50%;
+    top: 200px;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
     margin: 0;
   }
 }

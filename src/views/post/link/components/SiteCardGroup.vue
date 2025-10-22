@@ -14,8 +14,6 @@ const setupLazyLoad = async () => {
   // 等待 DOM 更新完成
   await nextTick();
 
-  console.log("[SiteCardGroup] 开始初始化懒加载");
-
   // 销毁旧的 observer
   if (observer) {
     destroyLazyLoad(observer);
@@ -27,29 +25,12 @@ const setupLazyLoad = async () => {
 
   // 使用容器引用查找图片
   if (!containerRef.value) {
-    console.warn("[SiteCardGroup] 容器引用未找到");
     return;
   }
 
   const images = containerRef.value.querySelectorAll("img[data-src]");
-  console.log(`[SiteCardGroup] 容器中找到 ${images.length} 个带data-src的图片`);
-
-  // 检查是否有图片没有 data-src 但有 src
-  const invalidImages = containerRef.value.querySelectorAll(
-    "img.flink-avatar:not([data-src])[src]"
-  );
-  if (invalidImages.length > 0) {
-    console.warn(
-      `[SiteCardGroup] 发现 ${invalidImages.length} 个图片没有data-src但有src`,
-      Array.from(invalidImages).map(img => ({
-        src: (img as HTMLImageElement).src,
-        alt: (img as HTMLImageElement).alt
-      }))
-    );
-  }
 
   if (images.length === 0) {
-    console.warn("[SiteCardGroup] 未找到需要懒加载的图片");
     return;
   }
 
@@ -60,23 +41,16 @@ const setupLazyLoad = async () => {
     loadedClass: "lazy-loaded",
     loadingClass: "lazy-loading"
   });
-
-  console.log("[SiteCardGroup] 懒加载初始化完成", observer);
 };
 
 onMounted(() => {
-  console.log("[SiteCardGroup] 组件已挂载，准备初始化懒加载");
   setupLazyLoad();
 });
 
 // 监听 links 变化，重新初始化懒加载
 watch(
   () => props.links,
-  (newLinks, oldLinks) => {
-    console.log("[SiteCardGroup] links 数据变化", {
-      oldCount: oldLinks?.length || 0,
-      newCount: newLinks?.length || 0
-    });
+  newLinks => {
     if (newLinks && newLinks.length > 0) {
       setupLazyLoad();
     }
