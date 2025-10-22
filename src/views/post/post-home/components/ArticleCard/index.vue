@@ -160,17 +160,27 @@ const goToTagPage = (tagName: string) => {
   border-radius: 12px;
   transition: all 0.3s ease-in-out;
 
-  // CSS 视口动画 - 使用 CSS 动画代替 JavaScript
+  // CSS 视口动画 - 使用纯淡入动画避免布局偏移
   opacity: 0;
-  transform: translateY(30px);
-  animation: slideInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation: fadeInCard 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
   animation-delay: calc(var(--animation-order, 0) * 0.1s);
+  /* 防止布局偏移：保持空间占用 */
+  visibility: visible;
 
   // 硬件加速优化
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   -webkit-transform-style: preserve-3d;
   transform-style: preserve-3d;
+
+  @keyframes fadeInCard {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 
   &.double-column-item {
     height: 18em;

@@ -30,45 +30,115 @@ let isInitializing = false;
 const initLazy = async () => {
   // 如果正在初始化，跳过
   if (isInitializing) {
-    console.log("[FlinkList] 正在初始化中，跳过重复调用");
+    console.log("[FlinkList] ⚠️ 正在初始化中，跳过重复调用");
     return;
   }
 
   // 清除之前的定时器
   if (initTimer) {
+    console.log("[FlinkList] 清除之前的定时器");
     clearTimeout(initTimer);
     initTimer = null;
   }
+
+  console.log("[FlinkList] 🔄 开始初始化流程", {
+    timestamp: new Date().toISOString(),
+    hasContainer: !!flinkListRef.value,
+    linksCount: props.links?.length || 0
+  });
 
   // 等待Vue的DOM更新完成
   await nextTick();
 
   // 检查容器是否存在
   if (!flinkListRef.value) {
-    console.warn("[FlinkList] 容器未找到");
+    console.warn("[FlinkList] ❌ 容器未找到");
     return;
   }
+
+  const containerRect = flinkListRef.value.getBoundingClientRect();
+  console.log("[FlinkList] 📦 容器信息:", {
+    position: {
+      top: containerRect.top,
+      bottom: containerRect.bottom,
+      left: containerRect.left,
+      right: containerRect.right,
+      width: containerRect.width,
+      height: containerRect.height
+    },
+    visibility: {
+      isInViewport:
+        containerRect.top < window.innerHeight && containerRect.bottom > 0,
+      distanceFromViewport: Math.round(containerRect.top - window.innerHeight)
+    },
+    scrollInfo: {
+      scrollY: window.scrollY,
+      viewportHeight: window.innerHeight
+    },
+    childrenCount: flinkListRef.value.children.length
+  });
 
   isInitializing = true;
 
   // 额外延迟以等待TransitionGroup的enter动画完成
   initTimer = window.setTimeout(() => {
     if (!flinkListRef.value) {
+      console.warn("[FlinkList] ❌ 定时器回调中容器已丢失");
       isInitializing = false;
       return;
     }
 
-    console.log("[FlinkList] 初始化懒加载");
+    console.log("[FlinkList] ⚡ 初始化懒加载 (延迟300ms后)");
 
     // 清理旧的observer
-    destroyLazyLoad(observer);
+    if (observer) {
+      console.log("[FlinkList] 🧹 销毁旧的observer");
+      destroyLazyLoad(observer);
+      observer = null;
+    }
 
     // 在容器内查找图片元素
     const images = flinkListRef.value.querySelectorAll("img[data-src]");
-    console.log(`[FlinkList] 找到 ${images.length} 个待加载图片`);
+    console.log(`[FlinkList] 🖼️  找到 ${images.length} 个待加载图片`);
+
+    // 检查是否有图片已经有src但还有data-src
+    const loadedImages = flinkListRef.value.querySelectorAll(
+      "img.flink-avatar[src]:not([src=''])"
+    );
+    const imagesWithoutDataSrc = flinkListRef.value.querySelectorAll(
+      "img.flink-avatar:not([data-src])"
+    );
+    console.log(`[FlinkList] 📊 图片状态统计:`, {
+      withDataSrc: images.length,
+      withSrc: loadedImages.length,
+      withoutDataSrc: imagesWithoutDataSrc.length,
+      total: flinkListRef.value.querySelectorAll("img.flink-avatar").length
+    });
 
     if (images.length > 0) {
+      // 打印每个图片的详细信息
+      Array.from(images).forEach((img, index) => {
+        const htmlImg = img as HTMLImageElement;
+        const rect = htmlImg.getBoundingClientRect();
+        console.log(`[FlinkList] 图片[${index + 1}/${images.length}] 详情:`, {
+          alt: htmlImg.alt,
+          dataSrc: htmlImg.dataset.src,
+          currentSrc: htmlImg.src,
+          position: {
+            top: Math.round(rect.top),
+            bottom: Math.round(rect.bottom),
+            height: Math.round(rect.height)
+          },
+          visibility: {
+            isInViewport: rect.top < window.innerHeight && rect.bottom > 0,
+            distanceFromViewport: Math.round(rect.top - window.innerHeight)
+          },
+          classList: Array.from(htmlImg.classList)
+        });
+      });
+
       // 创建新的observer，使用容器作为根元素
+      console.log("[FlinkList] 🔭 创建新的IntersectionObserver");
       observer = initLazyLoad(flinkListRef.value as unknown as Document, {
         threshold: 0.1,
         rootMargin: "100px",
@@ -76,20 +146,29 @@ const initLazy = async () => {
         loadedClass: "lazy-loaded",
         loadingClass: "lazy-loading"
       });
+      console.log("[FlinkList] ✅ Observer创建完成", {
+        observerExists: !!observer
+      });
+    } else {
+      console.warn("[FlinkList] ⚠️ 未找到需要懒加载的图片");
     }
 
     isInitializing = false;
     initTimer = null;
-  }, 600);
+    console.log("[FlinkList] ✅ 初始化流程完成");
+  }, 300);
 };
 
 // 防抖的初始化函数
 const debouncedInitLazy = () => {
   if (debounceTimer) {
+    console.log("[FlinkList] ⏱️  取消之前的防抖定时器");
     clearTimeout(debounceTimer);
   }
 
+  console.log("[FlinkList] ⏱️  设置防抖定时器 (100ms)");
   debounceTimer = window.setTimeout(() => {
+    console.log("[FlinkList] ⏱️  防抖定时器触发");
     initLazy();
     debounceTimer = null;
   }, 100);
@@ -97,31 +176,77 @@ const debouncedInitLazy = () => {
 
 // TransitionGroup 的 after-enter 事件处理
 const handleAfterEnter = () => {
+  console.log("[FlinkList] 🎬 TransitionGroup after-enter 事件触发");
   // 当有新元素进入完成后，重新扫描懒加载图片
   nextTick(() => {
-    if (flinkListRef.value && observer) {
-      const newImages = flinkListRef.value.querySelectorAll("img[data-src]");
-      if (newImages.length > 0) {
-        console.log(`[FlinkList] 检测到 ${newImages.length} 个新图片`);
-        // 不需要完全重新初始化，只需要让现有observer观察新图片
-        // 但由于initLazyLoad会重新查找，我们简化为重新初始化
-        debouncedInitLazy();
+    if (!flinkListRef.value) {
+      console.warn("[FlinkList] ⚠️ after-enter: 容器不存在");
+      return;
+    }
+
+    const newImages = flinkListRef.value.querySelectorAll("img[data-src]");
+    console.log(`[FlinkList] 🔍 after-enter 检测图片:`, {
+      hasContainer: !!flinkListRef.value,
+      hasObserver: !!observer,
+      isInitializing: isInitializing,
+      newImagesCount: newImages.length,
+      timestamp: new Date().toISOString()
+    });
+
+    // 只要有新图片需要加载，就触发初始化（无论 observer 是否存在）
+    if (newImages.length > 0) {
+      // 如果正在初始化中，取消当前定时器
+      if (isInitializing && initTimer) {
+        console.log(
+          `[FlinkList] ⚡ after-enter 检测到正在初始化，取消延迟定时器`
+        );
+        clearTimeout(initTimer);
+        initTimer = null;
+        isInitializing = false;
       }
+
+      // after-enter 事件触发时，动画已经完成，使用更短的延迟（50ms）
+      console.log(
+        `[FlinkList] 🚀 after-enter 触发快速懒加载初始化（检测到 ${newImages.length} 个图片，延迟50ms）`
+      );
+
+      // 清除防抖定时器
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+
+      // 使用短延迟直接初始化
+      debounceTimer = window.setTimeout(() => {
+        console.log("[FlinkList] ⏱️ after-enter 快速定时器触发");
+        initLazy();
+        debounceTimer = null;
+      }, 50);
+    } else {
+      console.log("[FlinkList] ℹ️ after-enter: 没有需要懒加载的图片");
     }
   });
 };
 
 // 组件挂载后初始化
 onMounted(() => {
-  console.log("[FlinkList] 组件已挂载");
+  console.log("[FlinkList] 🎉 组件已挂载", {
+    linksCount: props.links?.length || 0,
+    timestamp: new Date().toISOString(),
+    scrollY: window.scrollY,
+    viewportHeight: window.innerHeight
+  });
   initLazy();
 });
 
 // 监听links变化，使用防抖的重新初始化
 watch(
   () => props.links,
-  () => {
-    console.log("[FlinkList] 友链列表变化");
+  (newLinks, oldLinks) => {
+    console.log("[FlinkList] 📝 友链列表变化", {
+      oldCount: oldLinks?.length || 0,
+      newCount: newLinks?.length || 0,
+      timestamp: new Date().toISOString()
+    });
     debouncedInitLazy();
   }
 );
