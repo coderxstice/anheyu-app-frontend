@@ -115,6 +115,7 @@ const props = defineProps<{
   transition: 0.2s;
   transform: scale(0.8);
   transform-origin: top left;
+  cursor: auto;
 }
 
 .back-menu-list-group {
