@@ -300,13 +300,13 @@
         }
 
         /* 初始加载时隐藏实际内容 */
-        #app > :not(.loader):not(small) {
+        #app > :not(.loader-container):not(small) {
           opacity: 0;
           transition: opacity 0.3s ease-in;
         }
 
         /* Vue 挂载后显示实际内容 */
-        #app[data-loaded="true"] > :not(.loader):not(small) {
+        #app[data-loaded="true"] > :not(.loader-container):not(small) {
           opacity: 1;
         }
 
@@ -315,8 +315,8 @@
           min-height: 100vh;
         }
 
-        #app > .loader,
-        #app > small {
+        /* 加载器外层容器 - 负责居中定位 */
+        #app > .loader-container {
           position: fixed;
           top: 50%;
           left: 50%;
@@ -325,16 +325,20 @@
         }
 
         #app > small {
+          position: fixed;
           top: calc(50% + 60px);
+          left: 50%;
           transform: translateX(-50%);
+          z-index: 10000;
         }
 
         /* Vue 挂载后隐藏加载器 */
-        #app[data-loaded="true"] > .loader,
+        #app[data-loaded="true"] > .loader-container,
         #app[data-loaded="true"] > small {
           display: none;
         }
 
+        /* 加载器内层 - 负责旋转动画 */
         .loader {
           width: 60px;
           height: 60px;
@@ -368,7 +372,9 @@
           }
         }
       </style>
-      <div class="loader"></div>
+      <div class="loader-container">
+        <div class="loader"></div>
+      </div>
       <small id="app-small-text"></small>
     </div>
 
