@@ -68,7 +68,6 @@ const hasTags = computed(() => processedTags.value.length > 0);
   width: fit-content;
   height: 40px;
   padding: 4px 12px;
-  margin: 0 8px 0 0;
   font-size: 0.85rem;
   color: var(--anzhiyu-white);
   border-radius: 8px;
@@ -78,6 +77,7 @@ const hasTags = computed(() => processedTags.value.length > 0);
 .post-meta__box__tag-list {
   display: flex;
   flex-flow: row wrap;
+  gap: 10px;
 }
 
 .post-meta__box__tags:nth-child(5n) {
