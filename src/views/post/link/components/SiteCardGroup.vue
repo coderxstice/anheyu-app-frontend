@@ -11,18 +11,11 @@ const containerRef = ref<HTMLElement | null>(null);
 
 // 初始化懒加载的函数
 const setupLazyLoad = async () => {
-  console.log("[SiteCardGroup] 🔄 开始初始化懒加载", {
-    timestamp: new Date().toISOString(),
-    hasContainer: !!containerRef.value,
-    linksCount: props.links?.length || 0
-  });
-
   // 等待 DOM 更新完成
   await nextTick();
 
   // 销毁旧的 observer
   if (observer) {
-    console.log("[SiteCardGroup] 🧹 销毁旧的observer");
     destroyLazyLoad(observer);
     observer = null;
   }
@@ -32,90 +25,15 @@ const setupLazyLoad = async () => {
 
   // 使用容器引用查找图片
   if (!containerRef.value) {
-    console.warn("[SiteCardGroup] ❌ 容器引用未找到");
     return;
   }
-
-  const containerRect = containerRef.value.getBoundingClientRect();
-  console.log("[SiteCardGroup] 📦 容器信息:", {
-    position: {
-      top: containerRect.top,
-      bottom: containerRect.bottom,
-      left: containerRect.left,
-      right: containerRect.right,
-      width: containerRect.width,
-      height: containerRect.height
-    },
-    visibility: {
-      isInViewport:
-        containerRect.top < window.innerHeight && containerRect.bottom > 0,
-      distanceFromViewport: Math.round(containerRect.top - window.innerHeight)
-    },
-    scrollInfo: {
-      scrollY: window.scrollY,
-      viewportHeight: window.innerHeight
-    },
-    childrenCount: containerRef.value.children.length
-  });
 
   const images = containerRef.value.querySelectorAll("img[data-src]");
-  console.log(
-    `[SiteCardGroup] 🖼️  容器中找到 ${images.length} 个带data-src的图片`
-  );
-
-  // 检查是否有图片没有 data-src 但有 src
-  const invalidImages = containerRef.value.querySelectorAll(
-    "img.flink-avatar:not([data-src])[src]"
-  );
-  if (invalidImages.length > 0) {
-    console.warn(
-      `[SiteCardGroup] ⚠️ 发现 ${invalidImages.length} 个图片没有data-src但有src`,
-      Array.from(invalidImages).map(img => ({
-        src: (img as HTMLImageElement).src,
-        alt: (img as HTMLImageElement).alt,
-        classList: Array.from((img as HTMLImageElement).classList)
-      }))
-    );
-  }
-
-  // 检查所有图片的状态
-  const allImages = containerRef.value.querySelectorAll("img.flink-avatar");
-  console.log(`[SiteCardGroup] 📊 图片状态统计:`, {
-    withDataSrc: images.length,
-    withoutDataSrc: invalidImages.length,
-    total: allImages.length
-  });
-
-  if (images.length > 0) {
-    // 打印每个图片的详细信息
-    Array.from(images).forEach((img, index) => {
-      const htmlImg = img as HTMLImageElement;
-      const rect = htmlImg.getBoundingClientRect();
-      console.log(`[SiteCardGroup] 图片[${index + 1}/${images.length}] 详情:`, {
-        alt: htmlImg.alt,
-        dataSrc: htmlImg.dataset.src,
-        currentSrc: htmlImg.src,
-        position: {
-          top: Math.round(rect.top),
-          bottom: Math.round(rect.bottom),
-          height: Math.round(rect.height)
-        },
-        visibility: {
-          isInViewport: rect.top < window.innerHeight && rect.bottom > 0,
-          distanceFromViewport: Math.round(rect.top - window.innerHeight)
-        },
-        classList: Array.from(htmlImg.classList),
-        parentElement: htmlImg.parentElement?.tagName
-      });
-    });
-  }
 
   if (images.length === 0) {
-    console.warn("[SiteCardGroup] ⚠️ 未找到需要懒加载的图片");
     return;
   }
 
-  console.log("[SiteCardGroup] 🔭 创建新的IntersectionObserver");
   observer = initLazyLoad(containerRef.value, {
     threshold: 0.1,
     rootMargin: "100px",
@@ -123,42 +41,24 @@ const setupLazyLoad = async () => {
     loadedClass: "lazy-loaded",
     loadingClass: "lazy-loading"
   });
-
-  console.log("[SiteCardGroup] ✅ 懒加载初始化完成", {
-    observerExists: !!observer
-  });
 };
 
 onMounted(() => {
-  console.log("[SiteCardGroup] 🎉 组件已挂载，准备初始化懒加载", {
-    linksCount: props.links?.length || 0,
-    timestamp: new Date().toISOString(),
-    scrollY: window.scrollY,
-    viewportHeight: window.innerHeight
-  });
   setupLazyLoad();
 });
 
 // 监听 links 变化，重新初始化懒加载
 watch(
   () => props.links,
-  (newLinks, oldLinks) => {
-    console.log("[SiteCardGroup] 📝 links 数据变化", {
-      oldCount: oldLinks?.length || 0,
-      newCount: newLinks?.length || 0,
-      timestamp: new Date().toISOString()
-    });
+  newLinks => {
     if (newLinks && newLinks.length > 0) {
       setupLazyLoad();
-    } else {
-      console.warn("[SiteCardGroup] ⚠️ links为空或长度为0，跳过初始化");
     }
   },
   { deep: true }
 );
 
 onUnmounted(() => {
-  console.log("[SiteCardGroup] 🔚 组件卸载，清理observer");
   destroyLazyLoad(observer);
 });
 </script>
