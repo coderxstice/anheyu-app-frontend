@@ -41,6 +41,8 @@ export interface StoragePolicy {
     cdn_domain?: string;
     source_auth?: boolean;
     custom_proxy?: boolean;
+    // 样式分隔符（用于腾讯云COS和阿里云OSS的图片处理样式）
+    style_separator?: string;
     // AWS S3 相关配置
     force_path_style?: boolean;
     endpoint_url?: string;
