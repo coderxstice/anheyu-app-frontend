@@ -22,6 +22,9 @@ if (formData.value.settings.source_auth === undefined) {
 if (formData.value.settings.custom_proxy === undefined) {
   formData.value.settings.custom_proxy = false;
 }
+if (!formData.value.settings.style_separator) {
+  formData.value.settings.style_separator = "";
+}
 
 // 默认使用客户端直传方式
 const uploadMethod = {
@@ -180,6 +183,29 @@ const uploadMethod = {
           开启后，用户下载文件时会通过 Anheyu
           代理，可以提供更好的访问控制和统计。
         </div>
+      </div>
+    </el-form-item>
+
+    <el-form-item
+      v-if="
+        formData.flag === 'article_image' || formData.flag === 'comment_image'
+      "
+      label="样式分隔符（可选）"
+      prop="settings.style_separator"
+      label-width="160px"
+    >
+      <el-input
+        v-model="formData.settings.style_separator"
+        placeholder="/ArticleImage 或 /CommentImage"
+      />
+      <div class="form-item-help">
+        用于腾讯云数据万象的图片处理样式。<br />
+        <strong>配置方法：</strong><br />
+        1. 在腾讯云数据万象控制台创建图片样式（例如：ArticleImage）<br />
+        2. 在此处填写样式路径（例如：/ArticleImage）<br />
+        3. 系统会自动在图片URL后拼接样式分隔符和参数<br />
+        <strong>示例：</strong>如果配置为 /ArticleImage，生成的URL格式为：<br />
+        https://bucket.cos.region.myqcloud.com/path/image.jpg/ArticleImage
       </div>
     </el-form-item>
 

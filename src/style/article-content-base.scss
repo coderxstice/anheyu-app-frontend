@@ -30,9 +30,9 @@
 @mixin editor-preview-styles {
   .md-editor-preview {
     figure {
-      margin: 0 !important;
+      margin: 0 auto !important;
       img {
-        margin: 0 !important;
+        margin: 0 auto !important;
       }
     }
     .md-editor-code-block {
@@ -55,6 +55,7 @@
   figure {
     margin: 20px auto;
     text-align: center;
+    width: 100%;
 
     img {
       margin: 0 auto;

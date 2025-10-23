@@ -279,6 +279,7 @@ onUnmounted(() => {
 
           &:hover {
             background: var(--anzhiyu-main);
+            color: var(--anzhiyu-white);
           }
         }
       }
