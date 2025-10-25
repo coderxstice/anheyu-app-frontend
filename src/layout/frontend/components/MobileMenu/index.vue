@@ -2,7 +2,7 @@
  * @Description: 移动端菜单组件
  * @Author: 安知鱼
  * @Date: 2025-09-16 13:16:41
- * @LastEditTime: 2025-10-12 01:01:58
+ * @LastEditTime: 2025-10-25 11:28:06
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -681,7 +681,6 @@ hr {
 
     &:hover {
       background: var(--anzhiyu-main);
-      transform: translateY(-1px);
     }
 
     .back-menu-bottom-btn-icon {
@@ -771,7 +770,6 @@ hr {
         background: var(--anzhiyu-theme);
         border-color: var(--anzhiyu-theme);
         color: var(--anzhiyu-white) !important;
-        transform: translateY(-1px);
       }
 
       sup {

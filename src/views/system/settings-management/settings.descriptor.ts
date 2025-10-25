@@ -88,6 +88,12 @@ const siteDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyIcpNumber,
     defaultValue: "",
     type: "string"
+  },
+  {
+    frontendPath: "site.policeRecordNumber",
+    backendKey: constant.KeyPoliceRecordNumber,
+    defaultValue: "",
+    type: "string"
   }
 ];
 

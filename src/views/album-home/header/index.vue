@@ -26,6 +26,11 @@ const aboutLink = computed(() => siteConfig.value?.ABOUT_LINK || "#");
 // 动态获取 ICP 备案号
 const icpNumber = computed(() => siteConfig.value?.ICP_NUMBER || "");
 
+// 动态获取公安联网备案号
+const policeRecordNumber = computed(
+  () => siteConfig.value?.POLICE_RECORD_NUMBER || ""
+);
+
 // 前往首页
 const goHome = () => {
   router.push("/");
@@ -122,7 +127,7 @@ onMounted(() => {
         <li class="nav-item">
           <a style="cursor: pointer" :href="aboutLink" target="_blank">关于</a>
         </li>
-        <li class="nav-item">
+        <li v-if="icpNumber" class="nav-item">
           <a
             class="footer-bar-link"
             target="_blank"
@@ -130,6 +135,16 @@ onMounted(() => {
             href="https://beian.miit.gov.cn/"
             :title="icpNumber"
             >{{ icpNumber }}
+          </a>
+        </li>
+        <li v-if="policeRecordNumber" class="nav-item">
+          <a
+            class="footer-bar-link"
+            target="_blank"
+            rel="noopener external nofollow noreferrer"
+            href="http://www.beian.gov.cn/portal/registerSystemInfo"
+            :title="policeRecordNumber"
+            >{{ policeRecordNumber }}
           </a>
         </li>
       </ul>

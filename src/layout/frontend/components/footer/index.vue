@@ -196,6 +196,15 @@
           >
             {{ icpNumber }}
           </a>
+          <a
+            v-if="policeRecordNumber"
+            class="bar-link"
+            href="http://www.beian.gov.cn/portal/registerSystemInfo"
+            target="_blank"
+            rel="noopener"
+          >
+            {{ policeRecordNumber }}
+          </a>
 
           <el-tooltip
             v-if="footerConfig.bar.cc && footerConfig.bar.cc.link"
@@ -241,6 +250,9 @@ const siteConfigStore = useSiteConfigStore();
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);
 const footerConfig = computed(() => siteConfig.value?.footer);
 const icpNumber = computed(() => siteConfig.value?.ICP_NUMBER);
+const policeRecordNumber = computed(
+  () => siteConfig.value?.POLICE_RECORD_NUMBER
+);
 
 const displayedFriends = ref<FriendLink[]>([]);
 const rotationCount = ref(0);
