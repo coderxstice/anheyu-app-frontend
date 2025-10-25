@@ -4,6 +4,7 @@ import { useCommentStore } from "@/store/modules/commentStore";
 import type { Comment } from "@/api/comment/type";
 import { UAParser } from "ua-parser-js";
 import md5 from "blueimp-md5";
+import hljs from "highlight.js";
 import IconLike from "../icon/IconLike.vue";
 import IconReply from "../icon/IconReply.vue";
 import IconLocation from "../icon/IconLocation.vue";
@@ -224,6 +225,26 @@ const handleLoadMoreChildren = async () => {
     console.error("加载更多子评论失败:", error);
   }
 };
+
+// 代码高亮
+const commentContentRef = ref<HTMLElement | null>(null);
+
+const highlightCode = () => {
+  if (!commentContentRef.value) return;
+
+  // 查找所有代码块
+  const codeBlocks = commentContentRef.value.querySelectorAll("pre code");
+  codeBlocks.forEach(block => {
+    // 应用 highlight.js
+    hljs.highlightElement(block as HTMLElement);
+  });
+};
+
+onMounted(() => {
+  nextTick(() => {
+    highlightCode();
+  });
+});
 </script>
 
 <template>
@@ -289,6 +310,7 @@ const handleLoadMoreChildren = async () => {
           </div>
         </div>
         <div
+          ref="commentContentRef"
           class="comment-content"
           :class="{ 'can-reply': !comment.is_anonymous }"
           @click="handleContentClick"
