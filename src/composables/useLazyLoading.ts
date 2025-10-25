@@ -231,6 +231,30 @@ export function useLazyLoading(options: LazyLoadingOptions = {}) {
   const reinitialize = (container: HTMLElement): void => {
     // 清理现有的观察
     cleanup();
+
+    // 🔧 清理所有图片的懒加载标记，允许重新处理
+    const processedImages = container.querySelectorAll<HTMLImageElement>(
+      "img[data-lazy-processed]"
+    );
+    processedImages.forEach(img => {
+      // 移除懒加载标记，允许重新处理
+      img.removeAttribute("data-lazy-processed");
+      img.classList.remove(
+        "lazy-image",
+        "lazy-loading",
+        "lazy-loaded",
+        "lazy-error"
+      );
+
+      // 🔧 关键修复：保留 data-src 属性，让 processImage 重新处理
+      // 不要移除 data-src，也不要改变 src
+      // 这样 processImage 会检测到 data-src 并重新设置占位符、重新观察
+    });
+
+    console.log(
+      `🔄 [LazyLoad] 已清理 ${processedImages.length} 个图片的懒加载标记`
+    );
+
     // 重新初始化
     initLazyLoading(container);
   };

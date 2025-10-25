@@ -542,3 +542,8 @@ defineExpose({
   }
 }
 </style>
+
+<style lang="scss">
+// 引入评论代码高亮样式（只需引入一次）
+@use "./comment-code-highlight.scss";
+</style>
