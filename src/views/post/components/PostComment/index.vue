@@ -181,6 +181,37 @@ watch(
   { deep: true }
 );
 
+// 监听 targetPath 变化，重新加载评论（文章切换时）
+watch(
+  () => props.targetPath,
+  (newPath, oldPath) => {
+    if (newPath && newPath !== oldPath && isCommentEnabled.value) {
+      console.log("🔄 [评论] 文章切换，重新加载评论:", newPath);
+
+      // 重置评论可见状态，让用户滚动到评论区时再渲染
+      isCommentListVisible.value = false;
+
+      // 清理旧的 Intersection Observer
+      if (intersectionObserver) {
+        intersectionObserver.disconnect();
+        intersectionObserver = null;
+      }
+
+      // 重新加载评论数据
+      const pageSize = commentInfoConfig.value.page_size || 10;
+      commentStore.initComments(newPath, pageSize);
+
+      // 重新设置 Intersection Observer
+      nextTick(() => {
+        setupIntersectionObserver();
+      });
+
+      // 处理新页面的哈希值
+      handleHashChange(route.hash);
+    }
+  }
+);
+
 const scrollToComment = (id: string) => {
   const commentElement = document.getElementById(id);
   if (commentElement) {
