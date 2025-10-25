@@ -22,6 +22,7 @@ const KeyAppVersion: SettingKey = "APP_VERSION";
 const KeyApiURL: SettingKey = "API_URL";
 const KeyAboutLink: SettingKey = "ABOUT_LINK";
 const KeyIcpNumber: SettingKey = "ICP_NUMBER";
+const KeyPoliceRecordNumber: SettingKey = "POLICE_RECORD_NUMBER";
 const KeySiteKeywords: SettingKey = "SITE_KEYWORDS";
 const KeySiteDescription: SettingKey = "SITE_DESCRIPTION";
 const KeyUserAvatar: SettingKey = "USER_AVATAR";
@@ -287,6 +288,7 @@ export const constant = {
   KeyApiURL,
   KeyAboutLink,
   KeyIcpNumber,
+  KeyPoliceRecordNumber,
   KeySiteKeywords,
   KeySiteDescription,
   KeyUserAvatar,

@@ -22,6 +22,7 @@ export interface SiteInfo {
   iconMedium: string;
   iconLarge: string;
   icpNumber: string;
+  policeRecordNumber: string;
 }
 
 /**

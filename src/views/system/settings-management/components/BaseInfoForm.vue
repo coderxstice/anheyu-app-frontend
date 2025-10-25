@@ -75,6 +75,14 @@
     />
     <div class="form-item-help">网站的ICP备案号，用于页脚显示。</div>
   </el-form-item>
+
+  <el-form-item label="公安联网备案号">
+    <el-input
+      v-model="formData.policeRecordNumber"
+      placeholder="例如：京公网安备11010502012345号"
+    />
+    <div class="form-item-help">网站的公安联网备案号，用于页脚显示。</div>
+  </el-form-item>
 </template>
 
 <script setup lang="ts">
