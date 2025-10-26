@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, nextTick } from "vue";
+import { computed, ref, onMounted, nextTick, watchEffect } from "vue";
 import { useCommentStore } from "@/store/modules/commentStore";
 import type { Comment } from "@/api/comment/type";
 import { UAParser } from "ua-parser-js";
@@ -102,13 +102,19 @@ const handleLike = () => {
 const isLoadingChildren = computed(() =>
   commentStore.loadingChildrenCommentIds.has(props.comment.id)
 );
-const hasMoreChildren = computed(
-  () => props.comment.total_children > (props.comment.children?.length || 0)
-);
+const hasMoreChildren = computed(() => {
+  // 只有当显示的链头数量 >= 3 且数据库还有更多评论时，才显示"加载更多"按钮
+  const chainHeadCount = sortedChildren.value.length;
+  const loadedCount = props.comment.children?.length || 0;
+
+  // 链头数量 < 3：不显示按钮（预览模式，无需分页）
+  // 链头数量 >= 3 且还有更多数据：显示按钮
+  return chainHeadCount >= 3 && props.comment.total_children > loadedCount;
+});
 const childrenCountText = computed(() => {
-  const currentCount = props.comment.children?.length || 0;
+  const loadedCount = props.comment.children?.length || 0;
   const totalCount = props.comment.total_children;
-  const remainingCount = totalCount - currentCount;
+  const remainingCount = totalCount - loadedCount;
   if (remainingCount <= 0) return "已显示全部回复";
   return `展开 ${remainingCount} 条回复`;
 });
@@ -122,6 +128,232 @@ const isBlogger = computed(() => !!props.comment.is_admin_comment);
 const isReplyFormVisible = computed(
   () => commentStore.activeReplyCommentId === props.comment.id
 );
+
+// 记录上一次的排序结果（用于保持已显示评论的顺序）
+const previousSortedIds = ref<string[]>([]);
+
+// 排序后的子评论列表（使用 ref 而非 computed，以便在 watchEffect 中修改状态）
+const sortedChildren = ref<Comment[]>([]);
+
+// 使用 watchEffect 自动计算排序（允许副作用）
+watchEffect(() => {
+  if (!props.comment.children || props.comment.children.length === 0) {
+    previousSortedIds.value = [];
+    sortedChildren.value = [];
+    return;
+  }
+
+  const children = [...props.comment.children];
+  const currentIds = new Set(children.map(c => c.id));
+  const currentLength = children.length;
+
+  // 开发环境调试：输出原始子评论数据
+  if (import.meta.env.DEV) {
+    console.log(
+      `[评论排序] 顶级评论 ${props.comment.id} 的子评论:`,
+      children.map(c => ({
+        id: c.id,
+        nickname: c.nickname,
+        reply_to_id: c.reply_to_id,
+        reply_to_nick: c.reply_to_nick,
+        created_at: c.created_at
+      }))
+    );
+    console.log(
+      `[评论排序] children.length = ${children.length}, total_children = ${props.comment.total_children}`
+    );
+  }
+
+  // 构建子评论ID集合（用于检测reply_to目标是否在当前数组中）
+  const childrenIds = new Set(children.map(c => c.id));
+
+  // 构建回复关系映射：reply_to_id -> Comment[]
+  const replyMap = new Map<string, Comment[]>();
+
+  // 识别链头（直接回复顶级评论的评论）
+  const chainHeads: Comment[] = [];
+
+  children.forEach(child => {
+    // 如果 reply_to_id 是顶级评论的ID或为空，则是链头
+    if (!child.reply_to_id || child.reply_to_id === props.comment.id) {
+      chainHeads.push(child);
+    } else if (childrenIds.has(child.reply_to_id)) {
+      // reply_to 目标在当前数组中，建立回复关系映射
+      if (!replyMap.has(child.reply_to_id)) {
+        replyMap.set(child.reply_to_id, []);
+      }
+      replyMap.get(child.reply_to_id)!.push(child);
+    }
+    // 注意：如果 reply_to 目标不在当前数组中，说明它不属于这个预览范围
+    // 应该隐藏在"展开更多"按钮后面，这里不做处理
+  });
+
+  // 计算每个链头的权重（该链头下的所有回复数）
+  const calculateChainWeight = (comment: Comment): number => {
+    const directReplies = replyMap.get(comment.id) || [];
+    let weight = directReplies.length;
+
+    // 递归计算子回复
+    directReplies.forEach(reply => {
+      weight += calculateChainWeight(reply);
+    });
+
+    return weight;
+  };
+
+  // 为每个链头计算权重并附加回复信息
+  const chainHeadsWithInfo = chainHeads.map(head => {
+    const weight = calculateChainWeight(head);
+    return {
+      comment: head,
+      weight: weight,
+      hasReplies: weight > 0,
+      repliesCount: weight
+    };
+  });
+
+  // 对链头排序：优先按时间倒序（保持稳定顺序），权重差距显著时按权重排序
+  chainHeadsWithInfo.sort((a, b) => {
+    // 优先按时间倒序（新的在前）
+    const timeA = new Date(a.comment.created_at).getTime();
+    const timeB = new Date(b.comment.created_at).getTime();
+
+    // 如果权重差距较大（>= 5 条回复），则按权重排序（热门对话优先）
+    // 否则按时间排序（保持稳定性，避免展开时跳跃）
+    const weightDiff = Math.abs(a.weight - b.weight);
+    if (weightDiff >= 5) {
+      return b.weight - a.weight; // 权重降序
+    }
+
+    // 权重差距不大，按时间倒序
+    return timeB - timeA;
+  });
+
+  // 展开每条对话链
+  const expandChain = (comment: Comment): Comment[] => {
+    const result: Comment[] = [comment];
+    const replies = replyMap.get(comment.id) || [];
+
+    // 对当前层级的回复按时间正序排序（旧的在前）
+    const sortedReplies = [...replies].sort(
+      (a, b) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+
+    // 递归展开每个回复
+    sortedReplies.forEach(reply => {
+      result.push(...expandChain(reply));
+    });
+
+    return result;
+  };
+
+  // 按链头顺序展开所有对话链，并标记回复信息
+  const sortedResult: Comment[] = [];
+  chainHeadsWithInfo.forEach(({ comment, hasReplies, repliesCount }) => {
+    // 展开完整对话链
+    const chain = expandChain(comment);
+
+    // 为链头添加回复信息（用于UI展示"展开回复"按钮）
+    const enrichedHead = {
+      ...chain[0],
+      _hasReplies: hasReplies,
+      _repliesCount: repliesCount,
+      _replies: chain.slice(1) // 保存其回复链
+    } as Comment;
+
+    // 只push链头，回复通过展开按钮显示
+    sortedResult.push(enrichedHead);
+  });
+
+  // 开发环境调试：输出识别的链头
+  if (import.meta.env.DEV) {
+    console.log(
+      `[评论排序] 识别到 ${chainHeads.length} 个链头:`,
+      chainHeads.map(c => ({
+        id: c.id,
+        nickname: c.nickname,
+        reply_to_id: c.reply_to_id,
+        created_at: c.created_at
+      }))
+    );
+  }
+
+  // 判断是否是"加载更多"操作（更精确的判断）
+  // 加载更多的特征：新数据包含所有旧数据的 ID，且有新增的 ID
+  const previousIds = new Set(previousSortedIds.value);
+  const allOldIdsPresent = previousSortedIds.value.every(id =>
+    currentIds.has(id)
+  );
+  const hasNewIds = children.some(c => !previousIds.has(c.id));
+  const isLoadingMore =
+    previousSortedIds.value.length > 0 && allOldIdsPresent && hasNewIds;
+
+  // 首次渲染或非加载更多（如展开回复、刷新）：正常排序
+  if (!isLoadingMore) {
+    if (import.meta.env.DEV) {
+      console.log(
+        `[评论排序] 正常排序（首次或重新计算），子评论数=${currentLength}:`,
+        sortedResult.map(c => ({
+          id: c.id,
+          nickname: c.nickname,
+          reply_to_nick: c.reply_to_nick,
+          hasReplies: c._hasReplies,
+          repliesCount: c._repliesCount,
+          created_at: c.created_at
+        }))
+      );
+    }
+
+    // 更新记录
+    previousSortedIds.value = sortedResult.map(c => c.id);
+    sortedChildren.value = sortedResult;
+    return;
+  }
+
+  // 加载更多：保持已显示评论的顺序，新评论追加到末尾
+  const alreadyDisplayed: Comment[] = [];
+  const newComments: Comment[] = [];
+
+  sortedResult.forEach(comment => {
+    if (previousIds.has(comment.id)) {
+      alreadyDisplayed.push(comment);
+    } else {
+      newComments.push(comment);
+    }
+  });
+
+  // 保持已显示评论的原顺序
+  const finalResult: Comment[] = [];
+  previousSortedIds.value.forEach(id => {
+    const comment = alreadyDisplayed.find(c => c.id === id);
+    if (comment && currentIds.has(id)) {
+      finalResult.push(comment);
+    }
+  });
+
+  // 新加载的评论按排序结果追加到末尾
+  finalResult.push(...newComments);
+
+  // 开发环境调试：输出排序后结果
+  if (import.meta.env.DEV) {
+    console.log(
+      `[评论排序] 加载更多，保持已显示=${alreadyDisplayed.length}，新增=${newComments.length}:`,
+      finalResult.map(c => ({
+        id: c.id,
+        nickname: c.nickname,
+        reply_to_nick: c.reply_to_nick,
+        hasReplies: c._hasReplies,
+        repliesCount: c._repliesCount,
+        created_at: c.created_at
+      }))
+    );
+  }
+
+  // 更新记录
+  previousSortedIds.value = finalResult.map(c => c.id);
+  sortedChildren.value = finalResult;
+});
 
 const gravatarSrc = computed(() => {
   const url = new URL(props.config.gravatar_url);
@@ -344,12 +576,9 @@ onMounted(() => {
         @cancel="handleCancelReply"
       />
     </div>
-    <div
-      v-if="comment.children && comment.children.length > 0"
-      class="comment-children"
-    >
+    <div v-if="sortedChildren.length > 0" class="comment-children">
       <ReplyItem
-        v-for="child in comment.children"
+        v-for="child in sortedChildren"
         :key="child.id"
         :comment="child"
         :config="config"
@@ -405,6 +634,7 @@ onMounted(() => {
 
 .comment-main {
   flex: 1;
+  min-width: 0; // 允许 flex 子元素缩小到比内容更小，避免溢出
 }
 
 .comment-header {
@@ -511,6 +741,9 @@ onMounted(() => {
 
   // 使用 & {} 包装在 mixin 之后的普通声明，符合 Sass 新规范
   & {
+    max-width: 100%; // 限制最大宽度为父容器宽度
+    overflow-wrap: break-word; // 允许长单词换行
+    word-break: break-word; // 允许在任意字符处换行
     font-size: 0.95rem;
     line-height: 1.6;
     color: var(--anzhiyu-fontcolor);
@@ -526,6 +759,26 @@ onMounted(() => {
   // 覆盖文章样式中的部分规则以适应评论区
   p {
     margin: 0.5rem 0;
+  }
+
+  // 代码块溢出处理
+  pre,
+  .md-editor-code {
+    max-width: 100%;
+    overflow-x: auto; // 允许水平滚动
+  }
+
+  // 表格溢出处理
+  table {
+    max-width: 100%;
+    overflow-x: auto;
+    display: block;
+  }
+
+  // 图片溢出处理
+  img {
+    max-width: 100%;
+    height: auto;
   }
 
   // 排除 fancybox 图片链接的样式
@@ -600,13 +853,13 @@ onMounted(() => {
   padding-top: 1rem;
   margin-top: 1rem;
   margin-left: 56px;
+}
 
-  .reply-item-container {
-    padding: 1.25rem;
-    border-top: var(--style-border-dashed);
-    padding-left: calc(40px + 0.5rem);
-    padding-right: 0;
-  }
+:deep(.reply-item-container) {
+  padding: 1.25rem;
+  border-top: var(--style-border-dashed);
+  padding-left: calc(40px + 0.5rem);
+  padding-right: 0;
 }
 
 .reply-form-wrapper {

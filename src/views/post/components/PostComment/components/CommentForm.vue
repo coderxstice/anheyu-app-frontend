@@ -71,6 +71,7 @@ defineOptions({ name: "CommentForm" });
 const props = defineProps({
   targetPath: { type: String, required: true },
   parentId: { type: String, default: null },
+  replyToId: { type: String, default: null }, // 回复目标评论的ID（用于构建对话链）
   placeholder: { type: String, default: "欢迎留下宝贵的建议啦～" },
   showCancelButton: { type: Boolean, default: false },
   quoteText: { type: String, default: "" }
@@ -333,6 +334,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         target_path: props.targetPath,
         target_title: document.title,
         parent_id: props.parentId,
+        reply_to_id: props.replyToId, // 添加回复目标ID
         is_anonymous: isAnonymous.value // 明确告诉后端这是匿名评论
       };
       if (website && website.trim() !== "") payload.website = website;

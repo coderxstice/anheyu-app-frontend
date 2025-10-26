@@ -57,6 +57,44 @@ const isReplyFormVisible = computed(
   () => commentStore.activeReplyCommentId === props.comment.id
 );
 
+// 展开回复的状态
+const isRepliesExpanded = ref(false);
+
+// 已显示的回复数量（用于分页）
+const displayedRepliesCount = ref(5); // 初始显示5条
+const repliesPageSize = 10; // 每次加载更多显示10条
+
+// 是否有回复
+const hasReplies = computed(() => {
+  return !!props.comment._hasReplies;
+});
+
+// 回复总数量
+const repliesCount = computed(() => {
+  return props.comment._repliesCount || 0;
+});
+
+// 当前显示的回复列表
+const displayedReplies = computed(() => {
+  if (!props.comment._replies) return [];
+  return props.comment._replies.slice(0, displayedRepliesCount.value);
+});
+
+// 是否还有更多回复
+const hasMoreReplies = computed(() => {
+  return displayedRepliesCount.value < repliesCount.value;
+});
+
+// 展开回复（只展开，不收起）
+const expandReplies = () => {
+  isRepliesExpanded.value = true;
+};
+
+// 加载更多回复
+const loadMoreReplies = () => {
+  displayedRepliesCount.value += repliesPageSize;
+};
+
 const gravatarSrc = computed(() => {
   const url = new URL(props.config.gravatar_url);
   url.pathname += `avatar/${props.comment.email_md5}`;
@@ -123,9 +161,19 @@ const onAvatarError = (e: Event) => {
 const handleReplyClick = () => {
   // 如果是匿名评论，不允许回复
   if (props.comment.is_anonymous) return;
+
+  // 如果该评论有回复，自动展开回复列表
+  if (hasReplies.value && !isRepliesExpanded.value) {
+    isRepliesExpanded.value = true;
+  }
+
   commentStore.toggleReplyForm(props.comment.id);
 };
 const handleReplySubmitted = () => {
+  // 回复提交后，展开回复列表（这样用户可以看到刚发布的回复）
+  // 无论之前是否有回复，都应该展开，因为现在至少有一条回复了
+  isRepliesExpanded.value = true;
+
   commentStore.setActiveReplyCommentId(null);
   emit("comment-submitted");
 };
@@ -274,6 +322,16 @@ onMounted(() => {
             >
           </template>
         </div>
+
+        <!-- 展开回复按钮 -->
+        <div
+          v-if="hasReplies && !isRepliesExpanded"
+          class="expand-replies-btn-wrapper"
+        >
+          <button class="expand-replies-btn" @click="expandReplies">
+            展开 {{ repliesCount }} 条回复 ▼
+          </button>
+        </div>
       </div>
     </div>
 
@@ -281,6 +339,7 @@ onMounted(() => {
       <CommentForm
         :target-path="comment.target_path"
         :parent-id="comment.parent_id || comment.id"
+        :reply-to-id="comment.id"
         :placeholder="`回复 @${comment.nickname}`"
         show-cancel-button
         @submitted="handleReplySubmitted"
@@ -288,6 +347,24 @@ onMounted(() => {
       />
     </div>
   </div>
+
+  <!-- 展开的回复列表（平级显示，不缩进） -->
+  <template v-if="hasReplies && isRepliesExpanded">
+    <ReplyItem
+      v-for="reply in displayedReplies"
+      :key="reply.id"
+      :comment="reply"
+      :config="config"
+      @comment-submitted="emit('comment-submitted')"
+    />
+
+    <!-- 加载更多回复按钮 -->
+    <div v-if="hasMoreReplies" class="load-more-replies">
+      <button class="load-more-replies-btn" @click="loadMoreReplies">
+        加载更多回复 (还有 {{ repliesCount - displayedRepliesCount }} 条)
+      </button>
+    </div>
+  </template>
 </template>
 
 <style lang="scss" scoped>
@@ -314,6 +391,7 @@ onMounted(() => {
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-width: 0; // 允许 flex 子元素缩小到比内容更小，避免溢出
 }
 
 .comment-header {
@@ -428,6 +506,9 @@ onMounted(() => {
 
   // 使用 & {} 包装在 mixin 之后的普通声明，符合 Sass 新规范
   & {
+    max-width: 100%; // 限制最大宽度为父容器宽度
+    overflow-wrap: break-word; // 允许长单词换行
+    word-break: break-word; // 允许在任意字符处换行
     font-size: 0.95rem;
     line-height: 1.6;
     color: var(--anzhiyu-fontcolor);
@@ -443,6 +524,26 @@ onMounted(() => {
   // 覆盖文章样式中的部分规则以适应评论区
   p {
     margin: 0.5rem 0;
+  }
+
+  // 代码块溢出处理
+  pre,
+  .md-editor-code {
+    max-width: 100%;
+    overflow-x: auto; // 允许水平滚动
+  }
+
+  // 表格溢出处理
+  table {
+    max-width: 100%;
+    overflow-x: auto;
+    display: block;
+  }
+
+  // 图片溢出处理
+  img {
+    max-width: 100%;
+    height: auto;
   }
 
   // 排除 fancybox 图片链接的样式
@@ -519,6 +620,57 @@ onMounted(() => {
 @media (width <= 768px) {
   .reply-form-wrapper {
     margin-left: 0;
+  }
+}
+
+.expand-replies-btn-wrapper {
+  margin-top: 0.75rem;
+}
+
+.expand-replies-btn {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  color: var(--anzhiyu-main);
+  background: transparent;
+  border: 1px solid var(--anzhiyu-main);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: var(--anzhiyu-main);
+    color: var(--anzhiyu-white);
+  }
+
+  @media screen and (width <= 768px) {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8rem;
+  }
+}
+
+.load-more-replies {
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.load-more-replies-btn {
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+  color: var(--anzhiyu-fontcolor);
+  background: var(--anzhiyu-card-bg);
+  border: 1px solid var(--anzhiyu-main);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: var(--anzhiyu-main);
+    color: var(--anzhiyu-white);
+  }
+
+  @media screen and (width <= 768px) {
+    padding: 0.35rem 0.8rem;
+    font-size: 0.8rem;
   }
 }
 </style>
