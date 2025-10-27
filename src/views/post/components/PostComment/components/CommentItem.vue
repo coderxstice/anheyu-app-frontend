@@ -402,12 +402,36 @@ const formattedDate = computed(() => {
 
 const deviceInfo = computed(() => {
   if (!props.comment.user_agent) return { os: null, browser: null };
-  const parser = new UAParser(props.comment.user_agent);
+
+  // 提取 UA-CH Platform Version（如果存在）
+  let uaString = props.comment.user_agent;
+  let platformVersion = "";
+  const pvMatch = uaString.match(/\|PV:([^|]+)/);
+  if (pvMatch) {
+    platformVersion = pvMatch[1].replace(/"/g, ""); // 移除引号
+    uaString = uaString.replace(/\|PV:[^|]+/, ""); // 从 UA 字符串中移除 PV 部分
+  }
+
+  const parser = new UAParser(uaString);
   const result = parser.getResult();
+
+  let osName = result.os.name || "";
+  let osVersion = result.os.version || "";
+
+  // 如果是 Windows 且有 Platform Version，使用它来判断 Windows 版本
+  if (osName === "Windows" && platformVersion) {
+    const versionNum = parseFloat(platformVersion);
+    if (versionNum >= 13) {
+      osName = "Windows";
+      osVersion = "11";
+    } else if (versionNum >= 10) {
+      osName = "Windows";
+      osVersion = "10";
+    }
+  }
+
   return {
-    os: result.os.name
-      ? `${result.os.name} ${result.os.version || ""}`.trim()
-      : null,
+    os: osName ? `${osName} ${osVersion}`.trim() : null,
     browser: result.browser.name
       ? `${result.browser.name} ${result.browser.version || ""}`.trim()
       : null
