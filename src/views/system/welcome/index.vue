@@ -129,20 +129,6 @@
             <h3 class="card-header">访客分析 (最近7天)</h3>
             <div class="analytics-grid">
               <div class="analytics-item">
-                <h4>城市</h4>
-                <ul>
-                  <li
-                    v-for="c in getSortedAnalytics(
-                      statisticsSummary.analytics.top_cities
-                    )"
-                    :key="c.city"
-                  >
-                    <span>{{ c.city || "未知" }}</span>
-                    <span>{{ c.count }}</span>
-                  </li>
-                </ul>
-              </div>
-              <div class="analytics-item">
                 <h4>浏览器</h4>
                 <ul>
                   <li
@@ -217,7 +203,6 @@
             <div class="list-header">
               <span>UA</span>
               <span>IP</span>
-              <span>城市</span>
               <span>访问页面</span>
               <span>停留时间</span>
             </div>
@@ -233,7 +218,6 @@
                     </span>
                   </CustomTooltip>
                   <span class="ip-text">{{ item.ip_address || "-" }}</span>
-                  <span class="city-text">{{ item.city || "未知" }}</span>
                   <CustomTooltip :content="item.url_path" placement="top">
                     <span class="page-path" :title="item.url_path">
                       {{ item.url_path }}
@@ -352,7 +336,6 @@ function limitTopReferers<T extends { top_referers?: unknown[] }>(
 type VisitorLogItem = {
   user_agent: string;
   ip_address: string;
-  city: string;
   url_path: string;
   duration: number;
   created_at: string;
@@ -919,13 +902,12 @@ onMounted(async () => {
 
 .visitor-table-wrapper .pages-list li {
   grid-template-columns:
-    minmax(200px, 1.5fr) 140px 120px minmax(200px, 1.5fr)
+    minmax(200px, 1.5fr) 160px minmax(200px, 1.5fr)
     110px;
 }
 
 .visitor-table-wrapper .ua-text,
-.visitor-table-wrapper .ip-text,
-.visitor-table-wrapper .city-text {
+.visitor-table-wrapper .ip-text {
   min-width: 0;
   overflow: hidden;
   color: var(--anzhiyu-secondtext);
@@ -945,14 +927,10 @@ onMounted(async () => {
   -webkit-box-orient: vertical;
 }
 
-.visitor-table-wrapper .ip-text,
-.visitor-table-wrapper .city-text {
-  white-space: nowrap;
-}
-
 .visitor-table-wrapper .ip-text {
   font-family: monospace;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 
 .visitor-logs-section .pagination {
@@ -974,7 +952,7 @@ onMounted(async () => {
 
 .analytics-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
@@ -1177,8 +1155,7 @@ onMounted(async () => {
   .page-duration,
   .page-bounce,
   .ua-text,
-  .ip-text,
-  .city-text {
+  .ip-text {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1191,8 +1168,7 @@ onMounted(async () => {
   .page-duration::before,
   .page-bounce::before,
   .ua-text::before,
-  .ip-text::before,
-  .city-text::before {
+  .ip-text::before {
     font-size: 0.75rem;
     font-weight: 500;
     color: var(--anzhiyu-secondtext);
@@ -1227,10 +1203,6 @@ onMounted(async () => {
 
   .ip-text::before {
     content: "IP";
-  }
-
-  .city-text::before {
-    content: "城市";
   }
 
   .visitor-logs-section .page-path::before {

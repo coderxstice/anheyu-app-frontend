@@ -13,6 +13,7 @@ export interface CreateCommentPayload {
   target_path: string;
   target_title?: string;
   parent_id?: string | null;
+  reply_to_id?: string | null; // 回复目标评论的ID，用于构建对话链
   nickname: string;
   email?: string;
   website?: string;
@@ -40,9 +41,14 @@ export interface Comment {
   parent_id: string | null;
   user_agent: string;
   children: Comment[];
+  reply_to_id: string | null;
   reply_to_nick: string | null;
   like_count: number;
   total_children: number;
+  // 前端排序扩展字段
+  _hasReplies?: boolean;
+  _repliesCount?: number;
+  _replies?: Comment[];
 }
 
 /**

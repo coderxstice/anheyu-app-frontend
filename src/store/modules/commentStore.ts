@@ -131,6 +131,17 @@ export const useCommentStore = defineStore("comment", () => {
         children: []
       };
 
+      // 开发环境调试：输出新评论数据
+      if (import.meta.env.DEV) {
+        console.log("[新评论] 后端返回数据:", {
+          id: newComment.id,
+          parent_id: newComment.parent_id,
+          reply_to_id: newComment.reply_to_id,
+          reply_to_nick: newComment.reply_to_nick,
+          nickname: newComment.nickname
+        });
+      }
+
       if (newComment.parent_id) {
         let topLevelParent: Comment | null = null;
         topLevelParent =
@@ -153,7 +164,13 @@ export const useCommentStore = defineStore("comment", () => {
           if (!topLevelParent.children) {
             topLevelParent.children = [];
           }
-          topLevelParent.children.unshift(newComment);
+          topLevelParent.children.push(newComment); // 改用 push 而不是 unshift，让排序算法来决定顺序
+
+          if (import.meta.env.DEV) {
+            console.log(
+              `[新评论] 已添加到顶级评论 ${topLevelParent.id} 的 children`
+            );
+          }
         } else {
           console.warn(
             "Parent comment's thread not found, falling back to a refresh."
