@@ -88,7 +88,7 @@
         class="rightMenu-item"
         @click.stop="handleToggleCommentBarrage"
       >
-        <IconifyIconOffline icon="ri:chat-1-fill" class="!w-5 !h-5" />
+        <i class="anzhiyufont anzhiyu-icon-comments" />
         <span class="menu-commentBarrage-text">{{
           isCommentBarrageVisible ? "隐藏热评" : "显示热评"
         }}</span>
