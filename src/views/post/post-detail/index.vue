@@ -89,7 +89,9 @@ const commentBarrageConfig = computed(() => {
 
 const siteConfig = siteConfigStore.getSiteConfig;
 
-const siteName = computed(() => siteConfig.value?.APP_NAME || "安和鱼");
+const siteName = computed(() => {
+  return siteConfig?.APP_NAME || "安和鱼";
+});
 
 const authorInfoConfig = computed(() => {
   return {
