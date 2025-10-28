@@ -15,6 +15,7 @@ import BtnsPlugin from "./plugins/markdown-it-btns-plugin";
 import LinkCardPlugin from "./plugins/markdown-it-link-card-plugin";
 import GalleryPlugin from "./plugins/markdown-it-gallery-plugin";
 import VideoGalleryPlugin from "./plugins/markdown-it-video-gallery-plugin";
+import EnhancedImagePlugin from "./plugins/markdown-it-enhanced-image-plugin";
 
 export function installMarkdownEditorExtensions() {
   console.log("🔧 Installing markdown editor extensions...");
@@ -24,6 +25,9 @@ export function installMarkdownEditorExtensions() {
       console.log("⚙️ Configuring markdown-it with plugins...");
 
       try {
+        mdit.use(EnhancedImagePlugin);
+        console.log("✅ EnhancedImagePlugin registered");
+
         mdit.use(TabsPlugin);
         console.log("✅ TabsPlugin registered");
 
