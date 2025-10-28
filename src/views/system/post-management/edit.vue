@@ -61,6 +61,7 @@ const form = reactive<ArticleForm>({
   status: "DRAFT",
   post_tag_ids: [],
   post_category_ids: [],
+  show_on_home: true,
   home_sort: 0,
   pin_sort: 0,
   top_img_url: "",

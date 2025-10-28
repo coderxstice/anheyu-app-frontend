@@ -93,6 +93,7 @@ export interface Article {
   ip_location?: string;
   post_tags: PostTag[];
   post_categories: PostCategory[];
+  show_on_home: boolean;
   home_sort: number;
   pin_sort: number;
   top_img_url: string;
@@ -136,6 +137,7 @@ export interface ArticleForm {
   post_tag_ids?: string[];
   post_category_ids?: string[];
   ip_location?: string;
+  show_on_home?: boolean;
   home_sort?: number;
   pin_sort?: number;
   top_img_url?: string;

@@ -520,6 +520,20 @@ const handleFetchPrimaryColor = async () => {
                 </el-form-item>
               </el-col>
               <el-col :span="12">
+                <el-form-item label="在首页显示">
+                  <div>
+                    <el-switch
+                      v-model="internalForm.show_on_home"
+                      active-text="是"
+                      inactive-text="否"
+                    />
+                    <div class="form-item-help">
+                      控制文章发布后是否在首页展示
+                    </div>
+                  </div>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
                 <el-form-item label="首页推荐排序">
                   <el-input-number
                     v-model="internalForm.home_sort"
