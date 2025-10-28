@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-05 18:27:55
- * @LastEditTime: 2025-08-31 12:37:06
+ * @LastEditTime: 2025-10-28 10:12:21
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -43,6 +43,17 @@ const runningDays = computed(() => {
     return 0;
   }
 });
+
+const formattedWordCount = computed(() => {
+  const count = props.config.totalWordCount;
+  if (count === -1 || count === 0) {
+    return "0";
+  }
+  if (count < 1000) {
+    return count.toString();
+  }
+  return (count / 1000).toFixed(1) + "k";
+});
 </script>
 
 <template>
@@ -70,7 +81,7 @@ const runningDays = computed(() => {
             <i class="anzhiyufont anzhiyu-icon-font" />
             <div class="item-name">全站字数 :</div>
           </div>
-          <div class="item-count">{{ config.totalWordCount }}</div>
+          <div class="item-count">{{ formattedWordCount }}</div>
         </div>
       </div>
     </div>

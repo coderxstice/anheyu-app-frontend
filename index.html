@@ -123,16 +123,51 @@
           "@context": "https://schema.org",
           "@type": "WebSite",
           "name": "{{.ogSiteName}}",
+          "alternateName": "{{.ogSiteName}}",
           "url": "{{.ogUrl}}",
           "description": "{{.pageDescription}}",
+          "inLanguage": "zh-CN",
           "publisher": {
             "@type": "Organization",
             "name": "{{.ogSiteName}}",
+            "url": "{{.ogUrl}}",
             "logo": {
               "@type": "ImageObject",
-              "url": "{{.favicon}}"
+              "url": "{{.favicon}}",
+              "width": 512,
+              "height": 512
             }
+          },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "{{.ogUrl}}/search?keyword={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
           }
+        }
+      </script>
+
+      <!-- Organization Schema with Social Media Links -->
+      <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "{{.ogSiteName}}",
+          "url": "{{.ogUrl}}",
+          "logo": "{{.favicon}}",
+          "description": "{{.pageDescription}}",
+          "sameAs": {{json .socialMediaLinks}}
+        }
+      </script>
+      {{end}} {{if .breadcrumbList}}
+      <!-- BreadcrumbList Schema for Navigation -->
+      <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": {{json .breadcrumbList}}
         }
       </script>
       {{end}}
