@@ -77,7 +77,7 @@ function downloadViaBrowser(url: string, fileName?: string) {
   console.log("下载已触发，浏览器将显示下载进度");
 }
 
-// ✅ 导出方法
+//导出方法
 defineExpose({
   downloadImageWithProgress
 });

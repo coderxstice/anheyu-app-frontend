@@ -465,7 +465,7 @@ const initializeComponent = async () => {
   treeData.value = [rootNode];
   defaultExpandedKeys.value = expandedKeys;
   isInitializing.value = false;
-  console.log("[Init] ✅ 初始化完成！");
+  console.log("[Init]初始化完成！");
 };
 
 // 数据获取与处理

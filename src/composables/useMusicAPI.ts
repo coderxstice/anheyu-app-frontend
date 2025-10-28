@@ -176,7 +176,7 @@ export function useMusicAPI() {
     lrcValue: string,
     songName: string = "未知歌曲"
   ): Promise<string> => {
-    console.log(`[MUSIC_API] 🎵 开始处理歌词 - 歌曲: ${songName}`, {
+    console.log(`[MUSIC_API]  开始处理歌词 - 歌曲: ${songName}`, {
       lrcValue: lrcValue
         ? lrcValue.substring(0, 100) + (lrcValue.length > 100 ? "..." : "")
         : "空值",
@@ -186,7 +186,7 @@ export function useMusicAPI() {
 
     // 如果为空，返回空字符串
     if (!lrcValue || lrcValue.trim() === "") {
-      console.log(`[MUSIC_API] 🎵 歌曲 "${songName}" 无歌词数据`);
+      console.log(`[MUSIC_API]  歌曲 "${songName}" 无歌词数据`);
       return "";
     }
 
@@ -194,7 +194,7 @@ export function useMusicAPI() {
     const isUrl =
       lrcValue.startsWith("http://") || lrcValue.startsWith("https://");
 
-    console.log(`[MUSIC_API] 🎵 歌词类型检测 - 歌曲: ${songName}`, {
+    console.log(`[MUSIC_API]  歌词类型检测 - 歌曲: ${songName}`, {
       isUrl,
       lrcPreview: lrcValue.substring(0, 50) + "..."
     });
@@ -212,7 +212,7 @@ export function useMusicAPI() {
           return "";
         }
         const lrcContent = await response.text();
-        console.log(`[MUSIC_API] ✅ 歌词内容获取成功 - 歌曲: ${songName}`, {
+        console.log(`[MUSIC_API]歌词内容获取成功 - 歌曲: ${songName}`, {
           contentLength: lrcContent.length,
           firstLines: lrcContent.split("\n").slice(0, 3).join(" | "),
           hasLrcFormat: lrcContent.includes("[") && lrcContent.includes("]")
@@ -227,7 +227,7 @@ export function useMusicAPI() {
       }
     } else {
       // 直接返回歌词内容（已经是LRC格式的文本）
-      console.log(`[MUSIC_API] 🎵 使用直接歌词内容 - 歌曲: ${songName}`, {
+      console.log(`[MUSIC_API]  使用直接歌词内容 - 歌曲: ${songName}`, {
         contentLength: lrcValue.length,
         hasLrcFormat: lrcValue.includes("[") && lrcValue.includes("]")
       });
@@ -260,7 +260,7 @@ export function useMusicAPI() {
       const songPromises = jsonData.map(async (item: any, index: number) => {
         const songName = item.name || item.title || `未知歌曲-${index}`;
         console.log(
-          `[MUSIC_API] 🎵 开始处理第 ${index + 1} 首歌曲: ${songName}`,
+          `[MUSIC_API]  开始处理第 ${index + 1} 首歌曲: ${songName}`,
           {
             hasLrc: !!(item.lrc && item.lrc.trim()),
             lrcType: item.lrc
@@ -283,7 +283,7 @@ export function useMusicAPI() {
           lrc: lrcContent // 存储实际的歌词内容，而不是URL
         };
 
-        console.log(`[MUSIC_API] ✅ 歌曲处理完成: ${songName}`, {
+        console.log(`[MUSIC_API]歌曲处理完成: ${songName}`, {
           hasLyrics: !!(lrcContent && lrcContent.trim()),
           lyricsLength: lrcContent ? lrcContent.length : 0,
           lyricsPreview: lrcContent
@@ -338,7 +338,7 @@ export function useMusicAPI() {
       if (!forceRefresh) {
         const cached = getPlaylistCache();
         if (cached && cached.data.length > 0) {
-          console.log(`[MUSIC_API] 🎵 使用缓存数据详细信息:`, {
+          console.log(`[MUSIC_API]  使用缓存数据详细信息:`, {
             songsCount: cached.data.length,
             songsWithLyrics: cached.data.filter(
               song => song.lrc && song.lrc.trim()
@@ -386,7 +386,7 @@ export function useMusicAPI() {
 
         if (response.code === 200 && response.data && response.data.songs) {
           const songs = response.data.songs;
-          console.log(`[MUSIC_API] ✅ 后端API成功返回 ${songs.length} 首歌曲`);
+          console.log(`[MUSIC_API]后端API成功返回 ${songs.length} 首歌曲`);
 
           // 转换为统一格式（如果需要），确保所有URL使用HTTPS
           const formattedSongs: Song[] = songs.map((song: any) => ({
@@ -435,7 +435,7 @@ export function useMusicAPI() {
       formData.append("level", level);
       formData.append("type", "json");
 
-      console.log(`🎵 [Song_V1 API] 直接调用 - ID: ${songId}, 音质: ${level}`);
+      console.log(` [Song_V1 API] 直接调用 - ID: ${songId}, 音质: ${level}`);
 
       const response = await fetch("https://metings.qjqq.cn/Song_V1", {
         method: "POST",
@@ -450,7 +450,7 @@ export function useMusicAPI() {
         // 5xx 服务器错误 - 不应该降级
         if (response.status >= 500) {
           console.warn(
-            `🎵 [Song_V1 API] 服务器错误 ${response.status}，不尝试降级`
+            ` [Song_V1 API] 服务器错误 ${response.status}，不尝试降级`
           );
           return {
             url: "",
@@ -461,7 +461,7 @@ export function useMusicAPI() {
           };
         }
         // 4xx 客户端错误 - 可能是资源不存在，可以降级尝试
-        console.warn(`🎵 [Song_V1 API] 请求失败 - 状态码: ${response.status}`);
+        console.warn(` [Song_V1 API] 请求失败 - 状态码: ${response.status}`);
         return {
           url: "",
           lyric: "",
@@ -475,7 +475,7 @@ export function useMusicAPI() {
 
       if (data.status !== 200 || !data.success) {
         console.warn(
-          `🎵 [Song_V1 API] API返回错误 - 状态: ${data.status}, 消息: ${data.message}`
+          ` [Song_V1 API] API返回错误 - 状态: ${data.status}, 消息: ${data.message}`
         );
         return {
           url: "",
@@ -487,7 +487,7 @@ export function useMusicAPI() {
       }
 
       console.log(
-        `🎵 [Song_V1 API] 成功获取 - 音质: ${data.data.level}, 大小: ${data.data.size}`
+        ` [Song_V1 API] 成功获取 - 音质: ${data.data.level}, 大小: ${data.data.size}`
       );
 
       return {
@@ -497,7 +497,7 @@ export function useMusicAPI() {
         size: data.data.size
       };
     } catch (error) {
-      console.error(`🎵 [Song_V1 API] 请求异常 (网络错误):`, error);
+      console.error(` [Song_V1 API] 请求异常 (网络错误):`, error);
       // 网络异常 - 标记为服务器错误，不降级
       return {
         url: "",
@@ -519,7 +519,7 @@ export function useMusicAPI() {
     errorType?: "network" | "server" | "no_resources" | "unknown";
     errorMessage?: string;
   }> => {
-    console.log(`🎵 [歌曲资源] 前端直接获取资源 - ${song.name}`, {
+    console.log(` [歌曲资源] 前端直接获取资源 - ${song.name}`, {
       hasLrc: !!(song.lrc && song.lrc.trim()),
       lrcLength: song.lrc?.length || 0,
       lrcType: song.lrc
@@ -536,7 +536,7 @@ export function useMusicAPI() {
     if (song.lrc && song.lrc.trim() && !song.lrc.startsWith("http")) {
       // 如果 song.lrc 包含实际的LRC内容（不是URL），直接使用
       lyricsText = song.lrc;
-      console.log(`🎵 [歌曲资源] 使用歌曲自带的LRC内容 - ${song.name}`, {
+      console.log(` [歌曲资源] 使用歌曲自带的LRC内容 - ${song.name}`, {
         lyricsLength: lyricsText.length,
         firstLine: lyricsText.split("\n")[0] || "空"
       });
@@ -544,7 +544,7 @@ export function useMusicAPI() {
 
     // 如果没有网易云ID，返回现有的歌词内容
     if (!song.neteaseId) {
-      console.log(`🎵 [歌曲资源] 歌曲无网易云ID，返回现有资源 - ${song.name}`, {
+      console.log(` [歌曲资源] 歌曲无网易云ID，返回现有资源 - ${song.name}`, {
         hasLyrics: !!lyricsText,
         reason: "无网易云ID，跳过API调用"
       });
@@ -558,13 +558,13 @@ export function useMusicAPI() {
 
     try {
       // 第一步：尝试获取 exhigh 音质
-      console.log("🎵 [音质降级] 步骤1 - 尝试 exhigh 音质");
+      console.log(" [音质降级] 步骤1 - 尝试 exhigh 音质");
       let result = await fetchSongV1(song.neteaseId, "exhigh");
 
       // 第二步：根据错误类型决定是否降级
       if (result?.error === "server_error") {
         // 服务器错误或网络异常，不降级，直接返回
-        console.log("🎵 [音质降级] ⚠️ 检测到服务器错误/网络异常，不尝试降级");
+        console.log(" [音质降级] ⚠️ 检测到服务器错误/网络异常，不尝试降级");
         return {
           audioUrl: song.url || "", // 回退到播放列表基础 URL（如果有）
           lyricsText: lyricsText,
@@ -575,12 +575,12 @@ export function useMusicAPI() {
 
       // 如果是资源不存在，尝试降级到 standard
       if (!result || !result.url) {
-        console.log("🎵 [音质降级] 步骤2 - exhigh 无资源，尝试 standard 音质");
+        console.log(" [音质降级] 步骤2 - exhigh 无资源，尝试 standard 音质");
         result = await fetchSongV1(song.neteaseId, "standard");
 
         // 如果 standard 也是服务器错误，直接返回
         if (result?.error === "server_error") {
-          console.log("🎵 [音质降级] ⚠️ standard 也是服务器错误");
+          console.log(" [音质降级] ⚠️ standard 也是服务器错误");
           return {
             audioUrl: song.url || "",
             lyricsText: lyricsText,
@@ -592,7 +592,7 @@ export function useMusicAPI() {
 
       // 第三步：检查最终结果
       if (!result || !result.url) {
-        console.log("🎵 [音质降级] 所有音质都不可用");
+        console.log(" [音质降级] 所有音质都不可用");
         return {
           audioUrl: song.url || "", // 尝试使用播放列表基础 URL
           lyricsText: lyricsText,
@@ -603,7 +603,7 @@ export function useMusicAPI() {
 
       // 成功获取资源
       console.log(
-        `🎵 [歌曲资源] 成功获取 - 音质: ${result.level}, 大小: ${result.size}`,
+        ` [歌曲资源] 成功获取 - 音质: ${result.level}, 大小: ${result.size}`,
         {
           hasAudio: !!result.url,
           hasLyrics: !!result.lyric,
@@ -614,7 +614,7 @@ export function useMusicAPI() {
       // 优先使用已有的歌词内容，如果没有再使用API返回的
       const finalLyricsText = lyricsText || result.lyric || "";
 
-      console.log(`🎵 [歌曲资源] 最终歌词选择 - ${song.name}`, {
+      console.log(` [歌曲资源] 最终歌词选择 - ${song.name}`, {
         source: lyricsText ? "自定义JSON" : result.lyric ? "API" : "无",
         lyricsLength: finalLyricsText.length
       });
@@ -624,7 +624,7 @@ export function useMusicAPI() {
         lyricsText: finalLyricsText
       };
     } catch (error) {
-      console.error("🎵 [歌曲资源] 获取失败:", error);
+      console.error(" [歌曲资源] 获取失败:", error);
 
       let errorType: "network" | "server" | "unknown" = "unknown";
       let errorMessage = "获取资源失败";
@@ -648,7 +648,7 @@ export function useMusicAPI() {
         }
       }
 
-      console.log(`🎵 [歌曲资源] 降级到播放列表基础资源 - ${errorType}`, {
+      console.log(` [歌曲资源] 降级到播放列表基础资源 - ${errorType}`, {
         hasExistingLyrics: !!lyricsText,
         lyricsSource: lyricsText ? "自定义JSON" : "无"
       });

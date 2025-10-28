@@ -191,7 +191,7 @@ const calculateTargetScrollTop = (
 
 // 处理歌词点击
 const handleLyricClick = (index: number) => {
-  console.log("🎵 [歌词点击] 开始处理歌词点击事件:", {
+  console.log(" [歌词点击] 开始处理歌词点击事件:", {
     clickedIndex: index,
     currentIndex: props.lyricsState.currentIndex,
     totalLyrics: props.lyrics.length,
@@ -207,7 +207,7 @@ const handleLyricClick = (index: number) => {
   emit("lyric-click", index);
 
   // 立即滚动到点击的歌词位置
-  console.log("🎵 [歌词点击] 准备滚动到点击的歌词位置，重置滚动状态");
+  console.log(" [歌词点击] 准备滚动到点击的歌词位置，重置滚动状态");
 
   // 重置用户滚动状态，允许自动滚动
   userScrolling.value = false;
@@ -215,7 +215,7 @@ const handleLyricClick = (index: number) => {
 
   // 清除当前滚动动画
   if (scrollAnimationId.value) {
-    console.log("🎵 [歌词点击] 取消当前滚动动画");
+    console.log(" [歌词点击] 取消当前滚动动画");
     cancelAnimationFrame(scrollAnimationId.value);
   }
 
@@ -232,7 +232,7 @@ let touchStartY = 0;
 
 // 处理鼠标滚轮事件
 const handleWheel = (event: WheelEvent) => {
-  console.log("🖱️ [鼠标滚轮] 用户开始手动滚动:", {
+  console.log("[鼠标滚轮] 用户开始手动滚动:", {
     deltaY: event.deltaY,
     deltaX: event.deltaX,
     currentScrollTop: scrollContainer.value?.scrollTop || 0,
@@ -246,20 +246,20 @@ const handleWheel = (event: WheelEvent) => {
 
   // 清除当前滚动动画
   if (scrollAnimationId.value) {
-    console.log("🖱️ [鼠标滚轮] 取消当前滚动动画 ID:", scrollAnimationId.value);
+    console.log("[鼠标滚轮] 取消当前滚动动画 ID:", scrollAnimationId.value);
     cancelAnimationFrame(scrollAnimationId.value);
     scrollAnimationId.value = undefined;
   }
 
   // 清除之前的重置定时器
   if (userScrollResetTimer) {
-    console.log("🖱️ [鼠标滚轮] 清除之前的重置定时器");
+    console.log("[鼠标滚轮] 清除之前的重置定时器");
     clearTimeout(userScrollResetTimer);
     userScrollResetTimer = null;
   }
 
   userScrollResetTimer = window.setTimeout(() => {
-    console.log("🖱️ [鼠标滚轮] 4秒后重置用户滚动状态:", {
+    console.log("[鼠标滚轮] 4秒后重置用户滚动状态:", {
       currentIndex: props.lyricsState.currentIndex,
       currentLyric:
         props.lyrics[props.lyricsState.currentIndex]?.text?.substring(0, 30) +
@@ -275,7 +275,7 @@ const handleWheel = (event: WheelEvent) => {
 
     const currentIndex = props.lyricsState.currentIndex;
     if (currentIndex >= 0) {
-      console.log("🖱️ [鼠标滚轮] 恢复自动滚动到当前播放位置");
+      console.log("[鼠标滚轮] 恢复自动滚动到当前播放位置");
       scrollToCurrentLyricCenter(currentIndex);
     }
   }, 4000);
@@ -920,7 +920,7 @@ let isScrollingInProgress = false;
 watch(
   () => props.lyricsState.currentIndex,
   (newIndex, oldIndex) => {
-    console.log("🎵 [歌词索引变化] 检测到歌词索引改变:", {
+    console.log(" [歌词索引变化] 检测到歌词索引改变:", {
       oldIndex,
       newIndex,
       userScrolling: userScrolling.value,
@@ -936,19 +936,19 @@ watch(
 
     // 歌词索引变化时应该优先滚动，这是最重要的触发条件
     if (newIndex >= 0 && newIndex !== oldIndex && !isScrollingInProgress) {
-      console.log("🎵 [歌词索引变化] 歌词切换，开始自动滚动到新歌词位置");
+      console.log(" [歌词索引变化] 歌词切换，开始自动滚动到新歌词位置");
 
       // 标记滚动进行中，防止重复触发
       isScrollingInProgress = true;
 
       // 如果用户正在滚动，但歌词已经切换，我们需要权衡是否滚动
       if (userScrolling.value) {
-        console.log("🎵 [歌词索引变化] 检测到用户滚动状态，但歌词已切换");
+        console.log(" [歌词索引变化] 检测到用户滚动状态，但歌词已切换");
 
         // 如果用户滚动定时器还在，说明用户可能已经停止滚动，强制滚动到新歌词
         if (userScrollResetTimer) {
           console.log(
-            "🎵 [歌词索引变化] 歌词切换优先，清除用户滚动状态并执行滚动"
+            " [歌词索引变化] 歌词切换优先，清除用户滚动状态并执行滚动"
           );
           clearTimeout(userScrollResetTimer);
           userScrollResetTimer = null;
@@ -968,7 +968,7 @@ watch(
         });
       } else {
         console.log(
-          "🎵 [歌词索引变化] 用户仍在滚动中，延迟1秒后检查是否需要滚动"
+          " [歌词索引变化] 用户仍在滚动中，延迟1秒后检查是否需要滚动"
         );
         // 如果用户仍在滚动，等待1秒后检查
         setTimeout(() => {
@@ -976,14 +976,14 @@ watch(
             props.lyricsState.currentIndex === newIndex &&
             !userScrolling.value
           ) {
-            console.log("🎵 [歌词索引变化] 延迟滚动执行");
+            console.log(" [歌词索引变化] 延迟滚动执行");
             scrollToCurrentLyricCenter(newIndex);
           }
           isScrollingInProgress = false;
         }, 1000);
       }
     } else {
-      console.log("🎵 [歌词索引变化] 跳过自动滚动:", {
+      console.log(" [歌词索引变化] 跳过自动滚动:", {
         reason:
           newIndex < 0
             ? "索引无效"
@@ -1005,7 +1005,7 @@ watch(
 watch(
   () => props.lyrics,
   (newLyrics, oldLyrics) => {
-    console.log("🎵 [歌词数据变化] 歌词数据发生变化:", {
+    console.log(" [歌词数据变化] 歌词数据发生变化:", {
       oldLyricsLength: oldLyrics?.length || 0,
       newLyricsLength: newLyrics?.length || 0,
       firstOldLyric: oldLyrics?.[0]?.text?.substring(0, 30) + "..." || "无",
@@ -1022,8 +1022,8 @@ watch(
         oldLyrics?.[0]?.text !== newLyrics?.[0]?.text
     });
 
-    // 🎵 重要：切换歌曲时完全重置滚动状态
-    console.log("🎵 [歌词数据变化] 完全重置滚动状态和清理资源");
+    //  重要：切换歌曲时完全重置滚动状态
+    console.log(" [歌词数据变化] 完全重置滚动状态和清理资源");
     userScrolling.value = false;
     isAutoScrolling.value = false;
     lyricRefs.value = [];
@@ -1031,13 +1031,13 @@ watch(
     // 重置容器滚动位置
     if (scrollContainer.value) {
       scrollContainer.value.scrollTop = 0;
-      console.log("🎵 [歌词数据变化] 滚动容器位置已重置到顶部");
+      console.log(" [歌词数据变化] 滚动容器位置已重置到顶部");
     }
 
     // 清除正在进行的滚动动画
     if (scrollAnimationId.value) {
       console.log(
-        "🎵 [歌词数据变化] 清除正在进行的滚动动画 ID:",
+        " [歌词数据变化] 清除正在进行的滚动动画 ID:",
         scrollAnimationId.value
       );
       cancelAnimationFrame(scrollAnimationId.value);
@@ -1046,17 +1046,17 @@ watch(
 
     // 如果新歌词为空，直接返回
     if (!newLyrics || newLyrics.length === 0) {
-      console.log("🎵 [歌词数据变化] 新歌词为空，无需初始化滚动");
+      console.log(" [歌词数据变化] 新歌词为空，无需初始化滚动");
       return;
     }
 
     // 延迟执行滚动计算，确保DOM更新完成
     nextTick(() => {
-      console.log("🎵 [歌词数据变化] DOM更新完成，准备在500ms后执行初始滚动");
+      console.log(" [歌词数据变化] DOM更新完成，准备在500ms后执行初始滚动");
       setTimeout(() => {
         // 滚动到当前高亮歌词的居中位置
         const currentIndex = props.lyricsState.currentIndex;
-        console.log("🎵 [歌词数据变化] 开始执行初始滚动:", {
+        console.log(" [歌词数据变化] 开始执行初始滚动:", {
           currentIndex,
           hasValidIndex: currentIndex >= 0 && currentIndex < newLyrics.length,
           targetLyric:
@@ -1071,7 +1071,7 @@ watch(
           scrollToCurrentLyricCenter(currentIndex);
         } else {
           // 如果没有有效的当前索引，滚动到顶部或使用传统的居中滚动
-          console.log("🎵 [歌词数据变化] 无有效索引，使用备用滚动方法");
+          console.log(" [歌词数据变化] 无有效索引，使用备用滚动方法");
           calculateCenterScroll();
         }
       }, 500);
@@ -1242,7 +1242,7 @@ const debugScrollIssue = () => {
       : null
   });
 
-  console.log("🎵 [滚动调试] 歌词数据:", {
+  console.log(" [滚动调试] 歌词数据:", {
     currentLyric:
       props.lyrics[currentIndex]?.text?.substring(0, 50) + "..." || "无歌词",
     currentLyricTime: props.lyrics[currentIndex]?.time?.toFixed(2) || "无时间",

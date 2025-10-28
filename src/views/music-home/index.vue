@@ -665,7 +665,7 @@ const handleProgressClick = (event: MouseEvent) => {
   const percentage = (event.clientX - rect.left) / rect.width;
   const newTime = percentage * audioPlayer.audioState.duration;
 
-  console.log("🎵 [进度条点击] 处理进度条点击事件:", {
+  console.log(" [进度条点击] 处理进度条点击事件:", {
     clickX: event.clientX,
     rectLeft: rect.left,
     rectWidth: rect.width,
@@ -682,14 +682,14 @@ const handleProgressClick = (event: MouseEvent) => {
     // 跳转到新时间位置
     audioPlayer.seek(newTime);
 
-    console.log("🎵 [进度条点击] 时间跳转完成，准备更新歌词状态");
+    console.log(" [进度条点击] 时间跳转完成，准备更新歌词状态");
 
     // 立即更新歌词状态，确保在暂停状态下也能滚动
     lyricsComposable.updateCurrentLyricIndex();
 
     // 重置用户滚动状态，允许自动滚动
     if (lyricsScrollRef.value) {
-      console.log("🎵 [进度条点击] 重置歌词滚动状态并触发滚动");
+      console.log(" [进度条点击] 重置歌词滚动状态并触发滚动");
       // 通过调用组件的公开方法来重置滚动状态并触发滚动
       nextTick(() => {
         if (lyricsScrollRef.value?.resetScrollState) {
@@ -697,10 +697,10 @@ const handleProgressClick = (event: MouseEvent) => {
         }
       });
     } else {
-      console.warn("🎵 [进度条点击] 歌词滚动组件引用不存在");
+      console.warn(" [进度条点击] 歌词滚动组件引用不存在");
     }
   } else {
-    console.warn("🎵 [进度条点击] 音频元素不存在，无法跳转");
+    console.warn(" [进度条点击] 音频元素不存在，无法跳转");
   }
 };
 
@@ -860,7 +860,7 @@ const handleProgressMouseDown = (event: MouseEvent) => {
 };
 
 const togglePlaylist = async () => {
-  console.log("🎵 [播放列表] 切换播放列表状态", {
+  console.log(" [播放列表] 切换播放列表状态", {
     currentState: showPlaylist.value,
     action: showPlaylist.value ? "关闭" : "显示",
     screenWidth: window.innerWidth,
@@ -892,7 +892,7 @@ const showPlaylistWithAnimation = async () => {
   // 检测是否为移动端
   const isMobile = window.innerWidth <= 768;
 
-  console.log("🎵 [播放列表] 显示播放列表面板动画（无song-item动画）", {
+  console.log(" [播放列表] 显示播放列表面板动画（无song-item动画）", {
     isMobile,
     screenWidth: window.innerWidth,
     hasContainer: !!playlistContainer.value,
@@ -969,7 +969,7 @@ const hidePlaylist = () => {
     }
 
     const isMobile = window.innerWidth <= 768;
-    console.log("🎵 [播放列表] 隐藏播放列表面板动画（无song-item动画）", {
+    console.log(" [播放列表] 隐藏播放列表面板动画（无song-item动画）", {
       isMobile,
       hasContainer: !!playlistContainer.value
     });
@@ -1051,7 +1051,7 @@ const getPlayButtonTitle = (): string => {
 const handleLyricClick = (lyricIndex: number) => {
   const lyrics = lyricsComposable.lyrics.value;
 
-  console.log("🎵 [歌词点击处理] 处理歌词点击事件:", {
+  console.log(" [歌词点击处理] 处理歌词点击事件:", {
     lyricIndex,
     totalLyrics: lyrics.length,
     hasAudio: !!audioPlayer.audioRef.value,
@@ -1065,7 +1065,7 @@ const handleLyricClick = (lyricIndex: number) => {
   if (lyrics && lyrics[lyricIndex] && audioPlayer.audioRef.value) {
     const targetTime = lyrics[lyricIndex].time;
 
-    console.log("🎵 [歌词点击处理] 准备跳转到目标时间:", {
+    console.log(" [歌词点击处理] 准备跳转到目标时间:", {
       targetTime: targetTime.toFixed(2),
       timeDiff: (targetTime - audioPlayer.audioState.currentTime).toFixed(2),
       direction:
@@ -1077,12 +1077,12 @@ const handleLyricClick = (lyricIndex: number) => {
     // 使用 seek 方法跳转到指定时间，确保一致性和边界检查
     audioPlayer.seek(targetTime);
 
-    console.log("🎵 [歌词点击处理] 时间跳转完成，歌词滚动将自动处理");
+    console.log(" [歌词点击处理] 时间跳转完成，歌词滚动将自动处理");
 
     // 歌词索引和滚动都会通过时间驱动的连续滚动自动处理
     // 不需要手动触发滚动，时间变化会自动触发平滑的连续滚动
   } else {
-    console.warn("🎵 [歌词点击处理] 歌词点击失败:", {
+    console.warn(" [歌词点击处理] 歌词点击失败:", {
       hasLyrics: !!lyrics,
       hasTargetLyric: !!(lyrics && lyrics[lyricIndex]),
       hasAudioRef: !!audioPlayer.audioRef.value,
@@ -1183,7 +1183,7 @@ const refreshCache = async () => {
 };
 
 const loadPlaylist = async () => {
-  console.log("🎵 [播放列表] 开始加载播放列表");
+  console.log(" [播放列表] 开始加载播放列表");
 
   try {
     // 使用更新后的musicAPI，支持自定义JSON链接和智能缓存
@@ -1214,7 +1214,7 @@ const loadPlaylist = async () => {
 const onTimeUpdate = () => {
   // 如果正在拖拽进度条，不更新音频播放器的时间状态，避免与拖拽状态冲突
   if (!isDragging.value) {
-    console.log("🎵 [时间更新] 音频时间更新:", {
+    console.log(" [时间更新] 音频时间更新:", {
       currentTime: audioPlayer.audioState.currentTime.toFixed(2),
       duration: audioPlayer.audioState.duration.toFixed(2),
       playedPercentage: audioPlayer.playedPercentage.value.toFixed(1) + "%",
@@ -1227,7 +1227,7 @@ const onTimeUpdate = () => {
     audioPlayer.onTimeUpdate();
     // 歌词索引会通过 useLyrics 内部的 watch 自动更新，无需手动调用
   } else {
-    console.log("🎵 [时间更新] 拖拽中，跳过时间更新:", {
+    console.log(" [时间更新] 拖拽中，跳过时间更新:", {
       dragProgress: dragProgress.value.toFixed(1) + "%",
       dragLyricIndex: dragLyricIndex.value,
       currentTime: audioPlayer.audioState.currentTime.toFixed(2)
@@ -1242,7 +1242,7 @@ watch(
   newPercentage => {
     if (!isDragging.value) {
       thumbPosition.value = newPercentage;
-      console.log("🎵 [进度同步] 更新进度条位置:", {
+      console.log(" [进度同步] 更新进度条位置:", {
         percentage: newPercentage.toFixed(1) + "%",
         currentTime: audioPlayer.audioState.currentTime.toFixed(2),
         duration: audioPlayer.audioState.duration.toFixed(2)
@@ -1255,7 +1255,7 @@ watch(
 watch(
   () => audioPlayer.currentSong.value,
   async (newSong, oldSong) => {
-    console.log("🎵 [歌曲变化] 当前歌曲发生变化:", {
+    console.log(" [歌曲变化] 当前歌曲发生变化:", {
       oldSong: oldSong
         ? {
             name: oldSong.name?.substring(0, 30) + "..." || "未知歌曲",
@@ -1276,9 +1276,9 @@ watch(
       isPlaying: audioPlayer.audioState.isPlaying
     });
 
-    // 🎵 重置进度条相关状态
+    //  重置进度条相关状态
     if (oldSong !== newSong) {
-      console.log("🎵 [歌曲变化] 重置进度条和拖拽状态");
+      console.log(" [歌曲变化] 重置进度条和拖拽状态");
 
       // 重置拖拽相关状态
       isDragging.value = false;
@@ -1295,17 +1295,17 @@ watch(
 
     // 处理专辑封面和颜色提取
     if (newSong?.pic) {
-      console.log("🎵 [歌曲变化] 开始提取专辑封面主色调");
+      console.log(" [歌曲变化] 开始提取专辑封面主色调");
       isLoadingCover.value = true;
       await colorExtraction.extractAndSetDominantColor(newSong.pic);
     } else {
-      console.log("🎵 [歌曲变化] 无专辑封面，重置为默认颜色");
+      console.log(" [歌曲变化] 无专辑封面，重置为默认颜色");
       colorExtraction.resetToDefaultColor();
     }
 
     // 注意：歌曲资源获取（高质量音频和歌词）现在由 useAudioPlayer.loadSongWithResources 处理
     // 这样可以确保先获取资源再加载音频，避免时序问题
-    console.log("🎵 [歌曲变化] UI处理完成，音频和歌词由音频播放器内部处理");
+    console.log(" [歌曲变化] UI处理完成，音频和歌词由音频播放器内部处理");
   },
   { immediate: true }
 );
@@ -1316,25 +1316,25 @@ watch(
   newLyricsText => {
     if (newLyricsText) {
       console.log(
-        "🎵 [歌词变化] 音频播放器提供新歌词，长度:",
+        " [歌词变化] 音频播放器提供新歌词，长度:",
         newLyricsText.length
       );
       lyricsComposable.setLyrics(newLyricsText);
 
       // 歌词设置完成后，延迟触发滚动计算
       nextTick().then(() => {
-        console.log("🎵 [歌词变化] DOM更新完成，800ms后触发歌词居中滚动");
+        console.log(" [歌词变化] DOM更新完成，800ms后触发歌词居中滚动");
         setTimeout(() => {
           if (lyricsScrollRef.value?.calculateCenterScroll) {
-            console.log("🎵 [歌词变化] 执行歌词居中滚动");
+            console.log(" [歌词变化] 执行歌词居中滚动");
             lyricsScrollRef.value.calculateCenterScroll();
           } else {
-            console.warn("🎵 [歌词变化] 歌词滚动组件引用不存在");
+            console.warn(" [歌词变化] 歌词滚动组件引用不存在");
           }
         }, 800);
       });
     } else {
-      console.log("🎵 [歌词变化] 清空歌词");
+      console.log(" [歌词变化] 清空歌词");
       lyricsComposable.clearLyrics();
     }
   },

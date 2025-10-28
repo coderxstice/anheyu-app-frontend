@@ -299,10 +299,10 @@ const initializePlayer = async () => {
 
     // 预处理第一首歌曲的主色调
     if (firstSong?.pic) {
-      console.log("🎵 [初始化] 预处理第一首歌曲的主色调");
+      console.log(" [初始化] 预处理第一首歌曲的主色调");
       await colorExtraction.extractAndSetDominantColor(firstSong.pic);
     } else {
-      console.log("🎵 [初始化] 第一首歌曲无封面，使用默认颜色");
+      console.log(" [初始化] 第一首歌曲无封面，使用默认颜色");
       colorExtraction.resetToDefaultColor();
     }
 
@@ -310,7 +310,7 @@ const initializePlayer = async () => {
     isInitializing = false;
 
     // 设置播放列表和索引（此时watch可以正常工作）
-    console.log("🎵 [初始化] 设置播放列表，资源获取由useAudioPlayer统一处理");
+    console.log(" [初始化] 设置播放列表，资源获取由useAudioPlayer统一处理");
     playlist.value = playlistData;
     audioPlayer.currentSongIndex.value = randomIndex;
 
@@ -464,10 +464,10 @@ watch(
 
       // 处理主色调提取（不调用API，只处理UI）
       if (newSong?.pic) {
-        console.log("🎵 [音乐胶囊] 开始提取专辑封面主色调");
+        console.log(" [音乐胶囊] 开始提取专辑封面主色调");
         await colorExtraction.extractAndSetDominantColor(newSong.pic);
       } else {
-        console.log("🎵 [音乐胶囊] 无专辑封面，重置为默认颜色");
+        console.log(" [音乐胶囊] 无专辑封面，重置为默认颜色");
         colorExtraction.resetToDefaultColor();
       }
     }
@@ -481,12 +481,12 @@ watch(
   newLyricsText => {
     if (newLyricsText) {
       console.log(
-        "🎵 [音乐胶囊] 音频播放器提供新歌词，长度:",
+        " [音乐胶囊] 音频播放器提供新歌词，长度:",
         newLyricsText.length
       );
       lyricsComposable.setLyrics(newLyricsText);
     } else {
-      console.log("🎵 [音乐胶囊] 清空歌词");
+      console.log(" [音乐胶囊] 清空歌词");
       lyricsComposable.clearLyrics();
     }
   },
@@ -510,7 +510,7 @@ let cleanupMusicControlEvents: (() => void) | null = null;
 onMounted(async () => {
   // 如果是移动端，不执行任何初始化逻辑
   if (isMobile.value) {
-    console.log("🎵 [音乐播放器] 检测到移动端，跳过初始化");
+    console.log(" [音乐播放器] 检测到移动端，跳过初始化");
     return;
   }
 
