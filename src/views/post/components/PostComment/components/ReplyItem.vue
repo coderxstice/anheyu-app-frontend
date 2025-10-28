@@ -28,7 +28,7 @@ const contentWithFancybox = computed(() => {
   const imgTagRegex =
     /<img(?![^>]*class="[^"]*anzhiyu-owo-emotion[^"]*")[^>]+>/g;
 
-  return content.replace(imgTagRegex, imgTag => {
+  let processedContent = content.replace(imgTagRegex, imgTag => {
     const srcMatch = /src=(["'])(.*?)\1/.exec(imgTag);
     const altMatch = /alt=(["'])(.*?)\1/.exec(imgTag);
 
@@ -42,6 +42,41 @@ const contentWithFancybox = computed(() => {
 
     return `<a href="${src}" data-fancybox="${galleryName}" data-caption="${caption}">${imgTag}</a>`;
   });
+
+  // 处理普通链接，为没有 target 属性的链接添加 target="_blank" 和 rel
+  processedContent = processedContent.replace(
+    /<a\s+(?![^>]*data-fancybox)([^>]*)>/gi,
+    (match, attrs) => {
+      // 如果已经有 target 属性，不做修改
+      if (/target\s*=/i.test(attrs)) {
+        return match;
+      }
+
+      // 添加 target="_blank" 和 rel 属性
+      let newAttrs = attrs;
+
+      // 检查是否已有 rel 属性
+      const relMatch = /rel\s*=\s*["']([^"']*)["']/i.exec(attrs);
+      if (relMatch) {
+        // 如果已有 rel 属性，追加 noopener noreferrer
+        const existingRel = relMatch[1];
+        const relValues = new Set(existingRel.split(/\s+/));
+        relValues.add("noopener");
+        relValues.add("noreferrer");
+        newAttrs = attrs.replace(
+          /rel\s*=\s*["'][^"']*["']/i,
+          `rel="${Array.from(relValues).join(" ")}"`
+        );
+      } else {
+        // 如果没有 rel 属性，添加
+        newAttrs += ' rel="noopener noreferrer"';
+      }
+
+      return `<a ${newAttrs} target="_blank">`;
+    }
+  );
+
+  return processedContent;
 });
 
 const isLiked = computed(() =>
