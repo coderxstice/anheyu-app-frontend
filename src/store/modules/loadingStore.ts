@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-07 18:19:50
- * @LastEditTime: 2025-08-07 18:19:54
+ * @LastEditTime: 2025-10-30 14:18:41
  * @LastEditors: 安知鱼
  */
 import { defineStore } from "pinia";
@@ -16,8 +16,8 @@ export const useLoadingStore = defineStore("loading", {
   }),
   actions: {
     /**
-     * 开始加载（延迟 200ms 显示加载动画）
-     * 如果在 200ms 内路由加载完成，则不显示加载动画，避免闪烁
+     * 开始加载（延迟 300ms 显示加载动画）
+     * 如果在 300ms 内路由加载完成，则不显示加载动画，避免闪烁
      */
     startLoading() {
       // 清除之前可能存在的定时器
@@ -26,11 +26,11 @@ export const useLoadingStore = defineStore("loading", {
         loadingTimer = null;
       }
 
-      // 延迟 200ms 显示加载动画
+      // 延迟 300ms 显示加载动画
       loadingTimer = window.setTimeout(() => {
         this.isLoading = true;
         loadingTimer = null;
-      }, 200);
+      }, 300);
     },
     /**
      * 停止加载
