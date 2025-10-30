@@ -2,7 +2,7 @@
  * @Description: 用户中心页面
  * @Author: 安知鱼
  * @Date: 2025-10-03 18:26:16
- * @LastEditTime: 2025-10-12 02:54:18
+ * @LastEditTime: 2025-10-30 17:34:52
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -64,6 +64,18 @@
 
       <!-- 操作卡片 -->
       <div class="action-cards">
+        <!-- 管理员：写文章 -->
+        <div v-if="isAdmin" class="action-card" @click="goToPostManagement">
+          <div class="action-icon">
+            <IconifyIconOffline icon="ri:article-fill" />
+          </div>
+          <div class="action-content">
+            <h3>写文章</h3>
+            <p>创建和管理文章</p>
+          </div>
+          <i class="anzhiyufont anzhiyu-icon-chevron-right action-arrow" />
+        </div>
+
         <div class="action-card" @click="showEditDialog = true">
           <div class="action-icon">
             <IconifyIconOffline icon="ri:edit-fill" />
@@ -170,9 +182,19 @@ const joinTimeText = computed(() => {
   return formatRelativeTime(userStore.createdAt);
 });
 
+// 判断是否是管理员
+const isAdmin = computed(() => {
+  return userStore.roles.includes("1");
+});
+
 // 返回首页
 const goToHome = () => {
   router.push("/");
+};
+
+// 跳转到文章管理（新窗口打开）
+const goToPostManagement = () => {
+  window.open("/admin/post-management", "_blank");
 };
 
 // 资料更新成功
