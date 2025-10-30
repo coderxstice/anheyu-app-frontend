@@ -27,6 +27,7 @@ defineOptions({
 const siteConfigStore = useSiteConfigStore();
 const aboutConfig = ref<BackendAboutPageConfig | null>(null);
 const isLoading = ref(true);
+const customCodeHtml = ref<string>("");
 
 onMounted(async () => {
   try {
@@ -35,6 +36,11 @@ onMounted(async () => {
 
     if (config) {
       aboutConfig.value = config;
+
+      // 加载自定义 HTML 内容块
+      if (config.custom_code_html) {
+        customCodeHtml.value = config.custom_code_html;
+      }
     } else {
       ElMessage.error("获取关于页面配置失败，请检查后端配置或联系管理员");
     }
@@ -109,6 +115,13 @@ onMounted(async () => {
       <LikeTechCard :like="aboutConfig.like" />
       <MusicCard :music="aboutConfig.music" :author-name="aboutConfig.name" />
     </div>
+
+    <!-- 自定义内容块 -->
+    <div
+      v-if="customCodeHtml"
+      class="custom-content-block"
+      v-html="customCodeHtml"
+    />
   </div>
 
   <div v-else class="loading-container">
@@ -140,6 +153,106 @@ onMounted(async () => {
     @media screen and (max-width: 768px) {
       font-size: 2rem;
       margin: 0.5rem 0 1rem 0;
+    }
+  }
+
+  .custom-content-block {
+    width: 100%;
+    margin-top: 0.5rem;
+    animation: slide-in 0.6s 0.4s backwards;
+
+    // 美化自定义内容的样式
+    :deep(h1),
+    :deep(h2),
+    :deep(h3),
+    :deep(h4),
+    :deep(h5),
+    :deep(h6) {
+      margin: 1.5rem 0 1rem 0;
+      font-weight: 600;
+      color: var(--anzhiyu-fontcolor);
+    }
+
+    :deep(p) {
+      margin: 0.75rem 0;
+      line-height: 1.8;
+      color: var(--anzhiyu-fontcolor);
+    }
+
+    :deep(a) {
+      color: var(--anzhiyu-main);
+      text-decoration: none;
+      transition: all 0.3s ease;
+
+      &:hover {
+        color: var(--anzhiyu-main-op);
+        text-decoration: underline;
+      }
+    }
+
+    :deep(ul),
+    :deep(ol) {
+      margin: 0.75rem 0;
+      padding-left: 1.5rem;
+    }
+
+    :deep(li) {
+      margin: 0.5rem 0;
+      line-height: 1.8;
+    }
+
+    :deep(details) {
+      margin: 1rem 0;
+      padding: 1rem;
+      background: var(--anzhiyu-card-bg);
+      border-radius: 8px;
+      box-shadow: var(--anzhiyu-shadow-border);
+
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+        user-select: none;
+        transition: all 0.3s ease;
+
+        &:hover {
+          color: var(--anzhiyu-main);
+        }
+      }
+
+      .content {
+        margin-top: 1rem;
+      }
+    }
+
+    :deep(blockquote) {
+      margin: 1rem 0;
+      padding: 0.75rem 1rem;
+      border-left: 4px solid var(--anzhiyu-main);
+      background: var(--anzhiyu-secondbg);
+      border-radius: 4px;
+    }
+
+    :deep(code) {
+      padding: 0.2rem 0.4rem;
+      background: var(--anzhiyu-secondbg);
+      border-radius: 4px;
+      font-family: "Consolas", "Monaco", "Courier New", monospace;
+      font-size: 0.9em;
+      color: var(--anzhiyu-red);
+    }
+
+    :deep(pre) {
+      margin: 1rem 0;
+      padding: 1rem;
+      background: var(--anzhiyu-secondbg);
+      border-radius: 8px;
+      overflow-x: auto;
+
+      code {
+        padding: 0;
+        background: transparent;
+        color: var(--anzhiyu-fontcolor);
+      }
     }
   }
 }

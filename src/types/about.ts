@@ -239,4 +239,6 @@ export interface BackendAboutPageConfig {
     tips: string;
     title: string;
   };
+  custom_code?: string;
+  custom_code_html?: string;
 }
