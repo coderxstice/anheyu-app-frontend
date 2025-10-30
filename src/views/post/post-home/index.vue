@@ -12,6 +12,7 @@ import { getPublicArticles } from "@/api/post";
 import type { Article, GetArticleListParams } from "@/api/post/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { resetThemeToDefault } from "@/utils/themeManager";
+import { useDelayedLoading } from "@/composables/useDelayedLoading";
 
 defineOptions({
   name: "PostHome"
@@ -19,6 +20,7 @@ defineOptions({
 
 const route = useRoute();
 const siteConfigStore = useSiteConfigStore();
+const { isLoading: loading, withLoading } = useDelayedLoading();
 
 const pageType = computed(() => {
   if (route.path.startsWith("/tags/")) return "tag";
@@ -41,7 +43,6 @@ const isDoubleColumn = computed(() => {
 });
 
 const articles = ref<Article[]>([]);
-const loading = ref(true);
 const pagination = reactive({
   page: 1,
   pageSize: siteConfigStore.getSiteConfig?.post?.default.page_size || 12,
@@ -72,29 +73,28 @@ const newestArticleId = computed(() => {
 });
 
 const fetchData = async () => {
-  loading.value = true;
-  try {
-    const params: GetArticleListParams = {
-      page: pagination.page,
-      pageSize: pagination.pageSize
-    };
-    if (pageType.value === "category" && currentCategoryName.value) {
-      params.category = currentCategoryName.value;
-    } else if (pageType.value === "tag" && currentTagName.value) {
-      params.tag = currentTagName.value;
-    } else if (pageType.value === "archive") {
-      if (currentYear.value) params.year = currentYear.value;
-      if (currentMonth.value) params.month = currentMonth.value;
-    }
+  await withLoading(async () => {
+    try {
+      const params: GetArticleListParams = {
+        page: pagination.page,
+        pageSize: pagination.pageSize
+      };
+      if (pageType.value === "category" && currentCategoryName.value) {
+        params.category = currentCategoryName.value;
+      } else if (pageType.value === "tag" && currentTagName.value) {
+        params.tag = currentTagName.value;
+      } else if (pageType.value === "archive") {
+        if (currentYear.value) params.year = currentYear.value;
+        if (currentMonth.value) params.month = currentMonth.value;
+      }
 
-    const { data } = await getPublicArticles(params);
-    articles.value = data.list;
-    pagination.total = data.total;
-  } catch (error) {
-    console.error("获取文章列表失败:", error);
-  } finally {
-    loading.value = false;
-  }
+      const { data } = await getPublicArticles(params);
+      articles.value = data.list;
+      pagination.total = data.total;
+    } catch (error) {
+      console.error("获取文章列表失败:", error);
+    }
+  });
 };
 
 const handlePageChange = (newPage: number) => {
