@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-07-26 15:01:42
- * @LastEditTime: 2025-09-03 10:30:39
+ * @LastEditTime: 2025-10-30 10:57:34
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -39,7 +39,7 @@
     </el-tab-pane>
     <el-tab-pane label="关于页配置" name="aboutPage">
       <el-form :model="model" label-position="top" class="setting-form">
-        <AboutPageForm v-model="model.about" />
+        <AboutPageForm ref="aboutFormRef" v-model="model.about" />
       </el-form>
     </el-tab-pane>
     <el-tab-pane label="最近评论页配置" name="recentCommentsPage">
@@ -64,14 +64,18 @@ import RecentCommentsPageForm from "./frontDesk/RecentCommentsPageForm/index.vue
 
 const activeSubTab = ref("homePage");
 const fLinkFormRef = ref<InstanceType<typeof FLinkPageSettingsForm>>();
+const aboutFormRef = ref<InstanceType<typeof AboutPageForm>>();
 
 // 使用 defineModel 接收来自父组件(index.vue)的 v-model
 const model = defineModel<FrontDeskSettings>({ required: true });
 
-// 在表单提交前同步友链页的编辑器内容
+// 在表单提交前同步友链页和关于页的编辑器内容
 const syncBeforeSave = async () => {
   if (fLinkFormRef.value?.syncEditorContent) {
     await fLinkFormRef.value.syncEditorContent();
+  }
+  if (aboutFormRef.value?.syncEditorContent) {
+    await aboutFormRef.value.syncEditorContent();
   }
 };
 

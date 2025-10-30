@@ -514,6 +514,8 @@ export interface AboutPageSettingsInfo {
     tips: string;
   };
   statisticsBackground: string;
+  customCode: string; // 关于页自定义 Markdown 内容（用于编辑）
+  customCodeHtml: string; // 关于页自定义 HTML 内容（用于前台展示）
 }
 
 export interface RecentCommentsSettingsInfo {

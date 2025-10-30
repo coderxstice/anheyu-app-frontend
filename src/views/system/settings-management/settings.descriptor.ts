@@ -731,6 +731,18 @@ const aboutPageDescriptors: SettingDescriptor[] = [
     defaultValue:
       "https://upload-bbs.miyoushe.com/upload/2025/08/20/125766904/0d61be5d781e63642743883eb5580024_4597572337700501322.png",
     type: "string"
+  },
+  {
+    frontendPath: "frontDesk.about.customCode",
+    backendKey: constant.KeyAboutPageCustomCode,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.about.customCodeHtml",
+    backendKey: constant.KeyAboutPageCustomCodeHtml,
+    defaultValue: "",
+    type: "string"
   }
 ];
 

@@ -180,6 +180,8 @@ const KeyAboutPageCareers: SettingKey = "about.page.careers";
 const KeyAboutPageSkillsTips: SettingKey = "about.page.skills_tips";
 const KeyAboutPageStatisticsBackground: SettingKey =
   "about.page.statistics_background";
+const KeyAboutPageCustomCode: SettingKey = "about.page.custom_code";
+const KeyAboutPageCustomCodeHtml: SettingKey = "about.page.custom_code_html";
 const KeyMusicPlayerEnable: SettingKey = "music.player.enable";
 const KeyMusicPlayerPlaylistID: SettingKey = "music.player.playlist_id";
 const KeyMusicPlayerCustomPlaylist: SettingKey = "music.player.custom_playlist";
@@ -423,6 +425,8 @@ export const constant = {
   KeyAboutPageCareers,
   KeyAboutPageSkillsTips,
   KeyAboutPageStatisticsBackground,
+  KeyAboutPageCustomCode,
+  KeyAboutPageCustomCodeHtml,
   KeyMusicPlayerEnable,
   KeyMusicPlayerPlaylistID,
   KeyMusicPlayerCustomPlaylist,
@@ -518,3 +522,5 @@ export const constant = {
   // --- 其他 ---
   DEFAULT_CHUNK_SIZE
 };
+
+// Updated: 2025-10-30 - Added KeyAboutPageCustomCode and KeyAboutPageCustomCodeHtml
