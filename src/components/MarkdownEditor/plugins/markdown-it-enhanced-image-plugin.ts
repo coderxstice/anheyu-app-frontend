@@ -91,7 +91,6 @@ export default function enhancedImagePlugin(md: MarkdownIt): void {
   ): string {
     const token = tokens[idx];
     const srcIndex = token.attrIndex("src");
-    const altIndex = token.attrIndex("alt");
     const titleIndex = token.attrIndex("title");
 
     if (srcIndex < 0) {
@@ -99,7 +98,8 @@ export default function enhancedImagePlugin(md: MarkdownIt): void {
     }
 
     const src = token.attrs![srcIndex][1];
-    const alt = altIndex >= 0 ? token.attrs![altIndex][1] : "";
+    // alt 文本存储在 token.content 中，而不是 attrs
+    const alt = token.content || "";
     const title = titleIndex >= 0 ? token.attrs![titleIndex][1] : "";
 
     // 从 meta 中获取属性
@@ -108,8 +108,8 @@ export default function enhancedImagePlugin(md: MarkdownIt): void {
     const width = meta.width;
     const height = meta.height;
 
-    // caption 优先使用 meta.caption，如果没有则使用 title
-    const caption = meta.caption || title;
+    // caption 优先级：meta.caption > title > alt
+    const caption = meta.caption || title || alt;
 
     // 构建图片标签的属性
     const alignClass = `image-align-${align}`;
