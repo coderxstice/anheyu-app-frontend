@@ -941,7 +941,8 @@ onMounted(() => {
 // 响应式调整
 @media (max-width: 768px) {
   .post-management-container {
-    padding: 12px;
+    padding: 0px;
+    margin: 10px !important;
   }
 
   .control-panel {
