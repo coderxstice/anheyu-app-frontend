@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { type PropType, computed, ref, onMounted, onUnmounted } from "vue";
+import {
+  type PropType,
+  computed,
+  ref,
+  onMounted,
+  onUnmounted,
+  watch
+} from "vue";
 import type { Article } from "@/api/post/type";
 import { useRouter } from "vue-router";
 import { useArticleStore } from "@/store/modules/articleStore";
@@ -117,6 +124,21 @@ const { isDark } = useDark();
 const topCoverUrl = computed(() => {
   return props.article.top_img_url || articleStore.defaultCover;
 });
+
+const coverImageRef = ref<HTMLImageElement | null>(null);
+const isImageLoaded = ref(false);
+
+const handleImageLoad = () => {
+  isImageLoaded.value = true;
+};
+
+// 监听文章变化，重置图片加载状态
+watch(
+  () => props.article.id,
+  () => {
+    isImageLoaded.value = false;
+  }
+);
 
 const dynamicStyles = computed(() => {
   if (isDark.value) {
@@ -344,9 +366,13 @@ const scrollToComment = (event: Event) => {
     </div>
     <div class="post-top-cover">
       <img
-        class="post-top-bg lazy-loading"
-        :data-src="topCoverUrl"
+        ref="coverImageRef"
+        :key="article.id || topCoverUrl"
+        class="post-top-bg"
+        :class="{ 'is-loaded': isImageLoaded }"
+        :src="topCoverUrl"
         :alt="article.title"
+        @load="handleImageLoad"
       />
     </div>
     <section class="main-hero-waves-area waves-area">
@@ -438,23 +464,16 @@ const scrollToComment = (event: Event) => {
   height: 100%;
   min-height: 25rem;
   object-fit: cover;
-  opacity: 0.8;
-  transition: 0s;
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
 
-  // CSS 图片动画优化
   &:not([src]),
   &[src=""] {
     opacity: 0;
   }
 
-  &.lazy-loading {
-    background: var(--anzhiyu-secondbg);
-    opacity: 0.3;
-  }
-
-  &.lazy-loaded {
+  &.is-loaded {
     opacity: 0.8;
-    animation: imagePartialFadeIn 0.4s ease-out forwards;
   }
 
   &::after {
@@ -742,16 +761,6 @@ const scrollToComment = (event: Event) => {
     &::before {
       display: none;
     }
-  }
-}
-
-// 图片淡入动画（半透明）
-@keyframes imagePartialFadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 0.8;
   }
 }
 </style>
