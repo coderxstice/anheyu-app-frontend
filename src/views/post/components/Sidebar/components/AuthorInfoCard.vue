@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, type PropType } from "vue";
 import { ElTooltip } from "element-plus";
+import { useUserStoreHook } from "@/store/modules/user";
+import { storeToRefs } from "pinia";
 
 interface AuthorConfig {
   description: string;
@@ -19,15 +21,68 @@ const props = defineProps({
   }
 });
 
+const userStore = useUserStoreHook();
+const { nickname, id } = storeToRefs(userStore);
+
 const greetings = ref<string[]>([]);
 const currentGreetingIndex = ref(0);
+const showSkill = ref(false); // 控制是否显示技能标签
+
+// 用户问候语（仅登录用户）
+const userGreeting = computed(() => {
+  // 如果没有用户昵称，返回空（不应该被调用）
+  if (!nickname.value || nickname.value.trim() === "") {
+    return "";
+  }
+
+  // 检查上次问候时间
+  const lastGreetingTime = localStorage.getItem(`lastGreeting_${id.value}`);
+  const now = Date.now();
+
+  if (lastGreetingTime) {
+    const timeDiff = now - parseInt(lastGreetingTime);
+    const hoursDiff = timeDiff / (1000 * 60 * 60);
+
+    // 如果距离上次问候超过24小时，显示"好久不见"
+    if (hoursDiff > 24) {
+      return `好久不见，${nickname.value}`;
+    } else {
+      // 24小时内，显示"欢迎再次回来"
+      return `欢迎再次回来，${nickname.value}`;
+    }
+  } else {
+    // 第一次访问，显示"欢迎光临"
+    return `欢迎光临，${nickname.value}`;
+  }
+});
 
 const currentGreeting = computed(() => {
   if (greetings.value.length === 0) return "集中精力，攻克难关";
   return greetings.value[currentGreetingIndex.value];
 });
 
+// 显示的内容：有昵称时默认显示问候语，无昵称直接显示技能标签
+const displayGreeting = computed(() => {
+  // 如果没有昵称，直接显示技能标签
+  if (!nickname.value || nickname.value.trim() === "") {
+    return currentGreeting.value;
+  }
+
+  // 有昵称时，根据 showSkill 状态决定显示问候语还是技能标签
+  if (!showSkill.value) {
+    return userGreeting.value;
+  }
+  return currentGreeting.value;
+});
+
 const changeSayHelloText = () => {
+  if (!showSkill.value) {
+    // 第一次点击，切换到显示技能
+    showSkill.value = true;
+    return;
+  }
+
+  // 已经在显示技能，切换到下一个技能
   const totalGreetings = greetings.value.length;
   if (totalGreetings <= 1) return;
   let newIndex;
@@ -44,6 +99,11 @@ onMounted(() => {
       Math.random() * props.config.skills.length
     );
   }
+
+  // 更新用户的最后问候时间
+  if (id.value) {
+    localStorage.setItem(`lastGreeting_${id.value}`, Date.now().toString());
+  }
 });
 </script>
 
@@ -51,7 +111,7 @@ onMounted(() => {
   <div class="card-widget card-info">
     <div class="card-content">
       <div id="author-info__sayhi" @click="changeSayHelloText">
-        {{ currentGreeting }}
+        {{ displayGreeting }}
       </div>
       <div class="author-info-avatar">
         <img
