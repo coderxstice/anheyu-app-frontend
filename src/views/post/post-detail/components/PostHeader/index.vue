@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { type PropType, computed, ref, onMounted, onUnmounted } from "vue";
+import {
+  type PropType,
+  computed,
+  ref,
+  onMounted,
+  onUnmounted,
+  watch
+} from "vue";
 import type { Article } from "@/api/post/type";
 import { useRouter } from "vue-router";
 import { useArticleStore } from "@/store/modules/articleStore";
@@ -65,7 +72,8 @@ onMounted(() => {
         });
 
         tl.to(".post-info", {
-          scale: 0.5,
+          scale: 0.8,
+          y: 0,
           ease: "none"
         }).to(
           ".post-top-cover",
@@ -90,6 +98,7 @@ onMounted(() => {
 
         tl.to(".post-info", {
           scale: 1,
+          y: 0,
           ease: "none",
           transformOrigin: "center top"
         }).to(
@@ -115,6 +124,21 @@ const { isDark } = useDark();
 const topCoverUrl = computed(() => {
   return props.article.top_img_url || articleStore.defaultCover;
 });
+
+const coverImageRef = ref<HTMLImageElement | null>(null);
+const isImageLoaded = ref(false);
+
+const handleImageLoad = () => {
+  isImageLoaded.value = true;
+};
+
+// 监听文章变化，重置图片加载状态
+watch(
+  () => props.article.id,
+  () => {
+    isImageLoaded.value = false;
+  }
+);
 
 const dynamicStyles = computed(() => {
   if (isDark.value) {
@@ -144,6 +168,62 @@ const goToCategory = (categoryName: string) => {
 
 const goToTag = (tagName: string) => {
   router.push(`/tags/${tagName}/`);
+};
+
+// 优化的滚动到评论区方法
+const scrollToComment = (event: Event) => {
+  event.preventDefault();
+
+  const commentSection = document.getElementById("post-comment");
+  if (!commentSection) return;
+
+  const headerHeight = 80;
+
+  const scrollToTarget = () => {
+    const elementPosition = commentSection.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: "smooth"
+    });
+  };
+
+  // 第一次滚动
+  scrollToTarget();
+
+  // 监听文章内容区域的图片加载
+  const images = document.querySelectorAll(".post-content img");
+  if (images.length === 0) return;
+
+  let hasScrolled = false;
+  let loadedCount = 0;
+
+  images.forEach(img => {
+    const imgElement = img as HTMLImageElement;
+    if (imgElement.complete) {
+      loadedCount++;
+    } else {
+      imgElement.addEventListener(
+        "load",
+        () => {
+          loadedCount++;
+          // 只在所有图片加载完成后调整一次位置
+          if (loadedCount === images.length && !hasScrolled) {
+            hasScrolled = true;
+            setTimeout(scrollToTarget, 100);
+          }
+        },
+        { once: true }
+      );
+    }
+  });
+
+  // 如果所有图片都已经加载完成，则在短暂延迟后调整一次
+  if (loadedCount === images.length && !hasScrolled) {
+    hasScrolled = true;
+    setTimeout(scrollToTarget, 200);
+  }
 };
 </script>
 
@@ -182,61 +262,117 @@ const goToTag = (tagName: string) => {
       </div>
       <h1 class="post-title">{{ article.title }}</h1>
       <div class="post-meta">
-        <div class="meta-firstline">
-          <span class="post-meta-date">
-            <i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon" />
-            <span class="post-meta-label">发表于</span>
-            <time :datetime="article.created_at">{{
-              formatDate(article.created_at)
-            }}</time>
-
-            <span class="post-meta-separator" />
-            <i class="anzhiyufont anzhiyu-icon-history post-meta-icon" />
-            <span class="post-meta-label">更新于</span>
-            <time :datetime="article.updated_at">{{
-              formatDate(article.updated_at)
-            }}</time>
-          </span>
-        </div>
+        <div class="meta-firstline" />
         <div class="meta-secondline">
-          <span class="post-meta-wordcount">
-            <i class="anzhiyufont anzhiyu-icon-file-word post-meta-icon" />
-            <span class="post-meta-label">字数总计:</span>
-            <span>{{ article.word_count }}</span>
-          </span>
+          <el-tooltip
+            :content="'这篇文章有' + article.word_count + '字'"
+            placement="top"
+            :show-arrow="false"
+          >
+            <div>
+              <span class="post-meta-wordcount">
+                <i class="anzhiyufont anzhiyu-icon-file-word post-meta-icon" />
+                <span>{{ article.word_count }}</span>
+              </span>
+            </div>
+          </el-tooltip>
+
           <span class="post-meta-separator" />
-          <span class="post-meta-wordcount">
-            <i class="anzhiyufont anzhiyu-icon-clock post-meta-icon" />
-            <span class="post-meta-label">阅读时长:</span>
-            <span>{{ article.reading_time }}分钟</span>
-          </span>
+          <el-tooltip
+            :content="'预计阅读时长' + article.reading_time + '分钟'"
+            placement="top"
+            :show-arrow="false"
+          >
+            <div>
+              <span class="post-meta-wordcount">
+                <i class="anzhiyufont anzhiyu-icon-clock post-meta-icon" />
+                <span>{{ article.reading_time }}分钟</span>
+              </span>
+            </div>
+          </el-tooltip>
+
           <span class="post-meta-separator" />
-          <span class="post-meta-viewcount">
-            <i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon" />
-            <span class="post-meta-label">阅读量:</span>
-            <span>{{ article.view_count }}</span>
-          </span>
+          <el-tooltip
+            :content="'这篇文章创建于' + formatDate(article.created_at)"
+            placement="top"
+            :show-arrow="false"
+          >
+            <div>
+              <span class="post-meta-date">
+                <i
+                  class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"
+                />
+                <time :datetime="article.created_at">{{
+                  formatDate(article.created_at)
+                }}</time>
+              </span>
+            </div>
+          </el-tooltip>
+
+          <span class="post-meta-separator hidden-update-time" />
+          <el-tooltip
+            content="这篇文章更新于"
+            placement="top"
+            :show-arrow="false"
+          >
+            <div>
+              <span class="post-meta-date hidden-update-time">
+                <i class="anzhiyufont anzhiyu-icon-history post-meta-icon" />
+                <time :datetime="article.updated_at">{{
+                  formatDate(article.updated_at)
+                }}</time>
+              </span>
+            </div>
+          </el-tooltip>
+
           <span class="post-meta-separator" />
-          <span v-if="article.ip_location" class="post-meta-position">
-            <i class="anzhiyufont anzhiyu-icon-location-dot" />
-            {{ article.ip_location }}
-          </span>
+          <el-tooltip content="热度" placement="top" :show-arrow="false">
+            <div>
+              <span class="post-meta-viewcount">
+                <i class="anzhiyufont anzhiyu-icon-fire post-meta-icon" />
+                <span>{{ article.view_count }}</span>
+              </span>
+            </div>
+          </el-tooltip>
+
+          <span class="post-meta-separator" />
+          <el-tooltip
+            v-if="article.ip_location"
+            content="作者IP属地"
+            placement="top"
+            :show-arrow="false"
+          >
+            <div>
+              <span class="post-meta-position">
+                <i class="anzhiyufont anzhiyu-icon-location-dot" />
+                {{ article.ip_location }}
+              </span>
+            </div>
+          </el-tooltip>
+
           <template v-if="isCommentEnabled">
             <span class="post-meta-separator" />
-            <span class="post-meta-commentcount">
-              <i class="anzhiyufont anzhiyu-icon-comments post-meta-icon" />
-              <span class="post-meta-label">评论数:</span>
-              <a href="#post-comment">{{ article.comment_count || 0 }}</a>
-            </span>
+            <el-tooltip content="评论数" placement="top" :show-arrow="false">
+              <div>
+                <span class="post-meta-commentcount" @click="scrollToComment">
+                  <i class="anzhiyufont anzhiyu-icon-comments post-meta-icon" />
+                  <span>{{ article.comment_count || 0 }}</span>
+                </span>
+              </div>
+            </el-tooltip>
           </template>
         </div>
       </div>
     </div>
     <div class="post-top-cover">
       <img
-        class="post-top-bg lazy-loading"
-        :data-src="topCoverUrl"
+        ref="coverImageRef"
+        :key="article.id || topCoverUrl"
+        class="post-top-bg"
+        :class="{ 'is-loaded': isImageLoaded }"
+        :src="topCoverUrl"
         :alt="article.title"
+        @load="handleImageLoad"
       />
     </div>
     <section class="main-hero-waves-area waves-area">
@@ -328,23 +464,16 @@ const goToTag = (tagName: string) => {
   height: 100%;
   min-height: 25rem;
   object-fit: cover;
-  opacity: 0.8;
-  transition: 0s;
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
 
-  // CSS 图片动画优化
   &:not([src]),
   &[src=""] {
     opacity: 0;
   }
 
-  &.lazy-loading {
-    background: var(--anzhiyu-secondbg);
-    opacity: 0.3;
-  }
-
-  &.lazy-loaded {
+  &.is-loaded {
     opacity: 0.8;
-    animation: imagePartialFadeIn 0.4s ease-out forwards;
   }
 
   &::after {
@@ -433,9 +562,7 @@ const goToTag = (tagName: string) => {
 .post-meta {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
   align-items: flex-start;
-  margin-top: 1.5rem;
   font-size: 1rem;
   opacity: 0.9;
 }
@@ -457,7 +584,7 @@ const goToTag = (tagName: string) => {
 }
 
 .post-meta-separator {
-  margin: 0 0.75rem;
+  margin: 0 0.15rem;
 }
 
 .post-meta-date,
@@ -467,6 +594,25 @@ const goToTag = (tagName: string) => {
 .post-meta-commentcount {
   display: inline-flex;
   align-items: center;
+  opacity: 0.6;
+  transition: 0.3s;
+  border-radius: 12px;
+  padding: 2px 8px;
+  cursor: default;
+}
+
+.post-meta-commentcount {
+  cursor: pointer;
+  font-weight: 800;
+
+  &:hover {
+    opacity: 1;
+    background: var(--anzhiyu-white-op);
+  }
+}
+
+.hidden-update-time {
+  display: none !important;
 }
 
 .main-hero-waves-area {
@@ -615,16 +761,6 @@ const goToTag = (tagName: string) => {
     &::before {
       display: none;
     }
-  }
-}
-
-// 图片淡入动画（半透明）
-@keyframes imagePartialFadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 0.8;
   }
 }
 </style>

@@ -107,6 +107,14 @@ const goToTagPage = (tagName: string) => {
           </span>
 
           <span
+            v-if="article.comment_count > 10"
+            class="article-meta hot-interaction-warp"
+          >
+            <i class="hot-interaction anzhiyufont anzhiyu-icon-fire" />
+            <span class="hot-interaction">多人互动</span>
+          </span>
+
+          <span
             v-for="category in article.post_categories"
             :key="category.id"
             class="category-tip"
@@ -339,6 +347,18 @@ const goToTagPage = (tagName: string) => {
     color: #ff5722;
 
     .sticky {
+      margin-left: 4px;
+      font-size: 0.75rem;
+    }
+  }
+
+  .hot-interaction-warp {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 8px;
+    color: var(--anzhiyu-red);
+
+    .hot-interaction {
       margin-left: 4px;
       font-size: 0.75rem;
     }

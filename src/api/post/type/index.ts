@@ -106,6 +106,7 @@ export interface Article {
   copyright_author_href?: string;
   copyright_url?: string;
   keywords?: string;
+  comment_count: number;
   prev_article: ArticleLink | null;
   next_article: ArticleLink | null;
   related_articles: ArticleLink[];

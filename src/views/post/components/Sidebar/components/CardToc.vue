@@ -57,10 +57,22 @@ const parseHeadings = () => {
   const doc = parser.parseFromString(articleContentHtml.value, "text/html");
   const headings = doc.querySelectorAll("h1, h2, h3, h4, h5, h6");
   const newTocItems: TocItem[] = [];
+  const idMap = new Map<string, number>(); // 用于跟踪重复的ID
+
   headings.forEach(heading => {
     if (heading.id) {
+      let uniqueId = heading.id;
+      // 如果ID已经存在，添加数字后缀确保唯一性
+      if (idMap.has(uniqueId)) {
+        const count = idMap.get(uniqueId)! + 1;
+        idMap.set(uniqueId, count);
+        uniqueId = `${uniqueId}-${count}`;
+      } else {
+        idMap.set(uniqueId, 0);
+      }
+
       newTocItems.push({
-        id: heading.id,
+        id: uniqueId,
         text: heading.textContent || "",
         level: parseInt(heading.tagName.substring(1), 10)
       });
