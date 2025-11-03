@@ -501,16 +501,37 @@ onUnmounted(() => {
     flex-wrap: wrap;
     height: auto;
     padding: 10px;
-  }
-
-  .title-container {
-    order: -1;
-    width: 100%;
-    margin: 0 0 10px;
+    gap: 10px;
   }
 
   .header-left {
-    flex-grow: 0;
+    flex: 1;
+    flex-grow: 1;
+    min-width: 0;
+    gap: 12px;
+
+    :deep(.el-button) {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  .title-container {
+    flex: 1;
+    min-width: 0;
+
+    .title-input {
+      :deep(.el-input__wrapper) {
+        font-size: 16px;
+      }
+    }
+  }
+
+  .header-right {
+    width: 100%;
+    flex-shrink: 0;
+    justify-content: flex-end;
   }
 }
 </style>
