@@ -171,8 +171,17 @@ export function useLazyLoading(options: LazyLoadingOptions = {}) {
     }
 
     // 跳过在 a 标签内的图片（避免影响 Fancybox）
-    if (img.closest("a")) {
-      return;
+    // 但是允许处理 tag-link、tag-card 等插件中的图片
+    const parentLink = img.closest("a");
+    if (parentLink) {
+      const isInPlugin =
+        img.closest(".anzhiyu-tag-link") ||
+        img.closest(".anzhiyu-tag-card") ||
+        img.closest(".tag-link-left");
+      // 如果不在插件中，则跳过（这是 Fancybox 的图片）
+      if (!isInPlugin) {
+        return;
+      }
     }
 
     // 如果图片已经有 data-src，说明是预设的懒加载图片
