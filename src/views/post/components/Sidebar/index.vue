@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-04 10:11:57
- * @LastEditTime: 2025-08-08 18:16:13
+ * @LastEditTime: 2025-11-03 12:25:51
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -63,9 +63,8 @@ const wechatConfig = computed(() => {
   gap: 0.625rem;
   width: 300px;
   transition: all 0.3s;
-  opacity: 0;
-  animation: fadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-  /* 防止布局偏移：保持空间占用 */
+  opacity: 1;
+  animation: slide-in 0.6s 0.1s backwards;
   visibility: visible;
 }
 
