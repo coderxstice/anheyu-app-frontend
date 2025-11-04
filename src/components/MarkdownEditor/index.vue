@@ -172,11 +172,6 @@ const sanitize = (html: string): string => {
     }
   });
 
-  // 移除 md-editor-v3 添加的 data-line 属性
-  doc.querySelectorAll("[data-line]").forEach(element => {
-    element.removeAttribute("data-line");
-  });
-
   return doc.body.innerHTML;
 };
 
