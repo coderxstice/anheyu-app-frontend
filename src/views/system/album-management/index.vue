@@ -11,6 +11,7 @@ import Refresh from "@iconify-icons/ep/refresh";
 import AddFill from "@iconify-icons/ri/add-circle-line";
 import Search from "@iconify-icons/ri/search-line";
 import Upload from "@iconify-icons/ep/upload";
+import Download from "@iconify-icons/ep/download";
 import Setting from "@iconify-icons/ep/setting";
 import CategoryManage from "./category-manage.vue";
 
@@ -35,6 +36,8 @@ const {
   openDialog,
   handleDelete,
   openBatchImportDialog,
+  handleExport,
+  openImportDialog,
   loadCategories
 } = useAlbum();
 
@@ -70,70 +73,77 @@ function openCategoryManage() {
       :model="form"
       class="search-form bg-bg_color w-full pl-3 pr-3 md:pl-8 md:pr-4 pt-3 pb-3 md:pt-[12px] md:pb-[12px] overflow-auto rounded-2xl"
     >
-      <el-form-item label="分类：" prop="categoryId" class="search-form-item">
-        <el-select
-          v-model="form.categoryId"
-          placeholder="请选择分类"
-          clearable
-          class="!w-full md:!w-[180px]"
+      <!-- 第一行：分类和时间 -->
+      <div class="search-row">
+        <el-form-item label="分类：" prop="categoryId" class="search-form-item">
+          <el-select
+            v-model="form.categoryId"
+            placeholder="请选择分类"
+            clearable
+            class="!w-full md:!w-[180px]"
+          >
+            <el-option
+              v-for="category in categories"
+              :key="category.id"
+              :label="category.name"
+              :value="category.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item
+          label="上传时间："
+          prop="created_at"
+          class="search-form-item time-picker-item"
         >
-          <el-option
-            v-for="category in categories"
-            :key="category.id"
-            :label="category.name"
-            :value="category.id"
+          <el-date-picker
+            v-model="form.created_at"
+            type="datetimerange"
+            range-separator="至"
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            format="YYYY/MM/DD hh:mm:ss"
+            value-format="YYYY/MM/DD hh:mm:ss"
+            class="w-full md:w-auto"
           />
-        </el-select>
-      </el-form-item>
-      <el-form-item
-        label="上传时间："
-        prop="created_at"
-        class="search-form-item !hidden md:!block"
-      >
-        <el-date-picker
-          v-model="form.created_at"
-          type="datetimerange"
-          range-separator="至"
-          start-placeholder="开始时间"
-          end-placeholder="结束时间"
-          format="YYYY/MM/DD hh:mm:ss"
-          value-format="YYYY/MM/DD hh:mm:ss"
-          class="w-full md:w-auto"
-        />
-      </el-form-item>
-      <el-form-item label="排序：" prop="sort" class="search-form-item">
-        <el-select
-          v-model="form.sort"
-          placeholder="请选择"
-          clearable
-          class="!w-full md:!w-[180px]"
-        >
-          <el-option label="按排序号" value="display_order_asc" />
-          <el-option label="最新创建" value="created_at_desc" />
-          <el-option label="最早创建" value="created_at_asc" />
-          <el-option label="热度排序" value="view_count_desc" />
-        </el-select>
-      </el-form-item>
-      <el-form-item class="search-form-item search-buttons">
-        <el-button
-          v-ripple
-          type="primary"
-          :icon="useRenderIcon(Search)"
-          :loading="loading"
-          class="flex-1 md:flex-none"
-          @click="onSearch"
-        >
-          搜索
-        </el-button>
-        <el-button
-          v-ripple
-          :icon="useRenderIcon(Refresh)"
-          class="flex-1 md:flex-none"
-          @click="resetForm(formRef)"
-        >
-          重置
-        </el-button>
-      </el-form-item>
+        </el-form-item>
+      </div>
+
+      <!-- 第二行：排序和按钮 -->
+      <div class="search-row">
+        <el-form-item label="排序：" prop="sort" class="search-form-item">
+          <el-select
+            v-model="form.sort"
+            placeholder="请选择"
+            clearable
+            class="!w-full md:!w-[180px]"
+          >
+            <el-option label="按排序号" value="display_order_asc" />
+            <el-option label="最新创建" value="created_at_desc" />
+            <el-option label="最早创建" value="created_at_asc" />
+            <el-option label="热度排序" value="view_count_desc" />
+          </el-select>
+        </el-form-item>
+        <el-form-item class="search-form-item search-buttons">
+          <el-button
+            v-ripple
+            type="primary"
+            :icon="useRenderIcon(Search)"
+            :loading="loading"
+            class="flex-1 md:flex-none"
+            @click="onSearch"
+          >
+            搜索
+          </el-button>
+          <el-button
+            v-ripple
+            :icon="useRenderIcon(Refresh)"
+            class="flex-1 md:flex-none"
+            @click="resetForm(formRef)"
+          >
+            重置
+          </el-button>
+        </el-form-item>
+      </div>
     </el-form>
 
     <PureTableBar
@@ -162,6 +172,24 @@ function openCategoryManage() {
             @click="openBatchImportDialog()"
           >
             <span class="hidden md:inline">批量导入</span>
+            <span class="md:hidden">批量导入</span>
+          </el-button>
+          <el-button
+            v-ripple
+            type="warning"
+            :icon="useRenderIcon(Download)"
+            @click="handleExport()"
+          >
+            <span class="hidden md:inline">导出相册</span>
+            <span class="md:hidden">导出</span>
+          </el-button>
+          <el-button
+            v-ripple
+            type="info"
+            :icon="useRenderIcon(Upload)"
+            @click="openImportDialog()"
+          >
+            <span class="hidden md:inline">导入相册</span>
             <span class="md:hidden">导入</span>
           </el-button>
           <el-button
@@ -253,6 +281,33 @@ function openCategoryManage() {
     margin-bottom: 12px;
   }
 
+  // 搜索行布局
+  .search-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    width: 100%;
+
+    // 桌面端横向排列
+    @media (width > 768px) {
+      flex-wrap: nowrap;
+      align-items: flex-start;
+    }
+
+    // 移动端纵向排列
+    @media (width <= 768px) {
+      flex-direction: column;
+    }
+  }
+
+  // 时间选择器在桌面端占据剩余空间
+  .time-picker-item {
+    @media (width > 768px) {
+      flex: 1;
+      min-width: 400px;
+    }
+  }
+
   // 移动端适配
   @media (width <= 768px) {
     .search-form-item {
@@ -260,6 +315,7 @@ function openCategoryManage() {
       align-items: center;
       margin-bottom: 0 !important;
       margin-right: 0 !important;
+      width: 100%;
 
       :deep(.el-form-item__content) {
         flex: 1;
@@ -270,8 +326,8 @@ function openCategoryManage() {
 
       :deep(.el-form-item__label) {
         font-size: 13px;
-        width: 46px !important;
-        min-width: 46px;
+        width: 70px !important;
+        min-width: 70px;
         padding-right: 6px;
         flex-shrink: 0;
       }

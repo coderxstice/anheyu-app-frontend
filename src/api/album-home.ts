@@ -144,3 +144,36 @@ export const getPublicAlbumCategories = () => {
     code: number;
   }>("get", requestUrl);
 };
+
+// 导出相册
+export const exportAlbums = (data: {
+  album_ids: number[];
+  format?: string;
+}) => {
+  return http.request<Blob>("post", baseUrlApi("albums/export"), {
+    data,
+    responseType: "blob"
+  });
+};
+
+// 导入相册
+export const importAlbums = (formData: FormData) => {
+  return http.request<{
+    success: boolean;
+    message: string;
+    code: number;
+    data: {
+      total_count: number;
+      success_count: number;
+      skipped_count: number;
+      failed_count: number;
+      created_ids: number[];
+      errors?: string[];
+    };
+  }>("post", baseUrlApi("albums/import"), {
+    data: formData,
+    headers: {
+      "Content-Type": "multipart/form-data"
+    }
+  });
+};
