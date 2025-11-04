@@ -132,18 +132,26 @@ provide("updateHeadingTocItems", (items: { id: string }[]) => {
 
 // --- 方法与逻辑 ---
 
-// 组件初始化时立即重置主题色，确保不会残留上一篇文章的主色
-resetThemeToDefault();
-
 /**
- * @description 管理文章主色调主题的逻辑
+ * @description 管理文章主色调主题的逻辑（优化版本）
  * @param articleRef - 文章数据的 ref
  */
 const useArticleTheme = (articleRef: Ref<Article | null>) => {
+  // 记录上一次的颜色，避免重复设置
+  let previousColor: string | undefined = undefined;
+
   watch(
     () => articleRef.value?.primary_color,
     (newColor, oldColor) => {
-      // 如果新颜色为空，重置到默认主题色（而不是恢复到"原始颜色"）
+      // 如果颜色没有变化，跳过处理
+      if (newColor === previousColor) {
+        return;
+      }
+
+      // 更新记录
+      previousColor = newColor;
+
+      // 如果新颜色为空，重置到默认主题色
       if (!newColor) {
         resetThemeToDefault();
       } else {
@@ -154,8 +162,7 @@ const useArticleTheme = (articleRef: Ref<Article | null>) => {
   );
 
   onMounted(() => {
-    // 在mounted时立即保存当前的主题色作为原始颜色
-    // 这样即使从其他文章过来，也能正确保存当前状态
+    // 在mounted时保存当前的主题色作为原始颜色
     saveOriginalThemeColors();
   });
 
@@ -164,6 +171,9 @@ const useArticleTheme = (articleRef: Ref<Article | null>) => {
     // 离开文章页时，重置到默认主题色
     resetThemeToDefault();
     clearArticleMetaTags();
+
+    // 清空记录
+    previousColor = undefined;
   });
 };
 
@@ -215,12 +225,7 @@ const fetchRequiredData = async (id: string) => {
       // SSR场景：设置文章标题到store（与非SSR路径保持一致）
       articleStore.setCurrentArticleTitle(article.value.title);
 
-      // 显式处理主题色，确保在文章切换时正确更新
-      if (article.value.primary_color) {
-        setArticleTheme(article.value.primary_color);
-      } else {
-        resetThemeToDefault();
-      }
+      // 主题色将由 watch 自动处理，无需显式设置
 
       nextTick(() => {
         loadingStore.stopLoading();
@@ -261,12 +266,7 @@ const fetchRequiredData = async (id: string) => {
     // 更新meta标签
     updateArticleMetaTags();
 
-    // 显式处理主题色，确保在文章切换时正确更新
-    if (article.value.primary_color) {
-      setArticleTheme(article.value.primary_color);
-    } else {
-      resetThemeToDefault();
-    }
+    // 主题色将由 watch 自动处理，无需显式设置
 
     recentArticles.value = recentArticlesResponse.data.list.map(p => ({
       id: p.id,
