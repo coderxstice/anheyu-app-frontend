@@ -173,10 +173,11 @@ export default function galleryPlugin(md: MarkdownIt): void {
     const containerClass = ["gallery-container", `gallery-cols-${cols}`];
     let containerStyle = `--gallery-gap: ${gap};`;
 
+    // 将 ratio 从 "1:1" 格式转换为 CSS aspect-ratio 格式 "1/1"
+    let aspectRatio = "";
     if (ratio) {
-      const [w, h] = ratio.split(":");
-      const paddingBottom = (parseInt(h) / parseInt(w)) * 100;
-      containerStyle += ` --gallery-ratio: ${paddingBottom}%;`;
+      aspectRatio = ratio.replace(":", "/");
+      containerStyle += ` --gallery-ratio: ${aspectRatio};`;
     }
 
     let html = `<div class="${containerClass.join(" ")}" style="${containerStyle}">`;
@@ -189,19 +190,12 @@ export default function galleryPlugin(md: MarkdownIt): void {
       );
       const escapedDesc = img.desc ? md.utils.escapeHtml(img.desc) : "";
 
-      html += `<div class="gallery-item">`;
-
-      // 图片包装器（用于固定宽高比）
-      if (ratio) {
-        html += `<div class="gallery-image-wrapper">`;
-      }
+      // 如果有 ratio，在 gallery-item 上添加 data-ratio 属性
+      const itemAttrs = ratio ? " data-ratio" : "";
+      html += `<div class="gallery-item"${itemAttrs}>`;
 
       // 图片元素
       html += `<img src="${escapedUrl}" alt="${escapedAlt}" title="${escapedTitle}" loading="lazy" draggable="false" />`;
-
-      if (ratio) {
-        html += `</div>`;
-      }
 
       // 标题和描述
       if (escapedTitle || escapedDesc) {
