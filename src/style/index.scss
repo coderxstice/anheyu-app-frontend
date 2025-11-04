@@ -8,6 +8,31 @@
 @use "animation";
 @use "editor-specific";
 
+/* 为主色调CSS变量启用过渡动画支持 */
+@property --anzhiyu-main {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #163bf2;
+}
+
+@property --anzhiyu-main-op {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #4259ef23;
+}
+
+@property --anzhiyu-main-op-deep {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #4259efdd;
+}
+
+@property --anzhiyu-main-op-light {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #4259ef0d;
+}
+
 /* 自定义全局 CssVar */
 :root {
   --font-color: #4c4948;
@@ -56,6 +81,13 @@
   --anzhiyu-shadow-green: 0 8px 12px -3px #87ee7936;
   --anzhiyu-logo-color: linear-gradient(215deg, #4584ff 0%, #cf0db9 100%);
   --anzhiyu-snackbar-time: 5s;
+
+  /* 主题色平滑过渡动画 - 用于优化文章切换时的颜色变化 */
+  transition:
+    --anzhiyu-main 0.3s ease-in-out,
+    --anzhiyu-main-op 0.3s ease-in-out,
+    --anzhiyu-main-op-deep 0.3s ease-in-out,
+    --anzhiyu-main-op-light 0.3s ease-in-out;
   --anzhiyu-theme: #163bf2;
   --anzhiyu-theme-op: #4259ef23;
   --anzhiyu-theme-op-deep: #4259efdd;

@@ -19,6 +19,11 @@ let originalColors = {
 let currentArticlePrimaryColor = "";
 
 /**
+ * @description 保存当前实际应用的主色调（用于防止重复设置）
+ */
+let currentAppliedColor = "";
+
+/**
  * @description 保存当前页面的原始主题色
  */
 export const saveOriginalThemeColors = () => {
@@ -52,15 +57,31 @@ export const restoreOriginalThemeColors = () => {
 
   // 清空当前文章的主色调
   currentArticlePrimaryColor = "";
+  currentAppliedColor = "";
 
   // 注意：这里不再立即更新 meta 标签
   // meta 标签的更新由页面的 watch 监听器根据页面类型和滚动位置来处理
 };
 
 /**
+ * @description 获取默认主题色的计算值
+ */
+const getDefaultThemeColor = (): string => {
+  const rootStyle = getComputedStyle(document.documentElement);
+  return rootStyle.getPropertyValue("--anzhiyu-theme").trim();
+};
+
+/**
  * @description 重置主题色到默认值
  */
 export const resetThemeToDefault = () => {
+  const defaultColor = getDefaultThemeColor();
+
+  // 如果当前已经是默认颜色，跳过设置
+  if (currentAppliedColor === defaultColor) {
+    return;
+  }
+
   const rootStyle = document.documentElement.style;
   rootStyle.setProperty("--anzhiyu-main", "var(--anzhiyu-theme)");
   rootStyle.setProperty(
@@ -71,19 +92,38 @@ export const resetThemeToDefault = () => {
     "--anzhiyu-main-op-light",
     "var(--anzhiyu-theme-op-light)"
   );
+
+  currentArticlePrimaryColor = "";
+  currentAppliedColor = defaultColor;
 };
 
 /**
- * @description 设置文章主题色
+ * @description 设置文章主题色（带防抖优化）
  * @param primaryColor - 文章的主色调
  */
 export const setArticleTheme = (primaryColor: string) => {
-  const rootStyle = document.documentElement.style;
-  if (primaryColor) {
-    // 保存当前文章的主色调
-    currentArticlePrimaryColor = primaryColor;
+  if (!primaryColor) {
+    currentArticlePrimaryColor = "";
+    resetThemeToDefault();
+    restoreMetaThemeColor();
+    return;
+  }
 
+  // 如果要设置的颜色与当前已应用的颜色相同，跳过设置
+  if (currentAppliedColor === primaryColor) {
+    return;
+  }
+
+  const rootStyle = document.documentElement.style;
+
+  // 保存当前文章的主色调
+  currentArticlePrimaryColor = primaryColor;
+  currentAppliedColor = primaryColor;
+
+  // 使用 requestAnimationFrame 确保在下一帧更新，提升性能
+  requestAnimationFrame(() => {
     rootStyle.setProperty("--anzhiyu-main", primaryColor);
+
     // 简单判断是否为 HEX 颜色以添加透明度
     if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(primaryColor)) {
       rootStyle.setProperty("--anzhiyu-main-op-deep", `${primaryColor}dd`);
@@ -96,11 +136,7 @@ export const setArticleTheme = (primaryColor: string) => {
 
     // 更新页面meta标签的主题色
     updateMetaThemeColor(primaryColor);
-  } else {
-    currentArticlePrimaryColor = "";
-    restoreOriginalThemeColors();
-    restoreMetaThemeColor();
-  }
+  });
 };
 
 /**
