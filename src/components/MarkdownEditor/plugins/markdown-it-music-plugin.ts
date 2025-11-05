@@ -74,6 +74,7 @@ interface MusicData {
   artist?: string;
   pic?: string;
   url?: string;
+  color?: string;
 }
 
 /**
@@ -100,7 +101,8 @@ function generateMusicPlayerHTML(
   name?: string,
   artist?: string,
   pic?: string,
-  url?: string
+  _url?: string, // url 参数保留以兼容旧代码，但不再使用
+  color?: string // 封面主色，用于进度条
 ): string {
   // 反转义函数：将HTML实体转回普通字符
   const unescapeHtml = (text: string) => {
@@ -117,12 +119,14 @@ function generateMusicPlayerHTML(
 
   // 将所有数据编码到一个JSON对象中，方便前端解析
   // 注意：这里使用反转义后的原始值构建JSON
+  // 注意：不保存 url 参数，因为音频链接具有时效性，需要在播放时通过 API 动态获取
   const musicData: MusicData = {
     neteaseId: unescapeHtml(neteaseId),
     ...(name && { name: unescapeHtml(name) }),
     ...(artist && { artist: unescapeHtml(artist) }),
     ...(pic && { pic: unescapeHtml(pic) }),
-    ...(url && { url: unescapeHtml(url) })
+    ...(color && { color: unescapeHtml(color) })
+    // url 参数不再保存到 HTML 中
   };
 
   // JSON.stringify 然后转义HTML实体
@@ -251,6 +255,9 @@ export default function musicPlugin(md: MarkdownIt): void {
     const escapedUrl = parsedParams.url
       ? md.utils.escapeHtml(parsedParams.url)
       : undefined;
+    const escapedColor = parsedParams.color
+      ? md.utils.escapeHtml(parsedParams.color)
+      : undefined;
 
     // 生成唯一ID
     const uniqueId = `music-player-${Math.random().toString(36).substr(2, 9)}`;
@@ -262,7 +269,8 @@ export default function musicPlugin(md: MarkdownIt): void {
       escapedName,
       escapedArtist,
       escapedPic,
-      escapedUrl
+      escapedUrl,
+      escapedColor
     );
 
     const token = state.push("html_inline", "", 0);
@@ -339,6 +347,9 @@ export default function musicPlugin(md: MarkdownIt): void {
     const escapedUrl = parsedParams.url
       ? md.utils.escapeHtml(parsedParams.url)
       : undefined;
+    const escapedColor = parsedParams.color
+      ? md.utils.escapeHtml(parsedParams.color)
+      : undefined;
 
     // 生成唯一ID
     const uniqueId = `music-player-${Math.random().toString(36).substr(2, 9)}`;
@@ -349,7 +360,8 @@ export default function musicPlugin(md: MarkdownIt): void {
       escapedName,
       escapedArtist,
       escapedPic,
-      escapedUrl
+      escapedUrl,
+      escapedColor
     );
 
     const token = state.push("html_block", "", 0);
