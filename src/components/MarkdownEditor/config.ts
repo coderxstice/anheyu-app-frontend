@@ -16,6 +16,7 @@ import LinkCardPlugin from "./plugins/markdown-it-link-card-plugin";
 import GalleryPlugin from "./plugins/markdown-it-gallery-plugin";
 import VideoGalleryPlugin from "./plugins/markdown-it-video-gallery-plugin";
 import EnhancedImagePlugin from "./plugins/markdown-it-enhanced-image-plugin";
+import MusicPlugin from "./plugins/markdown-it-music-plugin";
 
 export function installMarkdownEditorExtensions() {
   console.log("🔧 Installing markdown editor extensions...");
@@ -27,6 +28,9 @@ export function installMarkdownEditorExtensions() {
       try {
         mdit.use(EnhancedImagePlugin);
         console.log("✅ EnhancedImagePlugin registered");
+
+        mdit.use(MusicPlugin);
+        console.log("✅ MusicPlugin registered");
 
         mdit.use(TabsPlugin);
         console.log("✅ TabsPlugin registered");

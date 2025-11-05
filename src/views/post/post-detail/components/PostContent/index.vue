@@ -3,6 +3,11 @@ import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import { useSnackbar } from "@/composables/useSnackbar";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useLazyLoading } from "@/composables/useLazyLoading";
+import {
+  initAllMusicPlayers,
+  registerGlobalMusicFunctions,
+  unregisterGlobalMusicFunctions
+} from "./music-player-global";
 import "katex/dist/katex.min.css";
 
 // Fancybox 懒加载，避免影响首屏性能
@@ -59,6 +64,9 @@ const handleContentClick = (event: Event) => {
 };
 
 onMounted(async () => {
+  // 注册全局音乐播放器函数
+  registerGlobalMusicFunctions();
+
   // 将复制处理函数暴露到全局作用域，供已发布文章中的内联事件使用
   (window as any).__markdownEditorCopyHandler = handleCodeCopy;
 
@@ -67,6 +75,9 @@ onMounted(async () => {
 
     // 初始化懒加载
     initLazyLoading(postContentRef.value);
+
+    // 初始化音乐播放器（仅绑定audio事件，点击事件由HTML的onclick处理）
+    initAllMusicPlayers(postContentRef.value);
 
     // 懒加载 Fancybox
     if (!Fancybox) {
@@ -82,6 +93,9 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  // 清理全局音乐播放器函数
+  unregisterGlobalMusicFunctions();
+
   if (postContentRef.value) {
     postContentRef.value.removeEventListener("click", handleContentClick);
     if (Fancybox) {
@@ -104,6 +118,8 @@ watch(
       setTimeout(() => {
         if (postContentRef.value) {
           reinitialize(postContentRef.value);
+          // 重新初始化音乐播放器
+          initAllMusicPlayers(postContentRef.value);
           // 重新绑定 Fancybox
           if (Fancybox) {
             Fancybox.unbind(postContentRef.value);
