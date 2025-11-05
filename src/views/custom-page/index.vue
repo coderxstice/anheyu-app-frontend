@@ -12,8 +12,7 @@
             <div
               class="error-img"
               :style="{
-                backgroundImage:
-                  'url(https://upload-bbs.miyoushe.com/upload/2025/07/28/125766904/b2642ea6a014ea8a7da64937480fed89_3971198511709008872.gif)'
+                backgroundImage: `url(${error404Image})`
               }"
             />
 
@@ -110,11 +109,13 @@ import { getPublicArticles } from "@/api/post";
 import type { Article } from "@/api/post/type";
 import { formatDate } from "@/utils/format";
 import { useArticleStore } from "@/store/modules/articleStore";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import PostComment from "@/views/post/components/PostComment/index.vue";
 
 const route = useRoute();
 const router = useRouter();
 const articleStore = useArticleStore();
+const siteConfigStore = useSiteConfigStore();
 const loading = ref(true);
 const error = ref("");
 const pageData = ref<any>(null);
@@ -126,6 +127,14 @@ const randomArticles = ref<Article[]>([]);
 const articlesLoading = ref(false);
 // 从 store 获取默认封面图
 const { defaultCover } = articleStore;
+
+// 从配置中获取 404 页面默认图片
+const error404Image = computed(() => {
+  return (
+    siteConfigStore.siteConfig.post?.page404?.default_image ||
+    "/static/img/background-effect.gif"
+  );
+});
 
 // 计算当前页面路径
 const currentPath = computed(() => {

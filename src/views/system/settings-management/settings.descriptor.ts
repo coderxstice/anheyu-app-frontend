@@ -375,6 +375,12 @@ const postDescriptors: SettingDescriptor[] = [
     type: "number"
   },
   {
+    frontendPath: "post.page404.defaultImage",
+    backendKey: constant.Key404PageDefaultImage,
+    defaultValue: "/static/img/background-effect.gif",
+    type: "string"
+  },
+  {
     frontendPath: "post.reward.enable",
     backendKey: constant.KeyPostRewardEnable,
     defaultValue: 12,
@@ -913,6 +919,36 @@ const frontDeskDescriptors: SettingDescriptor[] = [
     frontendPath: "frontDesk.home.music.player.custom_playlist",
     backendKey: constant.KeyMusicPlayerCustomPlaylist,
     defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.home.music.vinyl.background",
+    backendKey: constant.KeyMusicVinylBackground,
+    defaultValue: "/static/img/music-vinyl-background.png",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.home.music.vinyl.outer",
+    backendKey: constant.KeyMusicVinylOuter,
+    defaultValue: "/static/img/music-vinyl-outer.png",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.home.music.vinyl.inner",
+    backendKey: constant.KeyMusicVinylInner,
+    defaultValue: "/static/img/music-vinyl-inner.png",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.home.music.vinyl.needle",
+    backendKey: constant.KeyMusicVinylNeedle,
+    defaultValue: "/static/img/music-vinyl-needle.png",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.home.music.vinyl.groove",
+    backendKey: constant.KeyMusicVinylGroove,
+    defaultValue: "/static/img/music-vinyl-groove.png",
     type: "string"
   }
 ];

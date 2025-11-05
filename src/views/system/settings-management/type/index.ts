@@ -127,6 +127,9 @@ export interface PostSettingsInfo {
     pageSize: number;
   };
   expirationTime: number;
+  page404: {
+    defaultImage: string;
+  };
   reward: {
     enable: boolean;
     weChat: string;
@@ -301,6 +304,13 @@ export interface HomePageSettingsInfo {
       enable?: boolean;
       playlist_id?: string;
       custom_playlist?: string;
+    };
+    vinyl?: {
+      background?: string;
+      outer?: string;
+      inner?: string;
+      needle?: string;
+      groove?: string;
     };
   };
 }

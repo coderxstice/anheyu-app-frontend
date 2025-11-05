@@ -2,16 +2,17 @@
  * @Description: 404 页面
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-10-21 16:08:43
+ * @LastEditTime: 2025-11-05 16:31:49
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { getPublicArticles } from "@/api/post";
 import type { Article } from "@/api/post/type";
 import { formatDate } from "@/utils/format";
 import { useArticleStore } from "@/store/modules/articleStore";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
 defineOptions({
   name: "404"
@@ -19,11 +20,20 @@ defineOptions({
 
 const router = useRouter();
 const articleStore = useArticleStore();
+const siteConfigStore = useSiteConfigStore();
 const randomArticles = ref<Article[]>([]);
 const loading = ref(false);
 
 // 从 store 获取默认封面图
 const { defaultCover } = articleStore;
+
+// 从配置中获取 404 页面默认图片
+const error404Image = computed(() => {
+  return (
+    siteConfigStore.siteConfig.post?.page404?.default_image ||
+    "/static/img/background-effect.gif"
+  );
+});
 
 // 获取文章列表
 const fetchRandomArticles = async () => {
@@ -67,8 +77,7 @@ onMounted(() => {
           <div
             class="error-img"
             :style="{
-              backgroundImage:
-                'url(https://upload-bbs.miyoushe.com/upload/2025/07/28/125766904/b2642ea6a014ea8a7da64937480fed89_3971198511709008872.gif)'
+              backgroundImage: `url(${error404Image})`
             }"
           />
 

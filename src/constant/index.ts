@@ -2,7 +2,7 @@
  * @Description: 系统配置相关的常量，与后端 Go 定义和 API 响应保持同步。
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:42:04
- * @LastEditTime: 2025-10-08 23:54:50
+ * @LastEditTime: 2025-11-05 16:31:08
  * @LastEditors: 安知鱼
  */
 
@@ -134,6 +134,7 @@ const KeyDefaultCover: SettingKey = "post.default.cover";
 const KeyPostExpirationTime: SettingKey = "post.expiration_time";
 const KeyDoubleColumn: SettingKey = "post.default.double_column";
 const KeyPostDefaultPageSize: SettingKey = "post.default.page_size";
+const Key404PageDefaultImage: SettingKey = "post.page404.default_image";
 const KeyPostRewardEnable: SettingKey = "post.reward.enable";
 const KeyPostRewardWeChatQR: SettingKey = "post.reward.wechat_qr";
 const KeyPostRewardAlipayQR: SettingKey = "post.reward.alipay_qr";
@@ -185,6 +186,11 @@ const KeyAboutPageCustomCodeHtml: SettingKey = "about.page.custom_code_html";
 const KeyMusicPlayerEnable: SettingKey = "music.player.enable";
 const KeyMusicPlayerPlaylistID: SettingKey = "music.player.playlist_id";
 const KeyMusicPlayerCustomPlaylist: SettingKey = "music.player.custom_playlist";
+const KeyMusicVinylBackground: SettingKey = "music.vinyl.background";
+const KeyMusicVinylOuter: SettingKey = "music.vinyl.outer";
+const KeyMusicVinylInner: SettingKey = "music.vinyl.inner";
+const KeyMusicVinylNeedle: SettingKey = "music.vinyl.needle";
+const KeyMusicVinylGroove: SettingKey = "music.vinyl.groove";
 
 // --- 评论配置 ---
 const KeyCommentEnable: SettingKey = "comment.enable";
@@ -386,6 +392,7 @@ export const constant = {
   KeyDefaultCover,
   KeyDoubleColumn,
   KeyPostDefaultPageSize,
+  Key404PageDefaultImage,
   KeyPostRewardEnable,
   KeyPostRewardWeChatQR,
   KeyPostRewardAlipayQR,
@@ -430,6 +437,11 @@ export const constant = {
   KeyMusicPlayerEnable,
   KeyMusicPlayerPlaylistID,
   KeyMusicPlayerCustomPlaylist,
+  KeyMusicVinylBackground,
+  KeyMusicVinylOuter,
+  KeyMusicVinylInner,
+  KeyMusicVinylNeedle,
+  KeyMusicVinylGroove,
 
   // --- 评论配置 ---
   KeyCommentEnable,

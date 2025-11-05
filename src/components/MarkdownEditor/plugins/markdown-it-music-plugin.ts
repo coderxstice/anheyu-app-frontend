@@ -138,9 +138,7 @@ function generateMusicPlayerHTML(
   // 使用提供的数据或默认占位符（使用已转义的值）
   const displayName = name || "加载中...";
   const displayArtist = artist || "...";
-  const displayPic =
-    pic ||
-    "https://upload-bbs.miyoushe.com/upload/2025/09/23/125766904/61321cddd1e632df60cbc751953923f1_6948385422724592803.png";
+  const displayPic = pic || "/static/img/music-vinyl-background.png";
 
   return `<div class="markdown-music-player" id="${uniqueId}" ${dataAttrs.join(" ")}>
   <div class="music-player-container">
@@ -152,11 +150,11 @@ function generateMusicPlayerHTML(
     </div>
     <div class="music-artwork-container">
       <div class="music-artwork-wrapper" onclick="window.__musicPlayerToggle?.('${uniqueId}')">
-        <img src="https://upload-bbs.miyoushe.com/upload/2025/09/23/125766904/61321cddd1e632df60cbc751953923f1_6948385422724592803.png" alt="唱片背景" class="vinyl-background" />
-        <img src="https://upload-bbs.miyoushe.com/upload/2025/09/23/125766904/22e3492b5f5f27a08d725a057213caa7_6260158843656131388.png" alt="唱片外圈" class="artwork-image-vinyl-background" />
-        <img src="https://upload-bbs.miyoushe.com/upload/2025/09/23/125766904/f42b2b702883aafb66c3fdaa6163bc71_404470491737554604.png" alt="唱片内圈" class="artwork-image-vinyl-inner-background" />
-        <img src="https://upload-bbs.miyoushe.com/upload/2025/09/23/125766904/2f2c279fd93eabeb5ebff8e984964c48_5554239981642930129.png" alt="撞针" class="artwork-image-needle-background" />
-        <img src="https://upload-bbs.miyoushe.com/upload/2025/09/23/125766904/e93123a26f65d8984d75f9e1ffba8f24_5652931152834495590.png" alt="凹槽背景" class="artwork-image-groove-background" />
+        <img src="/static/img/music-vinyl-background.png" alt="唱片背景" class="vinyl-background" />
+        <img src="/static/img/music-vinyl-outer.png" alt="唱片外圈" class="artwork-image-vinyl-background" />
+        <img src="/static/img/music-vinyl-inner.png" alt="唱片内圈" class="artwork-image-vinyl-inner-background" />
+        <img src="/static/img/music-vinyl-needle.png" alt="撞针" class="artwork-image-needle-background" />
+        <img src="/static/img/music-vinyl-groove.png" alt="凹槽背景" class="artwork-image-groove-background" />
         <div class="artwork-transition-wrapper">
           <img src="${displayPic}" alt="专辑封面" class="artwork-image" />
           <img src="${displayPic}" alt="模糊背景" class="artwork-image-blur" />
