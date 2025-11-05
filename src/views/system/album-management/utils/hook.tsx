@@ -1,13 +1,16 @@
 import dayjs from "dayjs";
 import editForm from "../form.vue";
 import batchImportForm from "../batch-import-form.vue";
+import importExportForm from "../import-export-form.vue";
 import { message } from "@/utils/message";
 import {
   getWallpapertList,
   addWallpapert,
   updateWallpaper,
   deleteWallpaper,
-  batchImportAlbums
+  batchImportAlbums,
+  exportAlbums,
+  importAlbums
 } from "@/api/album-home";
 import {
   getAlbumCategoryList,
@@ -18,7 +21,7 @@ import { reactive, ref, onMounted, h } from "vue";
 import type { FormItemProps } from "./types";
 import { deviceDetection } from "@pureadmin/utils";
 import type { PaginationProps, LoadingConfig } from "@pureadmin/table";
-import { ElIcon, ElScrollbar } from "element-plus";
+import { ElIcon, ElScrollbar, ElMessageBox } from "element-plus";
 import {
   SuccessFilled,
   WarningFilled,
@@ -1047,6 +1050,265 @@ export function useAlbum() {
     onSearch();
   }
 
+  /**
+   * 导出相册
+   */
+  async function handleExport() {
+    try {
+      // 获取所有相册的ID
+      const albumIds = dataList.value.map((item: any) => item.id);
+
+      if (albumIds.length === 0) {
+        message("当前没有可导出的相册", { type: "warning" });
+        return;
+      }
+
+      // 创建一个响应式变量存储选择的格式
+      let selectedFormat = "json";
+
+      // 使用 ElMessageBox 显示格式选择对话框
+      await ElMessageBox({
+        title: "导出相册",
+        message: h("div", { style: "padding: 20px 0;" }, [
+          h(
+            "p",
+            {
+              style: "margin-bottom: 12px; color: var(--el-text-color-regular);"
+            },
+            `即将导出 ${albumIds.length} 个相册，请选择导出格式：`
+          ),
+          h(
+            "select",
+            {
+              id: "export-format-select",
+              style:
+                "width: 100%; padding: 8px 12px; border: 1px solid var(--el-border-color); border-radius: 4px; font-size: 14px; outline: none; cursor: pointer;",
+              onChange: (e: Event) => {
+                selectedFormat = (e.target as HTMLSelectElement).value;
+              }
+            },
+            [
+              h("option", { value: "json" }, "JSON 格式（纯文本）"),
+              h("option", { value: "zip" }, "ZIP 格式（压缩包）")
+            ]
+          )
+        ]),
+        confirmButtonText: "导出",
+        cancelButtonText: "取消",
+        beforeClose: (action, instance, done) => {
+          if (action === "confirm") {
+            const selectElement = document.getElementById(
+              "export-format-select"
+            ) as HTMLSelectElement;
+            if (selectElement) {
+              selectedFormat = selectElement.value;
+            }
+          }
+          done();
+        }
+      });
+
+      message(`正在导出 ${albumIds.length} 个相册...`, {
+        type: "info",
+        duration: 0
+      });
+
+      // 调用导出接口
+      const response: any = await exportAlbums({
+        album_ids: albumIds,
+        format: selectedFormat
+      });
+
+      // 创建下载链接
+      let blob: Blob;
+      if (response instanceof Blob) {
+        blob = response;
+      } else if (response?.data instanceof Blob) {
+        blob = response.data;
+      } else {
+        throw new Error("响应数据格式不正确");
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `albums-export-${new Date().getTime()}.${selectedFormat}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      message(`成功导出 ${albumIds.length} 个相册！`, { type: "success" });
+    } catch (error) {
+      if (error !== "cancel") {
+        console.error("导出失败:", error);
+        message(`导出失败: ${error.message || "未知错误"}`, {
+          type: "error"
+        });
+      }
+    }
+  }
+
+  /**
+   * 导入相册
+   */
+  function openImportDialog() {
+    const importFormRef = ref();
+
+    addDialog({
+      title: "导入相册",
+      props: {
+        formInline: {
+          importMode: "json",
+          file: null,
+          jsonContent: "",
+          skipExisting: true,
+          overwriteExisting: false,
+          defaultCategoryId: null
+        },
+        categories: categories.value
+      },
+      top: "10vh",
+      width: "70vw",
+      draggable: true,
+      fullscreen: deviceDetection(),
+      fullscreenIcon: true,
+      closeOnClickModal: false,
+      sureBtnLoading: true,
+      contentRenderer: () =>
+        h(importExportForm, {
+          ref: importFormRef,
+          formInline: null,
+          categories: categories.value
+        }),
+      beforeSure: async (done, { options, closeLoading }) => {
+        const FormRef = importFormRef.value.getRef();
+        const curData = options.props.formInline;
+
+        FormRef.validate(async valid => {
+          if (valid) {
+            // 根据导入模式处理数据
+            let formData: FormData;
+
+            if (curData.importMode === "json") {
+              // JSON 模式：创建临时文件
+              if (!curData.jsonContent) {
+                message("请输入 JSON 数据", { type: "error" });
+                closeLoading();
+                return;
+              }
+
+              try {
+                // 验证 JSON 格式
+                JSON.parse(curData.jsonContent);
+
+                // 创建 Blob 和 File 对象
+                const blob = new Blob([curData.jsonContent], {
+                  type: "application/json"
+                });
+                const file = new File([blob], "albums-import.json", {
+                  type: "application/json"
+                });
+
+                formData = new FormData();
+                formData.append("file", file);
+              } catch {
+                message("JSON 格式不正确", { type: "error" });
+                closeLoading();
+                return;
+              }
+            } else {
+              // 文件模式
+              if (!curData.file) {
+                message("请上传相册数据文件", { type: "error" });
+                closeLoading();
+                return;
+              }
+
+              formData = new FormData();
+              formData.append("file", curData.file);
+            }
+
+            // 添加其他参数
+            formData.append(
+              "skip_existing",
+              curData.skipExisting ? "true" : "false"
+            );
+            formData.append(
+              "overwrite_existing",
+              curData.overwriteExisting ? "true" : "false"
+            );
+            if (curData.defaultCategoryId) {
+              formData.append(
+                "default_category_id",
+                curData.defaultCategoryId.toString()
+              );
+            }
+
+            // 显示加载提示
+            const loadingMsg = message("正在导入相册数据，请稍候...", {
+              type: "info",
+              duration: 0
+            });
+
+            try {
+              const res = await importAlbums(formData);
+
+              // 关闭加载提示
+              loadingMsg.close();
+              closeLoading();
+
+              if (res.code === 200 && res.data) {
+                const { success_count, skipped_count, failed_count, errors } =
+                  res.data;
+
+                // 输出详细日志
+                if (errors && errors.length > 0) {
+                  console.group("📋 相册导入详细错误信息");
+                  errors.forEach((error, index) => {
+                    console.error(`${index + 1}. ${error}`);
+                  });
+                  console.groupEnd();
+                }
+
+                // 显示结果
+                if (failed_count > 0) {
+                  message(
+                    `导入完成！成功 ${success_count} 个，跳过 ${skipped_count} 个，失败 ${failed_count} 个`,
+                    { type: "warning", duration: 5000 }
+                  );
+                } else {
+                  message(
+                    `导入成功！成功 ${success_count} 个，跳过 ${skipped_count} 个`,
+                    { type: "success" }
+                  );
+                }
+
+                done(); // 关闭导入表单弹框
+                onSearch(); // 刷新表格数据
+              } else {
+                message(`导入失败: ${res.message || "未知错误"}`, {
+                  type: "error"
+                });
+              }
+            } catch (error) {
+              // 关闭加载提示
+              loadingMsg.close();
+              closeLoading();
+              console.error("导入请求失败:", error);
+              message(`导入请求失败: ${error.message || "未知错误"}`, {
+                type: "error",
+                duration: 5000
+              });
+            }
+          } else {
+            closeLoading();
+          }
+        });
+      }
+    });
+  }
+
   onMounted(() => {
     loadCategories();
     onSearch();
@@ -1067,6 +1329,8 @@ export function useAlbum() {
     openDialog,
     handleDelete,
     openBatchImportDialog,
+    handleExport,
+    openImportDialog,
     loadCategories
   };
 }

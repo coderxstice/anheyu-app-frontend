@@ -293,7 +293,7 @@ const scrollToComment = (event: Event) => {
 
           <span class="post-meta-separator" />
           <el-tooltip
-            :content="'这篇文章创建于' + formatDate(article.created_at)"
+            content="文章发布日期"
             placement="top"
             :show-arrow="false"
           >
