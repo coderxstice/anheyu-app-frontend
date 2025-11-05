@@ -43,28 +43,28 @@
             :class="{ 'is-playing': audioPlayer.audioState.isPlaying }"
           >
             <img
-              src="https://upload-bbs.miyoushe.com/upload/2025/09/23/125766904/61321cddd1e632df60cbc751953923f1_6948385422724592803.png"
+              :src="vinylImages.background"
               alt="唱片背景"
               class="vinyl-background"
             />
             <img
-              src="https://upload-bbs.miyoushe.com/upload/2025/09/23/125766904/22e3492b5f5f27a08d725a057213caa7_6260158843656131388.png"
+              :src="vinylImages.outer"
               alt="唱片外圈"
               class="artwork-image-vinyl-background"
             />
             <img
-              src="https://upload-bbs.miyoushe.com/upload/2025/09/23/125766904/f42b2b702883aafb66c3fdaa6163bc71_404470491737554604.png"
+              :src="vinylImages.inner"
               alt="唱片内圈"
               class="artwork-image-vinyl-inner-background"
             />
             <img
-              src="https://upload-bbs.miyoushe.com/upload/2025/09/23/125766904/2f2c279fd93eabeb5ebff8e984964c48_5554239981642930129.png"
+              :src="vinylImages.needle"
               alt="撞针"
               class="artwork-image-needle-background"
               :class="{ 'needle-playing': audioPlayer.audioState.isPlaying }"
             />
             <img
-              src="https://upload-bbs.miyoushe.com/upload/2025/09/23/125766904/e93123a26f65d8984d75f9e1ffba8f24_5652931152834495590.png"
+              :src="vinylImages.groove"
               alt="凹槽背景"
               class="artwork-image-groove-background"
             />
@@ -498,6 +498,26 @@ const audioElement = ref<HTMLAudioElement>();
 
 // 站点配置和移动端菜单
 const siteConfigStore = useSiteConfigStore();
+
+// 从配置中获取唱片图片
+const vinylImages = computed(() => ({
+  background:
+    siteConfigStore.siteConfig.frontDesk?.home?.music?.vinyl?.background ||
+    "/static/img/music-vinyl-background.png",
+  outer:
+    siteConfigStore.siteConfig.frontDesk?.home?.music?.vinyl?.outer ||
+    "/static/img/music-vinyl-outer.png",
+  inner:
+    siteConfigStore.siteConfig.frontDesk?.home?.music?.vinyl?.inner ||
+    "/static/img/music-vinyl-inner.png",
+  needle:
+    siteConfigStore.siteConfig.frontDesk?.home?.music?.vinyl?.needle ||
+    "/static/img/music-vinyl-needle.png",
+  groove:
+    siteConfigStore.siteConfig.frontDesk?.home?.music?.vinyl?.groove ||
+    "/static/img/music-vinyl-groove.png"
+}));
+
 const isMobileMenuOpen = ref(false);
 const navConfig = computed(() => siteConfigStore.getSiteConfig?.header?.nav);
 const menuConfig = computed(() => {

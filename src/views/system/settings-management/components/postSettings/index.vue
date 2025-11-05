@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-02 18:04:48
- * @LastEditTime: 2025-10-16 10:22:03
+ * @LastEditTime: 2025-11-05 16:20:09
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -51,6 +51,25 @@
       placeholder="例如: 10"
       :style="{ width: '100px' }"
     />
+  </el-form-item>
+
+  <el-form-item label="404 页面默认图片">
+    <el-input
+      :model-value="formData.page404?.defaultImage || ''"
+      placeholder="请输入 404 页面默认图片地址"
+      @update:model-value="
+        val => {
+          if (!formData.page404) {
+            formData.page404 = { defaultImage: '' };
+          }
+          formData.page404.defaultImage = val;
+        }
+      "
+    />
+    <div class="form-item-help">
+      用于 404 错误页面和自定义页面的背景图片，默认为
+      /static/img/background-effect.gif
+    </div>
   </el-form-item>
 
   <el-form-item label="IP属地查询 API 地址">

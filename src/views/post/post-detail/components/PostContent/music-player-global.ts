@@ -3,6 +3,8 @@
  * 这些函数会被HTML的onclick属性调用
  */
 
+import { getSongResourcesApi } from "@/api/music";
+
 /**
  * 格式化时间
  */
@@ -14,9 +16,10 @@ const formatTime = (seconds: number) => {
 };
 
 /**
- * 初始化音乐播放器数据（仅加载音频源）
+ * 初始化音乐播放器数据（通过API动态获取音频源）
+ * 此函数作为预加载失败时的后备方案
  */
-const initMusicPlayerData = (playerId: string) => {
+const initMusicPlayerData = async (playerId: string) => {
   const player = document.getElementById(playerId);
   if (!player || player.dataset.audioLoaded) return;
 
@@ -32,7 +35,6 @@ const initMusicPlayerData = (playerId: string) => {
 
   try {
     const musicDataAttr = player.getAttribute("data-music-data");
-    console.log("[音乐播放器] 原始data-music-data:", musicDataAttr);
 
     if (!musicDataAttr) {
       console.error("[音乐播放器] 没有找到data-music-data属性");
@@ -46,43 +48,72 @@ const initMusicPlayerData = (playerId: string) => {
       .replace(/&#039;/g, "'")
       .replace(/&amp;/g, "&");
 
-    console.log("[音乐播放器] 解码后的数据:", decodedData);
-
     const musicData = JSON.parse(decodedData);
-    console.log("[音乐播放器] 解析后的音乐数据:", musicData);
 
-    if (!musicData.url) {
-      console.error("[音乐播放器] 音乐URL不存在, musicData:", musicData);
+    // 由于音频链接具有时效性，需要通过 API 动态获取
+    if (!musicData.neteaseId) {
+      console.error(
+        "[音乐播放器] 缺少网易云音乐ID，无法获取音频资源",
+        musicData
+      );
       if (errorEl) errorEl.style.display = "flex";
       return;
     }
 
-    audio.src = musicData.url;
-    audio.load();
-    player.dataset.audioLoaded = "true";
+    console.log(
+      "[音乐播放器] 后备加载：通过API动态获取音频链接 - 网易云ID:",
+      musicData.neteaseId
+    );
 
-    // 应用主色到进度条
-    if (musicData.color) {
-      const progressFill = player.querySelector(
-        ".music-progress-fill"
-      ) as HTMLElement;
-      if (progressFill) {
-        progressFill.style.background = musicData.color;
-        console.log("[音乐播放器] 应用主色:", musicData.color);
+    // 显示加载状态
+    player.classList.add("loading");
+
+    // 调用后端 API 获取音频资源
+    const response = await getSongResourcesApi(musicData.neteaseId);
+
+    if (response.code === 200 && response.data?.audioUrl) {
+      audio.src = response.data.audioUrl;
+      audio.preload = "metadata";
+
+      // 监听 loadedmetadata 事件以更新播放时长
+      const updateDuration = () => {
+        const durationEl = player.querySelector(".duration") as HTMLElement;
+        if (durationEl && audio.duration) {
+          durationEl.textContent = formatTime(audio.duration);
+        }
+      };
+
+      // 如果元数据已经加载，直接更新；否则等待 loadedmetadata 事件
+      if (audio.readyState >= 1) {
+        updateDuration();
+      } else {
+        audio.addEventListener("loadedmetadata", updateDuration, {
+          once: true
+        });
       }
-    }
 
-    console.log("[音乐播放器] 音频加载完成:", musicData.name);
+      audio.load();
+      player.dataset.audioLoaded = "true";
+      player.classList.remove("loading");
+
+      console.log("[音乐播放器] 后备加载完成:", musicData.name);
+    } else {
+      console.error("[音乐播放器] API返回错误或无音频URL:", response);
+      if (errorEl) errorEl.style.display = "flex";
+      player.classList.remove("loading");
+      return;
+    }
   } catch (error) {
     console.error("[音乐播放器] 初始化失败:", error);
     if (errorEl) errorEl.style.display = "flex";
+    player.classList.remove("loading");
   }
 };
 
 /**
  * 切换播放/暂停 - 供HTML onclick调用
  */
-export const musicPlayerToggle = (playerId: string) => {
+export const musicPlayerToggle = async (playerId: string) => {
   const player = document.getElementById(playerId);
   if (!player) return;
 
@@ -91,8 +122,10 @@ export const musicPlayerToggle = (playerId: string) => {
   ) as HTMLAudioElement;
   if (!audio) return;
 
-  // 首次点击时初始化音频数据
-  initMusicPlayerData(playerId);
+  // 如果音频还未加载（预加载失败的情况），尝试手动加载
+  if (!player.dataset.audioLoaded) {
+    await initMusicPlayerData(playerId);
+  }
 
   if (audio.paused) {
     audio.play().catch(err => console.error("[音乐播放器] 播放失败:", err));
@@ -190,6 +223,55 @@ export const initAllMusicPlayers = (container: HTMLElement) => {
       if (artworkWrapper) artworkWrapper.classList.remove("is-playing");
       if (needleEl) needleEl.classList.remove("needle-playing");
     });
+
+    // 预加载音频元数据以显示时长
+    const preloadAudioMetadata = async () => {
+      try {
+        const musicDataAttr = player.getAttribute("data-music-data");
+        if (!musicDataAttr) return;
+
+        const decodedData = musicDataAttr
+          .replace(/&quot;/g, '"')
+          .replace(/&#039;/g, "'")
+          .replace(/&amp;/g, "&");
+
+        const musicData = JSON.parse(decodedData);
+        if (!musicData.neteaseId) return;
+
+        console.log(
+          `[音乐播放器] 预加载元数据 - ${musicData.name || "未知歌曲"}`
+        );
+
+        // 应用封面主色到进度条
+        if (musicData.color) {
+          const progressFill = player.querySelector(
+            ".music-progress-fill"
+          ) as HTMLElement;
+          if (progressFill) {
+            progressFill.style.background = musicData.color;
+            console.log("[音乐播放器] 应用主色:", musicData.color);
+          }
+        }
+
+        // 调用 API 获取音频链接
+        const response = await getSongResourcesApi(musicData.neteaseId);
+
+        if (response.code === 200 && response.data?.audioUrl) {
+          audio.src = response.data.audioUrl;
+          audio.preload = "metadata"; // 只预加载元数据，不下载整个音频
+          player.dataset.audioLoaded = "true";
+
+          console.log(
+            `[音乐播放器] 元数据预加载完成 - ${musicData.name || "未知歌曲"}`
+          );
+        }
+      } catch (error) {
+        console.error("[音乐播放器] 预加载元数据失败:", error);
+      }
+    };
+
+    // 异步预加载
+    preloadAudioMetadata();
   });
 };
 

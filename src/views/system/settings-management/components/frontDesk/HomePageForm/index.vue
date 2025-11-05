@@ -663,6 +663,91 @@
       json中的内容作为歌单列表，如果json内容有误将无法显示音乐。
     </div>
   </el-form-item>
+  <el-form-item label="唱片背景图">
+    <el-input
+      :model-value="model.music?.vinyl?.background || ''"
+      placeholder="/static/img/music-vinyl-background.png"
+      clearable
+      @update:model-value="updateMusicVinylBackground"
+    />
+    <div
+      style="
+        font-size: 12px;
+        color: var(--el-text-color-secondary);
+        margin-top: 8px;
+      "
+    >
+      音乐播放器唱片背景图片，默认为 /static/img/music-vinyl-background.png
+    </div>
+  </el-form-item>
+  <el-form-item label="唱片外圈图">
+    <el-input
+      :model-value="model.music?.vinyl?.outer || ''"
+      placeholder="/static/img/music-vinyl-outer.png"
+      clearable
+      @update:model-value="updateMusicVinylOuter"
+    />
+    <div
+      style="
+        font-size: 12px;
+        color: var(--el-text-color-secondary);
+        margin-top: 8px;
+      "
+    >
+      音乐播放器唱片外圈图片，默认为 /static/img/music-vinyl-outer.png
+    </div>
+  </el-form-item>
+  <el-form-item label="唱片内圈图">
+    <el-input
+      :model-value="model.music?.vinyl?.inner || ''"
+      placeholder="/static/img/music-vinyl-inner.png"
+      clearable
+      @update:model-value="updateMusicVinylInner"
+    />
+    <div
+      style="
+        font-size: 12px;
+        color: var(--el-text-color-secondary);
+        margin-top: 8px;
+      "
+    >
+      音乐播放器唱片内圈图片，默认为 /static/img/music-vinyl-inner.png
+    </div>
+  </el-form-item>
+  <el-form-item label="撞针图">
+    <el-input
+      :model-value="model.music?.vinyl?.needle || ''"
+      placeholder="/static/img/music-vinyl-needle.png"
+      clearable
+      @update:model-value="updateMusicVinylNeedle"
+    />
+    <div
+      style="
+        font-size: 12px;
+        color: var(--el-text-color-secondary);
+        margin-top: 8px;
+      "
+    >
+      音乐播放器撞针图片，默认为 /static/img/music-vinyl-needle.png
+    </div>
+  </el-form-item>
+  <el-form-item label="凹槽背景图">
+    <el-input
+      :model-value="model.music?.vinyl?.groove || ''"
+      placeholder="/static/img/music-vinyl-groove.png"
+      clearable
+      @update:model-value="updateMusicVinylGroove"
+    />
+    <div
+      style="
+        font-size: 12px;
+        color: var(--el-text-color-secondary);
+        margin-top: 8px;
+      "
+    >
+      音乐播放器凹槽背景图片，默认为 /static/img/music-vinyl-groove.png
+    </div>
+  </el-form-item>
   <el-form-item label="底部栏作者链接">
     <el-input
       :model-value="model.footerBarAuthorLink"
@@ -1482,6 +1567,71 @@ const updateMusicPlayerCustomPlaylist = (newPlaylist: string) => {
       player: {
         ...model.value.music?.player,
         custom_playlist: newPlaylist
+      }
+    }
+  };
+};
+
+const updateMusicVinylBackground = (newBackground: string) => {
+  model.value = {
+    ...model.value,
+    music: {
+      ...model.value.music,
+      vinyl: {
+        ...model.value.music?.vinyl,
+        background: newBackground
+      }
+    }
+  };
+};
+
+const updateMusicVinylOuter = (newOuter: string) => {
+  model.value = {
+    ...model.value,
+    music: {
+      ...model.value.music,
+      vinyl: {
+        ...model.value.music?.vinyl,
+        outer: newOuter
+      }
+    }
+  };
+};
+
+const updateMusicVinylInner = (newInner: string) => {
+  model.value = {
+    ...model.value,
+    music: {
+      ...model.value.music,
+      vinyl: {
+        ...model.value.music?.vinyl,
+        inner: newInner
+      }
+    }
+  };
+};
+
+const updateMusicVinylNeedle = (newNeedle: string) => {
+  model.value = {
+    ...model.value,
+    music: {
+      ...model.value.music,
+      vinyl: {
+        ...model.value.music?.vinyl,
+        needle: newNeedle
+      }
+    }
+  };
+};
+
+const updateMusicVinylGroove = (newGroove: string) => {
+  model.value = {
+    ...model.value,
+    music: {
+      ...model.value.music,
+      vinyl: {
+        ...model.value.music?.vinyl,
+        groove: newGroove
       }
     }
   };
