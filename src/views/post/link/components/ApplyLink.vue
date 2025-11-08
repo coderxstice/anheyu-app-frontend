@@ -51,7 +51,8 @@ const form = reactive<ApplyLinkRequest>({
   url: "",
   logo: "",
   description: "",
-  siteshot: ""
+  siteshot: "",
+  email: ""
 });
 const rules = reactive<FormRules>({
   name: [{ required: true, message: "请输入网站名称", trigger: "blur" }],
@@ -72,6 +73,13 @@ const rules = reactive<FormRules>({
     {
       type: "url",
       message: "请输入有效的网站快照链接",
+      trigger: ["blur", "change"]
+    }
+  ],
+  email: [
+    {
+      type: "email",
+      message: "请输入有效的邮箱地址",
       trigger: ["blur", "change"]
     }
   ]
@@ -230,6 +238,16 @@ watch(allChecked, isAllChecked => {
           />
           <div class="form-tip">
             <small>网站快照是您网站的截图，用于在友链页面展示。</small>
+          </div>
+        </el-form-item>
+        <el-form-item label="联系邮箱" prop="email">
+          <el-input
+            v-model="form.email"
+            type="email"
+            placeholder="your@email.com (可选)"
+          />
+          <div class="form-tip">
+            <small>用于接收友链审核通知和后续沟通。</small>
           </div>
         </el-form-item>
         <el-form-item>

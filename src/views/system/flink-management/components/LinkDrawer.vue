@@ -41,6 +41,17 @@
         </div>
       </el-form-item>
 
+      <el-form-item label="联系邮箱" prop="email">
+        <el-input
+          v-model="formData.email"
+          type="email"
+          placeholder="your@email.com (可选)"
+        />
+        <div class="form-tip">
+          <small>用于接收友链审核通知和后续沟通</small>
+        </div>
+      </el-form-item>
+
       <el-form-item label="排序权重" prop="sort_order">
         <div class="sort-order-wrapper">
           <el-input-number
@@ -257,6 +268,7 @@ const initialFormData: CreateLinkRequest = {
   logo: "",
   description: "",
   siteshot: "",
+  email: "",
   category_id: null,
   tag_id: null,
   status: "PENDING",
@@ -273,6 +285,13 @@ const formRules = reactive<FormRules>({
     {
       type: "url",
       message: "请输入有效的网站快照链接",
+      trigger: ["blur", "change"]
+    }
+  ],
+  email: [
+    {
+      type: "email",
+      message: "请输入有效的邮箱地址",
       trigger: ["blur", "change"]
     }
   ],
@@ -336,6 +355,7 @@ watch(
           logo: props.data.logo,
           description: props.data.description,
           siteshot: props.data.siteshot,
+          email: props.data.email || "",
           category_id: props.data.category?.id || null,
           tag_id: props.data.tag?.id || null,
           status: props.data.status,

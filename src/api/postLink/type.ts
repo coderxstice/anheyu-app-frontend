@@ -44,6 +44,7 @@ export interface LinkItem {
   siteshot: string;
   sort_order: number;
   skip_health_check: boolean;
+  email: string;
   category: LinkCategory | null;
   tag: LinkTag | null;
 }
@@ -57,6 +58,7 @@ export interface ApplyLinkRequest {
   logo?: string;
   description?: string;
   siteshot?: string;
+  email?: string;
 }
 
 /** [后台] 创建友链 */
@@ -66,6 +68,7 @@ export interface CreateLinkRequest {
   logo: string;
   description: string;
   siteshot: string;
+  email?: string;
   category_id: number;
   tag_id: number | null; // 改为单个标签，可选
   status: LinkStatus;
@@ -146,6 +149,7 @@ export interface ImportLinkItem {
   logo?: string;
   description?: string;
   siteshot?: string;
+  email?: string;
   category_name?: string; // 分类名称
   tag_name?: string; // 标签名称
   status?: LinkStatus; // 状态，默认为 PENDING

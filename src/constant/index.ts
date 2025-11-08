@@ -104,6 +104,17 @@ const KeyFriendLinkMailSubjectAdmin: SettingKey =
   "FRIEND_LINK_MAIL_SUBJECT_ADMIN";
 const KeyFriendLinkMailTemplateAdmin: SettingKey =
   "FRIEND_LINK_MAIL_TEMPLATE_ADMIN";
+// 友链审核邮件通知配置
+const KeyFriendLinkReviewMailEnable: SettingKey =
+  "FRIEND_LINK_REVIEW_MAIL_ENABLE";
+const KeyFriendLinkReviewMailSubjectApproved: SettingKey =
+  "FRIEND_LINK_REVIEW_MAIL_SUBJECT_APPROVED";
+const KeyFriendLinkReviewMailTemplateApproved: SettingKey =
+  "FRIEND_LINK_REVIEW_MAIL_TEMPLATE_APPROVED";
+const KeyFriendLinkReviewMailSubjectRejected: SettingKey =
+  "FRIEND_LINK_REVIEW_MAIL_SUBJECT_REJECTED";
+const KeyFriendLinkReviewMailTemplateRejected: SettingKey =
+  "FRIEND_LINK_REVIEW_MAIL_TEMPLATE_REJECTED";
 
 // --- 前台及页脚配置 ---
 const KeyFrontDeskSiteOwnerName: SettingKey = "frontDesk.siteOwner.name";
@@ -387,6 +398,11 @@ export const constant = {
   KeyFriendLinkScMailNotify,
   KeyFriendLinkMailSubjectAdmin,
   KeyFriendLinkMailTemplateAdmin,
+  KeyFriendLinkReviewMailEnable,
+  KeyFriendLinkReviewMailSubjectApproved,
+  KeyFriendLinkReviewMailTemplateApproved,
+  KeyFriendLinkReviewMailSubjectRejected,
+  KeyFriendLinkReviewMailTemplateRejected,
 
   // --- 文章配置 ---
   KeyDefaultCover,

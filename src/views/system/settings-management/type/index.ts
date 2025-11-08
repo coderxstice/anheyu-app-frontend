@@ -419,6 +419,12 @@ export interface FLinkSettingsInfo {
   scMailNotify: boolean; // 是否同时通过邮件和IM通知
   mailSubjectAdmin: string; // 博主收到新友链申请的邮件主题
   mailTemplateAdmin: string; // 博主收到新友链申请的邮件内容模板
+  // 友链审核邮件通知配置
+  reviewMailEnable: boolean; // 是否启用审核邮件通知
+  reviewMailSubjectApproved: string; // 审核通过邮件主题
+  reviewMailTemplateApproved: string; // 审核通过邮件模板
+  reviewMailSubjectRejected: string; // 审核未通过邮件主题
+  reviewMailTemplateRejected: string; // 审核未通过邮件模板
 }
 
 /**
