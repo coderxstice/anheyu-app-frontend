@@ -111,7 +111,7 @@ const emit = defineEmits<{
       cursor: pointer;
       border-radius: 50%;
       font-size: 18px;
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      transition: all 0.3s;
       color: rgba(255, 255, 255, 0.8);
 
       &:hover {
@@ -157,7 +157,7 @@ const emit = defineEmits<{
       align-items: center;
       gap: 12px;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      transition: all 0.3s;
       color: rgba(255, 255, 255, 0.9);
       user-select: none;
       position: relative;
@@ -173,7 +173,7 @@ const emit = defineEmits<{
         height: 100%;
         width: 3px;
         background: transparent;
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        transition: all 0.3s;
       }
 
       &:hover:not(.active):not(.loading) {

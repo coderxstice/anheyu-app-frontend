@@ -330,7 +330,8 @@ onMounted(() => {
   z-index: 9999;
   justify-content: center;
   opacity: 0;
-  transition: 0.3s ease-out;
+  // 只允许 opacity 过渡，禁用颜色过渡避免主题切换时的闪烁
+  transition: opacity 0.3s ease-out;
   flex-direction: column;
   align-items: center;
   pointer-events: none;
@@ -379,11 +380,27 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     gap: 24px;
+
+    // 禁用 .card-content 内文字元素的颜色过渡
+    .card-content {
+      // 禁用整个 card-content 的颜色过渡
+      transition: none !important;
+
+      .author-content-item-tips,
+      .author-content-item-title {
+        transition: none !important;
+        // 确保颜色立即变化，不经过过渡
+        will-change: auto;
+      }
+    }
   }
   .author-content-item-tips {
     opacity: 0.8;
     font-size: 0.75rem;
     margin-bottom: 0.625rem;
+    // 禁用颜色过渡，避免主题切换时的闪烁
+    transition: opacity 0.3s !important;
+    color: inherit;
   }
   .card-hor-content {
     width: 100%;
@@ -476,6 +493,9 @@ onMounted(() => {
       :deep(p) {
         margin: 0;
       }
+      :deep(a) {
+        transition: 0.3s !important;
+      }
     }
     .comment-title {
       font-size: 12px;
@@ -503,6 +523,9 @@ onMounted(() => {
     font-weight: 700;
     line-height: 1;
     display: flex;
+    // 禁用颜色过渡，避免主题切换时的闪烁
+    transition: none !important;
+    color: inherit;
   }
 
   .console-card-group-right {
@@ -531,6 +554,10 @@ onMounted(() => {
     transform: translateX(-50%);
     color: var(--anzhiyu-fontcolor);
     pointer-events: none;
+    // 禁用颜色过渡，避免主题切换时的闪烁
+    transition:
+      transform 0.3s,
+      opacity 0.3s !important;
   }
   .console-mask {
     background: var(--anzhiyu-maskbgdeep);
@@ -589,7 +616,9 @@ onMounted(() => {
         border: var(--style-border);
         font-size: 14px;
         font-weight: 700;
-        transition: 0s;
+        transition:
+          color 0.3s,
+          background 0s;
         &:hover {
           background: var(--anzhiyu-lighttext);
           color: var(--anzhiyu-card-bg) !important;
