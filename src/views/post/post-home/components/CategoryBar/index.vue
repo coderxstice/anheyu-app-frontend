@@ -143,19 +143,9 @@ onUnmounted(() => {
   border: var(--style-border);
   border-radius: 12px;
   transition: all 0.3s ease 0s;
-  opacity: 0;
-  animation: fadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-  /* 防止布局偏移：保持空间占用 */
+  opacity: 1;
+  animation: slide-in 0.6s 0.1s backwards;
   visibility: visible;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 .catalog-bar {

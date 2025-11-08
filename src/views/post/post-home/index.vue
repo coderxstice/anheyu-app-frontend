@@ -224,26 +224,22 @@ onMounted(() => {
   max-width: 1400px;
   padding: 0.5rem 1.5rem 1rem;
   margin: 0 auto;
-  /* 防止布局偏移：预留最小高度 */
   min-height: 600px;
-  /* 隔离布局计算 */
   contain: layout style;
 }
 
 .main-content {
   flex: 1;
   min-width: 0;
-  /* 防止内容加载时的布局偏移 */
   contain: layout;
 }
 
 .recent-posts {
   position: relative;
   width: 100%;
-  /* 防止布局偏移：固定最小高度 */
   min-height: 400px;
-  /* 防止动画导致的布局偏移 */
   will-change: auto;
+  animation: slide-in 0.6s 0.1s backwards;
 
   &.double-column-container {
     display: flex;
@@ -252,7 +248,6 @@ onMounted(() => {
     justify-content: space-between;
   }
 
-  /* 优化 Element Plus loading 样式，避免布局偏移 */
   :deep(.el-loading-mask) {
     position: absolute;
     top: 0;
