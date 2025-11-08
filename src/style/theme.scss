@@ -14,7 +14,7 @@ html[data-theme="light"] {
 html[data-theme="default"] {
   --anzhiyu-theme-sub-menu-active-text: #fff;
   --anzhiyu-theme-menu-bg: #001529;
-  --anzhiyu-theme-menu-hover: rgb(64 145 247 / 15%);
+  --anzhiyu-theme-menu-hover: var(--anzhiyu-theme);
   --anzhiyu-theme-sub-menu-bg: #0f0303;
   --anzhiyu-theme-menu-text: rgb(254 254 254 / 65%);
   --anzhiyu-theme-sidebar-logo: #002140;

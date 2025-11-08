@@ -165,7 +165,9 @@ const handleIconClick = (event: MouseEvent) => {
   cursor: pointer;
   backdrop-filter: blur(20px);
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition:
+    all 0s,
+    color 0.3s;
   background-color: var(--anzhiyu-card-bg);
   border: var(--style-border);
 
@@ -202,7 +204,7 @@ const handleIconClick = (event: MouseEvent) => {
     width: 100%;
     height: 100%;
     opacity: 1;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: all 0.3s;
 
     &.hidden {
       opacity: 0;
@@ -219,7 +221,7 @@ const handleIconClick = (event: MouseEvent) => {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      transition: all 0.3s;
       min-width: 0;
     }
 
