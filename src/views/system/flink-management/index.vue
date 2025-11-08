@@ -177,7 +177,18 @@
                   {{ link.description || "暂无描述" }}
                 </p>
 
-                <div v-if="link.category || link.tag" class="meta-info">
+                <div
+                  v-if="link.type || link.category || link.tag"
+                  class="meta-info"
+                >
+                  <el-tag
+                    v-if="link.type"
+                    size="small"
+                    :type="link.type === 'NEW' ? 'primary' : 'warning'"
+                    effect="plain"
+                  >
+                    {{ link.type === "NEW" ? "新增" : "修改" }}
+                  </el-tag>
                   <el-tag
                     v-if="link.category && link.category.style"
                     size="small"
@@ -202,6 +213,44 @@
                     }"
                     >{{ link.tag.name }}</el-tag
                   >
+                </div>
+
+                <!-- 如果是修改类型的友链，显示原URL和修改原因 -->
+                <div
+                  v-if="
+                    link.type === 'UPDATE' &&
+                    (link.original_url || link.update_reason)
+                  "
+                  class="update-info"
+                >
+                  <el-alert
+                    type="warning"
+                    :closable="false"
+                    class="update-alert"
+                  >
+                    <template #title>
+                      <div class="update-details">
+                        <div v-if="link.original_url" class="update-item">
+                          <span class="label">原链接：</span>
+                          <el-link
+                            :href="link.original_url"
+                            target="_blank"
+                            type="warning"
+                            :underline="false"
+                            class="original-url"
+                          >
+                            {{ link.original_url }}
+                          </el-link>
+                        </div>
+                        <div v-if="link.update_reason" class="update-item">
+                          <span class="label">修改原因：</span>
+                          <span class="reason-text">{{
+                            link.update_reason
+                          }}</span>
+                        </div>
+                      </div>
+                    </template>
+                  </el-alert>
                 </div>
 
                 <el-divider />
@@ -988,6 +1037,58 @@ onUnmounted(() => {
       border: none !important;
       border-radius: 12px 0;
       box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
+    }
+  }
+
+  .update-info {
+    margin-bottom: 12px;
+
+    @media screen and (width <= 768px) {
+      margin-bottom: 10px;
+    }
+
+    .update-alert {
+      :deep(.el-alert__content) {
+        padding: 0;
+        width: 100%;
+      }
+
+      :deep(.el-alert__title) {
+        font-size: 12px;
+        line-height: 1.5;
+      }
+    }
+
+    .update-details {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      .update-item {
+        display: flex;
+        align-items: flex-start;
+        word-break: break-word;
+
+        .label {
+          flex-shrink: 0;
+          font-weight: 500;
+          color: #e6a23c;
+        }
+
+        .original-url {
+          font-size: 12px;
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .reason-text {
+          color: #606266;
+          font-size: 12px;
+          line-height: 1.6;
+        }
+      }
     }
   }
 

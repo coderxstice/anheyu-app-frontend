@@ -2,7 +2,7 @@
  * @Description: 友情链接申请面板
  * @Author: 安知鱼
  * @Date: 2025-08-19 10:19:23
- * @LastEditTime: 2025-10-20 11:54:15
+ * @LastEditTime: 2025-11-08 17:01:55
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -15,6 +15,8 @@ import {
   ElButton,
   ElAlert,
   ElMessage,
+  ElRadioGroup,
+  ElRadio,
   type FormInstance,
   type FormRules
 } from "element-plus";
@@ -47,14 +49,18 @@ const allChecked = computed(() => {
 const formRef = ref<FormInstance>();
 const loading = ref(false);
 const form = reactive<ApplyLinkRequest>({
+  type: "NEW",
   name: "",
   url: "",
   logo: "",
   description: "",
   siteshot: "",
-  email: ""
+  email: "",
+  original_url: "",
+  update_reason: ""
 });
 const rules = reactive<FormRules>({
+  type: [{ required: true, message: "请选择申请类型", trigger: "change" }],
   name: [{ required: true, message: "请输入网站名称", trigger: "blur" }],
   url: [
     { required: true, message: "请输入网站链接", trigger: "blur" },
@@ -77,11 +83,22 @@ const rules = reactive<FormRules>({
     }
   ],
   email: [
+    { required: true, message: "请输入联系邮箱", trigger: "blur" },
     {
       type: "email",
       message: "请输入有效的邮箱地址",
       trigger: ["blur", "change"]
     }
+  ],
+  original_url: [
+    {
+      type: "url",
+      message: "请输入有效的原友链URL",
+      trigger: ["blur", "change"]
+    }
+  ],
+  update_reason: [
+    { required: true, message: "请说明修改原因", trigger: "blur" }
   ]
 });
 
@@ -200,6 +217,19 @@ watch(allChecked, isAllChecked => {
         label-position="top"
         @submit.prevent
       >
+        <el-form-item label="申请类型" prop="type">
+          <div>
+            <el-radio-group v-model="form.type">
+              <el-radio value="NEW">新增友链</el-radio>
+              <el-radio value="UPDATE">修改友链</el-radio>
+            </el-radio-group>
+            <div class="form-tip">
+              <small v-if="form.type === 'NEW'">申请添加新的友情链接。</small>
+              <small v-else>修改已存在的友情链接信息。</small>
+            </div>
+          </div>
+        </el-form-item>
+
         <el-form-item label="网站名称" prop="name">
           <el-input
             v-model="form.name"
@@ -229,6 +259,47 @@ watch(allChecked, isAllChecked => {
             :placeholder="placeholderDescription || '生活明朗，万物可爱'"
           />
         </el-form-item>
+        <el-form-item label="联系邮箱" prop="email">
+          <el-input
+            v-model="form.email"
+            type="email"
+            placeholder="your@email.com"
+          />
+          <div class="form-tip">
+            <small>必填项，用于接收友链审核通知和后续沟通。</small>
+          </div>
+        </el-form-item>
+
+        <el-form-item
+          v-if="form.type === 'UPDATE'"
+          label="原友链URL"
+          prop="original_url"
+        >
+          <el-input
+            v-model="form.original_url"
+            placeholder="https://old-blog.example.com/"
+          />
+          <div class="form-tip">
+            <small>请输入您原来友链的网站地址，用于定位需要修改的友链。</small>
+          </div>
+        </el-form-item>
+
+        <el-form-item
+          v-if="form.type === 'UPDATE'"
+          label="修改原因"
+          prop="update_reason"
+        >
+          <el-input
+            v-model="form.update_reason"
+            type="textarea"
+            :rows="3"
+            placeholder="请说明修改友链的原因，例如：网站域名更换、网站名称变更等"
+          />
+          <div class="form-tip">
+            <small>请说明修改友链的具体原因，以便博主快速处理您的申请。</small>
+          </div>
+        </el-form-item>
+
         <el-form-item label="网站快照" prop="siteshot">
           <el-input
             v-model="form.siteshot"
@@ -240,16 +311,7 @@ watch(allChecked, isAllChecked => {
             <small>网站快照是您网站的截图，用于在友链页面展示。</small>
           </div>
         </el-form-item>
-        <el-form-item label="联系邮箱" prop="email">
-          <el-input
-            v-model="form.email"
-            type="email"
-            placeholder="your@email.com (可选)"
-          />
-          <div class="form-tip">
-            <small>用于接收友链审核通知和后续沟通。</small>
-          </div>
-        </el-form-item>
+
         <el-form-item>
           <el-button
             type="primary"

@@ -45,20 +45,29 @@ export interface LinkItem {
   sort_order: number;
   skip_health_check: boolean;
   email: string;
+  type?: LinkApplyType; // 申请类型
+  original_url?: string; // 修改类型时的原URL
+  update_reason?: string; // 修改类型时的修改原因
   category: LinkCategory | null;
   tag: LinkTag | null;
 }
 
 // --- API 请求体类型 (Request Body) ---
 
+/** 友链申请类型 */
+export type LinkApplyType = "NEW" | "UPDATE";
+
 /** 申请友链 */
 export interface ApplyLinkRequest {
+  type: LinkApplyType; // 申请类型：NEW-新增友链, UPDATE-修改友链
   name: string;
   url: string;
   logo?: string;
   description?: string;
   siteshot?: string;
-  email?: string;
+  email: string;
+  original_url?: string; // 修改类型时，原友链的URL（用于定位要修改的友链）
+  update_reason?: string; // 修改类型时，修改原因说明
 }
 
 /** [后台] 创建友链 */
@@ -69,6 +78,9 @@ export interface CreateLinkRequest {
   description: string;
   siteshot: string;
   email?: string;
+  type?: LinkApplyType; // 申请类型（可选）
+  original_url?: string; // 原友链URL（可选）
+  update_reason?: string; // 修改原因（可选）
   category_id: number;
   tag_id: number | null; // 改为单个标签，可选
   status: LinkStatus;
