@@ -161,6 +161,7 @@ class AnHttp {
           // 友链（前台）
           "public/links",
           "public/links/random",
+          "public/links/applications",
           "public/link-categories",
           // 统计
           "public/statistics/basic",

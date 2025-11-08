@@ -2,11 +2,11 @@
  * @Description: 友情链接申请面板
  * @Author: 安知鱼
  * @Date: 2025-08-19 10:19:23
- * @LastEditTime: 2025-11-08 17:01:55
+ * @LastEditTime: 2025-11-08 18:27:40
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
-import { ref, computed, reactive, watch, nextTick } from "vue";
+import { ref, computed, reactive, watch, nextTick, onMounted } from "vue";
 import {
   ElCard,
   ElForm,
@@ -17,11 +17,16 @@ import {
   ElMessage,
   ElRadioGroup,
   ElRadio,
+  ElTag,
+  ElPagination,
+  ElEmpty,
   type FormInstance,
   type FormRules
 } from "element-plus";
-import { applyLink } from "@/api/postLink";
-import type { ApplyLinkRequest } from "@/api/postLink/type";
+import { applyLink, getLinkApplications } from "@/api/postLink";
+import type { ApplyLinkRequest, LinkItem } from "@/api/postLink/type";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import md5 from "blueimp-md5";
 
 defineOptions({
   name: "ApplyLink"
@@ -151,6 +156,88 @@ watch(allChecked, isAllChecked => {
   if (isInitialLoad.value) {
     isInitialLoad.value = false;
   }
+});
+
+// 友链申请列表相关
+const siteConfigStore = useSiteConfigStore();
+const applications = ref<LinkItem[]>([]);
+const applicationsLoading = ref(false);
+const applicationsTotal = ref(0);
+const applicationsPage = ref(1);
+const applicationsPageSize = ref(20);
+
+// 获取Gravatar头像URL
+const getGravatarUrl = (email: string) => {
+  if (!email) return "";
+  const emailMD5 = md5(email.toLowerCase());
+  const config = siteConfigStore.getSiteConfig;
+  let baseUrl = config.GRAVATAR_URL + "/avatar";
+  const defaultType = config.DEFAULT_GRAVATAR_TYPE || "identicon";
+  baseUrl = baseUrl.replace(/\/+$/, "");
+  return `${baseUrl}/${emailMD5}?d=${defaultType}&s=80`;
+};
+
+// 获取友链申请列表
+const fetchApplications = async () => {
+  applicationsLoading.value = true;
+  try {
+    const res = await getLinkApplications({
+      page: applicationsPage.value,
+      pageSize: applicationsPageSize.value
+    });
+    applications.value = res.data.list;
+    applicationsTotal.value = res.data.total;
+  } catch (error) {
+    console.error("获取友链申请列表失败:", error);
+    ElMessage.error("获取友链申请列表失败");
+  } finally {
+    applicationsLoading.value = false;
+  }
+};
+
+// 处理分页变化
+const handlePageChange = (page: number) => {
+  applicationsPage.value = page;
+  fetchApplications();
+};
+
+// 获取状态标签类型
+const getStatusType = (
+  status: string
+): "success" | "warning" | "danger" | "info" => {
+  const statusMap = {
+    APPROVED: "success" as const,
+    PENDING: "warning" as const,
+    REJECTED: "danger" as const,
+    INVALID: "info" as const
+  };
+  return statusMap[status as keyof typeof statusMap] || "info";
+};
+
+// 获取状态文本
+const getStatusText = (status: string): string => {
+  const statusTextMap: Record<string, string> = {
+    APPROVED: "已通过",
+    PENDING: "待审核",
+    REJECTED: "已拒绝",
+    INVALID: "已失效"
+  };
+  return statusTextMap[status] || status;
+};
+
+// 获取类型文本
+const getTypeText = (type?: string): string => {
+  if (!type) return "新增";
+  const typeTextMap: Record<string, string> = {
+    NEW: "新增",
+    UPDATE: "修改"
+  };
+  return typeTextMap[type] || type;
+};
+
+// 组件挂载时获取申请列表
+onMounted(() => {
+  fetchApplications();
 });
 </script>
 
@@ -324,6 +411,55 @@ watch(allChecked, isAllChecked => {
         </el-form-item>
       </el-form>
     </el-card>
+
+    <!-- 友链申请列表 -->
+    <el-card shadow="never" class="applications-card">
+      <template #header>
+        <div class="card-header">
+          <span>友链申请列表</span>
+          <span class="header-count">（共 {{ applicationsTotal }} 条）</span>
+        </div>
+      </template>
+
+      <div v-loading="applicationsLoading" class="applications-list">
+        <el-empty v-if="!applications.length" description="暂无申请记录" />
+
+        <div v-else class="application-items">
+          <div
+            v-for="item in applications"
+            :key="item.id"
+            class="application-item"
+          >
+            <div class="item-content">
+              <div class="item-header">
+                <span class="item-name">{{ item.name }}</span>
+                <div class="item-tags">
+                  <el-tag :type="getStatusType(item.status)" size="small">
+                    {{ getStatusText(item.status) }}
+                  </el-tag>
+                  <el-tag v-if="item.type" type="info" size="small">
+                    {{ getTypeText(item.type) }}
+                  </el-tag>
+                </div>
+              </div>
+              <div class="item-description">
+                {{ item.description || "暂无描述" }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="applicationsTotal > applicationsPageSize" class="pagination">
+          <el-pagination
+            v-model:current-page="applicationsPage"
+            :page-size="applicationsPageSize"
+            :total="applicationsTotal"
+            layout="prev, pager, next"
+            @current-change="handlePageChange"
+          />
+        </div>
+      </div>
+    </el-card>
   </div>
 </template>
 
@@ -355,6 +491,15 @@ watch(allChecked, isAllChecked => {
 
 .card-header {
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .header-count {
+    font-size: 14px;
+    font-weight: normal;
+    color: #909399;
+  }
 }
 
 .form-card {
@@ -366,5 +511,156 @@ watch(allChecked, isAllChecked => {
   font-size: 12px;
   line-height: 1.4;
   color: #909399;
+}
+
+// 友链申请列表样式
+.applications-card {
+  margin-top: 20px;
+}
+
+.applications-list {
+  min-height: 200px;
+}
+
+.application-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 0.625rem -6px 1.25rem;
+}
+
+.application-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: calc(20% - 12px);
+  height: 90px;
+  margin: 6px;
+  padding: 0 16px;
+  overflow: hidden;
+  background: var(--anzhiyu-card-bg);
+  border: var(--style-border-always);
+  border-radius: 12px;
+  box-shadow: var(--anzhiyu-shadow-border);
+}
+
+.item-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: fit-content;
+  gap: 4px;
+}
+
+.item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.item-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 20px;
+  color: var(--anzhiyu-fontcolor);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-tags {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+
+  :deep(.el-tag) {
+    height: 20px;
+    padding: 0 6px;
+    font-size: 11px;
+    line-height: 20px;
+    border: none;
+  }
+}
+
+.item-description {
+  width: 100%;
+  padding-right: 8px;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--anzhiyu-fontcolor);
+  text-align: left;
+  text-overflow: ellipsis;
+  opacity: 0.7;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.pagination {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+// 响应式布局
+@media (max-width: 1600px) {
+  .application-items {
+    .application-item {
+      width: calc(25% - 12px);
+    }
+  }
+}
+
+@media (max-width: 1200px) {
+  .application-items {
+    .application-item {
+      width: calc(33.333% - 12px);
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .application-items {
+    margin: 0.625rem -4px 1.25rem;
+
+    .application-item {
+      width: calc(50% - 8px);
+      height: 80px;
+      margin: 4px;
+      padding: 0 12px;
+
+      .item-name {
+        font-size: 14px;
+      }
+
+      .item-description {
+        font-size: 12px;
+      }
+
+      .item-tags {
+        :deep(.el-tag) {
+          height: 18px;
+          padding: 0 4px;
+          font-size: 10px;
+          line-height: 18px;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .application-items {
+    .application-item {
+      width: calc(100% - 8px);
+    }
+  }
 }
 </style>
