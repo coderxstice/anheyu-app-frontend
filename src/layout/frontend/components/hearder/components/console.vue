@@ -408,7 +408,6 @@ onMounted(() => {
       border: var(--style-border-always);
       padding: 14px;
       cursor: pointer;
-      transition: 0.3s;
       overflow: hidden;
       gap: 8px;
       display: flex;
@@ -572,6 +571,7 @@ onMounted(() => {
       overflow-y: scroll;
       gap: 6px;
       min-height: 0;
+      transition: 0s;
       &::-webkit-scrollbar {
         width: 8px;
       }
@@ -589,6 +589,7 @@ onMounted(() => {
         border: var(--style-border);
         font-size: 14px;
         font-weight: 700;
+        transition: 0s;
         &:hover {
           background: var(--anzhiyu-lighttext);
           color: var(--anzhiyu-card-bg) !important;
@@ -641,7 +642,6 @@ onMounted(() => {
         background: var(--anzhiyu-maskbgdeep);
         padding: 12px 16px;
         box-shadow: var(--anzhiyu-shadow-border);
-        transition: 0.3s;
         justify-content: center;
         height: 100%;
       }
