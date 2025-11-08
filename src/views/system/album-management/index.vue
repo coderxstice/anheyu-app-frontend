@@ -35,7 +35,6 @@ const {
   resetForm,
   openDialog,
   handleDelete,
-  openBatchImportDialog,
   handleExport,
   openImportDialog,
   loadCategories
@@ -169,10 +168,10 @@ function openCategoryManage() {
             v-ripple
             type="success"
             :icon="useRenderIcon(Upload)"
-            @click="openBatchImportDialog()"
+            @click="openImportDialog()"
           >
-            <span class="hidden md:inline">批量导入</span>
-            <span class="md:hidden">批量导入</span>
+            <span class="hidden md:inline">导入相册</span>
+            <span class="md:hidden">导入</span>
           </el-button>
           <el-button
             v-ripple
@@ -182,15 +181,6 @@ function openCategoryManage() {
           >
             <span class="hidden md:inline">导出相册</span>
             <span class="md:hidden">导出</span>
-          </el-button>
-          <el-button
-            v-ripple
-            type="info"
-            :icon="useRenderIcon(Upload)"
-            @click="openImportDialog()"
-          >
-            <span class="hidden md:inline">导入相册</span>
-            <span class="md:hidden">导入</span>
           </el-button>
           <el-button
             v-ripple

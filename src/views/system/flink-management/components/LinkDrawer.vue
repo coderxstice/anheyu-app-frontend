@@ -41,6 +41,62 @@
         </div>
       </el-form-item>
 
+      <el-form-item label="联系邮箱" prop="email">
+        <el-input
+          v-model="formData.email"
+          type="email"
+          placeholder="your@email.com (可选)"
+        />
+        <div class="form-tip">
+          <small>用于接收友链审核通知和后续沟通</small>
+        </div>
+      </el-form-item>
+
+      <el-form-item label="申请类型" prop="type">
+        <el-select
+          v-model="formData.type"
+          placeholder="请选择申请类型（可选）"
+          clearable
+          style="width: 100%"
+        >
+          <el-option label="新增友链" value="NEW" />
+          <el-option label="修改友链" value="UPDATE" />
+        </el-select>
+        <div class="form-tip">
+          <small>标记该友链的申请来源类型</small>
+        </div>
+      </el-form-item>
+
+      <el-form-item
+        v-if="formData.type === 'UPDATE'"
+        label="原友链URL"
+        prop="original_url"
+      >
+        <el-input
+          v-model="formData.original_url"
+          placeholder="https://old-blog.example.com/"
+        />
+        <div class="form-tip">
+          <small>修改类型时，原来的友链网址</small>
+        </div>
+      </el-form-item>
+
+      <el-form-item
+        v-if="formData.type === 'UPDATE'"
+        label="修改原因"
+        prop="update_reason"
+      >
+        <el-input
+          v-model="formData.update_reason"
+          type="textarea"
+          :rows="3"
+          placeholder="说明修改友链的原因"
+        />
+        <div class="form-tip">
+          <small>修改类型时，说明修改的具体原因</small>
+        </div>
+      </el-form-item>
+
       <el-form-item label="排序权重" prop="sort_order">
         <div class="sort-order-wrapper">
           <el-input-number
@@ -257,6 +313,10 @@ const initialFormData: CreateLinkRequest = {
   logo: "",
   description: "",
   siteshot: "",
+  email: "",
+  type: undefined,
+  original_url: "",
+  update_reason: "",
   category_id: null,
   tag_id: null,
   status: "PENDING",
@@ -273,6 +333,20 @@ const formRules = reactive<FormRules>({
     {
       type: "url",
       message: "请输入有效的网站快照链接",
+      trigger: ["blur", "change"]
+    }
+  ],
+  email: [
+    {
+      type: "email",
+      message: "请输入有效的邮箱地址",
+      trigger: ["blur", "change"]
+    }
+  ],
+  original_url: [
+    {
+      type: "url",
+      message: "请输入有效的原友链URL",
       trigger: ["blur", "change"]
     }
   ],
@@ -336,6 +410,10 @@ watch(
           logo: props.data.logo,
           description: props.data.description,
           siteshot: props.data.siteshot,
+          email: props.data.email || "",
+          type: props.data.type || undefined,
+          original_url: props.data.original_url || "",
+          update_reason: props.data.update_reason || "",
           category_id: props.data.category?.id || null,
           tag_id: props.data.tag?.id || null,
           status: props.data.status,

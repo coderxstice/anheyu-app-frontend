@@ -1,6 +1,5 @@
 import dayjs from "dayjs";
 import editForm from "../form.vue";
-import batchImportForm from "../batch-import-form.vue";
 import importExportForm from "../import-export-form.vue";
 import { message } from "@/utils/message";
 import {
@@ -844,180 +843,6 @@ export function useAlbum() {
     });
   }
 
-  /**
-   * 批量导入图片
-   */
-  function openBatchImportDialog() {
-    const batchFormRef = ref();
-
-    addDialog({
-      title: "批量导入图片",
-      props: {
-        formInline: {
-          categoryId: null,
-          urls: "",
-          thumbParam: "",
-          bigParam: "",
-          tags: [],
-          displayOrder: 0
-        },
-        categories: categories.value
-      },
-      top: "10vh",
-      width: "80vw",
-      draggable: true,
-      fullscreen: deviceDetection(),
-      fullscreenIcon: true,
-      closeOnClickModal: false,
-      sureBtnLoading: true,
-      contentRenderer: () =>
-        h(batchImportForm, {
-          ref: batchFormRef,
-          formInline: null,
-          categories: categories.value
-        }),
-      beforeSure: async (done, { options, closeLoading }) => {
-        const FormRef = batchFormRef.value.getRef();
-        const curData = options.props.formInline;
-
-        FormRef.validate(async valid => {
-          if (valid) {
-            // 解析URL列表并验证
-            const urls = curData.urls
-              .split("\n")
-              .map(line => line.trim())
-              .filter(Boolean);
-
-            if (urls.length === 0) {
-              message("请输入至少一个图片链接", { type: "error" });
-              closeLoading();
-              return;
-            }
-
-            if (urls.length > 100) {
-              message("单次最多导入100张图片", { type: "error" });
-              closeLoading();
-              return;
-            }
-
-            // 验证URL格式（记录无效URL数量供统计使用）
-            const invalidUrls: string[] = [];
-            const validUrls = urls.filter(url => {
-              try {
-                new URL(url);
-                // 检查是否为图片URL（简单的后缀检查）
-                const isImageUrl =
-                  /\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i.test(url) ||
-                  url.includes("upload") ||
-                  url.includes("image");
-                if (!isImageUrl) {
-                  console.warn(`可能不是图片URL: ${url}`);
-                }
-                return true;
-              } catch {
-                invalidUrls.push(url);
-                return false;
-              }
-            });
-
-            if (invalidUrls.length > 0) {
-              console.warn("无效的URL格式：", invalidUrls);
-              message(
-                `发现 ${invalidUrls.length} 个无效的URL格式，已自动跳过。有效URL: ${validUrls.length} 个`,
-                { type: "warning" }
-              );
-              if (validUrls.length === 0) {
-                closeLoading();
-                return;
-              }
-            }
-
-            // 显示加载提示
-            const loadingMsg = message(
-              `正在批量导入 ${validUrls.length} 张图片，请稍候...`,
-              {
-                type: "info",
-                duration: 0 // 不自动关闭
-              }
-            );
-
-            try {
-              // 调用后端批量导入接口
-              const startTime = Date.now();
-              const res = await batchImportAlbums({
-                categoryId: curData.categoryId,
-                urls: validUrls,
-                thumbParam: curData.thumbParam,
-                bigParam: curData.bigParam,
-                tags: curData.tags,
-                displayOrder: curData.displayOrder
-              });
-              const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-
-              // 关闭加载提示
-              loadingMsg.close();
-              closeLoading();
-
-              if (res.code === 200 && res.data) {
-                const {
-                  successCount,
-                  failCount,
-                  skipCount,
-                  errors,
-                  duplicates
-                } = res.data;
-
-                // 输出详细日志
-                if (errors && errors.length > 0) {
-                  console.group("📋 批量导入详细错误信息");
-                  errors.forEach(({ url, reason }, index) => {
-                    console.error(`${index + 1}. ${url}\n   原因: ${reason}`);
-                  });
-                  console.groupEnd();
-                }
-
-                if (duplicates && duplicates.length > 0) {
-                  console.warn("跳过的重复图片：", duplicates);
-                }
-
-                // 显示详细结果弹窗
-                showImportResultDialog({
-                  successCount,
-                  failCount,
-                  skipCount,
-                  invalidCount: invalidUrls.length,
-                  total: validUrls.length + invalidUrls.length,
-                  duration,
-                  errors,
-                  duplicates,
-                  invalidUrls
-                });
-
-                done(); // 关闭导入表单弹框
-                onSearch(); // 刷新表格数据
-              } else {
-                message(`批量导入失败: ${res.message || "未知错误"}`, {
-                  type: "error"
-                });
-              }
-            } catch (error) {
-              // 关闭加载提示
-              loadingMsg.close();
-              closeLoading();
-              console.error("批量导入请求失败:", error);
-              message(`批量导入请求失败: ${error.message || "未知错误"}`, {
-                type: "error",
-                duration: 5000
-              });
-            }
-          } else {
-            closeLoading();
-          }
-        });
-      }
-    });
-  }
-
   /** 分页配置 */
   const pagination = reactive<PaginationProps>({
     pageSize: 10,
@@ -1159,12 +984,16 @@ export function useAlbum() {
       title: "导入相册",
       props: {
         formInline: {
-          importMode: "json",
+          importMode: "urls",
           file: null,
           jsonContent: "",
+          urlsContent: "",
           skipExisting: true,
           overwriteExisting: false,
-          defaultCategoryId: null
+          defaultCategoryId: null,
+          thumbParam: "",
+          bigParam: "",
+          tags: []
         },
         categories: categories.value
       },
@@ -1190,7 +1019,131 @@ export function useAlbum() {
             // 根据导入模式处理数据
             let formData: FormData;
 
-            if (curData.importMode === "json") {
+            if (curData.importMode === "urls") {
+              // 链接导入模式：直接调用批量导入接口
+              const urls = curData.urlsContent
+                .split("\n")
+                .map(line => line.trim())
+                .filter(Boolean);
+
+              if (urls.length === 0) {
+                message("请输入至少一个图片链接", { type: "error" });
+                closeLoading();
+                return;
+              }
+
+              if (urls.length > 100) {
+                message("单次最多导入 100 个链接", { type: "error" });
+                closeLoading();
+                return;
+              }
+
+              // 验证URL格式
+              const invalidUrls: string[] = [];
+              const validUrls = urls.filter(url => {
+                try {
+                  new URL(url);
+                  const isImageUrl =
+                    /\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i.test(url) ||
+                    url.includes("upload") ||
+                    url.includes("image");
+                  if (!isImageUrl) {
+                    console.warn(`可能不是图片URL: ${url}`);
+                  }
+                  return true;
+                } catch {
+                  invalidUrls.push(url);
+                  return false;
+                }
+              });
+
+              if (invalidUrls.length > 0) {
+                console.warn("无效的URL格式：", invalidUrls);
+                message(
+                  `发现 ${invalidUrls.length} 个无效的URL格式，已自动跳过。有效URL: ${validUrls.length} 个`,
+                  { type: "warning" }
+                );
+                if (validUrls.length === 0) {
+                  closeLoading();
+                  return;
+                }
+              }
+
+              // 显示加载提示
+              const loadingMsg = message(
+                `正在导入 ${validUrls.length} 张图片，请稍候...`,
+                {
+                  type: "info",
+                  duration: 0
+                }
+              );
+
+              try {
+                const startTime = Date.now();
+                const res = await batchImportAlbums({
+                  categoryId: curData.defaultCategoryId,
+                  urls: validUrls,
+                  thumbParam: curData.thumbParam,
+                  bigParam: curData.bigParam,
+                  tags: curData.tags,
+                  displayOrder: 0
+                });
+                const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+
+                loadingMsg.close();
+                closeLoading();
+
+                if (res.code === 200 && res.data) {
+                  const {
+                    successCount,
+                    failCount,
+                    skipCount,
+                    errors,
+                    duplicates
+                  } = res.data;
+
+                  if (errors && errors.length > 0) {
+                    console.group("📋 链接导入详细错误信息");
+                    errors.forEach(({ url, reason }, index) => {
+                      console.error(`${index + 1}. ${url}\n   原因: ${reason}`);
+                    });
+                    console.groupEnd();
+                  }
+
+                  if (duplicates && duplicates.length > 0) {
+                    console.warn("跳过的重复图片：", duplicates);
+                  }
+
+                  showImportResultDialog({
+                    successCount,
+                    failCount,
+                    skipCount,
+                    invalidCount: invalidUrls.length,
+                    total: validUrls.length + invalidUrls.length,
+                    duration,
+                    errors,
+                    duplicates,
+                    invalidUrls
+                  });
+
+                  done();
+                  onSearch();
+                } else {
+                  message(`导入失败: ${res.message || "未知错误"}`, {
+                    type: "error"
+                  });
+                }
+              } catch (error) {
+                loadingMsg.close();
+                closeLoading();
+                console.error("导入请求失败:", error);
+                message(`导入请求失败: ${error.message || "未知错误"}`, {
+                  type: "error",
+                  duration: 5000
+                });
+              }
+              return;
+            } else if (curData.importMode === "json") {
               // JSON 模式：创建临时文件
               if (!curData.jsonContent) {
                 message("请输入 JSON 数据", { type: "error" });
@@ -1328,7 +1281,6 @@ export function useAlbum() {
     resetForm,
     openDialog,
     handleDelete,
-    openBatchImportDialog,
     handleExport,
     openImportDialog,
     loadCategories

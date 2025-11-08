@@ -1413,6 +1413,37 @@ const fLinkDescriptors: SettingDescriptor[] = [
     defaultValue:
       '<p>您好，</p><p>您的网站收到了来自 <strong>{{.LINK_NAME}}</strong> 的友链申请：</p><p>网站名称: <strong>{{.LINK_NAME}}</strong></p><p>网站地址: <a href="{{.LINK_URL}}">{{.LINK_URL}}</a></p><p>网站描述: {{.LINK_DESC}}</p><p>申请时间: {{.TIME}}</p><p>点击管理: <a href="{{.ADMIN_URL}}">{{.ADMIN_URL}}</a></p>',
     type: "string"
+  },
+  // 友链审核邮件通知配置
+  {
+    frontendPath: "frontDesk.fLink.reviewMailEnable",
+    backendKey: constant.KeyFriendLinkReviewMailEnable,
+    defaultValue: false,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.fLink.reviewMailSubjectApproved",
+    backendKey: constant.KeyFriendLinkReviewMailSubjectApproved,
+    defaultValue: "【{{.SITE_NAME}}】友链申请已通过",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.fLink.reviewMailTemplateApproved",
+    backendKey: constant.KeyFriendLinkReviewMailTemplateApproved,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.fLink.reviewMailSubjectRejected",
+    backendKey: constant.KeyFriendLinkReviewMailSubjectRejected,
+    defaultValue: "【{{.SITE_NAME}}】友链申请未通过",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.fLink.reviewMailTemplateRejected",
+    backendKey: constant.KeyFriendLinkReviewMailTemplateRejected,
+    defaultValue: "",
+    type: "string"
   }
 ];
 

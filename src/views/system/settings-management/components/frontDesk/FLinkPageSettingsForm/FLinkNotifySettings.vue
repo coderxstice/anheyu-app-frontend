@@ -308,7 +308,7 @@ User-Agent: AnheyuBlog-Webhook/1.0"
       </ul>
     </div>
 
-    <el-divider content-position="left">邮件模板设置</el-divider>
+    <el-divider content-position="left">友链申请通知邮件模板</el-divider>
     <el-form-item label="站长收到新友链申请的邮件主题">
       <el-input
         v-model="model.mailSubjectAdmin"
@@ -355,6 +355,122 @@ User-Agent: AnheyuBlog-Webhook/1.0"
         </ul>
       </div>
     </el-form-item>
+
+    <el-divider content-position="left">友链审核邮件通知</el-divider>
+    <el-form-item label="启用审核邮件通知">
+      <div>
+        <el-switch
+          v-model="model.reviewMailEnable"
+          active-text="开启"
+          inactive-text="关闭"
+        />
+        <div class="form-hint">
+          开启后，审核通过或拒绝友链时，如果友链申请人填写了邮箱，将自动发送邮件通知
+        </div>
+      </div>
+    </el-form-item>
+
+    <template v-if="model.reviewMailEnable">
+      <el-form-item label="审核通过邮件主题">
+        <el-input
+          v-model="model.reviewMailSubjectApproved"
+          placeholder="【{{.SITE_NAME}}】友链申请已通过"
+        />
+      </el-form-item>
+      <el-form-item label="审核通过邮件内容模板 (支持HTML)">
+        <el-input
+          v-model="model.reviewMailTemplateApproved"
+          type="textarea"
+          :rows="8"
+          placeholder="留空则使用默认模板"
+        />
+        <div v-pre class="template-hint">
+          <b>可用占位符:</b>
+          <ul>
+            <li>
+              <code>{{.SITE_NAME}}</code
+              >: 您的网站名称
+            </li>
+            <li>
+              <code>{{.SITE_URL}}</code
+              >: 您的网站地址
+            </li>
+            <li>
+              <code>{{.LINK_NAME}}</code
+              >: 友链的网站名称
+            </li>
+            <li>
+              <code>{{.LINK_URL}}</code
+              >: 友链的网站地址
+            </li>
+            <li>
+              <code>{{.LINK_LOGO}}</code
+              >: 友链的网站Logo
+            </li>
+            <li>
+              <code>{{.LINK_DESC}}</code
+              >: 友链的网站描述
+            </li>
+            <li>
+              <code>{{.TIME}}</code
+              >: 审核时间
+            </li>
+          </ul>
+        </div>
+      </el-form-item>
+
+      <el-form-item label="审核未通过邮件主题">
+        <el-input
+          v-model="model.reviewMailSubjectRejected"
+          placeholder="【{{.SITE_NAME}}】友链申请未通过"
+        />
+      </el-form-item>
+      <el-form-item label="审核未通过邮件内容模板 (支持HTML)">
+        <el-input
+          v-model="model.reviewMailTemplateRejected"
+          type="textarea"
+          :rows="8"
+          placeholder="留空则使用默认模板"
+        />
+        <div v-pre class="template-hint">
+          <b>可用占位符:</b>
+          <ul>
+            <li>
+              <code>{{.SITE_NAME}}</code
+              >: 您的网站名称
+            </li>
+            <li>
+              <code>{{.SITE_URL}}</code
+              >: 您的网站地址
+            </li>
+            <li>
+              <code>{{.LINK_NAME}}</code
+              >: 友链的网站名称
+            </li>
+            <li>
+              <code>{{.LINK_URL}}</code
+              >: 友链的网站地址
+            </li>
+            <li>
+              <code>{{.LINK_LOGO}}</code
+              >: 友链的网站Logo
+            </li>
+            <li>
+              <code>{{.LINK_DESC}}</code
+              >: 友链的网站描述
+            </li>
+            <li>
+              <code>{{.TIME}}</code
+              >: 审核时间
+            </li>
+            <li>
+              <code>{{.REASON}}</code
+              >: 拒绝原因(如果有)
+            </li>
+          </ul>
+        </div>
+      </el-form-item>
+    </template>
   </div>
 </template>
 

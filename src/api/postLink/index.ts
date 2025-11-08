@@ -75,6 +75,17 @@ export const applyLink = (
   });
 };
 
+/** @description 获取所有友链申请列表（公开接口） */
+export const getLinkApplications = (
+  params?: GetPublicLinksParams
+): Promise<BaseResponse<PublicLinkListResponse>> => {
+  return http.request<BaseResponse<PublicLinkListResponse>>(
+    "get",
+    baseUrlApi("public/links/applications"),
+    { params }
+  );
+};
+
 // ------------------ 后台管理接口 ------------------
 
 // --- 友链管理 ---
