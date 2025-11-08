@@ -311,11 +311,12 @@ onMounted(() => {
     height: var(--icon-size);
     margin-left: 1rem;
     cursor: pointer;
-    transition: 1s;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   #center-console + label:hover i.left {
     width: calc(var(--icon-size) / 2.5);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   #center-console + label:hover i.center {
@@ -323,12 +324,14 @@ onMounted(() => {
     filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
     filter: alpha(opacity=50);
     opacity: 0.5;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   #center-console + label:hover i.right {
     width: calc(var(--icon-size) / 2.5);
     height: calc(var(--icon-size) / 1.15);
     transform: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   #center-console + label i {
@@ -340,7 +343,7 @@ onMounted(() => {
     margin: auto;
     background: var(--light-grey);
     border-radius: calc(var(--icon-size) * 0.15);
-    transition: 0.3s var(--animation-on);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     transform: translateY(calc(var(--icon-size) / 4));
   }
 
@@ -356,7 +359,7 @@ onMounted(() => {
   }
 
   #center-console:checked + label {
-    top: 0.5rem;
+    top: 0;
     right: 0;
     z-index: 99999;
   }
@@ -376,6 +379,7 @@ onMounted(() => {
     content: "";
     background: var(--anzhiyu-fontcolor) !important;
     border-radius: 50px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   #center-console:checked
@@ -388,15 +392,18 @@ onMounted(() => {
   #center-console:checked + label i.left {
     width: 100% !important;
     transform: rotate(-45deg) !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
   }
 
   #center-console:checked + label i.center {
     width: 0 !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
   }
 
   #center-console:checked + label i.right {
     width: 100% !important;
     transform: rotate(45deg) !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
   }
 
   #center-console + label i {
