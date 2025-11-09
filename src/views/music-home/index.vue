@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-10-12 01:15:21
- * @LastEditTime: 2025-10-21 13:35:29
+ * @LastEditTime: 2025-11-09 13:56:18
  * @LastEditors: 安知鱼
 -->
 <!--
@@ -41,6 +41,8 @@
           <div
             class="artwork-container"
             :class="{ 'is-playing': audioPlayer.audioState.isPlaying }"
+            :style="{ cursor: currentSong ? 'pointer' : 'default' }"
+            @click="handlePlayPause"
           >
             <img
               :src="vinylImages.background"
@@ -1311,6 +1313,10 @@ watch(
       // 清理可能正在进行的拖拽事件
       document.removeEventListener("mousemove", () => {});
       document.removeEventListener("mouseup", () => {});
+
+      // 立即清空旧歌词，等待新歌词加载
+      console.log(" [歌曲变化] 立即清空旧歌词");
+      lyricsComposable.clearLyrics();
     }
 
     // 处理专辑封面和颜色提取

@@ -4,9 +4,9 @@
       class="header-wrapper"
       :class="{
         'is-transparent': isHeaderTransparent,
-        'text-is-white':
-          isHeaderTransparent && (isPostDetailPage || isMusicPage),
-        'is-scrolled': isScrolled
+        'text-is-white': shouldShowTextWhite,
+        'is-scrolled': isScrolled,
+        'is-route-changing': isRouteChanging
       }"
     >
       <div class="header-content">
@@ -220,8 +220,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch, onMounted, onUnmounted, ref } from "vue";
-import { useRoute } from "vue-router";
+import { computed, watch, onMounted, onUnmounted, ref, nextTick } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useArticleStore } from "@/store/modules/articleStore";
 import {
@@ -236,6 +236,7 @@ import HeaderRight from "./components/header-right.vue";
 const siteConfigStore = useSiteConfigStore();
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);
 const route = useRoute();
+const router = useRouter();
 const articleStore = useArticleStore();
 
 // 移动端检测
@@ -259,6 +260,62 @@ const isMusicPage = computed(() => route.name === "MusicHome");
 
 const { isHeaderTransparent, isScrolled, scrollPercent, isFooterVisible } =
   useHeader(isPostDetailPage.value);
+
+// 立即应用 text-is-white 类名，避免路由切换时的闪烁
+const shouldShowTextWhite = ref(false);
+const isRouteChanging = ref(false);
+
+// 更新 shouldShowTextWhite 的函数，基于实际滚动位置
+const updateTextWhite = () => {
+  const scrollTop = Math.max(0, window.scrollY);
+  const isAtTop = scrollTop === 0;
+  shouldShowTextWhite.value =
+    isAtTop && (isPostDetailPage.value || isMusicPage.value);
+};
+
+// 监听路由变化，立即更新类名
+watch(
+  [isPostDetailPage, isMusicPage],
+  () => {
+    // 路由切换时立即检查实际滚动位置并应用类名
+    updateTextWhite();
+  },
+  { immediate: true }
+);
+
+// 监听滚动状态变化，更新 text-is-white
+watch(
+  isHeaderTransparent,
+  () => {
+    if (!isRouteChanging.value) {
+      updateTextWhite();
+    }
+  },
+  { immediate: true }
+);
+
+// 监听路由变化，在路由切换时禁用动画并立即检查滚动位置
+router.beforeEach(() => {
+  isRouteChanging.value = true;
+});
+
+router.afterEach(() => {
+  // 路由切换后立即检查实际滚动位置
+  // 使用 nextTick 确保 DOM 已更新，然后立即检查滚动位置
+  nextTick(() => {
+    // 立即检查滚动位置并应用类名
+    updateTextWhite();
+
+    // 短暂延迟后恢复正常状态，允许后续滚动事件正常触发
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        isRouteChanging.value = false;
+        // 再次检查确保状态正确
+        updateTextWhite();
+      }, 50);
+    });
+  });
+});
 
 // 监听页面类型变化，更新 meta theme-color
 watch(
@@ -393,6 +450,15 @@ const scrollToTop = () => {
     transition:
       background-color 0.3s,
       outline-color 0.3s;
+
+    // 路由切换时禁用所有过渡动画，立即应用类名
+    &.is-route-changing {
+      transition: none !important;
+
+      * {
+        transition: none !important;
+      }
+    }
 
     .header-content {
       position: relative;
@@ -698,6 +764,7 @@ const scrollToTop = () => {
       :deep(.header-right a),
       :deep(.back-menu-button),
       :deep(.nav-button) {
+        transition: color 0.2s ease-out;
         color: var(--anzhiyu-white);
 
         &:hover {
@@ -707,10 +774,12 @@ const scrollToTop = () => {
       }
 
       :deep(#toggle-menu) {
+        transition: color 0.2s ease-out;
         color: var(--anzhiyu-white);
       }
 
       :deep(#center-console + label i) {
+        transition: background 0.2s ease-out;
         background: var(--anzhiyu-white);
       }
 
@@ -720,6 +789,7 @@ const scrollToTop = () => {
       }
 
       .back-home-button {
+        transition: color 0.2s ease-out;
         color: var(--anzhiyu-white);
 
         &:hover {
@@ -728,6 +798,7 @@ const scrollToTop = () => {
       }
 
       .main-nav .menus-items .menus-item .menu-title {
+        transition: color 0.2s ease-out;
         color: var(--anzhiyu-white);
 
         &:hover {

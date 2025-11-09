@@ -85,7 +85,7 @@ const goToTag = (tagName: string) => {
           </a>
           <div class="article-sort-item-info">
             <div class="article-sort-item-time">
-              <i class="far fa-calendar-alt" />
+              <i class="anzhiyufont anzhiyu-icon-clock" />
               <time :datetime="article.created_at">{{
                 formatDate(article.created_at)
               }}</time>

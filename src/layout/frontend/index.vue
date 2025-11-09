@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-21 17:48:59
- * @LastEditTime: 2025-10-12 01:04:08
+ * @LastEditTime: 2025-11-09 13:36:06
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -121,6 +121,7 @@ onUnmounted(() => {
 
 .frontend-main {
   flex: 1;
+  animation: slide-in 0.6s 0.1s backwards;
 }
 
 /* 移动端菜单遮罩层 */
