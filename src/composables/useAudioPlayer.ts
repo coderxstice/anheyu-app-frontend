@@ -1088,6 +1088,10 @@ export function useAudioPlayer(
         hasBasicUrl: !!newSong.url
       });
 
+      // 立即清空旧歌词，避免显示上一首歌曲的歌词
+      currentLyricsText.value = "";
+      console.log(" [音频播放器] 已清空旧歌词，等待新歌词加载");
+
       // 重置音频加载状态
       isAudioLoaded.value = false;
 
