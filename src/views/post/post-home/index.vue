@@ -12,7 +12,6 @@ import { getPublicArticles } from "@/api/post";
 import type { Article, GetArticleListParams } from "@/api/post/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { resetThemeToDefault } from "@/utils/themeManager";
-import { useDelayedLoading } from "@/composables/useDelayedLoading";
 
 defineOptions({
   name: "PostHome"
@@ -20,7 +19,6 @@ defineOptions({
 
 const route = useRoute();
 const siteConfigStore = useSiteConfigStore();
-const { isLoading: loading, withLoading } = useDelayedLoading();
 
 const pageType = computed(() => {
   if (route.path.startsWith("/tags/")) return "tag";
@@ -73,28 +71,26 @@ const newestArticleId = computed(() => {
 });
 
 const fetchData = async () => {
-  await withLoading(async () => {
-    try {
-      const params: GetArticleListParams = {
-        page: pagination.page,
-        pageSize: pagination.pageSize
-      };
-      if (pageType.value === "category" && currentCategoryName.value) {
-        params.category = currentCategoryName.value;
-      } else if (pageType.value === "tag" && currentTagName.value) {
-        params.tag = currentTagName.value;
-      } else if (pageType.value === "archive") {
-        if (currentYear.value) params.year = currentYear.value;
-        if (currentMonth.value) params.month = currentMonth.value;
-      }
-
-      const { data } = await getPublicArticles(params);
-      articles.value = data.list;
-      pagination.total = data.total;
-    } catch (error) {
-      console.error("获取文章列表失败:", error);
+  try {
+    const params: GetArticleListParams = {
+      page: pagination.page,
+      pageSize: pagination.pageSize
+    };
+    if (pageType.value === "category" && currentCategoryName.value) {
+      params.category = currentCategoryName.value;
+    } else if (pageType.value === "tag" && currentTagName.value) {
+      params.tag = currentTagName.value;
+    } else if (pageType.value === "archive") {
+      if (currentYear.value) params.year = currentYear.value;
+      if (currentMonth.value) params.month = currentMonth.value;
     }
-  });
+
+    const { data } = await getPublicArticles(params);
+    articles.value = data.list;
+    pagination.total = data.total;
+  } catch (error) {
+    console.error("获取文章列表失败:", error);
+  }
 };
 
 const handlePageChange = (newPage: number) => {
@@ -164,14 +160,13 @@ onMounted(() => {
 
         <div
           id="recent-posts"
-          v-loading="loading"
           class="recent-posts"
           :class="{
             'double-column-container': isDoubleColumn,
             '!justify-center': articles.length === 0
           }"
         >
-          <template v-if="!loading && articles.length > 0">
+          <template v-if="articles.length > 0">
             <Archives
               v-if="pageType === 'archive'"
               :articles="articles"
@@ -187,14 +182,11 @@ onMounted(() => {
               />
             </template>
           </template>
-          <el-empty
-            v-if="!loading && articles.length === 0"
-            description="暂无文章"
-          />
+          <el-empty v-if="articles.length === 0" description="暂无文章" />
         </div>
 
         <Pagination
-          v-if="!loading && pagination.total > pagination.pageSize"
+          v-if="pagination.total > pagination.pageSize"
           :page="pagination.page"
           :page-size="pagination.pageSize"
           :total="pagination.total"
@@ -246,23 +238,6 @@ onMounted(() => {
     flex-wrap: wrap;
     gap: 0.625rem;
     justify-content: space-between;
-  }
-
-  :deep(.el-loading-mask) {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: transparent;
-  }
-
-  :deep(.el-loading-spinner) {
-    position: absolute;
-    top: 200px;
-    left: 50%;
-    transform: translateX(-50%);
-    margin: 0;
   }
 }
 
