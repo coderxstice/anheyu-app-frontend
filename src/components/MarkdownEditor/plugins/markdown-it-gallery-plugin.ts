@@ -190,8 +190,8 @@ export default function galleryPlugin(md: MarkdownIt): void {
       );
       const escapedDesc = img.desc ? md.utils.escapeHtml(img.desc) : "";
 
-      // 如果有 ratio，在 gallery-item 上添加 data-ratio 属性
-      const itemAttrs = ratio ? " data-ratio" : "";
+      // 如果有 ratio，在 gallery-item 上添加 data-ratio 属性，并设置值
+      const itemAttrs = ratio ? ` data-ratio="${aspectRatio}"` : "";
       html += `<div class="gallery-item"${itemAttrs}>`;
 
       // 图片元素
