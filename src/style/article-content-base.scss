@@ -1087,12 +1087,19 @@
       }
 
       // 使用 aspect-ratio 控制宽高比
+      // 如果元素有 data-ratio 属性，则应用固定宽高比
       &[data-ratio] {
         aspect-ratio: var(--gallery-ratio, 4/3);
       }
 
-      // 如果没有指定宽高比，图片自适应
-      &:not([data-ratio]) {
+      // 如果容器设置了 --gallery-ratio（通过检查 style 属性），也应用固定宽高比
+      // 这样可以确保预览和发布后的样式一致
+      .gallery-container[style*="--gallery-ratio"] & {
+        aspect-ratio: var(--gallery-ratio, 4/3);
+      }
+
+      // 如果没有指定宽高比（既没有 data-ratio 属性，容器也没有 --gallery-ratio），图片自适应
+      .gallery-container:not([style*="--gallery-ratio"]) &:not([data-ratio]) {
         img {
           height: auto;
         }

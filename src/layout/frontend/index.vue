@@ -10,7 +10,9 @@
     <Header />
 
     <main class="frontend-main">
-      <router-view />
+      <keep-alive :include="cachedViews">
+        <router-view />
+      </keep-alive>
     </main>
 
     <Footer />
@@ -40,7 +42,14 @@
 
 <script setup lang="ts">
 import "@/components/ReIcon/src/offlineIcon";
-import { onBeforeMount, onMounted, onUnmounted, computed, ref } from "vue";
+import {
+  onBeforeMount,
+  onMounted,
+  onUnmounted,
+  computed,
+  ref,
+  watch
+} from "vue";
 import { useRoute } from "vue-router";
 import { useGlobal } from "@pureadmin/utils";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
@@ -60,6 +69,31 @@ const route = useRoute();
 const siteConfigStore = useSiteConfigStore();
 
 const { showShortcutsPanel, shortcuts } = useKeyboardShortcuts();
+
+// 管理需要缓存的组件名称（使用组件的 name，不是路由的 name）
+const cachedViews = ref<string[]>([]);
+
+// 监听路由变化，根据 meta.keepAlive 动态管理缓存
+watch(
+  () => route,
+  toRoute => {
+    if (!toRoute.name) return;
+
+    const matchedRoute = toRoute.matched.find(r => r.name === toRoute.name);
+    if (!matchedRoute?.meta?.keepAlive) return;
+
+    // 获取组件名称（从路由配置中获取组件的 name）
+    // 注意：keep-alive 的 include 需要的是组件的 name（defineOptions 中定义的）
+    // 这里我们使用路由的 name，因为组件名通常与路由名一致
+    const componentName = toRoute.name as string;
+
+    // 如果组件需要缓存且不在缓存列表中，添加到缓存列表
+    if (componentName && !cachedViews.value.includes(componentName)) {
+      cachedViews.value.push(componentName);
+    }
+  },
+  { immediate: true }
+);
 
 const mainContentClass = computed(() => {
   return route.name === "PostDetail" ? "is-post-detail" : "";

@@ -35,7 +35,8 @@ export default [
             const subTitle = configs?.SUB_TITLE;
             return `${appName} - ${subTitle}`;
           },
-          showLink: false
+          showLink: false,
+          keepAlive: true
         }
       },
       {

@@ -395,7 +395,7 @@ watch(
           />
         </div>
       </main>
-      <Sidebar />
+      <Sidebar v-if="!loading && !loadingStore.isLoading" />
     </div>
 
     <div id="anzhiyu-footer-bar">
