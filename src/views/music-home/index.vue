@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-10-12 01:15:21
- * @LastEditTime: 2025-11-09 13:56:18
+ * @LastEditTime: 2025-11-11 18:45:27
  * @LastEditors: 安知鱼
 -->
 <!--
@@ -73,19 +73,21 @@
             <Transition name="fade" mode="out-in">
               <template v-if="currentSong?.pic">
                 <div :key="currentSong.pic" class="artwork-transition-wrapper">
-                  <img
-                    :src="currentSong.pic"
-                    :alt="currentSong.name"
-                    class="artwork-image"
-                    :style="{ borderColor: borderColor }"
-                  />
-                  <img
-                    :src="currentSong.pic"
-                    :alt="currentSong.name + '模糊背景'"
-                    class="artwork-image-blur"
-                  />
-                  <!-- 清晰边框圆环 -->
-                  <div class="artwork-border-ring" />
+                  <div class="artwork-rotate-wrapper">
+                    <img
+                      :src="currentSong.pic"
+                      :alt="currentSong.name"
+                      class="artwork-image"
+                      :style="{ borderColor: borderColor }"
+                    />
+                    <img
+                      :src="currentSong.pic"
+                      :alt="currentSong.name + '模糊背景'"
+                      class="artwork-image-blur"
+                    />
+                    <!-- 清晰边框圆环 -->
+                    <div class="artwork-border-ring" />
+                  </div>
                 </div>
               </template>
               <div v-else key="placeholder" class="artwork-placeholder">
@@ -1677,7 +1679,7 @@ onBeforeUnmount(() => {
     background-color 1.2s cubic-bezier(0.4, 0, 0.2, 1),
     transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
     filter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  filter: blur(60px) brightness(0.4) saturate(1.2);
+  filter: blur(60px) brightness(0.7) saturate(1.2);
   transform: scale(1.1) rotate(0deg);
   will-change: background-image, background-color, transform;
 
@@ -1689,7 +1691,7 @@ onBeforeUnmount(() => {
   .music-home.no-song & {
     opacity: 0.8;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    filter: blur(80px) brightness(0.3) saturate(0.9);
+    filter: blur(80px) brightness(0.7) saturate(0.9);
   }
 }
 
@@ -1807,6 +1809,10 @@ onBeforeUnmount(() => {
 
     &.is-playing {
       transform: scale(1.02);
+      // 播放时让旋转动画运行（暂停时保持当前角度）
+      .artwork-rotate-wrapper {
+        animation-play-state: running;
+      }
     }
   }
 
@@ -1829,11 +1835,6 @@ onBeforeUnmount(() => {
     width: 50%;
     z-index: 1;
     transition: transform 0.3s ease;
-
-    // 播放时的唱片旋转
-    .artwork-container.is-playing & {
-      animation: vinyl-spin 3s linear infinite;
-    }
   }
   .artwork-image-vinyl-inner-background {
     position: absolute;
@@ -1880,6 +1881,20 @@ onBeforeUnmount(() => {
     }
   }
 
+  // 独立的旋转容器，避免与 fade 透明度动画冲突，同时不改变子元素的 translate 定位
+  .artwork-rotate-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform-origin: 50% 50%;
+    animation: album-spin 30s linear infinite;
+    animation-play-state: paused;
+    will-change: transform;
+    pointer-events: none;
+  }
+
   .artwork-image {
     width: 30%;
     height: 30%;
@@ -1892,11 +1907,6 @@ onBeforeUnmount(() => {
     z-index: 2;
     border: 7px solid transparent;
     transition: transform 0.3s ease;
-
-    // 播放时的专辑封面旋转
-    .artwork-container.is-playing & {
-      animation: vinyl-spin 3s linear infinite;
-    }
   }
 
   .artwork-image-blur {
@@ -2009,11 +2019,15 @@ onBeforeUnmount(() => {
   position: relative;
   bottom: 100px;
   .track-title {
+    max-width: 550px;
     font-size: 32px;
     font-weight: 700;
     margin: 0;
     line-height: 1.2;
     letter-spacing: -0.01em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
@@ -2480,27 +2494,27 @@ onBeforeUnmount(() => {
 // 音乐背景流动动画
 @keyframes musicBackgroundFlow {
   0% {
-    filter: blur(60px) brightness(0.4) saturate(1.2);
+    filter: blur(60px) brightness(0.6) saturate(1.2);
     transform: scale(1.1) rotate(0deg);
   }
 
   25% {
-    filter: blur(65px) brightness(0.3) saturate(1.4);
+    filter: blur(65px) brightness(0.5) saturate(1.4);
     transform: scale(1.15) rotate(0.5deg);
   }
 
   50% {
-    filter: blur(70px) brightness(0.5) saturate(1.1);
+    filter: blur(70px) brightness(0.7) saturate(1.1);
     transform: scale(1.2) rotate(-0.3deg);
   }
 
   75% {
-    filter: blur(62px) brightness(0.35) saturate(1.3);
+    filter: blur(62px) brightness(0.45) saturate(1.3);
     transform: scale(1.15) rotate(0.2deg);
   }
 
   100% {
-    filter: blur(60px) brightness(0.4) saturate(1.2);
+    filter: blur(60px) brightness(0.5) saturate(1.2);
     transform: scale(1.1) rotate(0deg);
   }
 }
@@ -3090,6 +3104,9 @@ onBeforeUnmount(() => {
       word-wrap: break-word;
       max-width: 100%;
       font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
 
       // 针对较矮屏幕的字体大小适配
       @media (max-height: 750px) {
