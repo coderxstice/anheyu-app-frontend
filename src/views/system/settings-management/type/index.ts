@@ -23,6 +23,8 @@ export interface SiteInfo {
   iconLarge: string;
   icpNumber: string;
   policeRecordNumber: string;
+  gravatarURL: string;
+  defaultGravatarType: string;
 }
 
 /**

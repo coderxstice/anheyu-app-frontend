@@ -35,6 +35,7 @@ const KeyIconURL: SettingKey = "ICON_URL";
 const KeyDefaultThumbParam: SettingKey = "DEFAULT_THUMB_PARAM";
 const KeyDefaultBigParam: SettingKey = "DEFAULT_BIG_PARAM";
 const KeyGravatarURL: SettingKey = "GRAVATAR_URL";
+const KeyDefaultGravatarType: SettingKey = "DEFAULT_GRAVATAR_TYPE";
 const KeyThemeColor: SettingKey = "THEME_COLOR";
 const KeySiteAnnouncement: SettingKey = "SITE_ANNOUNCEMENT";
 const KeyCustomHeaderHTML: SettingKey = "CUSTOM_HEADER_HTML";
@@ -320,6 +321,7 @@ export const constant = {
   KeyDefaultThumbParam,
   KeyDefaultBigParam,
   KeyGravatarURL,
+  KeyDefaultGravatarType,
   KeyThemeColor,
   KeySiteAnnouncement,
   KeyCustomHeaderHTML,
