@@ -226,91 +226,147 @@ const waitForImages = (callback: () => void, timeout = 3000) => {
   }
 };
 
-// 滚动到评论区
+// 滚动到评论区（带布局变动稳定器，兼容目标未渲染与图片懒加载）
 const scrollToComment = (commentId?: string | number) => {
   const targetId = commentId ? `comment-${commentId}` : props.observeTargetId;
-  let targetElement = document.getElementById(targetId);
 
-  // 执行滚动并等待图片加载完成后调整位置
-  const performScroll = (element: HTMLElement, retry = 0) => {
-    element.scrollIntoView({
-      behavior: "smooth",
-      block: commentId ? "center" : "start"
-    });
-
-    // 等待滚动动画和图片加载完成后，再次检查位置
-    setTimeout(() => {
-      waitForImages(() => {
-        const currentElement = document.getElementById(targetId);
-        if (currentElement) {
-          // 检查元素是否在视口中心
-          const rect = currentElement.getBoundingClientRect();
-          const viewportHeight = window.innerHeight;
-          const elementCenter = rect.top + rect.height / 2;
-          const viewportCenter = viewportHeight / 2;
-
-          // 如果偏差超过50px且重试次数小于2次，再次调整
-          if (Math.abs(elementCenter - viewportCenter) > 50 && retry < 2) {
-            currentElement.scrollIntoView({
-              behavior: "smooth",
-              block: commentId ? "center" : "start"
-            });
-          }
-        }
-      }, 1500);
-    }, 600);
-  };
-
-  // 如果目标元素不存在（可能还没加载），先滚动到评论区容器
-  if (!targetElement) {
-    const commentContainer = document.getElementById(props.observeTargetId);
-    if (commentContainer) {
-      commentContainer.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
-
-      // 如果需要定位到具体评论，等待评论组件渲染后再次尝试
-      if (commentId) {
-        // 使用 MutationObserver 监听 DOM 变化
-        const observer = new MutationObserver(() => {
-          targetElement = document.getElementById(targetId);
-          if (targetElement) {
-            observer.disconnect();
-            // 等待滚动动画完成后再定位到具体评论，并处理图片加载
-            setTimeout(() => {
-              if (targetElement) {
-                performScroll(targetElement);
-              }
-            }, 300);
-          }
-        });
-
-        // 监听评论容器的子元素变化
-        observer.observe(commentContainer, {
-          childList: true,
-          subtree: true
-        });
-
-        // 设置超时，避免无限等待
-        setTimeout(() => {
-          observer.disconnect();
-        }, 5000);
-      } else {
-        // 只是滚动到评论区，也需要等待图片加载
-        setTimeout(() => {
-          waitForImages(() => {
-            commentContainer.scrollIntoView({
-              behavior: "smooth",
-              block: "start"
-            });
-          }, 1000);
-        }, 600);
+  // 动态头部偏移：优先读取目标或评论容器的 scroll-margin-top，兜底 80
+  const getHeaderOffset = (el?: HTMLElement | null) => {
+    let offset = 80;
+    const candidate =
+      el ||
+      (document.getElementById(targetId) as HTMLElement | null) ||
+      (document.getElementById(props.observeTargetId) as HTMLElement | null);
+    if (candidate) {
+      const styles = window.getComputedStyle(candidate);
+      const smt = parseFloat((styles as any).scrollMarginTop || "0");
+      if (!Number.isNaN(smt) && smt > 0) {
+        offset = Math.max(offset, smt);
       }
     }
-  } else {
-    // 目标元素存在，直接滚动并处理图片加载
-    performScroll(targetElement);
+    return offset;
+  };
+
+  const getTargetElement = () =>
+    (document.getElementById(targetId) as HTMLElement | null) ||
+    (document.getElementById(props.observeTargetId) as HTMLElement | null);
+
+  const computeTargetTop = () => {
+    const el = getTargetElement();
+    if (!el) return window.scrollY;
+    const rect = el.getBoundingClientRect();
+    return rect.top + window.pageYOffset - getHeaderOffset(el);
+  };
+
+  const scrollToTop = (top: number, smooth = true) => {
+    window.scrollTo({
+      top,
+      behavior: smooth ? "smooth" : "auto"
+    });
+  };
+
+  // 若目标元素不存在（评论尚未渲染），先滚到评论容器，并等待渲染完成
+  let targetElement = getTargetElement();
+  if (!targetElement) {
+    const container = document.getElementById(props.observeTargetId);
+    if (container) {
+      container.scrollIntoView({ behavior: "smooth", block: "start" });
+      const mo = new MutationObserver(() => {
+        targetElement = getTargetElement();
+        if (targetElement) {
+          mo.disconnect();
+          // 初次定位
+          scrollToTop(computeTargetTop(), true);
+          // 启动稳定器
+          startStabilizer();
+        }
+      });
+      mo.observe(container, { childList: true, subtree: true });
+      // 兜底超时
+      window.setTimeout(() => mo.disconnect(), 5000);
+      return;
+    }
+  }
+
+  // 初次滚动
+  scrollToTop(computeTargetTop(), true);
+  // 启动稳定器
+  startStabilizer();
+
+  function startStabilizer() {
+    const contentRoot =
+      (document.querySelector(".post-content") as HTMLElement) || document.body;
+    const commentRoot =
+      (document.getElementById(props.observeTargetId) as HTMLElement) ||
+      document.body;
+
+    let settledTimer: number | null = null;
+    const settleQuietMs = 300;
+    const maxDurationMs = 3000;
+    const startTime = Date.now();
+
+    const reAlign = () => {
+      scrollToTop(computeTargetTop(), false);
+    };
+
+    // 图片加载监听（正文与评论区）
+    const imgs = [
+      ...Array.from(
+        (contentRoot.querySelectorAll("img") as NodeListOf<HTMLImageElement>) ||
+          []
+      ),
+      ...Array.from(
+        (commentRoot.querySelectorAll("img") as NodeListOf<HTMLImageElement>) ||
+          []
+      )
+    ];
+    imgs.forEach(img => {
+      if (!img.complete) {
+        const handler = () => {
+          reAlign();
+        };
+        img.addEventListener("load", handler, { once: true });
+        img.addEventListener("error", handler, { once: true });
+      }
+    });
+
+    // 尺寸变化监听（正文与评论区）
+    let resizeObserver: ResizeObserver | null = null;
+    if ("ResizeObserver" in window) {
+      resizeObserver = new ResizeObserver(() => {
+        reAlign();
+        if (settledTimer) {
+          window.clearTimeout(settledTimer);
+        }
+        settledTimer = window.setTimeout(() => {
+          if (Date.now() - startTime >= maxDurationMs) {
+            cleanup();
+            return;
+          }
+          cleanup();
+        }, settleQuietMs);
+      });
+      resizeObserver.observe(contentRoot);
+      if (commentRoot !== contentRoot) {
+        resizeObserver.observe(commentRoot);
+      }
+    }
+
+    const hardStopTimer = window.setTimeout(() => {
+      cleanup();
+    }, maxDurationMs + 300);
+
+    const cleanup = () => {
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+        resizeObserver = null;
+      }
+      if (settledTimer) {
+        window.clearTimeout(settledTimer);
+      }
+      window.clearTimeout(hardStopTimer);
+      reAlign();
+    };
   }
 };
 
@@ -366,14 +422,12 @@ onBeforeUnmount(() => {
         class="comment-barrage-item"
       >
         <div class="barrageHead">
-          <a
+          <span
             class="barrageTitle"
             :class="{ barrageBloggerTitle: item.is_admin_comment }"
-            href="#post-comment"
-            @click="e => handleClick(e)"
           >
             {{ item.is_admin_comment ? "博主" : "热评" }}
-          </a>
+          </span>
           <div class="barrageNick">{{ item.nickname }}</div>
           <img
             class="barrageAvatar"

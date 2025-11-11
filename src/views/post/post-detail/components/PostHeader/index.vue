@@ -170,7 +170,7 @@ const goToTag = (tagName: string) => {
   router.push(`/tags/${tagName}/`);
 };
 
-// 优化的滚动到评论区方法
+// 滚动到评论区（带布局变动稳定器）
 const scrollToComment = (event: Event) => {
   event.preventDefault();
 
@@ -179,51 +179,90 @@ const scrollToComment = (event: Event) => {
 
   const headerHeight = 80;
 
-  const scrollToTarget = () => {
+  const computeTargetTop = () => {
     const elementPosition = commentSection.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+    return elementPosition + window.pageYOffset - headerHeight;
+  };
 
+  const scrollToTop = (top: number, smooth = true) => {
     window.scrollTo({
-      top: offsetPosition,
-      behavior: "smooth"
+      top,
+      behavior: smooth ? "smooth" : "auto"
     });
   };
 
   // 第一次滚动
-  scrollToTarget();
+  scrollToTop(computeTargetTop(), true);
 
-  // 监听文章内容区域的图片加载
-  const images = document.querySelectorAll(".post-content img");
-  if (images.length === 0) return;
+  // 稳定器：在图片懒加载和内容高度变化时，重复校正滚动位置
+  const contentRoot =
+    (document.querySelector(".post-content") as HTMLElement) || document.body;
 
-  let hasScrolled = false;
-  let loadedCount = 0;
+  let lastResizeTime = Date.now();
+  let settledTimer: number | null = null;
+  const settleQuietMs = 300; // 多久没有尺寸变动认为稳定
+  const maxDurationMs = 3000; // 最长纠正时长
+  const startTime = Date.now();
 
+  const reAlign = () => {
+    // 使用 auto 避免叠加过多平滑动画
+    scrollToTop(computeTargetTop(), false);
+  };
+
+  // 图片加载监听（包括懒加载的逐张加载）
+  const images = Array.from(
+    (contentRoot.querySelectorAll("img") as NodeListOf<HTMLImageElement>) || []
+  );
   images.forEach(img => {
-    const imgElement = img as HTMLImageElement;
-    if (imgElement.complete) {
-      loadedCount++;
-    } else {
-      imgElement.addEventListener(
-        "load",
-        () => {
-          loadedCount++;
-          // 只在所有图片加载完成后调整一次位置
-          if (loadedCount === images.length && !hasScrolled) {
-            hasScrolled = true;
-            setTimeout(scrollToTarget, 100);
-          }
-        },
-        { once: true }
-      );
+    if (!img.complete) {
+      const handler = () => {
+        lastResizeTime = Date.now();
+        reAlign();
+      };
+      img.addEventListener("load", handler, { once: true });
     }
   });
 
-  // 如果所有图片都已经加载完成，则在短暂延迟后调整一次
-  if (loadedCount === images.length && !hasScrolled) {
-    hasScrolled = true;
-    setTimeout(scrollToTarget, 200);
+  // 尺寸变化监听（应对段落折行、图片高度变化、懒加载切换等）
+  let resizeObserver: ResizeObserver | null = null;
+  if ("ResizeObserver" in window) {
+    resizeObserver = new ResizeObserver(() => {
+      lastResizeTime = Date.now();
+      reAlign();
+      // 重新计时，直到稳定
+      if (settledTimer) {
+        window.clearTimeout(settledTimer);
+      }
+      settledTimer = window.setTimeout(() => {
+        // 如果已超过最大时长或已稳定一段时间，结束观察
+        if (Date.now() - startTime >= maxDurationMs) {
+          cleanup();
+          return;
+        }
+        // 若仍有变化，计时器会被上面回调重置；若无变化，则这里触发清理
+        cleanup();
+      }, settleQuietMs);
+    });
+    resizeObserver.observe(contentRoot);
   }
+
+  // 兜底：到达最大时长后强制停止
+  const hardStopTimer = window.setTimeout(() => {
+    cleanup();
+  }, maxDurationMs + 200);
+
+  const cleanup = () => {
+    if (resizeObserver) {
+      resizeObserver.disconnect();
+      resizeObserver = null;
+    }
+    if (settledTimer) {
+      window.clearTimeout(settledTimer);
+    }
+    window.clearTimeout(hardStopTimer);
+    // 最终再对齐一次，确保停在正确位置
+    reAlign();
+  };
 };
 </script>
 
