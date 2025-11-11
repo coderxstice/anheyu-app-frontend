@@ -94,6 +94,18 @@ const siteDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyPoliceRecordNumber,
     defaultValue: "",
     type: "string"
+  },
+  {
+    frontendPath: "site.gravatarURL",
+    backendKey: constant.KeyGravatarURL,
+    defaultValue: "https://cdn.sep.cc/",
+    type: "string"
+  },
+  {
+    frontendPath: "site.defaultGravatarType",
+    backendKey: constant.KeyDefaultGravatarType,
+    defaultValue: "mp",
+    type: "string"
   }
 ];
 

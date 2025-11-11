@@ -83,6 +83,28 @@
     />
     <div class="form-item-help">网站的公安联网备案号，用于页脚显示。</div>
   </el-form-item>
+
+  <el-form-item label="Gravatar 服务器地址">
+    <div>
+      <el-input
+        v-model="formData.gravatarURL"
+        placeholder="例如：https://cdn.sep.cc/"
+      />
+      <div class="form-item-help">
+        Gravatar 头像服务器地址，用于生成用户头像。请确保该地址可正常访问。
+      </div>
+    </div>
+  </el-form-item>
+
+  <el-form-item label="Gravatar 默认头像类型">
+    <div>
+      <el-input v-model="formData.defaultGravatarType" placeholder="例如：mp" />
+      <div class="form-item-help">
+        Gravatar
+        默认头像类型，当用户没有设置头像时使用。常见类型：mp（神秘人）、identicon（几何图案）、monsterid（怪物）、wavatar（卡通脸）、retro（复古）、robohash（机器人）、blank（空白）。
+      </div>
+    </div>
+  </el-form-item>
 </template>
 
 <script setup lang="ts">
