@@ -111,6 +111,11 @@ export type RegisterData = {
   repeat_password: string;
 };
 
+export type BasicResponse = {
+  code: number;
+  message: string;
+};
+
 /** 登录 */
 export const getLogin = (data?: object) => {
   return http.request<UserResult>("post", baseUrlApi("auth/login"), { data });
@@ -141,6 +146,29 @@ export const registerUserApi = (data: RegisterData) => {
   return http.request<RegisterUserResult>("post", baseUrlApi("auth/register"), {
     data
   });
+};
+
+/** 请求发送重置密码邮件 */
+export const requestPasswordResetApi = (data: { email: string }) => {
+  return http.request<BasicResponse>(
+    "post",
+    baseUrlApi("auth/forgot-password"),
+    { data }
+  );
+};
+
+/** 重置密码 */
+export const resetPasswordApi = (data: {
+  id: string;
+  sign: string;
+  password: string;
+  repeat_password: string;
+}) => {
+  return http.request<BasicResponse>(
+    "post",
+    baseUrlApi("auth/reset-password"),
+    { data }
+  );
 };
 
 /** 激活用户账号 */
