@@ -12,6 +12,8 @@ import {
   refreshTokenApi,
   checkEmailExistsApi,
   registerUserApi,
+  requestPasswordResetApi,
+  resetPasswordApi,
   getUserInfo
 } from "@/api/user";
 import { useMultiTagsStoreHook } from "./multiTags";
@@ -126,21 +128,25 @@ export const useUserStore = defineStore("anheyu-user", () => {
   }
 
   /**
-   * @description 模拟发送密码重置邮件 TODO: 需要修改
+   * @description 发送密码重置邮件
    */
   async function sendPasswordResetEmail(data: { email: string }) {
-    return new Promise<any>(resolve => {
-      console.log("模拟发送重置邮件到：", data.email);
-      // 模拟后端成功响应
-      resolve({ code: 200, message: "重置邮件已发送，请检查收件箱" });
-    });
+    return requestPasswordResetApi(data);
   }
-  /** 重设密码 TODO: 需要修改 */
-  async function resetPassword(data: object) {
-    return new Promise<any>(resolve => {
-      console.log("模拟使用以下信息重设密码：", data);
-      // 模拟后端成功响应
-      resolve({ code: 200, message: "密码重设成功" });
+  /**
+   * @description 重设密码
+   */
+  async function resetPassword(data: {
+    id: string;
+    secret: string;
+    password: string;
+    repeat_password: string;
+  }) {
+    return resetPasswordApi({
+      id: data.id,
+      sign: data.secret,
+      password: data.password,
+      repeat_password: data.repeat_password
     });
   }
 
