@@ -260,14 +260,19 @@ export function useUserManagement() {
           userGroupID: row?.userGroupID ?? (normalUserGroup?.id || ""),
           status: row?.status ?? 1,
           password: ""
-        }
+        },
+        userGroups: userGroups.value
       },
       width: "46%",
       draggable: true,
       fullscreen: deviceDetection(),
       fullscreenIcon: true,
       closeOnClickModal: false,
-      contentRenderer: () => h(editForm, { ref: formRef }),
+      contentRenderer: ({ options }) =>
+        h(editForm, {
+          ref: formRef,
+          ...options.props
+        }),
       beforeSure: (done, { options }) => {
         const FormRef = formRef.value.getRef();
         const curData = options.props.formInline as FormItemProps;
