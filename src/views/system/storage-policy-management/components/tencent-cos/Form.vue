@@ -188,7 +188,9 @@ const uploadMethod = {
 
     <el-form-item
       v-if="
-        formData.flag === 'article_image' || formData.flag === 'comment_image'
+        formData.flag === 'article_image' ||
+        formData.flag === 'comment_image' ||
+        formData.flag === 'user_avatar'
       "
       label="样式分隔符（可选）"
       prop="settings.style_separator"

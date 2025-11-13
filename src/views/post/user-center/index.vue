@@ -2,7 +2,7 @@
  * @Description: 用户中心页面
  * @Author: 安知鱼
  * @Date: 2025-10-03 18:26:16
- * @LastEditTime: 2025-10-30 17:34:52
+ * @LastEditTime: 2025-11-13 13:51:08
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -145,8 +145,9 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStoreHook } from "@/store/modules/user";
-import { ElMessageBox } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { formatRelativeTime } from "@/utils/format";
+import { uploadUserAvatar } from "@/api/user-center";
 import UserProfileDialog from "@/components/UserProfileDialog/index.vue";
 import ChangePasswordDialog from "@/components/ChangePasswordDialog/index.vue";
 import UserNotificationSettings from "@/components/UserNotificationSettings/index.vue";
@@ -207,20 +208,79 @@ const handleProfileUpdateSuccess = async () => {
   }
 };
 
-// 点击头像，显示 Cravatar 说明
+// 点击头像，上传自定义头像
 const handleAvatarClick = () => {
-  ElMessageBox.alert(
-    "本站使用 Cravatar 作为头像服务。您可以前往 Cravatar 官网使用相同的邮箱地址设置头像，设置后会自动在本站生效。",
-    "如何修改头像",
+  ElMessageBox.confirm(
+    "您可以上传自定义头像，或使用 Cravatar 头像服务。",
+    "修改头像",
     {
-      confirmButtonText: "前往 Cravatar",
-      callback: (action: string) => {
-        if (action === "confirm") {
-          window.open("https://cravatar.com", "_blank");
-        }
-      }
+      confirmButtonText: "上传头像",
+      cancelButtonText: "使用 Cravatar",
+      distinguishCancelAndClose: true,
+      type: "info"
     }
-  );
+  )
+    .then(() => {
+      // 用户选择上传头像
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/jpeg,image/jpg,image/png,image/gif,image/webp";
+      input.onchange = async (e: Event) => {
+        const target = e.target as HTMLInputElement;
+        const file = target.files?.[0];
+        if (!file) return;
+
+        // 验证文件大小（5MB）
+        const maxSize = 5 * 1024 * 1024;
+        if (file.size > maxSize) {
+          ElMessage.error("头像文件大小不能超过 5MB");
+          return;
+        }
+
+        // 验证文件类型
+        const allowedTypes = [
+          "image/jpeg",
+          "image/jpg",
+          "image/png",
+          "image/gif",
+          "image/webp"
+        ];
+        if (!allowedTypes.includes(file.type)) {
+          ElMessage.error("只支持 JPG、PNG、GIF、WebP 格式的图片");
+          return;
+        }
+
+        try {
+          const loadingMsg = ElMessage({
+            message: "正在上传头像...",
+            type: "info",
+            duration: 0
+          });
+
+          const response = await uploadUserAvatar(file);
+
+          loadingMsg.close();
+
+          if (response.code === 200) {
+            ElMessage.success("头像上传成功");
+            // 刷新用户信息
+            await userStore.fetchUserInfo();
+          } else {
+            ElMessage.error(response.message || "头像上传失败");
+          }
+        } catch (error: any) {
+          console.error("头像上传失败:", error);
+          ElMessage.error(error?.message || "头像上传失败，请稍后再试");
+        }
+      };
+      input.click();
+    })
+    .catch((action: string) => {
+      // 用户选择使用 Cravatar 或关闭对话框
+      if (action === "cancel") {
+        window.open("https://cravatar.com", "_blank");
+      }
+    });
 };
 
 // 退出登录

@@ -140,6 +140,7 @@ defineExpose({ getRef });
         <el-option label="无 (普通策略)" value="" />
         <el-option label="文章图片默认" value="article_image" />
         <el-option label="评论图片默认" value="comment_image" />
+        <el-option label="用户头像默认" value="user_avatar" />
       </el-select>
       <div class="form-item-help">
         设置后，该策略将成为系统核心功能的默认存储位置。此标志在系统中具有唯一性。
