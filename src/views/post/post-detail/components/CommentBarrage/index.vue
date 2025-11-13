@@ -4,6 +4,7 @@ import { useCommentStore } from "@/store/modules/commentStore";
 import type { Comment } from "@/api/comment/type";
 import { storeToRefs } from "pinia";
 import { gsap } from "gsap";
+import md5 from "blueimp-md5";
 
 defineOptions({
   name: "CommentBarrage"
@@ -169,6 +170,30 @@ watch(
   },
   { immediate: true, deep: true }
 );
+
+const getAvatarSrc = (comment: Comment): string => {
+  // 优先使用用户自定义头像
+  if (comment.avatar_url) {
+    return comment.avatar_url;
+  }
+
+  // 如果是匿名评论，使用匿名头像
+  if (comment.is_anonymous) {
+    return `${props.gravatarUrl}avatar/anonymous?d=mp&s=140&f=y`;
+  }
+
+  // 检查是否是 QQ 号
+  const isQQ = /^[1-9]\d{4,10}$/.test(comment.nickname?.trim() || "");
+  if (isQQ) {
+    const qqEmailMd5 = md5(`${comment.nickname?.trim()}@qq.com`).toLowerCase();
+    if (comment.email_md5?.toLowerCase() === qqEmailMd5) {
+      return `https://thirdqq.qlogo.cn/g?b=sdk&nk=${comment.nickname.trim()}&s=140`;
+    }
+  }
+
+  // 默认使用 Gravatar
+  return `${props.gravatarUrl}avatar/${comment.email_md5}?d=${props.defaultGravatarType}`;
+};
 
 const processCommentHtml = (html: string): string => {
   // 使用正则表达式替换，避免 innerHTML 触发图片加载
@@ -429,10 +454,7 @@ onBeforeUnmount(() => {
             {{ item.is_admin_comment ? "博主" : "热评" }}
           </span>
           <div class="barrageNick">{{ item.nickname }}</div>
-          <img
-            class="barrageAvatar"
-            :src="`${props.gravatarUrl}avatar/${item.email_md5}?d=${props.defaultGravatarType}`"
-          />
+          <img class="barrageAvatar" :src="getAvatarSrc(item)" />
         </div>
         <a
           class="barrageContent"

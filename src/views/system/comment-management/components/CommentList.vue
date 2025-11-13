@@ -75,6 +75,11 @@ const getGravatarUrl = (emailMD5: string) => {
 };
 
 const getAvatarSrc = (comment: AdminComment) => {
+  // 优先使用用户自定义头像
+  if (comment.avatar_url) {
+    return comment.avatar_url;
+  }
+
   if (!comment.nickname || !comment.email_md5) {
     return getGravatarUrl(comment.email_md5);
   }

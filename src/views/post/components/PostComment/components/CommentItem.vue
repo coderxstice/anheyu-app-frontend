@@ -397,6 +397,11 @@ const gravatarSrc = computed(() => {
 });
 
 const avatarSrc = computed(() => {
+  // 优先使用用户自定义头像
+  if (props.comment.avatar_url) {
+    return props.comment.avatar_url;
+  }
+
   // 如果是匿名评论，使用匿名头像
   if (props.comment.is_anonymous) {
     const url = new URL(props.config.gravatar_url);
