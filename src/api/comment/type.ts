@@ -31,6 +31,7 @@ export interface Comment {
   pinned_at: string | null;
   nickname: string;
   email_md5: string;
+  avatar_url?: string; // 用户自定义头像URL（如果有关联用户且用户上传了头像）
   website: string | null;
   content_html: string;
   is_admin_comment: boolean;

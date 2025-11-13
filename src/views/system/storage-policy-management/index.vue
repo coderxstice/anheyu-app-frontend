@@ -163,7 +163,8 @@ const typeIconMap = {
 // 用于将 flag 转换为可读的文本
 const flagDisplayMap = {
   article_image: "文章图片默认",
-  comment_image: "评论图片默认"
+  comment_image: "评论图片默认",
+  user_avatar: "用户头像默认"
 };
 
 function getFlagDisplayName(flag: string): string {

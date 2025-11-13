@@ -53,3 +53,29 @@ export const updateUserPassword = (data: UpdatePasswordRequest) => {
     { data }
   );
 };
+
+/**
+ * @description 上传用户头像响应类型
+ */
+export type UploadAvatarResponse = {
+  code: number;
+  message: string;
+  data: {
+    url: string;
+  };
+};
+
+/**
+ * 上传用户头像
+ */
+export const uploadUserAvatar = (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return http.request<UploadAvatarResponse>("post", baseUrlApi("user/avatar"), {
+    data: formData,
+    headers: {
+      "Content-Type": "multipart/form-data"
+    }
+  });
+};
