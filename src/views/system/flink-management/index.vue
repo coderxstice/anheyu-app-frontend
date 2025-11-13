@@ -182,7 +182,7 @@
                   class="meta-info"
                 >
                   <el-tag
-                    v-if="link.type"
+                    v-if="link.type && link.status === 'PENDING'"
                     size="small"
                     :type="link.type === 'NEW' ? 'primary' : 'warning'"
                     effect="plain"
@@ -481,10 +481,11 @@ const handleDelete = async (id: number) => {
 
 const handleReview = async (id: number, status: "APPROVED" | "REJECTED") => {
   try {
-    // 如果是审核通过，可能需要输入网站快照
     let siteshot: string | undefined;
+    let reject_reason: string | undefined;
+
     if (status === "APPROVED") {
-      // 使用 ElMessageBox 提示用户输入网站快照
+      // 如果是审核通过，可能需要输入网站快照
       const { value } = await ElMessageBox.prompt(
         "请输入网站快照链接（可选）：",
         "审核通过",
@@ -497,9 +498,24 @@ const handleReview = async (id: number, status: "APPROVED" | "REJECTED") => {
         }
       );
       siteshot = value || undefined;
+    } else if (status === "REJECTED") {
+      // 如果是拒绝，可以填写拒绝原因
+      const { value } = await ElMessageBox.prompt(
+        "请填写拒绝原因（可选）：",
+        "拒绝友链申请",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          inputPlaceholder: "请详细说明拒绝的原因，以便申请者了解并改进",
+          inputValidator: () => {
+            return true;
+          }
+        }
+      );
+      reject_reason = value?.trim();
     }
 
-    await reviewLink(id, { status, siteshot });
+    await reviewLink(id, { status, siteshot, reject_reason });
     ElMessage.success("审核操作成功");
     getLinkList();
   } catch (error) {

@@ -95,6 +95,7 @@ export type UpdateLinkRequest = CreateLinkRequest;
 export interface ReviewLinkRequest {
   status: "APPROVED" | "REJECTED";
   siteshot?: string;
+  reject_reason?: string; // 拒绝原因（可选）
 }
 
 /** [后台] 创建友链分类 */
