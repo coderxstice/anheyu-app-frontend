@@ -3,6 +3,7 @@ import { computed, type PropType } from "vue";
 import type { Article } from "@/api/post/type";
 import { useRouter } from "vue-router";
 import { useArticleStore } from "@/store/modules/articleStore";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
 const props = defineProps({
   articles: {
@@ -17,6 +18,17 @@ const props = defineProps({
 
 const router = useRouter();
 const articleStore = useArticleStore();
+const siteConfigStore = useSiteConfigStore();
+
+/**
+ * 判断是否开启了归档页一图流
+ */
+const isOneImageEnabled = computed(() => {
+  const pageConfig =
+    siteConfigStore.siteConfig?.page?.one_image?.config ||
+    siteConfigStore.siteConfig?.page?.oneImageConfig;
+  return pageConfig?.archives?.enable || false;
+});
 
 // 将扁平的文章数组按年份分组
 const groupedArticles = computed(() => {
@@ -65,7 +77,7 @@ const goToTag = (tagName: string) => {
 
 <template>
   <div class="archive-page">
-    <div class="article-sort-title">
+    <div v-if="!isOneImageEnabled" class="article-sort-title">
       文章<sup>{{ total }}</sup>
     </div>
     <div class="article-sort">

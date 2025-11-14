@@ -22,6 +22,16 @@ const homeTopCategories = computed(() => {
 });
 
 /**
+ * 判断是否开启了分类页一图流
+ */
+const isOneImageEnabled = computed(() => {
+  const pageConfig =
+    siteConfigStore.siteConfig?.page?.one_image?.config ||
+    siteConfigStore.siteConfig?.page?.oneImageConfig;
+  return pageConfig?.categories?.enable || false;
+});
+
+/**
  * 获取分类列表
  */
 const fetchCategories = async () => {
@@ -80,7 +90,7 @@ onMounted(() => {
 
 <template>
   <div v-loading="loading" class="category-cloud-amount">
-    <h1 class="page-title">分类</h1>
+    <h1 v-if="!isOneImageEnabled" class="page-title">分类</h1>
     <div class="category-cloud-list">
       <a
         v-for="category in categories"

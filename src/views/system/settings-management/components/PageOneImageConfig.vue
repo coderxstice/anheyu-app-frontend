@@ -14,15 +14,6 @@
         />
       </el-collapse-item>
 
-      <!-- 友链页配置 -->
-      <el-collapse-item title="友链页一图流配置" name="link">
-        <PageOneImageItem
-          v-model="formData.oneImageConfig.link"
-          page-name="友链页"
-          @update:model-value="handleUpdate"
-        />
-      </el-collapse-item>
-
       <!-- 分类页配置 -->
       <el-collapse-item title="分类页一图流配置" name="categories">
         <PageOneImageItem
@@ -69,14 +60,6 @@ const activePages = ref<string[]>([]);
 // 默认的一图流配置
 const defaultOneImageConfig: PageOneImageConfig = {
   home: {
-    enable: false,
-    background: "",
-    mainTitle: "安和鱼",
-    subTitle: "生活明朗，万物可爱",
-    typingEffect: false,
-    hitokoto: false
-  },
-  link: {
     enable: false,
     background: "",
     mainTitle: "安和鱼",

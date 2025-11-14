@@ -44,7 +44,6 @@ export interface PageOneImageItem {
  */
 export interface PageOneImageConfig {
   home: PageOneImageItem;
-  link: PageOneImageItem;
   categories: PageOneImageItem;
   tags: PageOneImageItem;
   archives: PageOneImageItem;

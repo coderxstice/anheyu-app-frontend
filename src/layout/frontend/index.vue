@@ -2,17 +2,42 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-21 17:48:59
- * @LastEditTime: 2025-11-09 13:36:06
+ * @LastEditTime: 2025-11-14 14:42:31
  * @LastEditors: 安知鱼
 -->
 <template>
-  <div :class="{ frontendLayout: true, [mainContentClass]: true }">
+  <div
+    :class="{ frontendLayout: true, [mainContentClass]: true }"
+    :style="oneImageStyle"
+  >
     <Header />
 
+    <!-- 一图流全屏背景 -->
+    <div v-if="currentOneImageConfig?.enable" class="one-image-banner">
+      <div id="site-info">
+        <h1 id="site-title">{{ currentOneImageConfig.mainTitle }}</h1>
+        <div id="site-subtitle">
+          <span id="subtitle">{{ displaySubtitle }}</span>
+          <span
+            v-if="currentOneImageConfig.typingEffect"
+            class="typed-cursor"
+            aria-hidden="true"
+            >|</span
+          >
+        </div>
+      </div>
+      <!-- scroll-down 按钮只在首页显示 -->
+      <div v-if="isHomePage" id="scroll-down" @click="scrollToMain">
+        <IconifyIconOffline :icon="ArrowDownBold" class="scroll-down-icon" />
+      </div>
+    </div>
+
     <main class="frontend-main">
-      <keep-alive :include="cachedViews">
-        <router-view />
-      </keep-alive>
+      <router-view v-slot="{ Component }">
+        <keep-alive :include="cachedViews">
+          <component :is="Component" />
+        </keep-alive>
+      </router-view>
     </main>
 
     <Footer />
@@ -55,6 +80,9 @@ import { useGlobal } from "@pureadmin/utils";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 import { useKeyboardShortcuts } from "@/composables/useKeyboardShortcuts";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import type { PageOneImageItem } from "@/views/system/settings-management/type";
+import { IconifyIconOffline } from "@/components/ReIcon";
+import ArrowDownBold from "@iconify-icons/ep/arrow-down-bold";
 
 import Header from "./components/hearder/index.vue";
 import Footer from "./components/footer/index.vue";
@@ -67,6 +95,127 @@ import MusicPlayer from "./components/MusicPlayer/index.vue";
 const { $storage } = useGlobal<GlobalPropertiesApi>();
 const route = useRoute();
 const siteConfigStore = useSiteConfigStore();
+
+// 一图流相关
+const displaySubtitle = ref("");
+const hitokotoText = ref("");
+
+// 路由名称到一图流配置键的映射
+const routeToConfigMap: Record<string, string> = {
+  PostHome: "home",
+  PostLink: "link",
+  PostCategoriesAll: "categories",
+  PostTagsAll: "tags",
+  PostArchives: "archives"
+};
+
+// 判断是否为首页
+const isHomePage = computed(() => {
+  return route.name === "PostHome";
+});
+
+// 获取当前页面的一图流配置
+const currentOneImageConfig = computed<PageOneImageItem | null>(() => {
+  const routeName = route.name as string;
+  const configKey = routeToConfigMap[routeName];
+
+  if (!configKey) return null;
+
+  // 后端返回的结构是 page.one_image.config，unflatten 后变成 page.one_image.config
+  const pageConfig =
+    siteConfigStore.siteConfig?.page?.one_image?.config ||
+    siteConfigStore.siteConfig?.page?.oneImageConfig;
+
+  if (!pageConfig || !pageConfig[configKey]) return null;
+
+  return pageConfig[configKey];
+});
+
+// 一图流背景样式
+const oneImageStyle = computed(() => {
+  if (
+    !currentOneImageConfig.value?.enable ||
+    !currentOneImageConfig.value?.background
+  ) {
+    return {};
+  }
+
+  return {
+    "--one-image-background": `url(${currentOneImageConfig.value.background})`
+  };
+});
+
+// 获取一言
+const fetchHitokoto = async () => {
+  try {
+    const response = await fetch("https://v1.hitokoto.cn/");
+    const data = await response.json();
+    hitokotoText.value = data.hitokoto;
+  } catch (error) {
+    console.error("获取一言失败:", error);
+    hitokotoText.value = "";
+  }
+};
+
+// 打字机效果
+const typeWriter = (text: string, speed = 100) => {
+  let i = 0;
+  displaySubtitle.value = "";
+
+  const type = () => {
+    if (i < text.length) {
+      displaySubtitle.value += text.charAt(i);
+      i++;
+      setTimeout(type, speed);
+    }
+  };
+
+  type();
+};
+
+// 滚动到主内容区
+const scrollToMain = () => {
+  const main = document.querySelector(".frontend-main");
+  if (main) {
+    const mainPosition = main.getBoundingClientRect().top + window.scrollY;
+    const offsetPosition = mainPosition - 70;
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: "smooth"
+    });
+  }
+};
+
+// 监听路由变化，更新副标题
+watch(
+  () => currentOneImageConfig.value,
+  async config => {
+    if (!config?.enable) {
+      displaySubtitle.value = "";
+      return;
+    }
+
+    // 如果开启一言
+    if (config.hitokoto) {
+      await fetchHitokoto();
+      const text = hitokotoText.value || config.subTitle;
+
+      if (config.typingEffect) {
+        typeWriter(text);
+      } else {
+        displaySubtitle.value = text;
+      }
+    } else {
+      // 使用手动设置的副标题
+      if (config.typingEffect) {
+        typeWriter(config.subTitle);
+      } else {
+        displaySubtitle.value = config.subTitle;
+      }
+    }
+  },
+  { immediate: true }
+);
 
 const { showShortcutsPanel, shortcuts } = useKeyboardShortcuts();
 
@@ -151,11 +300,102 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+
+  /* 一图流背景 */
+  &::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-image: var(--one-image-background);
+    background-attachment: local;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+
+  &:has(.one-image-banner)::before {
+    opacity: 1;
+  }
 }
 
 .frontend-main {
   flex: 1;
   animation: slide-in 0.6s 0.1s backwards;
+}
+
+/* 一图流全屏横幅 */
+.one-image-banner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100vh;
+  color: #fff;
+  text-align: center;
+
+  #site-info {
+    margin-bottom: 60px;
+    animation: fade-in-up 0.8s ease-out;
+
+    #site-title {
+      margin: 0 0 20px;
+      font-size: 3.5rem;
+      font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      animation: fade-in-up 0.8s 0.2s ease-out backwards;
+
+      @media (max-width: 768px) {
+        font-size: 2.5rem;
+      }
+    }
+
+    #site-subtitle {
+      font-size: 1.5rem;
+      font-weight: 300;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+      animation: fade-in-up 0.8s 0.4s ease-out backwards;
+
+      @media (max-width: 768px) {
+        font-size: 1.2rem;
+      }
+
+      #subtitle {
+        display: inline-block;
+      }
+
+      .typed-cursor {
+        display: inline-block;
+        margin-left: 4px;
+        font-weight: 400;
+        animation: blink 1s infinite;
+      }
+    }
+  }
+
+  #scroll-down {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: pointer;
+    animation: fade-in-up 0.8s 0.6s ease-out backwards;
+
+    .scroll-down-icon {
+      position: relative;
+      font-size: 2rem;
+      color: #fff;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+      animation: scroll-down-bounce 2s infinite;
+    }
+  }
 }
 
 /* 移动端菜单遮罩层 */
@@ -169,5 +409,43 @@ onUnmounted(() => {
   background: var(--anzhiyu-maskbg);
   backdrop-filter: saturate(180%) blur(20px);
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 动画定义 */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes scroll-down-bounce {
+  0% {
+    top: 0px;
+    opacity: 0.4;
+  }
+  50% {
+    top: -16px;
+    opacity: 1;
+    filter: none;
+  }
+  100% {
+    top: 0px;
+    opacity: 0.4;
+  }
 }
 </style>
