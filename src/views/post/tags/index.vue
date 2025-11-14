@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { getTagList } from "@/api/post";
 import type { PostTag } from "@/api/post/type";
 import { useRouter } from "vue-router";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
 defineOptions({
   name: "PostTagsAll"
@@ -11,6 +12,17 @@ defineOptions({
 const tags = ref<PostTag[]>([]);
 const loading = ref(true);
 const router = useRouter();
+const siteConfigStore = useSiteConfigStore();
+
+/**
+ * 判断是否开启了标签页一图流
+ */
+const isOneImageEnabled = computed(() => {
+  const pageConfig =
+    siteConfigStore.siteConfig?.page?.one_image?.config ||
+    siteConfigStore.siteConfig?.page?.oneImageConfig;
+  return pageConfig?.tags?.enable || false;
+});
 
 // 获取标签列表
 const fetchTags = async () => {
@@ -37,7 +49,7 @@ onMounted(() => {
 
 <template>
   <div v-loading="loading" class="tag-cloud-amount">
-    <h1 class="page-title">标签</h1>
+    <h1 v-if="!isOneImageEnabled" class="page-title">标签</h1>
     <div class="tag-cloud-list">
       <a
         v-for="tag in tags"

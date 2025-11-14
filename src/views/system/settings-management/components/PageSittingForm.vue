@@ -110,11 +110,14 @@
       &lt;style&gt; 和 &lt;script&gt; 标签）。
     </div>
   </el-form-item>
+
+  <PageOneImageConfig v-model="formData" />
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
 import type { PageSittingInfo } from "../type";
+import PageOneImageConfig from "./PageOneImageConfig.vue";
 
 const props = defineProps<{
   modelValue: PageSittingInfo;

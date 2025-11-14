@@ -163,6 +163,12 @@ const pageDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyCustomPostBottomHTML,
     defaultValue: "",
     type: "string"
+  },
+  {
+    frontendPath: "page.oneImageConfig",
+    backendKey: constant.KeyPageOneImageConfig,
+    defaultValue: {},
+    type: "json"
   }
 ];
 

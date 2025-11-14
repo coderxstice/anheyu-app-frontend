@@ -55,6 +55,9 @@ const KeyHeaderNavClock: SettingKey = "header.nav.clock";
 const KeyHeaderNavMenu: SettingKey = "header.nav.menu";
 const KeyHomeTop: SettingKey = "HOME_TOP";
 
+// --- 页面一图流配置 ---
+const KeyPageOneImageConfig: SettingKey = "page.one_image.config";
+
 // --- Sidebar 配置 ---
 const KeySidebarAuthorEnable: SettingKey = "sidebar.author.enable";
 const KeySidebarAuthorDescription: SettingKey = "sidebar.author.description";
@@ -340,6 +343,9 @@ export const constant = {
   KeyHeaderNavClock,
   KeyHeaderNavMenu,
   KeyHomeTop,
+
+  // --- 页面一图流配置 ---
+  KeyPageOneImageConfig,
 
   // --- Sidebar 配置 ---
   KeySidebarAuthorEnable,

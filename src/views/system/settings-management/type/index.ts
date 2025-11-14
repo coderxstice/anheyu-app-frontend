@@ -28,6 +28,28 @@ export interface SiteInfo {
 }
 
 /**
+ * @description: 单个页面一图流配置
+ */
+export interface PageOneImageItem {
+  enable: boolean;
+  background: string;
+  mainTitle: string;
+  subTitle: string;
+  typingEffect: boolean;
+  hitokoto: boolean;
+}
+
+/**
+ * @description: 页面一图流配置
+ */
+export interface PageOneImageConfig {
+  home: PageOneImageItem;
+  categories: PageOneImageItem;
+  tags: PageOneImageItem;
+  archives: PageOneImageItem;
+}
+
+/**
  * @description: 页面配置表单接口
  */
 export interface PageSittingInfo {
@@ -40,6 +62,7 @@ export interface PageSittingInfo {
   customJS: string;
   customPostTopHTML: string;
   customPostBottomHTML: string;
+  oneImageConfig: PageOneImageConfig;
 }
 
 /**
