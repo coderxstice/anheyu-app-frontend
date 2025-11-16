@@ -13,9 +13,9 @@
           <CircleCheck />
         </el-icon>
         <h2 class="success-title">账号激活成功！</h2>
-        <p class="success-text">您的账号已成功激活，即将返回并打开登录窗口</p>
+        <p class="success-text">您的账号已成功激活并自动登录，即将返回原页面</p>
         <el-button type="primary" size="large" @click="goToReturnUrl">
-          立即登录
+          立即返回
         </el-button>
       </div>
 
@@ -39,6 +39,9 @@ import { useRoute, useRouter } from "vue-router";
 import { activateUser } from "@/api/user";
 import { ElMessage } from "element-plus";
 import { Loading, CircleCheck, CircleClose } from "@element-plus/icons-vue";
+import { useUserStoreHook } from "@/store/modules/user";
+import { initRouter } from "@/router/utils";
+import { setToken } from "@/utils/auth";
 
 defineOptions({
   name: "ActivateAccount"
@@ -59,15 +62,29 @@ const goToReturnUrl = () => {
     // 清除已使用的URL
     localStorage.removeItem("activation_return_url");
 
-    // 解析URL，添加打开登录弹窗的参数
-    const url = new URL(returnUrl);
-    url.searchParams.set("openLogin", "1");
+    try {
+      // 尝试解析URL，提取路径部分
+      const url = new URL(returnUrl);
+      const path = url.pathname + url.search + url.hash;
 
-    // 跳转到原页面
-    window.location.href = url.toString();
+      // 如果是同域名，使用router导航（无刷新）
+      if (url.origin === window.location.origin) {
+        router.push(path);
+      } else {
+        // 如果是外部链接，使用window.location
+        window.location.href = returnUrl;
+      }
+    } catch (e) {
+      // 如果URL解析失败，尝试作为相对路径处理
+      if (returnUrl.startsWith("/")) {
+        router.push(returnUrl);
+      } else {
+        window.location.href = returnUrl;
+      }
+    }
   } else {
-    // 如果没有保存的URL，跳转到首页并打开登录弹窗
-    router.push("/?openLogin=1");
+    // 如果没有保存的URL，跳转到首页
+    router.push("/");
   }
 };
 
@@ -82,17 +99,38 @@ const activate = async () => {
   }
 
   try {
-    await activateUser(id, sign);
-    success.value = true;
+    // 调用激活API，现在会返回登录信息
+    const response = await activateUser(id, sign);
 
-    // 3秒后自动跳转到原页面并打开登录弹窗
-    setTimeout(() => {
-      goToReturnUrl();
-    }, 3000);
+    if (response.code === 200 && response.data) {
+      // 保存登录信息到 localStorage 和 store
+      const userStore = useUserStoreHook();
+
+      // 使用 setToken 保存完整的登录数据
+      setToken(response.data);
+
+      // 更新 store 中的用户信息
+      userStore.SET_USER_INFO(response.data.userInfo);
+
+      // 初始化路由（仅供管理员使用，普通用户不需要）
+      await initRouter();
+
+      success.value = true;
+      ElMessage.success("账号激活成功，已自动登录！");
+
+      // 2秒后自动跳转到原页面
+      setTimeout(() => {
+        goToReturnUrl();
+      }, 2000);
+    } else {
+      throw new Error(response.message || "激活失败");
+    }
   } catch (error: any) {
     success.value = false;
     errorMessage.value =
-      error.response?.data?.message || "激活失败，请稍后重试或联系管理员";
+      error.response?.data?.message ||
+      error.message ||
+      "激活失败，请稍后重试或联系管理员";
     ElMessage.error(errorMessage.value);
   } finally {
     loading.value = false;

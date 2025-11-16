@@ -329,10 +329,22 @@ const closeDialog = () => {
   );
 };
 
+// 追踪鼠标按下的位置，防止在弹窗内按下、在弹窗外松开时关闭弹窗
+const mouseDownTarget = ref<EventTarget | null>(null);
+
+const handleOverlayMouseDown = (event: MouseEvent) => {
+  mouseDownTarget.value = event.target;
+};
+
 const handleOverlayClick = (event: MouseEvent) => {
-  if (event.target === overlayRef.value) {
+  // 只有当 mousedown 和 click 都发生在 overlay 上时才关闭弹窗
+  if (
+    event.target === overlayRef.value &&
+    mouseDownTarget.value === overlayRef.value
+  ) {
     closeDialog();
   }
+  mouseDownTarget.value = null;
 };
 
 // 键盘事件
@@ -377,7 +389,12 @@ watch(
 <template>
   <Teleport to="body">
     <div v-if="modelValue" class="login-dialog-wrapper">
-      <div ref="overlayRef" class="dialog-overlay" @click="handleOverlayClick">
+      <div
+        ref="overlayRef"
+        class="dialog-overlay"
+        @mousedown="handleOverlayMouseDown"
+        @click="handleOverlayClick"
+      >
         <div ref="dialogRef" class="dialog-container" @click.stop>
           <button class="close-btn" @click="closeDialog">
             <svg

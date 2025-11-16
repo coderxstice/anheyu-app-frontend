@@ -172,15 +172,11 @@ export const resetPasswordApi = (data: {
   );
 };
 
-/** 激活用户账号 */
+/** 激活用户账号并自动登录 */
 export const activateUser = (id: string, sign: string) => {
-  return http.request<{ code: number; message: string }>(
-    "post",
-    baseUrlApi("auth/activate"),
-    {
-      data: { id, sign }
-    }
-  );
+  return http.request<UserResult>("post", baseUrlApi("auth/activate"), {
+    data: { id, sign }
+  });
 };
 
 /**
