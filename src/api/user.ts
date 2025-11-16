@@ -107,6 +107,7 @@ export type CheckEmailExistsResult = {
  */
 export type RegisterData = {
   email: string;
+  nickname: string;
   password: string;
   repeat_password: string;
 };

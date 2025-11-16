@@ -11,10 +11,12 @@ import type { ElInput } from "element-plus";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import MailFill from "@iconify-icons/ri/mail-fill";
 import LockFill from "@iconify-icons/ri/lock-password-fill";
+import UserFill from "@iconify-icons/ri/user-fill";
 
 defineProps({
   loading: Boolean,
   email: String,
+  nickname: String,
   password: String,
   confirmPassword: String
 });
@@ -22,20 +24,23 @@ const emit = defineEmits([
   "submit",
   "goToLogin",
   "update:email",
+  "update:nickname",
   "update:password",
   "update:confirmPassword"
 ]);
 
 const emailInputRef = ref<InstanceType<typeof ElInput>>();
+const nicknameInputRef = ref<InstanceType<typeof ElInput>>();
 const passwordInputRef = ref<InstanceType<typeof ElInput>>();
 const iconMap = {
   mail: useRenderIcon(MailFill),
+  user: useRenderIcon(UserFill),
   lock: useRenderIcon(LockFill)
 };
 
 const focus = (isEmailPrefilled: boolean) => {
   isEmailPrefilled
-    ? passwordInputRef.value?.focus()
+    ? nicknameInputRef.value?.focus()
     : emailInputRef.value?.focus();
 };
 
@@ -54,6 +59,16 @@ defineExpose({ focus });
           :prefix-icon="iconMap.mail"
           autocomplete="email"
           @update:model-value="emit('update:email', $event)"
+        />
+      </el-form-item>
+      <el-form-item prop="nickname">
+        <el-input
+          ref="nicknameInputRef"
+          :model-value="nickname"
+          placeholder="昵称"
+          :prefix-icon="iconMap.user"
+          autocomplete="nickname"
+          @update:model-value="emit('update:nickname', $event)"
         />
       </el-form-item>
       <el-form-item prop="password">

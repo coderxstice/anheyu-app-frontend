@@ -337,12 +337,17 @@ class AnHttp {
           return Promise.reject(error);
         }
 
-        // 对于其他所有错误（如500等），调用全局错误处理器显示UI提示
-        handleBackendError(error);
+        // 只对 5xx 服务器错误显示全局错误提示
+        // 4xx 客户端错误（如 409 冲突、400 参数错误等）应该由业务层自行处理
+        const status = response?.status;
+        if (status && status >= 500 && status < 600) {
+          handleBackendError(error);
+        }
 
-        // 返回一个永远处于挂起状态的Promise，以中断业务层代码的执行
-        // 这实现了“错误在HTTP层被完全处理，不再传递到业务层”的目标
-        return new Promise(() => {});
+        // 将后端返回的数据抛出到业务层，这样业务层可以获取到后端的错误信息
+        // 例如：{ code: 409, message: "该邮箱已被注册", data: null }
+        // 如果没有 response.data，则抛出原始错误对象
+        return Promise.reject(response?.data || error);
       }
     );
   }
