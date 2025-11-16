@@ -187,6 +187,9 @@
         </div>
       </div>
     </template>
+
+    <!-- 技能/创造力配置 -->
+    <CreativityEditor v-model="model.creativity" />
   </div>
   <el-divider content-position="left">页眉配置</el-divider>
   <el-row :gutter="20">
@@ -866,12 +869,14 @@ import type {
   SubMenuItem,
   NavMenuItem,
   HomeTopInfo,
-  HomeTopCategoryItem
+  HomeTopCategoryItem,
+  CreativityInfo
 } from "../../../type";
 import JsonEditorTable from "../components/JsonEditorTable.vue";
 import FooterLinkListEditor from "./FooterLinkListEditor.vue";
 import SubMenuEditor from "./SubMenuEditor.vue";
 import NavMenuItemsEditor from "./NavMenuItemsEditor.vue";
+import CreativityEditor from "./CreativityEditor.vue";
 
 const model = defineModel<HomePageSettingsInfo>({
   required: true

@@ -54,6 +54,7 @@ const KeyHeaderNavTravel: SettingKey = "header.nav.travelling";
 const KeyHeaderNavClock: SettingKey = "header.nav.clock";
 const KeyHeaderNavMenu: SettingKey = "header.nav.menu";
 const KeyHomeTop: SettingKey = "HOME_TOP";
+const KeyCreativity: SettingKey = "CREATIVITY";
 
 // --- 页面一图流配置 ---
 const KeyPageOneImageConfig: SettingKey = "page.one_image.config";
@@ -343,6 +344,7 @@ export const constant = {
   KeyHeaderNavClock,
   KeyHeaderNavMenu,
   KeyHomeTop,
+  KeyCreativity,
 
   // --- 页面一图流配置 ---
   KeyPageOneImageConfig,
