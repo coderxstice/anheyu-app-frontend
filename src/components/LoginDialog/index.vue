@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, nextTick, onMounted, watch, computed } from "vue";
+import { ref, reactive, nextTick, watch, computed } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 import { initRouter } from "@/router/utils";
@@ -70,6 +70,7 @@ const resetPasswordFormRef = ref();
 const formRef = ref<FormInstance>();
 const form = reactive({
   email: "",
+  nickname: "",
   password: "",
   confirmPassword: "",
   resetToken: { id: "", secret: "" }
@@ -79,6 +80,10 @@ const rules = reactive<FormRules>({
   email: [
     { required: true, message: "请输入电子邮箱", trigger: "blur" },
     { type: "email", message: "请输入有效的电子邮箱地址", trigger: "blur" }
+  ],
+  nickname: [
+    { required: true, message: "请输入昵称", trigger: "blur" },
+    { min: 2, max: 20, message: "长度在 2 到 20 个字符", trigger: "blur" }
   ],
   password: [{ required: true, message: "请输入密码", trigger: "blur" }],
   confirmPassword: [
@@ -118,6 +123,7 @@ const switchStep = (targetStep: Step, direction: "next" | "prev" = "next") => {
   transitionName.value = direction === "next" ? "slide-next" : "slide-prev";
   step.value = targetStep;
   if (targetStep !== "check-email") {
+    form.nickname = "";
     form.password = "";
     form.confirmPassword = "";
   }
@@ -162,6 +168,7 @@ const apiHandlers = {
     try {
       const res = await useUserStoreHook().registeredUser({
         email: form.email,
+        nickname: form.nickname,
         password: form.password,
         repeat_password: form.confirmPassword
       });
@@ -181,7 +188,17 @@ const apiHandlers = {
         throw new Error(res.message || "注册失败");
       }
     } catch (error: any) {
-      // 重新抛出错误，让 handleSubmit 处理
+      // 如果是后端返回的错误（包含 code 和 message），显示后端的错误信息
+      if (error?.code && error?.message) {
+        message(error.message, { type: "error" });
+      } else if (error?.message) {
+        // 如果是前端抛出的 Error 对象
+        message(error.message, { type: "error" });
+      } else {
+        // 其他未知错误
+        message("注册失败，请稍后重试", { type: "error" });
+      }
+      // 重新抛出错误，让 handleSubmit 处理 loading 状态
       throw error;
     }
   },
@@ -233,7 +250,7 @@ const eventHandlers = {
     handleSubmit(() => formRef.value!.validate(), apiHandlers.login),
   onRegister: () =>
     handleSubmit(() => formRef.value!.validate(), apiHandlers.register),
-  onForgotPassword: payload =>
+  onForgotPassword: (payload: { captcha: string; captchaCode: string }) =>
     handleSubmit(
       () => formRef.value!.validateField("email"),
       () => apiHandlers.sendResetEmail(payload)
@@ -312,10 +329,22 @@ const closeDialog = () => {
   );
 };
 
+// 追踪鼠标按下的位置，防止在弹窗内按下、在弹窗外松开时关闭弹窗
+const mouseDownTarget = ref<EventTarget | null>(null);
+
+const handleOverlayMouseDown = (event: MouseEvent) => {
+  mouseDownTarget.value = event.target;
+};
+
 const handleOverlayClick = (event: MouseEvent) => {
-  if (event.target === overlayRef.value) {
+  // 只有当 mousedown 和 click 都发生在 overlay 上时才关闭弹窗
+  if (
+    event.target === overlayRef.value &&
+    mouseDownTarget.value === overlayRef.value
+  ) {
     closeDialog();
   }
+  mouseDownTarget.value = null;
 };
 
 // 键盘事件
@@ -360,7 +389,12 @@ watch(
 <template>
   <Teleport to="body">
     <div v-if="modelValue" class="login-dialog-wrapper">
-      <div ref="overlayRef" class="dialog-overlay" @click="handleOverlayClick">
+      <div
+        ref="overlayRef"
+        class="dialog-overlay"
+        @mousedown="handleOverlayMouseDown"
+        @click="handleOverlayClick"
+      >
         <div ref="dialogRef" class="dialog-container" @click.stop>
           <button class="close-btn" @click="closeDialog">
             <svg
@@ -433,6 +467,7 @@ watch(
                       v-else-if="step === 'register-form'"
                       ref="registerFormRef"
                       v-model:email="form.email"
+                      v-model:nickname="form.nickname"
                       v-model:password="form.password"
                       v-model:confirmPassword="form.confirmPassword"
                       :loading="loading"

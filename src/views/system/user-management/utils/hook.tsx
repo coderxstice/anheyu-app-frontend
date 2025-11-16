@@ -2,7 +2,7 @@
  * @Description: 用户管理 Hook
  * @Author: 安知鱼
  * @Date: 2025-10-03 00:00:00
- * @LastEditTime: 2025-10-04 03:15:13
+ * @LastEditTime: 2025-11-16 12:29:17
  * @LastEditors: 安知鱼
  */
 
@@ -24,7 +24,7 @@ import { reactive, ref, onMounted, h } from "vue";
 import type { FormItemProps } from "./types";
 import { deviceDetection } from "@pureadmin/utils";
 import type { PaginationProps, LoadingConfig } from "@pureadmin/table";
-import { ElTag, ElMessageBox } from "element-plus";
+import { ElTag, ElMessageBox, ElInput } from "element-plus";
 import type { AdminUser, UserGroupOption } from "@/api/user-management/type";
 
 export function useUserManagement() {
@@ -329,24 +329,82 @@ export function useUserManagement() {
 
   // 重置密码
   async function handleResetPassword(row: AdminUser) {
-    ElMessageBox.prompt("请输入新密码", "重置密码", {
+    const passwordValue = ref("");
+    const inputError = ref("");
+
+    ElMessageBox({
+      title: "重置密码",
+      message: () =>
+        h("div", { style: "padding: 10px 0; min-height: 100px" }, [
+          h(
+            "p",
+            { style: "margin-bottom: 10px; color: #606266" },
+            "请输入新密码"
+          ),
+          h(ElInput, {
+            modelValue: passwordValue.value,
+            placeholder: "请输入新密码",
+            showPassword: true,
+            style: "width: 100%",
+            "onUpdate:modelValue": (val: string) => {
+              passwordValue.value = val;
+              // 验证密码长度
+              if (val && (val.length < 6 || val.length > 20)) {
+                inputError.value = "密码长度应在 6 到 20 个字符";
+              } else {
+                inputError.value = "";
+              }
+            }
+          }),
+          h(
+            "p",
+            {
+              style:
+                "margin-top: 5px; color: #f56c6c; font-size: 12px; min-height: 18px"
+            },
+            inputError.value || ""
+          )
+        ]),
       confirmButtonText: "确定",
       cancelButtonText: "取消",
-      inputPattern: /^.{6,20}$/,
-      inputErrorMessage: "密码长度应在 6 到 20 个字符",
-      inputType: "password"
-    })
-      .then(async ({ value }) => {
-        try {
-          await resetUserPassword(row.id, { newPassword: value });
-          message("密码重置成功", { type: "success" });
-        } catch (error) {
-          message(`密码重置失败: ${error.message}`, { type: "error" });
+      showCancelButton: true,
+      closeOnClickModal: false,
+      beforeClose: (action, instance, done) => {
+        if (action === "confirm") {
+          // 验证密码
+          if (!passwordValue.value) {
+            instance.confirmButtonLoading = false;
+            ElMessageBox.alert("请输入新密码", "提示", { type: "warning" });
+            return;
+          }
+          if (
+            passwordValue.value.length < 6 ||
+            passwordValue.value.length > 20
+          ) {
+            instance.confirmButtonLoading = false;
+            ElMessageBox.alert("密码长度应在 6 到 20 个字符", "提示", {
+              type: "warning"
+            });
+            return;
+          }
+          instance.confirmButtonLoading = true;
+          // 重置密码
+          resetUserPassword(row.id, { newPassword: passwordValue.value })
+            .then(() => {
+              message("密码重置成功", { type: "success" });
+              done();
+            })
+            .catch(error => {
+              message(`密码重置失败: ${error.message}`, { type: "error" });
+              instance.confirmButtonLoading = false;
+            });
+        } else {
+          done();
         }
-      })
-      .catch(() => {
-        message("已取消", { type: "info" });
-      });
+      }
+    }).catch(() => {
+      // 用户取消操作
+    });
   }
 
   // 切换用户状态

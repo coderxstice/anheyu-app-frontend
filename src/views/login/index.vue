@@ -9,7 +9,7 @@ import {
 } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
-import { initRouter, getTopMenu } from "@/router/utils";
+import { initRouter } from "@/router/utils";
 import dayIcon from "@/assets/svg/day.svg?component";
 import darkIcon from "@/assets/svg/dark.svg?component";
 import { message } from "@/utils/message";
@@ -77,6 +77,7 @@ const resetPasswordFormRef = ref();
 const formRef = ref<FormInstance>();
 const form = reactive({
   email: "",
+  nickname: "",
   password: "",
   confirmPassword: "",
   resetToken: { id: "", secret: "" }
@@ -86,6 +87,10 @@ const rules = reactive<FormRules>({
   email: [
     { required: true, message: "请输入电子邮箱", trigger: "blur" },
     { type: "email", message: "请输入有效的电子邮箱地址", trigger: "blur" }
+  ],
+  nickname: [
+    { required: true, message: "请输入昵称", trigger: "blur" },
+    { min: 2, max: 20, message: "昵称长度应在2到20个字符之间", trigger: "blur" }
   ],
   password: [{ required: true, message: "请输入密码", trigger: "blur" }],
   confirmPassword: [
@@ -128,6 +133,9 @@ const switchStep = (targetStep: Step, direction: "next" | "prev" = "next") => {
   if (targetStep !== "check-email") {
     form.password = "";
     form.confirmPassword = "";
+  }
+  if (targetStep !== "register-form") {
+    form.nickname = "";
   }
   nextTick(() => formRef.value?.clearValidate());
 };
@@ -179,21 +187,37 @@ const apiHandlers = {
     message("登录成功", { type: "success" });
   },
   register: async () => {
-    const res = await useUserStoreHook().registeredUser({
-      email: form.email,
-      password: form.password,
-      repeat_password: form.confirmPassword
-    });
-    if (res.code === 200) {
-      if (res.data?.activation_required) {
-        switchStep("activate-prompt", "next");
-        message("注册成功，请查收激活邮件", { type: "success" });
+    try {
+      const res = await useUserStoreHook().registeredUser({
+        email: form.email,
+        nickname: form.nickname,
+        password: form.password,
+        repeat_password: form.confirmPassword
+      });
+      if (res.code === 200) {
+        if (res.data?.activation_required) {
+          switchStep("activate-prompt", "next");
+          message("注册成功，请查收激活邮件", { type: "success" });
+        } else {
+          switchStep("login-password", "prev");
+          message("注册成功，请登录", { type: "success" });
+        }
       } else {
-        switchStep("login-password", "prev");
-        message("注册成功，请登录", { type: "success" });
+        message(res.message || "注册失败", { type: "error" });
       }
-    } else {
-      message(res.message || "注册失败", { type: "error" });
+    } catch (error: any) {
+      // 如果是后端返回的错误（包含 code 和 message），显示后端的错误信息
+      if (error?.code && error?.message) {
+        message(error.message, { type: "error" });
+      } else if (error?.message) {
+        // 如果是前端抛出的 Error 对象
+        message(error.message, { type: "error" });
+      } else {
+        // 其他未知错误
+        message("注册失败，请稍后重试", { type: "error" });
+      }
+      // 重新抛出错误，让 handleSubmit 处理 loading 状态
+      throw error;
     }
   },
   sendResetEmail: async (payload: { captcha: string; captchaCode: string }) => {
@@ -247,7 +271,7 @@ const eventHandlers = {
     handleSubmit(() => formRef.value!.validate(), apiHandlers.login),
   onRegister: () =>
     handleSubmit(() => formRef.value!.validate(), apiHandlers.register),
-  onForgotPassword: payload =>
+  onForgotPassword: (payload: { captcha: string; captchaCode: string }) =>
     handleSubmit(
       () => formRef.value!.validateField("email"),
       () => apiHandlers.sendResetEmail(payload)
@@ -349,6 +373,7 @@ onBeforeUnmount(() =>
                 v-else-if="step === 'register-form'"
                 ref="registerFormRef"
                 v-model:email="form.email"
+                v-model:nickname="form.nickname"
                 v-model:password="form.password"
                 v-model:confirmPassword="form.confirmPassword"
                 :loading="loading"
