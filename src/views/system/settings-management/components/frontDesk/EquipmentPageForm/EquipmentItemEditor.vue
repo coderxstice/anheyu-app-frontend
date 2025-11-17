@@ -280,7 +280,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted } from "vue";
+import { ref, watch, nextTick, onMounted, onBeforeUnmount } from "vue";
 import {
   Plus,
   Delete,
@@ -295,6 +295,7 @@ import {
 } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import type { EquipmentItem } from "../../../type";
+import Sortable from "sortablejs";
 
 const props = defineProps<{
   equipmentItems: EquipmentItem[];
@@ -307,6 +308,7 @@ const emit = defineEmits<{
 // 本地装备项数据（用于拖拽排序）
 const localEquipmentItems = ref<(EquipmentItem & { _expanded: boolean })[]>([]);
 const itemsContainerRef = ref<HTMLElement>();
+let sortableInstance: Sortable | null = null;
 
 // 监听props变化，同步到本地数据
 watch(
@@ -316,8 +318,12 @@ watch(
       ...item,
       _expanded: false
     }));
+    // 重新初始化拖拽排序
+    nextTick(() => {
+      initSortable();
+    });
   },
-  { immediate: true, deep: true }
+  { immediate: true }
 );
 
 // 新装备项状态
@@ -335,30 +341,54 @@ const isImportDialogVisible = ref(false);
 const importJsonData = ref("");
 
 // 初始化拖拽排序
-onMounted(() => {
-  nextTick(async () => {
-    if (itemsContainerRef.value) {
-      // 动态导入 Sortable，只在需要时加载
-      const { default: Sortable } = await import("sortablejs");
-      new Sortable(itemsContainerRef.value, {
-        handle: ".drag-handle",
-        animation: 150,
-        onEnd: evt => {
-          const { oldIndex, newIndex } = evt;
-          if (oldIndex !== undefined && newIndex !== undefined) {
-            const items = [...localEquipmentItems.value];
-            const [removed] = items.splice(oldIndex, 1);
-            items.splice(newIndex, 0, removed);
-            localEquipmentItems.value = items;
-            emit(
-              "update:equipment-items",
-              items.map(({ _expanded, ...item }) => item)
-            );
-          }
+const initSortable = () => {
+  // 先销毁旧实例
+  if (sortableInstance) {
+    sortableInstance.destroy();
+    sortableInstance = null;
+  }
+
+  // 确保DOM元素存在
+  if (itemsContainerRef.value && localEquipmentItems.value.length > 0) {
+    sortableInstance = Sortable.create(itemsContainerRef.value, {
+      handle: ".drag-handle",
+      animation: 150,
+      ghostClass: "sortable-ghost",
+      dragClass: "sortable-drag",
+      onEnd: evt => {
+        const { oldIndex, newIndex } = evt;
+        if (
+          oldIndex !== undefined &&
+          newIndex !== undefined &&
+          oldIndex !== newIndex
+        ) {
+          const items = [...localEquipmentItems.value];
+          const [removed] = items.splice(oldIndex, 1);
+          items.splice(newIndex, 0, removed);
+          localEquipmentItems.value = items;
+          emit(
+            "update:equipment-items",
+            items.map(({ _expanded, ...item }) => item)
+          );
         }
-      });
-    }
+      }
+    });
+  }
+};
+
+// 初始化拖拽排序
+onMounted(() => {
+  nextTick(() => {
+    initSortable();
   });
+});
+
+// 组件卸载时销毁Sortable实例
+onBeforeUnmount(() => {
+  if (sortableInstance) {
+    sortableInstance.destroy();
+    sortableInstance = null;
+  }
 });
 
 // 添加新装备项
@@ -691,6 +721,17 @@ const exportToJson = () => {
       }
     }
   }
+}
+
+// 拖拽排序样式
+.sortable-ghost {
+  opacity: 0.4;
+}
+
+.sortable-drag {
+  background: white !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+  opacity: 0.9;
 }
 
 // 响应式设计

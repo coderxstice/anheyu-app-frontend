@@ -203,19 +203,19 @@
     </el-dialog>
 
     <!-- 装备项编辑器弹窗 -->
-    <el-dialog
+    <AnDialog
       v-model="isEquipmentItemsEditorVisible"
       :title="`管理装备项 - ${currentEditingCategory?.title || ''}`"
       width="95%"
-      class="equipment-items-dialog"
       :close-on-click-modal="false"
-      :append-to-body="true"
+      hide-footer
+      container-class="equipment-items-dialog"
     >
       <EquipmentItemEditor
         :equipment-items="currentEditingCategory?.equipment_list || []"
         @update:equipment-items="updateEquipmentItems"
       />
-    </el-dialog>
+    </AnDialog>
   </div>
 </template>
 
@@ -234,6 +234,7 @@ import {
 import type { EquipmentCategory, EquipmentItem } from "../../../type";
 import { ElMessage, ElMessageBox } from "element-plus";
 import EquipmentItemEditor from "./EquipmentItemEditor.vue";
+import AnDialog from "@/components/AnDialog";
 
 const props = defineProps<{
   equipmentList: EquipmentCategory[];

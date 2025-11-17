@@ -296,6 +296,24 @@ export interface HomeTopInfo {
   title: string;
 }
 
+/**
+ * @description: 技能/创造力列表项的类型定义
+ */
+export interface CreativityItem {
+  name: string;
+  color: string;
+  icon: string;
+}
+
+/**
+ * @description: 技能/创造力模块的类型定义
+ */
+export interface CreativityInfo {
+  title: string;
+  subtitle: string;
+  creativity_list: CreativityItem[];
+}
+
 export interface HomePageSettingsInfo {
   siteOwnerName: string;
   siteOwnerEmail: string;
@@ -315,6 +333,7 @@ export interface HomePageSettingsInfo {
   navTravel: boolean;
   navClock: boolean;
   homeTop: HomeTopInfo;
+  creativity?: CreativityInfo;
 
   footerBadgesEnable: boolean;
   footerBadges: BadgeItem[];
