@@ -2,7 +2,7 @@
  * @Description: 移动端菜单组件
  * @Author: 安知鱼
  * @Date: 2025-09-16 13:16:41
- * @LastEditTime: 2025-10-25 11:28:06
+ * @LastEditTime: 2025-11-17 14:11:23
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -84,34 +84,68 @@
       <div v-for="menu in mainMenus" :key="menu.name" class="menu-group">
         <div class="menu-group-title">{{ menu.name }}</div>
         <div class="menu-group-list">
-          <template v-for="child in menu.children" :key="child.name">
+          <!-- 如果菜单有子项，显示子项列表 -->
+          <template v-if="menu.children && menu.children.length > 0">
+            <template v-for="child in menu.children" :key="child.name">
+              <a
+                v-if="child.isExternal"
+                :href="child.href"
+                :target="child.target"
+                :rel="child.rel"
+                class="menu-group-item"
+              >
+                <i :class="['anzhiyufont', child.icon]" />
+                <span>{{ child.name }}</span>
+              </a>
+              <a
+                v-else-if="child.href === '/travelling'"
+                href="#"
+                class="menu-group-item"
+                @click.prevent="handleTreasureLinkClick"
+              >
+                <i :class="['anzhiyufont', child.icon]" />
+                <span>{{ child.name }}</span>
+              </a>
+              <router-link
+                v-else
+                :to="child.href"
+                class="menu-group-item"
+                @click="handleInternalLinkClick"
+              >
+                <i :class="['anzhiyufont', child.icon]" />
+                <span>{{ child.name }}</span>
+              </router-link>
+            </template>
+          </template>
+          <!-- 如果菜单没有子项，直接显示该菜单本身 -->
+          <template v-else>
             <a
-              v-if="child.isExternal"
-              :href="child.href"
-              :target="child.target"
-              :rel="child.rel"
+              v-if="menu.isExternal"
+              :href="menu.href"
+              :target="menu.target"
+              :rel="menu.rel"
               class="menu-group-item"
             >
-              <i :class="['anzhiyufont', child.icon]" />
-              <span>{{ child.name }}</span>
+              <i :class="['anzhiyufont', menu.icon]" />
+              <span>{{ menu.name }}</span>
             </a>
             <a
-              v-else-if="child.href === '/travelling'"
+              v-else-if="menu.href === '/travelling'"
               href="#"
               class="menu-group-item"
               @click.prevent="handleTreasureLinkClick"
             >
-              <i :class="['anzhiyufont', child.icon]" />
-              <span>{{ child.name }}</span>
+              <i :class="['anzhiyufont', menu.icon]" />
+              <span>{{ menu.name }}</span>
             </a>
             <router-link
               v-else
-              :to="child.href"
+              :to="menu.href"
               class="menu-group-item"
               @click="handleInternalLinkClick"
             >
-              <i :class="['anzhiyufont', child.icon]" />
-              <span>{{ child.name }}</span>
+              <i :class="['anzhiyufont', menu.icon]" />
+              <span>{{ menu.name }}</span>
             </router-link>
           </template>
         </div>
