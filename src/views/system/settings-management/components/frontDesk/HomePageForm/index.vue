@@ -605,6 +605,46 @@
     />
   </el-form-item>
 
+  <el-form-item label="上班状态图">
+    <el-input
+      :model-value="model.footerRuntimeWorkImg"
+      placeholder="例如：https://npm.elemecdn.com/anzhiyu-blog@2.0.4/img/badge/安知鱼-上班摸鱼中.svg"
+      clearable
+      @update:model-value="updateFooterRuntimeWorkImg"
+    />
+    <div class="form-item-help">上班时间显示的状态徽章图片链接</div>
+  </el-form-item>
+
+  <el-form-item label="上班状态描述">
+    <el-input
+      :model-value="model.footerRuntimeWorkDesc"
+      placeholder="例如：距离月入25k也就还差一个大佬带我~"
+      clearable
+      @update:model-value="updateFooterRuntimeWorkDesc"
+    />
+    <div class="form-item-help">上班时间显示的状态描述文字</div>
+  </el-form-item>
+
+  <el-form-item label="下班状态图">
+    <el-input
+      :model-value="model.footerRuntimeOffDutyImg"
+      placeholder="例如：https://npm.elemecdn.com/anzhiyu-blog@2.0.4/img/badge/安知鱼-下班啦.svg"
+      clearable
+      @update:model-value="updateFooterRuntimeOffDutyImg"
+    />
+    <div class="form-item-help">下班时间显示的状态徽章图片链接</div>
+  </el-form-item>
+
+  <el-form-item label="下班状态描述">
+    <el-input
+      :model-value="model.footerRuntimeOffDutyDesc"
+      placeholder="例如：下班了就该开开心心的玩耍，嘿嘿~"
+      clearable
+      @update:model-value="updateFooterRuntimeOffDutyDesc"
+    />
+    <div class="form-item-help">下班时间显示的状态描述文字</div>
+  </el-form-item>
+
   <el-divider content-position="left">链接配置</el-divider>
   <el-form-item label="页脚列表随机友链数量">
     <el-input
@@ -1503,6 +1543,34 @@ const updateFooterRuntimeLaunchTime = (newTime: string) => {
   };
 };
 
+const updateFooterRuntimeWorkImg = (newValue: string) => {
+  model.value = {
+    ...model.value,
+    footerRuntimeWorkImg: newValue
+  };
+};
+
+const updateFooterRuntimeWorkDesc = (newValue: string) => {
+  model.value = {
+    ...model.value,
+    footerRuntimeWorkDesc: newValue
+  };
+};
+
+const updateFooterRuntimeOffDutyImg = (newValue: string) => {
+  model.value = {
+    ...model.value,
+    footerRuntimeOffDutyImg: newValue
+  };
+};
+
+const updateFooterRuntimeOffDutyDesc = (newValue: string) => {
+  model.value = {
+    ...model.value,
+    footerRuntimeOffDutyDesc: newValue
+  };
+};
+
 const updateFooterListRandomFriends = (newCount: string) => {
   model.value = {
     ...model.value,
@@ -1644,6 +1712,13 @@ const updateMusicVinylGroove = (newGroove: string) => {
 </script>
 
 <style scoped lang="scss">
+.form-item-help {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #909399;
+}
+
 /* 分类设置卡片样式 */
 .category-settings-container {
   display: flex;

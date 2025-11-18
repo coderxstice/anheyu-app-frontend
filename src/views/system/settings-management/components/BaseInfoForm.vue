@@ -105,6 +105,15 @@
       </div>
     </div>
   </el-form-item>
+
+  <el-form-item label="是否开启注册">
+    <div>
+      <el-switch v-model="formData.enableRegistration" />
+      <div class="form-item-help">
+        关闭后，前端登录页面和登录弹窗中的注册相关入口将被隐藏，用户将无法自行注册新账号。
+      </div>
+    </div>
+  </el-form-item>
 </template>
 
 <script setup lang="ts">

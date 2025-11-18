@@ -106,6 +106,12 @@ const siteDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyDefaultGravatarType,
     defaultValue: "mp",
     type: "string"
+  },
+  {
+    frontendPath: "site.enableRegistration",
+    backendKey: constant.KeyEnableRegistration,
+    defaultValue: true,
+    type: "boolean"
   }
 ];
 

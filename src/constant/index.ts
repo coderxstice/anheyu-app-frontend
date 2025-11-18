@@ -300,6 +300,7 @@ const KeyActivateAccountSubject: SettingKey =
 const KeyActivateAccountTemplate: SettingKey =
   "DEFAULT_ACTIVATE_ACCOUNT_TEMPLATE";
 const KeyEnableUserActivation: SettingKey = "ENABLE_USER_ACTIVATION";
+const KeyEnableRegistration: SettingKey = "ENABLE_REGISTRATION";
 const KeySmtpHost: SettingKey = "SMTP_HOST";
 const KeySmtpPort: SettingKey = "SMTP_PORT";
 const KeySmtpUsername: SettingKey = "SMTP_USERNAME";
@@ -577,6 +578,7 @@ export const constant = {
   KeyActivateAccountSubject,
   KeyActivateAccountTemplate,
   KeyEnableUserActivation,
+  KeyEnableRegistration,
   KeySmtpHost,
   KeySmtpPort,
   KeySmtpUsername,

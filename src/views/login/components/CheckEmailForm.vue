@@ -11,7 +11,11 @@ import type { ElInput } from "element-plus";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import MailFill from "@iconify-icons/ri/mail-fill";
 
-defineProps({ loading: Boolean, email: String });
+defineProps({
+  loading: Boolean,
+  email: String,
+  enableRegistration: { type: Boolean, default: true }
+});
 const emit = defineEmits(["submit", "goToRegister", "update:email"]);
 
 const emailInputRef = ref<InstanceType<typeof ElInput>>();
@@ -46,7 +50,7 @@ defineExpose({ focus: () => emailInputRef.value?.focus() });
           >下一步
         </el-button>
       </el-form-item>
-      <div class="mt-6 text-sm text-center">
+      <div v-if="enableRegistration" class="mt-6 text-sm text-center">
         <span class="text-gray-600">还没有账号？</span>
         <a
           href="#"
