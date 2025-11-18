@@ -473,8 +473,8 @@ const scrollToLyricIndex = async (targetIndex: number) => {
     return;
   }
 
-  // 原生风格的滚动动画 - 根据距离调整时长
-  const animationDuration = scrollDistance > 500 ? 300 : 200;
+  // 优化的滚动动画 - 根据距离调整时长，使用更短的时长提升丝滑度
+  const animationDuration = scrollDistance > 500 ? 250 : 180;
   smoothScrollTo(targetScrollTop, `点击歌词${targetIndex}`, animationDuration);
 };
 
@@ -666,8 +666,8 @@ const calculateCenterScroll = async () => {
     return;
   }
 
-  // 原生风格的自动滚动
-  const animationDuration = scrollDistance > 600 ? 400 : 250;
+  // 优化的自动滚动 - 使用更短的时长提升丝滑度
+  const animationDuration = scrollDistance > 600 ? 350 : 220;
   smoothScrollTo(
     targetScrollTop,
     `自动滚动到歌词${currentIndex}`,
@@ -703,17 +703,18 @@ const smoothScrollTo = (
   const duration = customDuration;
   const startTime = performance.now();
 
-  // 预先获取缓动函数信息用于日志
+  // 预先获取缓动函数信息
   const absDistance = Math.abs(distance);
   const easingConfig = selectEasingFunction(absDistance);
 
-  console.log("🌊 [原生滚动] 开始:", {
-    reason,
-    distance: Math.round(absDistance),
-    duration,
-    easing: easingConfig.name,
-    isDragging: props.isDragging || false
-  });
+  // 减少日志输出，仅在调试时启用
+  // console.log("🌊 [原生滚动] 开始:", {
+  //   reason,
+  //   distance: Math.round(absDistance),
+  //   duration,
+  //   easing: easingConfig.name,
+  //   isDragging: props.isDragging || false
+  // });
 
   // 如果距离很小，不需要滚动
   if (Math.abs(distance) <= 5) {
@@ -754,14 +755,14 @@ const smoothScrollTo = (
     scrollContainer.value.scrollTop = currentScrollTop;
     frameCount++;
 
-    // 减少日志输出 - 只在完成时输出，保持清爽
-    if (progress >= 1) {
-      console.log("🌊 [原生滚动] 完成:", {
-        reason,
-        frames: frameCount,
-        easing: easingConfig.name
-      });
-    }
+    // 减少日志输出 - 注释掉以提升性能
+    // if (progress >= 1) {
+    //   console.log("🌊 [原生滚动] 完成:", {
+    //     reason,
+    //     frames: frameCount,
+    //     easing: easingConfig.name
+    //   });
+    // }
 
     if (progress < 1 && !userScrolling.value && !props.isDragging) {
       scrollAnimationId.value = requestAnimationFrame(animateScroll);
@@ -774,12 +775,12 @@ const smoothScrollTo = (
   scrollAnimationId.value = requestAnimationFrame(animateScroll);
 };
 
-// 缓动函数集合
+// 优化的缓动函数集合 - 提供更丝滑的滚动体验
 const easeInOutCubic = (t: number): number => {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 };
 
-// 快速启动，平滑结束 - 适合大跨度滚动
+// 快速启动，平滑结束 - 适合大跨度滚动（优化版）
 const easeOutQuart = (t: number): number => {
   return 1 - Math.pow(1 - t, 4);
 };
@@ -789,30 +790,35 @@ const easeInOutQuad = (t: number): number => {
   return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 };
 
-// 简化的缓动函数 - 模拟原生滚动感觉
+// 优化的指数缓动 - 更自然的滚动感觉
 const easeOutExpo = (t: number): number => {
   return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
 };
 
-// 原生滚动风格的线性缓动
-const easeLinear = (t: number): number => {
-  return t;
+// 优化的三次缓出 - 最丝滑的短距离滚动
+const easeOutCubic = (t: number): number => {
+  return 1 - Math.pow(1 - t, 3);
+};
+
+// 优化的四次缓入缓出 - 适合中等距离的丝滑滚动
+const easeInOutQuart = (t: number): number => {
+  return t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
 };
 
 const selectEasingFunction = (distance: number) => {
   if (props.isDragging) {
-    return { func: easeInOutQuad, name: "拖拽滚动" };
+    return { func: easeOutCubic, name: "拖拽滚动" };
   }
 
   if (distance <= 200) {
-    // 短距离：使用二次缓动，更顺滑
-    return { func: easeInOutQuad, name: "短距离滚动" };
+    // 短距离：使用三次缓出，最丝滑
+    return { func: easeOutCubic, name: "短距离滚动" };
   } else if (distance <= 500) {
-    // 中距离：使用三次缓动，平衡流畅度和速度
-    return { func: easeInOutCubic, name: "中距离滚动" };
+    // 中距离：使用四次缓入缓出，平衡流畅度和速度
+    return { func: easeInOutQuart, name: "中距离滚动" };
   } else {
-    // 长距离：使用四次缓出，模拟的长距离滚动
-    return { func: easeOutQuart, name: "长距离滚动" };
+    // 长距离：使用指数缓出，自然的长距离滚动
+    return { func: easeOutExpo, name: "长距离滚动" };
   }
 };
 
@@ -865,37 +871,38 @@ const scrollToCurrentLyricCenter = (currentIndex: number) => {
     return;
   }
 
-  // 风格的动画时长策略 - 精确模拟的滚动时长
+  // 优化的动画时长策略 - 更短的时长，更丝滑的体验
   let animationDuration: number;
   let animationStrategy: string;
 
   if (scrollDistance <= 80) {
-    // 极短距离：快速响应，风格
-    animationDuration = 200;
+    // 极短距离：快速响应
+    animationDuration = 150;
     animationStrategy = "快速滚动";
   } else if (scrollDistance <= 300) {
-    // 短距离：流畅自然，模拟的短距离滚动
-    animationDuration = 400;
+    // 短距离：流畅自然
+    animationDuration = 300;
     animationStrategy = "自然滚动";
   } else if (scrollDistance <= 800) {
     // 中等距离：平衡速度和流畅度
-    animationDuration = 600;
+    animationDuration = 450;
     animationStrategy = "平衡滚动";
   } else {
-    // 长距离：有明显的缓动感，类似的长距离滚动
-    animationDuration = 800;
+    // 长距离：有明显的缓动感
+    animationDuration = 600;
     animationStrategy = "长距离滚动";
   }
 
-  console.log("🎯 [原生滚动] 滚动策略:", {
-    currentIndex,
-    scrollDistance: Math.round(scrollDistance),
-    animationDuration,
-    strategy: animationStrategy,
-    target: Math.round(targetScrollTop),
-    current: Math.round(currentScrollTop),
-    isDragging: props.isDragging || false
-  });
+  // 减少日志输出以提升性能
+  // console.log("🎯 [原生滚动] 滚动策略:", {
+  //   currentIndex,
+  //   scrollDistance: Math.round(scrollDistance),
+  //   animationDuration,
+  //   strategy: animationStrategy,
+  //   target: Math.round(targetScrollTop),
+  //   current: Math.round(currentScrollTop),
+  //   isDragging: props.isDragging || false
+  // });
 
   // 使用智能调整的滚动参数
   smoothScrollTo(
@@ -1381,6 +1388,7 @@ defineExpose({
     position: relative;
     padding: 0 20px;
     min-height: 100%;
+    will-change: scroll-position; // 硬件加速优化
 
     &.auto-scrolling {
       pointer-events: none;
@@ -1398,9 +1406,10 @@ defineExpose({
     padding: 12px 12px;
     border-radius: 12px;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); // 优化过渡时长和缓动函数
     text-align: center;
     user-select: none;
+    will-change: transform, opacity; // 硬件加速优化
 
     // 悬停效果
     &:hover:not(.no-lyrics) {
@@ -1420,14 +1429,14 @@ defineExpose({
       }
     }
 
-    // 当前播放状态 - 风格
+    // 当前播放状态 - 优化的丝滑效果
     &.is-current {
       .lyric-text {
         color: #ffffff;
         font-weight: 700;
         opacity: 1;
         transform: scale(1.05); // 轻微放大，增强焦点效果
-        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); // 更短更流畅的过渡
         text-shadow: 0px 2px 0px #ffffff00; // 文字阴影效果
       }
     }
@@ -1454,19 +1463,20 @@ defineExpose({
       }
     }
 
-    // 歌词文本样式 - 风格
+    // 歌词文本样式 - 优化的丝滑过渡
     .lyric-text {
       width: 100%;
       line-height: 1.6;
       word-wrap: break-word;
       word-break: break-word;
       white-space: pre-wrap;
-      transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); // 更短更流畅的过渡
       font-size: 28px;
       font-weight: 500;
       color: rgba(255, 255, 255, 0.7);
       position: relative;
       z-index: 1;
+      will-change: transform, color, opacity; // 硬件加速优化
     }
   }
 }
