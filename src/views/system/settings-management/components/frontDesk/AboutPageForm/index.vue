@@ -8,7 +8,153 @@
     <h3>关于页配置</h3>
   </el-divider>
 
+  <!-- 板块显示开关 -->
+  <el-divider content-position="left">
+    <h4>板块显示开关</h4>
+  </el-divider>
+  <div class="switches-container">
+    <el-form-item label="作者头像框">
+      <el-switch
+        v-model="formData.enableAuthorBox"
+        active-text="显示"
+        inactive-text="隐藏"
+      />
+      <div class="form-item-help">控制关于页面作者头像框板块的显示。</div>
+    </el-form-item>
+
+    <el-form-item label="基础介绍内容">
+      <el-switch
+        v-model="formData.enablePageContent"
+        active-text="显示"
+        inactive-text="隐藏"
+      />
+      <div class="form-item-help">控制关于页面基础介绍内容板块的显示。</div>
+    </el-form-item>
+
+    <el-form-item label="技能卡片">
+      <el-switch
+        v-model="formData.enableSkills"
+        active-text="显示"
+        inactive-text="隐藏"
+      />
+      <div class="form-item-help">控制关于页面技能卡片板块的显示。</div>
+    </el-form-item>
+
+    <el-form-item label="职业经历卡片">
+      <el-switch
+        v-model="formData.enableCareers"
+        active-text="显示"
+        inactive-text="隐藏"
+      />
+      <div class="form-item-help">控制关于页面职业经历卡片板块的显示。</div>
+    </el-form-item>
+
+    <el-form-item label="访问统计卡片">
+      <el-switch
+        v-model="formData.enableStatistic"
+        active-text="显示"
+        inactive-text="隐藏"
+      />
+      <div class="form-item-help">控制关于页面访问统计卡片板块的显示。</div>
+    </el-form-item>
+
+    <el-form-item label="地图和个人信息">
+      <el-switch
+        v-model="formData.enableMapAndInfo"
+        active-text="显示"
+        inactive-text="隐藏"
+      />
+      <div class="form-item-help">
+        控制关于页面地图和个人信息卡片板块的显示。
+      </div>
+    </el-form-item>
+
+    <el-form-item label="性格卡片">
+      <el-switch
+        v-model="formData.enablePersonality"
+        active-text="显示"
+        inactive-text="隐藏"
+      />
+      <div class="form-item-help">控制关于页面性格卡片板块的显示。</div>
+    </el-form-item>
+
+    <el-form-item label="照片卡片">
+      <el-switch
+        v-model="formData.enablePhoto"
+        active-text="显示"
+        inactive-text="隐藏"
+      />
+      <div class="form-item-help">控制关于页面照片卡片板块的显示。</div>
+    </el-form-item>
+
+    <el-form-item label="格言卡片">
+      <el-switch
+        v-model="formData.enableMaxim"
+        active-text="显示"
+        inactive-text="隐藏"
+      />
+      <div class="form-item-help">控制关于页面格言卡片板块的显示。</div>
+    </el-form-item>
+
+    <el-form-item label="特长卡片">
+      <el-switch
+        v-model="formData.enableBuff"
+        active-text="显示"
+        inactive-text="隐藏"
+      />
+      <div class="form-item-help">控制关于页面特长卡片板块的显示。</div>
+    </el-form-item>
+
+    <el-form-item label="游戏卡片">
+      <el-switch
+        v-model="formData.enableGame"
+        active-text="显示"
+        inactive-text="隐藏"
+      />
+      <div class="form-item-help">控制关于页面游戏卡片板块的显示。</div>
+    </el-form-item>
+
+    <el-form-item label="漫画/番剧卡片">
+      <el-switch
+        v-model="formData.enableComic"
+        active-text="显示"
+        inactive-text="隐藏"
+      />
+      <div class="form-item-help">控制关于页面漫画/番剧卡片板块的显示。</div>
+    </el-form-item>
+
+    <el-form-item label="技术偏好卡片">
+      <el-switch
+        v-model="formData.enableLikeTech"
+        active-text="显示"
+        inactive-text="隐藏"
+      />
+      <div class="form-item-help">控制关于页面技术偏好卡片板块的显示。</div>
+    </el-form-item>
+
+    <el-form-item label="音乐卡片">
+      <el-switch
+        v-model="formData.enableMusic"
+        active-text="显示"
+        inactive-text="隐藏"
+      />
+      <div class="form-item-help">控制关于页面音乐卡片板块的显示。</div>
+    </el-form-item>
+
+    <el-form-item label="自定义内容块">
+      <el-switch
+        v-model="formData.enableCustomCode"
+        active-text="显示"
+        inactive-text="隐藏"
+      />
+      <div class="form-item-help">控制关于页面自定义内容块的显示。</div>
+    </el-form-item>
+  </div>
+
   <!-- 基本信息 -->
+  <el-divider content-position="left">
+    <h4>基本信息配置</h4>
+  </el-divider>
   <el-form-item label="姓名">
     <el-input v-model="formData.name" placeholder="请输入姓名" />
     <div class="form-item-help">关于页面显示的个人姓名。</div>
@@ -485,9 +631,24 @@ defineExpose({
 .el-divider {
   margin: 40px 0 28px;
 
-  h3 {
+  h3,
+  h4 {
     margin: 0;
     color: #606266;
+  }
+}
+
+.switches-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px 40px;
+  margin-bottom: 20px;
+  padding: 20px;
+  background-color: var(--el-fill-color-lighter);
+  border-radius: 8px;
+
+  .el-form-item {
+    margin-bottom: 0;
   }
 }
 

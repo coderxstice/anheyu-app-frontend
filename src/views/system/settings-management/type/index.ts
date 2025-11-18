@@ -576,6 +576,23 @@ export interface AboutPageSettingsInfo {
   statisticsBackground: string;
   customCode: string; // 关于页自定义 Markdown 内容（用于编辑）
   customCodeHtml: string; // 关于页自定义 HTML 内容（用于前台展示）
+
+  // 板块开关配置
+  enableAuthorBox?: boolean;
+  enablePageContent?: boolean;
+  enableSkills?: boolean;
+  enableCareers?: boolean;
+  enableStatistic?: boolean;
+  enableMapAndInfo?: boolean;
+  enablePersonality?: boolean;
+  enablePhoto?: boolean;
+  enableMaxim?: boolean;
+  enableBuff?: boolean;
+  enableGame?: boolean;
+  enableComic?: boolean;
+  enableLikeTech?: boolean;
+  enableMusic?: boolean;
+  enableCustomCode?: boolean;
 }
 
 export interface RecentCommentsSettingsInfo {
