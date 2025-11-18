@@ -12,7 +12,7 @@ import {
   deleteAlbumCategory,
   type AlbumCategoryDTO
 } from "@/api/album-category";
-import { addDialog } from "@/components/ReDialog";
+import { addDialog } from "@/components/AnDialog";
 import {
   ElMessageBox,
   ElForm,

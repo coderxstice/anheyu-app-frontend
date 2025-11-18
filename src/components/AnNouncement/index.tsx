@@ -6,7 +6,7 @@
  * @LastEditors: 安知鱼
  */
 // src/components/AnNouncement/index.ts
-import { addDialog } from "@/components/ReDialog/index";
+import { addDialog } from "@/components/AnDialog/index";
 import { h } from "vue";
 
 // 用于存储公告内容在 localStorage 的键名，与 Pinia store 中的 SiteAnnouncement 对应

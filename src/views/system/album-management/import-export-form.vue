@@ -357,37 +357,6 @@ https://example.com/image3.webp
 </template>
 
 <style scoped lang="scss">
-.import-export-container {
-  max-height: 67vh;
-  overflow: auto;
-  padding-right: 1rem;
-
-  /* 美化垂直滚动条 */
-  &::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: var(--el-fill-color-lighter);
-    border-radius: 3px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--el-color-info-light-5);
-    border-radius: 3px;
-
-    &:hover {
-      background: var(--el-color-info-light-3);
-    }
-  }
-
-  // 移动端适配
-  @media (width <= 768px) {
-    max-height: 70vh;
-  }
-}
-
 :deep(.el-form) {
   // 移动端调整标签宽度
   @media (width <= 768px) {

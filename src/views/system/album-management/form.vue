@@ -238,34 +238,4 @@ defineExpose({ getRef });
   </div>
 </template>
 
-<style lang="scss" scoped>
-.form-container {
-  max-height: 70vh;
-  overflow-y: auto;
-
-  /* 美化垂直滚动条 */
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: var(--el-fill-color-lighter);
-    border-radius: 3px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--el-color-info-light-5);
-    border-radius: 3px;
-
-    &:hover {
-      background: var(--el-color-info-light-3);
-    }
-  }
-
-  // 移动端适配
-  @media (width <= 768px) {
-    max-height: 65vh;
-    padding-right: 4px;
-  }
-}
-</style>
+<style lang="scss" scoped></style>
