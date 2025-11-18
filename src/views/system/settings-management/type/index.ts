@@ -53,6 +53,7 @@ export interface PageOneImageConfig {
  * @description: 页面配置表单接口
  */
 export interface PageSittingInfo {
+  enableExternalLinkWarning: boolean;
   albumApiURL: string;
   defaultThumbParam?: string;
   defaultBigParam?: string;

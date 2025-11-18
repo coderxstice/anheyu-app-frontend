@@ -33,6 +33,7 @@ import { MotionPlugin } from "@vueuse/motion";
 import { createApp, type Directive } from "vue";
 import { useElementPlus } from "@/plugins/elementPlus";
 import { injectResponsiveStorage } from "@/utils/responsive";
+import { initExternalLinkInterceptor } from "@/utils/externalLink";
 
 import Table from "@pureadmin/table";
 // 引入重置样式
@@ -94,6 +95,9 @@ initializeConfigs(app)
 
     app.use(MotionPlugin).use(useElementPlus).use(Table);
     app.mount("#app");
+
+    // 初始化外链拦截器
+    initExternalLinkInterceptor();
 
     // 标记应用已加载，移除加载动画，防止布局偏移
     requestAnimationFrame(() => {

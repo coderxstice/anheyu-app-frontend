@@ -47,6 +47,7 @@ const KeyCustomPostTopHTML: SettingKey = "CUSTOM_POST_TOP_HTML";
 const KeyCustomPostBottomHTML: SettingKey = "CUSTOM_POST_BOTTOM_HTML";
 const KeyUploadAllowedExtensions: SettingKey = "UPLOAD_ALLOWED_EXTENSIONS";
 const KeyUploadDeniedExtensions: SettingKey = "UPLOAD_DENIED_EXTENSIONS";
+const KeyEnableExternalLinkWarning: SettingKey = "ENABLE_EXTERNAL_LINK_WARNING";
 
 // --- Header/Nav 配置 ---
 const KeyHeaderMenu: SettingKey = "header.menu";
@@ -360,6 +361,7 @@ export const constant = {
   KeyCustomPostBottomHTML,
   KeyUploadAllowedExtensions,
   KeyUploadDeniedExtensions,
+  KeyEnableExternalLinkWarning,
 
   // --- Header/Nav 配置 ---
   KeyHeaderMenu,

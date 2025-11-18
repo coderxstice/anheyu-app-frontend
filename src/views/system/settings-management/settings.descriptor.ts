@@ -117,6 +117,12 @@ const siteDescriptors: SettingDescriptor[] = [
 
 const pageDescriptors: SettingDescriptor[] = [
   {
+    frontendPath: "page.enableExternalLinkWarning",
+    backendKey: constant.KeyEnableExternalLinkWarning,
+    defaultValue: false,
+    type: "boolean"
+  },
+  {
     frontendPath: "page.albumApiURL",
     backendKey: constant.KeyApiURL,
     defaultValue: "",

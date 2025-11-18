@@ -11,6 +11,19 @@ import { getConfig } from "@/config/base";
 
 export default [
   {
+    path: "/external-link-warning",
+    name: "ExternalLinkWarning",
+    component: () => import("@/views/external-link-warning/index.vue"),
+    meta: {
+      title: () => {
+        const configs = getConfig();
+        const appName = configs?.APP_NAME;
+        return `${appName} - 外链跳转提示`;
+      },
+      showLink: false
+    }
+  },
+  {
     path: "/",
     component: FrontendLayout,
     meta: {
