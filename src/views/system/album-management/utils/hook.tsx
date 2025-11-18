@@ -20,7 +20,7 @@ import { reactive, ref, onMounted, h } from "vue";
 import type { FormItemProps } from "./types";
 import { deviceDetection } from "@pureadmin/utils";
 import type { PaginationProps, LoadingConfig } from "@pureadmin/table";
-import { ElIcon, ElScrollbar, ElMessageBox } from "element-plus";
+import { ElIcon, ElScrollbar } from "element-plus";
 import {
   SuccessFilled,
   WarningFilled,
@@ -888,49 +888,68 @@ export function useAlbum() {
         return;
       }
 
-      // 创建一个响应式变量存储选择的格式
-      let selectedFormat = "json";
+      // 导入 AnSelect 组件
+      const AnSelect = (await import("@/components/AnSelect")).default;
 
-      // 使用 ElMessageBox 显示格式选择对话框
-      await ElMessageBox({
-        title: "导出相册",
-        message: h("div", { style: "padding: 20px 0;" }, [
-          h(
-            "p",
-            {
-              style: "margin-bottom: 12px; color: var(--el-text-color-regular);"
-            },
-            `即将导出 ${albumIds.length} 个相册，请选择导出格式：`
-          ),
-          h(
-            "select",
-            {
-              id: "export-format-select",
-              style:
-                "width: 100%; padding: 8px 12px; border: 1px solid var(--el-border-color); border-radius: 4px; font-size: 14px; outline: none; cursor: pointer;",
-              onChange: (e: Event) => {
-                selectedFormat = (e.target as HTMLSelectElement).value;
-              }
-            },
-            [
-              h("option", { value: "json" }, "JSON 格式（纯文本）"),
-              h("option", { value: "zip" }, "ZIP 格式（压缩包）")
-            ]
-          )
-        ]),
-        confirmButtonText: "导出",
-        cancelButtonText: "取消",
-        beforeClose: (action, instance, done) => {
-          if (action === "confirm") {
-            const selectElement = document.getElementById(
-              "export-format-select"
-            ) as HTMLSelectElement;
-            if (selectElement) {
-              selectedFormat = selectElement.value;
+      // 创建响应式的格式选择
+      const selectedFormat = ref("json");
+
+      // 使用 AnDialog 显示导出对话框
+      await new Promise((resolve, reject) => {
+        addDialog({
+          title: "导出相册",
+          width: "480px",
+          showFooter: true,
+          confirmText: "导出",
+          cancelText: "取消",
+          contentRenderer: () => {
+            return h("div", { class: "export-dialog-content" }, [
+              h(
+                "p",
+                {
+                  style: {
+                    marginBottom: "16px",
+                    fontSize: "14px",
+                    color: "var(--anzhiyu-fontcolor)",
+                    lineHeight: "1.6"
+                  }
+                },
+                `即将导出 ${albumIds.length} 个相册，请选择导出格式：`
+              ),
+              h(
+                "div",
+                {
+                  style: {
+                    marginBottom: "8px",
+                    fontSize: "13px",
+                    fontWeight: "500",
+                    color: "var(--anzhiyu-secondtext)"
+                  }
+                },
+                "导出格式"
+              ),
+              h(AnSelect, {
+                modelValue: selectedFormat.value,
+                "onUpdate:modelValue": (val: string) => {
+                  selectedFormat.value = val;
+                },
+                options: [
+                  { label: "JSON 格式（纯文本）", value: "json" },
+                  { label: "ZIP 格式（压缩包）", value: "zip" }
+                ],
+                placeholder: "请选择导出格式"
+              })
+            ]);
+          },
+          onConfirm: () => {
+            resolve(selectedFormat.value);
+          },
+          closeCallBack: ({ args }) => {
+            if (args?.command === "cancel" || args?.command === "close") {
+              reject(new Error("cancelled"));
             }
           }
-          done();
-        }
+        });
       });
 
       message(`正在导出 ${albumIds.length} 个相册...`, {
@@ -941,7 +960,7 @@ export function useAlbum() {
       // 调用导出接口
       const response: any = await exportAlbums({
         album_ids: albumIds,
-        format: selectedFormat
+        format: selectedFormat.value
       });
 
       // 创建下载链接
@@ -957,7 +976,7 @@ export function useAlbum() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `albums-export-${new Date().getTime()}.${selectedFormat}`;
+      link.download = `albums-export-${new Date().getTime()}.${selectedFormat.value}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -965,7 +984,7 @@ export function useAlbum() {
 
       message(`成功导出 ${albumIds.length} 个相册！`, { type: "success" });
     } catch (error) {
-      if (error !== "cancel") {
+      if (error?.message !== "cancelled") {
         console.error("导出失败:", error);
         message(`导出失败: ${error.message || "未知错误"}`, {
           type: "error"
