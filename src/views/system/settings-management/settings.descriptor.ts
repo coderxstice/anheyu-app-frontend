@@ -767,6 +767,97 @@ const aboutPageDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyAboutPageCustomCodeHtml,
     defaultValue: "",
     type: "string"
+  },
+  // 板块开关配置
+  {
+    frontendPath: "frontDesk.about.enableAuthorBox",
+    backendKey: constant.KeyAboutPageEnableAuthorBox,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.about.enablePageContent",
+    backendKey: constant.KeyAboutPageEnablePageContent,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.about.enableSkills",
+    backendKey: constant.KeyAboutPageEnableSkills,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.about.enableCareers",
+    backendKey: constant.KeyAboutPageEnableCareers,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.about.enableStatistic",
+    backendKey: constant.KeyAboutPageEnableStatistic,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.about.enableMapAndInfo",
+    backendKey: constant.KeyAboutPageEnableMapAndInfo,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.about.enablePersonality",
+    backendKey: constant.KeyAboutPageEnablePersonality,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.about.enablePhoto",
+    backendKey: constant.KeyAboutPageEnablePhoto,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.about.enableMaxim",
+    backendKey: constant.KeyAboutPageEnableMaxim,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.about.enableBuff",
+    backendKey: constant.KeyAboutPageEnableBuff,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.about.enableGame",
+    backendKey: constant.KeyAboutPageEnableGame,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.about.enableComic",
+    backendKey: constant.KeyAboutPageEnableComic,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.about.enableLikeTech",
+    backendKey: constant.KeyAboutPageEnableLikeTech,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.about.enableMusic",
+    backendKey: constant.KeyAboutPageEnableMusic,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.about.enableCustomCode",
+    backendKey: constant.KeyAboutPageEnableCustomCode,
+    defaultValue: true,
+    type: "boolean"
   }
 ];
 

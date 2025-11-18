@@ -199,6 +199,28 @@ const KeyAboutPageStatisticsBackground: SettingKey =
   "about.page.statistics_background";
 const KeyAboutPageCustomCode: SettingKey = "about.page.custom_code";
 const KeyAboutPageCustomCodeHtml: SettingKey = "about.page.custom_code_html";
+
+// --- 关于页面板块开关配置 ---
+const KeyAboutPageEnableAuthorBox: SettingKey = "about.page.enable.author_box";
+const KeyAboutPageEnablePageContent: SettingKey =
+  "about.page.enable.page_content";
+const KeyAboutPageEnableSkills: SettingKey = "about.page.enable.skills";
+const KeyAboutPageEnableCareers: SettingKey = "about.page.enable.careers";
+const KeyAboutPageEnableStatistic: SettingKey = "about.page.enable.statistic";
+const KeyAboutPageEnableMapAndInfo: SettingKey =
+  "about.page.enable.map_and_info";
+const KeyAboutPageEnablePersonality: SettingKey =
+  "about.page.enable.personality";
+const KeyAboutPageEnablePhoto: SettingKey = "about.page.enable.photo";
+const KeyAboutPageEnableMaxim: SettingKey = "about.page.enable.maxim";
+const KeyAboutPageEnableBuff: SettingKey = "about.page.enable.buff";
+const KeyAboutPageEnableGame: SettingKey = "about.page.enable.game";
+const KeyAboutPageEnableComic: SettingKey = "about.page.enable.comic";
+const KeyAboutPageEnableLikeTech: SettingKey = "about.page.enable.like_tech";
+const KeyAboutPageEnableMusic: SettingKey = "about.page.enable.music";
+const KeyAboutPageEnableCustomCode: SettingKey =
+  "about.page.enable.custom_code";
+
 const KeyMusicPlayerEnable: SettingKey = "music.player.enable";
 const KeyMusicPlayerPlaylistID: SettingKey = "music.player.playlist_id";
 const KeyMusicPlayerCustomPlaylist: SettingKey = "music.player.custom_playlist";
@@ -460,6 +482,24 @@ export const constant = {
   KeyAboutPageStatisticsBackground,
   KeyAboutPageCustomCode,
   KeyAboutPageCustomCodeHtml,
+
+  // --- 关于页面板块开关配置 ---
+  KeyAboutPageEnableAuthorBox,
+  KeyAboutPageEnablePageContent,
+  KeyAboutPageEnableSkills,
+  KeyAboutPageEnableCareers,
+  KeyAboutPageEnableStatistic,
+  KeyAboutPageEnableMapAndInfo,
+  KeyAboutPageEnablePersonality,
+  KeyAboutPageEnablePhoto,
+  KeyAboutPageEnableMaxim,
+  KeyAboutPageEnableBuff,
+  KeyAboutPageEnableGame,
+  KeyAboutPageEnableComic,
+  KeyAboutPageEnableLikeTech,
+  KeyAboutPageEnableMusic,
+  KeyAboutPageEnableCustomCode,
+
   KeyMusicPlayerEnable,
   KeyMusicPlayerPlaylistID,
   KeyMusicPlayerCustomPlaylist,

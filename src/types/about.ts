@@ -241,4 +241,21 @@ export interface BackendAboutPageConfig {
   };
   custom_code?: string;
   custom_code_html?: string;
+
+  // 板块开关配置
+  enable_author_box?: boolean;
+  enable_page_content?: boolean;
+  enable_skills?: boolean;
+  enable_careers?: boolean;
+  enable_statistic?: boolean;
+  enable_map_and_info?: boolean;
+  enable_personality?: boolean;
+  enable_photo?: boolean;
+  enable_maxim?: boolean;
+  enable_buff?: boolean;
+  enable_game?: boolean;
+  enable_comic?: boolean;
+  enable_like_tech?: boolean;
+  enable_music?: boolean;
+  enable_custom_code?: boolean;
 }

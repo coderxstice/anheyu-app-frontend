@@ -57,6 +57,7 @@ onMounted(async () => {
   <div v-if="aboutConfig" class="about-container">
     <!-- 作者头像框 -->
     <AuthorBox
+      v-if="aboutConfig.enable_author_box !== false"
       :avatar-img="aboutConfig.avatar_img"
       :avatar-skills="{
         left: aboutConfig.avatar_skills_left,
@@ -68,57 +69,125 @@ onMounted(async () => {
 
     <!-- 基础介绍内容 -->
     <AuthorPageContent
+      v-if="aboutConfig.enable_page_content !== false"
       :name="aboutConfig.name"
       :description="aboutConfig.description"
       :about-site-tips="aboutConfig.about_site_tips"
     />
 
     <!-- 技能和职业经历 -->
-    <div class="author-content">
-      <SkillsCard :skills-tips="aboutConfig.skills_tips" />
-      <CareersCard :careers="aboutConfig.careers" />
+    <div
+      v-if="
+        aboutConfig.enable_skills !== false ||
+        aboutConfig.enable_careers !== false
+      "
+      class="author-content"
+    >
+      <SkillsCard
+        v-if="aboutConfig.enable_skills !== false"
+        :skills-tips="aboutConfig.skills_tips"
+      />
+      <CareersCard
+        v-if="aboutConfig.enable_careers !== false"
+        :careers="aboutConfig.careers"
+      />
     </div>
 
     <!-- 访问统计和地图信息 -->
-    <div class="author-content">
+    <div
+      v-if="
+        aboutConfig.enable_statistic !== false ||
+        aboutConfig.enable_map_and_info !== false
+      "
+      class="author-content"
+    >
       <StatisticCard
+        v-if="aboutConfig.enable_statistic !== false"
         :cover="aboutConfig.statistics_background"
         link="/statistics"
         text="更多统计"
       />
       <MapAndInfoCard
+        v-if="aboutConfig.enable_map_and_info !== false"
         :map="aboutConfig.map"
         :self-info="aboutConfig.self_info"
       />
     </div>
 
     <!-- 性格和照片 -->
-    <div class="author-content">
-      <PersonalityCard :personalities="aboutConfig.personalities" />
-      <PhotoCard :photo-url="aboutConfig.personalities.photoUrl" />
+    <div
+      v-if="
+        aboutConfig.enable_personality !== false ||
+        aboutConfig.enable_photo !== false
+      "
+      class="author-content"
+    >
+      <PersonalityCard
+        v-if="aboutConfig.enable_personality !== false"
+        :personalities="aboutConfig.personalities"
+      />
+      <PhotoCard
+        v-if="aboutConfig.enable_photo !== false"
+        :photo-url="aboutConfig.personalities.photoUrl"
+      />
     </div>
 
     <!-- 格言和特长 -->
-    <div class="author-content">
-      <MaximCard :maxim="aboutConfig.maxim" />
-      <BuffCard :buff="aboutConfig.buff" />
+    <div
+      v-if="
+        aboutConfig.enable_maxim !== false || aboutConfig.enable_buff !== false
+      "
+      class="author-content"
+    >
+      <MaximCard
+        v-if="aboutConfig.enable_maxim !== false"
+        :maxim="aboutConfig.maxim"
+      />
+      <BuffCard
+        v-if="aboutConfig.enable_buff !== false"
+        :buff="aboutConfig.buff"
+      />
     </div>
 
     <!-- 游戏和漫画 -->
-    <div class="author-content">
-      <GameCard :game="aboutConfig.game" />
-      <ComicCard :comic="aboutConfig.comic" />
+    <div
+      v-if="
+        aboutConfig.enable_game !== false || aboutConfig.enable_comic !== false
+      "
+      class="author-content"
+    >
+      <GameCard
+        v-if="aboutConfig.enable_game !== false"
+        :game="aboutConfig.game"
+      />
+      <ComicCard
+        v-if="aboutConfig.enable_comic !== false"
+        :comic="aboutConfig.comic"
+      />
     </div>
 
     <!-- 技术和音乐 -->
-    <div class="author-content">
-      <LikeTechCard :like="aboutConfig.like" />
-      <MusicCard :music="aboutConfig.music" :author-name="aboutConfig.name" />
+    <div
+      v-if="
+        aboutConfig.enable_like_tech !== false ||
+        aboutConfig.enable_music !== false
+      "
+      class="author-content"
+    >
+      <LikeTechCard
+        v-if="aboutConfig.enable_like_tech !== false"
+        :like="aboutConfig.like"
+      />
+      <MusicCard
+        v-if="aboutConfig.enable_music !== false"
+        :music="aboutConfig.music"
+        :author-name="aboutConfig.name"
+      />
     </div>
 
     <!-- 自定义内容块 -->
     <div
-      v-if="customCodeHtml"
+      v-if="customCodeHtml && aboutConfig.enable_custom_code !== false"
       class="custom-content-block"
       v-html="customCodeHtml"
     />

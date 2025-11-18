@@ -141,12 +141,12 @@ onMounted(() => {
         {{ error }}
       </div>
 
-      <div class="banner-button-group">
+      <!-- <div class="banner-button-group">
         <a class="banner-button" @click="$router.push(link)">
           <i class="anzhiyufont anzhiyu-icon-arrow-circle-right" />
           <span class="banner-button-text">{{ text }}</span>
         </a>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
