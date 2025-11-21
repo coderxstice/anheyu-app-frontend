@@ -25,6 +25,7 @@ export interface SiteInfo {
   policeRecordNumber: string;
   gravatarURL: string;
   defaultGravatarType: string;
+  enableRegistration: boolean;
 }
 
 /**
