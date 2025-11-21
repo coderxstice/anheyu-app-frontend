@@ -136,7 +136,8 @@ const whiteList = [
   "/equipment",
   "/page",
   "/recentcomments",
-  "/update"
+  "/update",
+  "/external-link-warning"
 ];
 
 const { VITE_HIDE_HOME } = import.meta.env;

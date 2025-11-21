@@ -44,6 +44,12 @@ const siteIcon = computed(() => {
     : config.LOGO_HORIZONTAL_DAY || "/static/img/logo-horizontal-day.png";
 });
 
+// 是否开启注册
+const enableRegistration = computed(() => {
+  const config = siteConfigStore.getSiteConfig;
+  return config?.ENABLE_REGISTRATION !== "false";
+});
+
 /**
  * 处理 el-switch 的切换事件
  * @param isDark el-switch 传来的新值，true 代表暗色，false 代表浅色
@@ -259,7 +265,18 @@ const eventHandlers = {
       await formRef.value?.validateField("email");
       loading.value = true;
       const exists = await apiHandlers.checkEmailExists(form.email);
-      switchStep(exists ? "login-password" : "register-prompt", "next");
+      if (exists) {
+        switchStep("login-password", "next");
+      } else {
+        // 如果用户不存在
+        if (enableRegistration.value) {
+          // 开启注册：跳转到注册提示
+          switchStep("register-prompt", "next");
+        } else {
+          // 关闭注册：显示错误提示
+          message("该邮箱尚未注册，当前系统已关闭注册功能", { type: "error" });
+        }
+      }
     } catch (err: any) {
       // 验证失败，不执行任何操作
       console.log("验证失败", err);
@@ -347,6 +364,7 @@ onBeforeUnmount(() =>
                 ref="checkEmailFormRef"
                 v-model:email="form.email"
                 :loading="loading"
+                :enable-registration="enableRegistration"
                 @submit="eventHandlers.onNextStep"
                 @go-to-register="switchStep('register-form', 'next')"
               />

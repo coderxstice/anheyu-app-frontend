@@ -106,10 +106,22 @@ const siteDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyDefaultGravatarType,
     defaultValue: "mp",
     type: "string"
+  },
+  {
+    frontendPath: "site.enableRegistration",
+    backendKey: constant.KeyEnableRegistration,
+    defaultValue: true,
+    type: "boolean"
   }
 ];
 
 const pageDescriptors: SettingDescriptor[] = [
+  {
+    frontendPath: "page.enableExternalLinkWarning",
+    backendKey: constant.KeyEnableExternalLinkWarning,
+    defaultValue: false,
+    type: "boolean"
+  },
   {
     frontendPath: "page.albumApiURL",
     backendKey: constant.KeyApiURL,

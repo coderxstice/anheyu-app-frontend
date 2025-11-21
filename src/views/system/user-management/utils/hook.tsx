@@ -19,7 +19,7 @@ import {
   updateUserStatus,
   getUserGroups
 } from "@/api/user-management";
-import { addDialog } from "@/components/ReDialog";
+import { addDialog } from "@/components/AnDialog";
 import { reactive, ref, onMounted, h } from "vue";
 import type { FormItemProps } from "./types";
 import { deviceDetection } from "@pureadmin/utils";

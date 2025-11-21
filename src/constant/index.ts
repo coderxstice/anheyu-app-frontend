@@ -47,6 +47,7 @@ const KeyCustomPostTopHTML: SettingKey = "CUSTOM_POST_TOP_HTML";
 const KeyCustomPostBottomHTML: SettingKey = "CUSTOM_POST_BOTTOM_HTML";
 const KeyUploadAllowedExtensions: SettingKey = "UPLOAD_ALLOWED_EXTENSIONS";
 const KeyUploadDeniedExtensions: SettingKey = "UPLOAD_DENIED_EXTENSIONS";
+const KeyEnableExternalLinkWarning: SettingKey = "ENABLE_EXTERNAL_LINK_WARNING";
 
 // --- Header/Nav 配置 ---
 const KeyHeaderMenu: SettingKey = "header.menu";
@@ -300,6 +301,7 @@ const KeyActivateAccountSubject: SettingKey =
 const KeyActivateAccountTemplate: SettingKey =
   "DEFAULT_ACTIVATE_ACCOUNT_TEMPLATE";
 const KeyEnableUserActivation: SettingKey = "ENABLE_USER_ACTIVATION";
+const KeyEnableRegistration: SettingKey = "ENABLE_REGISTRATION";
 const KeySmtpHost: SettingKey = "SMTP_HOST";
 const KeySmtpPort: SettingKey = "SMTP_PORT";
 const KeySmtpUsername: SettingKey = "SMTP_USERNAME";
@@ -359,6 +361,7 @@ export const constant = {
   KeyCustomPostBottomHTML,
   KeyUploadAllowedExtensions,
   KeyUploadDeniedExtensions,
+  KeyEnableExternalLinkWarning,
 
   // --- Header/Nav 配置 ---
   KeyHeaderMenu,
@@ -577,6 +580,7 @@ export const constant = {
   KeyActivateAccountSubject,
   KeyActivateAccountTemplate,
   KeyEnableUserActivation,
+  KeyEnableRegistration,
   KeySmtpHost,
   KeySmtpPort,
   KeySmtpUsername,

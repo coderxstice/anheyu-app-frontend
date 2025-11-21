@@ -135,6 +135,33 @@
         </div>
       </div>
 
+      <!-- 页脚运行时间模块 -->
+      <div
+        v-if="footerConfig.runtime?.enable && footerConfig.runtime?.launch_time"
+        class="footer-runtime-board"
+      >
+        <div v-if="currentStatusImg" class="status-img-row">
+          <img
+            class="status-badge"
+            :src="currentStatusImg"
+            :title="currentStatusDesc"
+            alt="工作状态"
+          />
+        </div>
+        <div class="runtime-info-row">
+          <span class="runtime-text">
+            本站居然运行了 {{ runtimeDays }} 天
+          </span>
+          <span class="runtime-time">
+            {{ runtimeTime }}
+          </span>
+          <component
+            :is="useRenderIcon('fa:heartbeat', { style: { color: 'red' } })"
+            class="heartbeat-icon"
+          />
+        </div>
+      </div>
+
       <div
         v-if="footerConfig.custom_text"
         class="footer-custom-text"
@@ -234,12 +261,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { onEnter, onLeave } from "@/utils/transitions";
 import { getIconClass } from "@/utils/icon";
 import { getRandomLinks } from "@/api/postLink";
 import { useLazyLoading } from "@/composables/useLazyLoading";
+import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 
 interface FriendLink {
   name: string;
@@ -316,11 +344,74 @@ const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
+// 运行时间相关
+const runtimeDays = ref(0);
+const runtimeTime = ref("0 小时 0 分 0 秒");
+const currentStatusImg = ref("");
+const currentStatusDesc = ref("");
+let runtimeInterval: number | null = null;
+
+// 判断是否在工作时间（9:00-18:00）
+const isWorkingHours = () => {
+  const now = new Date();
+  const hour = now.getHours();
+  return hour >= 9 && hour < 18;
+};
+
+// 计算运行时间
+const calculateRuntime = () => {
+  if (!footerConfig.value?.runtime?.launch_time) return;
+
+  try {
+    const launchDate = new Date(footerConfig.value.runtime.launch_time);
+    const currentDate = new Date();
+    const differenceInTime = currentDate.getTime() - launchDate.getTime();
+
+    // 计算天数
+    runtimeDays.value = Math.floor(differenceInTime / (1000 * 3600 * 24));
+
+    // 计算剩余的小时、分钟、秒
+    const remainingTime = differenceInTime % (1000 * 3600 * 24);
+    const hours = Math.floor(remainingTime / (1000 * 3600));
+    const minutes = Math.floor((remainingTime % (1000 * 3600)) / (1000 * 60));
+    const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+
+    runtimeTime.value = `${hours} 小时 ${minutes} 分 ${seconds} 秒`;
+
+    // 更新状态图和描述
+    if (isWorkingHours()) {
+      currentStatusImg.value = footerConfig.value.runtime?.work_img || "";
+      currentStatusDesc.value =
+        footerConfig.value.runtime?.work_description || "";
+    } else {
+      currentStatusImg.value = footerConfig.value.runtime?.offduty_img || "";
+      currentStatusDesc.value =
+        footerConfig.value.runtime?.offduty_description || "";
+    }
+  } catch (error) {
+    console.error("Invalid launch_time format:", error);
+  }
+};
+
 onMounted(() => {
   if (footerConfig.value) refreshFriendLinks();
   // 初始化footer区域的懒加载
   if (footerRef.value) {
     initLazyLoading(footerRef.value);
+  }
+
+  // 初始化运行时间
+  if (footerConfig.value?.runtime?.enable) {
+    calculateRuntime();
+    // 每秒更新一次运行时间
+    runtimeInterval = window.setInterval(calculateRuntime, 1000);
+  }
+});
+
+onUnmounted(() => {
+  // 清除定时器
+  if (runtimeInterval) {
+    clearInterval(runtimeInterval);
   }
 });
 </script>
@@ -549,6 +640,78 @@ a {
 @media (width >= 1200) {
   .footer-link-grid {
     gap: 8rem;
+  }
+}
+
+// 页脚运行时间模块样式
+.footer-runtime-board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  margin: 1rem 0;
+  font-size: 12px;
+  color: var(--anzhiyu-fontcolor);
+
+  .status-img-row {
+    display: flex;
+    justify-content: center;
+
+    .status-badge {
+      width: 100%;
+      max-width: 130px;
+      height: auto;
+      border-radius: 0;
+    }
+  }
+
+  .runtime-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+
+    .runtime-text {
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    .runtime-time {
+      display: inline-block;
+      font-weight: 600;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .heartbeat-icon {
+      display: inline-flex;
+      align-items: center;
+      font-size: 16px;
+      animation: heartbeat 1.3s ease-in-out infinite;
+    }
+  }
+
+  @keyframes heartbeat {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    10%,
+    30% {
+      transform: scale(0.9);
+    }
+    20%,
+    40%,
+    60%,
+    80% {
+      transform: scale(1.1);
+    }
+    50%,
+    70% {
+      transform: scale(1.05);
+    }
   }
 }
 

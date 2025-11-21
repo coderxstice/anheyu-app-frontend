@@ -305,8 +305,28 @@ defineExpose({
 
 .dialog-content {
   flex: 1;
+  min-height: 0; // 关键：允许 flex 子元素正确计算滚动
   padding: 1.5rem;
   overflow-y: auto;
+
+  // 美化滚动条
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--el-fill-color-lighter);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--el-color-info-light-5);
+    border-radius: 3px;
+
+    &:hover {
+      background: var(--el-color-info-light-3);
+    }
+  }
 }
 
 .dialog-footer {

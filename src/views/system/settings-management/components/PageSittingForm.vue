@@ -10,6 +10,17 @@
     <h3>页面设置</h3>
   </el-divider>
 
+  <el-form-item label="外链跳转提示">
+    <el-switch
+      v-model="formData.enableExternalLinkWarning"
+      active-text="开启"
+      inactive-text="关闭"
+    />
+    <div class="form-item-help">
+      开启后，点击外部链接时会显示中间提示页面，提醒用户即将跳转到外部网站。
+    </div>
+  </el-form-item>
+
   <el-form-item>
     <template #label>
       <span>相册页面【/album】请求后端 URL</span>
