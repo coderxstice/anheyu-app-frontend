@@ -14,14 +14,17 @@ defineOptions({
 
 const allSpyIds = inject<Ref<string[]>>("allSpyIds", ref([]));
 const updateHeadingTocItems = inject<(items: TocItem[]) => void>(
-  "updateHeadingTocItems"
+  "updateHeadingTocItems",
+  () => {}
 );
 
 const tocRef = ref<HTMLElement | null>(null);
 const indicatorRef = ref<HTMLElement | null>(null);
 
-const articleContentHtml =
-  inject<Ref<string | undefined>>("articleContentHtml");
+const articleContentHtml = inject<Ref<string | undefined>>(
+  "articleContentHtml",
+  ref(undefined)
+);
 const tocItems = ref<TocItem[]>([]);
 const activeTocId = ref<string | null>(null);
 
