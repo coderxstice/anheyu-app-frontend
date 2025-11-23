@@ -33,6 +33,6 @@ const formData = defineModel<Partial<StoragePolicy>>({ required: true });
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.5;
-  color: #999;
+  color: var(--anzhiyu-secondfontcolor);
 }
 </style>

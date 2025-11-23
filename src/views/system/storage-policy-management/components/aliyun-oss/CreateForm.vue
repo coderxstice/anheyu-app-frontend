@@ -272,7 +272,7 @@ defineExpose({ submitForm });
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.5;
-  color: #999;
+  color: var(--anzhiyu-secondfontcolor);
 }
 
 .upload-method-info {
@@ -390,6 +390,6 @@ defineExpose({ submitForm });
 :deep(.el-form-item__label) {
   font-size: 16px;
   font-weight: 600;
-  color: #000;
+  color: var(--anzhiyu-fontcolor);
 }
 </style>
