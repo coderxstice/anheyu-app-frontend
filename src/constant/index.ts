@@ -227,6 +227,7 @@ const KeyAboutPageEnableCustomCode: SettingKey =
 const KeyMusicPlayerEnable: SettingKey = "music.player.enable";
 const KeyMusicPlayerPlaylistID: SettingKey = "music.player.playlist_id";
 const KeyMusicPlayerCustomPlaylist: SettingKey = "music.player.custom_playlist";
+const KeyMusicAPIBaseURL: SettingKey = "music.api.base_url";
 const KeyMusicVinylBackground: SettingKey = "music.vinyl.background";
 const KeyMusicVinylOuter: SettingKey = "music.vinyl.outer";
 const KeyMusicVinylInner: SettingKey = "music.vinyl.inner";
@@ -510,6 +511,7 @@ export const constant = {
   KeyMusicPlayerEnable,
   KeyMusicPlayerPlaylistID,
   KeyMusicPlayerCustomPlaylist,
+  KeyMusicAPIBaseURL,
   KeyMusicVinylBackground,
   KeyMusicVinylOuter,
   KeyMusicVinylInner,

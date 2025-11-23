@@ -123,7 +123,7 @@ const formData = computed({
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.5;
-  color: #909399;
+  color: var(--anzhiyu-secondtext);
 }
 
 .el-divider {
@@ -131,12 +131,22 @@ const formData = computed({
 
   h3 {
     margin: 0;
-    color: #606266;
+    color: var(--anzhiyu-fontcolor);
+  }
+
+  :deep(.el-divider__text) {
+    background-color: var(--anzhiyu-background);
   }
 }
 
 .el-image {
   border: var(--style-border);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: scale(1.02);
+    box-shadow: var(--anzhiyu-shadow-border);
+  }
 }
 
 .logo-inputs {
@@ -145,6 +155,42 @@ const formData = computed({
   .logo-input-item {
     &:first-child {
       margin-bottom: 10px;
+    }
+  }
+}
+
+// 暗色模式下的输入框优化
+@media (prefers-color-scheme: dark) {
+  :deep(.el-input__wrapper) {
+    background-color: var(--el-fill-color-blank);
+    border-color: var(--el-border-color-darker);
+
+    &:hover {
+      border-color: var(--el-border-color);
+    }
+
+    &.is-focus {
+      background-color: var(--el-bg-color);
+      border-color: var(--el-color-primary);
+      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+    }
+  }
+}
+
+// 手动切换暗色模式支持
+html.dark & {
+  :deep(.el-input__wrapper) {
+    background-color: var(--el-fill-color-blank);
+    border-color: var(--el-border-color-darker);
+
+    &:hover {
+      border-color: var(--el-border-color);
+    }
+
+    &.is-focus {
+      background-color: var(--el-bg-color);
+      border-color: var(--el-color-primary);
+      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
     }
   }
 }

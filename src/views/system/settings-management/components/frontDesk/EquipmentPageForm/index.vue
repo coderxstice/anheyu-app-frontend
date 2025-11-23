@@ -56,7 +56,7 @@ const handleBannerUpdate = (newBanner: EquipmentPageSettingsInfo["banner"]) => {
 
   h3 {
     margin: 0;
-    color: #606266;
+    color: var(--anzhiyu-fontcolor, #606266);
   }
 }
 </style>

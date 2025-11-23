@@ -284,6 +284,7 @@ const handleImportConfig = () => {
 
   h1 {
     margin: 0;
+    color: var(--anzhiyu-fontcolor);
   }
 
   .config-actions {
@@ -300,12 +301,129 @@ const handleImportConfig = () => {
 .highlight-focus {
   background-color: var(--el-color-warning-light-9);
   border-radius: 8px;
+
+  // 暗色模式优化
+  @media (prefers-color-scheme: dark) {
+    background-color: color-mix(
+      in srgb,
+      var(--el-color-warning) 15%,
+      transparent
+    );
+  }
+
+  html.dark & {
+    background-color: color-mix(
+      in srgb,
+      var(--el-color-warning) 15%,
+      transparent
+    );
+  }
 }
 
 .form-item-help {
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.5;
-  color: #909399;
+  color: var(--anzhiyu-secondtext);
+}
+
+// 暗色模式下的输入框优化
+@media (prefers-color-scheme: dark) {
+  :deep(.el-input__wrapper) {
+    background-color: var(--el-fill-color-blank);
+    border-color: var(--el-border-color-darker);
+
+    &:hover {
+      border-color: var(--el-border-color);
+    }
+
+    &.is-focus {
+      background-color: var(--el-bg-color);
+      border-color: var(--el-color-primary);
+      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+    }
+  }
+
+  :deep(.el-textarea__inner) {
+    background-color: var(--el-fill-color-blank);
+    border-color: var(--el-border-color-darker);
+    color: var(--el-text-color-primary);
+
+    &:hover {
+      border-color: var(--el-border-color);
+    }
+
+    &:focus {
+      background-color: var(--el-bg-color);
+      border-color: var(--el-color-primary);
+      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+    }
+  }
+
+  :deep(.el-select) {
+    .el-input__wrapper {
+      background-color: var(--el-fill-color-blank);
+      border-color: var(--el-border-color-darker);
+
+      &:hover {
+        border-color: var(--el-border-color);
+      }
+
+      &.is-focus {
+        background-color: var(--el-bg-color);
+        border-color: var(--el-color-primary);
+      }
+    }
+  }
+}
+
+// 手动切换暗色模式支持
+html.dark & {
+  :deep(.el-input__wrapper) {
+    background-color: var(--el-fill-color-blank);
+    border-color: var(--el-border-color-darker);
+
+    &:hover {
+      border-color: var(--el-border-color);
+    }
+
+    &.is-focus {
+      background-color: var(--el-bg-color);
+      border-color: var(--el-color-primary);
+      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+    }
+  }
+
+  :deep(.el-textarea__inner) {
+    background-color: var(--el-fill-color-blank);
+    border-color: var(--el-border-color-darker);
+    color: var(--el-text-color-primary);
+
+    &:hover {
+      border-color: var(--el-border-color);
+    }
+
+    &:focus {
+      background-color: var(--el-bg-color);
+      border-color: var(--el-color-primary);
+      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+    }
+  }
+
+  :deep(.el-select) {
+    .el-input__wrapper {
+      background-color: var(--el-fill-color-blank);
+      border-color: var(--el-border-color-darker);
+
+      &:hover {
+        border-color: var(--el-border-color);
+      }
+
+      &.is-focus {
+        background-color: var(--el-bg-color);
+        border-color: var(--el-color-primary);
+      }
+    }
+  }
 }
 </style>

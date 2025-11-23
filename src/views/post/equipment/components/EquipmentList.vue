@@ -144,6 +144,7 @@ const handleCommentClick = (item: EquipmentItem) => {
   .goodthings-title {
     margin: 1rem 0;
     line-height: 1;
+    color: var(--anzhiyu-fontcolor);
   }
 
   .goodthings-item-description {
@@ -191,6 +192,7 @@ const handleCommentClick = (item: EquipmentItem) => {
           text-overflow: ellipsis;
           white-space: nowrap;
           cursor: pointer;
+          color: var(--anzhiyu-fontcolor);
 
           &:hover {
             color: var(--anzhiyu-main);
@@ -222,11 +224,12 @@ const handleCommentClick = (item: EquipmentItem) => {
         a.equipment-item-content-item-link {
           padding: 4px 8px;
           font-size: 12px;
-          color: inherit;
+          color: var(--anzhiyu-fontcolor);
           text-decoration: none;
           cursor: pointer;
           background: var(--anzhiyu-gray-op);
           border-radius: 8px;
+          transition: all 0.3s ease;
 
           &:hover {
             color: var(--anzhiyu-white);
@@ -241,6 +244,7 @@ const handleCommentClick = (item: EquipmentItem) => {
           width: 100%;
           height: 200px;
           background: var(--anzhiyu-secondbg);
+          border-bottom: var(--style-border-always);
         }
 
         img.equipment-item-content-item-image {

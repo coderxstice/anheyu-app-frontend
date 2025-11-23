@@ -181,6 +181,11 @@ const handleUpdate = () => {
 
   .global-config {
     margin-bottom: 20px;
+    padding: 20px;
+    background: var(--anzhiyu-secondbg, #f8f9fa);
+    border-radius: 8px;
+    border: var(--style-border-always);
+    transition: all 0.3s ease;
 
     .el-form-item {
       margin-bottom: 24px;
@@ -190,20 +195,117 @@ const handleUpdate = () => {
       margin-top: 8px;
       font-size: 13px;
       line-height: 1.5;
-      color: #909399;
+      color: var(--anzhiyu-secondtext, #909399);
+    }
+
+    // 暗色模式优化
+    @media (prefers-color-scheme: dark) {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    html.dark & {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
   }
 
   :deep(.el-collapse-item__header) {
     font-size: 15px;
     font-weight: 500;
-    color: #303133;
+    color: var(--anzhiyu-fontcolor, #303133);
+    transition: color 0.3s ease;
+
+    // 暗色模式优化
+    @media (prefers-color-scheme: dark) {
+      background-color: var(--el-fill-color-light);
+    }
+
+    html.dark & {
+      background-color: var(--el-fill-color-light);
+    }
   }
 
   :deep(.el-collapse-item__content) {
     padding: 20px;
-    background: #f8f9fa;
+    background: var(--anzhiyu-secondbg, #f8f9fa);
     border-radius: 4px;
+    transition: all 0.3s ease;
+
+    // 暗色模式优化
+    @media (prefers-color-scheme: dark) {
+      background: var(--anzhiyu-card-bg);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    html.dark & {
+      background: var(--anzhiyu-card-bg);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+// 分割线暗色模式
+:deep(.el-divider) {
+  margin: 40px 0 28px;
+
+  h3 {
+    color: var(--anzhiyu-fontcolor, #606266);
+  }
+
+  .el-divider__text {
+    background-color: var(--anzhiyu-background);
+    color: var(--anzhiyu-fontcolor);
+  }
+}
+
+// 暗色模式下的输入框优化
+@media (prefers-color-scheme: dark) {
+  :deep(.el-input__wrapper) {
+    background-color: var(--el-fill-color-blank);
+    border-color: var(--el-border-color-darker);
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: var(--el-border-color);
+    }
+
+    &.is-focus {
+      background-color: var(--el-bg-color);
+      border-color: var(--el-color-primary);
+      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+    }
+  }
+
+  :deep(.el-input-number) {
+    .el-input__wrapper {
+      background-color: var(--el-fill-color-blank);
+      border-color: var(--el-border-color-darker);
+    }
+  }
+}
+
+// 手动切换暗色模式支持
+html.dark & {
+  :deep(.el-input__wrapper) {
+    background-color: var(--el-fill-color-blank);
+    border-color: var(--el-border-color-darker);
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: var(--el-border-color);
+    }
+
+    &.is-focus {
+      background-color: var(--el-bg-color);
+      border-color: var(--el-color-primary);
+      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+    }
+  }
+
+  :deep(.el-input-number) {
+    .el-input__wrapper {
+      background-color: var(--el-fill-color-blank);
+      border-color: var(--el-border-color-darker);
+    }
   }
 }
 </style>

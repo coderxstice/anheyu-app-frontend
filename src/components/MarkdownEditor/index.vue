@@ -22,6 +22,14 @@ const emit = defineEmits<{
 const siteConfigStore = useSiteConfigStore();
 const { showSnackbar } = useSnackbar();
 
+// 获取音乐API基础地址
+const getMusicAPIBaseURL = (): string => {
+  const apiBaseURL = siteConfigStore.siteConfig?.music?.api?.base_url;
+  return apiBaseURL && apiBaseURL.trim() !== ""
+    ? apiBaseURL.trim()
+    : "https://metings.qjqq.cn";
+};
+
 // 动态导入的编辑器组件和加载状态
 const MdEditorComponent = ref<any>(null);
 const isEditorLoading = ref(true);
@@ -181,7 +189,8 @@ const enrichMusicPlayers = async (doc: Document): Promise<void> => {
       formData.append("level", "exhigh");
       formData.append("type", "json");
 
-      let response = await fetch("https://metings.qjqq.cn/Song_V1", {
+      const apiBaseURL = getMusicAPIBaseURL();
+      let response = await fetch(`${apiBaseURL}/Song_V1`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: formData
@@ -197,7 +206,7 @@ const enrichMusicPlayers = async (doc: Document): Promise<void> => {
         standardFormData.append("level", "standard");
         standardFormData.append("type", "json");
 
-        response = await fetch("https://metings.qjqq.cn/Song_V1", {
+        response = await fetch(`${apiBaseURL}/Song_V1`, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: standardFormData
@@ -677,12 +686,13 @@ const initMusicPlayer = (player: HTMLElement) => {
     try {
       // 尝试获取 exhigh 音质
       console.log("[音乐播放器] 尝试获取 exhigh 音质");
+      const apiBaseURL = getMusicAPIBaseURL();
       const formData = new URLSearchParams();
       formData.append("url", neteaseId);
       formData.append("level", "exhigh");
       formData.append("type", "json");
 
-      const response = await fetch("https://metings.qjqq.cn/Song_V1", {
+      const response = await fetch(`${apiBaseURL}/Song_V1`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: formData
@@ -696,14 +706,11 @@ const initMusicPlayer = (player: HTMLElement) => {
         standardFormData.append("level", "standard");
         standardFormData.append("type", "json");
 
-        const standardResponse = await fetch(
-          "https://metings.qjqq.cn/Song_V1",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: standardFormData
-          }
-        );
+        const standardResponse = await fetch(`${apiBaseURL}/Song_V1`, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: standardFormData
+        });
 
         if (!standardResponse.ok) {
           console.error("[音乐播放器] 所有音质都获取失败");
@@ -739,7 +746,7 @@ const initMusicPlayer = (player: HTMLElement) => {
       standardFormData.append("level", "standard");
       standardFormData.append("type", "json");
 
-      const standardResponse = await fetch("https://metings.qjqq.cn/Song_V1", {
+      const standardResponse = await fetch(`${apiBaseURL}/Song_V1`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: standardFormData

@@ -1061,6 +1061,12 @@ const frontDeskDescriptors: SettingDescriptor[] = [
     type: "string"
   },
   {
+    frontendPath: "frontDesk.home.music.api.base_url",
+    backendKey: constant.KeyMusicAPIBaseURL,
+    defaultValue: "https://metings.qjqq.cn",
+    type: "string"
+  },
+  {
     frontendPath: "frontDesk.home.music.vinyl.background",
     backendKey: constant.KeyMusicVinylBackground,
     defaultValue: "/static/img/music-vinyl-background.png",

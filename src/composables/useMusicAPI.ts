@@ -41,6 +41,14 @@ export function useMusicAPI() {
   const CACHE_KEY = "anheyu-playlist-cache";
   const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7天缓存
 
+  // 从配置获取音乐API基础地址
+  const getMusicAPIBaseURL = (): string => {
+    const apiBaseURL = get(siteConfigStore.siteConfig, "music.api.base_url");
+    return apiBaseURL && apiBaseURL.trim() !== ""
+      ? apiBaseURL.trim()
+      : "https://metings.qjqq.cn";
+  };
+
   // 从配置获取当前播放列表ID
   const getCurrentPlaylistId = (): string => {
     // 优先从 siteConfig 中获取设置值
@@ -437,7 +445,8 @@ export function useMusicAPI() {
 
       console.log(` [Song_V1 API] 直接调用 - ID: ${songId}, 音质: ${level}`);
 
-      const response = await fetch("https://metings.qjqq.cn/Song_V1", {
+      const apiBaseURL = getMusicAPIBaseURL();
+      const response = await fetch(`${apiBaseURL}/Song_V1`, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded"

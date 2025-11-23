@@ -706,6 +706,24 @@
       json中的内容作为歌单列表，如果json内容有误将无法显示音乐。
     </div>
   </el-form-item>
+  <el-form-item label="音乐API地址">
+    <el-input
+      :model-value="model.music?.api?.base_url || ''"
+      placeholder="https://metings.qjqq.cn"
+      clearable
+      @update:model-value="updateMusicAPIBaseURL"
+    />
+    <div
+      style="
+        font-size: 12px;
+        color: var(--el-text-color-secondary);
+        margin-top: 8px;
+      "
+    >
+      音乐API基础地址（不带末尾斜杠），用于获取歌曲信息和播放地址。默认为
+      https://metings.qjqq.cn
+    </div>
+  </el-form-item>
   <el-form-item label="唱片背景图">
     <el-input
       :model-value="model.music?.vinyl?.background || ''"
@@ -1640,6 +1658,19 @@ const updateMusicPlayerCustomPlaylist = (newPlaylist: string) => {
       player: {
         ...model.value.music?.player,
         custom_playlist: newPlaylist
+      }
+    }
+  };
+};
+
+const updateMusicAPIBaseURL = (newURL: string) => {
+  model.value = {
+    ...model.value,
+    music: {
+      ...model.value.music,
+      api: {
+        ...model.value.music?.api,
+        base_url: newURL
       }
     }
   };

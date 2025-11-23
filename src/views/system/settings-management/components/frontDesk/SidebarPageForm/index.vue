@@ -270,6 +270,134 @@ const updateSocials = (jsonString: string) => {
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.5;
-  color: #909399;
+  color: var(--anzhiyu-secondtext);
+
+  code {
+    background-color: var(--anzhiyu-card-bg-grey);
+    color: var(--anzhiyu-theme);
+    padding: 2px 6px;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+
+    // 暗色模式优化
+    @media (prefers-color-scheme: dark) {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    html.dark & {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+:deep(.el-divider) {
+  margin: 40px 0 28px;
+
+  .el-divider__text {
+    background-color: var(--anzhiyu-background);
+    color: var(--anzhiyu-fontcolor);
+  }
+}
+
+// 暗色模式下的输入框优化
+@media (prefers-color-scheme: dark) {
+  :deep(.el-input__wrapper) {
+    background-color: var(--el-fill-color-blank);
+    border-color: var(--el-border-color-darker);
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: var(--el-border-color);
+    }
+
+    &.is-focus {
+      background-color: var(--el-bg-color);
+      border-color: var(--el-color-primary);
+      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+    }
+  }
+
+  :deep(.el-textarea__inner) {
+    background-color: var(--el-fill-color-blank);
+    border-color: var(--el-border-color-darker);
+    color: var(--el-text-color-primary);
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: var(--el-border-color);
+    }
+
+    &:focus {
+      background-color: var(--el-bg-color);
+      border-color: var(--el-color-primary);
+      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+    }
+  }
+
+  :deep(.el-switch) {
+    &.is-checked {
+      .el-switch__core {
+        background-color: var(--el-color-primary);
+      }
+    }
+  }
+
+  :deep(.el-input-number) {
+    .el-input__wrapper {
+      background-color: var(--el-fill-color-blank);
+      border-color: var(--el-border-color-darker);
+    }
+  }
+}
+
+// 手动切换暗色模式支持
+html.dark & {
+  :deep(.el-input__wrapper) {
+    background-color: var(--el-fill-color-blank);
+    border-color: var(--el-border-color-darker);
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: var(--el-border-color);
+    }
+
+    &.is-focus {
+      background-color: var(--el-bg-color);
+      border-color: var(--el-color-primary);
+      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+    }
+  }
+
+  :deep(.el-textarea__inner) {
+    background-color: var(--el-fill-color-blank);
+    border-color: var(--el-border-color-darker);
+    color: var(--el-text-color-primary);
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: var(--el-border-color);
+    }
+
+    &:focus {
+      background-color: var(--el-bg-color);
+      border-color: var(--el-color-primary);
+      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+    }
+  }
+
+  :deep(.el-switch) {
+    &.is-checked {
+      .el-switch__core {
+        background-color: var(--el-color-primary);
+      }
+    }
+  }
+
+  :deep(.el-input-number) {
+    .el-input__wrapper {
+      background-color: var(--el-fill-color-blank);
+      border-color: var(--el-border-color-darker);
+    }
+  }
 }
 </style>
