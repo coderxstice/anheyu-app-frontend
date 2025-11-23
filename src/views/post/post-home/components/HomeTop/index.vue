@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useArticleStore } from "@/store/modules/articleStore";
 import { initLazyLoad, destroyLazyLoad } from "@/utils/lazyload";
@@ -10,6 +11,7 @@ defineOptions({
 
 const siteConfigStore = useSiteConfigStore();
 const articleStore = useArticleStore();
+const router = useRouter();
 
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);
 const homeTopConfig = computed(() => siteConfig.value?.HOME_TOP);
@@ -35,6 +37,42 @@ const expandTopGroup = () => {
 };
 const collapseTopGroup = () => {
   isTopGroupExpanded.value = false;
+};
+
+/**
+ * 处理分类点击事件
+ * @param item - 分类项配置
+ * @param event - 点击事件
+ */
+const handleCategoryClick = (item: any, event: MouseEvent) => {
+  event.preventDefault();
+
+  const path = item.path;
+  const isExternal = item.isExternal ?? false;
+
+  // 判断是否为外部链接（以 http:// 或 https:// 开头）
+  const isExternalUrl = /^https?:\/\//.test(path);
+
+  if (isExternalUrl) {
+    // 外部链接
+    if (isExternal) {
+      // 新窗口打开
+      window.open(path, "_blank");
+    } else {
+      // 当前页面打开
+      window.location.href = path;
+    }
+  } else {
+    // 内部链接
+    if (isExternal) {
+      // 新窗口打开（使用 router 的方式打开新窗口）
+      const routeUrl = router.resolve({ path });
+      window.open(routeUrl.href, "_blank");
+    } else {
+      // 当前页面打开
+      router.push({ path });
+    }
+  }
 };
 
 let observer: IntersectionObserver | null = null;
@@ -134,10 +172,10 @@ const creativityPairs = computed(() => {
           :key="item.name"
           class="category-item"
         >
-          <router-link
+          <a
             class="category-button"
             :style="{ background: item.background }"
-            :to="item.path"
+            @click="handleCategoryClick(item, $event)"
           >
             <span class="category-button-text">{{ item.name }}</span>
             <!-- 支持HTTP链接图标 -->
@@ -157,7 +195,7 @@ const creativityPairs = computed(() => {
               :class="['anzhiyufont', item.icon]"
               class="category-icon"
             />
-          </router-link>
+          </a>
         </div>
       </div>
     </div>
