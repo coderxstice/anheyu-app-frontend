@@ -59,21 +59,28 @@ const goToCategory = (categoryName: string) => {
   if (homeCategory && homeCategory.path) {
     // 如果配置了自定义路径，使用配置的路径和打开方式
     const path = homeCategory.path;
-    const isExternal = homeCategory.isExternal;
+    const isExternal = homeCategory.isExternal ?? false;
 
-    // 判断是否为外部链接
-    if (path.match(/^https?:\/\//)) {
+    // 判断是否为外部链接（以 http:// 或 https:// 开头）
+    const isExternalUrl = /^https?:\/\//.test(path);
+
+    if (isExternalUrl) {
       // 外部链接
       if (isExternal) {
+        // 新窗口打开
         window.open(path, "_blank");
       } else {
+        // 当前页面打开
         window.location.href = path;
       }
     } else {
       // 内部链接
       if (isExternal) {
-        window.open(path, "_blank");
+        // 新窗口打开（使用 router 的方式打开新窗口）
+        const routeUrl = router.resolve({ path });
+        window.open(routeUrl.href, "_blank");
       } else {
+        // 当前页面打开
         router.push({ path });
       }
     }
