@@ -191,9 +191,9 @@ defineExpose({ getRef });
         <re-col :value="24" :xs="24" :sm="24">
           <el-form-item label="导入方式">
             <el-radio-group v-model="newFormInline.importMode">
-              <el-radio label="urls">🔗 粘贴链接（一行一个）</el-radio>
-              <el-radio label="json">📝 粘贴 JSON 数据</el-radio>
-              <el-radio label="file">📁 上传文件</el-radio>
+              <el-radio value="urls">🔗 粘贴链接（一行一个）</el-radio>
+              <el-radio value="json">📝 粘贴 JSON 数据</el-radio>
+              <el-radio value="file">📁 上传文件</el-radio>
             </el-radio-group>
           </el-form-item>
         </re-col>

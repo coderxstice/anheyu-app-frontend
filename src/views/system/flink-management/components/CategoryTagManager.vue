@@ -181,11 +181,11 @@
         </el-form-item>
         <el-form-item label="样式" prop="style">
           <el-radio-group v-model="categoryForm.style">
-            <el-radio-button label="card">
+            <el-radio-button value="card">
               <el-icon><CreditCard /></el-icon>
               卡片样式
             </el-radio-button>
-            <el-radio-button label="list">
+            <el-radio-button value="list">
               <el-icon><List /></el-icon>
               列表样式
             </el-radio-button>

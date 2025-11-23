@@ -11,8 +11,8 @@
       <el-form-item :label="`${pageName}背景媒体类型`">
         <div>
           <el-radio-group v-model="localValue.mediaType" @change="handleUpdate">
-            <el-radio label="image">图片</el-radio>
-            <el-radio label="video">视频</el-radio>
+            <el-radio value="image">图片</el-radio>
+            <el-radio value="video">视频</el-radio>
           </el-radio-group>
           <div class="form-item-help">选择使用图片还是视频作为背景</div>
         </div>
