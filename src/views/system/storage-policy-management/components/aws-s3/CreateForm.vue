@@ -66,7 +66,28 @@ const rules = reactive<FormRules>({
     { required: true, message: "Secret Access Key 不能为空", trigger: "blur" }
   ],
   virtual_path: [
-    { required: true, message: "应用内挂载路径不能为空", trigger: "blur" }
+    { required: true, message: "应用内挂载路径不能为空", trigger: "blur" },
+    {
+      pattern: /^\/[a-zA-Z0-9_-]+$/,
+      message:
+        "路径必须以 / 开头，只能包含字母、数字、下划线和连字符，且只能是一级目录（如 /s3）",
+      trigger: "blur"
+    },
+    {
+      validator: (rule, value, callback) => {
+        const pathWithoutSlash = value.replace(/^\//, "");
+        if (pathWithoutSlash.includes("/")) {
+          callback(
+            new Error(
+              "只允许一级路径，不能包含多级目录（如 /data/s3 是不允许的）"
+            )
+          );
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur"
+    }
   ]
 });
 
@@ -106,7 +127,18 @@ defineExpose({ submitForm });
         v-model="formData.virtual_path"
         placeholder="例如 /s3 或 /aws"
       />
-      <div class="form-item-help">此策略在应用内部的访问路径，需保证唯一。</div>
+      <div class="form-item-help">
+        此策略在应用内部的访问路径，<strong>需保证唯一</strong>，<strong
+          style="color: var(--anzhiyu-yellow)"
+          >只允许一级路径</strong
+        >。<br />
+        <span style="color: var(--anzhiyu-green)"
+          >✓ 正确示例：/s3、/aws、/aws-s3</span
+        ><br />
+        <span style="color: var(--anzhiyu-red)"
+          >✗ 错误示例：/data/s3、/storage/aws</span
+        >
+      </div>
     </el-form-item>
 
     <div class="info-block">

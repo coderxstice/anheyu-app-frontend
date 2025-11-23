@@ -23,7 +23,23 @@ const rules = reactive<FormRules>({
     { required: true, message: "应用内挂载路径不能为空", trigger: "blur" },
     {
       pattern: /^\/[a-zA-Z0-9_-]+$/,
-      message: "路径必须以 / 开头，只能包含字母、数字、下划线和连字符",
+      message:
+        "路径必须以 / 开头，只能包含字母、数字、下划线和连字符，且只能是一级目录（如 /local）",
+      trigger: "blur"
+    },
+    {
+      validator: (rule, value, callback) => {
+        const pathWithoutSlash = value.replace(/^\//, "");
+        if (pathWithoutSlash.includes("/")) {
+          callback(
+            new Error(
+              "只允许一级路径，不能包含多级目录（如 /data/local 是不允许的）"
+            )
+          );
+        } else {
+          callback();
+        }
+      },
       trigger: "blur"
     }
   ]
@@ -78,7 +94,16 @@ defineExpose({ submitForm });
         placeholder="例如 /comments 或 /articles"
       />
       <div class="form-item-help">
-        文件的访问路径，<strong>需保证唯一性</strong>。例如：/comments、/articles、/uploads<br />
+        文件的访问路径，<strong>需保证唯一性</strong>，<strong
+          style="color: var(--anzhiyu-yellow)"
+          >只允许一级路径</strong
+        >。<br />
+        <span style="color: var(--anzhiyu-green)"
+          >✓ 正确示例：/comments、/articles、/uploads</span
+        ><br />
+        <span style="color: var(--anzhiyu-red)"
+          >✗ 错误示例：/data/comments、/storage/articles</span
+        ><br />
         <span style="color: var(--anzhiyu-blue); font-size: 11px">
           实际存储位置：data/storage{{
             formData.virtual_path ? formData.virtual_path : "/路径名"
@@ -105,6 +130,10 @@ defineExpose({ submitForm });
       <ul>
         <li>文件将保存在应用的 data/storage 目录下</li>
         <li>存储路径必须唯一，不能与其他策略重复</li>
+        <li>
+          <strong style="color: var(--anzhiyu-yellow)">只允许一级路径</strong
+          >，例如 /comments（正确）而不是 /data/comments（错误）
+        </li>
         <li>建议使用有意义的路径名，方便后期管理</li>
         <li>例如：/comments 将存储到 data/storage/comments/</li>
       </ul>
