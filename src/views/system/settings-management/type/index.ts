@@ -34,10 +34,14 @@ export interface SiteInfo {
 export interface PageOneImageItem {
   enable: boolean;
   background: string;
+  mediaType: "image" | "video"; // 媒体类型：图片或视频
   mainTitle: string;
   subTitle: string;
   typingEffect: boolean;
   hitokoto: boolean;
+  videoAutoplay: boolean; // 视频自动播放
+  videoLoop: boolean; // 视频循环播放
+  videoMuted: boolean; // 视频静音
 }
 
 /**
@@ -65,6 +69,8 @@ export interface PageSittingInfo {
   customPostTopHTML: string;
   customPostBottomHTML: string;
   oneImageConfig: PageOneImageConfig;
+  hitokotoAPI: string; // 一言API地址
+  typingSpeed: number; // 打字机效果速度（毫秒/字符）
 }
 
 /**

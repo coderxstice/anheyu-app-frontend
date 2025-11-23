@@ -8,18 +8,70 @@
     </el-form-item>
 
     <template v-if="localValue.enable">
-      <el-form-item :label="`${pageName}全屏背景图片URL`">
+      <el-form-item :label="`${pageName}背景媒体类型`">
+        <div>
+          <el-radio-group v-model="localValue.mediaType" @change="handleUpdate">
+            <el-radio label="image">图片</el-radio>
+            <el-radio label="video">视频</el-radio>
+          </el-radio-group>
+          <div class="form-item-help">选择使用图片还是视频作为背景</div>
+        </div>
+      </el-form-item>
+
+      <el-form-item
+        :label="
+          localValue.mediaType === 'image'
+            ? `${pageName}全屏背景图片URL`
+            : `${pageName}全屏背景视频URL`
+        "
+      >
         <div>
           <el-input
             v-model="localValue.background"
-            placeholder="请输入背景图片URL"
+            :placeholder="
+              localValue.mediaType === 'image'
+                ? '请输入背景图片URL'
+                : '请输入背景视频URL（支持 .mp4, .webm 等格式）'
+            "
             @input="handleUpdate"
           />
           <div class="form-item-help">
-            全屏背景图片的URL地址，建议使用高清大图
+            {{
+              localValue.mediaType === "image"
+                ? "全屏背景图片的URL地址，建议使用高清大图"
+                : "全屏背景视频的URL地址，建议使用压缩优化后的视频文件"
+            }}
           </div>
         </div>
       </el-form-item>
+
+      <template v-if="localValue.mediaType === 'video'">
+        <el-form-item :label="`${pageName}视频自动播放`">
+          <div>
+            <el-switch
+              v-model="localValue.videoAutoplay"
+              @change="handleUpdate"
+            />
+            <div class="form-item-help">开启后视频将自动播放</div>
+          </div>
+        </el-form-item>
+
+        <el-form-item :label="`${pageName}视频循环播放`">
+          <div>
+            <el-switch v-model="localValue.videoLoop" @change="handleUpdate" />
+            <div class="form-item-help">开启后视频将循环播放</div>
+          </div>
+        </el-form-item>
+
+        <el-form-item :label="`${pageName}视频静音`">
+          <div>
+            <el-switch v-model="localValue.videoMuted" @change="handleUpdate" />
+            <div class="form-item-help">
+              开启后视频将静音播放（建议开启，否则可能影响用户体验）
+            </div>
+          </div>
+        </el-form-item>
+      </template>
 
       <el-form-item :label="`${pageName}主标题`">
         <div>
@@ -78,10 +130,14 @@ const emit = defineEmits(["update:modelValue"]);
 const localValue = reactive<PageOneImageItem>({
   enable: props.modelValue.enable ?? false,
   background: props.modelValue.background ?? "",
+  mediaType: props.modelValue.mediaType ?? "image",
   mainTitle: props.modelValue.mainTitle ?? "",
   subTitle: props.modelValue.subTitle ?? "",
   typingEffect: props.modelValue.typingEffect ?? false,
-  hitokoto: props.modelValue.hitokoto ?? false
+  hitokoto: props.modelValue.hitokoto ?? false,
+  videoAutoplay: props.modelValue.videoAutoplay ?? true,
+  videoLoop: props.modelValue.videoLoop ?? true,
+  videoMuted: props.modelValue.videoMuted ?? true
 });
 
 watch(

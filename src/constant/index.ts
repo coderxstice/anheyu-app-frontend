@@ -59,6 +59,8 @@ const KeyCreativity: SettingKey = "CREATIVITY";
 
 // --- 页面一图流配置 ---
 const KeyPageOneImageConfig: SettingKey = "page.one_image.config";
+const KeyHitokotoAPI: SettingKey = "page.one_image.hitokoto_api";
+const KeyTypingSpeed: SettingKey = "page.one_image.typing_speed";
 
 // --- Sidebar 配置 ---
 const KeySidebarAuthorEnable: SettingKey = "sidebar.author.enable";
@@ -373,6 +375,8 @@ export const constant = {
 
   // --- 页面一图流配置 ---
   KeyPageOneImageConfig,
+  KeyHitokotoAPI,
+  KeyTypingSpeed,
 
   // --- Sidebar 配置 ---
   KeySidebarAuthorEnable,

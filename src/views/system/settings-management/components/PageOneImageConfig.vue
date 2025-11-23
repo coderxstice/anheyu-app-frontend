@@ -4,6 +4,40 @@
   </el-divider>
 
   <div class="one-image-config">
+    <!-- 全局配置 -->
+    <div class="global-config">
+      <el-form-item label="一言 API 地址">
+        <div>
+          <el-input
+            v-model="formData.hitokotoAPI"
+            placeholder="请输入一言API地址"
+            @input="handleUpdate"
+          />
+          <div class="form-item-help">
+            用于获取随机一言的 API 地址，默认为官方 API：https://v1.hitokoto.cn/
+          </div>
+        </div>
+      </el-form-item>
+
+      <el-form-item label="打字机效果速度（毫秒/字符）">
+        <div>
+          <el-input-number
+            v-model="formData.typingSpeed"
+            :min="10"
+            :max="500"
+            :step="10"
+            @change="handleUpdate"
+          />
+          <div class="form-item-help">
+            打字机效果的打字速度，单位为毫秒/字符。数值越小速度越快，建议范围
+            50-200
+          </div>
+        </div>
+      </el-form-item>
+    </div>
+
+    <el-divider />
+
     <el-collapse v-model="activePages" accordion>
       <!-- 首页配置 -->
       <el-collapse-item title="首页一图流配置" name="home">
@@ -62,34 +96,50 @@ const defaultOneImageConfig: PageOneImageConfig = {
   home: {
     enable: false,
     background: "",
+    mediaType: "image",
     mainTitle: "安和鱼",
     subTitle: "生活明朗，万物可爱",
     typingEffect: false,
-    hitokoto: false
+    hitokoto: false,
+    videoAutoplay: true,
+    videoLoop: true,
+    videoMuted: true
   },
   categories: {
     enable: false,
     background: "",
+    mediaType: "image",
     mainTitle: "安和鱼",
     subTitle: "生活明朗，万物可爱",
     typingEffect: false,
-    hitokoto: false
+    hitokoto: false,
+    videoAutoplay: true,
+    videoLoop: true,
+    videoMuted: true
   },
   tags: {
     enable: false,
     background: "",
+    mediaType: "image",
     mainTitle: "安和鱼",
     subTitle: "生活明朗，万物可爱",
     typingEffect: false,
-    hitokoto: false
+    hitokoto: false,
+    videoAutoplay: true,
+    videoLoop: true,
+    videoMuted: true
   },
   archives: {
     enable: false,
     background: "",
+    mediaType: "image",
     mainTitle: "安和鱼",
     subTitle: "生活明朗，万物可爱",
     typingEffect: false,
-    hitokoto: false
+    hitokoto: false,
+    videoAutoplay: true,
+    videoLoop: true,
+    videoMuted: true
   }
 };
 
@@ -128,6 +178,21 @@ const handleUpdate = () => {
 <style scoped lang="scss">
 .one-image-config {
   margin-top: 20px;
+
+  .global-config {
+    margin-bottom: 20px;
+
+    .el-form-item {
+      margin-bottom: 24px;
+    }
+
+    .form-item-help {
+      margin-top: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #909399;
+    }
+  }
 
   :deep(.el-collapse-item__header) {
     font-size: 15px;

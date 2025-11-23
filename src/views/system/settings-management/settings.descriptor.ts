@@ -181,6 +181,18 @@ const pageDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyPageOneImageConfig,
     defaultValue: {},
     type: "json"
+  },
+  {
+    frontendPath: "page.hitokotoAPI",
+    backendKey: constant.KeyHitokotoAPI,
+    defaultValue: "https://v1.hitokoto.cn/",
+    type: "string"
+  },
+  {
+    frontendPath: "page.typingSpeed",
+    backendKey: constant.KeyTypingSpeed,
+    defaultValue: 100,
+    type: "number"
   }
 ];
 
