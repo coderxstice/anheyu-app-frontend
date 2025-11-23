@@ -92,6 +92,6 @@ if (!formData.value.settings) {
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.5;
-  color: #999;
+  color: var(--anzhiyu-secondfontcolor);
 }
 </style>

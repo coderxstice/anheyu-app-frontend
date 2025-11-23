@@ -35,9 +35,18 @@ export function useDataThemeChange() {
     const config = getConfig();
     const storageLayout = storageLocal().getItem<StorageConfigs>(storageKey);
 
-    const initialDarkMode = storageLayout?.darkMode ?? config.DarkMode ?? false;
-    const initialOverallStyle =
-      storageLayout?.overallStyle ?? config.OverallStyle ?? "light";
+    // 确定默认主题模式：优先使用用户存储 > 后端配置 > 前端默认配置
+    let defaultThemeMode = config.OverallStyle ?? "light";
+
+    // 如果后端配置了 DEFAULT_THEME_MODE，且用户没有存储，则使用后端配置
+    if (!storageLayout && config.DEFAULT_THEME_MODE) {
+      defaultThemeMode =
+        config.DEFAULT_THEME_MODE === "dark" ? "dark" : "light";
+    }
+
+    const initialDarkMode =
+      storageLayout?.darkMode ?? defaultThemeMode === "dark";
+    const initialOverallStyle = storageLayout?.overallStyle ?? defaultThemeMode;
 
     if (initialOverallStyle === "system") {
       overallStyle.value = "system";

@@ -45,6 +45,7 @@ const KeyCustomJS: SettingKey = "CUSTOM_JS";
 const KeyCustomSidebar: SettingKey = "CUSTOM_SIDEBAR";
 const KeyCustomPostTopHTML: SettingKey = "CUSTOM_POST_TOP_HTML";
 const KeyCustomPostBottomHTML: SettingKey = "CUSTOM_POST_BOTTOM_HTML";
+const KeyDefaultThemeMode: SettingKey = "DEFAULT_THEME_MODE";
 const KeyUploadAllowedExtensions: SettingKey = "UPLOAD_ALLOWED_EXTENSIONS";
 const KeyUploadDeniedExtensions: SettingKey = "UPLOAD_DENIED_EXTENSIONS";
 const KeyEnableExternalLinkWarning: SettingKey = "ENABLE_EXTERNAL_LINK_WARNING";
@@ -362,6 +363,7 @@ export const constant = {
   KeyCustomSidebar,
   KeyCustomPostTopHTML,
   KeyCustomPostBottomHTML,
+  KeyDefaultThemeMode,
   KeyUploadAllowedExtensions,
   KeyUploadDeniedExtensions,
   KeyEnableExternalLinkWarning,

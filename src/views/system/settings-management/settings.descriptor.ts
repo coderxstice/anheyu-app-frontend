@@ -112,6 +112,12 @@ const siteDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyEnableRegistration,
     defaultValue: true,
     type: "boolean"
+  },
+  {
+    frontendPath: "site.defaultThemeMode",
+    backendKey: constant.KeyDefaultThemeMode,
+    defaultValue: "light",
+    type: "string"
   }
 ];
 
