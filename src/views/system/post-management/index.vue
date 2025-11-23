@@ -47,8 +47,8 @@ const selectionMode = ref(false);
 
 const statusOptions = [
   { value: "", label: "全部状态" },
-  { value: "PUBLISHED", label: "已发布", type: "success", color: "#67C23A" },
-  { value: "DRAFT", label: "草稿", type: "warning", color: "#E6A23C" },
+  { value: "PUBLISHED", label: "已发布", type: "success", color: "var(--anzhiyu-green)" },
+  { value: "DRAFT", label: "草稿", type: "warning", color: "var(--anzhiyu-yellow)" },
   { value: "ARCHIVED", label: "已归档", type: "info", color: "#909399" }
 ];
 
@@ -755,11 +755,11 @@ onMounted(() => {
     z-index: 1;
 
     &.status-published {
-      background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
+      background: linear-gradient(135deg, var(--anzhiyu-green) 0%, #85ce61 100%);
     }
 
     &.status-draft {
-      background: linear-gradient(135deg, #e6a23c 0%, #f0c78a 100%);
+      background: linear-gradient(135deg, var(--anzhiyu-yellow) 0%, #f0c78a 100%);
     }
 
     &.status-archived {

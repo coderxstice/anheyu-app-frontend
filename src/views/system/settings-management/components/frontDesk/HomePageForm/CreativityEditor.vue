@@ -347,10 +347,10 @@ const predefineColors = [
   "#1e90ff",
   "#c71585",
   "#42b883",
-  "#409eff",
-  "#67c23a",
-  "#e6a23c",
-  "#f56c6c",
+  "var(--anzhiyu-theme)",
+  "var(--anzhiyu-green)",
+  "var(--anzhiyu-yellow)",
+  "var(--anzhiyu-red)",
   "#909399",
   "#fff",
   "transparent"
@@ -370,7 +370,7 @@ watch(editingIndex, newVal => {
   } else if (newVal === -1) {
     editingSkill.value = {
       name: "",
-      color: "#409eff",
+      color: "var(--anzhiyu-theme)",
       icon: ""
     };
     iconType.value = "icon";
@@ -469,7 +469,7 @@ const saveEditingSkill = () => {
   margin-top: 24px;
 
   .skill-list-container {
-    background: var(--el-bg-color);
+    background: var(--anzhiyu-card-bg);
     border: 1px solid var(--el-border-color-light);
     border-radius: 8px;
     padding: 20px;
@@ -490,7 +490,7 @@ const saveEditingSkill = () => {
           margin: 0;
           font-size: 16px;
           font-weight: 600;
-          color: var(--el-text-color-primary);
+          color: var(--anzhiyu-fontcolor);
         }
       }
 
@@ -510,7 +510,7 @@ const saveEditingSkill = () => {
       }
 
       .skill-grid-item {
-        background: var(--el-fill-color-light);
+        background: var(--anzhiyu-secondbg);
         border: 2px solid var(--el-border-color-lighter);
         border-radius: 12px;
         padding: 20px;
@@ -521,7 +521,7 @@ const saveEditingSkill = () => {
 
         &:hover {
           transform: translateY(-2px);
-          border-color: var(--el-color-primary);
+          border-color: var(--anzhiyu-theme);
           box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 
           .skill-grid-actions {
@@ -553,12 +553,12 @@ const saveEditingSkill = () => {
 
         .skill-icon-font {
           font-size: 36px;
-          color: var(--el-text-color-primary);
+          color: var(--anzhiyu-fontcolor);
         }
 
         .skill-icon-placeholder {
           font-size: 32px;
-          color: var(--el-text-color-placeholder);
+          color: var(--anzhiyu-secondtext);
         }
 
         .skill-info {
@@ -568,7 +568,7 @@ const saveEditingSkill = () => {
         .skill-name {
           font-size: 16px;
           font-weight: 500;
-          color: var(--el-text-color-primary);
+          color: var(--anzhiyu-fontcolor);
         }
 
         .skill-grid-actions {
@@ -601,7 +601,7 @@ const saveEditingSkill = () => {
     display: flex;
     justify-content: center;
     padding: 20px;
-    background: var(--el-fill-color-lighter);
+    background: var(--anzhiyu-secondbg);
     border-radius: 8px;
 
     .skill-preview-item {
@@ -618,16 +618,16 @@ const saveEditingSkill = () => {
     .preview-name {
       font-size: 14px;
       font-weight: 500;
-      color: var(--el-text-color-primary);
+      color: var(--anzhiyu-fontcolor);
     }
   }
 
   .icon-help {
-    color: var(--el-color-info);
+    color: var(--anzhiyu-blue);
     cursor: help;
 
     &:hover {
-      color: var(--el-color-primary);
+      color: var(--anzhiyu-theme);
     }
   }
 }

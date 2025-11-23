@@ -235,12 +235,12 @@ onUnmounted(() => {
 }
 
 .grid-item:hover {
-  background-color: #f5f7fa;
+  background-color: var(--anzhiyu-secondbg);
 }
 
 .grid-item.selected {
-  background-color: var(--el-color-primary-light-9);
-  border-color: var(--el-color-primary);
+  background-color: var(--anzhiyu-theme-op-light);
+  border-color: var(--anzhiyu-theme);
 }
 
 .grid-item.is-uploading {
@@ -250,7 +250,7 @@ onUnmounted(() => {
 }
 
 .grid-item.is-disabled {
-  color: #a8abb2;
+  color: var(--anzhiyu-secondtext);
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -260,7 +260,7 @@ onUnmounted(() => {
 }
 
 .grid-item.is-disabled .file-icon {
-  color: #c0c4cc;
+  color: var(--anzhiyu-secondtext);
 }
 
 .item-icon {
@@ -289,7 +289,7 @@ onUnmounted(() => {
 
 .uploading-indicator {
   font-size: 24px;
-  color: var(--el-color-primary);
+  color: var(--anzhiyu-theme);
   animation: spin 1.5s linear infinite;
 }
 
@@ -322,7 +322,7 @@ onUnmounted(() => {
   justify-content: center;
   padding: 15px 0;
   font-size: 14px;
-  color: #909399;
+  color: var(--anzhiyu-secondtext);
 }
 
 .load-more-indicator .el-icon {
@@ -339,7 +339,7 @@ onUnmounted(() => {
   justify-content: center;
   padding: 0 0 20px;
   font-size: 13px;
-  color: #c0c4cc;
+  color: var(--anzhiyu-secondtext);
 }
 
 .grid-item:hover :deep(.thumbnail-image) {

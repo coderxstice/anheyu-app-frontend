@@ -251,7 +251,7 @@ const handleAvatarError = (event: Event, comment: AdminComment) => {
   padding: 16px;
   margin-bottom: 16px;
   cursor: pointer;
-  background-color: var(--el-bg-color);
+  background-color: var(--anzhiyu-card-bg);
   border: 1px solid var(--el-border-color-lighter);
   border-radius: 8px;
   transition: box-shadow 0.3s;
@@ -287,11 +287,11 @@ const handleAvatarError = (event: Event, comment: AdminComment) => {
 
   .nickname {
     font-weight: bold;
-    color: var(--el-text-color-primary);
+    color: var(--anzhiyu-fontcolor);
   }
 
   .reply-info {
-    color: var(--el-text-color-secondary);
+    color: var(--anzhiyu-secondtext);
   }
 }
 
@@ -303,14 +303,14 @@ const handleAvatarError = (event: Event, comment: AdminComment) => {
 .comment-content {
   font-size: 14px;
   line-height: 1.6;
-  color: var(--el-text-color-regular);
+  color: var(--anzhiyu-fontcolor);
 
   :deep(p) {
     margin: 0 0 8px;
   }
 
   :deep(a) {
-    color: var(--el-color-primary);
+    color: var(--anzhiyu-theme);
     text-decoration: none;
 
     &:hover {
@@ -343,7 +343,7 @@ const handleAvatarError = (event: Event, comment: AdminComment) => {
   justify-content: space-between;
   margin-top: 12px;
   font-size: 12px;
-  color: var(--el-text-color-secondary);
+  color: var(--anzhiyu-secondtext);
 }
 
 .meta-info {

@@ -1022,13 +1022,13 @@ onMounted(() => {
     .page-title {
       font-size: 28px;
       font-weight: 600;
-      color: var(--el-text-color-primary);
+      color: var(--anzhiyu-fontcolor);
       margin: 0 0 8px 0;
       line-height: 1.3;
     }
 
     .page-description {
-      color: var(--el-text-color-regular);
+      color: var(--anzhiyu-fontcolor);
       font-size: 16px;
       margin: 0;
       font-weight: 400;
@@ -1057,7 +1057,7 @@ onMounted(() => {
       .el-tabs__item {
         padding: 16px 24px;
         font-weight: 500;
-        color: var(--el-text-color-regular);
+        color: var(--anzhiyu-fontcolor);
         border: none;
 
         .tab-label {
@@ -1071,17 +1071,17 @@ onMounted(() => {
         }
 
         &.is-active {
-          color: var(--el-color-primary);
-          background: var(--el-color-primary-light-9);
+          color: var(--anzhiyu-theme);
+          background: var(--anzhiyu-theme-op-light);
         }
 
         &:hover {
-          color: var(--el-color-primary);
+          color: var(--anzhiyu-theme);
         }
       }
 
       .el-tabs__active-bar {
-        background-color: var(--el-color-primary);
+        background-color: var(--anzhiyu-theme);
         height: 3px;
       }
     }
@@ -1108,7 +1108,7 @@ onMounted(() => {
     margin-bottom: 24px;
 
     .stats-text {
-      color: var(--el-text-color-regular);
+      color: var(--anzhiyu-fontcolor);
       font-size: 14px;
       font-weight: 500;
     }
@@ -1137,7 +1137,7 @@ onMounted(() => {
     }
 
     .theme-card {
-      background: var(--el-bg-color);
+      background: var(--anzhiyu-card-bg);
       border: 1px solid var(--el-border-color-light);
       border-radius: 12px;
       overflow: hidden;
@@ -1147,12 +1147,12 @@ onMounted(() => {
       height: 100%;
 
       &:hover {
-        border-color: var(--el-border-color);
+        border-color: var(--anzhiyu-card-border);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
       }
 
       &.current-theme {
-        border-color: var(--el-color-success);
+        border-color: var(--anzhiyu-green);
         background: var(--el-color-success-light-9);
         position: relative;
 
@@ -1161,7 +1161,7 @@ onMounted(() => {
           position: absolute;
           top: 12px;
           right: 12px;
-          background: var(--el-color-success);
+          background: var(--anzhiyu-green);
           color: white;
           padding: 4px 8px;
           border-radius: 4px;
@@ -1175,7 +1175,7 @@ onMounted(() => {
         position: relative;
         height: 176px;
         overflow: hidden;
-        background: var(--el-fill-color-light);
+        background: var(--anzhiyu-secondbg);
 
         .preview-image {
           width: 100%;
@@ -1189,7 +1189,7 @@ onMounted(() => {
           display: flex;
           align-items: center;
           justify-content: center;
-          color: var(--el-text-color-placeholder);
+          color: var(--anzhiyu-secondtext);
 
           .placeholder-icon {
             font-size: 48px;
@@ -1210,7 +1210,7 @@ onMounted(() => {
             display: flex;
             align-items: center;
             gap: 4px;
-            background: #163bf3;
+            background: var(--anzhiyu-theme);
             color: white;
             padding: 4px 10px;
             border-radius: 6px;
@@ -1230,7 +1230,7 @@ onMounted(() => {
             font-weight: 500;
 
             &.type-pro {
-              background: linear-gradient(45deg, #f59e0b, #f97316);
+              background: linear-gradient(45deg, var(--anzhiyu-orange), #f97316);
               color: white;
             }
           }
@@ -1249,20 +1249,20 @@ onMounted(() => {
           .theme-title {
             font-size: 18px;
             font-weight: 600;
-            color: var(--el-text-color-primary);
+            color: var(--anzhiyu-fontcolor);
             margin: 0 0 4px 0;
             line-height: 1.3;
           }
 
           .theme-author {
             font-size: 14px;
-            color: var(--el-text-color-secondary);
+            color: var(--anzhiyu-secondtext);
             margin: 0;
           }
         }
 
         .theme-description {
-          color: var(--el-text-color-regular);
+          color: var(--anzhiyu-fontcolor);
           font-size: 14px;
           line-height: 1.5;
           margin: 0 0 16px 0;
@@ -1288,7 +1288,7 @@ onMounted(() => {
 
           .more-tags {
             font-size: 12px;
-            color: var(--el-text-color-secondary);
+            color: var(--anzhiyu-secondtext);
             font-weight: 500;
           }
         }
@@ -1304,14 +1304,14 @@ onMounted(() => {
             align-items: center;
             gap: 4px;
             font-size: 14px;
-            color: var(--el-text-color-secondary);
+            color: var(--anzhiyu-secondtext);
 
             .el-icon {
               font-size: 16px;
             }
 
             &.version {
-              background: var(--el-fill-color-light);
+              background: var(--anzhiyu-secondbg);
               padding: 2px 8px;
               border-radius: 4px;
               font-size: 12px;
@@ -1333,18 +1333,18 @@ onMounted(() => {
           padding: 8px 12px;
           background: linear-gradient(135deg, #fef3c7, #fbbf24);
           border-radius: 8px;
-          border: 1px solid #f59e0b;
+          border: var(--style-border-always);
 
           .price-label {
             font-size: 14px;
-            color: #92400e;
+            color: var(--anzhiyu-orange);
             font-weight: 500;
           }
 
           .price-value {
             font-size: 18px;
             font-weight: 600;
-            color: #92400e;
+            color: var(--anzhiyu-orange);
           }
         }
 
@@ -1364,13 +1364,13 @@ onMounted(() => {
             }
 
             &.pro-action {
-              background: linear-gradient(45deg, #f59e0b, #f97316);
-              border-color: #f59e0b;
+              background: linear-gradient(45deg, var(--anzhiyu-orange), #f97316);
+              border-color: var(--anzhiyu-orange);
               color: white;
 
               &:hover {
-                background: linear-gradient(45deg, #d97706, #ea580c);
-                border-color: #d97706;
+                background: linear-gradient(45deg, var(--anzhiyu-orange), #ea580c);
+                border-color: var(--anzhiyu-orange);
               }
 
               &:active {
@@ -1379,14 +1379,14 @@ onMounted(() => {
             }
 
             &.current-btn {
-              background: var(--el-color-success);
-              border-color: var(--el-color-success);
+              background: var(--anzhiyu-green);
+              border-color: var(--anzhiyu-green);
               color: white;
               cursor: not-allowed;
 
               &:hover {
-                background: var(--el-color-success);
-                border-color: var(--el-color-success);
+                background: var(--anzhiyu-green);
+                border-color: var(--anzhiyu-green);
               }
             }
           }
@@ -1394,14 +1394,14 @@ onMounted(() => {
           .action-secondary {
             width: 40px;
             border-radius: 8px;
-            border: 1px solid var(--el-border-color);
-            color: var(--el-text-color-regular);
+            border: var(--style-border-always);
+            color: var(--anzhiyu-fontcolor);
             &.el-button--danger {
               color: var(--anzhiyu-white);
             }
 
             &:hover {
-              background: var(--el-fill-color-light);
+              background: var(--anzhiyu-secondbg);
             }
 
             .el-icon {
@@ -1422,7 +1422,7 @@ onMounted(() => {
     .pagination {
       :deep(.el-pagination__total),
       :deep(.el-pagination__jump) {
-        color: var(--el-text-color-regular);
+        color: var(--anzhiyu-fontcolor);
         font-weight: 500;
       }
 

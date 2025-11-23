@@ -59,6 +59,8 @@ const KeyCreativity: SettingKey = "CREATIVITY";
 
 // --- 页面一图流配置 ---
 const KeyPageOneImageConfig: SettingKey = "page.one_image.config";
+const KeyHitokotoAPI: SettingKey = "page.one_image.hitokoto_api";
+const KeyTypingSpeed: SettingKey = "page.one_image.typing_speed";
 
 // --- Sidebar 配置 ---
 const KeySidebarAuthorEnable: SettingKey = "sidebar.author.enable";
@@ -225,6 +227,7 @@ const KeyAboutPageEnableCustomCode: SettingKey =
 const KeyMusicPlayerEnable: SettingKey = "music.player.enable";
 const KeyMusicPlayerPlaylistID: SettingKey = "music.player.playlist_id";
 const KeyMusicPlayerCustomPlaylist: SettingKey = "music.player.custom_playlist";
+const KeyMusicAPIBaseURL: SettingKey = "music.api.base_url";
 const KeyMusicVinylBackground: SettingKey = "music.vinyl.background";
 const KeyMusicVinylOuter: SettingKey = "music.vinyl.outer";
 const KeyMusicVinylInner: SettingKey = "music.vinyl.inner";
@@ -373,6 +376,8 @@ export const constant = {
 
   // --- 页面一图流配置 ---
   KeyPageOneImageConfig,
+  KeyHitokotoAPI,
+  KeyTypingSpeed,
 
   // --- Sidebar 配置 ---
   KeySidebarAuthorEnable,
@@ -506,6 +511,7 @@ export const constant = {
   KeyMusicPlayerEnable,
   KeyMusicPlayerPlaylistID,
   KeyMusicPlayerCustomPlaylist,
+  KeyMusicAPIBaseURL,
   KeyMusicVinylBackground,
   KeyMusicVinylOuter,
   KeyMusicVinylInner,

@@ -625,7 +625,7 @@ defineExpose({
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.5;
-  color: #909399;
+  color: var(--anzhiyu-secondtext);
 }
 
 .el-divider {
@@ -634,7 +634,11 @@ defineExpose({
   h3,
   h4 {
     margin: 0;
-    color: #606266;
+    color: var(--anzhiyu-fontcolor);
+  }
+
+  :deep(.el-divider__text) {
+    background-color: var(--anzhiyu-background);
   }
 }
 
@@ -644,11 +648,23 @@ defineExpose({
   gap: 20px 40px;
   margin-bottom: 20px;
   padding: 20px;
-  background-color: var(--el-fill-color-lighter);
+  background-color: var(--anzhiyu-secondbg);
   border-radius: 8px;
+  box-shadow: var(--anzhiyu-shadow-border);
+  border: var(--style-border-always);
+  transition: all 0.3s ease;
 
   .el-form-item {
     margin-bottom: 0;
+  }
+
+  // 暗色模式优化
+  @media (prefers-color-scheme: dark) {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  html.dark {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 }
 
@@ -658,20 +674,119 @@ defineExpose({
   .markdown-editor-wrapper {
     width: 100%;
     height: 500px;
-    border: 1px solid var(--el-border-color-light);
+    border: var(--style-border-always);
     border-radius: 4px;
     overflow: hidden;
+    background: var(--anzhiyu-card-bg);
+    transition: all 0.3s ease;
 
     :deep(.md-editor-container) {
       height: 100%;
+    }
+
+    // 暗色模式优化
+    @media (prefers-color-scheme: dark) {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    html.dark {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
   }
 
   .editor-tip {
     margin-top: 8px;
     font-size: 12px;
-    color: var(--el-text-color-secondary);
+    color: var(--anzhiyu-secondtext);
     line-height: 1.5;
+  }
+}
+
+// 暗色模式下的输入框优化
+@media (prefers-color-scheme: dark) {
+  :deep(.el-input__wrapper) {
+    background-color: var(--anzhiyu-card-bg);
+    border-color: var(--el-border-color-darker);
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: var(--anzhiyu-card-border);
+    }
+
+    &.is-focus {
+      background-color: var(--anzhiyu-card-bg);
+      border-color: var(--anzhiyu-theme);
+      box-shadow: 0 0 0 1px var(--anzhiyu-theme) inset;
+    }
+  }
+
+  :deep(.el-textarea__inner) {
+    background-color: var(--anzhiyu-card-bg);
+    border-color: var(--el-border-color-darker);
+    color: var(--anzhiyu-fontcolor);
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: var(--anzhiyu-card-border);
+    }
+
+    &:focus {
+      background-color: var(--anzhiyu-card-bg);
+      border-color: var(--anzhiyu-theme);
+      box-shadow: 0 0 0 1px var(--anzhiyu-theme) inset;
+    }
+  }
+
+  :deep(.el-switch) {
+    &.is-checked {
+      .el-switch__core {
+        background-color: var(--anzhiyu-theme);
+      }
+    }
+  }
+}
+
+// 手动切换暗色模式支持
+html.dark {
+  :deep(.el-input__wrapper) {
+    background-color: var(--anzhiyu-card-bg);
+    border-color: var(--el-border-color-darker);
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: var(--anzhiyu-card-border);
+    }
+
+    &.is-focus {
+      background-color: var(--anzhiyu-card-bg);
+      border-color: var(--anzhiyu-theme);
+      box-shadow: 0 0 0 1px var(--anzhiyu-theme) inset;
+    }
+  }
+
+  :deep(.el-textarea__inner) {
+    background-color: var(--anzhiyu-card-bg);
+    border-color: var(--el-border-color-darker);
+    color: var(--anzhiyu-fontcolor);
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: var(--anzhiyu-card-border);
+    }
+
+    &:focus {
+      background-color: var(--anzhiyu-card-bg);
+      border-color: var(--anzhiyu-theme);
+      box-shadow: 0 0 0 1px var(--anzhiyu-theme) inset;
+    }
+  }
+
+  :deep(.el-switch) {
+    &.is-checked {
+      .el-switch__core {
+        background-color: var(--anzhiyu-theme);
+      }
+    }
   }
 }
 </style>

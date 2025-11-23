@@ -291,7 +291,12 @@ const formData = computed({
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.5;
-  color: #909399;
+  color: var(--anzhiyu-secondtext);
+
+  strong {
+    color: var(--anzhiyu-yellow);
+    font-weight: 600;
+  }
 }
 
 .el-divider {
@@ -299,7 +304,143 @@ const formData = computed({
 
   h3 {
     margin: 0;
-    color: #606266;
+    color: var(--anzhiyu-fontcolor);
+  }
+
+  :deep(.el-divider__text) {
+    background-color: var(--anzhiyu-background);
+  }
+}
+
+// 暗色模式下的输入框优化
+@media (prefers-color-scheme: dark) {
+  :deep(.el-input__wrapper) {
+    background-color: var(--anzhiyu-card-bg);
+    border-color: var(--el-border-color-darker);
+
+    &:hover {
+      border-color: var(--anzhiyu-card-border);
+    }
+
+    &.is-focus {
+      background-color: var(--anzhiyu-card-bg);
+      border-color: var(--anzhiyu-theme);
+      box-shadow: 0 0 0 1px var(--anzhiyu-theme) inset;
+    }
+  }
+
+  :deep(.el-textarea__inner) {
+    background-color: var(--anzhiyu-card-bg);
+    border-color: var(--el-border-color-darker);
+    color: var(--anzhiyu-fontcolor);
+
+    &:hover {
+      border-color: var(--anzhiyu-card-border);
+    }
+
+    &:focus {
+      background-color: var(--anzhiyu-card-bg);
+      border-color: var(--anzhiyu-theme);
+      box-shadow: 0 0 0 1px var(--anzhiyu-theme) inset;
+    }
+  }
+
+  :deep(.el-input-number) {
+    .el-input__wrapper {
+      background-color: var(--anzhiyu-card-bg);
+      border-color: var(--el-border-color-darker);
+
+      &:hover {
+        border-color: var(--anzhiyu-card-border);
+      }
+
+      &.is-focus {
+        background-color: var(--anzhiyu-card-bg);
+        border-color: var(--anzhiyu-theme);
+      }
+    }
+  }
+
+  :deep(.el-select) {
+    .el-input__wrapper {
+      background-color: var(--anzhiyu-card-bg);
+      border-color: var(--el-border-color-darker);
+
+      &:hover {
+        border-color: var(--anzhiyu-card-border);
+      }
+
+      &.is-focus {
+        background-color: var(--anzhiyu-card-bg);
+        border-color: var(--anzhiyu-theme);
+      }
+    }
+  }
+}
+
+// 手动切换暗色模式支持
+html.dark {
+  :deep(.el-input__wrapper) {
+    background-color: var(--anzhiyu-card-bg);
+    border-color: var(--el-border-color-darker);
+
+    &:hover {
+      border-color: var(--anzhiyu-card-border);
+    }
+
+    &.is-focus {
+      background-color: var(--anzhiyu-card-bg);
+      border-color: var(--anzhiyu-theme);
+      box-shadow: 0 0 0 1px var(--anzhiyu-theme) inset;
+    }
+  }
+
+  :deep(.el-textarea__inner) {
+    background-color: var(--anzhiyu-card-bg);
+    border-color: var(--el-border-color-darker);
+    color: var(--anzhiyu-fontcolor);
+
+    &:hover {
+      border-color: var(--anzhiyu-card-border);
+    }
+
+    &:focus {
+      background-color: var(--anzhiyu-card-bg);
+      border-color: var(--anzhiyu-theme);
+      box-shadow: 0 0 0 1px var(--anzhiyu-theme) inset;
+    }
+  }
+
+  :deep(.el-input-number) {
+    .el-input__wrapper {
+      background-color: var(--anzhiyu-card-bg);
+      border-color: var(--el-border-color-darker);
+
+      &:hover {
+        border-color: var(--anzhiyu-card-border);
+      }
+
+      &.is-focus {
+        background-color: var(--anzhiyu-card-bg);
+        border-color: var(--anzhiyu-theme);
+      }
+    }
+  }
+
+  :deep(.el-select) {
+    .el-input__wrapper {
+      background-color: var(--anzhiyu-card-bg);
+      border-color: var(--el-border-color-darker);
+
+      &:hover {
+        border-color: var(--anzhiyu-card-border);
+      }
+
+      &.is-focus {
+        background-color: var(--anzhiyu-card-bg);
+        border-color: var(--anzhiyu-theme);
+      }
+    }
   }
 }
 </style>

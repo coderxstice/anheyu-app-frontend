@@ -190,12 +190,12 @@ watch(
   top: 0;
   left: 0;
   z-index: 1;
-  background-color: var(--el-fill-color-light);
+  background-color: var(--anzhiyu-secondbg);
 }
 
 .thumbnail-placeholder.is-loading .el-icon {
   font-size: 32px;
-  color: var(--el-color-primary-light-3);
+  color: var(--anzhiyu-theme);
   animation: spin 1.5s linear infinite;
 }
 
@@ -203,6 +203,6 @@ watch(
   width: 50px;
   height: 50px;
   font-size: 50px;
-  color: #a8abb2;
+  color: var(--anzhiyu-secondtext);
 }
 </style>

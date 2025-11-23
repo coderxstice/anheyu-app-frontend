@@ -1014,7 +1014,7 @@ onUnmounted(() => {
     margin: 0 0 10px;
     overflow: hidden;
     font-size: 14px;
-    color: #606266;
+    color: var(--anzhiyu-fontcolor);
     line-height: 1.6;
     -webkit-line-clamp: 2;
     line-clamp: 2;
@@ -1088,7 +1088,7 @@ onUnmounted(() => {
         .label {
           flex-shrink: 0;
           font-weight: 500;
-          color: #e6a23c;
+          color: var(--anzhiyu-yellow);
         }
 
         .original-url {
@@ -1100,7 +1100,7 @@ onUnmounted(() => {
         }
 
         .reason-text {
-          color: #606266;
+          color: var(--anzhiyu-fontcolor);
           font-size: 12px;
           line-height: 1.6;
         }
@@ -1167,7 +1167,7 @@ onUnmounted(() => {
 // 拖拽时的占位样式
 .ghost {
   opacity: 0.5;
-  background: #f0f0f0;
-  border: 2px dashed var(--el-color-primary);
+  background: var(--anzhiyu-card-bg-grey);
+  border: 2px dashed var(--anzhiyu-theme);
 }
 </style>

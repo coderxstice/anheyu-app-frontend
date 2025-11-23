@@ -338,7 +338,7 @@ export function useUserManagement() {
         h("div", { style: "padding: 10px 0; min-height: 100px" }, [
           h(
             "p",
-            { style: "margin-bottom: 10px; color: #606266" },
+            { style: "margin-bottom: 10px; color: var(--anzhiyu-fontcolor)" },
             "请输入新密码"
           ),
           h(ElInput, {
@@ -360,7 +360,7 @@ export function useUserManagement() {
             "p",
             {
               style:
-                "margin-top: 5px; color: #f56c6c; font-size: 12px; min-height: 18px"
+                "margin-top: 5px; color: var(--anzhiyu-red); font-size: 12px; min-height: 18px"
             },
             inputError.value || ""
           )

@@ -480,8 +480,8 @@ User-Agent: AnheyuBlog-Webhook/1.0"
   margin-top: 6px;
   font-size: 13px;
   line-height: 1.6;
-  color: #606266;
-  background-color: #f5f7fa;
+  color: var(--anzhiyu-fontcolor);
+  background-color: var(--anzhiyu-secondbg);
   border-radius: 4px;
 }
 
@@ -502,8 +502,8 @@ User-Agent: AnheyuBlog-Webhook/1.0"
 }
 
 .template-hint li:hover {
-  color: #409eff;
-  background-color: #ecf5ff;
+  color: var(--anzhiyu-theme);
+  background-color: var(--anzhiyu-theme-op-light);
 }
 
 .template-hint code {
@@ -511,7 +511,7 @@ User-Agent: AnheyuBlog-Webhook/1.0"
   margin-right: 8px;
   font-family: "Courier New", Courier, monospace;
   font-size: 12px;
-  background-color: #e9e9eb;
+  background-color: var(--anzhiyu-card-bg-grey);
   border-radius: 3px;
 }
 
@@ -520,15 +520,15 @@ User-Agent: AnheyuBlog-Webhook/1.0"
   margin-top: 8px;
   font-size: 13px;
   line-height: 1.6;
-  color: #606266;
-  background-color: #f0f9ff;
-  border: 1px solid #b3e5fc;
+  color: var(--anzhiyu-fontcolor);
+  background-color: var(--anzhiyu-theme-op-light);
+  border: var(--style-border-always);
   border-radius: 4px;
 }
 
 .pushoo-hint b {
   font-weight: 600;
-  color: #1976d2;
+  color: var(--anzhiyu-blue);
 }
 
 .pushoo-hint ul {
@@ -551,8 +551,8 @@ User-Agent: AnheyuBlog-Webhook/1.0"
   margin-top: 6px;
   font-size: 13px;
   line-height: 1.6;
-  color: #606266;
-  background-color: #f5f7fa;
+  color: var(--anzhiyu-fontcolor);
+  background-color: var(--anzhiyu-secondbg);
   border-radius: 4px;
 }
 
@@ -573,7 +573,7 @@ User-Agent: AnheyuBlog-Webhook/1.0"
   align-items: center;
   margin-top: 8px;
   font-size: 12px;
-  color: #f56c6c;
+  color: var(--anzhiyu-red);
 }
 
 .json-validation-error .el-icon {
@@ -585,7 +585,7 @@ User-Agent: AnheyuBlog-Webhook/1.0"
   align-items: center;
   margin-top: 8px;
   font-size: 12px;
-  color: #67c23a;
+  color: var(--anzhiyu-green);
 }
 
 .json-validation-success .el-icon {
@@ -594,12 +594,12 @@ User-Agent: AnheyuBlog-Webhook/1.0"
 
 /* JSON输入框错误状态样式 */
 :deep(.json-error .el-textarea__inner) {
-  border-color: #f56c6c;
-  box-shadow: 0 0 0 1px #f56c6c inset;
+  border-color: var(--anzhiyu-red);
+  box-shadow: 0 0 0 1px var(--anzhiyu-red) inset;
 }
 
 :deep(.json-error .el-textarea__inner:focus) {
-  border-color: #f56c6c;
-  box-shadow: 0 0 0 1px #f56c6c inset;
+  border-color: var(--anzhiyu-red);
+  box-shadow: 0 0 0 1px var(--anzhiyu-red) inset;
 }
 </style>

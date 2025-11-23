@@ -245,7 +245,7 @@ onMounted(() => {
     .title {
       font-size: 15px;
       font-weight: 600;
-      color: var(--el-text-color-primary);
+      color: var(--anzhiyu-fontcolor);
     }
   }
 }

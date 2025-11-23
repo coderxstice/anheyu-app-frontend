@@ -195,8 +195,8 @@ const handleSendTestEmail = async () => {
   margin-top: 6px;
   font-size: 13px;
   line-height: 1.6;
-  color: #606266;
-  background-color: #f5f7fa;
+  color: var(--anzhiyu-fontcolor);
+  background-color: var(--anzhiyu-secondbg);
   border-radius: 4px;
 }
 
@@ -219,7 +219,7 @@ const handleSendTestEmail = async () => {
   margin-right: 8px;
   font-family: "Courier New", Courier, monospace;
   font-size: 12px;
-  background-color: #e9e9eb;
+  background-color: var(--anzhiyu-card-bg-grey);
   border-radius: 3px;
 }
 </style>

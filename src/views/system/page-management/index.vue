@@ -254,7 +254,7 @@ const handlePreview = (row: PageData): void => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; }
-          .preview-header { background: #f5f5f5; padding: 10px; margin-bottom: 20px; border-radius: 4px; }
+          .preview-header { background: var(--anzhiyu-card-bg-grey); padding: 10px; margin-bottom: 20px; border-radius: 4px; }
           .preview-content { max-width: 800px; margin: 0 auto; }
         </style>
       </head>
@@ -360,13 +360,13 @@ onMounted((): void => {
       margin: 0 0 8px;
       font-size: 18px;
       font-weight: 600;
-      color: var(--el-text-color-primary);
+      color: var(--anzhiyu-fontcolor);
     }
 
     .subtitle {
       margin: 0;
       font-size: 14px;
-      color: var(--el-text-color-regular);
+      color: var(--anzhiyu-fontcolor);
     }
   }
 

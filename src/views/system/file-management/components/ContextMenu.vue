@@ -320,7 +320,7 @@ ul {
 }
 
 .menu-item.danger:hover {
-  color: #fff;
+  color: var(--anzhiyu-white);
   background-color: var(--el-color-error);
 }
 
@@ -329,6 +329,6 @@ ul {
   padding: 0;
   margin: 6px 0;
   cursor: default;
-  background-color: #e0e0e0;
+  background-color: var(--anzhiyu-card-bg-grey);
 }
 </style>

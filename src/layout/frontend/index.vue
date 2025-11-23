@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-21 17:48:59
- * @LastEditTime: 2025-11-14 14:42:31
+ * @LastEditTime: 2025-11-23 12:58:42
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -148,7 +148,11 @@ const oneImageStyle = computed(() => {
 // 获取一言
 const fetchHitokoto = async () => {
   try {
-    const response = await fetch("https://v1.hitokoto.cn/");
+    // 从配置中获取一言 API 地址，如果没有配置则使用默认值
+    const hitokotoAPI =
+      siteConfigStore.siteConfig?.page?.one_image?.hitokoto_api ||
+      "https://v1.hitokoto.cn/";
+    const response = await fetch(hitokotoAPI);
     const data = await response.json();
     hitokotoText.value = data.hitokoto;
   } catch (error) {
@@ -158,7 +162,11 @@ const fetchHitokoto = async () => {
 };
 
 // 打字机效果
-const typeWriter = (text: string, speed = 100) => {
+const typeWriter = (text: string, speed?: number) => {
+  // 从配置中获取打字机速度，如果没有配置则使用默认值
+  const configSpeed = siteConfigStore.siteConfig?.page?.one_image?.typing_speed;
+  const typingSpeed = speed || Number(configSpeed) || 100;
+
   let i = 0;
   displaySubtitle.value = "";
 
@@ -166,7 +174,7 @@ const typeWriter = (text: string, speed = 100) => {
     if (i < text.length) {
       displaySubtitle.value += text.charAt(i);
       i++;
-      setTimeout(type, speed);
+      setTimeout(type, typingSpeed);
     }
   };
 

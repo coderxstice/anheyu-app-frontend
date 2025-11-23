@@ -71,7 +71,7 @@ h2 {
   margin-bottom: 20px;
   font-size: 1.2em;
   font-weight: 600;
-  border-bottom: 1px solid var(--el-border-color-lighter);
+  border-bottom: var(--style-border-always);
 
   &:first-child {
     margin-top: 10px;

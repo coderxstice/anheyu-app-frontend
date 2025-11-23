@@ -508,7 +508,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
   width: fit-content;
   min-width: 100%;
   font-weight: 500;
-  color: #64748b;
+  color: var(--anzhiyu-secondtext);
   user-select: none;
   background-color: var(--anzhiyu-card-bg);
   border-bottom: var(--style-border);
@@ -570,12 +570,12 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 
   &.column-size {
-    color: #64748b;
+    color: var(--anzhiyu-secondtext);
   }
 
   &.column-updated_at,
   &.column-created_at {
-    color: #64748b;
+    color: var(--anzhiyu-secondtext);
   }
 }
 
@@ -589,7 +589,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
   justify-content: center;
   padding: 60px 20px;
   font-size: 14px;
-  color: #909399;
+  color: var(--anzhiyu-secondtext);
 }
 
 .state-view-overlay {
@@ -599,7 +599,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  color: #909399;
+  color: var(--anzhiyu-secondtext);
   pointer-events: none;
   transform: translateX(-50%);
 
@@ -703,11 +703,11 @@ const handleKeyDown = (event: KeyboardEvent) => {
 }
 
 .sort-indicator.active {
-  color: var(--el-color-primary);
+  color: var(--anzhiyu-theme);
 }
 
 .sort-indicator-hover {
-  color: #c0c4cc;
+  color: var(--anzhiyu-secondtext);
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
 }
@@ -730,11 +730,11 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
   .el-icon {
     font-size: 18px;
-    color: #606266;
+    color: var(--anzhiyu-fontcolor);
   }
 
   &:hover {
-    background-color: var(--el-color-primary);
+    background-color: var(--anzhiyu-theme);
 
     .el-icon {
       color: var(--anzhiyu-card-bg);
@@ -777,7 +777,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
 }
 
 .file-item.is-disabled {
-  color: #a8abb2;
+  color: var(--anzhiyu-secondtext);
   cursor: not-allowed;
 
   &:hover {
@@ -785,7 +785,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 
   .file-icon {
-    color: #c0c4cc;
+    color: var(--anzhiyu-secondtext);
   }
 }
 

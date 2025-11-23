@@ -193,7 +193,7 @@ function getFlagDisplayName(flag: string): string {
           class="card-item add-card"
           @click="chooseTypeDialogVisible = true"
         >
-          <el-icon :size="48" color="var(--el-color-primary)">
+          <el-icon :size="48" color="var(--anzhiyu-theme)">
             <IconifyIconOffline :icon="AddFill" />
           </el-icon>
           <p>添加存储策略</p>
@@ -369,7 +369,7 @@ function getFlagDisplayName(flag: string): string {
     >
       <div class="success-content">
         <div class="success-header">
-          <el-icon class="success-icon" color="#67C23A" size="24">
+          <el-icon class="success-icon" color="var(--anzhiyu-green)" size="24">
             <CircleCheck />
           </el-icon>
           <h3>{{ createdPolicyName }} 已成功创建</h3>
@@ -449,7 +449,7 @@ function getFlagDisplayName(flag: string): string {
   height: calc(100% - 48px);
   padding: 16px;
   overflow: hidden;
-  background-color: var(--el-bg-color);
+  background-color: var(--anzhiyu-card-bg);
   border-radius: 12px;
 }
 
@@ -466,9 +466,9 @@ function getFlagDisplayName(flag: string): string {
   height: 130px;
   overflow: hidden;
   cursor: pointer;
-  background-color: var(--el-bg-color-page);
+  background-color: var(--anzhiyu-background);
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgb(0 0 0 / 5%);
+  box-shadow: var(--anzhiyu-shadow-border);
   transition: all 0.3s ease;
 }
 
@@ -481,7 +481,7 @@ function getFlagDisplayName(flag: string): string {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: var(--el-text-color-secondary);
+  color: var(--anzhiyu-secondtext);
   border: 2px dashed var(--el-border-color);
 
   p {
@@ -490,8 +490,8 @@ function getFlagDisplayName(flag: string): string {
   }
 
   &:hover {
-    color: var(--el-color-primary);
-    border-color: var(--el-color-primary);
+    color: var(--anzhiyu-theme);
+    border: var(--style-border-hover);
   }
 }
 
@@ -507,7 +507,7 @@ function getFlagDisplayName(flag: string): string {
   }
 
   .policy-icon {
-    color: var(--el-text-color-primary);
+    color: var(--anzhiyu-fontcolor);
   }
 
   .policy-details {
@@ -578,14 +578,14 @@ function getFlagDisplayName(flag: string): string {
   align-items: center;
   padding: 16px;
   cursor: pointer;
-  border: 1px solid var(--el-border-color);
+  border: var(--style-border-always);
   border-radius: 8px;
   transition: all 0.2s ease-in-out;
 
   &:hover {
     color: var(--anzhiyu-white);
     background-color: var(--anzhiyu-theme);
-    border-color: var(--el-color-primary);
+    border-color: var(--anzhiyu-theme);
   }
 }
 
@@ -600,16 +600,16 @@ function getFlagDisplayName(flag: string): string {
   }
 
   &::-webkit-scrollbar-track {
-    background: var(--el-fill-color-light);
+    background: var(--anzhiyu-secondbg);
     border-radius: 3px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: var(--el-color-info-light-5);
+    background: var(--anzhiyu-scrollbar);
     border-radius: 3px;
 
     &:hover {
-      background: var(--el-color-info-light-3);
+      background: var(--anzhiyu-lighttext);
     }
   }
 }
@@ -626,15 +626,15 @@ function getFlagDisplayName(flag: string): string {
     align-items: center;
     padding: 16px 20px;
     margin-bottom: 20px;
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-    border-left: 4px solid #67c23a;
+    background: var(--anzhiyu-secondbg);
+    border-left: 4px solid var(--anzhiyu-green);
     border-radius: 8px;
 
     h3 {
       margin: 0;
       font-size: 18px;
       font-weight: 600;
-      color: var(--el-text-color-primary);
+      color: var(--anzhiyu-fontcolor);
     }
   }
 
@@ -646,20 +646,20 @@ function getFlagDisplayName(flag: string): string {
       margin: 0 0 12px;
       font-size: 16px;
       font-weight: 600;
-      color: #67c23a;
+      color: var(--anzhiyu-green);
     }
 
     > p {
       margin: 0 0 16px;
       line-height: 1.6;
-      color: var(--el-text-color-regular);
+      color: var(--anzhiyu-fontcolor);
     }
   }
 
   .cors-rules {
     padding: 16px;
     margin-bottom: 16px;
-    background: var(--el-fill-color-extra-light);
+    background: var(--anzhiyu-secondbg);
     border-radius: 8px;
 
     .rule-item {
@@ -667,7 +667,7 @@ function getFlagDisplayName(flag: string): string {
       flex-direction: column;
       padding-bottom: 12px;
       margin-bottom: 12px;
-      border-bottom: 1px solid var(--el-border-color-lighter);
+      border-bottom: var(--style-border-always);
 
       &:last-child {
         padding-bottom: 0;
@@ -679,7 +679,7 @@ function getFlagDisplayName(flag: string): string {
         margin-bottom: 4px;
         font-size: 14px;
         font-weight: 600;
-        color: var(--el-text-color-primary);
+        color: var(--anzhiyu-fontcolor);
       }
 
       .rule-value {
@@ -688,33 +688,33 @@ function getFlagDisplayName(flag: string): string {
         margin-bottom: 4px;
         font-family: Monaco, Menlo, "Ubuntu Mono", monospace;
         font-size: 13px;
-        color: #409eff;
-        background: rgb(64 158 255 / 10%);
+        color: var(--anzhiyu-theme);
+        background: var(--anzhiyu-theme-op);
         border-radius: 4px;
       }
 
       .rule-desc {
         font-size: 12px;
         line-height: 1.5;
-        color: var(--el-text-color-secondary);
+        color: var(--anzhiyu-secondtext);
       }
     }
   }
 
   .success-note {
     padding: 12px 16px;
-    background: #f0f9ff;
-    border: 1px solid #bfdbfe;
+    background: var(--anzhiyu-secondbg);
+    border: var(--style-border-always);
     border-radius: 6px;
 
     p {
       margin: 0;
       font-size: 14px;
       line-height: 1.5;
-      color: var(--el-text-color-regular);
+      color: var(--anzhiyu-fontcolor);
 
       strong {
-        color: var(--el-text-color-primary);
+        color: var(--anzhiyu-fontcolor);
       }
     }
   }

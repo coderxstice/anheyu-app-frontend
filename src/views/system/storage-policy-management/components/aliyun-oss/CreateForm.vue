@@ -254,7 +254,7 @@ defineExpose({ submitForm });
   }
 
   &::-webkit-scrollbar-track {
-    background: var(--el-fill-color-light);
+    background: var(--anzhiyu-secondbg);
     border-radius: 3px;
   }
 
@@ -277,7 +277,7 @@ defineExpose({ submitForm });
 
 .upload-method-info {
   padding: 12px 16px;
-  background: var(--el-fill-color-extra-light);
+  background: var(--anzhiyu-secondbg);
   border: var(--style-border);
   border-radius: 6px;
 
@@ -285,13 +285,13 @@ defineExpose({ submitForm });
     margin-bottom: 4px;
     font-size: 14px;
     font-weight: 600;
-    color: var(--el-text-color-primary);
+    color: var(--anzhiyu-fontcolor);
   }
 
   .method-description {
     font-size: 13px;
     line-height: 1.5;
-    color: var(--el-text-color-regular);
+    color: var(--anzhiyu-fontcolor);
   }
 }
 
@@ -308,7 +308,7 @@ defineExpose({ submitForm });
     margin: 0 0 8px;
     font-size: 14px;
     line-height: 1.7;
-    color: var(--el-text-color-regular);
+    color: var(--anzhiyu-fontcolor);
   }
 
   ul {
@@ -319,7 +319,7 @@ defineExpose({ submitForm });
       margin-bottom: 2px;
       font-size: 13px;
       line-height: 1.4;
-      color: var(--el-text-color-regular);
+      color: var(--anzhiyu-fontcolor);
     }
   }
 }
@@ -334,7 +334,7 @@ defineExpose({ submitForm });
 
   &:hover {
     background-color: var(--el-fill-color-extra-light);
-    border-color: var(--el-color-primary);
+    border-color: var(--anzhiyu-theme);
   }
 }
 
@@ -343,13 +343,13 @@ defineExpose({ submitForm });
   margin-left: 24px;
   font-size: 13px;
   line-height: 1.5;
-  color: var(--el-color-info);
+  color: var(--anzhiyu-blue);
 }
 
 .cors-config-details {
   padding: 10px;
   margin-top: 10px;
-  background: var(--el-fill-color-extra-light);
+  background: var(--anzhiyu-secondbg);
   border: var(--style-border);
   border-radius: 6px;
 
@@ -357,7 +357,7 @@ defineExpose({ submitForm });
     margin: 0 0 8px;
     font-size: 14px;
     font-weight: 600;
-    color: var(--el-text-color-primary);
+    color: var(--anzhiyu-fontcolor);
   }
 
   ul {
@@ -368,15 +368,15 @@ defineExpose({ submitForm });
       margin-bottom: 4px;
       font-size: 13px;
       line-height: 1.4;
-      color: var(--el-text-color-regular);
+      color: var(--anzhiyu-fontcolor);
     }
   }
 
   code {
     padding: 2px 6px;
     font-size: 0.9em;
-    color: var(--el-text-color-primary);
-    background: var(--el-fill-color-light);
+    color: var(--anzhiyu-fontcolor);
+    background: var(--anzhiyu-secondbg);
     border: 1px solid var(--el-border-color-light);
     border-radius: 4px;
   }

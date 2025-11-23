@@ -181,11 +181,11 @@
         </el-form-item>
         <el-form-item label="样式" prop="style">
           <el-radio-group v-model="categoryForm.style">
-            <el-radio-button label="card">
+            <el-radio-button value="card">
               <el-icon><CreditCard /></el-icon>
               卡片样式
             </el-radio-button>
-            <el-radio-button label="list">
+            <el-radio-button value="list">
               <el-icon><List /></el-icon>
               列表样式
             </el-radio-button>
@@ -402,9 +402,9 @@ const predefineColors = [
   "#1e90ff",
   "#c71585",
   "#409EFF",
-  "#67C23A",
-  "#E6A23C",
-  "#F56C6C",
+  "var(--anzhiyu-green)",
+  "var(--anzhiyu-yellow)",
+  "var(--anzhiyu-red)",
   "#909399"
 ];
 
@@ -692,13 +692,13 @@ onUnmounted(() => {
       margin: 0 0 4px 0;
       font-size: 18px;
       font-weight: 600;
-      color: var(--el-text-color-primary);
+      color: var(--anzhiyu-fontcolor);
     }
 
     .subtitle {
       margin: 0;
       font-size: 14px;
-      color: var(--el-text-color-regular);
+      color: var(--anzhiyu-fontcolor);
     }
   }
 }
@@ -717,13 +717,13 @@ onUnmounted(() => {
 }
 
 .category-card {
-  border: 1px solid var(--el-border-color);
+  border: var(--style-border-always);
   border-radius: 8px;
   padding: 16px;
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: var(--el-color-primary);
+    border-color: var(--anzhiyu-theme);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 
@@ -745,7 +745,7 @@ onUnmounted(() => {
         align-items: center;
         font-size: 16px;
         font-weight: 600;
-        color: var(--el-text-color-primary);
+        color: var(--anzhiyu-fontcolor);
         margin-bottom: 8px;
 
         .protected-tag {
@@ -760,7 +760,7 @@ onUnmounted(() => {
 
         .usage-count {
           font-size: 12px;
-          color: var(--el-text-color-secondary);
+          color: var(--anzhiyu-secondtext);
         }
       }
     }
@@ -773,7 +773,7 @@ onUnmounted(() => {
 
   .category-description {
     font-size: 14px;
-    color: var(--el-text-color-regular);
+    color: var(--anzhiyu-fontcolor);
     line-height: 1.5;
   }
 }
@@ -786,13 +786,13 @@ onUnmounted(() => {
 }
 
 .tag-card {
-  border: 1px solid var(--el-border-color);
+  border: var(--style-border-always);
   border-radius: 8px;
   padding: 16px;
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: var(--el-color-primary);
+    border-color: var(--anzhiyu-theme);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 
@@ -835,7 +835,7 @@ onUnmounted(() => {
     .tag-name {
       font-size: 16px;
       font-weight: 600;
-      color: var(--el-text-color-primary);
+      color: var(--anzhiyu-fontcolor);
       margin-bottom: 4px;
     }
 
@@ -845,11 +845,11 @@ onUnmounted(() => {
       align-items: center;
       gap: 8px;
       font-size: 12px;
-      color: var(--el-text-color-secondary);
+      color: var(--anzhiyu-secondtext);
 
       .color-code {
         font-family: monospace;
-        background: var(--el-bg-color-page);
+        background: var(--anzhiyu-background);
         padding: 2px 4px;
         border-radius: 4px;
       }
@@ -866,7 +866,7 @@ onUnmounted(() => {
 // 表单样式
 .form-tip {
   margin-top: 8px;
-  color: var(--el-text-color-regular);
+  color: var(--anzhiyu-fontcolor);
   font-size: 12px;
   line-height: 1.4;
 }

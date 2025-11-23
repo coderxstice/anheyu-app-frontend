@@ -130,11 +130,11 @@ const onLeave = (el: HTMLElement, done: () => void) => {
   top: 40px;
   right: 40px;
   font-size: 24px;
-  color: #909399;
+  color: var(--anzhiyu-secondtext);
   cursor: pointer;
 
   &:hover {
-    color: var(--el-color-primary);
+    color: var(--anzhiyu-theme);
   }
 }
 

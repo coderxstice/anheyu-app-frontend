@@ -232,6 +232,6 @@ function onFullscreen() {
 }
 
 .table-bar {
-  background-color: var(--el-bg-color);
+  background-color: var(--anzhiyu-card-bg);
 }
 </style>

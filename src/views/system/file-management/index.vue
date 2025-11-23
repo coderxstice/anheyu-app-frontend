@@ -329,7 +329,7 @@ const {
   width: 40px;
   height: 40px;
   border: 4px solid var(--el-color-primary-light-7);
-  border-top-color: var(--el-color-primary);
+  border-top-color: var(--anzhiyu-theme);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

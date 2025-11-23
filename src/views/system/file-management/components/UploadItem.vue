@@ -221,7 +221,7 @@ const onAnimateLeave = (el: Element, done: () => void) => {
 }
 
 .upload-item:hover {
-  background-color: #f5f7fa;
+  background-color: var(--anzhiyu-secondbg);
 }
 
 .item-icon {
@@ -230,7 +230,7 @@ const onAnimateLeave = (el: Element, done: () => void) => {
   flex-shrink: 0;
   margin-right: 12px;
   font-size: 28px;
-  color: #909399;
+  color: var(--anzhiyu-secondtext);
 }
 
 .item-info {
@@ -299,32 +299,32 @@ const onAnimateLeave = (el: Element, done: () => void) => {
   gap: 8px;
   align-items: center;
   font-size: 12px;
-  color: #606266;
+  color: var(--anzhiyu-fontcolor);
   white-space: nowrap;
 }
 
 .speed {
   min-width: 75px;
   font-weight: 500;
-  color: var(--el-color-primary);
+  color: var(--anzhiyu-theme);
   text-align: left;
 }
 
 .size-info {
-  color: #909399;
+  color: var(--anzhiyu-secondtext);
 }
 
 .item-message {
   overflow: hidden;
   font-size: 12px;
   line-height: 1.4;
-  color: #909399;
+  color: var(--anzhiyu-secondtext);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .item-message.is-success {
-  color: var(--el-color-success);
+  color: var(--anzhiyu-green);
 }
 
 .item-actions {
@@ -349,12 +349,12 @@ const onAnimateLeave = (el: Element, done: () => void) => {
   z-index: 1;
   width: 100%;
   height: 2px;
-  background-color: #e9e9eb;
+  background-color: var(--anzhiyu-card-bg-grey);
 }
 
 .progress-bar-fg {
   height: 100%;
-  background-color: var(--el-color-primary);
+  background-color: var(--anzhiyu-theme);
   transition: width 0.3s ease;
 }
 </style>

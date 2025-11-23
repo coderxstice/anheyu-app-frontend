@@ -264,7 +264,7 @@ watch(
 
     .el-descriptions__title {
       font-size: 14px;
-      color: #606266;
+      color: var(--anzhiyu-fontcolor);
     }
 
     .el-descriptions {

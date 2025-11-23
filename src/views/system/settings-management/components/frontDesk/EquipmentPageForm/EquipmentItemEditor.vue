@@ -529,20 +529,21 @@ const exportToJson = () => {
     align-items: center;
     margin-bottom: 24px;
     padding: 20px;
-    background: #f8f9fa;
+    background: var(--anzhiyu-secondbg, #f8f9fa);
     border-radius: 8px;
-    border: 1px solid #e4e7ed;
+    border: var(--style-border-always);
+    transition: all 0.3s ease;
 
     .header-left {
       h4 {
         margin: 0 0 8px 0;
-        color: #303133;
+        color: var(--anzhiyu-fontcolor, #303133);
         font-size: 18px;
         font-weight: 600;
       }
 
       .item-count {
-        color: #909399;
+        color: var(--anzhiyu-secondtext, #909399);
         font-size: 14px;
       }
     }
@@ -550,6 +551,15 @@ const exportToJson = () => {
     .header-actions {
       display: flex;
       gap: 12px;
+    }
+
+    // 暗色模式优化
+    @media (prefers-color-scheme: dark) {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    html.dark {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
   }
 
@@ -561,14 +571,28 @@ const exportToJson = () => {
     }
 
     .equipment-item-card {
-      border: 1px solid #e4e7ed;
+      border: var(--style-border-always);
       border-radius: 8px;
       overflow: hidden;
       transition: all 0.3s ease;
+      background: var(--anzhiyu-card-bg, white);
 
       &:hover {
-        border-color: #409eff;
-        box-shadow: 0 2px 12px rgba(64, 158, 255, 0.1);
+        border-color: var(--anzhiyu-main, var(--anzhiyu-theme));
+        box-shadow: var(--anzhiyu-shadow-border);
+      }
+
+      // 暗色模式优化
+      @media (prefers-color-scheme: dark) {
+        &:hover {
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+      }
+
+      html.dark {
+        &:hover {
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
       }
 
       .item-header {
@@ -576,19 +600,32 @@ const exportToJson = () => {
         align-items: center;
         gap: 12px;
         padding: 16px 20px;
-        background: #fafafa;
-        border-bottom: 1px solid #e4e7ed;
+        background: var(--anzhiyu-card-bg-grey, #fafafa);
+        border-bottom: var(--style-border-always);
 
         .drag-handle {
           cursor: move;
-          color: #909399;
+          color: var(--anzhiyu-secondtext, #909399);
           padding: 4px;
           border-radius: 4px;
           transition: all 0.2s ease;
 
           &:hover {
-            background: #e4e7ed;
-            color: #606266;
+            background: var(--anzhiyu-card-bg-grey, #e4e7ed);
+            color: var(--anzhiyu-fontcolor, #606266);
+          }
+
+          // 暗色模式优化
+          @media (prefers-color-scheme: dark) {
+            &:hover {
+              background: rgba(255, 255, 255, 0.05);
+            }
+          }
+
+          html.dark {
+            &:hover {
+              background: rgba(255, 255, 255, 0.05);
+            }
           }
         }
 
@@ -596,17 +633,37 @@ const exportToJson = () => {
           flex: 1;
 
           .name-input {
-            .el-input__wrapper {
+            :deep(.el-input__wrapper) {
               background: transparent;
               border: none;
               box-shadow: none;
               padding: 0;
+              transition: all 0.3s ease;
 
               &:focus-within {
-                background: white;
-                border: 1px solid #409eff;
+                background: var(--anzhiyu-card-bg, white);
+                border: 1px solid var(--anzhiyu-main, var(--anzhiyu-theme));
                 border-radius: 4px;
                 padding: 0 8px;
+              }
+
+              // 暗色模式优化
+              @media (prefers-color-scheme: dark) {
+                &:focus-within {
+                  background: rgba(255, 255, 255, 0.05);
+                  box-shadow: 0 0 0 1px
+                    var(--anzhiyu-main, var(--anzhiyu-theme));
+                }
+              }
+            }
+
+            html.dark {
+              :deep(.el-input__wrapper) {
+                &:focus-within {
+                  background: rgba(255, 255, 255, 0.05);
+                  box-shadow: 0 0 0 1px
+                    var(--anzhiyu-main, var(--anzhiyu-theme));
+                }
               }
             }
           }
@@ -620,7 +677,7 @@ const exportToJson = () => {
 
       .item-details {
         padding: 20px;
-        background: white;
+        background: var(--anzhiyu-card-bg, white);
 
         .details-grid {
           display: grid;
@@ -631,7 +688,7 @@ const exportToJson = () => {
             label {
               display: block;
               margin-bottom: 8px;
-              color: #606266;
+              color: var(--anzhiyu-fontcolor, #606266);
               font-size: 14px;
               font-weight: 500;
             }
@@ -650,7 +707,26 @@ const exportToJson = () => {
                 width: 100px;
                 height: 100px;
                 border-radius: 4px;
-                border: 1px solid #e4e7ed;
+                border: var(--style-border-always);
+                transition: all 0.3s ease;
+
+                &:hover {
+                  transform: scale(1.05);
+                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                }
+
+                // 暗色模式优化
+                @media (prefers-color-scheme: dark) {
+                  &:hover {
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+                  }
+                }
+
+                html.dark {
+                  &:hover {
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+                  }
+                }
               }
             }
           }
@@ -661,7 +737,7 @@ const exportToJson = () => {
     .empty-state {
       text-align: center;
       padding: 60px 20px;
-      color: #909399;
+      color: var(--anzhiyu-secondtext, #909399);
 
       .empty-icon {
         font-size: 48px;
@@ -684,7 +760,7 @@ const exportToJson = () => {
       gap: 12px;
       margin-top: 24px;
       padding-top: 20px;
-      border-top: 1px solid #e4e7ed;
+      border-top: var(--style-border-always);
     }
 
     .image-preview {
@@ -694,30 +770,71 @@ const exportToJson = () => {
         width: 100px;
         height: 100px;
         border-radius: 4px;
-        border: 1px solid #e4e7ed;
+        border: var(--style-border-always);
       }
     }
   }
 
   .import-dialog {
     .json-example {
-      background: #f8f9fa;
+      background: var(--anzhiyu-secondbg, #f8f9fa);
       padding: 12px;
       border-radius: 4px;
-      border: 1px solid #e4e7ed;
+      border: var(--style-border-always);
       font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
       font-size: 12px;
       line-height: 1.4;
       margin: 12px 0 0 0;
       overflow-x: auto;
+      color: var(--anzhiyu-fontcolor);
+
+      // 暗色模式优化
+      @media (prefers-color-scheme: dark) {
+        background: rgba(0, 0, 0, 0.2);
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+
+      html.dark {
+        background: rgba(0, 0, 0, 0.2);
+        border-color: rgba(255, 255, 255, 0.1);
+      }
     }
 
     .json-input-item {
       margin-top: 20px;
 
-      .json-textarea {
+      :deep(.json-textarea) {
         font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
         font-size: 12px;
+
+        // 暗色模式优化
+        @media (prefers-color-scheme: dark) {
+          .el-textarea__inner {
+            background: rgba(0, 0, 0, 0.1);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: var(--anzhiyu-fontcolor);
+
+            &:focus {
+              border-color: var(--anzhiyu-main, var(--anzhiyu-theme));
+              background: rgba(0, 0, 0, 0.2);
+            }
+          }
+        }
+      }
+
+      html.dark {
+        :deep(.json-textarea) {
+          .el-textarea__inner {
+            background: rgba(0, 0, 0, 0.1);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: var(--anzhiyu-fontcolor);
+
+            &:focus {
+              border-color: var(--anzhiyu-main, var(--anzhiyu-theme));
+              background: rgba(0, 0, 0, 0.2);
+            }
+          }
+        }
       }
     }
   }
@@ -729,9 +846,18 @@ const exportToJson = () => {
 }
 
 .sortable-drag {
-  background: white !important;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+  background: var(--anzhiyu-card-bg, white) !important;
+  box-shadow: var(--anzhiyu-shadow-border) !important;
   opacity: 0.9;
+
+  // 暗色模式优化
+  @media (prefers-color-scheme: dark) {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  html.dark {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  }
 }
 
 // 响应式设计

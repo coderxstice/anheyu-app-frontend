@@ -420,16 +420,16 @@ const importFromJson = () => {
   .banner-config-section {
     margin-bottom: 32px;
     padding: 24px;
-    background: #f8f9fa;
+    background: var(--anzhiyu-secondbg, #f8f9fa);
     border-radius: 8px;
-    border: 1px solid #e4e7ed;
+    border: var(--style-border-always);
 
     .section-title {
       display: flex;
       align-items: center;
       gap: 8px;
       margin: 0 0 20px 0;
-      color: #303133;
+      color: var(--anzhiyu-fontcolor, #303133);
       font-size: 16px;
       font-weight: 600;
     }
@@ -453,7 +453,7 @@ const importFromJson = () => {
         align-items: center;
         gap: 8px;
         margin: 0;
-        color: #303133;
+        color: var(--anzhiyu-fontcolor);
         font-size: 16px;
         font-weight: 600;
       }
@@ -465,14 +465,14 @@ const importFromJson = () => {
       gap: 20px;
 
       .category-card {
-        border: 1px solid #e4e7ed;
+        border: var(--style-border-always);
         border-radius: 8px;
         overflow: hidden;
         transition: all 0.3s ease;
 
         &:hover {
-          border-color: #409eff;
-          box-shadow: 0 2px 12px rgba(64, 158, 255, 0.1);
+          border-color: var(--anzhiyu-main, var(--anzhiyu-theme));
+          box-shadow: var(--anzhiyu-shadow-border);
         }
 
         .category-header {
@@ -480,20 +480,20 @@ const importFromJson = () => {
           justify-content: space-between;
           align-items: center;
           padding: 16px 20px;
-          background: #fafafa;
-          border-bottom: 1px solid #e4e7ed;
+          background: var(--anzhiyu-card-bg-grey, #fafafa);
+          border-bottom: var(--style-border-always);
 
           .category-info {
             .category-title {
               margin: 0 0 4px 0;
-              color: #303133;
+              color: var(--anzhiyu-fontcolor, #303133);
               font-size: 16px;
               font-weight: 600;
             }
 
             .category-description {
               margin: 0;
-              color: #909399;
+              color: var(--anzhiyu-secondtext, #909399);
               font-size: 14px;
             }
           }
@@ -514,7 +514,7 @@ const importFromJson = () => {
             margin-bottom: 16px;
 
             .items-count {
-              color: #606266;
+              color: var(--anzhiyu-secondtext, #606266);
               font-size: 14px;
             }
           }
@@ -529,9 +529,9 @@ const importFromJson = () => {
               align-items: center;
               gap: 8px;
               padding: 8px 12px;
-              background: #f8f9fa;
+              background: var(--anzhiyu-secondbg, #f8f9fa);
               border-radius: 6px;
-              border: 1px solid #e4e7ed;
+              border: var(--style-border-always);
               min-width: 200px;
 
               .item-image,
@@ -547,8 +547,8 @@ const importFromJson = () => {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background: #e4e7ed;
-                color: #909399;
+                background: var(--anzhiyu-card-bg-grey, #e4e7ed);
+                color: var(--anzhiyu-secondtext, #909399);
               }
 
               .item-info {
@@ -556,7 +556,7 @@ const importFromJson = () => {
                 min-width: 0;
 
                 .item-name {
-                  color: #303133;
+                  color: var(--anzhiyu-fontcolor, #303133);
                   font-size: 14px;
                   font-weight: 500;
                   margin-bottom: 2px;
@@ -566,7 +566,7 @@ const importFromJson = () => {
                 }
 
                 .item-spec {
-                  color: #909399;
+                  color: var(--anzhiyu-secondtext, #909399);
                   font-size: 12px;
                   overflow: hidden;
                   text-overflow: ellipsis;
@@ -579,11 +579,11 @@ const importFromJson = () => {
               display: flex;
               align-items: center;
               padding: 8px 12px;
-              color: #909399;
+              color: var(--anzhiyu-secondtext, #909399);
               font-size: 14px;
-              background: #f8f9fa;
+              background: var(--anzhiyu-secondbg, #f8f9fa);
               border-radius: 6px;
-              border: 1px solid #e4e7ed;
+              border: var(--style-border-always);
             }
           }
         }
@@ -592,7 +592,7 @@ const importFromJson = () => {
       .empty-state {
         text-align: center;
         padding: 60px 20px;
-        color: #909399;
+        color: var(--anzhiyu-secondtext, #909399);
 
         .empty-icon {
           font-size: 48px;
@@ -621,13 +621,13 @@ const importFromJson = () => {
 
       .new-item-form {
         padding: 20px;
-        background: #f8f9fa;
+        background: var(--anzhiyu-secondbg, #f8f9fa);
         border-radius: 8px;
-        border: 1px solid #e4e7ed;
+        border: var(--style-border-always);
 
         h5 {
           margin: 0 0 16px 0;
-          color: #303133;
+          color: var(--anzhiyu-fontcolor, #303133);
           font-size: 14px;
           font-weight: 600;
         }

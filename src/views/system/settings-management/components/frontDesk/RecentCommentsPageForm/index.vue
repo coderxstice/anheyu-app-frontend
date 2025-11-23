@@ -94,12 +94,21 @@ const updateBannerConfig = (
 
   h3 {
     margin: 0;
-    color: #606266;
+    color: var(--anzhiyu-fontcolor);
+  }
+
+  :deep(.el-divider__text) {
+    background-color: var(--anzhiyu-background);
   }
 }
 
 .banner-config-section {
   margin-bottom: 32px;
+  padding: 24px;
+  background: var(--anzhiyu-secondbg, #f8f9fa);
+  border-radius: 8px;
+  border: var(--style-border-always);
+  transition: all 0.3s ease;
 
   .section-title {
     display: flex;
@@ -108,10 +117,10 @@ const updateBannerConfig = (
     margin: 0 0 20px;
     font-size: 16px;
     font-weight: 600;
-    color: #303133;
+    color: var(--anzhiyu-fontcolor);
 
     .el-icon {
-      color: #409eff;
+      color: var(--anzhiyu-theme);
     }
   }
 
@@ -128,9 +137,18 @@ const updateBannerConfig = (
         margin-top: 4px;
         font-size: 12px;
         line-height: 1.4;
-        color: #909399;
+        color: var(--anzhiyu-secondtext);
       }
     }
+  }
+
+  // 暗色模式优化
+  @media (prefers-color-scheme: dark) {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  html.dark {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 }
 

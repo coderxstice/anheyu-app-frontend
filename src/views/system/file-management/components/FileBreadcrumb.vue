@@ -267,7 +267,7 @@ watch(
 }
 
 :root {
-  --style-border: 1px solid #e0e0e0;
+  --style-border: var(--style-border-always);
 }
 
 .file-breadcrumb-wrapper {
@@ -337,7 +337,7 @@ watch(
 }
 
 .home-icon:hover {
-  color: var(--el-color-primary);
+  color: var(--anzhiyu-theme);
 }
 
 .is-link {

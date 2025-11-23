@@ -87,7 +87,7 @@ const removeComic = (index: number) => {
 
       .comic-index {
         font-weight: bold;
-        color: #409eff;
+        color: var(--anzhiyu-theme);
       }
     }
   }
