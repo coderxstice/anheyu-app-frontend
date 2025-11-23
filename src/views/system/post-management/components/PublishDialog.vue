@@ -782,7 +782,7 @@ const handleFetchPrimaryColor = async () => {
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.5;
-  color: var(--el-text-color-secondary);
+  color: var(--anzhiyu-secondtext);
 }
 
 .primary-color-controls {
@@ -825,7 +825,7 @@ const handleFetchPrimaryColor = async () => {
   .label-icon {
     margin-left: 4px;
     vertical-align: middle;
-    color: var(--el-text-color-secondary);
+    color: var(--anzhiyu-secondtext);
   }
   .manage-btn {
     margin-left: auto;
@@ -845,7 +845,7 @@ const handleFetchPrimaryColor = async () => {
     display: flex;
     align-items: center;
     padding-bottom: 16px;
-    border-bottom: 1px solid var(--el-border-color-lighter);
+    border-bottom: var(--style-border-always);
     margin-bottom: 16px;
   }
   .edit-cell {

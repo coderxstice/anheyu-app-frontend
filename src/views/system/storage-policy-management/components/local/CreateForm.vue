@@ -79,7 +79,7 @@ defineExpose({ submitForm });
       />
       <div class="form-item-help">
         文件的访问路径，<strong>需保证唯一性</strong>。例如：/comments、/articles、/uploads<br />
-        <span style="color: var(--el-color-info); font-size: 11px">
+        <span style="color: var(--anzhiyu-blue); font-size: 11px">
           实际存储位置：data/storage{{
             formData.virtual_path ? formData.virtual_path : "/路径名"
           }}
@@ -124,21 +124,21 @@ defineExpose({ submitForm });
   color: #999;
 
   strong {
-    color: var(--el-color-warning);
+    color: var(--anzhiyu-yellow);
   }
 }
 
 .info-block {
   padding: 12px 16px;
   margin-bottom: 16px;
-  background: var(--el-fill-color-extra-light);
+  background: var(--anzhiyu-secondbg);
   border-radius: 6px;
 
   h3 {
     margin: 0 0 8px;
     font-size: 16px;
     font-weight: 600;
-    color: var(--el-text-color-primary);
+    color: var(--anzhiyu-fontcolor);
   }
 
   ul {
@@ -149,7 +149,7 @@ defineExpose({ submitForm });
       margin-bottom: 4px;
       font-size: 13px;
       line-height: 1.6;
-      color: var(--el-text-color-regular);
+      color: var(--anzhiyu-fontcolor);
     }
   }
 }

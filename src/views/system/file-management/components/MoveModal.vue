@@ -750,7 +750,7 @@ const confirmAction = async () => {
 
       &.is-current-path {
         font-weight: bold;
-        color: var(--el-color-primary);
+        color: var(--anzhiyu-theme);
       }
     }
 
@@ -759,10 +759,10 @@ const confirmAction = async () => {
       padding: 4px 8px;
       margin: 4px auto 8px;
       font-size: 13px;
-      color: var(--el-color-primary);
+      color: var(--anzhiyu-theme);
       text-align: center;
       cursor: pointer;
-      background-color: var(--el-color-primary-light-9);
+      background-color: var(--anzhiyu-theme-op-light);
       border-radius: 12px;
       transition: background-color 0.2s ease;
 
@@ -773,7 +773,7 @@ const confirmAction = async () => {
     }
 
     .el-tree-node[aria-disabled="true"] > .el-tree-node__content {
-      color: #c0c4cc;
+      color: var(--anzhiyu-secondtext);
       cursor: not-allowed;
       background: transparent !important;
       opacity: 0.7;
@@ -785,7 +785,7 @@ const confirmAction = async () => {
       align-items: center;
       padding: 0 8px;
       font-size: 14px;
-      color: #909399;
+      color: var(--anzhiyu-secondtext);
       cursor: progress;
     }
 
@@ -819,7 +819,7 @@ const confirmAction = async () => {
       align-items: center;
       max-width: 70%;
       font-size: 14px;
-      color: var(--el-text-color-regular);
+      color: var(--anzhiyu-fontcolor);
 
       .target-path-text {
         overflow: hidden;

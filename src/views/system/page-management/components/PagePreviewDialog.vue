@@ -88,7 +88,7 @@ const handleOpenInNewTab = () => {
     align-items: flex-start;
     margin-bottom: 20px;
     padding: 16px;
-    background-color: var(--el-bg-color-page);
+    background-color: var(--anzhiyu-background);
     border-radius: 8px;
     border: 1px solid var(--el-border-color-light);
 
@@ -99,20 +99,20 @@ const handleOpenInNewTab = () => {
         margin: 0 0 8px 0;
         font-size: 18px;
         font-weight: 600;
-        color: var(--el-text-color-primary);
+        color: var(--anzhiyu-fontcolor);
       }
 
       .path {
         margin: 0 0 4px 0;
         font-size: 14px;
-        color: var(--el-text-color-regular);
+        color: var(--anzhiyu-fontcolor);
         font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
       }
 
       .description {
         margin: 0;
         font-size: 14px;
-        color: var(--el-text-color-secondary);
+        color: var(--anzhiyu-secondtext);
       }
     }
 
@@ -124,7 +124,7 @@ const handleOpenInNewTab = () => {
 
       .sort {
         font-size: 12px;
-        color: var(--el-text-color-secondary);
+        color: var(--anzhiyu-secondtext);
       }
     }
   }
@@ -138,27 +138,27 @@ const handleOpenInNewTab = () => {
       font-size: 2.5rem;
       font-weight: bold;
       margin-bottom: 1.5rem;
-      color: var(--el-text-color-primary);
+      color: var(--anzhiyu-fontcolor);
     }
 
     :deep(h2) {
       font-size: 2rem;
       font-weight: bold;
       margin: 2rem 0 1rem 0;
-      color: var(--el-text-color-primary);
+      color: var(--anzhiyu-fontcolor);
     }
 
     :deep(h3) {
       font-size: 1.5rem;
       font-weight: bold;
       margin: 1.5rem 0 0.75rem 0;
-      color: var(--el-text-color-primary);
+      color: var(--anzhiyu-fontcolor);
     }
 
     :deep(p) {
       margin-bottom: 1rem;
       line-height: 1.6;
-      color: var(--el-text-color-regular);
+      color: var(--anzhiyu-fontcolor);
     }
 
     :deep(ul),
@@ -169,17 +169,17 @@ const handleOpenInNewTab = () => {
       li {
         margin-bottom: 0.5rem;
         line-height: 1.6;
-        color: var(--el-text-color-regular);
+        color: var(--anzhiyu-fontcolor);
       }
     }
 
     :deep(strong) {
       font-weight: bold;
-      color: var(--el-text-color-primary);
+      color: var(--anzhiyu-fontcolor);
     }
 
     :deep(a) {
-      color: var(--el-color-primary);
+      color: var(--anzhiyu-theme);
       text-decoration: none;
 
       &:hover {
@@ -190,12 +190,12 @@ const handleOpenInNewTab = () => {
     :deep(blockquote) {
       margin: 1rem 0;
       padding: 1rem;
-      background-color: var(--el-bg-color-page);
-      color: var(--el-text-color-regular);
+      background-color: var(--anzhiyu-background);
+      color: var(--anzhiyu-fontcolor);
     }
 
     :deep(code) {
-      background-color: var(--el-bg-color-page);
+      background-color: var(--anzhiyu-background);
       padding: 0.2rem 0.4rem;
       border-radius: 4px;
       font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
@@ -203,7 +203,7 @@ const handleOpenInNewTab = () => {
     }
 
     :deep(pre) {
-      background-color: var(--el-bg-color-page);
+      background-color: var(--anzhiyu-background);
       padding: 1rem;
       border-radius: 8px;
       overflow-x: auto;
@@ -223,12 +223,12 @@ const handleOpenInNewTab = () => {
       th,
       td {
         padding: 8px 12px;
-        border: 1px solid var(--el-border-color);
+        border: var(--style-border-always);
         text-align: left;
       }
 
       th {
-        background-color: var(--el-bg-color-page);
+        background-color: var(--anzhiyu-background);
         font-weight: bold;
       }
     }

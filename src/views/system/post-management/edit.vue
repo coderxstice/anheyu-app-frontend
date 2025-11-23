@@ -433,7 +433,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   height: calc(100%);
-  background-color: var(--el-bg-color-page);
+  background-color: var(--anzhiyu-background);
 }
 
 .post-edit-header {
@@ -485,7 +485,7 @@ onUnmounted(() => {
   height: 500px;
   min-height: 0;
   padding: 8px;
-  background-color: var(--el-bg-color);
+  background-color: var(--anzhiyu-card-bg);
 }
 
 :deep(.md-editor-preview .md-editor-code .md-editor-code-head) {

@@ -453,7 +453,7 @@ const importFromJson = () => {
         align-items: center;
         gap: 8px;
         margin: 0;
-        color: #303133;
+        color: var(--anzhiyu-fontcolor);
         font-size: 16px;
         font-weight: 600;
       }
@@ -471,7 +471,7 @@ const importFromJson = () => {
         transition: all 0.3s ease;
 
         &:hover {
-          border-color: var(--anzhiyu-main, #409eff);
+          border-color: var(--anzhiyu-main, var(--anzhiyu-theme));
           box-shadow: var(--anzhiyu-shadow-border);
         }
 

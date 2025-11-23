@@ -143,6 +143,6 @@ const handleCancel = () => {
   padding-top: 4px;
   font-size: 12px;
   line-height: 1;
-  color: var(--el-color-danger);
+  color: var(--anzhiyu-red);
 }
 </style>

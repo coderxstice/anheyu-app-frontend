@@ -58,7 +58,7 @@ const careerList = defineModel<CareerItem[]>("career-list", { required: true });
 
 const addCareer = () => {
   const newCareer: CareerItem = {
-    color: "#409eff",
+    color: "var(--anzhiyu-theme)",
     desc: ""
   };
   // 直接修改 careerList.value，defineModel 会自动 emit 更新
@@ -86,7 +86,7 @@ const removeCareer = (index: number) => {
 
       .career-index {
         font-weight: bold;
-        color: #409eff;
+        color: var(--anzhiyu-theme);
       }
     }
   }

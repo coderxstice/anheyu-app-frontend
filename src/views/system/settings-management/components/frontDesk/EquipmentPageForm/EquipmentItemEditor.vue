@@ -558,7 +558,7 @@ const exportToJson = () => {
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
-    html.dark & {
+    html.dark {
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
   }
@@ -578,7 +578,7 @@ const exportToJson = () => {
       background: var(--anzhiyu-card-bg, white);
 
       &:hover {
-        border-color: var(--anzhiyu-main, #409eff);
+        border-color: var(--anzhiyu-main, var(--anzhiyu-theme));
         box-shadow: var(--anzhiyu-shadow-border);
       }
 
@@ -589,7 +589,7 @@ const exportToJson = () => {
         }
       }
 
-      html.dark & {
+      html.dark {
         &:hover {
           box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
         }
@@ -622,7 +622,7 @@ const exportToJson = () => {
             }
           }
 
-          html.dark & {
+          html.dark {
             &:hover {
               background: rgba(255, 255, 255, 0.05);
             }
@@ -642,7 +642,7 @@ const exportToJson = () => {
 
               &:focus-within {
                 background: var(--anzhiyu-card-bg, white);
-                border: 1px solid var(--anzhiyu-main, #409eff);
+                border: 1px solid var(--anzhiyu-main, var(--anzhiyu-theme));
                 border-radius: 4px;
                 padding: 0 8px;
               }
@@ -651,16 +651,18 @@ const exportToJson = () => {
               @media (prefers-color-scheme: dark) {
                 &:focus-within {
                   background: rgba(255, 255, 255, 0.05);
-                  box-shadow: 0 0 0 1px var(--anzhiyu-main, #409eff);
+                  box-shadow: 0 0 0 1px
+                    var(--anzhiyu-main, var(--anzhiyu-theme));
                 }
               }
             }
 
-            html.dark & {
+            html.dark {
               :deep(.el-input__wrapper) {
                 &:focus-within {
                   background: rgba(255, 255, 255, 0.05);
-                  box-shadow: 0 0 0 1px var(--anzhiyu-main, #409eff);
+                  box-shadow: 0 0 0 1px
+                    var(--anzhiyu-main, var(--anzhiyu-theme));
                 }
               }
             }
@@ -720,7 +722,7 @@ const exportToJson = () => {
                   }
                 }
 
-                html.dark & {
+                html.dark {
                   &:hover {
                     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
                   }
@@ -792,7 +794,7 @@ const exportToJson = () => {
         border-color: rgba(255, 255, 255, 0.1);
       }
 
-      html.dark & {
+      html.dark {
         background: rgba(0, 0, 0, 0.2);
         border-color: rgba(255, 255, 255, 0.1);
       }
@@ -813,14 +815,14 @@ const exportToJson = () => {
             color: var(--anzhiyu-fontcolor);
 
             &:focus {
-              border-color: var(--anzhiyu-main, #409eff);
+              border-color: var(--anzhiyu-main, var(--anzhiyu-theme));
               background: rgba(0, 0, 0, 0.2);
             }
           }
         }
       }
 
-      html.dark & {
+      html.dark {
         :deep(.json-textarea) {
           .el-textarea__inner {
             background: rgba(0, 0, 0, 0.1);
@@ -828,7 +830,7 @@ const exportToJson = () => {
             color: var(--anzhiyu-fontcolor);
 
             &:focus {
-              border-color: var(--anzhiyu-main, #409eff);
+              border-color: var(--anzhiyu-main, var(--anzhiyu-theme));
               background: rgba(0, 0, 0, 0.2);
             }
           }
@@ -853,7 +855,7 @@ const exportToJson = () => {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
   }
 
-  html.dark & {
+  html.dark {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
   }
 }

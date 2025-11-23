@@ -238,14 +238,14 @@ const bucketPermissions = [
   margin: 0;
   font-size: 16px;
   font-weight: 500;
-  color: var(--el-color-primary);
+  color: var(--anzhiyu-theme);
 }
 
 .form-item-help {
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.4;
-  color: var(--el-color-info);
+  color: var(--anzhiyu-blue);
 }
 
 .upload-method-info {
@@ -254,27 +254,27 @@ const bucketPermissions = [
 
 .method-item {
   padding: 12px;
-  background-color: var(--el-fill-color-lighter);
-  border: 1px solid var(--el-border-color);
+  background-color: var(--anzhiyu-secondbg);
+  border: var(--style-border-always);
   border-radius: 6px;
 }
 
 .method-title {
   margin-bottom: 4px;
   font-weight: 500;
-  color: var(--el-color-primary);
+  color: var(--anzhiyu-theme);
 }
 
 .method-description {
   font-size: 13px;
   line-height: 1.4;
-  color: var(--el-color-info);
+  color: var(--anzhiyu-blue);
 }
 
 .info-block {
   padding: 12px;
   margin-bottom: 16px;
-  background-color: var(--el-fill-color-light);
+  background-color: var(--anzhiyu-secondbg);
   border: 1px solid var(--el-border-color-lighter);
   border-radius: 6px;
 
@@ -282,14 +282,14 @@ const bucketPermissions = [
     margin: 0 0 8px;
     font-size: 14px;
     font-weight: 500;
-    color: var(--el-text-color-primary);
+    color: var(--anzhiyu-fontcolor);
   }
 
   p {
     margin: 0;
     font-size: 13px;
     line-height: 1.4;
-    color: var(--el-color-info);
+    color: var(--anzhiyu-blue);
   }
 }
 
@@ -303,7 +303,7 @@ const bucketPermissions = [
 
   &:hover {
     background-color: var(--el-fill-color-extra-light);
-    border-color: var(--el-color-primary);
+    border-color: var(--anzhiyu-theme);
   }
 }
 
@@ -312,7 +312,7 @@ const bucketPermissions = [
   margin-left: 24px;
   font-size: 13px;
   line-height: 1.4;
-  color: var(--el-color-info);
+  color: var(--anzhiyu-blue);
 }
 
 .cors-config-details {
@@ -328,7 +328,7 @@ const bucketPermissions = [
     li {
       margin: 4px 0;
       font-size: 13px;
-      color: var(--el-text-color-regular);
+      color: var(--anzhiyu-fontcolor);
     }
   }
 }

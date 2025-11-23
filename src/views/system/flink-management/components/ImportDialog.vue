@@ -503,7 +503,7 @@ onMounted(() => {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: var(--el-text-color-regular);
+    color: var(--anzhiyu-fontcolor);
     font-size: 14px;
   }
 }
@@ -521,7 +521,7 @@ onMounted(() => {
   .example-code {
     margin: 0;
     padding: 16px;
-    background: var(--el-fill-color-lighter);
+    background: var(--anzhiyu-secondbg);
     border-radius: 6px;
     font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
     font-size: 12px;
@@ -559,7 +559,7 @@ onMounted(() => {
   .options-content {
     .option-desc {
       margin-top: 4px;
-      color: var(--el-text-color-secondary);
+      color: var(--anzhiyu-secondtext);
       font-size: 12px;
     }
 
@@ -571,7 +571,7 @@ onMounted(() => {
       .category-label {
         display: block;
         margin-bottom: 8px;
-        color: var(--el-text-color-regular);
+        color: var(--anzhiyu-fontcolor);
         font-size: 14px;
         font-weight: 500;
       }
@@ -615,16 +615,16 @@ onMounted(() => {
 
             .link-name {
               font-weight: 500;
-              color: var(--el-text-color-primary);
+              color: var(--anzhiyu-fontcolor);
               margin-bottom: 4px;
             }
 
             .link-reason {
               font-size: 12px;
-              color: var(--el-text-color-secondary);
+              color: var(--anzhiyu-secondtext);
 
               &.error {
-                color: var(--el-color-danger);
+                color: var(--anzhiyu-red);
               }
             }
           }

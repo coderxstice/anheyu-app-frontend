@@ -486,9 +486,9 @@ export function useAlbum() {
               {
                 size: 64,
                 color: allSuccess
-                  ? "#67C23A"
+                  ? "var(--anzhiyu-green)"
                   : hasError
-                    ? "#E6A23C"
+                    ? "var(--anzhiyu-yellow)"
                     : "#409EFF",
                 style: { marginBottom: "12px" }
               },
@@ -550,7 +550,7 @@ export function useAlbum() {
                   padding: "16px",
                   background: "#f0f9ff",
                   borderRadius: "8px",
-                  border: "1px solid #409EFF20"
+                  border: "var(--style-border-always)"
                 }
               },
               [
@@ -571,7 +571,7 @@ export function useAlbum() {
                     style: {
                       fontSize: "24px",
                       fontWeight: "600",
-                      color: "#67C23A"
+                      color: "var(--anzhiyu-green)"
                     }
                   },
                   successCount
@@ -587,7 +587,7 @@ export function useAlbum() {
                   background: failCount > 0 ? "#fef0f0" : "#f5f5f5",
                   borderRadius: "8px",
                   border:
-                    failCount > 0 ? "1px solid #F5672220" : "1px solid #DCDFE6"
+                    failCount > 0 ? "1px solid #F5672220" : "var(--style-border-always)"
                 }
               },
               [
@@ -608,7 +608,7 @@ export function useAlbum() {
                     style: {
                       fontSize: "24px",
                       fontWeight: "600",
-                      color: failCount > 0 ? "#F56C6C" : "#909399"
+                      color: failCount > 0 ? "var(--anzhiyu-red)" : "#909399"
                     }
                   },
                   failCount
@@ -624,7 +624,7 @@ export function useAlbum() {
                   background: skipCount > 0 ? "#fdf6ec" : "#f5f5f5",
                   borderRadius: "8px",
                   border:
-                    skipCount > 0 ? "1px solid #E6A23C20" : "1px solid #DCDFE6"
+                    skipCount > 0 ? "1px solid var(--anzhiyu-yellow)20" : "var(--style-border-always)"
                 }
               },
               [
@@ -645,7 +645,7 @@ export function useAlbum() {
                     style: {
                       fontSize: "24px",
                       fontWeight: "600",
-                      color: skipCount > 0 ? "#E6A23C" : "#909399"
+                      color: skipCount > 0 ? "var(--anzhiyu-yellow)" : "#909399"
                     }
                   },
                   skipCount
@@ -660,7 +660,7 @@ export function useAlbum() {
                   padding: "16px",
                   background: invalidCount > 0 ? "#f4f4f5" : "#f5f5f5",
                   borderRadius: "8px",
-                  border: "1px solid #DCDFE6"
+                  border: "var(--style-border-always)"
                 }
               },
               [
@@ -733,7 +733,7 @@ export function useAlbum() {
                               {
                                 style: {
                                   fontWeight: "500",
-                                  color: "#F56C6C",
+                                  color: "var(--anzhiyu-red)",
                                   marginBottom: "8px"
                                 }
                               },
@@ -766,7 +766,7 @@ export function useAlbum() {
                                     "div",
                                     {
                                       style: {
-                                        color: "#F56C6C",
+                                        color: "var(--anzhiyu-red)",
                                         paddingLeft: "16px"
                                       }
                                     },
@@ -786,7 +786,7 @@ export function useAlbum() {
                               {
                                 style: {
                                   fontWeight: "500",
-                                  color: "#E6A23C",
+                                  color: "var(--anzhiyu-yellow)",
                                   marginBottom: "8px"
                                 }
                               },
@@ -814,7 +814,7 @@ export function useAlbum() {
                               "div",
                               {
                                 style: {
-                                  color: "#E6A23C",
+                                  color: "var(--anzhiyu-yellow)",
                                   fontSize: "12px"
                                 }
                               },

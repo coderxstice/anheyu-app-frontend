@@ -475,7 +475,7 @@ defineExpose({
     margin-bottom: 12px;
     font-size: 13px;
     font-weight: 500;
-    color: #909399;
+    color: var(--anzhiyu-secondtext);
   }
 
   .el-button-group.view-switcher {
@@ -501,10 +501,10 @@ defineExpose({
       min-width: 45px;
       padding: 2px 8px;
       font-size: 14px;
-      color: var(--el-text-color-primary);
+      color: var(--anzhiyu-fontcolor);
       text-align: center;
       user-select: none;
-      background-color: var(--el-fill-color-light);
+      background-color: var(--anzhiyu-secondbg);
       border-radius: 4px;
     }
   }
@@ -532,13 +532,13 @@ defineExpose({
 }
 
 :deep(.el-dropdown-menu__item.active) {
-  color: var(--el-color-primary, #409eff);
+  color: var(--el-color-primary, var(--anzhiyu-theme));
   background-color: var(--el-color-primary-light-9, #ecf5ff);
 }
 
 .column-settings-body {
   overflow: hidden;
-  background-color: var(--el-bg-color);
+  background-color: var(--anzhiyu-card-bg);
   border: 1px solid var(--el-border-color-lighter);
   border-radius: 8px;
 }
@@ -549,8 +549,8 @@ defineExpose({
   padding: 8px 16px;
   font-size: 14px;
   font-weight: 500;
-  color: var(--el-text-color-secondary);
-  background-color: var(--el-fill-color-light);
+  color: var(--anzhiyu-secondtext);
+  background-color: var(--anzhiyu-secondbg);
 }
 
 .column-list {
@@ -562,8 +562,8 @@ defineExpose({
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background-color: var(--el-bg-color);
-  border-bottom: 1px solid var(--el-border-color-lighter);
+  background-color: var(--anzhiyu-card-bg);
+  border-bottom: var(--style-border-always);
 
   &:last-child {
     border-bottom: none;
@@ -578,7 +578,7 @@ defineExpose({
   display: flex;
   gap: 16px;
   align-items: center;
-  color: var(--el-text-color-regular);
+  color: var(--anzhiyu-fontcolor);
 
   .action-icon {
     font-size: 16px;
@@ -586,11 +586,11 @@ defineExpose({
     transition: color 0.2s ease;
 
     &:hover {
-      color: var(--el-color-primary);
+      color: var(--anzhiyu-theme);
     }
 
     &.danger:hover {
-      color: var(--el-color-danger);
+      color: var(--anzhiyu-red);
     }
   }
 }

@@ -309,12 +309,12 @@ const handleCommand = (command: string, value?: any) => {
 }
 
 .popover-menu li:hover {
-  background-color: #f5f7fa;
+  background-color: var(--anzhiyu-secondbg);
 }
 
 .popover-menu li.active {
   font-weight: 500;
-  color: var(--el-color-primary);
+  color: var(--anzhiyu-theme);
 }
 
 .popover-menu li.active::before {
@@ -332,11 +332,11 @@ const handleCommand = (command: string, value?: any) => {
   padding: 0;
   margin: 8px 0;
   cursor: default;
-  background-color: #e9e9eb;
+  background-color: var(--anzhiyu-card-bg-grey);
 }
 
 .popover-menu li.divider:hover {
-  background-color: #e9e9eb;
+  background-color: var(--anzhiyu-card-bg-grey);
 }
 
 .icon-wrapper {
@@ -387,7 +387,7 @@ const handleCommand = (command: string, value?: any) => {
   width: 420px;
   max-height: 500px;
   overflow: hidden;
-  color: #303133;
+  color: var(--anzhiyu-fontcolor);
   background-color: #fff;
   border-radius: 12px;
   box-shadow:
@@ -423,12 +423,12 @@ const handleCommand = (command: string, value?: any) => {
 
 .action-icon {
   font-size: 16px;
-  color: #909399;
+  color: var(--anzhiyu-secondtext);
   transition: color 0.2s;
 }
 
 .icon-wrapper:hover .action-icon {
-  color: var(--el-color-primary);
+  color: var(--anzhiyu-theme);
 }
 
 .collapsible-content {
@@ -451,7 +451,7 @@ const handleCommand = (command: string, value?: any) => {
 .empty-queue {
   padding: 40px 0;
   font-size: 14px;
-  color: #909399;
+  color: var(--anzhiyu-secondtext);
   text-align: center;
 }
 </style>

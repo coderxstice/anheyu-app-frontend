@@ -163,7 +163,7 @@ const handleUpdate = () => {
     margin-top: 8px;
     font-size: 13px;
     line-height: 1.5;
-    color: #909399;
+    color: var(--anzhiyu-secondtext);
   }
 }
 </style>

@@ -274,7 +274,7 @@ onMounted(() => {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 
-  html.dark & {
+  html.dark {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 }
@@ -302,41 +302,41 @@ onMounted(() => {
 // 暗色模式下的输入框优化
 @media (prefers-color-scheme: dark) {
   :deep(.el-input__wrapper) {
-    background-color: var(--el-fill-color-blank);
+    background-color: var(--anzhiyu-card-bg);
     border-color: var(--el-border-color-darker);
     transition: all 0.3s ease;
 
     &:hover {
-      border-color: var(--el-border-color);
+      border-color: var(--anzhiyu-card-border);
     }
 
     &.is-focus {
-      background-color: var(--el-bg-color);
-      border-color: var(--el-color-primary);
-      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+      background-color: var(--anzhiyu-card-bg);
+      border-color: var(--anzhiyu-theme);
+      box-shadow: 0 0 0 1px var(--anzhiyu-theme) inset;
     }
   }
 
   :deep(.el-textarea__inner) {
-    background-color: var(--el-fill-color-blank);
+    background-color: var(--anzhiyu-card-bg);
     border-color: var(--el-border-color-darker);
-    color: var(--el-text-color-primary);
+    color: var(--anzhiyu-fontcolor);
     transition: all 0.3s ease;
 
     &:hover {
-      border-color: var(--el-border-color);
+      border-color: var(--anzhiyu-card-border);
     }
 
     &:focus {
-      background-color: var(--el-bg-color);
-      border-color: var(--el-color-primary);
-      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+      background-color: var(--anzhiyu-card-bg);
+      border-color: var(--anzhiyu-theme);
+      box-shadow: 0 0 0 1px var(--anzhiyu-theme) inset;
     }
   }
 
   :deep(.el-select) {
     .el-input__wrapper {
-      background-color: var(--el-fill-color-blank);
+      background-color: var(--anzhiyu-card-bg);
       border-color: var(--el-border-color-darker);
     }
   }
@@ -345,41 +345,41 @@ onMounted(() => {
 // 手动切换暗色模式支持
 html.dark {
   :deep(.el-input__wrapper) {
-    background-color: var(--el-fill-color-blank);
+    background-color: var(--anzhiyu-card-bg);
     border-color: var(--el-border-color-darker);
     transition: all 0.3s ease;
 
     &:hover {
-      border-color: var(--el-border-color);
+      border-color: var(--anzhiyu-card-border);
     }
 
     &.is-focus {
-      background-color: var(--el-bg-color);
-      border-color: var(--el-color-primary);
-      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+      background-color: var(--anzhiyu-card-bg);
+      border-color: var(--anzhiyu-theme);
+      box-shadow: 0 0 0 1px var(--anzhiyu-theme) inset;
     }
   }
 
   :deep(.el-textarea__inner) {
-    background-color: var(--el-fill-color-blank);
+    background-color: var(--anzhiyu-card-bg);
     border-color: var(--el-border-color-darker);
-    color: var(--el-text-color-primary);
+    color: var(--anzhiyu-fontcolor);
     transition: all 0.3s ease;
 
     &:hover {
-      border-color: var(--el-border-color);
+      border-color: var(--anzhiyu-card-border);
     }
 
     &:focus {
-      background-color: var(--el-bg-color);
-      border-color: var(--el-color-primary);
-      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+      background-color: var(--anzhiyu-card-bg);
+      border-color: var(--anzhiyu-theme);
+      box-shadow: 0 0 0 1px var(--anzhiyu-theme) inset;
     }
   }
 
   :deep(.el-select) {
     .el-input__wrapper {
-      background-color: var(--el-fill-color-blank);
+      background-color: var(--anzhiyu-card-bg);
       border-color: var(--el-border-color-darker);
     }
   }

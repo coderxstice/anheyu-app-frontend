@@ -147,7 +147,7 @@ const updateBannerConfig = (
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 
-  html.dark & {
+  html.dark {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 }

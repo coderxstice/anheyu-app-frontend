@@ -177,10 +177,10 @@ defineExpose({ getRef });
             <p>
               📁 <strong>文件导入</strong>：上传 JSON 或 ZIP 格式的相册数据文件
             </p>
-            <p style="margin-top: 8px; color: var(--el-color-info)">
+            <p style="margin-top: 8px; color: var(--anzhiyu-blue)">
               • 单次最多导入 100 条数据，文件大小限制 50MB
             </p>
-            <p style="color: var(--el-color-info)">
+            <p style="color: var(--anzhiyu-blue)">
               • 默认跳过已存在的相册（基于文件哈希值）
             </p>
           </div>
@@ -409,7 +409,7 @@ https://example.com/image3.webp
 :deep(.el-upload__tip) {
   margin-top: 8px;
   font-size: 13px;
-  color: var(--el-color-info);
+  color: var(--anzhiyu-blue);
 }
 
 .json-textarea {

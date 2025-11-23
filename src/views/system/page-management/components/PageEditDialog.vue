@@ -353,7 +353,7 @@ const handleClose = () => {
   .editor-tip {
     margin-top: 8px;
     font-size: 12px;
-    color: var(--el-text-color-secondary);
+    color: var(--anzhiyu-secondtext);
     line-height: 1.5;
   }
 }
@@ -394,7 +394,7 @@ const handleClose = () => {
 .form-item-tip {
   margin-top: 4px;
   font-size: 12px;
-  color: var(--el-text-color-secondary);
+  color: var(--anzhiyu-secondtext);
   line-height: 1.4;
 }
 

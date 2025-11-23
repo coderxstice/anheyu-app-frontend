@@ -166,7 +166,7 @@ const removeLink = (columnIndex: number, linkIndex: number) => {
 
 .column-item {
   margin-bottom: 16px;
-  background-color: var(--el-bg-color-page);
+  background-color: var(--anzhiyu-background);
   border: 1px solid var(--el-border-color-light);
   border-radius: 4px;
 }
@@ -176,7 +176,7 @@ const removeLink = (columnIndex: number, linkIndex: number) => {
   align-items: center;
   justify-content: space-between;
   padding: 8px 16px;
-  background-color: var(--el-fill-color-lighter);
+  background-color: var(--anzhiyu-secondbg);
   border-bottom: 1px solid var(--el-border-color-light);
 }
 

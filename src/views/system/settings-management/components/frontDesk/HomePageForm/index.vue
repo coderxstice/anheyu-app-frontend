@@ -664,7 +664,7 @@
     <div
       style="
         font-size: 12px;
-        color: var(--el-text-color-secondary);
+        color: var(--anzhiyu-secondtext);
         margin-left: 8px;
       "
     >
@@ -679,11 +679,7 @@
       @update:model-value="updateMusicPlayerPlaylistId"
     />
     <div
-      style="
-        font-size: 12px;
-        color: var(--el-text-color-secondary);
-        margin-top: 8px;
-      "
+      style="font-size: 12px; color: var(--anzhiyu-secondtext); margin-top: 8px"
     >
       网易云音乐歌单ID，用于前端音乐播放器获取歌曲列表
     </div>
@@ -696,11 +692,7 @@
       @update:model-value="updateMusicPlayerCustomPlaylist"
     />
     <div
-      style="
-        font-size: 12px;
-        color: var(--el-text-color-secondary);
-        margin-top: 8px;
-      "
+      style="font-size: 12px; color: var(--anzhiyu-secondtext); margin-top: 8px"
     >
       指向包含歌单信息的JSON文件的链接地址，配置后将不再使用歌单id，而是使用
       json中的内容作为歌单列表，如果json内容有误将无法显示音乐。
@@ -714,11 +706,7 @@
       @update:model-value="updateMusicAPIBaseURL"
     />
     <div
-      style="
-        font-size: 12px;
-        color: var(--el-text-color-secondary);
-        margin-top: 8px;
-      "
+      style="font-size: 12px; color: var(--anzhiyu-secondtext); margin-top: 8px"
     >
       音乐API基础地址（不带末尾斜杠），用于获取歌曲信息和播放地址。默认为
       https://metings.qjqq.cn
@@ -732,11 +720,7 @@
       @update:model-value="updateMusicVinylBackground"
     />
     <div
-      style="
-        font-size: 12px;
-        color: var(--el-text-color-secondary);
-        margin-top: 8px;
-      "
+      style="font-size: 12px; color: var(--anzhiyu-secondtext); margin-top: 8px"
     >
       音乐播放器唱片背景图片，默认为 /static/img/music-vinyl-background.png
     </div>
@@ -749,11 +733,7 @@
       @update:model-value="updateMusicVinylOuter"
     />
     <div
-      style="
-        font-size: 12px;
-        color: var(--el-text-color-secondary);
-        margin-top: 8px;
-      "
+      style="font-size: 12px; color: var(--anzhiyu-secondtext); margin-top: 8px"
     >
       音乐播放器唱片外圈图片，默认为 /static/img/music-vinyl-outer.png
     </div>
@@ -766,11 +746,7 @@
       @update:model-value="updateMusicVinylInner"
     />
     <div
-      style="
-        font-size: 12px;
-        color: var(--el-text-color-secondary);
-        margin-top: 8px;
-      "
+      style="font-size: 12px; color: var(--anzhiyu-secondtext); margin-top: 8px"
     >
       音乐播放器唱片内圈图片，默认为 /static/img/music-vinyl-inner.png
     </div>
@@ -783,11 +759,7 @@
       @update:model-value="updateMusicVinylNeedle"
     />
     <div
-      style="
-        font-size: 12px;
-        color: var(--el-text-color-secondary);
-        margin-top: 8px;
-      "
+      style="font-size: 12px; color: var(--anzhiyu-secondtext); margin-top: 8px"
     >
       音乐播放器撞针图片，默认为 /static/img/music-vinyl-needle.png
     </div>
@@ -800,11 +772,7 @@
       @update:model-value="updateMusicVinylGroove"
     />
     <div
-      style="
-        font-size: 12px;
-        color: var(--el-text-color-secondary);
-        margin-top: 8px;
-      "
+      style="font-size: 12px; color: var(--anzhiyu-secondtext); margin-top: 8px"
     >
       音乐播放器凹槽背景图片，默认为 /static/img/music-vinyl-groove.png
     </div>
@@ -1747,7 +1715,7 @@ const updateMusicVinylGroove = (newGroove: string) => {
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.5;
-  color: #909399;
+  color: var(--anzhiyu-secondtext);
 }
 
 /* 分类设置卡片样式 */
@@ -1759,26 +1727,26 @@ const updateMusicVinylGroove = (newGroove: string) => {
 }
 
 .category-card {
-  background: var(--el-bg-color);
+  background: var(--anzhiyu-card-bg);
   border: 1px solid var(--el-border-color-light);
   border-radius: 8px;
   overflow: hidden;
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: var(--el-color-primary-light-5);
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    border-color: var(--anzhiyu-theme-op);
+    box-shadow: var(--anzhiyu-shadow-border);
   }
 
   .category-card-header {
     padding: 12px 20px;
-    background: var(--el-fill-color-light);
-    border-bottom: 1px solid var(--el-border-color-lighter);
+    background: var(--anzhiyu-secondbg);
+    border-bottom: var(--style-border-always);
 
     .category-number {
       font-size: 14px;
       font-weight: 600;
-      color: var(--el-color-primary);
+      color: var(--anzhiyu-theme);
     }
   }
 
@@ -1797,7 +1765,7 @@ const updateMusicVinylGroove = (newGroove: string) => {
 
 /* 简洁菜单管理器样式 */
 .menu-manager {
-  background: var(--el-bg-color);
+  background: var(--anzhiyu-card-bg);
   border-radius: 8px;
   border: 1px solid var(--el-border-color-light);
 
@@ -1806,20 +1774,20 @@ const updateMusicVinylGroove = (newGroove: string) => {
     justify-content: space-between;
     align-items: center;
     padding: 20px 24px;
-    border-bottom: 1px solid var(--el-border-color-lighter);
+    border-bottom: var(--style-border-always);
 
     .header-info {
       h3 {
         margin: 0 0 4px 0;
         font-size: 18px;
         font-weight: 600;
-        color: var(--el-text-color-primary);
+        color: var(--anzhiyu-fontcolor);
       }
 
       p {
         margin: 0;
         font-size: 14px;
-        color: var(--el-text-color-secondary);
+        color: var(--anzhiyu-secondtext);
       }
     }
 
@@ -1841,14 +1809,14 @@ const updateMusicVinylGroove = (newGroove: string) => {
           align-items: center;
           justify-content: space-between;
           padding: 16px 20px;
-          background: var(--el-fill-color-light);
+          background: var(--anzhiyu-secondbg);
           border: 1px solid var(--el-border-color-lighter);
           border-radius: 8px;
           transition: all 0.2s;
 
           &:hover {
-            border-color: var(--el-color-primary);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border-color: var(--anzhiyu-theme);
+            box-shadow: var(--anzhiyu-shadow-border);
           }
 
           .item-info {
@@ -1870,29 +1838,29 @@ const updateMusicVinylGroove = (newGroove: string) => {
 
                 &.direct {
                   background: rgba(64, 158, 255, 0.1);
-                  color: var(--el-color-primary);
+                  color: var(--anzhiyu-theme);
                 }
 
                 &.dropdown {
                   background: rgba(103, 194, 58, 0.1);
-                  color: var(--el-color-success);
+                  color: var(--anzhiyu-green);
                 }
               }
 
               .title {
                 font-size: 16px;
                 font-weight: 500;
-                color: var(--el-text-color-primary);
+                color: var(--anzhiyu-fontcolor);
               }
 
               .validation-error {
-                color: var(--el-color-danger);
+                color: var(--anzhiyu-red);
                 font-size: 16px;
                 margin-left: 8px;
               }
 
               .validation-success {
-                color: var(--el-color-success);
+                color: var(--anzhiyu-green);
                 font-size: 16px;
                 margin-left: 8px;
                 opacity: 0.6;
@@ -1902,7 +1870,7 @@ const updateMusicVinylGroove = (newGroove: string) => {
             .item-meta {
               .meta-text {
                 font-size: 14px;
-                color: var(--el-text-color-secondary);
+                color: var(--anzhiyu-secondtext);
               }
             }
           }
@@ -1936,7 +1904,7 @@ const updateMusicVinylGroove = (newGroove: string) => {
         margin: 0;
         font-size: 16px;
         font-weight: 600;
-        color: var(--el-text-color-primary);
+        color: var(--anzhiyu-fontcolor);
         display: flex;
         align-items: center;
         gap: 8px;
@@ -1959,20 +1927,20 @@ const updateMusicVinylGroove = (newGroove: string) => {
 
     &.direct-group {
       .group-header h4 {
-        color: var(--el-color-primary);
+        color: var(--anzhiyu-theme);
 
         .el-icon {
-          color: var(--el-color-primary);
+          color: var(--anzhiyu-theme);
         }
       }
     }
 
     &.dropdown-group {
       .group-header h4 {
-        color: var(--el-color-success);
+        color: var(--anzhiyu-green);
 
         .el-icon {
-          color: var(--el-color-success);
+          color: var(--anzhiyu-green);
         }
       }
     }
@@ -1988,24 +1956,24 @@ const updateMusicVinylGroove = (newGroove: string) => {
       align-items: center;
       gap: 12px;
       padding: 16px;
-      border: 1px solid var(--el-border-color);
+      border: var(--style-border-always);
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s;
 
       &:hover {
-        border-color: var(--el-color-primary);
-        background: var(--el-fill-color-light);
+        border-color: var(--anzhiyu-theme);
+        background: var(--anzhiyu-secondbg);
       }
 
       &.active {
-        border-color: var(--el-color-primary);
+        border-color: var(--anzhiyu-theme);
         background: rgba(64, 158, 255, 0.04);
       }
 
       .el-icon {
         font-size: 18px;
-        color: var(--el-text-color-secondary);
+        color: var(--anzhiyu-secondtext);
       }
 
       .option-info {
@@ -2015,13 +1983,13 @@ const updateMusicVinylGroove = (newGroove: string) => {
           display: block;
           font-weight: 500;
           font-size: 14px;
-          color: var(--el-text-color-primary);
+          color: var(--anzhiyu-fontcolor);
           margin-bottom: 4px;
         }
 
         .option-desc {
           font-size: 12px;
-          color: var(--el-text-color-secondary);
+          color: var(--anzhiyu-secondtext);
         }
       }
     }
@@ -2029,24 +1997,24 @@ const updateMusicVinylGroove = (newGroove: string) => {
 
   .hint-text {
     font-size: 12px;
-    color: var(--el-text-color-secondary);
+    color: var(--anzhiyu-secondtext);
     margin-top: 8px;
 
     &.error-hint {
-      color: var(--el-color-danger);
+      color: var(--anzhiyu-red);
       font-weight: 500;
     }
   }
 
   .validation-error {
-    --el-input-border-color: var(--el-color-danger) !important;
-    --el-input-focus-border-color: var(--el-color-danger) !important;
+    --el-input-border-color: var(--anzhiyu-red) !important;
+    --el-input-focus-border-color: var(--anzhiyu-red) !important;
 
     :deep(.el-input__wrapper) {
-      box-shadow: 0 0 0 1px var(--el-color-danger) inset;
+      box-shadow: 0 0 0 1px var(--anzhiyu-red) inset;
 
       &.is-focus {
-        box-shadow: 0 0 0 1px var(--el-color-danger) inset;
+        box-shadow: 0 0 0 1px var(--anzhiyu-red) inset;
       }
     }
   }
@@ -2063,12 +2031,12 @@ const updateMusicVinylGroove = (newGroove: string) => {
         .stat-number {
           font-size: 24px;
           font-weight: 600;
-          color: var(--el-color-success);
+          color: var(--anzhiyu-green);
         }
 
         .stat-label {
           font-size: 14px;
-          color: var(--el-text-color-secondary);
+          color: var(--anzhiyu-secondtext);
         }
       }
     }
@@ -2079,12 +2047,12 @@ const updateMusicVinylGroove = (newGroove: string) => {
         align-items: center;
         gap: 12px;
         padding: 12px 16px;
-        background: var(--el-fill-color-light);
+        background: var(--anzhiyu-secondbg);
         border-radius: 6px;
         margin-bottom: 8px;
 
         .el-icon {
-          color: var(--el-text-color-secondary);
+          color: var(--anzhiyu-secondtext);
         }
 
         .item-title {
@@ -2105,7 +2073,7 @@ const updateMusicVinylGroove = (newGroove: string) => {
         text-align: center;
         padding: 8px;
         font-size: 13px;
-        color: var(--el-text-color-secondary);
+        color: var(--anzhiyu-secondtext);
       }
     }
 
@@ -2115,13 +2083,13 @@ const updateMusicVinylGroove = (newGroove: string) => {
 
       .el-icon {
         font-size: 32px;
-        color: var(--el-text-color-placeholder);
+        color: var(--anzhiyu-secondtext);
         margin-bottom: 12px;
       }
 
       p {
         margin: 0 0 16px 0;
-        color: var(--el-text-color-secondary);
+        color: var(--anzhiyu-secondtext);
         font-size: 14px;
       }
     }
@@ -2129,11 +2097,11 @@ const updateMusicVinylGroove = (newGroove: string) => {
 }
 
 .icon-help {
-  color: var(--el-color-info);
+  color: var(--anzhiyu-blue);
   cursor: help;
 
   &:hover {
-    color: var(--el-color-primary);
+    color: var(--anzhiyu-theme);
   }
 }
 

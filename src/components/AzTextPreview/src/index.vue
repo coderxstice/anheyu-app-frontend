@@ -463,7 +463,7 @@ defineExpose({ open });
 
 .editor-modal.light-theme .editor-header {
   color: #303133;
-  background-color: #f5f7fa;
+  background-color: var(--anzhiyu-secondbg);
   border-bottom: 1px solid #e0e0e0;
 }
 

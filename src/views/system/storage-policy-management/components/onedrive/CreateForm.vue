@@ -214,14 +214,14 @@ defineExpose({ submitForm });
     margin: 0 0 8px;
     font-size: 14px;
     line-height: 1.7;
-    color: var(--el-text-color-regular);
+    color: var(--anzhiyu-fontcolor);
   }
 
   code {
     padding: 2px 6px;
     font-size: 0.9em;
-    color: var(--el-text-color-primary);
-    background: var(--el-fill-color-light);
+    color: var(--anzhiyu-fontcolor);
+    background: var(--anzhiyu-secondbg);
     border: 1px solid var(--el-border-color-light);
     border-radius: 4px;
   }

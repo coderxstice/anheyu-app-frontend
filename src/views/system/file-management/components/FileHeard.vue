@@ -188,7 +188,7 @@ const onToolbarLeave = (el: HTMLElement, done: () => void) => {
     display: flex;
     align-items: center;
     overflow: hidden;
-    border: 1px solid var(--el-border-color);
+    border: var(--style-border-always);
     border-radius: var(--el-border-radius-base);
     flex-shrink: 0;
     min-height: 40px;
@@ -234,7 +234,7 @@ const onToolbarLeave = (el: HTMLElement, done: () => void) => {
 }
 
 .selection-count {
-  color: var(--el-text-color-primary) !important;
+  color: var(--anzhiyu-fontcolor) !important;
   cursor: default !important;
   background-color: transparent !important;
   border-left: 1px solid var(--el-border-color-lighter) !important;

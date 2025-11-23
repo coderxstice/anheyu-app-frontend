@@ -564,7 +564,7 @@ onUnmounted(() => {
 
 .form-tip {
   margin-top: 8px;
-  color: var(--el-text-color-regular);
+  color: var(--anzhiyu-fontcolor);
   font-size: 12px;
   line-height: 1.4;
 }

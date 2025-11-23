@@ -181,15 +181,15 @@ const handleCancel = () => {
   padding-top: 4px;
   font-size: 12px;
   line-height: 1;
-  color: var(--el-color-danger);
+  color: var(--anzhiyu-red);
 }
 
 .icon-help {
-  color: var(--el-color-info);
+  color: var(--anzhiyu-blue);
   cursor: help;
 
   &:hover {
-    color: var(--el-color-primary);
+    color: var(--anzhiyu-theme);
   }
 }
 </style>

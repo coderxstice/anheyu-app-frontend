@@ -89,7 +89,7 @@ defineEmits(["update:enabled"]);
     :deep(.el-checkbox__label) {
       font-size: 16px;
       font-weight: 500;
-      color: var(--el-text-color-primary);
+      color: var(--anzhiyu-fontcolor);
     }
   }
 }
