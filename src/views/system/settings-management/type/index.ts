@@ -26,6 +26,7 @@ export interface SiteInfo {
   gravatarURL: string;
   defaultGravatarType: string;
   enableRegistration: boolean;
+  defaultThemeMode: string;
 }
 
 /**

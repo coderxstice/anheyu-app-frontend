@@ -1,3 +1,10 @@
+<!--
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-11-23 13:45:57
+ * @LastEditTime: 2025-11-23 17:10:46
+ * @LastEditors: 安知鱼
+-->
 <template>
   <div class="base-info-header">
     <h1>基本信息</h1>
@@ -111,6 +118,18 @@
       <el-switch v-model="formData.enableRegistration" />
       <div class="form-item-help">
         关闭后，前端登录页面和登录弹窗中的注册相关入口将被隐藏，用户将无法自行注册新账号。
+      </div>
+    </div>
+  </el-form-item>
+
+  <el-form-item label="默认主题模式">
+    <div>
+      <el-radio-group v-model="formData.defaultThemeMode">
+        <el-radio value="light">亮色模式</el-radio>
+        <el-radio value="dark">暗色模式</el-radio>
+      </el-radio-group>
+      <div class="form-item-help">
+        设置新访问者进入网站时默认使用的主题模式。用户可以在访问后自行切换主题。
       </div>
     </div>
   </el-form-item>

@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2025-09-20 18:36:06
+ * @LastEditTime: 2025-11-23 17:13:52
+ * @LastEditors: 安知鱼
+ */
 import type { TableColumns } from "@pureadmin/table";
 
 /**
@@ -94,6 +101,7 @@ declare global {
     Theme?: string;
     DarkMode?: boolean;
     OverallStyle?: "light" | "dark" | "system";
+    DEFAULT_THEME_MODE?: "light" | "dark";
     Grey?: boolean;
     Weak?: boolean;
     HideTabs?: boolean;
