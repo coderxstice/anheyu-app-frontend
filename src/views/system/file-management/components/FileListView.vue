@@ -508,7 +508,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
   width: fit-content;
   min-width: 100%;
   font-weight: 500;
-  color: #64748b;
+  color: var(--anzhiyu-secondtext);
   user-select: none;
   background-color: var(--anzhiyu-card-bg);
   border-bottom: var(--style-border);
@@ -570,12 +570,12 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 
   &.column-size {
-    color: #64748b;
+    color: var(--anzhiyu-secondtext);
   }
 
   &.column-updated_at,
   &.column-created_at {
-    color: #64748b;
+    color: var(--anzhiyu-secondtext);
   }
 }
 
