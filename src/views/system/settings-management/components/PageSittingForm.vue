@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:36:57
- * @LastEditTime: 2025-10-14 10:25:13
+ * @LastEditTime: 2025-11-25 09:41:26
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -11,13 +11,15 @@
   </el-divider>
 
   <el-form-item label="外链跳转提示">
-    <el-switch
-      v-model="formData.enableExternalLinkWarning"
-      active-text="开启"
-      inactive-text="关闭"
-    />
-    <div class="form-item-help">
-      开启后，点击外部链接时会显示中间提示页面，提醒用户即将跳转到外部网站。
+    <div>
+      <el-switch
+        v-model="formData.enableExternalLinkWarning"
+        active-text="开启"
+        inactive-text="关闭"
+      />
+      <div class="form-item-help">
+        开启后，点击外部链接时会显示中间提示页面，提醒用户即将跳转到外部网站。
+      </div>
     </div>
   </el-form-item>
 

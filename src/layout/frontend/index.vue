@@ -14,6 +14,19 @@
 
     <!-- 一图流全屏背景 -->
     <div v-if="currentOneImageConfig?.enable" class="one-image-banner">
+      <!-- 视频背景 -->
+      <video
+        v-if="
+          currentOneImageConfig.mediaType === 'video' &&
+          currentOneImageConfig.background
+        "
+        :src="currentOneImageConfig.background"
+        :autoplay="currentOneImageConfig.videoAutoplay ?? true"
+        :loop="currentOneImageConfig.videoLoop ?? true"
+        :muted="currentOneImageConfig.videoMuted ?? true"
+        playsinline
+        class="one-image-video-background"
+      />
       <div id="site-info">
         <h1 id="site-title">{{ currentOneImageConfig.mainTitle }}</h1>
         <div id="site-subtitle">
@@ -131,11 +144,12 @@ const currentOneImageConfig = computed<PageOneImageItem | null>(() => {
   return pageConfig[configKey];
 });
 
-// 一图流背景样式
+// 一图流背景样式（仅用于图片背景）
 const oneImageStyle = computed(() => {
   if (
     !currentOneImageConfig.value?.enable ||
-    !currentOneImageConfig.value?.background
+    !currentOneImageConfig.value?.background ||
+    currentOneImageConfig.value?.mediaType === "video"
   ) {
     return {};
   }
@@ -309,7 +323,7 @@ onUnmounted(() => {
   flex-direction: column;
   min-height: 100vh;
 
-  /* 一图流背景 */
+  /* 一图流背景（图片） */
   &::before {
     content: "";
     position: fixed;
@@ -348,6 +362,20 @@ onUnmounted(() => {
   height: 100vh;
   color: #fff;
   text-align: center;
+  overflow: hidden;
+
+  /* 视频背景样式 */
+  .one-image-video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -1;
+    opacity: 1;
+    transition: opacity 0.6s ease;
+  }
 
   #site-info {
     margin-bottom: 60px;
