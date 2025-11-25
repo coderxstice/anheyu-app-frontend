@@ -4,7 +4,7 @@
  * @Date: 2025-01-27
 -->
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, computed, ref, onUnmounted } from "vue";
 import type { Map, SelfInfo } from "@/types/about";
 
 interface Props {
@@ -12,7 +12,28 @@ interface Props {
   selfInfo: SelfInfo;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+
+// 监听主题变化
+const isDarkMode = ref(
+  document.documentElement.getAttribute("data-theme") === "dark"
+);
+
+// 监听主题变化
+const themeObserver = new MutationObserver(() => {
+  isDarkMode.value =
+    document.documentElement.getAttribute("data-theme") === "dark";
+});
+
+// 根据主题动态计算背景图片
+const mapBackgroundStyle = computed(() => {
+  const backgroundImage = isDarkMode.value
+    ? props.map.backgroundDark
+    : props.map.background;
+  return {
+    backgroundImage: `url(${backgroundImage})`
+  };
+});
 
 // 数字动画效果
 const animateNumber = (element: HTMLElement, target: number) => {
@@ -29,6 +50,12 @@ const animateNumber = (element: HTMLElement, target: number) => {
 };
 
 onMounted(() => {
+  // 开始监听主题变化
+  themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"]
+  });
+
   // 监听元素进入视口，触发数字动画
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
@@ -52,17 +79,16 @@ onMounted(() => {
     observer.observe(selfInfoElement);
   }
 });
+
+onUnmounted(() => {
+  // 清理主题监听器
+  themeObserver.disconnect();
+});
 </script>
 
 <template>
   <div class="author-content-item-group column mapAndInfo">
-    <div
-      class="author-content-item map single"
-      :style="{
-        backgroundImage: `url(${map.background})`,
-        '--dark-bg': `url(${map.backgroundDark})`
-      }"
-    >
+    <div class="author-content-item map single" :style="mapBackgroundStyle">
       <span class="map-title">
         {{ map.title }}
         <b>{{ map.strengthenTitle }}</b>
@@ -132,10 +158,6 @@ onMounted(() => {
     width: 100% !important;
     height: 200px;
     margin-bottom: 1rem;
-  }
-
-  :deep([data-theme="dark"]) & {
-    background-image: var(--dark-bg) !important;
   }
 
   &:hover {
