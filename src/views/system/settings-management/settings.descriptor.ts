@@ -453,6 +453,32 @@ const postDescriptors: SettingDescriptor[] = [
     type: "number"
   },
   {
+    frontendPath: "post.copy.enable",
+    backendKey: constant.KeyPostCopyEnable,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "post.copy.copyrightEnable",
+    backendKey: constant.KeyPostCopyCopyrightEnable,
+    defaultValue: false,
+    type: "boolean"
+  },
+  {
+    frontendPath: "post.copy.copyrightOriginal",
+    backendKey: constant.KeyPostCopyCopyrightOriginal,
+    defaultValue:
+      "本文来自 {siteName}，作者 {author}，转载请注明出处。\n原文地址：{url}",
+    type: "string"
+  },
+  {
+    frontendPath: "post.copy.copyrightReprint",
+    backendKey: constant.KeyPostCopyCopyrightReprint,
+    defaultValue:
+      "本文转载自 {originalAuthor}，原文地址：{originalUrl}\n当前页面：{currentUrl}",
+    type: "string"
+  },
+  {
     frontendPath: "post.cdn.enable",
     backendKey: constant.KeyCDNEnable,
     defaultValue: false,

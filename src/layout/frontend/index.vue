@@ -16,17 +16,28 @@
     <div v-if="currentOneImageConfig?.enable" class="one-image-banner">
       <!-- 视频背景 -->
       <video
-        v-if="
-          currentOneImageConfig.mediaType === 'video' &&
-          currentOneImageConfig.background
-        "
-        :src="currentOneImageConfig.background"
-        :autoplay="currentOneImageConfig.videoAutoplay ?? true"
-        :loop="currentOneImageConfig.videoLoop ?? true"
-        :muted="currentOneImageConfig.videoMuted ?? true"
+        v-if="effectiveMediaType === 'video' && effectiveBackground"
+        ref="videoRef"
+        :key="effectiveBackground"
+        :src="effectiveBackground"
+        :loop="effectiveVideoLoop"
         playsinline
         class="one-image-video-background"
+        @loadedmetadata="handleVideoLoaded"
       />
+      <!-- 视频声音控制按钮 -->
+      <div
+        v-if="effectiveMediaType === 'video'"
+        class="video-sound-control"
+        :class="{ 'has-hint': showUnmuteButton }"
+        @click="toggleVideoMute"
+      >
+        <IconifyIconOffline
+          :icon="isVideoMuted ? MuteIcon : MicrophoneIcon"
+          class="sound-icon"
+        />
+        <span v-if="showUnmuteButton">点击开启声音</span>
+      </div>
       <div id="site-info">
         <h1 id="site-title">{{ currentOneImageConfig.mainTitle }}</h1>
         <div id="site-subtitle">
@@ -96,6 +107,8 @@ import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import type { PageOneImageItem } from "@/views/system/settings-management/type";
 import { IconifyIconOffline } from "@/components/ReIcon";
 import ArrowDownBold from "@iconify-icons/ep/arrow-down-bold";
+import MuteIcon from "@iconify-icons/ep/mute";
+import MicrophoneIcon from "@iconify-icons/ep/microphone";
 
 import Header from "./components/hearder/index.vue";
 import Footer from "./components/footer/index.vue";
@@ -104,6 +117,7 @@ import RightMenu from "./components/RightMenu/index.vue";
 import KeyboardTips from "./components/KeyboardTips/index.vue";
 import MobileMenu from "./components/MobileMenu/index.vue";
 import MusicPlayer from "./components/MusicPlayer/index.vue";
+import { useCopyProtection } from "@/composables/useCopyProtection";
 
 const { $storage } = useGlobal<GlobalPropertiesApi>();
 const route = useRoute();
@@ -112,6 +126,17 @@ const siteConfigStore = useSiteConfigStore();
 // 一图流相关
 const displaySubtitle = ref("");
 const hitokotoText = ref("");
+
+// 视频相关
+const videoRef = ref<HTMLVideoElement | null>(null);
+const showUnmuteButton = ref(false);
+const isVideoMuted = ref(true); // 跟踪当前视频静音状态
+
+// 移动设备检测
+const isMobile = ref(false);
+const checkIsMobile = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
 
 // 路由名称到一图流配置键的映射
 const routeToConfigMap: Record<string, string> = {
@@ -144,18 +169,79 @@ const currentOneImageConfig = computed<PageOneImageItem | null>(() => {
   return pageConfig[configKey];
 });
 
+// 根据设备类型获取实际的背景URL和媒体类型
+const effectiveBackground = computed(() => {
+  const config = currentOneImageConfig.value;
+  if (!config) return "";
+
+  // 如果是移动设备且配置了移动端背景，使用移动端配置
+  if (isMobile.value && config.mobileBackground) {
+    return config.mobileBackground;
+  }
+
+  return config.background;
+});
+
+const effectiveMediaType = computed(() => {
+  const config = currentOneImageConfig.value;
+  if (!config) return "image";
+
+  // 如果是移动设备且配置了移动端背景，使用移动端媒体类型
+  if (isMobile.value && config.mobileBackground) {
+    return config.mobileMediaType || "image";
+  }
+
+  return config.mediaType;
+});
+
+const effectiveVideoAutoplay = computed(() => {
+  const config = currentOneImageConfig.value;
+  if (!config) return true;
+
+  // 如果是移动设备且配置了移动端背景，使用移动端视频配置
+  if (isMobile.value && config.mobileBackground) {
+    return config.mobileVideoAutoplay ?? true;
+  }
+
+  return config.videoAutoplay ?? true;
+});
+
+const effectiveVideoLoop = computed(() => {
+  const config = currentOneImageConfig.value;
+  if (!config) return true;
+
+  // 如果是移动设备且配置了移动端背景，使用移动端视频配置
+  if (isMobile.value && config.mobileBackground) {
+    return config.mobileVideoLoop ?? true;
+  }
+
+  return config.videoLoop ?? true;
+});
+
+const effectiveVideoMuted = computed(() => {
+  const config = currentOneImageConfig.value;
+  if (!config) return true;
+
+  // 如果是移动设备且配置了移动端背景，使用移动端视频配置
+  if (isMobile.value && config.mobileBackground) {
+    return config.mobileVideoMuted ?? true;
+  }
+
+  return config.videoMuted ?? true;
+});
+
 // 一图流背景样式（仅用于图片背景）
 const oneImageStyle = computed(() => {
   if (
     !currentOneImageConfig.value?.enable ||
-    !currentOneImageConfig.value?.background ||
-    currentOneImageConfig.value?.mediaType === "video"
+    !effectiveBackground.value ||
+    effectiveMediaType.value === "video"
   ) {
     return {};
   }
 
   return {
-    "--one-image-background": `url(${currentOneImageConfig.value.background})`
+    "--one-image-background": `url(${effectiveBackground.value})`
   };
 });
 
@@ -208,10 +294,77 @@ const scrollToMain = () => {
   }
 };
 
-// 监听路由变化，更新副标题
+// 处理视频加载完成
+const handleVideoLoaded = async () => {
+  const video = videoRef.value;
+  if (!video || !currentOneImageConfig.value) return;
+
+  const shouldAutoplay = effectiveVideoAutoplay.value;
+  const shouldMute = effectiveVideoMuted.value;
+
+  if (!shouldAutoplay) {
+    isVideoMuted.value = shouldMute;
+    video.muted = shouldMute;
+    return;
+  }
+
+  // 如果配置为静音，直接静音播放
+  if (shouldMute) {
+    video.muted = true;
+    isVideoMuted.value = true;
+    showUnmuteButton.value = false;
+    try {
+      await video.play();
+    } catch {
+      console.warn("视频自动播放失败");
+    }
+    return;
+  }
+
+  // 如果配置为非静音，先尝试带声音播放
+  video.muted = false;
+  try {
+    await video.play();
+    isVideoMuted.value = false;
+    showUnmuteButton.value = false;
+  } catch {
+    // 浏览器策略阻止带声音自动播放，改为静音播放并显示提示
+    console.info("浏览器策略阻止带声音自动播放，已切换为静音播放");
+    video.muted = true;
+    isVideoMuted.value = true;
+    showUnmuteButton.value = true;
+    try {
+      await video.play();
+    } catch {
+      console.warn("视频播放失败");
+    }
+  }
+};
+
+// 切换视频静音状态
+const toggleVideoMute = () => {
+  const video = videoRef.value;
+  if (!video) return;
+
+  if (isVideoMuted.value) {
+    // 取消静音
+    video.muted = false;
+    isVideoMuted.value = false;
+    showUnmuteButton.value = false;
+  } else {
+    // 静音
+    video.muted = true;
+    isVideoMuted.value = true;
+  }
+};
+
+// 监听路由变化，更新副标题和视频状态
 watch(
   () => currentOneImageConfig.value,
   async config => {
+    // 重置视频静音提示状态
+    showUnmuteButton.value = false;
+
     if (!config?.enable) {
       displaySubtitle.value = "";
       return;
@@ -240,6 +393,9 @@ watch(
 );
 
 const { showShortcutsPanel, shortcuts } = useKeyboardShortcuts();
+
+// 初始化文章复制保护功能
+useCopyProtection();
 
 // 管理需要缓存的组件名称（使用组件的 name，不是路由的 name）
 const cachedViews = ref<string[]>([]);
@@ -305,12 +461,16 @@ onBeforeMount(() => {
 });
 
 onMounted(() => {
+  // 初始化移动设备检测
+  checkIsMobile();
+  window.addEventListener("resize", checkIsMobile);
   // 监听移动端菜单切换事件
   window.addEventListener("toggle-mobile-menu", toggleMobileMenu);
 });
 
 onUnmounted(() => {
   // 清理事件监听器
+  window.removeEventListener("resize", checkIsMobile);
   window.removeEventListener("toggle-mobile-menu", toggleMobileMenu);
   // 确保移除body样式
   document.body.style.overflow = "";
@@ -375,6 +535,61 @@ onUnmounted(() => {
     z-index: -1;
     opacity: 1;
     transition: opacity 0.6s ease;
+  }
+
+  /* 视频声音控制按钮 */
+  .video-sound-control {
+    position: absolute;
+    bottom: 120px;
+    right: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    color: #fff;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    animation: fade-in-up 0.8s 0.8s ease-out backwards;
+    z-index: 10;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.7);
+      transform: scale(1.1);
+    }
+
+    .sound-icon {
+      font-size: 1.3rem;
+    }
+
+    span {
+      display: none;
+    }
+
+    /* 有提示文字时的样式（首次需要开启声音时） */
+    &.has-hint {
+      width: auto;
+      padding: 10px 20px;
+      border-radius: 25px;
+      right: auto;
+      left: 50%;
+      transform: translateX(-50%);
+
+      &:hover {
+        transform: translateX(-50%) scale(1.05);
+      }
+
+      span {
+        display: inline;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+    }
   }
 
   #site-info {
