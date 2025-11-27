@@ -43,6 +43,12 @@ export interface PageOneImageItem {
   videoAutoplay: boolean; // 视频自动播放
   videoLoop: boolean; // 视频循环播放
   videoMuted: boolean; // 视频静音
+  // 移动设备单独配置
+  mobileBackground?: string; // 移动设备背景URL
+  mobileMediaType?: "image" | "video"; // 移动设备媒体类型
+  mobileVideoAutoplay?: boolean; // 移动设备视频自动播放
+  mobileVideoLoop?: boolean; // 移动设备视频循环播放
+  mobileVideoMuted?: boolean; // 移动设备视频静音
 }
 
 /**
@@ -171,6 +177,12 @@ export interface PostSettingsInfo {
   };
   codeBlock: {
     codeMaxLines: number;
+  };
+  copy: {
+    enable: boolean; // 是否允许复制文章内容
+    copyrightEnable: boolean; // 复制时是否携带版权信息
+    copyrightOriginal: string; // 原创文章版权模板
+    copyrightReprint: string; // 转载文章版权模板
   };
   cdn: {
     enable: boolean;

@@ -131,6 +131,95 @@
   </el-form-item>
 
   <el-divider content-position="left">
+    <h3>文章复制版权配置</h3>
+  </el-divider>
+
+  <el-form-item label="允许复制文章内容">
+    <div>
+      <el-switch
+        :model-value="formData.copy?.enable ?? true"
+        @update:model-value="
+          (val: boolean) => {
+            if (!formData.copy) {
+              formData.copy = {
+                enable: true,
+                copyrightEnable: false,
+                copyrightOriginal: '',
+                copyrightReprint: ''
+              };
+            }
+            formData.copy.enable = val;
+          }
+        "
+      />
+      <div class="form-item-help">
+        是否允许访客复制文章内容。关闭后，访客将无法选择和复制文章内容。
+      </div>
+    </div>
+  </el-form-item>
+
+  <el-form-item label="复制时携带版权信息">
+    <div>
+      <el-switch
+        :model-value="formData.copy?.copyrightEnable ?? false"
+        :disabled="!(formData.copy?.enable ?? true)"
+        @update:model-value="
+          (val: boolean) => {
+            if (!formData.copy) {
+              formData.copy = {
+                enable: true,
+                copyrightEnable: false,
+                copyrightOriginal: '',
+                copyrightReprint: ''
+              };
+            }
+            formData.copy.copyrightEnable = val;
+          }
+        "
+      />
+      <div class="form-item-help">
+        启用后，访客复制文章内容时会自动追加版权信息。
+      </div>
+    </div>
+  </el-form-item>
+
+  <el-form-item label="原创文章版权模板">
+    <el-input
+      v-model="formData.copy.copyrightOriginal"
+      type="textarea"
+      :rows="3"
+      :disabled="
+        !(formData.copy?.enable ?? true) ||
+        !(formData.copy?.copyrightEnable ?? false)
+      "
+      placeholder="本文来自 {siteName}，作者 {author}，转载请注明出处。\n原文地址：{url}"
+    />
+    <div class="form-item-help">
+      原创文章复制时追加的版权信息模板。<br />
+      支持变量：<code>{siteName}</code> 站点名称、<code>{author}</code>
+      作者名称、<code>{url}</code> 当前文章链接
+    </div>
+  </el-form-item>
+
+  <el-form-item label="转载文章版权模板">
+    <el-input
+      v-model="formData.copy.copyrightReprint"
+      type="textarea"
+      :rows="3"
+      :disabled="
+        !(formData.copy?.enable ?? true) ||
+        !(formData.copy?.copyrightEnable ?? false)
+      "
+      placeholder="本文转载自 {originalAuthor}，原文地址：{originalUrl}\n当前页面：{currentUrl}"
+    />
+    <div class="form-item-help">
+      转载文章复制时追加的版权信息模板。<br />
+      支持变量：<code>{originalAuthor}</code> 原作者、<code>{originalUrl}</code>
+      原文链接、<code>{currentUrl}</code> 当前页面链接
+    </div>
+  </el-form-item>
+
+  <el-divider content-position="left">
     <h3>CDN 缓存刷新配置</h3>
   </el-divider>
 

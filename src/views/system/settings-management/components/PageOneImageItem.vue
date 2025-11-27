@@ -8,6 +8,9 @@
     </el-form-item>
 
     <template v-if="localValue.enable">
+      <!-- 桌面端配置 -->
+      <el-divider content-position="left">桌面端配置</el-divider>
+
       <el-form-item :label="`${pageName}背景媒体类型`">
         <div>
           <el-radio-group v-model="localValue.mediaType" @change="handleUpdate">
@@ -73,6 +76,84 @@
         </el-form-item>
       </template>
 
+      <!-- 移动端配置 -->
+      <el-divider content-position="left">移动端配置（可选）</el-divider>
+
+      <el-form-item :label="`${pageName}移动端背景媒体类型`">
+        <div>
+          <el-radio-group
+            v-model="localValue.mobileMediaType"
+            @change="handleUpdate"
+          >
+            <el-radio value="image">图片</el-radio>
+            <el-radio value="video">视频</el-radio>
+          </el-radio-group>
+          <div class="form-item-help">
+            选择移动设备上使用图片还是视频作为背景，留空背景URL时将使用桌面端配置
+          </div>
+        </div>
+      </el-form-item>
+
+      <el-form-item
+        :label="
+          localValue.mobileMediaType === 'image'
+            ? `${pageName}移动端背景图片URL`
+            : `${pageName}移动端背景视频URL`
+        "
+      >
+        <div>
+          <el-input
+            v-model="localValue.mobileBackground"
+            :placeholder="
+              localValue.mobileMediaType === 'image'
+                ? '请输入移动端背景图片URL（留空则使用桌面端配置）'
+                : '请输入移动端背景视频URL（留空则使用桌面端配置）'
+            "
+            @input="handleUpdate"
+          />
+          <div class="form-item-help">
+            移动设备上的背景URL，建议使用竖版或适合移动端的媒体资源，留空将使用桌面端配置
+          </div>
+        </div>
+      </el-form-item>
+
+      <template v-if="localValue.mobileMediaType === 'video'">
+        <el-form-item :label="`${pageName}移动端视频自动播放`">
+          <div>
+            <el-switch
+              v-model="localValue.mobileVideoAutoplay"
+              @change="handleUpdate"
+            />
+            <div class="form-item-help">开启后移动端视频将自动播放</div>
+          </div>
+        </el-form-item>
+
+        <el-form-item :label="`${pageName}移动端视频循环播放`">
+          <div>
+            <el-switch
+              v-model="localValue.mobileVideoLoop"
+              @change="handleUpdate"
+            />
+            <div class="form-item-help">开启后移动端视频将循环播放</div>
+          </div>
+        </el-form-item>
+
+        <el-form-item :label="`${pageName}移动端视频静音`">
+          <div>
+            <el-switch
+              v-model="localValue.mobileVideoMuted"
+              @change="handleUpdate"
+            />
+            <div class="form-item-help">
+              开启后移动端视频将静音播放（建议开启，否则可能影响用户体验）
+            </div>
+          </div>
+        </el-form-item>
+      </template>
+
+      <!-- 通用标题配置 -->
+      <el-divider content-position="left">标题配置</el-divider>
+
       <el-form-item :label="`${pageName}主标题`">
         <div>
           <el-input
@@ -137,7 +218,13 @@ const localValue = reactive<PageOneImageItem>({
   hitokoto: props.modelValue.hitokoto ?? false,
   videoAutoplay: props.modelValue.videoAutoplay ?? true,
   videoLoop: props.modelValue.videoLoop ?? true,
-  videoMuted: props.modelValue.videoMuted ?? true
+  videoMuted: props.modelValue.videoMuted ?? true,
+  // 移动端配置
+  mobileBackground: props.modelValue.mobileBackground ?? "",
+  mobileMediaType: props.modelValue.mobileMediaType ?? "image",
+  mobileVideoAutoplay: props.modelValue.mobileVideoAutoplay ?? true,
+  mobileVideoLoop: props.modelValue.mobileVideoLoop ?? true,
+  mobileVideoMuted: props.modelValue.mobileVideoMuted ?? true
 });
 
 watch(

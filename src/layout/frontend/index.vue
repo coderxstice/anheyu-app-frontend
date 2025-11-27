@@ -16,20 +16,18 @@
     <div v-if="currentOneImageConfig?.enable" class="one-image-banner">
       <!-- 视频背景 -->
       <video
-        v-if="
-          currentOneImageConfig.mediaType === 'video' &&
-          currentOneImageConfig.background
-        "
+        v-if="effectiveMediaType === 'video' && effectiveBackground"
         ref="videoRef"
-        :src="currentOneImageConfig.background"
-        :loop="currentOneImageConfig.videoLoop ?? true"
+        :key="effectiveBackground"
+        :src="effectiveBackground"
+        :loop="effectiveVideoLoop"
         playsinline
         class="one-image-video-background"
         @loadedmetadata="handleVideoLoaded"
       />
       <!-- 视频声音控制按钮 -->
       <div
-        v-if="currentOneImageConfig.mediaType === 'video'"
+        v-if="effectiveMediaType === 'video'"
         class="video-sound-control"
         :class="{ 'has-hint': showUnmuteButton }"
         @click="toggleVideoMute"
@@ -119,6 +117,7 @@ import RightMenu from "./components/RightMenu/index.vue";
 import KeyboardTips from "./components/KeyboardTips/index.vue";
 import MobileMenu from "./components/MobileMenu/index.vue";
 import MusicPlayer from "./components/MusicPlayer/index.vue";
+import { useCopyProtection } from "@/composables/useCopyProtection";
 
 const { $storage } = useGlobal<GlobalPropertiesApi>();
 const route = useRoute();
@@ -132,6 +131,12 @@ const hitokotoText = ref("");
 const videoRef = ref<HTMLVideoElement | null>(null);
 const showUnmuteButton = ref(false);
 const isVideoMuted = ref(true); // 跟踪当前视频静音状态
+
+// 移动设备检测
+const isMobile = ref(false);
+const checkIsMobile = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
 
 // 路由名称到一图流配置键的映射
 const routeToConfigMap: Record<string, string> = {
@@ -164,18 +169,79 @@ const currentOneImageConfig = computed<PageOneImageItem | null>(() => {
   return pageConfig[configKey];
 });
 
+// 根据设备类型获取实际的背景URL和媒体类型
+const effectiveBackground = computed(() => {
+  const config = currentOneImageConfig.value;
+  if (!config) return "";
+
+  // 如果是移动设备且配置了移动端背景，使用移动端配置
+  if (isMobile.value && config.mobileBackground) {
+    return config.mobileBackground;
+  }
+
+  return config.background;
+});
+
+const effectiveMediaType = computed(() => {
+  const config = currentOneImageConfig.value;
+  if (!config) return "image";
+
+  // 如果是移动设备且配置了移动端背景，使用移动端媒体类型
+  if (isMobile.value && config.mobileBackground) {
+    return config.mobileMediaType || "image";
+  }
+
+  return config.mediaType;
+});
+
+const effectiveVideoAutoplay = computed(() => {
+  const config = currentOneImageConfig.value;
+  if (!config) return true;
+
+  // 如果是移动设备且配置了移动端背景，使用移动端视频配置
+  if (isMobile.value && config.mobileBackground) {
+    return config.mobileVideoAutoplay ?? true;
+  }
+
+  return config.videoAutoplay ?? true;
+});
+
+const effectiveVideoLoop = computed(() => {
+  const config = currentOneImageConfig.value;
+  if (!config) return true;
+
+  // 如果是移动设备且配置了移动端背景，使用移动端视频配置
+  if (isMobile.value && config.mobileBackground) {
+    return config.mobileVideoLoop ?? true;
+  }
+
+  return config.videoLoop ?? true;
+});
+
+const effectiveVideoMuted = computed(() => {
+  const config = currentOneImageConfig.value;
+  if (!config) return true;
+
+  // 如果是移动设备且配置了移动端背景，使用移动端视频配置
+  if (isMobile.value && config.mobileBackground) {
+    return config.mobileVideoMuted ?? true;
+  }
+
+  return config.videoMuted ?? true;
+});
+
 // 一图流背景样式（仅用于图片背景）
 const oneImageStyle = computed(() => {
   if (
     !currentOneImageConfig.value?.enable ||
-    !currentOneImageConfig.value?.background ||
-    currentOneImageConfig.value?.mediaType === "video"
+    !effectiveBackground.value ||
+    effectiveMediaType.value === "video"
   ) {
     return {};
   }
 
   return {
-    "--one-image-background": `url(${currentOneImageConfig.value.background})`
+    "--one-image-background": `url(${effectiveBackground.value})`
   };
 });
 
@@ -233,9 +299,8 @@ const handleVideoLoaded = async () => {
   const video = videoRef.value;
   if (!video || !currentOneImageConfig.value) return;
 
-  const config = currentOneImageConfig.value;
-  const shouldAutoplay = config.videoAutoplay ?? true;
-  const shouldMute = config.videoMuted ?? true;
+  const shouldAutoplay = effectiveVideoAutoplay.value;
+  const shouldMute = effectiveVideoMuted.value;
 
   if (!shouldAutoplay) {
     isVideoMuted.value = shouldMute;
@@ -329,6 +394,9 @@ watch(
 
 const { showShortcutsPanel, shortcuts } = useKeyboardShortcuts();
 
+// 初始化文章复制保护功能
+useCopyProtection();
+
 // 管理需要缓存的组件名称（使用组件的 name，不是路由的 name）
 const cachedViews = ref<string[]>([]);
 
@@ -393,12 +461,16 @@ onBeforeMount(() => {
 });
 
 onMounted(() => {
+  // 初始化移动设备检测
+  checkIsMobile();
+  window.addEventListener("resize", checkIsMobile);
   // 监听移动端菜单切换事件
   window.addEventListener("toggle-mobile-menu", toggleMobileMenu);
 });
 
 onUnmounted(() => {
   // 清理事件监听器
+  window.removeEventListener("resize", checkIsMobile);
   window.removeEventListener("toggle-mobile-menu", toggleMobileMenu);
   // 确保移除body样式
   document.body.style.overflow = "";

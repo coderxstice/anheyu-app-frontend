@@ -350,6 +350,30 @@ watch(
   },
   { immediate: true }
 );
+
+// 监听文章变化，发送文章信息更新事件（用于复制版权功能）
+watch(
+  () => article.value,
+  newArticle => {
+    if (newArticle) {
+      const siteOwnerName = siteConfig.frontDesk?.siteOwner?.name;
+      const isReprint =
+        newArticle.copyright_author &&
+        newArticle.copyright_author !== siteOwnerName;
+
+      window.dispatchEvent(
+        new CustomEvent("article-info-update", {
+          detail: {
+            isReprint,
+            copyrightAuthor: newArticle.copyright_author,
+            copyrightUrl: newArticle.copyright_url
+          }
+        })
+      );
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
