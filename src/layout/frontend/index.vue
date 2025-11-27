@@ -20,13 +20,26 @@
           currentOneImageConfig.mediaType === 'video' &&
           currentOneImageConfig.background
         "
+        ref="videoRef"
         :src="currentOneImageConfig.background"
-        :autoplay="currentOneImageConfig.videoAutoplay ?? true"
         :loop="currentOneImageConfig.videoLoop ?? true"
-        :muted="currentOneImageConfig.videoMuted ?? true"
         playsinline
         class="one-image-video-background"
+        @loadedmetadata="handleVideoLoaded"
       />
+      <!-- 视频声音控制按钮 -->
+      <div
+        v-if="currentOneImageConfig.mediaType === 'video'"
+        class="video-sound-control"
+        :class="{ 'has-hint': showUnmuteButton }"
+        @click="toggleVideoMute"
+      >
+        <IconifyIconOffline
+          :icon="isVideoMuted ? MuteIcon : MicrophoneIcon"
+          class="sound-icon"
+        />
+        <span v-if="showUnmuteButton">点击开启声音</span>
+      </div>
       <div id="site-info">
         <h1 id="site-title">{{ currentOneImageConfig.mainTitle }}</h1>
         <div id="site-subtitle">
@@ -96,6 +109,8 @@ import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import type { PageOneImageItem } from "@/views/system/settings-management/type";
 import { IconifyIconOffline } from "@/components/ReIcon";
 import ArrowDownBold from "@iconify-icons/ep/arrow-down-bold";
+import MuteIcon from "@iconify-icons/ep/mute";
+import MicrophoneIcon from "@iconify-icons/ep/microphone";
 
 import Header from "./components/hearder/index.vue";
 import Footer from "./components/footer/index.vue";
@@ -112,6 +127,11 @@ const siteConfigStore = useSiteConfigStore();
 // 一图流相关
 const displaySubtitle = ref("");
 const hitokotoText = ref("");
+
+// 视频相关
+const videoRef = ref<HTMLVideoElement | null>(null);
+const showUnmuteButton = ref(false);
+const isVideoMuted = ref(true); // 跟踪当前视频静音状态
 
 // 路由名称到一图流配置键的映射
 const routeToConfigMap: Record<string, string> = {
@@ -208,10 +228,78 @@ const scrollToMain = () => {
   }
 };
 
-// 监听路由变化，更新副标题
+// 处理视频加载完成
+const handleVideoLoaded = async () => {
+  const video = videoRef.value;
+  if (!video || !currentOneImageConfig.value) return;
+
+  const config = currentOneImageConfig.value;
+  const shouldAutoplay = config.videoAutoplay ?? true;
+  const shouldMute = config.videoMuted ?? true;
+
+  if (!shouldAutoplay) {
+    isVideoMuted.value = shouldMute;
+    video.muted = shouldMute;
+    return;
+  }
+
+  // 如果配置为静音，直接静音播放
+  if (shouldMute) {
+    video.muted = true;
+    isVideoMuted.value = true;
+    showUnmuteButton.value = false;
+    try {
+      await video.play();
+    } catch {
+      console.warn("视频自动播放失败");
+    }
+    return;
+  }
+
+  // 如果配置为非静音，先尝试带声音播放
+  video.muted = false;
+  try {
+    await video.play();
+    isVideoMuted.value = false;
+    showUnmuteButton.value = false;
+  } catch {
+    // 浏览器策略阻止带声音自动播放，改为静音播放并显示提示
+    console.info("浏览器策略阻止带声音自动播放，已切换为静音播放");
+    video.muted = true;
+    isVideoMuted.value = true;
+    showUnmuteButton.value = true;
+    try {
+      await video.play();
+    } catch {
+      console.warn("视频播放失败");
+    }
+  }
+};
+
+// 切换视频静音状态
+const toggleVideoMute = () => {
+  const video = videoRef.value;
+  if (!video) return;
+
+  if (isVideoMuted.value) {
+    // 取消静音
+    video.muted = false;
+    isVideoMuted.value = false;
+    showUnmuteButton.value = false;
+  } else {
+    // 静音
+    video.muted = true;
+    isVideoMuted.value = true;
+  }
+};
+
+// 监听路由变化，更新副标题和视频状态
 watch(
   () => currentOneImageConfig.value,
   async config => {
+    // 重置视频静音提示状态
+    showUnmuteButton.value = false;
+
     if (!config?.enable) {
       displaySubtitle.value = "";
       return;
@@ -375,6 +463,61 @@ onUnmounted(() => {
     z-index: -1;
     opacity: 1;
     transition: opacity 0.6s ease;
+  }
+
+  /* 视频声音控制按钮 */
+  .video-sound-control {
+    position: absolute;
+    bottom: 120px;
+    right: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    color: #fff;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    animation: fade-in-up 0.8s 0.8s ease-out backwards;
+    z-index: 10;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.7);
+      transform: scale(1.1);
+    }
+
+    .sound-icon {
+      font-size: 1.3rem;
+    }
+
+    span {
+      display: none;
+    }
+
+    /* 有提示文字时的样式（首次需要开启声音时） */
+    &.has-hint {
+      width: auto;
+      padding: 10px 20px;
+      border-radius: 25px;
+      right: auto;
+      left: 50%;
+      transform: translateX(-50%);
+
+      &:hover {
+        transform: translateX(-50%) scale(1.05);
+      }
+
+      span {
+        display: inline;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+    }
   }
 
   #site-info {
