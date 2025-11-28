@@ -159,7 +159,7 @@ const goToTagPage = (tagName: string) => {
   position: relative;
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: stretch;
   margin: 1rem 0;
   overflow: hidden;
   cursor: pointer;
@@ -223,10 +223,20 @@ const goToTagPage = (tagName: string) => {
   }
 
   .post_cover {
+    position: relative;
     flex-shrink: 0;
     width: 45%;
-    height: 100%;
+    min-height: 180px;
     overflow: hidden;
+
+    // 内部容器使用绝对定位填满
+    > div {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
 
     a,
     img {
@@ -237,6 +247,12 @@ const goToTagPage = (tagName: string) => {
     }
 
     .post_bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       border-radius: 0;
       transition:
         opacity 0.6s ease,

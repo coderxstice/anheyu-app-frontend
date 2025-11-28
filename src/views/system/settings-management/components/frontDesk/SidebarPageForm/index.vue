@@ -239,6 +239,17 @@ const updateSocials = (jsonString: string) => {
       </el-col>
     </el-row>
 
+    <el-divider content-position="left">目录设置</el-divider>
+    <el-form-item label="目录折叠模式">
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <el-switch v-model="model.tocCollapseMode" />
+        <div class="form-item-help">
+          开启后，目录会根据当前阅读位置自动折叠/展开子标题。<br />
+          例如：阅读 H2 标题时展开其下 H3 子标题，阅读 H3 时展开 H4，以此类推。
+        </div>
+      </div>
+    </el-form-item>
+
     <el-divider content-position="left">自定义侧边栏</el-divider>
     <el-form-item label="在文章页显示自定义侧边栏">
       <div style="display: flex; flex-direction: column; gap: 4px">

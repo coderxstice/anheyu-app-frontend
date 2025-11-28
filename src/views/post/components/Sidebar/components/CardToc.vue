@@ -1,6 +1,15 @@
 <script setup lang="ts">
-import { ref, watch, inject, onMounted, onUnmounted, nextTick } from "vue";
+import {
+  ref,
+  watch,
+  inject,
+  onMounted,
+  onUnmounted,
+  nextTick,
+  computed
+} from "vue";
 import type { Ref } from "vue";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
 interface TocItem {
   id: string;
@@ -12,6 +21,7 @@ defineOptions({
   name: "CardToc"
 });
 
+const siteConfigStore = useSiteConfigStore();
 const allSpyIds = inject<Ref<string[]>>("allSpyIds", ref([]));
 const updateHeadingTocItems = inject<(items: TocItem[]) => void>(
   "updateHeadingTocItems",
@@ -30,6 +40,155 @@ const activeTocId = ref<string | null>(null);
 
 const isClickScrolling = ref(false);
 let scrollTimer: number | null = null;
+
+// 获取目录折叠模式配置
+const tocCollapseMode = computed(() => {
+  const config = siteConfigStore.siteConfig?.sidebar?.toc?.collapseMode;
+  return config === "true" || config === true;
+});
+
+// 计算可见的目录项（折叠模式下）
+const visibleTocItems = computed(() => {
+  if (!tocCollapseMode.value || tocItems.value.length === 0) {
+    return tocItems.value;
+  }
+
+  const items = tocItems.value;
+  const activeId = activeTocId.value;
+  const visibleItems: TocItem[] = [];
+
+  // 找到当前激活项的索引
+  let activeIndex = -1;
+  if (activeId) {
+    activeIndex = items.findIndex(item => item.id === activeId);
+  }
+
+  // 获取最小级别（通常是H2）
+  const minLevel = Math.min(...items.map(item => item.level));
+
+  // 构建可见项列表
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+
+    // 1. 顶级标题（最小级别）总是显示
+    if (item.level === minLevel) {
+      visibleItems.push(item);
+      continue;
+    }
+
+    // 如果没有激活项，只显示顶级标题
+    if (activeIndex < 0) {
+      continue;
+    }
+
+    // 2. 检查是否是当前激活项的祖先
+    const isAncestor = isAncestorOf(items, i, activeIndex);
+    if (isAncestor) {
+      visibleItems.push(item);
+      continue;
+    }
+
+    // 3. 检查是否是当前激活项的直接子标题
+    const isDirectChild = isDirectChildOf(items, activeIndex, i);
+    if (isDirectChild) {
+      visibleItems.push(item);
+      continue;
+    }
+
+    // 4. 如果当前项是激活项本身
+    if (i === activeIndex) {
+      visibleItems.push(item);
+      continue;
+    }
+
+    // 5. 检查是否是当前激活项的兄弟节点（同一父级下的同级标题）
+    const isSibling = isSiblingOf(items, activeIndex, i);
+    if (isSibling) {
+      visibleItems.push(item);
+      continue;
+    }
+  }
+
+  return visibleItems;
+});
+
+// 判断 ancestorIndex 是否是 targetIndex 的祖先
+function isAncestorOf(
+  items: TocItem[],
+  ancestorIndex: number,
+  targetIndex: number
+): boolean {
+  if (ancestorIndex >= targetIndex) return false;
+
+  const ancestor = items[ancestorIndex];
+  const target = items[targetIndex];
+
+  // 祖先的级别必须小于目标的级别
+  if (ancestor.level >= target.level) return false;
+
+  // 检查在 ancestorIndex 和 targetIndex 之间是否有更高或同级的标题
+  for (let i = ancestorIndex + 1; i < targetIndex; i++) {
+    if (items[i].level <= ancestor.level) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// 判断 childIndex 是否是 parentIndex 的直接子标题
+function isDirectChildOf(
+  items: TocItem[],
+  parentIndex: number,
+  childIndex: number
+): boolean {
+  if (parentIndex >= childIndex) return false;
+
+  const parent = items[parentIndex];
+  const child = items[childIndex];
+
+  // 子标题的级别必须比父标题大1级
+  if (child.level !== parent.level + 1) return false;
+
+  // 检查在 parentIndex 和 childIndex 之间是否有同级或更高级的标题
+  for (let i = parentIndex + 1; i < childIndex; i++) {
+    if (items[i].level <= parent.level) {
+      return false;
+    }
+    // 如果有同级的子标题，则 childIndex 不是直接子标题
+    if (items[i].level === child.level) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// 判断两个项是否是兄弟节点
+function isSiblingOf(
+  items: TocItem[],
+  index1: number,
+  index2: number
+): boolean {
+  const item1 = items[index1];
+  const item2 = items[index2];
+
+  // 必须是同一级别
+  if (item1.level !== item2.level) return false;
+
+  // 找到它们的共同父级
+  const minIndex = Math.min(index1, index2);
+  const maxIndex = Math.max(index1, index2);
+
+  // 检查在两者之间是否有更高级的标题（这意味着它们不是同一父级下的）
+  for (let i = minIndex + 1; i < maxIndex; i++) {
+    if (items[i].level < item1.level) {
+      return false;
+    }
+  }
+
+  return true;
+}
 
 const scrollToHeading = (event: MouseEvent, id: string) => {
   event.preventDefault();
@@ -146,6 +305,11 @@ watch(activeTocId, () => {
   nextTick(updateIndicator);
 });
 
+// 当可见项变化时也更新指示器
+watch(visibleTocItems, () => {
+  nextTick(updateIndicator);
+});
+
 let scrollEndHandler: () => void;
 
 onMounted(() => {
@@ -184,21 +348,23 @@ defineExpose({
     </div>
     <div class="toc-content">
       <ol ref="tocRef" class="toc">
-        <li
-          v-for="item in tocItems"
-          :key="item.id"
-          class="toc-item"
-          :class="`toc-level-${item.level}`"
-        >
-          <a
-            :href="`#${item.id}`"
-            class="toc-link"
-            :class="{ active: activeTocId === item.id }"
-            @click="scrollToHeading($event, item.id)"
+        <TransitionGroup name="toc-item">
+          <li
+            v-for="item in visibleTocItems"
+            :key="item.id"
+            class="toc-item"
+            :class="`toc-level-${item.level}`"
           >
-            <span class="toc-text">{{ item.text }}</span>
-          </a>
-        </li>
+            <a
+              :href="`#${item.id}`"
+              class="toc-link"
+              :class="{ active: activeTocId === item.id }"
+              @click="scrollToHeading($event, item.id)"
+            >
+              <span class="toc-text">{{ item.text }}</span>
+            </a>
+          </li>
+        </TransitionGroup>
         <div ref="indicatorRef" class="toc-indicator" />
       </ol>
     </div>
@@ -311,6 +477,22 @@ defineExpose({
     height 0.2s cubic-bezier(0, 1, 0.5, 1),
     opacity 0.2s ease-in-out;
   transform: translateY(50%);
+}
+
+// 目录项过渡动画
+.toc-item-enter-active,
+.toc-item-leave-active {
+  transition: all 0.3s ease;
+}
+
+.toc-item-enter-from,
+.toc-item-leave-to {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.toc-item-move {
+  transition: transform 0.3s ease;
 }
 
 @for $i from 1 through 6 {
