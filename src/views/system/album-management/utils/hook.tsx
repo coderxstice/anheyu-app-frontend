@@ -165,7 +165,8 @@ export function useAlbum() {
       label: "操作",
       // fixed: "right",
       width: 210,
-      slot: "operation"
+      slot: "operation",
+      showOverflowTooltip: false
     }
   ];
   function resetForm(formEl) {
@@ -899,10 +900,35 @@ export function useAlbum() {
     }
   });
 
-  /** 加载动画配置 */
+  /** 加载动画配置 - 优化的图片加载动画 */
   const loadingConfig = reactive<LoadingConfig>({
-    text: "正在加载第一页...",
-    viewBox: "-10 -10 50 50"
+    text: "正在加载相册...",
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="albumGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:var(--el-color-primary);stop-opacity:1" />
+          <stop offset="100%" style="stop-color:var(--el-color-primary-light-3);stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="50" r="40" stroke="var(--el-border-color-lighter)" stroke-width="6" fill="none"/>
+      <circle cx="50" cy="50" r="40" stroke="url(#albumGradient)" stroke-width="6" fill="none"
+        stroke-linecap="round" stroke-dasharray="180 251.2">
+        <animateTransform attributeName="transform" type="rotate" dur="1s" repeatCount="indefinite" from="0 50 50" to="360 50 50"/>
+      </circle>
+      <g transform="translate(50,50)">
+        <rect x="-15" y="-12" width="30" height="24" rx="3" fill="none" stroke="var(--el-color-primary)" stroke-width="2.5">
+          <animate attributeName="opacity" values="0.4;1;0.4" dur="1.5s" repeatCount="indefinite"/>
+        </rect>
+        <circle cx="-6" cy="-3" r="3" fill="var(--el-color-primary)">
+          <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+        <polygon points="-12,8 -3,0 3,5 12,0 12,8 -12,8" fill="var(--el-color-primary-light-5)">
+          <animate attributeName="opacity" values="0.3;0.8;0.3" dur="1.5s" repeatCount="indefinite"/>
+        </polygon>
+      </g>
+    </svg>`,
+    viewBox: "0 0 100 100",
+    background: "var(--el-mask-color)"
   });
 
   function onSizeChange(val) {
@@ -913,7 +939,7 @@ export function useAlbum() {
 
   function onCurrentChange(val) {
     pagination.currentPage = val;
-    loadingConfig.text = `正在加载第${val}页...`;
+    loadingConfig.text = `加载第 ${val} 页`;
     onSearch();
   }
 

@@ -5,7 +5,13 @@
         <div
           style="display: inline-block; height: 100%; vertical-align: middle"
         />
-        <div ref="popupRef" class="poptrox-popup" :style="{ opacity: 0 }">
+        <div
+          ref="popupRef"
+          class="poptrox-popup"
+          :style="{ opacity: 0 }"
+          @touchstart="handleTouchStart"
+          @touchend="handleTouchEnd"
+        >
           <div v-if="loading" class="loader" />
 
           <div v-if="containerVisible" :key="imageKey" class="pic">
@@ -87,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick, computed } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import gsap from "gsap";
 import Download from "@/assets/svg/download.svg?component";
 import Downloads from "@/assets/svg/downloads.svg?component";
@@ -99,6 +105,11 @@ import dayjs from "dayjs";
 import { updateWallpaperStat } from "@/api/album-home";
 import DownloadProgressBar from "./downloadProgressBar.vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
+
+// 触摸滑动相关
+let touchStartX = 0;
+let touchEndX = 0;
+const minSwipeDistance = 50;
 
 const props = defineProps({
   page: {
@@ -231,6 +242,30 @@ const handleKeydown = (e: KeyboardEvent) => {
       break;
   }
 };
+
+// 触摸事件处理
+const handleTouchStart = (e: TouchEvent) => {
+  touchStartX = e.changedTouches[0].screenX;
+};
+
+const handleTouchEnd = (e: TouchEvent) => {
+  if (!visible.value || !showControls.value) return;
+  if (previewSrcList.value.length <= 1) return;
+
+  touchEndX = e.changedTouches[0].screenX;
+  const swipeDistance = touchEndX - touchStartX;
+
+  if (Math.abs(swipeDistance) > minSwipeDistance) {
+    if (swipeDistance > 0) {
+      // 向右滑动 -> 上一张
+      prev();
+    } else {
+      // 向左滑动 -> 下一张
+      next();
+    }
+  }
+};
+
 onMounted(() => {
   window.addEventListener("resize", handleResize);
   window.addEventListener("keydown", handleKeydown);
@@ -515,12 +550,24 @@ $transition: opacity 0.2s ease-in-out;
     .poptrox-popup .caption {
       position: fixed;
       bottom: 0;
+      padding: 1.5em 1.5em 1em;
     }
 
-    .poptrox-popup .closer,
+    /* 移动端导航按钮样式 */
+    .poptrox-popup .closer {
+      width: 3.5em;
+      height: 3.5em;
+      background-size: 2em;
+      opacity: 0.8 !important;
+    }
+
     .poptrox-popup .nav-previous,
     .poptrox-popup .nav-next {
-      display: none !important;
+      width: 3.5em;
+      height: 5em;
+      margin-top: -2.5em;
+      background-size: 3em;
+      opacity: 0.8 !important;
     }
   }
 
