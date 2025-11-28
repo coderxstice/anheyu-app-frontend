@@ -1405,6 +1405,7 @@ defineExpose({
 
   .login-button {
     background: var(--anzhiyu-fontcolor);
+    color: var(--anzhiyu-card-bg);
   }
 
   .register-button {
