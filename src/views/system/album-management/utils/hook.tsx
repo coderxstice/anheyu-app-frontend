@@ -8,6 +8,7 @@ import {
   updateWallpaper,
   deleteWallpaper,
   batchImportAlbums,
+  batchDeleteAlbums,
   exportAlbums,
   importAlbums
 } from "@/api/album-home";
@@ -39,8 +40,15 @@ export function useAlbum() {
   const formRef = ref();
   const dataList = ref([]);
   const loading = ref(true);
+  const selectedRows = ref<any[]>([]);
 
   const columns: TableColumnList = [
+    {
+      type: "selection",
+      width: 55,
+      align: "center",
+      reserveSelection: true
+    },
     {
       label: "id",
       prop: "id",
@@ -431,6 +439,36 @@ export function useAlbum() {
     });
   }
 
+  /** 处理选择变化 */
+  function handleSelectionChange(selection: any[]) {
+    selectedRows.value = selection;
+  }
+
+  /** 批量删除 */
+  async function handleBatchDelete() {
+    if (selectedRows.value.length === 0) {
+      message("请先选择要删除的图片", { type: "warning" });
+      return;
+    }
+
+    const ids = selectedRows.value.map((row: any) => row.id);
+    try {
+      const res = await batchDeleteAlbums(ids);
+      if (res.code === 200) {
+        message(`成功删除 ${res.data.deleted} 张图片`, { type: "success" });
+        selectedRows.value = [];
+        onSearch();
+      } else {
+        message(res.message, { type: "error" });
+      }
+    } catch (error) {
+      console.error("批量删除失败:", error);
+      message(`批量删除失败: ${error.message || "未知错误"}`, {
+        type: "error"
+      });
+    }
+  }
+
   /**
    * 显示导入结果弹窗
    */
@@ -587,7 +625,9 @@ export function useAlbum() {
                   background: failCount > 0 ? "#fef0f0" : "#f5f5f5",
                   borderRadius: "8px",
                   border:
-                    failCount > 0 ? "1px solid #F5672220" : "var(--style-border-always)"
+                    failCount > 0
+                      ? "1px solid #F5672220"
+                      : "var(--style-border-always)"
                 }
               },
               [
@@ -624,7 +664,9 @@ export function useAlbum() {
                   background: skipCount > 0 ? "#fdf6ec" : "#f5f5f5",
                   borderRadius: "8px",
                   border:
-                    skipCount > 0 ? "1px solid var(--anzhiyu-yellow)20" : "var(--style-border-always)"
+                    skipCount > 0
+                      ? "1px solid var(--anzhiyu-yellow)20"
+                      : "var(--style-border-always)"
                 }
               },
               [
@@ -1293,6 +1335,7 @@ export function useAlbum() {
     columns,
     dataList,
     pagination,
+    selectedRows,
     onSizeChange,
     onCurrentChange,
     loadingConfig,
@@ -1300,6 +1343,8 @@ export function useAlbum() {
     resetForm,
     openDialog,
     handleDelete,
+    handleBatchDelete,
+    handleSelectionChange,
     handleExport,
     openImportDialog,
     loadCategories
