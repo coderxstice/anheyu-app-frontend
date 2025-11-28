@@ -23,7 +23,11 @@ import {
   type FormInstance,
   type FormRules
 } from "element-plus";
-import { applyLink, getLinkApplications } from "@/api/postLink";
+import {
+  applyLink,
+  getLinkApplications,
+  checkLinkExists
+} from "@/api/postLink";
 import type { ApplyLinkRequest, LinkItem } from "@/api/postLink/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import md5 from "blueimp-md5";
@@ -53,6 +57,8 @@ const allChecked = computed(() => {
 
 const formRef = ref<FormInstance>();
 const loading = ref(false);
+const urlCheckLoading = ref(false);
+const urlExists = ref(false); // URL是否已存在
 const form = reactive<ApplyLinkRequest>({
   type: "NEW",
   name: "",
@@ -107,6 +113,40 @@ const rules = reactive<FormRules>({
   ]
 });
 
+// 检查URL是否已存在
+const checkUrlExists = async () => {
+  const url = form.url.trim();
+  if (!url) {
+    urlExists.value = false;
+    return;
+  }
+
+  // 简单校验URL格式
+  try {
+    new URL(url);
+  } catch {
+    urlExists.value = false;
+    return;
+  }
+
+  urlCheckLoading.value = true;
+  try {
+    const res = await checkLinkExists(url);
+    urlExists.value = res.data.exists;
+    if (res.data.exists) {
+      // URL已存在，自动切换到修改模式
+      form.type = "UPDATE";
+      ElMessage.warning("该网站已申请过友链，已自动切换为修改模式");
+    }
+  } catch (error) {
+    console.error("检查URL失败:", error);
+    // 检查失败时不阻止用户继续操作
+    urlExists.value = false;
+  } finally {
+    urlCheckLoading.value = false;
+  }
+};
+
 const handleSubmit = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async valid => {
@@ -116,6 +156,7 @@ const handleSubmit = async (formEl: FormInstance | undefined) => {
         await applyLink(form);
         ElMessage.success("申请提交成功，请等待博主审核！");
         formEl.resetFields();
+        urlExists.value = false; // 重置URL存在状态
       } catch (error) {
         console.error("申请友链失败:", error);
         ElMessage.error("申请失败，请稍后再试或联系博主。");
@@ -304,14 +345,33 @@ onMounted(() => {
         label-position="top"
         @submit.prevent
       >
+        <el-form-item label="网站链接" prop="url">
+          <el-input
+            v-model="form.url"
+            :placeholder="placeholderURL || 'https://blog.anheyu.com/'"
+            @blur="checkUrlExists"
+          />
+          <div v-if="urlCheckLoading" class="form-tip">
+            <small>正在检查网站地址...</small>
+          </div>
+          <div v-else-if="urlExists" class="form-tip url-exists-tip">
+            <small>该网站已申请过友链，只能提交修改申请。</small>
+          </div>
+        </el-form-item>
+
         <el-form-item label="申请类型" prop="type">
           <div>
-            <el-radio-group v-model="form.type">
-              <el-radio value="NEW">新增友链</el-radio>
+            <el-radio-group v-model="form.type" :disabled="urlExists">
+              <el-radio value="NEW" :disabled="urlExists">新增友链</el-radio>
               <el-radio value="UPDATE">修改友链</el-radio>
             </el-radio-group>
             <div class="form-tip">
-              <small v-if="form.type === 'NEW'">申请添加新的友情链接。</small>
+              <small v-if="urlExists" class="url-exists-tip">
+                该网站已申请过友链，只能选择修改友链。
+              </small>
+              <small v-else-if="form.type === 'NEW'"
+                >申请添加新的友情链接。</small
+              >
               <small v-else>修改已存在的友情链接信息。</small>
             </div>
           </div>
@@ -321,12 +381,6 @@ onMounted(() => {
           <el-input
             v-model="form.name"
             :placeholder="placeholderName || '例如：安知鱼'"
-          />
-        </el-form-item>
-        <el-form-item label="网站链接" prop="url">
-          <el-input
-            v-model="form.url"
-            :placeholder="placeholderURL || 'https://blog.anheyu.com/'"
           />
         </el-form-item>
         <el-form-item label="网站 LOGO" prop="logo">
@@ -511,6 +565,11 @@ onMounted(() => {
   font-size: 12px;
   line-height: 1.4;
   color: #909399;
+
+  &.url-exists-tip,
+  .url-exists-tip {
+    color: #e6a23c;
+  }
 }
 
 // 友链申请列表样式

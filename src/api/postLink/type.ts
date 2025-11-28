@@ -249,3 +249,9 @@ export interface ExportLinksResponse {
   links: ImportLinkItem[];
   total: number;
 }
+
+/** 检查友链URL是否存在的响应 */
+export interface CheckLinkExistsResponse {
+  exists: boolean; // 是否存在
+  url: string; // 查询的URL
+}

@@ -29,7 +29,8 @@ import type {
   LinkHealthCheckResponse,
   BatchUpdateLinkSortRequest,
   ExportLinksParams,
-  ExportLinksResponse
+  ExportLinksResponse,
+  CheckLinkExistsResponse
 } from "./type";
 
 // ------------------ 前台公开接口 ------------------
@@ -83,6 +84,17 @@ export const getLinkApplications = (
     "get",
     baseUrlApi("public/links/applications"),
     { params }
+  );
+};
+
+/** @description 检查友链URL是否已存在（公开接口） */
+export const checkLinkExists = (
+  url: string
+): Promise<BaseResponse<CheckLinkExistsResponse>> => {
+  return http.request<BaseResponse<CheckLinkExistsResponse>>(
+    "get",
+    baseUrlApi("public/links/check-exists"),
+    { params: { url } }
   );
 };
 
