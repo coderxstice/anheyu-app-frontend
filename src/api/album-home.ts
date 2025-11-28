@@ -177,3 +177,17 @@ export const importAlbums = (formData: FormData) => {
     }
   });
 };
+
+// 批量删除相册图片
+export const batchDeleteAlbums = (ids: number[]) => {
+  return http.request<{
+    success: boolean;
+    message: string;
+    code: number;
+    data: {
+      deleted: number;
+    };
+  }>("delete", baseUrlApi("albums/batch-delete"), {
+    data: { ids }
+  });
+};

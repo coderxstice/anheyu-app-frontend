@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useAlbumStore } from "@/store/modules/album";
 import { useRouter } from "vue-router";
@@ -13,6 +13,9 @@ const siteConfigStore = useSiteConfigStore();
 
 const albumStore = useAlbumStore();
 const { sortOrder, categoryId, categories } = storeToRefs(albumStore);
+
+// 当前打开的下拉菜单
+const activeDropdown = ref<string | null>(null);
 
 // 计算属性，从 Pinia Store 获取站点配置
 const siteConfig = computed(() => siteConfigStore.getSiteConfig);
@@ -36,23 +39,46 @@ const goHome = () => {
   router.push("/");
 };
 
+// 切换下拉菜单
+const toggleDropdown = (event: Event, name: string) => {
+  event.stopPropagation();
+  activeDropdown.value = activeDropdown.value === name ? null : name;
+};
+
+// 关闭所有下拉菜单
+const closeDropdowns = () => {
+  activeDropdown.value = null;
+};
+
+// 点击外部关闭下拉菜单
+const handleClickOutside = () => {
+  closeDropdowns();
+};
+
 const handleSortChange = (newOrder: string) => {
   albumStore.setSortOrder(newOrder);
+  closeDropdowns();
 };
 
 const handleCategoryChange = (newCategoryId: number | null) => {
   albumStore.setCategoryId(newCategoryId);
+  closeDropdowns();
 };
 
 // 组件挂载时获取分类列表
 onMounted(() => {
   albumStore.fetchCategories();
+  document.addEventListener("click", handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener("click", handleClickOutside);
 });
 </script>
 
 <template>
   <header id="header">
-    <div class="flex items-center justify-center" @click="goHome">
+    <div class="header-left" @click="goHome">
       <a style="cursor: pointer">
         <img
           class="site-logo"
@@ -71,9 +97,19 @@ onMounted(() => {
     </div>
     <nav>
       <ul class="nav_links">
-        <li v-if="categories.length > 0" class="nav-item">
-          <a style="cursor: pointer">分类</a>
-          <div class="nav-item-child">
+        <li
+          v-if="categories.length > 0"
+          class="nav-item nav-dropdown"
+          :class="{ 'is-open': activeDropdown === 'category' }"
+          @click.stop
+        >
+          <a
+            class="dropdown-trigger"
+            @click="toggleDropdown($event, 'category')"
+          >
+            分类
+          </a>
+          <div class="nav-item-child" @click.stop>
             <ul>
               <li class="mb-1 category-parent category-level-0">
                 <a
@@ -96,9 +132,15 @@ onMounted(() => {
             </ul>
           </div>
         </li>
-        <li class="nav-item">
-          <a style="cursor: pointer">排序</a>
-          <div class="nav-item-child">
+        <li
+          class="nav-item nav-dropdown"
+          :class="{ 'is-open': activeDropdown === 'sort' }"
+          @click.stop
+        >
+          <a class="dropdown-trigger" @click="toggleDropdown($event, 'sort')">
+            排序
+          </a>
+          <div class="nav-item-child" @click.stop>
             <ul>
               <li class="mb-1 category-parent category-level-0">
                 <a
@@ -124,10 +166,10 @@ onMounted(() => {
             </ul>
           </div>
         </li>
-        <li class="nav-item">
+        <li class="nav-item nav-about">
           <a style="cursor: pointer" :href="aboutLink" target="_blank">关于</a>
         </li>
-        <li v-if="icpNumber" class="nav-item">
+        <li v-if="icpNumber" class="nav-item nav-icp">
           <a
             class="footer-bar-link"
             target="_blank"
@@ -137,7 +179,7 @@ onMounted(() => {
             >{{ icpNumber }}
           </a>
         </li>
-        <li v-if="policeRecordNumber" class="nav-item">
+        <li v-if="policeRecordNumber" class="nav-item nav-police">
           <a
             class="footer-bar-link"
             target="_blank"
@@ -173,6 +215,7 @@ onMounted(() => {
   z-index: 10002;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
   height: 80px;
   padding: 0 1.5em;
@@ -202,6 +245,13 @@ onMounted(() => {
     animation: none;
   }
 
+  .header-left {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    cursor: pointer;
+  }
+
   h1 {
     display: flex;
     align-items: center;
@@ -224,10 +274,16 @@ onMounted(() => {
   }
 
   nav {
+    flex: 1;
+    min-width: 0;
     margin-left: auto;
 
     > ul {
       display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+      justify-content: flex-end;
       padding: 0;
       margin: 0;
       list-style: none;
@@ -270,11 +326,31 @@ onMounted(() => {
             }
           }
 
-          &:hover {
+          /* PC端 hover 触发 */
+          @media (hover: hover) {
+            &:hover {
+              .nav-item-child {
+                display: flex;
+                pointer-events: all;
+                opacity: 1;
+              }
+
+              > a {
+                background: #ffffff1e;
+              }
+            }
+          }
+
+          /* 点击展开状态（移动端 + PC端点击） */
+          &.is-open {
             .nav-item-child {
               display: flex;
               pointer-events: all;
               opacity: 1;
+            }
+
+            > a {
+              background: #ffffff1e;
             }
           }
 
@@ -310,6 +386,10 @@ onMounted(() => {
           border: 0;
           border-radius: 8px;
           transition: background-color 0.5s ease;
+
+          &.dropdown-trigger {
+            user-select: none;
+          }
 
           &.icon {
             &::before {
@@ -347,21 +427,104 @@ onMounted(() => {
     color: #fff;
   }
 
-  @media screen and (width <= 736px) {
+  /* 平板适配 (768px - 1024px) */
+  @media screen and (width <= 1024px) {
+    padding: 0 1em;
+
+    nav > ul > li a {
+      padding: 8px 10px;
+      font-size: 0.85em;
+    }
+
+    .nav-icp,
+    .nav-police {
+      display: none;
+    }
+  }
+
+  /* 手机适配 (< 768px) */
+  @media screen and (width <= 768px) {
     top: 0;
     bottom: auto;
-    height: 60px;
-    padding: 0 1em;
+    height: 56px;
+    padding: 0 12px;
     transform: translateY(0);
+    animation:
+      header-slide-up 0.6s ease-out 0.5s forwards,
+      header-fade-in 0.4s ease-in 0.5s forwards;
 
-    .nav-item {
-      font-size: 0.7em;
+    .header-left {
+      flex-shrink: 0;
+    }
+
+    .site-logo {
+      width: 32px;
+      height: 32px;
+      margin-right: 8px;
     }
 
     h1 {
-      font-size: 0.8em;
-      color: #fff;
       display: none !important;
+    }
+
+    nav {
+      flex: 1;
+      overflow: visible;
+
+      > ul {
+        gap: 4px;
+        justify-content: flex-end;
+
+        > li {
+          &.nav-item {
+            .nav-item-child {
+              bottom: auto;
+              top: 46px;
+
+              &::before {
+                top: -40px;
+                bottom: auto;
+              }
+            }
+          }
+
+          a {
+            padding: 8px 14px;
+            font-size: 0.9em;
+            letter-spacing: 0.05em;
+          }
+        }
+      }
+    }
+
+    .nav-about {
+      display: none;
+    }
+
+    .nav-icp,
+    .nav-police {
+      display: none;
+    }
+  }
+
+  /* 超小屏幕适配 (< 480px) */
+  @media screen and (width <= 480px) {
+    height: 50px;
+    padding: 0 10px;
+
+    .site-logo {
+      width: 28px;
+      height: 28px;
+      margin-right: 6px;
+    }
+
+    nav > ul {
+      gap: 2px;
+
+      > li a {
+        padding: 6px 12px;
+        font-size: 0.85em;
+      }
     }
   }
 }

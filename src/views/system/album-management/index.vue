@@ -13,6 +13,8 @@ import Search from "@iconify-icons/ri/search-line";
 import Upload from "@iconify-icons/ep/upload";
 import Download from "@iconify-icons/ep/download";
 import Setting from "@iconify-icons/ep/setting";
+import DeleteBatch from "@iconify-icons/ep/delete-filled";
+import View from "@iconify-icons/ep/view";
 import CategoryManage from "./category-manage.vue";
 
 defineOptions({
@@ -28,6 +30,7 @@ const {
   columns,
   dataList,
   pagination,
+  selectedRows,
   loadingConfig,
   onSizeChange,
   onCurrentChange,
@@ -35,6 +38,8 @@ const {
   resetForm,
   openDialog,
   handleDelete,
+  handleBatchDelete,
+  handleSelectionChange,
   handleExport,
   openImportDialog,
   loadCategories
@@ -61,6 +66,11 @@ function openCategoryManage() {
         }
       })
   });
+}
+
+// 打开相册页面
+function openAlbumPage() {
+  window.open("/album", "_blank");
 }
 </script>
 
@@ -182,6 +192,30 @@ function openCategoryManage() {
             <span class="hidden md:inline">导出相册</span>
             <span class="md:hidden">导出</span>
           </el-button>
+          <el-popconfirm
+            :title="`确认批量删除选中的 ${selectedRows.length} 张图片吗？`"
+            @confirm="handleBatchDelete"
+          >
+            <template #reference>
+              <el-button
+                v-ripple
+                type="danger"
+                :icon="useRenderIcon(DeleteBatch)"
+                :disabled="selectedRows.length === 0"
+              >
+                <span class="hidden md:inline"
+                  >批量删除{{
+                    selectedRows.length > 0 ? `(${selectedRows.length})` : ""
+                  }}</span
+                >
+                <span class="md:hidden"
+                  >删除{{
+                    selectedRows.length > 0 ? `(${selectedRows.length})` : ""
+                  }}</span
+                >
+              </el-button>
+            </template>
+          </el-popconfirm>
           <el-button
             v-ripple
             :icon="useRenderIcon(Setting)"
@@ -189,6 +223,15 @@ function openCategoryManage() {
           >
             <span class="hidden md:inline">分类管理</span>
             <span class="md:hidden">分类</span>
+          </el-button>
+          <el-button
+            v-ripple
+            type="info"
+            :icon="useRenderIcon(View)"
+            @click="openAlbumPage()"
+          >
+            <span class="hidden md:inline">查看相册</span>
+            <span class="md:hidden">查看</span>
           </el-button>
         </div>
       </template>
@@ -212,13 +255,12 @@ function openCategoryManage() {
           }"
           @page-size-change="onSizeChange"
           @page-current-change="onCurrentChange"
+          @selection-change="handleSelectionChange"
         >
           <template #operation="{ row }">
             <div class="flex flex-col gap-1 sm:flex-row sm:gap-2">
               <el-button
-                v-ripple
                 class="w-full reset-margin sm:w-auto"
-                link
                 type="primary"
                 :size="size"
                 :icon="useRenderIcon(EditPen)"
@@ -234,8 +276,7 @@ function openCategoryManage() {
                   <el-button
                     v-ripple
                     class="w-full reset-margin sm:w-auto"
-                    link
-                    type="primary"
+                    type="danger"
                     :size="size"
                     :icon="useRenderIcon(Delete)"
                   >

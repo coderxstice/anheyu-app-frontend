@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { ElMessage } from "element-plus";
 import type { BackendAboutPageConfig } from "@/types/about";
@@ -29,6 +29,28 @@ const aboutConfig = ref<BackendAboutPageConfig | null>(null);
 const isLoading = ref(true);
 const customCodeHtml = ref<string>("");
 
+// 获取板块开关配置（存储在 enable 子对象中）
+const enableConfig = computed(() => {
+  const config = siteConfigStore.getSiteConfig?.about?.page?.enable;
+  return {
+    author_box: config?.author_box !== false,
+    page_content: config?.page_content !== false,
+    skills: config?.skills !== false,
+    careers: config?.careers !== false,
+    statistic: config?.statistic !== false,
+    map_and_info: config?.map_and_info !== false,
+    personality: config?.personality !== false,
+    photo: config?.photo !== false,
+    maxim: config?.maxim !== false,
+    buff: config?.buff !== false,
+    game: config?.game !== false,
+    comic: config?.comic !== false,
+    like_tech: config?.like_tech !== false,
+    music: config?.music !== false,
+    custom_code: config?.custom_code !== false
+  };
+});
+
 onMounted(async () => {
   try {
     isLoading.value = true;
@@ -57,7 +79,7 @@ onMounted(async () => {
   <div v-if="aboutConfig" class="about-container">
     <!-- 作者头像框 -->
     <AuthorBox
-      v-if="aboutConfig.enable_author_box !== false"
+      v-if="enableConfig.author_box"
       :avatar-img="aboutConfig.avatar_img"
       :avatar-skills="{
         left: aboutConfig.avatar_skills_left,
@@ -69,7 +91,7 @@ onMounted(async () => {
 
     <!-- 基础介绍内容 -->
     <AuthorPageContent
-      v-if="aboutConfig.enable_page_content !== false"
+      v-if="enableConfig.page_content"
       :name="aboutConfig.name"
       :description="aboutConfig.description"
       :about-site-tips="aboutConfig.about_site_tips"
@@ -77,38 +99,29 @@ onMounted(async () => {
 
     <!-- 技能和职业经历 -->
     <div
-      v-if="
-        aboutConfig.enable_skills !== false ||
-        aboutConfig.enable_careers !== false
-      "
+      v-if="enableConfig.skills || enableConfig.careers"
       class="author-content"
     >
       <SkillsCard
-        v-if="aboutConfig.enable_skills !== false"
+        v-if="enableConfig.skills"
         :skills-tips="aboutConfig.skills_tips"
       />
-      <CareersCard
-        v-if="aboutConfig.enable_careers !== false"
-        :careers="aboutConfig.careers"
-      />
+      <CareersCard v-if="enableConfig.careers" :careers="aboutConfig.careers" />
     </div>
 
     <!-- 访问统计和地图信息 -->
     <div
-      v-if="
-        aboutConfig.enable_statistic !== false ||
-        aboutConfig.enable_map_and_info !== false
-      "
+      v-if="enableConfig.statistic || enableConfig.map_and_info"
       class="author-content"
     >
       <StatisticCard
-        v-if="aboutConfig.enable_statistic !== false"
+        v-if="enableConfig.statistic"
         :cover="aboutConfig.statistics_background"
         link="/statistics"
         text="更多统计"
       />
       <MapAndInfoCard
-        v-if="aboutConfig.enable_map_and_info !== false"
+        v-if="enableConfig.map_and_info"
         :map="aboutConfig.map"
         :self-info="aboutConfig.self_info"
       />
@@ -116,70 +129,39 @@ onMounted(async () => {
 
     <!-- 性格和照片 -->
     <div
-      v-if="
-        aboutConfig.enable_personality !== false ||
-        aboutConfig.enable_photo !== false
-      "
+      v-if="enableConfig.personality || enableConfig.photo"
       class="author-content"
     >
       <PersonalityCard
-        v-if="aboutConfig.enable_personality !== false"
+        v-if="enableConfig.personality"
         :personalities="aboutConfig.personalities"
       />
       <PhotoCard
-        v-if="aboutConfig.enable_photo !== false"
+        v-if="enableConfig.photo"
         :photo-url="aboutConfig.personalities.photoUrl"
       />
     </div>
 
     <!-- 格言和特长 -->
-    <div
-      v-if="
-        aboutConfig.enable_maxim !== false || aboutConfig.enable_buff !== false
-      "
-      class="author-content"
-    >
-      <MaximCard
-        v-if="aboutConfig.enable_maxim !== false"
-        :maxim="aboutConfig.maxim"
-      />
-      <BuffCard
-        v-if="aboutConfig.enable_buff !== false"
-        :buff="aboutConfig.buff"
-      />
+    <div v-if="enableConfig.maxim || enableConfig.buff" class="author-content">
+      <MaximCard v-if="enableConfig.maxim" :maxim="aboutConfig.maxim" />
+      <BuffCard v-if="enableConfig.buff" :buff="aboutConfig.buff" />
     </div>
 
     <!-- 游戏和漫画 -->
-    <div
-      v-if="
-        aboutConfig.enable_game !== false || aboutConfig.enable_comic !== false
-      "
-      class="author-content"
-    >
-      <GameCard
-        v-if="aboutConfig.enable_game !== false"
-        :game="aboutConfig.game"
-      />
-      <ComicCard
-        v-if="aboutConfig.enable_comic !== false"
-        :comic="aboutConfig.comic"
-      />
+    <div v-if="enableConfig.game || enableConfig.comic" class="author-content">
+      <GameCard v-if="enableConfig.game" :game="aboutConfig.game" />
+      <ComicCard v-if="enableConfig.comic" :comic="aboutConfig.comic" />
     </div>
 
     <!-- 技术和音乐 -->
     <div
-      v-if="
-        aboutConfig.enable_like_tech !== false ||
-        aboutConfig.enable_music !== false
-      "
+      v-if="enableConfig.like_tech || enableConfig.music"
       class="author-content"
     >
-      <LikeTechCard
-        v-if="aboutConfig.enable_like_tech !== false"
-        :like="aboutConfig.like"
-      />
+      <LikeTechCard v-if="enableConfig.like_tech" :like="aboutConfig.like" />
       <MusicCard
-        v-if="aboutConfig.enable_music !== false"
+        v-if="enableConfig.music"
         :music="aboutConfig.music"
         :author-name="aboutConfig.name"
       />
@@ -187,7 +169,7 @@ onMounted(async () => {
 
     <!-- 自定义内容块 -->
     <div
-      v-if="customCodeHtml && aboutConfig.enable_custom_code !== false"
+      v-if="customCodeHtml && enableConfig.custom_code"
       class="custom-content-block"
       v-html="customCodeHtml"
     />
@@ -202,153 +184,186 @@ onMounted(async () => {
 .about-container {
   animation: slide-in 0.6s 0.2s backwards;
   max-width: 1400px;
-  padding: 1.5rem;
+  padding: 0.5rem;
   margin: 0 auto;
+}
+
+.author-title {
+  padding-left: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  color: var(--anzhiyu-fontcolor);
+}
+
+.author-content {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
 
-  @media screen and (max-width: 768px) {
-    padding: 1rem;
+  @media screen and (width <= 768px) {
+    flex-direction: column;
+  }
+}
+
+.custom-content-block {
+  padding: 1rem;
+  margin-top: 0.5rem;
+  background: var(--anzhiyu-card-bg);
+  border: var(--style-border);
+  border-radius: 12px;
+
+  // 继承 markdown 样式
+  :deep(h1),
+  :deep(h2),
+  :deep(h3),
+  :deep(h4),
+  :deep(h5),
+  :deep(h6) {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    font-weight: 600;
+    color: var(--anzhiyu-fontcolor);
+  }
+
+  :deep(p) {
+    margin-bottom: 1em;
+    line-height: 1.7;
+    color: var(--anzhiyu-secondtext);
+  }
+
+  :deep(a) {
+    color: var(--anzhiyu-theme);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  :deep(ul),
+  :deep(ol) {
+    padding-left: 1.5em;
+    margin-bottom: 1em;
+  }
+
+  :deep(li) {
+    margin-bottom: 0.5em;
+    color: var(--anzhiyu-secondtext);
+  }
+
+  :deep(code) {
+    padding: 0.2em 0.4em;
+    font-family:
+      SFMono-Regular,
+      Consolas,
+      Liberation Mono,
+      Menlo,
+      monospace;
+    font-size: 0.9em;
+    background: var(--anzhiyu-card-bg-grey);
+    border-radius: 4px;
+  }
+
+  :deep(pre) {
+    padding: 1em;
+    margin-bottom: 1em;
+    overflow-x: auto;
+    background: var(--anzhiyu-card-bg-grey);
+    border-radius: 8px;
+
+    code {
+      padding: 0;
+      background: transparent;
+    }
+  }
+
+  :deep(blockquote) {
+    padding: 0.5em 1em;
+    margin: 1em 0;
+    color: var(--anzhiyu-secondtext);
+    border-left: 4px solid var(--anzhiyu-theme);
+  }
+
+  :deep(img) {
     max-width: 100%;
+    height: auto;
+    border-radius: 8px;
   }
 
-  .author-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin: 0.625rem 0 1.25rem 0;
-    line-height: 1;
-
-    @media screen and (max-width: 768px) {
-      font-size: 2rem;
-      margin: 0.5rem 0 1rem 0;
-    }
+  :deep(hr) {
+    margin: 1.5em 0;
+    border: none;
+    border-top: 1px solid var(--anzhiyu-card-border);
   }
 
-  .custom-content-block {
+  :deep(table) {
     width: 100%;
-    margin-top: 0.5rem;
-    animation: slide-in 0.6s 0.4s backwards;
+    margin-bottom: 1em;
+    border-collapse: collapse;
 
-    // 美化自定义内容的样式
-    :deep(h1),
-    :deep(h2),
-    :deep(h3),
-    :deep(h4),
-    :deep(h5),
-    :deep(h6) {
-      margin: 1.5rem 0 1rem 0;
+    th,
+    td {
+      padding: 0.5em;
+      border: 1px solid var(--anzhiyu-card-border);
+    }
+
+    th {
       font-weight: 600;
-      color: var(--anzhiyu-fontcolor);
+      background: var(--anzhiyu-card-bg-grey);
     }
+  }
 
-    :deep(p) {
-      margin: 0.75rem 0;
-      line-height: 1.8;
-      color: var(--anzhiyu-fontcolor);
-    }
+  // 支持折叠块样式
+  :deep(.folding-tag) {
+    margin: 1em 0;
+    border: var(--style-border);
+    border-radius: 8px;
 
-    :deep(a) {
-      color: var(--anzhiyu-main);
-      text-decoration: none;
-      transition: all 0.3s ease;
+    summary {
+      padding: 0.75em 1em;
+      font-weight: 500;
+      cursor: pointer;
+      background: var(--anzhiyu-card-bg-grey);
+      border-radius: 8px 8px 0 0;
 
       &:hover {
-        color: var(--anzhiyu-main-op);
-        text-decoration: underline;
+        background: var(--anzhiyu-main-op-light);
       }
     }
 
-    :deep(ul),
-    :deep(ol) {
-      margin: 0.75rem 0;
-      padding-left: 1.5rem;
+    &[open] summary {
+      border-bottom: var(--style-border);
+      border-radius: 8px 8px 0 0;
     }
 
-    :deep(li) {
-      margin: 0.5rem 0;
-      line-height: 1.8;
-    }
-
-    :deep(details) {
-      margin: 1rem 0;
-      padding: 1rem;
-      background: var(--anzhiyu-card-bg);
-      border-radius: 8px;
-      box-shadow: var(--anzhiyu-shadow-border);
-
-      summary {
-        cursor: pointer;
-        font-weight: 600;
-        user-select: none;
-        transition: all 0.3s ease;
-
-        &:hover {
-          color: var(--anzhiyu-main);
-        }
-      }
-
-      .content {
-        margin-top: 1rem;
-      }
-    }
-
-    :deep(blockquote) {
-      margin: 1rem 0;
-      padding: 0.75rem 1rem;
-      border-left: 4px solid var(--anzhiyu-main);
-      background: var(--anzhiyu-secondbg);
-      border-radius: 4px;
-    }
-
-    :deep(code) {
-      padding: 0.2rem 0.4rem;
-      background: var(--anzhiyu-secondbg);
-      border-radius: 4px;
-      font-family: "Consolas", "Monaco", "Courier New", monospace;
-      font-size: 0.9em;
-      color: var(--anzhiyu-red);
-    }
-
-    :deep(pre) {
-      margin: 1rem 0;
-      padding: 1rem;
-      background: var(--anzhiyu-secondbg);
-      border-radius: 8px;
-      overflow-x: auto;
-
-      code {
-        padding: 0;
-        background: transparent;
-        color: var(--anzhiyu-fontcolor);
-      }
+    .content {
+      padding: 1em;
     }
   }
 }
 
 .loading-container {
   display: flex;
-  justify-content: center;
   align-items: center;
-  min-height: 400px;
+  justify-content: center;
+  min-height: 50vh;
 
   .loading {
-    font-size: 18px;
+    font-size: 1.2rem;
     color: var(--anzhiyu-secondtext);
-    opacity: 0.8;
   }
 }
 
-// 移动端适配
-@media screen and (max-width: 768px) {
-  .author-content {
-    flex-direction: column;
-    gap: 1rem;
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
 
-    > * {
-      width: 100% !important;
-      flex: none !important;
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>

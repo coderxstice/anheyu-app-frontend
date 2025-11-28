@@ -8,6 +8,7 @@ import {
   updateWallpaper,
   deleteWallpaper,
   batchImportAlbums,
+  batchDeleteAlbums,
   exportAlbums,
   importAlbums
 } from "@/api/album-home";
@@ -39,8 +40,15 @@ export function useAlbum() {
   const formRef = ref();
   const dataList = ref([]);
   const loading = ref(true);
+  const selectedRows = ref<any[]>([]);
 
   const columns: TableColumnList = [
+    {
+      type: "selection",
+      width: 55,
+      align: "center",
+      reserveSelection: true
+    },
     {
       label: "id",
       prop: "id",
@@ -157,7 +165,8 @@ export function useAlbum() {
       label: "操作",
       // fixed: "right",
       width: 210,
-      slot: "operation"
+      slot: "operation",
+      showOverflowTooltip: false
     }
   ];
   function resetForm(formEl) {
@@ -431,6 +440,36 @@ export function useAlbum() {
     });
   }
 
+  /** 处理选择变化 */
+  function handleSelectionChange(selection: any[]) {
+    selectedRows.value = selection;
+  }
+
+  /** 批量删除 */
+  async function handleBatchDelete() {
+    if (selectedRows.value.length === 0) {
+      message("请先选择要删除的图片", { type: "warning" });
+      return;
+    }
+
+    const ids = selectedRows.value.map((row: any) => row.id);
+    try {
+      const res = await batchDeleteAlbums(ids);
+      if (res.code === 200) {
+        message(`成功删除 ${res.data.deleted} 张图片`, { type: "success" });
+        selectedRows.value = [];
+        onSearch();
+      } else {
+        message(res.message, { type: "error" });
+      }
+    } catch (error) {
+      console.error("批量删除失败:", error);
+      message(`批量删除失败: ${error.message || "未知错误"}`, {
+        type: "error"
+      });
+    }
+  }
+
   /**
    * 显示导入结果弹窗
    */
@@ -587,7 +626,9 @@ export function useAlbum() {
                   background: failCount > 0 ? "#fef0f0" : "#f5f5f5",
                   borderRadius: "8px",
                   border:
-                    failCount > 0 ? "1px solid #F5672220" : "var(--style-border-always)"
+                    failCount > 0
+                      ? "1px solid #F5672220"
+                      : "var(--style-border-always)"
                 }
               },
               [
@@ -624,7 +665,9 @@ export function useAlbum() {
                   background: skipCount > 0 ? "#fdf6ec" : "#f5f5f5",
                   borderRadius: "8px",
                   border:
-                    skipCount > 0 ? "1px solid var(--anzhiyu-yellow)20" : "var(--style-border-always)"
+                    skipCount > 0
+                      ? "1px solid var(--anzhiyu-yellow)20"
+                      : "var(--style-border-always)"
                 }
               },
               [
@@ -857,10 +900,35 @@ export function useAlbum() {
     }
   });
 
-  /** 加载动画配置 */
+  /** 加载动画配置 - 优化的图片加载动画 */
   const loadingConfig = reactive<LoadingConfig>({
-    text: "正在加载第一页...",
-    viewBox: "-10 -10 50 50"
+    text: "正在加载相册...",
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="albumGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:var(--el-color-primary);stop-opacity:1" />
+          <stop offset="100%" style="stop-color:var(--el-color-primary-light-3);stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="50" r="40" stroke="var(--el-border-color-lighter)" stroke-width="6" fill="none"/>
+      <circle cx="50" cy="50" r="40" stroke="url(#albumGradient)" stroke-width="6" fill="none"
+        stroke-linecap="round" stroke-dasharray="180 251.2">
+        <animateTransform attributeName="transform" type="rotate" dur="1s" repeatCount="indefinite" from="0 50 50" to="360 50 50"/>
+      </circle>
+      <g transform="translate(50,50)">
+        <rect x="-15" y="-12" width="30" height="24" rx="3" fill="none" stroke="var(--el-color-primary)" stroke-width="2.5">
+          <animate attributeName="opacity" values="0.4;1;0.4" dur="1.5s" repeatCount="indefinite"/>
+        </rect>
+        <circle cx="-6" cy="-3" r="3" fill="var(--el-color-primary)">
+          <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+        <polygon points="-12,8 -3,0 3,5 12,0 12,8 -12,8" fill="var(--el-color-primary-light-5)">
+          <animate attributeName="opacity" values="0.3;0.8;0.3" dur="1.5s" repeatCount="indefinite"/>
+        </polygon>
+      </g>
+    </svg>`,
+    viewBox: "0 0 100 100",
+    background: "var(--el-mask-color)"
   });
 
   function onSizeChange(val) {
@@ -871,7 +939,7 @@ export function useAlbum() {
 
   function onCurrentChange(val) {
     pagination.currentPage = val;
-    loadingConfig.text = `正在加载第${val}页...`;
+    loadingConfig.text = `加载第 ${val} 页`;
     onSearch();
   }
 
@@ -1293,6 +1361,7 @@ export function useAlbum() {
     columns,
     dataList,
     pagination,
+    selectedRows,
     onSizeChange,
     onCurrentChange,
     loadingConfig,
@@ -1300,6 +1369,8 @@ export function useAlbum() {
     resetForm,
     openDialog,
     handleDelete,
+    handleBatchDelete,
+    handleSelectionChange,
     handleExport,
     openImportDialog,
     loadCategories
