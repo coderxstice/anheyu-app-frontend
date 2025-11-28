@@ -405,6 +405,7 @@ export interface SidebarPageSettingsInfo {
   archiveDisplayMonths: number;
   customSidebar: string;
   customShowInPost: boolean;
+  tocCollapseMode: boolean;
 }
 
 /**

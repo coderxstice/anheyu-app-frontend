@@ -1238,6 +1238,12 @@ const sidebarDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeySidebarCustomShowInPost,
     defaultValue: false,
     type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.sidebar.tocCollapseMode",
+    backendKey: constant.KeySidebarTocCollapseMode,
+    defaultValue: false,
+    type: "boolean"
   }
 ];
 

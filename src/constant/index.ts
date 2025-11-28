@@ -85,6 +85,7 @@ const KeySidebarSiteInfoTotalWordCount: SettingKey =
 const KeySidebarArchiveDisplayMonths: SettingKey =
   "sidebar.archive.displayMonths";
 const KeySidebarCustomShowInPost: SettingKey = "sidebar.custom.showInPost";
+const KeySidebarTocCollapseMode: SettingKey = "sidebar.toc.collapseMode";
 
 // 友链配置
 const KeyFriendLinkDefaultCategory: SettingKey = "FRIEND_LINK_DEFAULTCATEGORY";
@@ -404,6 +405,7 @@ export const constant = {
   KeySidebarSiteInfoTotalWordCount,
   KeySidebarArchiveDisplayMonths,
   KeySidebarCustomShowInPost,
+  KeySidebarTocCollapseMode,
 
   // --- 前台及页脚配置 ---
   KeyFrontDeskSiteOwnerName,
