@@ -8,6 +8,7 @@ import darkIcon from "@/assets/svg/dark.svg?component";
 import { message } from "@/utils/message";
 import { useUserStoreHook } from "@/store/modules/user";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import { storeToRefs } from "pinia";
 import { gsap } from "gsap";
 
 // 导入子组件
@@ -31,6 +32,7 @@ const emit = defineEmits(["update:modelValue", "login-success"]);
 
 const siteConfigStore = useSiteConfigStore();
 const { dataTheme, dataThemeChange } = useDataThemeChange();
+const { enableRegistration } = storeToRefs(siteConfigStore);
 
 // Logo
 const siteIcon = computed(() => {
@@ -39,12 +41,6 @@ const siteIcon = computed(() => {
   return dataTheme.value
     ? config.LOGO_HORIZONTAL_NIGHT || "/static/img/logo-horizontal-night.png"
     : config.LOGO_HORIZONTAL_DAY || "/static/img/logo-horizontal-day.png";
-});
-
-// 是否开启注册
-const enableRegistration = computed(() => {
-  const config = siteConfigStore.getSiteConfig;
-  return config?.ENABLE_REGISTRATION !== "false";
 });
 
 const handleThemeSwitch = (isDark: boolean) => {

@@ -33,6 +33,7 @@
             <span>登录</span>
           </div>
           <div
+            v-if="enableRegistration"
             class="dropdown-item"
             @click="handleDropdownItemClick('register-form')"
           >
@@ -121,6 +122,7 @@ import { useSnackbar } from "@/composables/useSnackbar";
 import { useArticleStore } from "@/store/modules/articleStore";
 import { useAppStore } from "@/store/modules/app";
 import { useUserStoreHook } from "@/store/modules/user";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import Console from "./console.vue";
 import LoginDialog from "@/components/LoginDialog/index.vue";
 
@@ -152,7 +154,9 @@ const router = useRouter();
 const articleStore = useArticleStore();
 const appStore = useAppStore();
 const userStore = useUserStoreHook();
+const siteConfigStore = useSiteConfigStore();
 const { isConsoleOpen } = storeToRefs(appStore);
+const { enableRegistration } = storeToRefs(siteConfigStore);
 const { showSnackbar } = useSnackbar();
 
 // 登录弹窗控制

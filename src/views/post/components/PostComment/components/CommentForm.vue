@@ -8,6 +8,7 @@ import {
   watch,
   onUnmounted
 } from "vue";
+import { storeToRefs } from "pinia";
 import { useCommentStore } from "@/store/modules/commentStore";
 import type { CreateCommentPayload } from "@/api/comment/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
@@ -87,6 +88,7 @@ const emit = defineEmits([
 const siteConfigStore = useSiteConfigStore();
 const commentStore = useCommentStore();
 const userStore = useUserStoreHook();
+const { enableRegistration } = storeToRefs(siteConfigStore);
 const formRef = ref<FormInstance>();
 const textareaRef = ref();
 const owoContainerRef = ref<HTMLElement | null>(null);
@@ -839,6 +841,7 @@ defineExpose({
                 登录
               </el-button>
               <el-button
+                v-if="enableRegistration"
                 size="large"
                 class="register-button"
                 @click="openLoginDialog('register-form')"
