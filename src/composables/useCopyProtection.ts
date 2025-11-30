@@ -92,7 +92,7 @@ export function useCopyProtection() {
   };
 
   /**
-   * 处理复制事件
+   * 处理复制事件（仅用于禁止复制，版权信息处理已移至 PostContent 组件）
    */
   const handleCopy = (event: ClipboardEvent) => {
     // 检查是否在文章页面
@@ -101,24 +101,13 @@ export function useCopyProtection() {
     // 如果不是文章页面，不处理
     if (!isPostPage) return;
 
-    // 如果禁止复制
+    // 如果禁止复制，阻止复制
     if (!copyEnabled.value) {
       event.preventDefault();
       return;
     }
 
-    // 如果需要携带版权信息
-    if (copyrightEnabled.value && event.clipboardData) {
-      const selection = window.getSelection();
-      if (selection && selection.toString().length > 0) {
-        const originalText = selection.toString();
-        const copyrightText = generateCopyrightText();
-        const textWithCopyright = originalText + copyrightText;
-
-        event.clipboardData.setData("text/plain", textWithCopyright);
-        event.preventDefault();
-      }
-    }
+    // 版权信息处理已移至 PostContent 组件，这里不再处理
   };
 
   /**
