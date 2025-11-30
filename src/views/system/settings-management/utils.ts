@@ -100,7 +100,13 @@ export function parseBackendValue(
     case "boolean":
       return value === "true" || value === true;
     case "number":
-      return Number(value);
+      // 空字符串应该解析为 null，表示未设置
+      if (value === "" || value === null || value === undefined) {
+        return null;
+      }
+      const numValue = Number(value);
+      // 如果转换后是 NaN，返回 null
+      return isNaN(numValue) ? null : numValue;
     case "json":
       if (typeof value === "object") {
         return processJsonValueForBackend(value, backendKey);
