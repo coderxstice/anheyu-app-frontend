@@ -166,7 +166,7 @@ export interface PostSettingsInfo {
     doubleColumn: boolean;
     pageSize: number;
   };
-  expirationTime: number;
+  expirationTime: number | null;
   page404: {
     defaultImage: string;
   };

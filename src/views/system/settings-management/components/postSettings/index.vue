@@ -30,11 +30,12 @@
   <el-form-item label="文章过期时间">
     <el-input-number
       v-model="formData.expirationTime"
-      :min="1"
+      :min="0"
       controls-position="right"
       style="width: 100%"
       placeholder="例如: 365"
       :style="{ width: '100px' }"
+      :value-on-clear="null"
     />
     <div class="form-item-help">
       文章过期时间，单位为天。<br />
