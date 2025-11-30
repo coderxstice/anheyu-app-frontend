@@ -81,8 +81,8 @@ onMounted(() => {
   color: var(--anzhiyu-fontcolor);
   text-decoration: none;
   cursor: pointer;
-  background-color: var(--anzhiyu-gray-50, #f8f9fa);
-  border: 1px solid var(--anzhiyu-gray-100, #eef0f2);
+  background-color: var(--anzhiyu-card-bg);
+  border: var(--style-border);
   border-radius: 8px;
   transition: all 0.2s ease-in-out;
 
@@ -123,11 +123,11 @@ onMounted(() => {
 }
 
 .tags-page-count {
-  padding: 1px 6px;
+  padding: 0px 6px;
   margin-left: 0.5rem;
   font-size: 0.75rem;
   font-weight: 500;
-  color: var(--anzhiyu-secondtext);
+  color: var(--anzhiyu-card-bg);
   background-color: var(--anzhiyu-gray-200, #e9ecef);
   border-radius: 5px;
   transition: all 0.2s ease-in-out;

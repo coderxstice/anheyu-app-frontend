@@ -126,6 +126,9 @@ const siteConfigStore = useSiteConfigStore();
 // 一图流相关
 const displaySubtitle = ref("");
 const hitokotoText = ref("");
+const typingTimer = ref<ReturnType<typeof setTimeout> | null>(null);
+const typingId = ref(0); // 用于标识当前活动的打字机效果
+const fetchController = ref<AbortController | null>(null); // 用于取消正在进行的 fetch 请求
 
 // 视频相关
 const videoRef = ref<HTMLVideoElement | null>(null);
@@ -246,35 +249,75 @@ const oneImageStyle = computed(() => {
 });
 
 // 获取一言
-const fetchHitokoto = async () => {
+const fetchHitokoto = async (): Promise<string> => {
+  // 取消之前的请求
+  if (fetchController.value) {
+    fetchController.value.abort();
+  }
+
+  // 创建新的 AbortController
+  const controller = new AbortController();
+  fetchController.value = controller;
+
   try {
     // 从配置中获取一言 API 地址，如果没有配置则使用默认值
     const hitokotoAPI =
       siteConfigStore.siteConfig?.page?.one_image?.hitokoto_api ||
       "https://v1.hitokoto.cn/";
-    const response = await fetch(hitokotoAPI);
+    const response = await fetch(hitokotoAPI, {
+      signal: controller.signal
+    });
     const data = await response.json();
-    hitokotoText.value = data.hitokoto;
+    return data.hitokoto || "";
   } catch (error) {
+    // 如果是取消请求，不输出错误
+    if (error instanceof Error && error.name === "AbortError") {
+      return "";
+    }
     console.error("获取一言失败:", error);
-    hitokotoText.value = "";
+    return "";
+  } finally {
+    // 如果这是当前活动的请求，清除 controller
+    if (fetchController.value === controller) {
+      fetchController.value = null;
+    }
   }
 };
 
 // 打字机效果
 const typeWriter = (text: string, speed?: number) => {
+  // 清除之前的打字机效果
+  if (typingTimer.value) {
+    clearTimeout(typingTimer.value);
+    typingTimer.value = null;
+  }
+
+  // 生成新的打字机 ID，使旧的打字机效果失效
+  typingId.value++;
+  const currentTypingId = typingId.value;
+
+  // 立即清空显示文本
+  displaySubtitle.value = "";
+
   // 从配置中获取打字机速度，如果没有配置则使用默认值
   const configSpeed = siteConfigStore.siteConfig?.page?.one_image?.typing_speed;
   const typingSpeed = speed || Number(configSpeed) || 100;
 
   let i = 0;
-  displaySubtitle.value = "";
 
   const type = () => {
+    // 检查这个打字机效果是否仍然有效
+    if (currentTypingId !== typingId.value) {
+      // 这个打字机效果已被新的效果取代，停止执行
+      return;
+    }
+
     if (i < text.length) {
       displaySubtitle.value += text.charAt(i);
       i++;
-      setTimeout(type, typingSpeed);
+      typingTimer.value = setTimeout(type, typingSpeed);
+    } else {
+      typingTimer.value = null;
     }
   };
 
@@ -365,6 +408,10 @@ watch(
     // 重置视频静音提示状态
     showUnmuteButton.value = false;
 
+    // 生成新的配置 ID，用于标识当前配置
+    typingId.value++;
+    const currentConfigId = typingId.value;
+
     if (!config?.enable) {
       displaySubtitle.value = "";
       return;
@@ -372,8 +419,14 @@ watch(
 
     // 如果开启一言
     if (config.hitokoto) {
-      await fetchHitokoto();
-      const text = hitokotoText.value || config.subTitle;
+      const hitokotoText = await fetchHitokoto();
+
+      // 检查这个配置是否仍然有效（没有被新的配置取代）
+      if (currentConfigId !== typingId.value) {
+        return;
+      }
+
+      const text = hitokotoText || config.subTitle;
 
       if (config.typingEffect) {
         typeWriter(text);
@@ -474,6 +527,16 @@ onUnmounted(() => {
   window.removeEventListener("toggle-mobile-menu", toggleMobileMenu);
   // 确保移除body样式
   document.body.style.overflow = "";
+  // 清除打字机定时器
+  if (typingTimer.value) {
+    clearTimeout(typingTimer.value);
+    typingTimer.value = null;
+  }
+  // 取消正在进行的 fetch 请求
+  if (fetchController.value) {
+    fetchController.value.abort();
+    fetchController.value = null;
+  }
 });
 </script>
 
