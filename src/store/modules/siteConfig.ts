@@ -71,6 +71,12 @@ export const useSiteConfigStore = defineStore("anheyu-site-config", {
         return siteURL;
       }
       return null;
+    },
+    // 是否开启注册功能
+    enableRegistration: state => {
+      const value = state.siteConfig?.ENABLE_REGISTRATION;
+      // 支持布尔值和字符串类型
+      return value === true || value === "true";
     }
   },
 

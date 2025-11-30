@@ -129,24 +129,163 @@ export function useCopyProtection() {
   };
 
   /**
-   * 处理选择事件（用于禁止复制时阻止选择）
+   * 检查目标元素是否在文章内容区域
+   */
+  const isInArticleContent = (target: HTMLElement): boolean => {
+    return !!(
+      target.closest(".post-content") || target.closest(".post-detail-content")
+    );
+  };
+
+  /**
+   * 处理选择开始事件（用于禁止复制时阻止选择）
    */
   const handleSelectStart = (event: Event) => {
     // 检查是否在文章页面
     const isPostPage = route.name === "PostDetail";
-
-    // 如果不是文章页面，不处理
     if (!isPostPage) return;
 
     // 如果禁止复制，阻止选择
     if (!copyEnabled.value) {
       const target = event.target as HTMLElement;
-      // 只在文章内容区域阻止选择
-      if (
-        target.closest(".post-content") ||
-        target.closest(".post-detail-content")
-      ) {
+      if (isInArticleContent(target)) {
         event.preventDefault();
+      }
+    }
+  };
+
+  /**
+   * 处理选择变化事件（清除已选择的文本）
+   */
+  const handleSelectionChange = () => {
+    // 检查是否在文章页面
+    const isPostPage = route.name === "PostDetail";
+    if (!isPostPage) return;
+
+    // 如果禁止复制，清除选择
+    if (!copyEnabled.value) {
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const container = range.commonAncestorContainer;
+        const target =
+          container.nodeType === Node.TEXT_NODE
+            ? container.parentElement
+            : (container as HTMLElement);
+
+        if (target && isInArticleContent(target)) {
+          selection.removeAllRanges();
+        }
+      }
+    }
+  };
+
+  /**
+   * 处理右键菜单事件（禁止右键菜单）
+   */
+  const handleContextMenu = (event: MouseEvent) => {
+    // 检查是否在文章页面
+    const isPostPage = route.name === "PostDetail";
+    if (!isPostPage) return;
+
+    // 如果禁止复制，阻止右键菜单
+    if (!copyEnabled.value) {
+      const target = event.target as HTMLElement;
+      if (isInArticleContent(target)) {
+        event.preventDefault();
+        return false;
+      }
+    }
+  };
+
+  /**
+   * 处理键盘事件（禁止复制快捷键）
+   */
+  const handleKeyDown = (event: KeyboardEvent) => {
+    // 检查是否在文章页面
+    const isPostPage = route.name === "PostDetail";
+    if (!isPostPage) return;
+
+    // 如果禁止复制，阻止复制相关的快捷键
+    if (!copyEnabled.value) {
+      const target = event.target as HTMLElement;
+      if (isInArticleContent(target)) {
+        // 阻止 Ctrl+C, Ctrl+A, Ctrl+V, Ctrl+X, Ctrl+S 等快捷键
+        if (
+          (event.ctrlKey || event.metaKey) &&
+          (event.key === "c" ||
+            event.key === "C" ||
+            event.key === "a" ||
+            event.key === "A" ||
+            event.key === "v" ||
+            event.key === "V" ||
+            event.key === "x" ||
+            event.key === "X" ||
+            event.key === "s" ||
+            event.key === "S")
+        ) {
+          event.preventDefault();
+          return false;
+        }
+        // 阻止 F12 开发者工具（可选，但可能影响用户体验）
+        // if (event.key === "F12") {
+        //   event.preventDefault();
+        //   return false;
+        // }
+      }
+    }
+  };
+
+  /**
+   * 处理鼠标按下事件（阻止拖拽选择）
+   */
+  const handleMouseDown = (event: MouseEvent) => {
+    // 检查是否在文章页面
+    const isPostPage = route.name === "PostDetail";
+    if (!isPostPage) return;
+
+    // 如果禁止复制，阻止鼠标选择
+    if (!copyEnabled.value) {
+      const target = event.target as HTMLElement;
+      if (isInArticleContent(target)) {
+        // 阻止鼠标拖拽选择
+        if (event.button === 0) {
+          // 左键
+          event.preventDefault();
+        }
+      }
+    }
+  };
+
+  /**
+   * 应用或移除 CSS 样式来禁止选择
+   */
+  const applyCopyProtectionStyles = (enable: boolean) => {
+    const styleId = "copy-protection-style";
+    let styleElement = document.getElementById(styleId) as HTMLStyleElement;
+
+    if (!enable) {
+      // 禁止复制时，添加样式
+      if (!styleElement) {
+        styleElement = document.createElement("style");
+        styleElement.id = styleId;
+        document.head.appendChild(styleElement);
+      }
+      styleElement.textContent = `
+        .post-content,
+        .post-detail-content {
+          -webkit-user-select: none !important;
+          -moz-user-select: none !important;
+          -ms-user-select: none !important;
+          user-select: none !important;
+          -webkit-touch-callout: none !important;
+          -webkit-tap-highlight-color: transparent !important;
+        }
+      `;
+    } else {
+      // 允许复制时，移除样式
+      if (styleElement) {
+        styleElement.remove();
       }
     }
   };
@@ -161,18 +300,47 @@ export function useCopyProtection() {
       handleArticleInfoUpdate as EventListener
     );
 
-    // 如果禁止复制，添加选择阻止
+    // 如果禁止复制，添加各种保护措施
     if (!copyEnabled.value) {
       document.addEventListener("selectstart", handleSelectStart);
+      document.addEventListener("selectionchange", handleSelectionChange);
+      document.addEventListener(
+        "contextmenu",
+        handleContextMenu as EventListener
+      );
+      document.addEventListener("keydown", handleKeyDown as EventListener);
+      document.addEventListener("mousedown", handleMouseDown as EventListener);
+      applyCopyProtectionStyles(false);
     }
   });
 
   // 监听复制配置变化
   watch(copyEnabled, newValue => {
     if (!newValue) {
+      // 禁止复制时，添加所有保护措施
       document.addEventListener("selectstart", handleSelectStart);
+      document.addEventListener("selectionchange", handleSelectionChange);
+      document.addEventListener(
+        "contextmenu",
+        handleContextMenu as EventListener
+      );
+      document.addEventListener("keydown", handleKeyDown as EventListener);
+      document.addEventListener("mousedown", handleMouseDown as EventListener);
+      applyCopyProtectionStyles(false);
     } else {
+      // 允许复制时，移除所有保护措施
       document.removeEventListener("selectstart", handleSelectStart);
+      document.removeEventListener("selectionchange", handleSelectionChange);
+      document.removeEventListener(
+        "contextmenu",
+        handleContextMenu as EventListener
+      );
+      document.removeEventListener("keydown", handleKeyDown as EventListener);
+      document.removeEventListener(
+        "mousedown",
+        handleMouseDown as EventListener
+      );
+      applyCopyProtectionStyles(true);
     }
   });
 
@@ -183,6 +351,14 @@ export function useCopyProtection() {
       handleArticleInfoUpdate as EventListener
     );
     document.removeEventListener("selectstart", handleSelectStart);
+    document.removeEventListener("selectionchange", handleSelectionChange);
+    document.removeEventListener(
+      "contextmenu",
+      handleContextMenu as EventListener
+    );
+    document.removeEventListener("keydown", handleKeyDown as EventListener);
+    document.removeEventListener("mousedown", handleMouseDown as EventListener);
+    applyCopyProtectionStyles(true);
   });
 
   return {
