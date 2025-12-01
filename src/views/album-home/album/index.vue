@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-04-09 12:31:32
- * @LastEditTime: 2025-10-12 19:52:04
+ * @LastEditTime: 2025-12-01 10:48:36
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -119,12 +119,17 @@ onMounted(() => {
           @open-preview="handlePreview(index)"
         />
 
-        <div class="link" @click="handleDownload(item)">
+        <!-- <div class="link" @click="handleDownload(item)">
           <Download style="transform: scale(0.8)" />
           <span>下载</span>
-        </div>
+        </div> -->
 
-        <h2>{{ item.width + " x " + item.height }}</h2>
+        <div class="image-info">
+          <h2>{{ item.title || item.width + " x " + item.height }}</h2>
+          <p v-if="item.description" class="image-desc">
+            {{ item.description }}
+          </p>
+        </div>
         <div v-if="item.tags" class="tag-info">
           <span class="tag-categorys">
             <a
@@ -162,6 +167,7 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   padding: 0 0 4em;
+  font-family: "Source Sans Pro", Helvetica, sans-serif;
   transition: filter 0.5s ease;
 
   #main {
@@ -218,6 +224,34 @@ onMounted(() => {
 
       h6 {
         font-size: 0.7em;
+      }
+
+      .thumb .image-info {
+        right: 12px;
+        bottom: 12px;
+        left: 12px;
+
+        h2 {
+          font-size: 13px;
+        }
+
+        .image-desc {
+          margin-top: 3px;
+          font-size: 11px;
+          -webkit-line-clamp: 2;
+        }
+      }
+
+      .thumb .tag-info {
+        top: 12px;
+        left: 12px;
+      }
+
+      .tag-categorys a {
+        padding: 6px;
+        margin-top: 8px;
+        margin-left: 8px;
+        font-size: 11px;
       }
 
       form > .fields {
@@ -347,17 +381,35 @@ onMounted(() => {
         );
       }
 
-      /* 标题 */
-      > h2 {
+      /* 标题和描述 */
+      .image-info {
         position: absolute;
+        right: 16px;
         bottom: 16px;
         left: 16px;
         z-index: 1;
-        margin: 0;
-        font-size: 14px;
-        font-weight: bold;
-        color: #fff;
         pointer-events: none;
+
+        h2 {
+          margin: 0;
+          font-size: 14px;
+          font-weight: 600;
+          line-height: 1.4;
+          color: #fff;
+          text-shadow: 0 1px 3px rgb(0 0 0 / 50%);
+        }
+
+        .image-desc {
+          display: -webkit-box;
+          margin: 4px 0 0;
+          overflow: hidden;
+          font-size: 12px;
+          line-height: 1.5;
+          color: rgb(255 255 255 / 85%);
+          text-shadow: 0 1px 2px rgb(0 0 0 / 50%);
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+        }
       }
 
       .link {

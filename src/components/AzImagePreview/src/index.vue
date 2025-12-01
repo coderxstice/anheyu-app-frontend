@@ -29,47 +29,68 @@
           </div>
 
           <div v-if="!loading" class="caption">
-            <div class="tag-info tag-info-bottom">
-              <span
-                v-if="props.page === 'album'"
-                class="tag-device"
-                style="margin-right: 4px; margin-bottom: 2px"
+            <!-- 标题和描述 -->
+            <div
+              v-if="
+                props.page === 'album' &&
+                (previewSrcList[currentIndex]?.title ||
+                  previewSrcList[currentIndex]?.description)
+              "
+              class="image-title-desc"
+            >
+              <h3
+                v-if="previewSrcList[currentIndex]?.title"
+                class="image-title"
               >
-                <Fire />
-                热度 {{ previewSrcList[currentIndex].viewCount }}
-              </span>
-              <span
-                v-if="props.page === 'album'"
-                class="tag-location"
-                style="margin-right: 4px"
+                {{ previewSrcList[currentIndex].title }}
+              </h3>
+              <p
+                v-if="previewSrcList[currentIndex]?.description"
+                class="image-description"
               >
-                <Downloads />
-                下载量 {{ downloadCount }}
-              </span>
-              <span class="tag-location" style="margin-right: 4px">
-                <Size />
-                大小 {{ formatFileSize(previewSrcList[currentIndex].fileSize) }}
-              </span>
-              <span class="tag-time">
-                <TimeLine />
-                {{
-                  dayjs(previewSrcList[currentIndex].createTime).format(
-                    "YYYY-MM-DD HH:mm:ss"
-                  )
-                }}
-              </span>
+                {{ previewSrcList[currentIndex].description }}
+              </p>
             </div>
-            <div class="tag-info">
-              <span class="tag-categorys">
-                <div
-                  v-if="props.downloadBtn"
-                  class="link"
-                  @click.stop="downImage(previewSrcList[currentIndex])"
+            <div class="tag-info-row">
+              <div class="tag-info tag-info-bottom">
+                <span
+                  v-if="props.page === 'album'"
+                  class="tag-device"
+                  style="margin-right: 4px; margin-bottom: 2px"
                 >
-                  <Download style="margin-right: 4px" />
-                  原图下载
-                </div>
-              </span>
+                  <Fire />
+                  热度 {{ previewSrcList[currentIndex].viewCount }}
+                </span>
+                <span
+                  v-if="props.page === 'album'"
+                  class="tag-location"
+                  style="margin-right: 4px"
+                >
+                  <Downloads />
+                  下载量 {{ downloadCount }}
+                </span>
+                <span class="tag-location" style="margin-right: 4px">
+                  <Size />
+                  大小
+                  {{ formatFileSize(previewSrcList[currentIndex].fileSize) }}
+                </span>
+                <span class="tag-time">
+                  <TimeLine />
+                  {{
+                    dayjs(previewSrcList[currentIndex].createTime).format(
+                      "YYYY-MM-DD HH:mm:ss"
+                    )
+                  }}
+                </span>
+              </div>
+              <div
+                v-if="props.downloadBtn"
+                class="download-btn"
+                @click.stop="downImage(previewSrcList[currentIndex])"
+              >
+                <Download style="margin-right: 4px" />
+                原图下载
+              </div>
             </div>
           </div>
 
@@ -670,18 +691,75 @@ $transition: opacity 0.2s ease-in-out;
       z-index: 3;
     }
 
+    .poptrox-popup .image-title-desc {
+      margin-bottom: 8px;
+
+      .image-title {
+        margin: 0 0 3px;
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 1.3;
+        color: #fff;
+      }
+
+      .image-description {
+        display: -webkit-box;
+        margin: 0;
+        overflow: hidden;
+        font-size: 12px;
+        line-height: 1.4;
+        color: rgb(255 255 255 / 80%);
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+    }
+
+    .poptrox-popup .tag-info-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .poptrox-popup .tag-info-bottom {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
     .poptrox-popup .tag-info-bottom span {
-      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       padding: 4px 8px;
+      margin: 0;
+      font-size: 11px;
+      white-space: nowrap;
       background: rgb(255 255 255 / 10%);
       border-radius: 4px;
-      margin-right: 6px;
-      margin-bottom: 4px;
-      white-space: nowrap;
     }
 
     .poptrox-popup .tag-info-bottom span svg {
       flex-shrink: 0;
+      width: 14px;
+      height: 14px;
+    }
+
+    .poptrox-popup .download-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 10px 16px;
+      font-size: 13px;
+      color: #f7f7fa;
+      cursor: pointer;
+      background: rgb(255 255 255 / 15%);
+      backdrop-filter: blur(10px);
+      border-radius: 8px;
+
+      &:active {
+        background: rgb(255 255 255 / 25%);
+      }
     }
 
     .poptrox-popup .tag-categorys {
@@ -882,6 +960,53 @@ $transition: opacity 0.2s ease-in-out;
       p {
         font-size: 15px;
         color: #fff;
+      }
+
+      .image-title-desc {
+        margin-bottom: 8px;
+
+        .image-title {
+          margin: 0 0 6px;
+          font-size: 18px;
+          font-weight: 600;
+          line-height: 1.4;
+          color: #fff;
+        }
+
+        .image-description {
+          margin: 0;
+          font-size: 14px;
+          line-height: 1.6;
+          color: var(--anzhiyu-white);
+        }
+      }
+
+      .tag-info-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .download-btn {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 16px;
+        font-size: 13px;
+        line-height: 1;
+        color: #f7f7fa;
+        cursor: pointer;
+        background: rgb(0 0 0 / 50%);
+        backdrop-filter: saturate(180%) blur(20px);
+        border-radius: 8px;
+        transition: 0.3s;
+
+        &:hover {
+          color: #fff;
+          background: #0d00ff;
+        }
       }
     }
 

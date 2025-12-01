@@ -21,6 +21,8 @@ interface FormItemProps {
   widthAndHeight: string;
   fileSize: number;
   displayOrder: number;
+  imageTitle: string;
+  description: string;
 }
 interface FormProps {
   formInline: FormItemProps;

@@ -370,7 +370,9 @@ export function useAlbum() {
           aspectRatio: row?.aspectRatio ?? "",
           widthAndHeight: row?.widthAndHeight ?? "",
           fileSize: row?.fileSize ?? 0,
-          displayOrder: row?.displayOrder ?? 0
+          displayOrder: row?.displayOrder ?? 0,
+          imageTitle: (row as any)?.title ?? "",
+          description: row?.description ?? ""
         },
         categories: categories.value
       },
@@ -401,11 +403,19 @@ export function useAlbum() {
         FormRef.validate(async valid => {
           if (valid) {
             // 表单规则校验通过
+            // 将前端字段名映射为后端字段名
+            const apiData = {
+              ...curData,
+              title: curData.imageTitle, // imageTitle -> title
+              description: curData.description
+            };
+            delete (apiData as any).imageTitle; // 删除前端专用字段
+
             if (title === "新增") {
               // 🧠 调用重构后的函数获取图片元数据
               const imageInfo = await getImageMeta(curData.imageUrl);
               addWallpapert({
-                ...curData,
+                ...apiData,
                 ...imageInfo
               }).then(res => {
                 if (res.code === 200) {
@@ -416,7 +426,7 @@ export function useAlbum() {
                 }
               });
             } else {
-              updateWallpaper(curData).then(res => {
+              updateWallpaper(apiData).then(res => {
                 if (res.code === 200) {
                   chores();
                 } else {

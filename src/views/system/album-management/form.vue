@@ -20,7 +20,9 @@ const props = withDefaults(defineProps<FormProps>(), {
     aspectRatio: "",
     widthAndHeight: "",
     fileSize: 0,
-    displayOrder: 0
+    displayOrder: 0,
+    imageTitle: "",
+    description: ""
   }),
   categories: () => []
 });
@@ -61,6 +63,32 @@ defineExpose({ getRef });
                 :value="category.id"
               />
             </el-select>
+          </el-form-item>
+        </re-col>
+
+        <re-col :value="12" :xs="24" :sm="24">
+          <el-form-item label="图片标题" prop="imageTitle">
+            <el-input
+              v-model="newFormInline.imageTitle"
+              clearable
+              placeholder="请输入图片标题（可选）"
+              maxlength="255"
+              show-word-limit
+            />
+          </el-form-item>
+        </re-col>
+
+        <re-col :value="24" :xs="24" :sm="24">
+          <el-form-item label="图片描述" prop="description">
+            <el-input
+              v-model="newFormInline.description"
+              clearable
+              placeholder="请输入图片描述（可选）"
+              type="textarea"
+              :rows="3"
+              maxlength="1000"
+              show-word-limit
+            />
           </el-form-item>
         </re-col>
 
