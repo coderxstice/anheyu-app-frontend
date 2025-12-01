@@ -11,7 +11,8 @@ import type { UploadItem, StoragePolicy, FileItem } from "@/api/sys-file/type";
 import {
   createUploadSessionApi,
   deleteUploadSessionApi,
-  validateUploadSessionApi
+  validateUploadSessionApi,
+  finalizeClientUploadApi
 } from "@/api/sys-file/sys-file";
 import {
   joinPath,
@@ -166,6 +167,9 @@ export function useFileUploader(
         if (sessionData.upload_method === "client") {
           item.uploadMethod = "client";
           item.uploadUrl = sessionData.upload_url;
+          // 设置存储类型和策略ID，用于客户端直传
+          item.storageType = sessionData.storage_policy?.type as UploadItem["storageType"];
+          item.policyId = storagePolicy.value!.id;
           // 在客户端模式下，sessionId 不是必须的，可以不赋值或设为 undefined
           item.sessionId = undefined;
         } else {
@@ -190,6 +194,30 @@ export function useFileUploader(
       manageSpeedCalculator();
       await createSessionWithLock(item);
       await uploadFileChunksWorker(item);
+
+      // 对于 COS/OSS/S3 客户端直传，需要调用 finalize 接口创建文件记录
+      // OneDrive 由云端自动完成，不需要额外处理
+      if (
+        item.uploadMethod === "client" &&
+        item.policyId &&
+        ["tencent_cos", "aliyun_oss", "aws_s3"].includes(item.storageType || "")
+      ) {
+        console.log(
+          `[Uploader] ${item.name}: 调用 finalize 接口创建文件记录...`
+        );
+        const fullPath = joinPath(item.targetPath, item.relativePath);
+        const finalizeRes = await finalizeClientUploadApi(
+          fullPath,
+          item.policyId,
+          item.size
+        );
+        if (!finalizeRes || finalizeRes.code !== 200) {
+          throw new Error(finalizeRes?.message || "创建文件记录失败");
+        }
+        console.log(
+          `[Uploader] ${item.name}: 文件记录创建成功，file_id: ${finalizeRes.data.file_id}`
+        );
+      }
     } catch (error: any) {
       if (item.status !== "canceled") {
         item.status = error.isConflict ? "conflict" : "error";

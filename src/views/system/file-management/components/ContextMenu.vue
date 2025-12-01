@@ -284,7 +284,7 @@ watch(
   background-color: var(--anzhiyu-card-bg);
   border: var(--style-border);
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+  box-shadow: var(--anzhiyu-shadow-border);
   opacity: 0;
   transform: scale(0.8);
 }

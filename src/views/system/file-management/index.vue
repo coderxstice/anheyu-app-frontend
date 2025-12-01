@@ -269,7 +269,7 @@ const {
   flex-direction: column;
   width: 100%;
   min-height: 0;
-  background-color: #fff;
+  background-color: var(--anzhiyu-card-bg);
   border: var(--style-border);
 }
 
@@ -322,7 +322,7 @@ const {
   justify-content: center;
   width: 100%;
   height: 100%;
-  background-color: rgb(255 255 255 / 85%);
+  background-color: var(--el-mask-color);
 }
 
 .loading-spinner {

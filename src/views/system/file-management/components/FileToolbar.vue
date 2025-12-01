@@ -459,7 +459,7 @@ defineExpose({
   backdrop-filter: blur(20px);
   border: none !important;
   border-radius: 12px !important;
-  box-shadow: 0 5px 15px rgb(0 0 0 / 10%) !important;
+  box-shadow: var(--anzhiyu-shadow-border) !important;
   transform-origin: top right;
 
   .popover-content {

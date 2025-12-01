@@ -518,7 +518,8 @@ const handleKeyDown = (event: KeyboardEvent) => {
   position: relative;
   flex: 1;
   min-height: 0;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   background-color: var(--anzhiyu-card-bg);
 }
 
@@ -725,7 +726,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
   cursor: pointer;
   background-color: var(--anzhiyu-card-bg);
   border-radius: 50%;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+  box-shadow: var(--anzhiyu-shadow-border);
   transition: all 0.2s ease-in-out;
 
   .el-icon {

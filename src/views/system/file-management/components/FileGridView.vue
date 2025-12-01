@@ -282,7 +282,7 @@ onUnmounted(() => {
   justify-content: center;
   width: 100%;
   height: 100%;
-  background-color: rgb(255 255 255 / 70%);
+  background-color: var(--anzhiyu-maskbg);
   backdrop-filter: blur(2px);
   border-radius: 8px;
 }

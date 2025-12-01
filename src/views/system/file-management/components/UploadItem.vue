@@ -1,15 +1,28 @@
 <template>
   <div
     class="upload-item"
+    :class="[`status-${item.status}`]"
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
   >
-    <div class="progress-bar-bg">
-      <div class="progress-bar-fg" :style="{ width: item.progress + '%' }" />
-    </div>
+    <!-- 进度背景填充 -->
+    <div
+      v-if="item.status === 'uploading' || item.status === 'pending'"
+      class="progress-fill"
+      :style="{ width: item.progress + '%' }"
+    />
 
     <div class="item-icon">
-      <el-icon><Document /></el-icon>
+      <el-icon v-if="item.status === 'success'" class="icon-success"
+        ><CircleCheckFilled
+      /></el-icon>
+      <el-icon v-else-if="item.status === 'error'" class="icon-error"
+        ><CircleCloseFilled
+      /></el-icon>
+      <el-icon v-else-if="item.status === 'uploading'" class="icon-uploading"
+        ><Loading
+      /></el-icon>
+      <el-icon v-else><Document /></el-icon>
     </div>
 
     <div class="item-info">
@@ -49,6 +62,7 @@
               v-if="['uploading', 'resumable'].includes(item.status)"
               class="item-detail-info"
             >
+              <span class="progress-percent">{{ item.progress }}%</span>
               <span class="speed">
                 {{
                   formatBytes(
@@ -60,8 +74,8 @@
                 }}/s
               </span>
               <span class="size-info">
-                已上传 {{ formatBytes(item.uploadedSize, 1) }}, 共
-                {{ formatBytes(item.size, 1) }} - {{ item.progress }}%
+                {{ formatBytes(item.uploadedSize, 1) }} /
+                {{ formatBytes(item.size, 1) }}
               </span>
             </div>
             <div
@@ -157,7 +171,10 @@ import {
   RefreshRight,
   Switch,
   EditPen,
-  Warning
+  Warning,
+  CircleCheckFilled,
+  CircleCloseFilled,
+  Loading
 } from "@element-plus/icons-vue";
 
 const props = defineProps<{
@@ -214,23 +231,87 @@ const onAnimateLeave = (el: Element, done: () => void) => {
   position: relative;
   display: flex;
   align-items: center;
-  padding: 10px 12px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
   overflow: hidden;
-  border-radius: 8px;
-  transition: background-color 0.2s;
+  background-color: var(--anzhiyu-secondbg);
+  border: 1px solid var(--anzhiyu-card-border);
+  border-radius: 12px;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.upload-item:last-child {
+  margin-bottom: 0;
 }
 
 .upload-item:hover {
-  background-color: var(--anzhiyu-secondbg);
+  border-color: var(--anzhiyu-theme-op);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 6%);
+}
+
+/* 状态特定样式 */
+.upload-item.status-success {
+  background-color: color-mix(
+    in srgb,
+    var(--anzhiyu-green) 10%,
+    var(--anzhiyu-card-bg)
+  );
+  border-color: color-mix(in srgb, var(--anzhiyu-green) 30%, transparent);
+}
+
+.upload-item.status-error {
+  background-color: color-mix(
+    in srgb,
+    var(--el-color-error) 10%,
+    var(--anzhiyu-card-bg)
+  );
+  border-color: color-mix(in srgb, var(--el-color-error) 30%, transparent);
+}
+
+.upload-item.status-uploading {
+  border-color: color-mix(in srgb, var(--anzhiyu-theme) 40%, transparent);
 }
 
 .item-icon {
   position: relative;
   z-index: 2;
+  display: flex;
   flex-shrink: 0;
-  margin-right: 12px;
-  font-size: 28px;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-right: 14px;
+  font-size: 20px;
   color: var(--anzhiyu-secondtext);
+  background-color: var(--anzhiyu-card-bg);
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
+}
+
+.icon-success {
+  color: var(--anzhiyu-green);
+}
+
+.icon-error {
+  color: var(--el-color-error);
+}
+
+.icon-uploading {
+  color: var(--anzhiyu-theme);
+  animation: spin 1.2s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .item-info {
@@ -250,6 +331,7 @@ const onAnimateLeave = (el: Element, done: () => void) => {
   align-items: center;
   overflow: hidden;
   font-size: 14px;
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -296,21 +378,33 @@ const onAnimateLeave = (el: Element, done: () => void) => {
 
 .item-detail-info {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
   font-size: 12px;
   color: var(--anzhiyu-fontcolor);
   white-space: nowrap;
 }
 
-.speed {
-  min-width: 75px;
-  font-weight: 500;
+.progress-percent {
+  min-width: 36px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
   color: var(--anzhiyu-theme);
-  text-align: left;
+}
+
+.speed {
+  min-width: 72px;
+  padding: 2px 8px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--anzhiyu-theme);
+  text-align: center;
+  background-color: color-mix(in srgb, var(--anzhiyu-theme) 12%, transparent);
+  border-radius: 4px;
 }
 
 .size-info {
+  font-variant-numeric: tabular-nums;
   color: var(--anzhiyu-secondtext);
 }
 
@@ -324,6 +418,7 @@ const onAnimateLeave = (el: Element, done: () => void) => {
 }
 
 .item-message.is-success {
+  font-weight: 500;
   color: var(--anzhiyu-green);
 }
 
@@ -333,7 +428,6 @@ const onAnimateLeave = (el: Element, done: () => void) => {
   align-items: center;
   justify-content: flex-end;
   padding: 0 4px;
-  background-color: rgb(245 247 250 / 85%);
   backdrop-filter: blur(2px);
 }
 
@@ -342,19 +436,19 @@ const onAnimateLeave = (el: Element, done: () => void) => {
   height: 28px;
 }
 
-.progress-bar-bg {
+/* 进度背景填充 */
+.progress-fill {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
-  z-index: 1;
-  width: 100%;
-  height: 2px;
-  background-color: var(--anzhiyu-card-bg-grey);
-}
-
-.progress-bar-fg {
+  z-index: 0;
   height: 100%;
-  background-color: var(--anzhiyu-theme);
-  transition: width 0.3s ease;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--anzhiyu-theme) 18%, var(--anzhiyu-card-bg)),
+    color-mix(in srgb, var(--anzhiyu-theme) 8%, var(--anzhiyu-card-bg))
+  );
+  border-radius: 11px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>

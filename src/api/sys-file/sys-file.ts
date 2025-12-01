@@ -192,6 +192,26 @@ export const deleteUploadSessionApi = (
   });
 };
 
+/**
+ * 客户端直传完成后的回调接口
+ * 通知服务器在云端文件上传完成后创建数据库记录
+ * @param fullPath 文件的完整路径
+ * @param policyId 存储策略ID
+ * @param size 文件大小
+ */
+export const finalizeClientUploadApi = (
+  fullPath: string,
+  policyId: string,
+  size: number
+): Promise<BaseResponse<{ file_id: string; name: string; size: number }>> => {
+  const fullUri = buildFullUri(fullPath);
+  return http.request<
+    BaseResponse<{ file_id: string; name: string; size: number }>
+  >("post", baseUrlApi("file/upload/finalize"), {
+    data: { uri: fullUri, policy_id: policyId, size }
+  });
+};
+
 export const createItemApi = (
   type: number,
   logicalPath: string,
