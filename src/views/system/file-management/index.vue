@@ -269,7 +269,7 @@ const {
   flex-direction: column;
   width: 100%;
   min-height: 0;
-  background-color: #fff;
+  background-color: var(--anzhiyu-card-bg);
   border: var(--style-border);
 }
 
