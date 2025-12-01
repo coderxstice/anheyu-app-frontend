@@ -25,26 +25,40 @@ const daysSinceUpdate = computed(() => {
 });
 
 /**
- * 从站点配置中获取文章过期时间阈值，如果没有配置，则默认为 365 天
+ * 从站点配置中获取文章过期时间阈值
+ * 如果未配置（null、undefined、空字符串或0），则返回 null，表示不开启过期提示功能
  */
 const expirationThreshold = computed(() => {
-  return siteConfig.post?.expiration_time ?? 365;
+  const value = siteConfig.post?.expiration_time;
+  // 如果值为 null、undefined、空字符串、0 或 NaN，返回 null
+  if (
+    value === null ||
+    value === undefined ||
+    value === "" ||
+    value === 0 ||
+    isNaN(Number(value))
+  ) {
+    return null;
+  }
+  const numValue = Number(value);
+  // 如果转换后不是有效数字或小于等于0，返回 null
+  return numValue > 0 ? numValue : null;
 });
 
 /**
  * 判断文章是否已过时。
  * @returns {boolean} 如果上次更新天数大于或等于配置的阈值，则返回 true。
- * 如果阈值为 0，则代表功能关闭，始终返回 false。
+ * 如果阈值未配置（null），则返回 false，不显示过期提示。
  */
 const isOutdated = computed(() => {
   const threshold = expirationThreshold.value;
 
-  // 当阈值为 0 时，表示不开启过期提示功能
-  if (threshold === 0) {
+  // 当阈值未配置时，不显示过期提示
+  if (threshold === null || threshold === undefined) {
     return false;
   }
 
-  // 否则，正常判断天数是否超过阈值
+  // 正常判断天数是否超过阈值
   return daysSinceUpdate.value >= threshold;
 });
 </script>
