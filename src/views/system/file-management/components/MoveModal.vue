@@ -805,6 +805,11 @@ const confirmAction = async () => {
       flex: 1;
       margin-top: 10px;
       overflow-y: auto;
+      background-color: var(--el-bg-color);
+
+      .el-loading-mask {
+        background-color: var(--el-mask-color);
+      }
     }
   }
 

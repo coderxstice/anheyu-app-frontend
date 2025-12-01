@@ -115,7 +115,7 @@ const onLeave = (el: HTMLElement, done: () => void) => {
 
   /* [!修改] 为背景添加可点击的光标样式 */
   cursor: pointer;
-  background-color: rgb(255 255 255 / 90%);
+  background-color: var(--anzhiyu-maskbgdeep);
   backdrop-filter: blur(10px);
 }
 
@@ -141,7 +141,7 @@ const onLeave = (el: HTMLElement, done: () => void) => {
 :deep(.el-input__wrapper) {
   padding: 4px 20px;
   border-radius: 24px !important;
-  box-shadow: 0 4px 20px rgb(0 0 0 / 10%) !important;
+  box-shadow: var(--anzhiyu-shadow-border) !important;
 }
 
 :deep(.el-input__prefix .el-icon) {

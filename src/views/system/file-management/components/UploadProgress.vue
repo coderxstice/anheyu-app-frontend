@@ -388,12 +388,10 @@ const handleCommand = (command: string, value?: any) => {
   max-height: 500px;
   overflow: hidden;
   color: var(--anzhiyu-fontcolor);
-  background-color: #fff;
+  background-color: var(--anzhiyu-card-bg);
   border-radius: 12px;
-  box-shadow:
-    0 6px 16px -8px rgb(0 0 0 / 8%),
-    0 9px 28px 0 rgb(0 0 0 / 5%),
-    0 12px 48px 16px rgb(0 0 0 / 3%);
+  border: var(--style-border);
+  box-shadow: var(--anzhiyu-shadow-border);
   transition:
     max-height 0.3s ease-in-out,
     height 0.3s ease-in-out;
@@ -412,7 +410,7 @@ const handleCommand = (command: string, value?: any) => {
   height: 53px;
   padding: 12px 20px;
   font-weight: 500;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--anzhiyu-card-border);
 }
 
 .header-actions {

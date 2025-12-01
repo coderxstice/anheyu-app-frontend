@@ -322,7 +322,7 @@ const {
   justify-content: center;
   width: 100%;
   height: 100%;
-  background-color: rgb(255 255 255 / 85%);
+  background-color: var(--el-mask-color);
 }
 
 .loading-spinner {

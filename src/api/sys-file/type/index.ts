@@ -112,7 +112,7 @@ export interface UploadItem {
   /**
    * @description 上传模式，由后端在创建会话时指定。
    * "server": 服务端中转模式（默认）。
-   * "client": 客户端直传模式（如 OneDrive）。
+   * "client": 客户端直传模式（如 OneDrive、COS、OSS、S3）。
    * @optional
    */
   uploadMethod?: "client" | "server";
@@ -122,6 +122,18 @@ export interface UploadItem {
    * @optional
    */
   uploadUrl?: string;
+
+  /**
+   * @description 存储类型，用于客户端直传时确定使用哪种上传方式。
+   * @optional
+   */
+  storageType?: "local" | "onedrive" | "tencent_cos" | "aliyun_oss" | "aws_s3";
+
+  /**
+   * @description 存储策略 ID，用于客户端直传完成后回调。
+   * @optional
+   */
+  policyId?: string;
 }
 
 // =================================================================
