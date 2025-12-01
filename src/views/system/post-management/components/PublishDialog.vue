@@ -248,7 +248,117 @@ const removeSummaryInput = (index: number) => {
   internalForm.summaries.splice(index, 1);
 };
 
+// 禁用未来日期
+const disabledFutureDate = (time: Date) => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const selectedDate = new Date(
+    time.getFullYear(),
+    time.getMonth(),
+    time.getDate()
+  );
+
+  // 禁用今天之后的所有日期
+  return selectedDate.getTime() > today.getTime();
+};
+
+// 禁用未来的小时（仅当选择的是今天时）
+const disabledFutureHours = () => {
+  const now = new Date();
+  const currentHour = now.getHours();
+  const disabledHours: number[] = [];
+
+  // 如果当前选择的日期是今天，禁用当前小时之后的所有小时
+  if (internalForm.custom_published_at) {
+    const selectedDate = new Date(internalForm.custom_published_at);
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const selectedDay = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate()
+    );
+
+    if (selectedDay.getTime() === today.getTime()) {
+      // 禁用当前小时之后的所有小时（24小时制）
+      for (let i = currentHour + 1; i < 24; i++) {
+        disabledHours.push(i);
+      }
+    }
+  }
+
+  return disabledHours;
+};
+
+// 禁用未来的分钟（仅当选择的是今天且是当前小时时）
+const disabledFutureMinutes = (hour: number) => {
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  const disabledMinutes: number[] = [];
+
+  if (internalForm.custom_published_at) {
+    const selectedDate = new Date(internalForm.custom_published_at);
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const selectedDay = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate()
+    );
+
+    // 如果选择的是今天且是当前小时，禁用当前分钟之后的所有分钟
+    if (selectedDay.getTime() === today.getTime() && hour === currentHour) {
+      for (let i = currentMinute + 1; i < 60; i++) {
+        disabledMinutes.push(i);
+      }
+    }
+  }
+
+  return disabledMinutes;
+};
+
+// 禁用未来的秒（仅当选择的是今天且是当前小时和当前分钟时）
+const disabledFutureSeconds = (hour: number, minute: number) => {
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  const currentSecond = now.getSeconds();
+  const disabledSeconds: number[] = [];
+
+  if (internalForm.custom_published_at) {
+    const selectedDate = new Date(internalForm.custom_published_at);
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const selectedDay = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate()
+    );
+
+    // 如果选择的是今天且是当前小时和当前分钟，禁用当前秒之后的所有秒
+    if (
+      selectedDay.getTime() === today.getTime() &&
+      hour === currentHour &&
+      minute === currentMinute
+    ) {
+      for (let i = currentSecond + 1; i < 60; i++) {
+        disabledSeconds.push(i);
+      }
+    }
+  }
+
+  return disabledSeconds;
+};
+
 const handleConfirm = () => {
+  // 验证发布时间不能是未来时间
+  if (internalForm.custom_published_at) {
+    const publishedTime = new Date(internalForm.custom_published_at);
+    const now = new Date();
+    if (publishedTime.getTime() > now.getTime()) {
+      ElMessage.error("发布时间不能设置为未来时间");
+      return;
+    }
+  }
+
   internalForm.copyright = true;
   // 将关键词标签数组转换为逗号分隔的字符串
   internalForm.keywords = keywordTags.value.join(", ");
@@ -632,9 +742,13 @@ const handleFetchPrimaryColor = async () => {
                     style="width: 100%"
                     format="YYYY-MM-DD HH:mm:ss"
                     value-format="YYYY-MM-DDTHH:mm:ssZ"
+                    :disabled-date="disabledFutureDate"
+                    :disabled-hours="disabledFutureHours"
+                    :disabled-minutes="disabledFutureMinutes"
+                    :disabled-seconds="disabledFutureSeconds"
                   />
                   <div class="form-item-help">
-                    留空则使用当前时间，可用于定时发布或回溯发布
+                    留空则使用当前时间，可用于回溯发布（不允许设置未来时间）
                   </div>
                 </el-form-item>
               </el-col>
