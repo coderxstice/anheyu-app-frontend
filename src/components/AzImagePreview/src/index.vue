@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <Transition name="az-fade">
-      <div v-show="visible" class="az-preview-overlay" @click.self="close">
+      <div v-show="visible" class="az-preview-overlay" @click="close">
         <div
           style="display: inline-block; height: 100%; vertical-align: middle"
         />
@@ -24,7 +24,6 @@
                     `?${previewSrcList[previewIndex]?.bigParam}`
                   : previewSrcList[previewIndex]?.imageUrl
               "
-              @click.stop
               @load="imgLoad()"
             />
           </div>
@@ -65,7 +64,7 @@
                 <div
                   v-if="props.downloadBtn"
                   class="link"
-                  @click="downImage(previewSrcList[currentIndex])"
+                  @click.stop="downImage(previewSrcList[currentIndex])"
                 >
                   <Download style="margin-right: 4px" />
                   原图下载
@@ -202,11 +201,11 @@ const getImageSize = (url: string) => {
 
 const handleResize = () => {
   if (visible.value && popupRef.value && !loading.value) {
-    const isMobile = window.innerWidth < 600;
+    const isMobile = window.innerWidth <= 736;
     let targetWidth: string, targetHeight: string;
     if (isMobile) {
       targetWidth = "100vw";
-      targetHeight = "auto";
+      targetHeight = "100vh";
     } else {
       const viewportWidth = window.innerWidth * 0.9;
       const viewportHeight = window.innerHeight * 0.9;
@@ -314,30 +313,46 @@ const open = async (list: Array<any>, index = 0, next = false) => {
 
   // await nextTick();
 
+  const isMobile = window.innerWidth <= 736;
+
   if (popupRef.value) {
     if (next) {
       containerVisible.value = true;
     } else {
-      gsap.fromTo(
-        popupRef.value,
-        {
-          width: "150px",
-          height: "150px",
-          scale: 0.7,
-          opacity: 0,
-          x: "-50%",
-          y: "-50%"
-        },
-        {
-          scale: 1,
-          opacity: 1,
-          duration: 0.2,
-          ease: "power2.out",
-          onComplete: () => {
-            containerVisible.value = true;
+      if (isMobile) {
+        // 移动端：直接全屏显示，无动画
+        gsap.set(popupRef.value, {
+          width: "100vw",
+          height: "100vh",
+          top: 0,
+          left: 0,
+          transform: "none",
+          opacity: 1
+        });
+        containerVisible.value = true;
+      } else {
+        // 桌面端：使用原有动画
+        gsap.fromTo(
+          popupRef.value,
+          {
+            width: "150px",
+            height: "150px",
+            scale: 0.7,
+            opacity: 0,
+            x: "-50%",
+            y: "-50%"
+          },
+          {
+            scale: 1,
+            opacity: 1,
+            duration: 0.2,
+            ease: "power2.out",
+            onComplete: () => {
+              containerVisible.value = true;
+            }
           }
-        }
-      );
+        );
+      }
     }
   }
 
@@ -357,10 +372,20 @@ function imgLoad() {
   // 图片成功加载后，将其索引添加到记录中
   loadedImageIndexes.value.add(currentIndex.value);
 
-  const isMobile = window.innerWidth < 600;
+  const isMobile = window.innerWidth <= 736;
   if (isMobile) {
     finalWidth.value = "100vw";
-    finalHeight.value = "auto";
+    finalHeight.value = "100vh";
+    // 移动端直接设置，不需要动画
+    if (popupRef.value) {
+      gsap.set(popupRef.value, {
+        width: "100vw",
+        height: "100vh",
+        top: 0,
+        left: 0,
+        transform: "none"
+      });
+    }
   } else {
     const viewportWidth = window.innerWidth * 0.9;
     const viewportHeight = window.innerHeight * 0.9;
@@ -379,7 +404,8 @@ function imgLoad() {
     }
   });
 
-  if (popupRef.value) {
+  if (popupRef.value && !isMobile) {
+    // 桌面端才需要动画
     tl.to(popupRef.value, {
       width: finalWidth.value,
       height: finalHeight.value,
@@ -400,7 +426,10 @@ function imgLoad() {
   });
 }
 const close = () => {
+  const isMobile = window.innerWidth <= 736;
+
   if (popupRef.value) {
+    // 隐藏控制按钮
     gsap.to(
       ".poptrox-popup .closer, .poptrox-popup .nav-previous, .poptrox-popup .nav-next",
       {
@@ -410,26 +439,62 @@ const close = () => {
       }
     );
 
-    gsap.to(popupRef.value, {
+    // 隐藏图片和说明文字
+    gsap.to([".az-preview-image", ".caption"], {
       opacity: 0,
-      scale: 0.7,
       duration: 0.15,
-      ease: "power2.in",
-      x: "-50%",
-      y: "-50%",
-      onComplete: () => {
-        visible.value = false;
-        containerVisible.value = false;
-        showControls.value = false;
-
-        gsap.set(
-          ".poptrox-popup .closer, .poptrox-popup .nav-previous, .poptrox-popup .nav-next",
-          { clearProps: "opacity" }
-        );
-
-        gsap.set(popupRef.value, { clearProps: "all" });
-      }
+      ease: "power2.in"
     });
+
+    if (isMobile) {
+      // 移动端：淡出动画
+      gsap.to(popupRef.value, {
+        opacity: 0,
+        scale: 0.95,
+        duration: 0.2,
+        ease: "power2.in",
+        onComplete: () => {
+          visible.value = false;
+          containerVisible.value = false;
+          showControls.value = false;
+
+          gsap.set(
+            ".poptrox-popup .closer, .poptrox-popup .nav-previous, .poptrox-popup .nav-next",
+            { clearProps: "opacity" }
+          );
+
+          gsap.set([".az-preview-image", ".caption"], {
+            clearProps: "opacity"
+          });
+          gsap.set(popupRef.value, { clearProps: "all" });
+        }
+      });
+    } else {
+      // 桌面端：原有动画
+      gsap.to(popupRef.value, {
+        opacity: 0,
+        scale: 0.7,
+        duration: 0.15,
+        ease: "power2.in",
+        x: "-50%",
+        y: "-50%",
+        onComplete: () => {
+          visible.value = false;
+          containerVisible.value = false;
+          showControls.value = false;
+
+          gsap.set(
+            ".poptrox-popup .closer, .poptrox-popup .nav-previous, .poptrox-popup .nav-next",
+            { clearProps: "opacity" }
+          );
+
+          gsap.set([".az-preview-image", ".caption"], {
+            clearProps: "opacity"
+          });
+          gsap.set(popupRef.value, { clearProps: "all" });
+        }
+      });
+    }
   } else {
     visible.value = false;
   }
@@ -533,41 +598,119 @@ $transition: opacity 0.2s ease-in-out;
   -webkit-tap-highlight-color: rgb(255 255 255 / 0%);
 
   @media screen and (width <= 736px) {
+    .az-preview-overlay {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .az-preview-overlay > div:first-of-type {
+      display: none !important;
+    }
+
     .poptrox-popup .tag-info-bottom {
       flex-direction: column;
       align-items: flex-start;
+      gap: 8px;
     }
 
     .poptrox-popup {
-      margin-bottom: 120px;
+      position: fixed !important;
+      margin: 0 !important;
       border-radius: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      top: 0 !important;
+      left: 0 !important;
+      transform: none !important;
+      max-width: 100vw !important;
+      max-height: 100vh !important;
     }
 
     .poptrox-popup::before {
       display: none;
     }
 
-    .poptrox-popup .caption {
-      position: fixed;
-      bottom: 0;
-      padding: 1.5em 1.5em 1em;
+    .poptrox-popup .pic {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-bottom: 200px;
+      box-sizing: border-box;
     }
 
-    /* 移动端导航按钮样式 */
+    .poptrox-popup .az-preview-image {
+      max-width: 90%;
+      max-height: calc(100vh - 200px);
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+
+    .poptrox-popup .caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+      background: linear-gradient(
+        to top,
+        rgb(16 16 16 / 95%) 0%,
+        rgb(16 16 16 / 85%) 30%,
+        rgb(16 16 16 / 0%) 100%
+      );
+      backdrop-filter: blur(20px);
+      border-radius: 0;
+      z-index: 3;
+    }
+
+    .poptrox-popup .tag-info-bottom span {
+      font-size: 12px;
+      padding: 4px 8px;
+      background: rgb(255 255 255 / 10%);
+      border-radius: 4px;
+      margin-right: 6px;
+      margin-bottom: 4px;
+      white-space: nowrap;
+    }
+
+    .poptrox-popup .tag-info-bottom span svg {
+      flex-shrink: 0;
+    }
+
+    .poptrox-popup .tag-categorys {
+      margin-top: 8px;
+    }
+
+    .poptrox-popup .tag-categorys .link {
+      padding: 10px 16px;
+      font-size: 14px;
+      margin: 0;
+      width: 100%;
+      justify-content: center;
+      border-radius: 8px;
+      background: rgb(255 255 255 / 15%);
+      backdrop-filter: blur(10px);
+    }
+
+    .poptrox-popup .tag-categorys .link:active {
+      background: rgb(255 255 255 / 25%);
+    }
+
+    /* 移动端隐藏导航按钮 */
     .poptrox-popup .closer {
-      width: 3.5em;
-      height: 3.5em;
-      background-size: 2em;
-      opacity: 0.8 !important;
+      display: none !important;
     }
 
     .poptrox-popup .nav-previous,
     .poptrox-popup .nav-next {
-      width: 3.5em;
-      height: 5em;
-      margin-top: -2.5em;
-      background-size: 3em;
-      opacity: 0.8 !important;
+      display: none !important;
     }
   }
 
