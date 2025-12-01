@@ -47,12 +47,18 @@ export function useAlbum() {
       type: "selection",
       width: 55,
       align: "center",
+      headerAlign: "center",
       reserveSelection: true
     },
     {
-      label: "id",
-      prop: "id",
-      minWidth: 70
+      label: "序号",
+      prop: "index",
+      minWidth: 70,
+      align: "center",
+      cellRenderer: ({ index }) => {
+        const { currentPage, pageSize, total } = pagination;
+        return String(total - (currentPage - 1) * pageSize - index);
+      }
     },
     {
       label: "分类",
