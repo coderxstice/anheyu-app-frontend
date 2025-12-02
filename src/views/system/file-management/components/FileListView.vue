@@ -611,12 +611,19 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
 .file-list-header .column {
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 
   &:hover {
     color: var(--anzhiyu-white);
     background-color: var(--anzhiyu-main);
+
     .sort-indicator.active {
+      color: var(--anzhiyu-white);
+    }
+
+    .sort-indicator-hover {
       color: var(--anzhiyu-white);
     }
   }
@@ -755,19 +762,22 @@ const handleKeyDown = (event: KeyboardEvent) => {
 }
 
 .file-item:hover {
-  color: var(--anzhiyu-black);
-  background-color: var(--anzhiyu-ahoverbg);
+  background-color: var(--anzhiyu-secondbg);
 }
 
 .file-item.selected {
-  color: var(--anzhiyu-fontcolor);
+  color: #fff;
   background-color: var(--anzhiyu-theme, #007bff) !important;
 
   .column-name-content,
   .column.column-size,
   .column.column-updated_at,
   .column.column-created_at {
-    color: var(--anzhiyu-card-bg) !important;
+    color: #fff !important;
+  }
+
+  .file-icon {
+    color: #fff;
   }
 }
 
@@ -797,5 +807,73 @@ const handleKeyDown = (event: KeyboardEvent) => {
 .uploading-indicator {
   margin-left: 8px;
   animation: spin 1.5s linear infinite;
+}
+</style>
+
+<!-- 深色模式样式优化 -->
+<style lang="scss">
+html.dark {
+  .file-list-container {
+    // 文件项悬停 - 使用半透明白色背景
+    .file-item:hover {
+      background-color: rgb(255 255 255 / 6%);
+    }
+
+    // 文件项选中 - 优化深色模式下的对比度
+    .file-item.selected {
+      background-color: var(--anzhiyu-theme, #dfa621) !important;
+
+      .column-name-content,
+      .column.column-size,
+      .column.column-updated_at,
+      .column.column-created_at {
+        color: rgb(0 0 0 / 90%) !important;
+      }
+
+      .file-icon,
+      .selected-icon {
+        color: rgb(0 0 0 / 85%);
+      }
+    }
+
+    // 表头悬停 - 优化深色模式下的文字颜色
+    .file-list-header .column:hover {
+      color: rgb(0 0 0 / 90%);
+      background-color: var(--anzhiyu-theme);
+
+      .sort-indicator.active,
+      .sort-indicator-hover {
+        color: rgb(0 0 0 / 85%);
+      }
+    }
+
+    // 排序指示器激活态
+    .sort-indicator.active {
+      color: var(--anzhiyu-theme);
+    }
+
+    // 添加按钮样式优化
+    .add-btn-wrapper {
+      background-color: var(--anzhiyu-secondbg);
+      border: 1px solid var(--anzhiyu-card-border);
+
+      &:hover {
+        background-color: var(--anzhiyu-theme);
+        border-color: var(--anzhiyu-theme);
+
+        .el-icon {
+          color: rgb(0 0 0 / 85%);
+        }
+      }
+    }
+
+    // 列调整器样式优化
+    .column-resizer {
+      &.is-hovered,
+      &.is-resizing {
+        background-color: var(--anzhiyu-theme);
+      }
+    }
+  }
 }
 </style>
