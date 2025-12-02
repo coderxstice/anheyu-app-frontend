@@ -507,7 +507,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   padding: 4px;
-  color: #8a919f;
+  color: var(--anzhiyu-secondtext);
   cursor: pointer;
   background: none;
   border: none;
@@ -518,7 +518,7 @@ onMounted(() => {
 
   &:hover {
     color: var(--anzhiyu-fontcolor);
-    background-color: #f1f3f4;
+    background-color: var(--anzhiyu-secondbg);
   }
 
   &.is-liked {
@@ -526,16 +526,16 @@ onMounted(() => {
   }
 
   &.is-liked:hover {
-    background-color: #f1f3f4;
+    background-color: var(--anzhiyu-secondbg);
   }
 
   &.is-disabled {
-    color: #d0d0d0;
+    color: var(--anzhiyu-lighttext);
     cursor: not-allowed;
     opacity: 0.5;
 
     &:hover {
-      color: #d0d0d0;
+      color: var(--anzhiyu-lighttext);
       background-color: transparent;
     }
   }
