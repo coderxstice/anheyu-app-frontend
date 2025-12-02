@@ -427,7 +427,9 @@ watch(
       <div class="footer-bar-description">
         来自 {{ authorInfoConfig?.ownerName }} 最新设计与科技的文章
       </div>
-      <div class="footer-bar-link" href="/archives">查看全部</div>
+      <router-link to="/archives" class="footer-bar-link">
+        查看全部
+      </router-link>
     </div>
 
     <CommentBarrage
