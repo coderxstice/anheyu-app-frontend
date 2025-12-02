@@ -167,8 +167,10 @@ export function useFileUploader(
         if (sessionData.upload_method === "client") {
           item.uploadMethod = "client";
           item.uploadUrl = sessionData.upload_url;
+          item.contentType = sessionData.content_type; // 设置 Content-Type（仅阿里云OSS需要）
           // 设置存储类型和策略ID，用于客户端直传
-          item.storageType = sessionData.storage_policy?.type as UploadItem["storageType"];
+          item.storageType = sessionData.storage_policy
+            ?.type as UploadItem["storageType"];
           item.policyId = storagePolicy.value!.id;
           // 在客户端模式下，sessionId 不是必须的，可以不赋值或设为 undefined
           item.sessionId = undefined;
