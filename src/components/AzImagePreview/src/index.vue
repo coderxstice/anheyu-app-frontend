@@ -393,6 +393,23 @@ function imgLoad() {
   // 图片成功加载后，将其索引添加到记录中
   loadedImageIndexes.value.add(currentIndex.value);
 
+  // 直接从 imgRef 获取图片实际尺寸，避免竞态条件
+  // 因为 @load 事件触发时图片已加载完成，naturalWidth/naturalHeight 是可用的
+  if (imgRef.value) {
+    currentImgSize = {
+      width: imgRef.value.naturalWidth,
+      height: imgRef.value.naturalHeight
+    };
+    // 同时更新缓存
+    const imgUrl = previewSrcList.value[previewIndex.value]?.bigParam
+      ? previewSrcList.value[previewIndex.value]?.imageUrl +
+        `?${previewSrcList.value[previewIndex.value]?.bigParam}`
+      : previewSrcList.value[previewIndex.value]?.imageUrl;
+    if (imgUrl) {
+      imageDimensionsCache.value.set(imgUrl, { ...currentImgSize });
+    }
+  }
+
   const isMobile = window.innerWidth <= 736;
   if (isMobile) {
     finalWidth.value = "100vw";

@@ -126,14 +126,16 @@ async function uploadCloudStorageFile(item: UploadItem): Promise<void> {
   );
 
   // 使用预签名URL上传整个文件
+  // 对于阿里云OSS，必须使用后端返回的 contentType 以确保签名匹配
   await uploadToCloudStorage(
     item.uploadUrl!,
     item.file,
     item.storageType as "tencent_cos" | "aliyun_oss" | "aws_s3",
-    (progress) => {
+    progress => {
       item.progress = progress;
       item.uploadedSize = Math.round((progress / 100) * item.size);
-    }
+    },
+    item.contentType // 传递后端返回的 Content-Type
   );
 
   // 上传完成

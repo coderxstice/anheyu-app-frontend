@@ -118,6 +118,12 @@ export interface UploadItem {
   uploadMethod?: "client" | "server";
 
   /**
+   * @description 在客户端直传模式下，由后端提供的期望 Content-Type（仅阿里云OSS需要）。
+   * @optional
+   */
+  contentType?: string;
+
+  /**
    * @description 在客户端直传模式下，由后端提供的上传目标 URL。
    * @optional
    */
@@ -269,6 +275,12 @@ export interface UploadSessionData {
    * @optional
    */
   upload_url?: string;
+
+  /**
+   * @description 客户端直传模式下期望的 Content-Type（仅阿里云OSS需要）。
+   * @optional
+   */
+  content_type?: string;
 }
 
 /**

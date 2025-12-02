@@ -21,16 +21,19 @@ export type CloudStorageType = "tencent_cos" | "aliyun_oss" | "aws_s3";
  * @param file - 要上传的文件（整个文件）
  * @param storageType - 云存储类型，用于设置正确的请求头
  * @param onProgress - 可选的进度回调
+ * @param contentType - 可选的 Content-Type，如果提供则使用此值（用于阿里云OSS）
  */
 export async function uploadToCloudStorage(
   uploadUrl: string,
   file: File | Blob,
   storageType: CloudStorageType,
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: number) => void,
+  contentType?: string
 ): Promise<void> {
   // 根据存储类型设置请求头
+  // 对于阿里云OSS，如果提供了 contentType，则必须使用它以确保签名匹配
   const headers: Record<string, string> = {
-    "Content-Type": file.type || "application/octet-stream"
+    "Content-Type": contentType || file.type || "application/octet-stream"
   };
 
   // 腾讯云 COS 可能需要额外的请求头
@@ -52,7 +55,7 @@ export async function uploadToCloudStorage(
   // 使用原始的 axios 实例发送 PUT 请求
   await axios.put(uploadUrl, file, {
     headers,
-    onUploadProgress: (progressEvent) => {
+    onUploadProgress: progressEvent => {
       if (onProgress && progressEvent.total) {
         const progress = Math.round(
           (progressEvent.loaded * 100) / progressEvent.total
@@ -104,4 +107,3 @@ export async function uploadToS3(
 ): Promise<void> {
   return uploadToCloudStorage(uploadUrl, file, "aws_s3", onProgress);
 }
-
