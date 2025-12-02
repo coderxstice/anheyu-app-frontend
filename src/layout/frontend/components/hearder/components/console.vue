@@ -713,31 +713,42 @@ onMounted(() => {
       margin-right: 0.5rem;
     }
     .console-btn-item button {
-      width: 100%;
-      height: 100%;
-      background: var(--anzhiyu-card-bg);
-      border: var(--style-border);
-      border-radius: 60px;
       display: flex;
       align-items: center;
       justify-content: center;
+      width: 100%;
+      height: 100%;
       color: var(--anzhiyu-fontcolor);
-      transition: 0.3s;
+      cursor: pointer;
+      background: var(--anzhiyu-card-bg);
+      border: var(--style-border);
+      border-radius: 60px;
+      outline: none;
       box-shadow: var(--anzhiyu-shadow-border);
+      transition:
+        color 0.3s,
+        background 0.3s,
+        filter 0.3s;
+
       &:hover {
-        background: var(--anzhiyu-main);
         color: var(--anzhiyu-white);
+        background: var(--anzhiyu-main);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--anzhiyu-main);
+        outline-offset: 2px;
       }
     }
     .console-btn-item {
       width: 60px;
       height: 60px;
-      transition: 0.3s;
       cursor: pointer;
+
       &.on button {
-        background: var(--anzhiyu-orange);
         color: var(--anzhiyu-white);
-        transition: 0.3s;
+        background: var(--anzhiyu-orange);
+
         &:hover {
           filter: brightness(1.2);
         }
