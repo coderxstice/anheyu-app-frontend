@@ -705,7 +705,6 @@ const creativityPairs = computed(() => {
     justify-content: flex-start;
     flex-wrap: nowrap;
     width: 100%;
-    overflow-x: scroll;
     ::-webkit-scrollbar {
       width: 4px;
       height: 4px;
