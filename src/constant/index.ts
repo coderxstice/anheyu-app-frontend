@@ -159,6 +159,14 @@ const Key404PageDefaultImage: SettingKey = "post.page404.default_image";
 const KeyPostRewardEnable: SettingKey = "post.reward.enable";
 const KeyPostRewardWeChatQR: SettingKey = "post.reward.wechat_qr";
 const KeyPostRewardAlipayQR: SettingKey = "post.reward.alipay_qr";
+const KeyPostRewardWeChatEnable: SettingKey = "post.reward.wechat_enable";
+const KeyPostRewardAlipayEnable: SettingKey = "post.reward.alipay_enable";
+const KeyPostRewardButtonText: SettingKey = "post.reward.button_text";
+const KeyPostRewardTitle: SettingKey = "post.reward.title";
+const KeyPostRewardWeChatLabel: SettingKey = "post.reward.wechat_label";
+const KeyPostRewardAlipayLabel: SettingKey = "post.reward.alipay_label";
+const KeyPostRewardListButtonText: SettingKey = "post.reward.list_button_text";
+const KeyPostRewardListButtonDesc: SettingKey = "post.reward.list_button_desc";
 const KeyPostCodeBlockCodeMaxLines: SettingKey =
   "post.code_block.code_max_lines";
 
@@ -462,6 +470,14 @@ export const constant = {
   KeyPostRewardEnable,
   KeyPostRewardWeChatQR,
   KeyPostRewardAlipayQR,
+  KeyPostRewardWeChatEnable,
+  KeyPostRewardAlipayEnable,
+  KeyPostRewardButtonText,
+  KeyPostRewardTitle,
+  KeyPostRewardWeChatLabel,
+  KeyPostRewardAlipayLabel,
+  KeyPostRewardListButtonText,
+  KeyPostRewardListButtonDesc,
   KeyPostExpirationTime,
   KeyPostCodeBlockCodeMaxLines,
 

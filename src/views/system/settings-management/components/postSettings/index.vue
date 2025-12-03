@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-02 18:04:48
- * @LastEditTime: 2025-11-05 16:20:09
+ * @LastEditTime: 2025-12-03 11:13:32
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -103,18 +103,98 @@
     <el-switch v-model="formData.reward.enable" placeholder="例如：true" />
   </el-form-item>
 
+  <el-form-item label="开启微信打赏">
+    <el-switch
+      v-model="formData.reward.weChatEnable"
+      :disabled="!formData.reward.enable"
+    />
+    <div class="form-item-help">单独控制是否显示微信打赏方式。</div>
+  </el-form-item>
+
   <el-form-item label="文章打赏微信二维码图片">
     <el-input
       v-model="formData.reward.weChat"
+      :disabled="!formData.reward.enable || !formData.reward.weChatEnable"
       placeholder="请输入文章打赏微信二维码图片链接地址"
     />
+  </el-form-item>
+
+  <el-form-item label="微信标签文案">
+    <el-input
+      v-model="formData.reward.weChatLabel"
+      :disabled="!formData.reward.enable || !formData.reward.weChatEnable"
+      placeholder="例如：微信"
+    />
+    <div class="form-item-help">微信二维码下方的标签文案，默认为"微信"。</div>
+  </el-form-item>
+
+  <el-form-item label="开启支付宝打赏">
+    <el-switch
+      v-model="formData.reward.aliPayEnable"
+      :disabled="!formData.reward.enable"
+    />
+    <div class="form-item-help">单独控制是否显示支付宝打赏方式。</div>
   </el-form-item>
 
   <el-form-item label="文章打赏支付宝二维码图片">
     <el-input
       v-model="formData.reward.aliPay"
+      :disabled="!formData.reward.enable || !formData.reward.aliPayEnable"
       placeholder="请输入文章打赏支付宝二维码图片链接地址"
     />
+  </el-form-item>
+
+  <el-form-item label="支付宝标签文案">
+    <el-input
+      v-model="formData.reward.aliPayLabel"
+      :disabled="!formData.reward.enable || !formData.reward.aliPayEnable"
+      placeholder="例如：支付宝"
+    />
+    <div class="form-item-help">
+      支付宝二维码下方的标签文案，默认为"支付宝"。
+    </div>
+  </el-form-item>
+
+  <el-form-item label="打赏按钮文案">
+    <el-input
+      v-model="formData.reward.buttonText"
+      :disabled="!formData.reward.enable"
+      placeholder="例如：打赏作者"
+    />
+    <div class="form-item-help">文章底部打赏按钮的文案，默认为"打赏作者"。</div>
+  </el-form-item>
+
+  <el-form-item label="打赏弹窗标题">
+    <el-input
+      v-model="formData.reward.title"
+      :disabled="!formData.reward.enable"
+      placeholder="例如：感谢你赐予我前进的力量"
+    />
+    <div class="form-item-help">
+      打赏弹窗顶部的标题文案，默认为"感谢你赐予我前进的力量"。
+    </div>
+  </el-form-item>
+
+  <el-form-item label="打赏者名单按钮文案">
+    <el-input
+      v-model="formData.reward.listButtonText"
+      :disabled="!formData.reward.enable"
+      placeholder="例如：打赏者名单"
+    />
+    <div class="form-item-help">
+      打赏弹窗底部按钮的文案，默认为"打赏者名单"。
+    </div>
+  </el-form-item>
+
+  <el-form-item label="打赏者名单按钮描述">
+    <el-input
+      v-model="formData.reward.listButtonDesc"
+      :disabled="!formData.reward.enable"
+      placeholder="例如：因为你们的支持让我意识到写文章的价值"
+    />
+    <div class="form-item-help">
+      打赏弹窗底部按钮的描述文案，默认为"因为你们的支持让我意识到写文章的价值"。
+    </div>
   </el-form-item>
 
   <el-form-item label="代码块最大行数">

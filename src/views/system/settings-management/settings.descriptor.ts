@@ -447,6 +447,54 @@ const postDescriptors: SettingDescriptor[] = [
     type: "string"
   },
   {
+    frontendPath: "post.reward.weChatEnable",
+    backendKey: constant.KeyPostRewardWeChatEnable,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "post.reward.aliPayEnable",
+    backendKey: constant.KeyPostRewardAlipayEnable,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "post.reward.buttonText",
+    backendKey: constant.KeyPostRewardButtonText,
+    defaultValue: "打赏作者",
+    type: "string"
+  },
+  {
+    frontendPath: "post.reward.title",
+    backendKey: constant.KeyPostRewardTitle,
+    defaultValue: "感谢你赐予我前进的力量",
+    type: "string"
+  },
+  {
+    frontendPath: "post.reward.weChatLabel",
+    backendKey: constant.KeyPostRewardWeChatLabel,
+    defaultValue: "微信",
+    type: "string"
+  },
+  {
+    frontendPath: "post.reward.aliPayLabel",
+    backendKey: constant.KeyPostRewardAlipayLabel,
+    defaultValue: "支付宝",
+    type: "string"
+  },
+  {
+    frontendPath: "post.reward.listButtonText",
+    backendKey: constant.KeyPostRewardListButtonText,
+    defaultValue: "打赏者名单",
+    type: "string"
+  },
+  {
+    frontendPath: "post.reward.listButtonDesc",
+    backendKey: constant.KeyPostRewardListButtonDesc,
+    defaultValue: "因为你们的支持让我意识到写文章的价值",
+    type: "string"
+  },
+  {
     frontendPath: "post.codeBlock.codeMaxLines",
     backendKey: constant.KeyPostCodeBlockCodeMaxLines,
     defaultValue: 10,

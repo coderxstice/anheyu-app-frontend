@@ -63,6 +63,39 @@ const goRss = () => {
 const goRewardPage = () => {
   router.push({ path: "/about" });
 };
+
+// 检查是否有任何打赏方式可用
+const hasAnyRewardMethod = computed(() => {
+  const reward = siteConfig.post?.reward;
+  if (!reward) return false;
+  const wechatEnabled = reward.wechat_enable !== false && reward.wechat_qr;
+  const alipayEnabled = reward.alipay_enable !== false && reward.alipay_qr;
+  return wechatEnabled || alipayEnabled;
+});
+
+// 获取打赏配置文案
+const rewardConfig = computed(() => ({
+  buttonText: siteConfig.post?.reward?.button_text || "打赏作者",
+  title: siteConfig.post?.reward?.title || "感谢你赐予我前进的力量",
+  wechatLabel: siteConfig.post?.reward?.wechat_label || "微信",
+  alipayLabel: siteConfig.post?.reward?.alipay_label || "支付宝",
+  listButtonText: siteConfig.post?.reward?.list_button_text || "打赏者名单",
+  listButtonDesc:
+    siteConfig.post?.reward?.list_button_desc ||
+    "因为你们的支持让我意识到写文章的价值"
+}));
+
+// 检查微信打赏是否可用
+const isWechatEnabled = computed(() => {
+  const reward = siteConfig.post?.reward;
+  return reward?.wechat_enable !== false && reward?.wechat_qr;
+});
+
+// 检查支付宝打赏是否可用
+const isAlipayEnabled = computed(() => {
+  const reward = siteConfig.post?.reward;
+  return reward?.alipay_enable !== false && reward?.alipay_qr;
+});
 </script>
 
 <template>
@@ -76,42 +109,45 @@ const goRewardPage = () => {
     <div class="author-desc">{{ siteConfig?.SUB_TITLE }}</div>
 
     <div class="button-group">
-      <div v-if="siteConfig.post.reward?.enable" class="reward">
+      <div
+        v-if="siteConfig.post.reward?.enable && hasAnyRewardMethod"
+        class="reward"
+      >
         <div class="reward-button" @click="showRewardPanel = !showRewardPanel">
           <IconifyIconOffline :icon="HandHeartIcon" />
-          <span>打赏作者</span>
+          <span>{{ rewardConfig.buttonText }}</span>
         </div>
         <Transition name="reward-slide">
           <div v-show="showRewardPanel" class="reward-main">
             <div class="reward-all">
-              <span class="reward-title">感谢你赐予我前进的力量</span>
+              <span class="reward-title">{{ rewardConfig.title }}</span>
               <ul class="reward-group">
-                <li class="reward-item">
+                <li v-if="isWechatEnabled" class="reward-item">
                   <a :href="siteConfig.post.reward.wechat_qr" target="_blank">
                     <img
                       class="qr-code"
                       :src="siteConfig.post.reward.wechat_qr"
-                      alt="微信"
+                      :alt="rewardConfig.wechatLabel"
                     />
                   </a>
 
-                  <div class="qr-code-desc">微信</div>
+                  <div class="qr-code-desc">{{ rewardConfig.wechatLabel }}</div>
                 </li>
-                <li class="reward-item">
+                <li v-if="isAlipayEnabled" class="reward-item">
                   <a :href="siteConfig.post.reward.alipay_qr" target="_blank">
                     <img
                       class="qr-code"
                       :src="siteConfig.post.reward.alipay_qr"
-                      alt="支付宝"
+                      :alt="rewardConfig.alipayLabel"
                     />
                   </a>
-                  <div class="qr-code-desc">支付宝</div>
+                  <div class="qr-code-desc">{{ rewardConfig.alipayLabel }}</div>
                 </li>
               </ul>
               <div class="reward-main-btn" @click="goRewardPage">
-                <div class="reward-text">打赏者名单</div>
+                <div class="reward-text">{{ rewardConfig.listButtonText }}</div>
                 <div class="reward-dec">
-                  因为你们的支持让我意识到写文章的价值🙏
+                  {{ rewardConfig.listButtonDesc }}
                 </div>
               </div>
             </div>
