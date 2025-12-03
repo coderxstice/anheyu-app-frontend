@@ -174,6 +174,14 @@ export interface PostSettingsInfo {
     enable: boolean;
     weChat: string;
     aliPay: string;
+    weChatEnable: boolean;
+    aliPayEnable: boolean;
+    buttonText: string;
+    title: string;
+    weChatLabel: string;
+    aliPayLabel: string;
+    listButtonText: string;
+    listButtonDesc: string;
   };
   codeBlock: {
     codeMaxLines: number;

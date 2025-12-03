@@ -1,15 +1,8 @@
 <!--
- * @Description:
- * @Author: 安知鱼
- * @Date: 2025-10-12 01:15:21
- * @LastEditTime: 2025-11-11 18:45:27
- * @LastEditors: 安知鱼
--->
-<!--
  * @Description: 音乐馆页面
  * @Author: 安知鱼
  * @Date: 2025-09-23 12:13:32
- * @LastEditTime: 2025-10-12 01:09:43
+ * @LastEditTime: 2025-12-03 10:24:14
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -454,6 +447,7 @@
 </template>
 
 <script setup lang="ts">
+import "@/components/ReIcon/src/offlineIcon";
 import {
   ref,
   computed,
@@ -2939,7 +2933,7 @@ onBeforeUnmount(() => {
     position: fixed;
     top: 60px; // 从 header 下方开始
     left: 0;
-    z-index: 1000;
+    z-index: 10; // 降低 z-index 避免遮挡 header 下拉菜单
     box-sizing: border-box;
 
     // 确保在不同高度下都不出现滚动条
