@@ -2933,7 +2933,7 @@ onBeforeUnmount(() => {
     position: fixed;
     top: 60px; // 从 header 下方开始
     left: 0;
-    z-index: 1000;
+    z-index: 10; // 降低 z-index 避免遮挡 header 下拉菜单
     box-sizing: border-box;
 
     // 确保在不同高度下都不出现滚动条

@@ -575,6 +575,7 @@ onMounted(() => {
 .dropdown-bridge {
   position: absolute;
   top: 100%;
+  left: 0;
   width: 140px;
   height: 8px;
   pointer-events: auto;
@@ -583,7 +584,8 @@ onMounted(() => {
 .user-dropdown-menu {
   position: absolute;
   top: calc(100% + 8px);
-  z-index: 1000;
+  left: 0;
+  z-index: 9999;
   min-width: 140px;
   background: var(--anzhiyu-card-bg);
   backdrop-filter: saturate(180%) blur(20px);
