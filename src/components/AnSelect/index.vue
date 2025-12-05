@@ -279,17 +279,18 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 32px;
-  padding: 0 12px;
+  min-height: 36px;
+  padding: 8px 12px;
   font-size: 14px;
   color: var(--anzhiyu-fontcolor);
   cursor: pointer;
+  background: transparent;
   border-radius: 6px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
     color: var(--anzhiyu-fontcolor);
-    background: rgba(var(--anzhiyu-main-rgb), 0.08);
+    background: var(--anzhiyu-secondbg);
   }
 
   &.is-selected {
