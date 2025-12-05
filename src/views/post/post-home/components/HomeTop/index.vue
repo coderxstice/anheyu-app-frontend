@@ -458,6 +458,11 @@ const creativityPairs = computed(() => {
 .category-group .category-item .category-button .category-button-text {
   font-size: 1.2rem;
   font-weight: bold;
+  display: inline-block;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .category-group .category-item .category-button .category-icon {
   font-size: 5rem;

@@ -101,6 +101,9 @@ const handlePageChange = (newPage: number) => {
 watch(
   () => route.params,
   newParams => {
+    // 路由参数变化时先清空文章列表，避免显示旧数据导致的闪动
+    articles.value = [];
+
     if (pageType.value === "category") {
       currentCategoryName.value = (newParams.name as string) || null;
       currentTagName.value = null;

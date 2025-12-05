@@ -2,7 +2,7 @@
  * @Description: 友情链接申请面板
  * @Author: 安知鱼
  * @Date: 2025-08-19 10:19:23
- * @LastEditTime: 2025-11-08 18:27:40
+ * @LastEditTime: 2025-12-05 16:02:40
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -28,8 +28,13 @@ import {
   getLinkApplications,
   checkLinkExists
 } from "@/api/postLink";
-import type { ApplyLinkRequest, LinkItem } from "@/api/postLink/type";
+import type {
+  ApplyLinkRequest,
+  LinkItem,
+  LinkStatus
+} from "@/api/postLink/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
+import AnSelect from "@/components/AnSelect/index.vue";
 import md5 from "blueimp-md5";
 
 defineOptions({
@@ -207,6 +212,20 @@ const applicationsTotal = ref(0);
 const applicationsPage = ref(1);
 const applicationsPageSize = ref(20);
 
+// 筛选和搜索相关
+const filterStatus = ref<LinkStatus | "">("");
+const searchName = ref("");
+let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+// 状态选项
+const statusOptions = [
+  { value: "", label: "全部状态" },
+  { value: "PENDING", label: "待审核" },
+  { value: "APPROVED", label: "已通过" },
+  { value: "REJECTED", label: "已拒绝" },
+  { value: "INVALID", label: "已失效" }
+];
+
 // 获取Gravatar头像URL
 const getGravatarUrl = (email: string) => {
   if (!email) return "";
@@ -224,7 +243,9 @@ const fetchApplications = async () => {
   try {
     const res = await getLinkApplications({
       page: applicationsPage.value,
-      pageSize: applicationsPageSize.value
+      pageSize: applicationsPageSize.value,
+      status: filterStatus.value || undefined,
+      name: searchName.value || undefined
     });
     applications.value = res.data.list;
     applicationsTotal.value = res.data.total;
@@ -240,6 +261,23 @@ const fetchApplications = async () => {
 const handlePageChange = (page: number) => {
   applicationsPage.value = page;
   fetchApplications();
+};
+
+// 处理状态筛选变化
+const handleStatusChange = () => {
+  applicationsPage.value = 1; // 重置到第一页
+  fetchApplications();
+};
+
+// 处理名称搜索（防抖）
+const handleSearchInput = () => {
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer);
+  }
+  searchDebounceTimer = setTimeout(() => {
+    applicationsPage.value = 1; // 重置到第一页
+    fetchApplications();
+  }, 300);
 };
 
 // 获取状态标签类型
@@ -469,9 +507,28 @@ onMounted(() => {
     <!-- 友链申请列表 -->
     <el-card shadow="never" class="applications-card">
       <template #header>
-        <div class="card-header">
-          <span>友链申请列表</span>
-          <span class="header-count">（共 {{ applicationsTotal }} 条）</span>
+        <div class="card-header applications-header">
+          <div class="header-title">
+            <span>友链申请列表</span>
+            <span class="header-count">（共 {{ applicationsTotal }} 条）</span>
+          </div>
+          <div class="header-filters">
+            <AnSelect
+              v-model="filterStatus"
+              :options="statusOptions"
+              placeholder="全部状态"
+              class="status-filter"
+              @change="handleStatusChange"
+            />
+            <el-input
+              v-model="searchName"
+              placeholder="搜索名称"
+              clearable
+              class="name-search"
+              @input="handleSearchInput"
+              @clear="handleSearchInput"
+            />
+          </div>
         </div>
       </template>
 
@@ -553,6 +610,44 @@ onMounted(() => {
     font-size: 14px;
     font-weight: normal;
     color: #909399;
+  }
+
+  &.applications-header {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .header-filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    .status-filter {
+      width: 120px;
+
+      :deep(.an-select-trigger) {
+        min-height: 32px;
+        padding: 0 10px;
+        font-size: 13px;
+        border-radius: 8px;
+      }
+    }
+
+    .name-search {
+      width: 160px;
+
+      :deep(.el-input__wrapper) {
+        border-radius: 8px;
+      }
+    }
   }
 }
 
@@ -686,6 +781,24 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
+  .card-header {
+    &.applications-header {
+      flex-direction: column;
+      align-items: flex-start;
+
+      .header-filters {
+        width: 100%;
+
+        .status-filter,
+        .name-search {
+          flex: 1;
+          min-width: 0;
+          width: auto;
+        }
+      }
+    }
+  }
+
   .application-items {
     margin: 0.625rem -4px 1.25rem;
 
