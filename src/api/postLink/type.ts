@@ -124,6 +124,8 @@ export interface GetPublicLinksParams {
   page?: number;
   pageSize?: number;
   category_id?: number;
+  status?: LinkStatus;
+  name?: string;
 }
 
 /** [后台] 获取友链列表的查询参数 */

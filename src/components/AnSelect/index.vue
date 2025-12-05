@@ -239,12 +239,15 @@ onBeforeUnmount(() => {
 
 .an-select-dropdown {
   position: fixed;
-  padding: 4px 0;
+  padding: 6px;
   overflow: hidden;
   background: var(--anzhiyu-card-bg);
   border: var(--style-border);
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  box-shadow:
+    0 3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 6px 16px 0 rgba(0, 0, 0, 0.08),
+    0 9px 28px 8px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(8px);
 }
 
@@ -276,21 +279,27 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 36px;
-  padding: 8px 12px;
+  min-height: 32px;
+  padding: 0 12px;
   font-size: 14px;
   color: var(--anzhiyu-fontcolor);
   cursor: pointer;
+  border-radius: 6px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    background: var(--anzhiyu-background);
+    color: var(--anzhiyu-fontcolor);
+    background: rgba(var(--anzhiyu-main-rgb), 0.08);
   }
 
   &.is-selected {
     color: var(--anzhiyu-main);
     font-weight: 500;
-    background: rgba(var(--anzhiyu-main-rgb), 0.08);
+    background: rgba(var(--anzhiyu-main-rgb), 0.1);
+
+    &:hover {
+      background: rgba(var(--anzhiyu-main-rgb), 0.15);
+    }
   }
 
   &.is-disabled {
