@@ -392,6 +392,15 @@ export interface HomePageSettingsInfo {
 }
 
 /**
+ * @description: 自定义侧边栏块类型
+ */
+export interface CustomSidebarBlock {
+  title: string; // 块标题（可选，为空时不显示标题）
+  content: string; // 块内容（HTML代码）
+  showInPost: boolean; // 是否在文章页显示
+}
+
+/**
  * @description: 侧边栏配置表单接口
  */
 export interface SidebarPageSettingsInfo {
@@ -411,8 +420,7 @@ export interface SidebarPageSettingsInfo {
   siteInfoRuntimeEnable: boolean;
   siteInfoTotalWordCount: number;
   archiveDisplayMonths: number;
-  customSidebar: string;
-  customShowInPost: boolean;
+  customSidebarBlocks: CustomSidebarBlock[]; // 自定义侧边栏块数组（0-3个）
   tocCollapseMode: boolean;
 }
 
@@ -434,6 +442,8 @@ export interface CommentSettingsInfo {
   limitPerMinute: number;
   limitLength: number;
   forbiddenWords: string;
+  qqAPIURL: string;
+  qqAPIKey: string;
   notifyAdmin: boolean;
   notifyReply: boolean;
   pushooChannel: string;

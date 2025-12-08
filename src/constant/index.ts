@@ -265,6 +265,8 @@ const KeyCommentAllowImageUpload: SettingKey = "comment.allow_image_upload";
 const KeyCommentLimitPerMinute: SettingKey = "comment.limit_per_minute";
 const KeyCommentLimitLength: SettingKey = "comment.limit_length";
 const KeyCommentForbiddenWords: SettingKey = "comment.forbidden_words";
+const KeyCommentQQAPIURL: SettingKey = "comment.qq_api_url";
+const KeyCommentQQAPIKey: SettingKey = "comment.qq_api_key";
 const KeyCommentNotifyAdmin: SettingKey = "comment.notify_admin";
 const KeyCommentNotifyReply: SettingKey = "comment.notify_reply";
 const KeyPushooChannel: SettingKey = "pushoo.channel";
@@ -565,6 +567,8 @@ export const constant = {
   KeyCommentLimitPerMinute,
   KeyCommentLimitLength,
   KeyCommentForbiddenWords,
+  KeyCommentQQAPIURL,
+  KeyCommentQQAPIKey,
   KeyCommentNotifyAdmin,
   KeyCommentNotifyReply,
   KeyPushooChannel,

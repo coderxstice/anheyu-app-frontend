@@ -1,11 +1,20 @@
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, nextTick, onMounted } from "vue";
+import {
+  Plus,
+  Delete,
+  ArrowUp,
+  ArrowDown,
+  Edit
+} from "@element-plus/icons-vue";
 import type {
   SidebarPageSettingsInfo,
-  JsonEditorTableColumn
+  JsonEditorTableColumn,
+  CustomSidebarBlock
 } from "../../../type";
 import JsonEditorTable from "../components/JsonEditorTable.vue";
 import HighlightTagSelector from "../components/HighlightTagSelector.vue";
+import AnDialog from "@/components/AnDialog/index.vue";
 
 defineOptions({
   name: "SidebarPageForm"
@@ -123,6 +132,193 @@ const updateSocials = (jsonString: string) => {
   } catch (e) {
     console.error("更新社交链接失败:", e);
   }
+};
+
+// 迁移旧数据格式到新格式
+const migrateCustomSidebarBlocks = (value: any): CustomSidebarBlock[] => {
+  // 如果已经是数组格式，确保每个块都有必要字段
+  if (Array.isArray(value)) {
+    return value.map((block: any) => ({
+      title: block.title || "",
+      content: block.content || "",
+      showInPost: block.showInPost !== undefined ? block.showInPost : true
+    }));
+  }
+
+  // 如果是字符串（旧格式），转换为数组
+  if (typeof value === "string") {
+    if (!value.trim()) {
+      return [];
+    }
+    // 尝试解析为 JSON
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed.map((block: any) => ({
+          title: block.title || "",
+          content: block.content || "",
+          showInPost: block.showInPost !== undefined ? block.showInPost : true
+        }));
+      }
+    } catch {
+      // 解析失败，说明是旧的纯 HTML 字符串，转换为单个块
+      return [
+        {
+          title: "",
+          content: value,
+          showInPost: true
+        }
+      ];
+    }
+  }
+
+  // 其他情况返回空数组
+  return [];
+};
+
+// 检查并修复 customSidebarBlocks 格式（只在需要时修改）
+const ensureCustomSidebarBlocks = () => {
+  const currentValue = model.value.customSidebarBlocks;
+
+  // 如果不存在或者是非数组类型，进行迁移或初始化
+  if (!currentValue || !Array.isArray(currentValue)) {
+    model.value.customSidebarBlocks = migrateCustomSidebarBlocks(currentValue);
+    return;
+  }
+
+  // 如果已经是数组，检查是否需要规范化字段
+  // 如果所有块都正常，就不需要更新
+  const allBlocksValid = currentValue.every((block: any) => {
+    return (
+      block &&
+      typeof block === "object" &&
+      typeof block.title !== "undefined" &&
+      typeof block.content !== "undefined" &&
+      typeof block.showInPost !== "undefined"
+    );
+  });
+
+  if (!allBlocksValid) {
+    model.value.customSidebarBlocks = currentValue.map((block: any) => ({
+      title: block?.title || "",
+      content: block?.content || "",
+      showInPost: block?.showInPost !== undefined ? block.showInPost : true
+    }));
+  }
+};
+
+// 初始化时确保数组存在（只执行一次，避免递归）
+onMounted(() => {
+  nextTick(() => {
+    const currentValue = model.value.customSidebarBlocks;
+    // 只在数据格式不正确时才处理
+    if (!currentValue || !Array.isArray(currentValue)) {
+      ensureCustomSidebarBlocks();
+    }
+  });
+});
+
+// Dialog 相关状态
+const dialogVisible = ref(false);
+const dialogMode = ref<"add" | "edit">("add");
+const editingBlockIndex = ref<number | null>(null);
+const dialogForm = ref<CustomSidebarBlock>({
+  title: "",
+  content: "",
+  showInPost: true
+});
+
+// 打开添加块的弹窗
+const addSidebarBlock = () => {
+  // 确保数组存在且是数组类型
+  ensureCustomSidebarBlocks();
+
+  const blocks = model.value.customSidebarBlocks;
+
+  // 双重检查：确保 blocks 是数组
+  if (!blocks || !Array.isArray(blocks)) {
+    // 如果不是数组，重新迁移
+    model.value.customSidebarBlocks = migrateCustomSidebarBlocks(blocks);
+    return;
+  }
+
+  // 检查是否已达到最大数量
+  if (blocks.length >= 3) {
+    return;
+  }
+
+  // 打开添加弹窗
+  dialogMode.value = "add";
+  editingBlockIndex.value = null;
+  dialogForm.value = {
+    title: "",
+    content: "",
+    showInPost: true
+  };
+  dialogVisible.value = true;
+};
+
+// 打开编辑块的弹窗
+const editSidebarBlock = (index: number) => {
+  const blocks = model.value.customSidebarBlocks;
+  if (!blocks || !Array.isArray(blocks) || !blocks[index]) {
+    return;
+  }
+
+  dialogMode.value = "edit";
+  editingBlockIndex.value = index;
+  dialogForm.value = {
+    title: blocks[index].title || "",
+    content: blocks[index].content || "",
+    showInPost:
+      blocks[index].showInPost !== undefined ? blocks[index].showInPost : true
+  };
+  dialogVisible.value = true;
+};
+
+// 保存块（添加或编辑）
+const saveSidebarBlock = () => {
+  const blocks = model.value.customSidebarBlocks;
+  if (!blocks || !Array.isArray(blocks)) {
+    return;
+  }
+
+  if (dialogMode.value === "add") {
+    // 添加新块
+    blocks.push({ ...dialogForm.value });
+  } else if (dialogMode.value === "edit" && editingBlockIndex.value !== null) {
+    // 编辑现有块
+    blocks[editingBlockIndex.value] = { ...dialogForm.value };
+  }
+
+  dialogVisible.value = false;
+};
+
+// 取消编辑
+const cancelEdit = () => {
+  dialogVisible.value = false;
+  dialogForm.value = {
+    title: "",
+    content: "",
+    showInPost: true
+  };
+  editingBlockIndex.value = null;
+};
+
+const removeSidebarBlock = (index: number) => {
+  model.value.customSidebarBlocks?.splice(index, 1);
+};
+
+const moveSidebarBlock = (index: number, direction: number) => {
+  const blocks = model.value.customSidebarBlocks;
+  if (!blocks) return;
+
+  const newIndex = index + direction;
+  if (newIndex < 0 || newIndex >= blocks.length) return;
+
+  const temp = blocks[index];
+  blocks[index] = blocks[newIndex];
+  blocks[newIndex] = temp;
 };
 </script>
 
@@ -251,28 +447,145 @@ const updateSocials = (jsonString: string) => {
     </el-form-item>
 
     <el-divider content-position="left">自定义侧边栏</el-divider>
-    <el-form-item label="在文章页显示自定义侧边栏">
-      <div style="display: flex; flex-direction: column; gap: 4px">
-        <el-switch v-model="model.customShowInPost" />
-        <div class="form-item-help">
-          开启后，自定义侧边栏内容将在文章详情页显示
+    <div class="custom-sidebar-blocks">
+      <div class="blocks-header">
+        <span class="blocks-title"
+          >自定义侧边栏块（{{
+            model.customSidebarBlocks?.length || 0
+          }}/3）</span
+        >
+        <el-button
+          type="primary"
+          size="small"
+          :disabled="(model.customSidebarBlocks?.length || 0) >= 3"
+          @click="addSidebarBlock"
+        >
+          <el-icon><Plus /></el-icon>
+          添加块
+        </el-button>
+      </div>
+      <div class="form-item-help" style="margin-bottom: 16px">
+        可添加 0-3 个自定义侧边栏块，每个块支持完整的 HTML 代码（包括
+        &lt;style&gt; 和 &lt;script&gt; 标签）。<br />
+        块将按顺序显示在侧边栏顶部，可用于添加广告、公告、自定义小工具等。
+      </div>
+
+      <div
+        v-for="(block, index) in model.customSidebarBlocks"
+        :key="index"
+        class="sidebar-block-item"
+      >
+        <div class="block-header">
+          <span class="block-number">块 {{ index + 1 }}</span>
+          <div class="block-actions">
+            <el-button
+              type="primary"
+              size="small"
+              link
+              @click="editSidebarBlock(index)"
+            >
+              <el-icon><Edit /></el-icon>
+              编辑
+            </el-button>
+            <el-button
+              type="primary"
+              size="small"
+              :disabled="index === 0"
+              link
+              @click="moveSidebarBlock(index, -1)"
+            >
+              <el-icon><ArrowUp /></el-icon>
+            </el-button>
+            <el-button
+              type="primary"
+              size="small"
+              :disabled="index === model.customSidebarBlocks.length - 1"
+              link
+              @click="moveSidebarBlock(index, 1)"
+            >
+              <el-icon><ArrowDown /></el-icon>
+            </el-button>
+            <el-button
+              type="danger"
+              size="small"
+              link
+              @click="removeSidebarBlock(index)"
+            >
+              <el-icon><Delete /></el-icon>
+            </el-button>
+          </div>
+        </div>
+        <div class="block-preview">
+          <div class="block-preview-header">
+            <span class="block-preview-label">在文章页显示：</span>
+            <el-switch v-model="block.showInPost" size="small" />
+          </div>
+          <div v-if="block.title" class="block-preview-title">
+            <strong>标题：</strong>{{ block.title }}
+          </div>
+          <div class="block-preview-content">
+            <strong>内容预览：</strong>
+            <!-- eslint-disable-next-line vue/html-self-closing -->
+            <div
+              class="content-preview"
+              v-html="block.content || '（空）'"
+            ></div>
+          </div>
         </div>
       </div>
-    </el-form-item>
-    <el-form-item label="自定义侧边栏内容">
-      <el-input
-        v-model="model.customSidebar"
-        type="textarea"
-        :rows="8"
-        placeholder="请填写自定义侧边栏HTML内容"
+
+      <el-empty
+        v-if="!model.customSidebarBlocks?.length"
+        description="暂无自定义侧边栏块，点击上方按钮添加"
+        :image-size="80"
       />
-      <div class="form-item-help">
-        自定义侧边栏内容，支持完整的 HTML 代码（包括 &lt;style&gt; 和
-        &lt;script&gt; 标签）。<br />
-        此内容将显示在侧边栏顶部，可用于添加广告、公告、自定义小工具等。<br />
-        示例：<code>&lt;p&gt;欢迎来到小站～&lt;/p&gt;</code>
-      </div>
-    </el-form-item>
+    </div>
+
+    <!-- 添加/编辑块的弹窗 -->
+    <AnDialog
+      v-model="dialogVisible"
+      :title="
+        dialogMode === 'add' ? '添加自定义侧边栏块' : '编辑自定义侧边栏块'
+      "
+      width="800px"
+      :close-on-click-modal="false"
+    >
+      <el-form :model="dialogForm" label-position="top">
+        <el-form-item label="在文章页显示">
+          <el-switch v-model="dialogForm.showInPost" />
+          <span class="form-item-inline-help"
+            >开启后此块将在文章详情页显示</span
+          >
+        </el-form-item>
+        <el-form-item label="块标题（可选）">
+          <el-input
+            v-model="dialogForm.title"
+            placeholder="留空则不显示标题"
+            clearable
+          />
+          <div class="form-item-help">块标题，留空则不显示标题</div>
+        </el-form-item>
+        <el-form-item label="块内容">
+          <el-input
+            v-model="dialogForm.content"
+            type="textarea"
+            :rows="10"
+            placeholder="请填写HTML内容"
+          />
+          <div class="form-item-help">
+            支持完整的 HTML 代码（包括 &lt;style&gt; 和 &lt;script&gt;
+            标签）。<br />
+            可用于添加广告、公告、自定义小工具等。
+          </div>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="cancelEdit">取消</el-button>
+        <el-button type="primary" @click="saveSidebarBlock">
+          {{ dialogMode === "add" ? "添加" : "保存" }}
+        </el-button>
+      </template>
+    </AnDialog>
   </div>
 </template>
 
@@ -297,6 +610,120 @@ const updateSocials = (jsonString: string) => {
 
     html.dark {
       background-color: rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+.form-item-inline-help {
+  margin-left: 12px;
+  font-size: 12px;
+  color: var(--anzhiyu-secondtext);
+}
+
+// 自定义侧边栏块样式
+.custom-sidebar-blocks {
+  .blocks-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+
+    .blocks-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--anzhiyu-fontcolor);
+    }
+  }
+
+  .sidebar-block-item {
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--el-border-color);
+    border-radius: 8px;
+    background-color: var(--anzhiyu-card-bg);
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: var(--anzhiyu-theme);
+    }
+
+    .block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed var(--el-border-color);
+
+      .block-number {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--anzhiyu-theme);
+      }
+
+      .block-actions {
+        display: flex;
+        gap: 4px;
+      }
+    }
+
+    .block-preview {
+      .block-preview-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+
+        .block-preview-label {
+          font-size: 14px;
+          color: var(--anzhiyu-fontcolor);
+        }
+      }
+
+      .block-preview-title {
+        margin-bottom: 12px;
+        padding: 8px 12px;
+        background-color: var(--anzhiyu-card-bg-grey);
+        border-radius: 4px;
+        font-size: 14px;
+        color: var(--anzhiyu-fontcolor);
+
+        strong {
+          color: var(--anzhiyu-theme);
+          margin-right: 8px;
+        }
+      }
+
+      .block-preview-content {
+        font-size: 14px;
+        color: var(--anzhiyu-fontcolor);
+
+        strong {
+          color: var(--anzhiyu-theme);
+          margin-right: 8px;
+        }
+
+        .content-preview {
+          margin-top: 8px;
+          padding: 12px;
+          background-color: var(--anzhiyu-card-bg-grey);
+          border-radius: 4px;
+          max-height: 200px;
+          overflow-y: auto;
+          word-break: break-all;
+          font-size: 12px;
+          line-height: 1.5;
+
+          :deep(*) {
+            max-width: 100%;
+          }
+
+          :deep(img) {
+            max-width: 100%;
+            height: auto;
+          }
+        }
+      }
     }
   }
 }
