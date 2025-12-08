@@ -155,24 +155,30 @@ onMounted(() => {
 
     .error-content {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
+      align-items: stretch;
       background: var(--el-bg-color-overlay);
       border-radius: 12px;
       border: var(--style-border);
+      overflow: hidden;
+      min-height: 400px;
 
       .error-img {
-        width: 400px;
-        height: 400px;
+        flex: 1;
+        min-width: 300px;
         background-size: cover;
         background-position: center;
-        border-radius: 12px;
-        flex-shrink: 0;
+        border-radius: 12px 0 0 12px;
       }
 
       .error-info {
+        flex: 1;
+        min-width: 280px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         text-align: center;
+        padding: 2rem;
 
         .error-title {
           font-size: 8rem;
@@ -322,15 +328,18 @@ onMounted(() => {
 
     .error-box {
       .error-content {
-        gap: 2rem;
-        padding: 1.5rem;
+        flex-direction: column;
+        min-height: auto;
 
         .error-img {
-          width: 280px;
-          height: 280px;
+          min-width: 100%;
+          height: 250px;
+          border-radius: 12px 12px 0 0;
         }
 
         .error-info {
+          padding: 1.5rem;
+
           .error-title {
             font-size: 5rem;
           }
@@ -377,11 +386,12 @@ onMounted(() => {
     .error-box {
       .error-content {
         .error-img {
-          width: 200px;
-          height: 200px;
+          height: 180px;
         }
 
         .error-info {
+          padding: 1rem;
+
           .error-title {
             font-size: 4rem;
           }
