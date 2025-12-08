@@ -108,6 +108,10 @@ export function parseBackendValue(
       // 如果转换后是 NaN，返回 null
       return isNaN(numValue) ? null : numValue;
     case "json":
+      // 特殊处理 CUSTOM_SIDEBAR：迁移旧字符串格式到新数组格式
+      if (backendKey === "CUSTOM_SIDEBAR") {
+        return migrateCustomSidebarValue(value);
+      }
       if (typeof value === "object") {
         return processJsonValueForBackend(value, backendKey);
       }
@@ -211,11 +215,93 @@ function processJsonValueForBackend(value: any, backendKey?: string): any {
 }
 
 /**
+ * 迁移自定义侧边栏的旧数据格式到新格式
+ * 旧格式：纯 HTML 字符串
+ * 新格式：数组 [{title: string, content: string, showInPost: boolean}]
+ */
+function migrateCustomSidebarValue(value: any): any[] {
+  // 如果已经是数组格式，直接返回
+  if (Array.isArray(value)) {
+    // 确保每个块都有 showInPost 字段
+    return value.map((block: any) => ({
+      title: block.title || "",
+      content: block.content || "",
+      showInPost: block.showInPost !== undefined ? block.showInPost : true
+    }));
+  }
+
+  // 如果是对象（可能是解析后的 JSON），尝试转换
+  if (typeof value === "object" && value !== null) {
+    // 如果对象有 content 属性，说明可能是单个块
+    if (value.content) {
+      return [
+        {
+          title: value.title || "",
+          content: value.content || "",
+          showInPost: value.showInPost !== undefined ? value.showInPost : true
+        }
+      ];
+    }
+    // 其他情况返回空数组
+    return [];
+  }
+
+  // 如果是字符串
+  if (typeof value === "string") {
+    // 空字符串返回空数组
+    if (!value.trim()) {
+      return [];
+    }
+
+    // 尝试解析为 JSON
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed.map((block: any) => ({
+          title: block.title || "",
+          content: block.content || "",
+          showInPost: block.showInPost !== undefined ? block.showInPost : true
+        }));
+      }
+      // 如果是对象，转换为数组
+      if (typeof parsed === "object" && parsed !== null) {
+        if (parsed.content) {
+          return [
+            {
+              title: parsed.title || "",
+              content: parsed.content || "",
+              showInPost:
+                parsed.showInPost !== undefined ? parsed.showInPost : true
+            }
+          ];
+        }
+      }
+    } catch {
+      // 解析失败，说明是旧的纯 HTML 字符串，转换为单个块
+      return [
+        {
+          title: "",
+          content: value,
+          showInPost: true
+        }
+      ];
+    }
+  }
+
+  // 其他情况返回空数组
+  return [];
+}
+
+/**
  * 获取后端键对应的默认值
  * @param backendKey 后端配置键名
  * @returns 默认值
  */
 function getDefaultValueForBackendKey(backendKey?: string): any {
+  // CUSTOM_SIDEBAR 应该返回空数组
+  if (backendKey === "CUSTOM_SIDEBAR") {
+    return [];
+  }
   if (isAnyMenuConfig(backendKey)) {
     return [];
   }

@@ -1276,16 +1276,10 @@ const sidebarDescriptors: SettingDescriptor[] = [
     type: "number"
   },
   {
-    frontendPath: "frontDesk.sidebar.customSidebar",
+    frontendPath: "frontDesk.sidebar.customSidebarBlocks",
     backendKey: constant.KeyCustomSidebar,
-    defaultValue: "",
-    type: "string"
-  },
-  {
-    frontendPath: "frontDesk.sidebar.customShowInPost",
-    backendKey: constant.KeySidebarCustomShowInPost,
-    defaultValue: false,
-    type: "boolean"
+    defaultValue: [],
+    type: "json"
   },
   {
     frontendPath: "frontDesk.sidebar.tocCollapseMode",
@@ -1378,6 +1372,18 @@ const commentDescriptors: SettingDescriptor[] = [
   {
     frontendPath: "frontDesk.comment.forbiddenWords",
     backendKey: constant.KeyCommentForbiddenWords,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.comment.qqAPIURL",
+    backendKey: constant.KeyCommentQQAPIURL,
+    defaultValue: "https://api.nsmao.net/api/qq/query",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.comment.qqAPIKey",
+    backendKey: constant.KeyCommentQQAPIKey,
     defaultValue: "",
     type: "string"
   },
