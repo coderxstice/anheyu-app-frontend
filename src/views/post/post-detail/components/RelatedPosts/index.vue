@@ -163,4 +163,91 @@ const defaultCover = articleStore.defaultCover;
     line-clamp: 4;
   }
 }
+
+/* 移动端响应式样式 */
+@media screen and (max-width: 768px) {
+  .headline {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+
+    i {
+      font-size: 18px;
+    }
+
+    span {
+      margin-left: 6px;
+    }
+  }
+
+  .relatedPosts-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+
+    & > div {
+      height: auto;
+      margin-bottom: 0;
+      border-radius: 8px;
+
+      &:hover {
+        background: var(--anzhiyu-secondbg);
+
+        a .title {
+          color: var(--anzhiyu-fontcolor);
+        }
+      }
+    }
+  }
+
+  .relatedPosts-list a {
+    flex-direction: column;
+
+    .cover {
+      width: 100%;
+      min-width: 100%;
+      max-width: 100%;
+      height: 90px;
+      border-radius: 8px 8px 0 0;
+    }
+
+    .content {
+      padding: 0.5rem;
+
+      &.is-center {
+        justify-content: flex-start;
+        text-align: left;
+      }
+    }
+
+    .title {
+      font-size: 0.875rem;
+      line-height: 1.4;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+    }
+  }
+}
+
+/* 超小屏幕优化 */
+@media screen and (max-width: 480px) {
+  .headline {
+    font-size: 1rem;
+
+    i {
+      font-size: 16px;
+    }
+  }
+
+  .relatedPosts-list a {
+    .cover {
+      height: 75px;
+    }
+
+    .title {
+      font-size: 0.8125rem;
+    }
+  }
+}
 </style>
