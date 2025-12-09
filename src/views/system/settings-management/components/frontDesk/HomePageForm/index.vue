@@ -108,7 +108,7 @@
             <span class="category-number">分类 {{ index + 1 }}</span>
           </div>
           <div class="category-card-body">
-            <el-row :gutter="16">
+            <el-row :gutter="16" class="mb-2">
               <el-col :span="12">
                 <el-form-item label="分类名称">
                   <el-input
@@ -122,25 +122,12 @@
               </el-col>
               <el-col :span="12">
                 <el-form-item label="图标类名">
-                  <el-input
+                  <IconSelector
                     :model-value="category.icon"
-                    placeholder="字体图标或HTTP链接"
                     @update:model-value="
                       updateCategoryField(index, 'icon', $event)
                     "
-                  >
-                    <template #suffix>
-                      <el-tooltip
-                        content="支持字体图标类名（如：anzhiyu-icon-dove）或HTTP图标链接（如：https://example.com/icon.png）"
-                        placement="top"
-                        :show-arrow="false"
-                      >
-                        <el-icon class="icon-help">
-                          <QuestionFilled />
-                        </el-icon>
-                      </el-tooltip>
-                    </template>
-                  </el-input>
+                  />
                 </el-form-item>
               </el-col>
             </el-row>
@@ -432,26 +419,10 @@
             </el-form-item>
 
             <el-form-item label="图标样式">
-              <el-input
+              <IconSelector
                 :model-value="currentEditingMenu.icon || ''"
-                placeholder="字体图标或HTTP链接"
                 @update:model-value="updateCurrentMenuField('icon', $event)"
-              >
-                <template #prefix>
-                  <el-icon><DCaret /></el-icon>
-                </template>
-                <template #suffix>
-                  <el-tooltip
-                    content="支持字体图标类名（如：anzhiyu-icon-home）或HTTP图标链接（如：https://example.com/icon.png）"
-                    placement="top"
-                    :show-arrow="false"
-                  >
-                    <el-icon class="icon-help">
-                      <QuestionFilled />
-                    </el-icon>
-                  </el-tooltip>
-                </template>
-              </el-input>
+              />
               <div class="hint-text">
                 支持字体图标类名或HTTP图标链接，可选填
               </div>
@@ -886,8 +857,7 @@ import {
   Menu,
   Setting,
   Warning,
-  CircleCheck,
-  QuestionFilled
+  CircleCheck
 } from "@element-plus/icons-vue";
 import type {
   HomePageSettingsInfo,
@@ -903,6 +873,7 @@ import FooterLinkListEditor from "./FooterLinkListEditor.vue";
 import SubMenuEditor from "./SubMenuEditor.vue";
 import NavMenuItemsEditor from "./NavMenuItemsEditor.vue";
 import CreativityEditor from "./CreativityEditor.vue";
+import IconSelector from "../components/IconSelector.vue";
 
 const model = defineModel<HomePageSettingsInfo>({
   required: true
@@ -2093,15 +2064,6 @@ const updateMusicVinylGroove = (newGroove: string) => {
         font-size: 14px;
       }
     }
-  }
-}
-
-.icon-help {
-  color: var(--anzhiyu-blue);
-  cursor: help;
-
-  &:hover {
-    color: var(--anzhiyu-theme);
   }
 }
 

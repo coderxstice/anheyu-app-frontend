@@ -20,9 +20,9 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="图标 URL" prop="icon" min-width="220">
+      <el-table-column label="图标" prop="icon" min-width="200">
         <template #default="{ row }">
-          <el-input v-model="row.icon" placeholder="https://.../icon.png" />
+          <IconSelector v-model="row.icon" />
         </template>
       </el-table-column>
 
@@ -70,6 +70,7 @@ import { ref, watch, computed } from "vue";
 import { Delete, Plus } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import type { NavMenuItem } from "../../../type";
+import IconSelector from "../components/IconSelector.vue";
 
 const props = defineProps<{
   items: NavMenuItem[];
