@@ -3,6 +3,7 @@ import { ref, computed, onMounted, type PropType } from "vue";
 import { ElTooltip } from "element-plus";
 import { useUserStoreHook } from "@/store/modules/user";
 import { storeToRefs } from "pinia";
+import { IconifyIconOnline } from "@/components/ReIcon";
 
 interface AuthorConfig {
   description: string;
@@ -153,7 +154,31 @@ onMounted(() => {
               rel="external nofollow noreferrer"
               target="_blank"
             >
-              <i class="anzhiyufont" :class="social.icon" />
+              <!-- 图片 URL -->
+              <img
+                v-if="
+                  social.icon &&
+                  (social.icon.startsWith('http://') ||
+                    social.icon.startsWith('https://'))
+                "
+                :src="social.icon"
+                :alt="name"
+                class="social-icon-img"
+              />
+              <!-- Iconify 图标 -->
+              <IconifyIconOnline
+                v-else-if="social.icon && social.icon.includes(':')"
+                :icon="social.icon"
+                width="20"
+                height="20"
+                class="social-iconify"
+              />
+              <!-- anzhiyu 图标 -->
+              <i
+                v-else-if="social.icon"
+                class="anzhiyufont"
+                :class="social.icon"
+              />
             </a>
           </el-tooltip>
         </div>
@@ -409,6 +434,17 @@ onMounted(() => {
         box-shadow: none;
         transform: scale(1.1);
       }
+    }
+
+    .social-icon-img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      border-radius: 50%;
+    }
+
+    .social-iconify {
+      color: var(--anzhiyu-white);
     }
   }
 }

@@ -14,6 +14,7 @@ import type {
 } from "../../../type";
 import JsonEditorTable from "../components/JsonEditorTable.vue";
 import HighlightTagSelector from "../components/HighlightTagSelector.vue";
+import IconSelector from "../components/IconSelector.vue";
 import AnDialog from "@/components/AnDialog/index.vue";
 
 defineOptions({
@@ -103,7 +104,7 @@ const updateSkills = (jsonString: string) => {
 const socialColumns = ref<JsonEditorTableColumn[]>([
   { prop: "title", label: "标题 (如: Github)" },
   { prop: "link", label: "链接" },
-  { prop: "icon", label: "图标类名" }
+  { prop: "icon", label: "图标类名", slot: "icon" }
 ]);
 
 const socialsForTable = computed(() => {
@@ -367,7 +368,14 @@ const moveSidebarBlock = (index: number, direction: number) => {
         :columns="socialColumns"
         :new-item-template="{ title: '', link: '', icon: '' }"
         @update:model-value="updateSocials($event)"
-      />
+      >
+        <template #icon="{ scope }">
+          <IconSelector
+            :model-value="scope.row.icon"
+            @update:model-value="scope.row.icon = $event"
+          />
+        </template>
+      </JsonEditorTable>
     </template>
 
     <el-divider content-position="left">微信二维码</el-divider>

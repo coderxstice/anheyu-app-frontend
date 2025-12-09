@@ -100,7 +100,7 @@
                     : null
                 "
               >
-                <!-- 支持HTTP链接图标 -->
+                <!-- 图片 URL -->
                 <img
                   v-if="
                     menuItem.icon &&
@@ -111,7 +111,15 @@
                   :alt="menuItem.title"
                   class="menu-icon menu-icon-img"
                 />
-                <!-- 字体图标 -->
+                <!-- Iconify 图标 -->
+                <IconifyIconOnline
+                  v-else-if="menuItem.icon && menuItem.icon.includes(':')"
+                  :icon="menuItem.icon"
+                  width="16"
+                  height="16"
+                  class="menu-icon menu-icon-iconify"
+                />
+                <!-- anzhiyu 图标 -->
                 <i
                   v-else-if="menuItem.icon"
                   :class="['anzhiyufont', menuItem.icon]"
@@ -140,7 +148,7 @@
                       rel="noopener noreferrer"
                       class="site-page"
                     >
-                      <!-- 支持HTTP链接图标 -->
+                      <!-- 图片 URL -->
                       <img
                         v-if="
                           item.icon &&
@@ -151,10 +159,19 @@
                         :alt="item.title"
                         class="menu-icon menu-icon-img"
                       />
-                      <!-- 字体图标 -->
+                      <!-- Iconify 图标 -->
+                      <IconifyIconOnline
+                        v-else-if="item.icon && item.icon.includes(':')"
+                        :icon="item.icon"
+                        width="16"
+                        height="16"
+                        class="menu-icon menu-icon-iconify"
+                      />
+                      <!-- anzhiyu 图标 -->
                       <i
                         v-else-if="item.icon"
                         :class="['anzhiyufont', item.icon]"
+                        class="menu-icon"
                       />
                       <span>{{ item.title }}</span>
                     </a>
@@ -164,7 +181,7 @@
                       class="site-page"
                       @click.prevent="handleTreasureLinkClick"
                     >
-                      <!-- 支持HTTP链接图标 -->
+                      <!-- 图片 URL -->
                       <img
                         v-if="
                           item.icon &&
@@ -175,15 +192,24 @@
                         :alt="item.title"
                         class="menu-icon menu-icon-img"
                       />
-                      <!-- 字体图标 -->
+                      <!-- Iconify 图标 -->
+                      <IconifyIconOnline
+                        v-else-if="item.icon && item.icon.includes(':')"
+                        :icon="item.icon"
+                        width="16"
+                        height="16"
+                        class="menu-icon menu-icon-iconify"
+                      />
+                      <!-- anzhiyu 图标 -->
                       <i
                         v-else-if="item.icon"
                         :class="['anzhiyufont', item.icon]"
+                        class="menu-icon"
                       />
                       <span>{{ item.title }}</span>
                     </a>
                     <router-link v-else :to="item.path" class="site-page">
-                      <!-- 支持HTTP链接图标 -->
+                      <!-- 图片 URL -->
                       <img
                         v-if="
                           item.icon &&
@@ -194,10 +220,19 @@
                         :alt="item.title"
                         class="menu-icon menu-icon-img"
                       />
-                      <!-- 字体图标 -->
+                      <!-- Iconify 图标 -->
+                      <IconifyIconOnline
+                        v-else-if="item.icon && item.icon.includes(':')"
+                        :icon="item.icon"
+                        width="16"
+                        height="16"
+                        class="menu-icon menu-icon-iconify"
+                      />
+                      <!-- anzhiyu 图标 -->
                       <i
                         v-else-if="item.icon"
                         :class="['anzhiyufont', item.icon]"
+                        class="menu-icon"
                       />
                       <span>{{ item.title }}</span>
                     </router-link>
@@ -228,6 +263,7 @@ import {
   updateMetaThemeColorDynamic,
   getCurrentArticlePrimaryColor
 } from "@/utils/themeManager";
+import { IconifyIconOnline } from "@/components/ReIcon";
 
 import { useHeader } from "./hooks/useHeader";
 import BackMenuListGroups from "./components/back-menu-list-groups.vue";
@@ -889,6 +925,12 @@ const scrollToTop = () => {
     width: 14px;
     height: 14px;
     object-fit: contain;
+  }
+
+  .menu-icon-iconify {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 </style>

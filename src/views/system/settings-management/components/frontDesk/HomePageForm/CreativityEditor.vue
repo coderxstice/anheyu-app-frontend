@@ -83,11 +83,19 @@
                   v-if="
                     skill.icon &&
                     (skill.icon.startsWith('http') ||
+                      skill.icon.startsWith('https') ||
                       skill.icon.startsWith('data:'))
                   "
                   :src="skill.icon"
                   :alt="skill.name"
                   class="skill-icon-img"
+                />
+                <IconifyIconOnline
+                  v-else-if="skill.icon && skill.icon.includes(':')"
+                  :icon="skill.icon"
+                  width="36"
+                  height="36"
+                  class="skill-icon-iconify"
                 />
                 <i
                   v-else-if="skill.icon"
@@ -127,7 +135,11 @@
         v-else-if="localValue.creativity_list?.length && viewMode === 'list'"
         class="skill-list"
       >
-        <el-table :data="localValue.creativity_list" stripe style="width: 100%">
+        <el-table
+          :data="localValue.creativity_list"
+          stripe
+          :style="{ width: '100%' }"
+        >
           <el-table-column label="图标" width="80" align="center">
             <template #default="{ row }">
               <div
@@ -138,11 +150,19 @@
                   v-if="
                     row.icon &&
                     (row.icon.startsWith('http') ||
+                      row.icon.startsWith('https') ||
                       row.icon.startsWith('data:'))
                   "
                   :src="row.icon"
                   :alt="row.name"
                   class="skill-icon-img"
+                />
+                <IconifyIconOnline
+                  v-else-if="row.icon && row.icon.includes(':')"
+                  :icon="row.icon"
+                  width="24"
+                  height="24"
+                  class="skill-icon-iconify"
                 />
                 <i
                   v-else-if="row.icon"
@@ -248,32 +268,12 @@
         </el-form-item>
 
         <el-form-item label="图标设置">
-          <el-radio-group v-model="iconType" style="margin-bottom: 10px">
-            <el-radio value="icon">图标类名</el-radio>
-            <el-radio value="image">图片链接</el-radio>
-          </el-radio-group>
-          <el-input
-            v-model="editingSkill.icon"
-            :placeholder="
-              iconType === 'icon'
-                ? '例如：fa-brands fa-vuejs'
-                : '例如：https://example.com/icon.png'
-            "
-          >
-            <template #append>
-              <el-tooltip
-                content="支持 Font Awesome、Element Plus 图标或图片URL"
-                placement="top"
-              >
-                <el-icon><QuestionFilled /></el-icon>
-              </el-tooltip>
-            </template>
-          </el-input>
+          <IconSelector v-model="editingSkill.icon" :exclude-anzhiyu="true" />
         </el-form-item>
 
         <!-- 预览 -->
         <el-form-item label="效果预览">
-          <div class="skill-preview-box">
+          <div class="skill-preview-box creativity-editor-preview">
             <div
               class="skill-preview-item"
               :style="{ backgroundColor: editingSkill.color || '#fff' }"
@@ -282,11 +282,19 @@
                 v-if="
                   editingSkill.icon &&
                   (editingSkill.icon.startsWith('http') ||
+                    editingSkill.icon.startsWith('https') ||
                     editingSkill.icon.startsWith('data:'))
                 "
                 :src="editingSkill.icon"
                 :alt="editingSkill.name"
                 class="skill-icon-img"
+              />
+              <IconifyIconOnline
+                v-else-if="editingSkill.icon && editingSkill.icon.includes(':')"
+                :icon="editingSkill.icon"
+                width="36"
+                height="36"
+                class="skill-icon-iconify"
               />
               <i
                 v-else-if="editingSkill.icon"
@@ -294,9 +302,6 @@
                 class="skill-icon-font"
               />
               <el-icon v-else class="skill-icon-placeholder"><Box /></el-icon>
-              <span class="preview-name">{{
-                editingSkill.name || "技能名称"
-              }}</span>
             </div>
           </div>
         </el-form-item>
@@ -319,6 +324,8 @@ import {
 import type { CreativityInfo, CreativityItem } from "../../../type";
 import { ElMessageBox, ElMessage } from "element-plus";
 import AnDialog from "@/components/AnDialog";
+import IconSelector from "../components/IconSelector.vue";
+import { IconifyIconOnline } from "@/components/ReIcon";
 
 const props = defineProps<{
   modelValue?: CreativityInfo;
@@ -335,7 +342,6 @@ const viewMode = ref<"grid" | "list">("grid");
 const editDialogVisible = ref(false);
 const editingIndex = ref(-2); // 使用 -2 作为初始值，-1 表示新增，>= 0 表示编辑
 const editingSkill = ref<CreativityItem | null>(null);
-const iconType = ref<"icon" | "image">("icon");
 
 // 预定义颜色
 const predefineColors = [
@@ -361,19 +367,13 @@ watch(editingIndex, newVal => {
   if (newVal >= 0) {
     const skill = localValue.value.creativity_list[newVal];
     editingSkill.value = { ...skill };
-    iconType.value =
-      skill.icon &&
-      (skill.icon.startsWith("http") || skill.icon.startsWith("data:"))
-        ? "image"
-        : "icon";
     editDialogVisible.value = true;
   } else if (newVal === -1) {
     editingSkill.value = {
       name: "",
-      color: "var(--anzhiyu-theme)",
+      color: "",
       icon: ""
     };
-    iconType.value = "icon";
     editDialogVisible.value = true;
   }
 });
@@ -551,6 +551,10 @@ const saveEditingSkill = () => {
           object-fit: contain;
         }
 
+        .skill-icon-iconify {
+          color: var(--anzhiyu-fontcolor);
+        }
+
         .skill-icon-font {
           font-size: 36px;
           color: var(--anzhiyu-fontcolor);
@@ -592,6 +596,10 @@ const saveEditingSkill = () => {
         align-items: center;
         justify-content: center;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        .skill-icon-iconify {
+          color: var(--anzhiyu-fontcolor);
+        }
       }
     }
   }
@@ -605,20 +613,36 @@ const saveEditingSkill = () => {
     border-radius: 8px;
 
     .skill-preview-item {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto;
+      border-radius: 16px;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 12px;
-      padding: 20px;
-      border-radius: 12px;
+      justify-content: center;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      min-width: 120px;
-    }
+      transition: all 0.3s ease;
+      overflow: hidden;
 
-    .preview-name {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--anzhiyu-fontcolor);
+      .skill-icon-img {
+        width: 48px;
+        height: 48px;
+        object-fit: contain;
+      }
+
+      .skill-icon-iconify {
+        color: var(--anzhiyu-fontcolor);
+      }
+
+      .skill-icon-font {
+        font-size: 36px;
+        color: var(--anzhiyu-fontcolor);
+      }
+
+      .skill-icon-placeholder {
+        font-size: 32px;
+        color: var(--anzhiyu-secondtext);
+      }
     }
   }
 
@@ -692,6 +716,10 @@ const saveEditingSkill = () => {
             max-height: 36px;
           }
 
+          .skill-icon-iconify {
+            color: var(--anzhiyu-fontcolor);
+          }
+
           .skill-icon-font {
             font-size: 28px;
           }
@@ -701,6 +729,63 @@ const saveEditingSkill = () => {
           }
         }
       }
+    }
+  }
+}
+</style>
+
+<!-- 非 scoped 样式，用于 Teleport 到 body 的弹窗内容 -->
+<style lang="scss">
+// 优化弹窗表单样式
+:deep(.dialog-content) {
+  .el-form {
+    .el-form-item {
+      margin-bottom: 20px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+.creativity-editor-preview {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  background: var(--anzhiyu-secondbg);
+  border-radius: 8px;
+
+  .skill-preview-item {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+
+    .skill-icon-img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+    }
+
+    .skill-icon-iconify {
+      color: var(--anzhiyu-fontcolor);
+    }
+
+    .skill-icon-font {
+      font-size: 36px;
+      color: var(--anzhiyu-fontcolor);
+    }
+
+    .skill-icon-placeholder {
+      font-size: 32px;
+      color: var(--anzhiyu-secondtext);
     }
   }
 }
