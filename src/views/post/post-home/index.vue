@@ -19,70 +19,62 @@ defineOptions({
 
 const route = useRoute();
 const siteConfigStore = useSiteConfigStore();
+const postConfig = computed(() => siteConfigStore.getSiteConfig?.post?.default);
 
-const pageType = computed(() => {
-  if (route.path.startsWith("/tags/")) return "tag";
-  if (route.path.startsWith("/categories/")) return "category";
-  if (route.path.startsWith("/archives")) return "archive";
+type PageType = "home" | "tag" | "category" | "archive";
+
+const pageType = computed<PageType>(() => {
+  const { path } = route;
+  if (path.startsWith("/tags/")) return "tag";
+  if (path.startsWith("/categories/")) return "category";
+  if (path.startsWith("/archives")) return "archive";
   return "home";
 });
 
-const showHomeTop = computed(() => {
-  return pageType.value === "home" && pagination.page === 1;
-});
-
-const isDoubleColumn = computed(() => {
-  const doubleColumnSetting =
-    siteConfigStore.getSiteConfig?.post?.default.double_column;
-  console.log("doubleColumnSetting:", doubleColumnSetting);
-
-  // 如果配置项存在（不管是true还是false），使用配置值；否则默认为true
-  return doubleColumnSetting !== undefined ? doubleColumnSetting : true;
-});
+const isHomePage = computed(() => pageType.value === "home");
+const isFirstPage = computed(() => pagination.page === 1);
+const showHomeTop = computed(() => isHomePage.value && isFirstPage.value);
+const isDoubleColumn = computed(() => postConfig.value?.double_column ?? true);
 
 const articles = ref<Article[]>([]);
+const isLoading = ref(false);
 const pagination = reactive({
   page: 1,
-  pageSize: siteConfigStore.getSiteConfig?.post?.default.page_size || 12,
+  pageSize: postConfig.value?.page_size || 12,
   total: 0
 });
 
-const currentCategoryName = ref<string | null>(null);
-const currentTagName = ref<string | null>(null);
-const currentYear = ref<number | null>(null);
-const currentMonth = ref<number | null>(null);
-
-// 计算最新文章的ID（只在第一页且是首页时有效）
+// 计算最新文章的ID（只在首页第一页时有效）
 const newestArticleId = computed(() => {
-  if (
-    pagination.page !== 1 ||
-    pageType.value !== "home" ||
-    articles.value.length === 0
-  ) {
-    return null;
-  }
-  // 找出创建时间最晚的文章
-  const newest = articles.value.reduce((latest, current) => {
-    const latestTime = new Date(latest.created_at).getTime();
-    const currentTime = new Date(current.created_at).getTime();
-    return currentTime > latestTime ? current : latest;
-  }, articles.value[0]);
-  return newest.id;
+  if (!showHomeTop.value || articles.value.length === 0) return null;
+  return articles.value.reduce((latest, current) =>
+    new Date(current.created_at) > new Date(latest.created_at)
+      ? current
+      : latest
+  ).id;
 });
 
+// 是否显示分页
+const showPagination = computed(() => pagination.total > pagination.pageSize);
+
 const fetchData = async () => {
+  isLoading.value = true;
   try {
     const params: GetArticleListParams = {
       page: pagination.page,
       pageSize: pagination.pageSize
     };
-    if (pageType.value === "category" && currentCategoryName.value) {
-      params.category = currentCategoryName.value;
-    } else if (pageType.value === "tag" && currentTagName.value) {
-      params.tag = currentTagName.value;
-    } else if (pageType.value === "archive") {
-      if (currentYear.value) params.year = currentYear.value;
-      if (currentMonth.value) params.month = currentMonth.value;
+
+    const { name, year, month } = route.params;
+    const type = pageType.value;
+
+    if (type === "category" && name) {
+      params.category = name as string;
+    } else if (type === "tag" && name) {
+      params.tag = name as string;
+    } else if (type === "archive") {
+      if (year) params.year = Number(year);
+      if (month) params.month = Number(month);
     }
 
     const { data } = await getPublicArticles(params);
@@ -90,6 +82,9 @@ const fetchData = async () => {
     pagination.total = data.total;
   } catch (error) {
     console.error("获取文章列表失败:", error);
+    articles.value = [];
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -99,52 +94,15 @@ const handlePageChange = (newPage: number) => {
 };
 
 watch(
-  () => route.params,
-  newParams => {
-    // 路由参数变化时先清空文章列表，避免显示旧数据导致的闪动
+  () => route.fullPath,
+  () => {
     articles.value = [];
-
-    if (pageType.value === "category") {
-      currentCategoryName.value = (newParams.name as string) || null;
-      currentTagName.value = null;
-      currentYear.value = null;
-      currentMonth.value = null;
-    } else if (pageType.value === "tag") {
-      currentTagName.value = (newParams.name as string) || null;
-      currentCategoryName.value = null;
-      currentYear.value = null;
-      currentMonth.value = null;
-    } else if (pageType.value === "archive") {
-      currentYear.value = newParams.year ? Number(newParams.year) : null;
-      currentMonth.value = newParams.month ? Number(newParams.month) : null;
-      currentCategoryName.value = null;
-      currentTagName.value = null;
-    } else {
-      currentCategoryName.value = null;
-      currentTagName.value = null;
-      currentYear.value = null;
-      currentMonth.value = null;
-    }
-    pagination.page = newParams.id ? Number(newParams.id) : 1;
+    pagination.page = route.params.id ? Number(route.params.id) : 1;
+    fetchData();
   },
-  { immediate: true, deep: true }
+  { immediate: true }
 );
 
-watch(
-  [
-    () => pagination.page,
-    currentCategoryName,
-    currentTagName,
-    currentYear,
-    currentMonth
-  ],
-  fetchData,
-  {
-    immediate: true
-  }
-);
-
-// 在首页挂载时重置主题色到默认值
 onMounted(() => {
   resetThemeToDefault();
 });
@@ -152,29 +110,35 @@ onMounted(() => {
 
 <template>
   <div class="post-home-container">
+    <!-- 首页顶部区域 -->
     <div v-if="showHomeTop" class="post-home-top-container">
       <HomeTop />
     </div>
 
     <div id="content-inner" class="layout">
       <main class="main-content">
-        <CategoryBar v-if="pageType === 'home' || pageType === 'category'" />
+        <!-- 分类/标签导航栏 -->
+        <CategoryBar v-if="isHomePage || pageType === 'category'" />
         <TagBar v-else-if="pageType === 'tag'" />
 
+        <!-- 文章列表区域 -->
         <div
           id="recent-posts"
           class="recent-posts"
           :class="{
             'double-column-container': isDoubleColumn,
-            '!justify-center': articles.length === 0
+            '!justify-center': !isLoading && articles.length === 0
           }"
         >
+          <!-- 文章内容 -->
           <template v-if="articles.length > 0">
+            <!-- 归档视图 -->
             <Archives
               v-if="pageType === 'archive'"
               :articles="articles"
               :total="pagination.total"
             />
+            <!-- 卡片视图 -->
             <template v-else>
               <ArticleCard
                 v-for="article in articles"
@@ -185,11 +149,17 @@ onMounted(() => {
               />
             </template>
           </template>
-          <el-empty v-if="articles.length === 0" description="暂无文章" />
+
+          <!-- 空状态 -->
+          <el-empty
+            v-if="!isLoading && articles.length === 0"
+            description="暂无文章"
+          />
         </div>
 
+        <!-- 分页 -->
         <Pagination
-          v-if="pagination.total > pagination.pageSize"
+          v-if="showPagination"
           :page="pagination.page"
           :page-size="pagination.pageSize"
           :total="pagination.total"
