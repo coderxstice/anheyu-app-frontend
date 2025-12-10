@@ -22,6 +22,15 @@
         :src="effectiveBackground"
         :loop="effectiveVideoLoop"
         playsinline
+        webkit-playsinline
+        x5-playsinline
+        x5-video-player-type="h5"
+        x5-video-player-fullscreen="false"
+        x5-video-orientation="portraint"
+        x-webkit-airplay="deny"
+        disablePictureInPicture
+        disableRemotePlayback
+        controlsList="nodownload nofullscreen noremoteplayback noplaybackrate"
         class="one-image-video-background"
         @loadedmetadata="handleVideoLoaded"
       />

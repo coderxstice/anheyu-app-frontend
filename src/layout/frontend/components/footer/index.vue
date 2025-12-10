@@ -225,11 +225,17 @@
           </a>
           <a
             v-if="policeRecordNumber"
-            class="bar-link"
+            class="bar-link police-record-link"
             href="http://www.beian.gov.cn/portal/registerSystemInfo"
             target="_blank"
             rel="noopener"
           >
+            <img
+              v-if="policeRecordIcon"
+              :src="policeRecordIcon"
+              alt="公安备案"
+              class="police-record-icon"
+            />
             {{ policeRecordNumber }}
           </a>
 
@@ -281,6 +287,7 @@ const icpNumber = computed(() => siteConfig.value?.ICP_NUMBER);
 const policeRecordNumber = computed(
   () => siteConfig.value?.POLICE_RECORD_NUMBER
 );
+const policeRecordIcon = computed(() => siteConfig.value?.POLICE_RECORD_ICON);
 
 const displayedFriends = ref<FriendLink[]>([]);
 const rotationCount = ref(0);
@@ -634,6 +641,18 @@ a {
 
   i {
     margin: 0 2px;
+  }
+}
+
+.police-record-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  .police-record-icon {
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
   }
 }
 

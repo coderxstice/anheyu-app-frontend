@@ -96,6 +96,12 @@ const siteDescriptors: SettingDescriptor[] = [
     type: "string"
   },
   {
+    frontendPath: "site.policeRecordIcon",
+    backendKey: constant.KeyPoliceRecordIcon,
+    defaultValue: "https://www.beian.gov.cn/img/new/gongan.png",
+    type: "string"
+  },
+  {
     frontendPath: "site.gravatarURL",
     backendKey: constant.KeyGravatarURL,
     defaultValue: "https://cdn.sep.cc/",
