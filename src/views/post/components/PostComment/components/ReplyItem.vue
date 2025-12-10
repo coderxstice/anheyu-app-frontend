@@ -89,7 +89,9 @@ const handleLike = () => {
 const isBlogger = computed(() => !!props.comment.is_admin_comment);
 
 const isReplyFormVisible = computed(
-  () => commentStore.activeReplyCommentId === props.comment.id
+  () =>
+    commentStore.activeReplyCommentId === props.comment.id &&
+    !props.comment.is_anonymous
 );
 
 // 展开回复的状态
@@ -404,6 +406,7 @@ onMounted(() => {
         :target-path="comment.target_path"
         :parent-id="comment.parent_id || comment.id"
         :reply-to-id="comment.id"
+        :reply-to-is-anonymous="comment.is_anonymous"
         :placeholder="`回复 @${comment.nickname}`"
         show-cancel-button
         @submitted="handleReplySubmitted"

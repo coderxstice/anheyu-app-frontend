@@ -170,6 +170,12 @@ const handleEdit = (comment: AdminComment) => {
 };
 
 const handleReply = (comment: AdminComment) => {
+  // 匿名评论不允许回复
+  if (comment.is_anonymous) {
+    ElMessage.warning("匿名评论无法回复");
+    return;
+  }
+
   ElMessageBox.prompt(`回复 @${comment.nickname}:`, "回复评论", {
     inputType: "textarea",
     confirmButtonText: "提交",

@@ -73,6 +73,7 @@ const props = defineProps({
   targetPath: { type: String, required: true },
   parentId: { type: String, default: null },
   replyToId: { type: String, default: null }, // 回复目标评论的ID（用于构建对话链）
+  replyToIsAnonymous: { type: Boolean, default: false }, // 被回复的评论是否为匿名评论
   placeholder: { type: String, default: "欢迎留下宝贵的建议啦～" },
   showCancelButton: { type: Boolean, default: false },
   quoteText: { type: String, default: "" }
@@ -281,6 +282,7 @@ const showAnonymousDialog = () => {
   } else {
     // 已开启匿名，直接关闭匿名模式
     isAnonymous.value = false;
+    saveAnonymousState(false); // 保存匿名状态
     loadUserInfo();
     emit("anonymous-state-change", false);
     ElMessage.success({
@@ -299,6 +301,7 @@ const handleAnonymousToggle = () => {
     form.nickname = generateRandomName();
     form.email = getAnonymousEmail.value;
     showAnonymousConfirmDialog.value = false;
+    saveAnonymousState(true); // 保存匿名状态
     emit("anonymous-state-change", true);
     ElMessage.success({
       message: "已开启匿名评论模式",
@@ -307,6 +310,7 @@ const handleAnonymousToggle = () => {
   } else {
     // 关闭匿名评论，恢复之前的信息
     isAnonymous.value = false;
+    saveAnonymousState(false); // 保存匿名状态
     loadUserInfo();
     emit("anonymous-state-change", false);
   }
@@ -336,6 +340,12 @@ const checkUserProfileComplete = (): boolean => {
 
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
+
+  // 前端拦截：匿名评论不允许被回复
+  if (props.replyToIsAnonymous) {
+    ElMessage.error("匿名评论不允许被回复");
+    return;
+  }
 
   // 检查是否需要完善用户信息
   if (!checkUserProfileComplete()) {
@@ -390,8 +400,8 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         emit("submitted");
         form.content = "";
       } catch (error) {
+        // HTTP 拦截器已经显示了具体的错误消息，这里只记录日志
         console.error("评论发布失败:", error);
-        ElMessage.error("评论发布失败，请稍后再试。");
       } finally {
         isSubmitting.value = false;
       }
@@ -605,6 +615,24 @@ const loadUserInfo = () => {
   }
 };
 
+// 加载匿名状态
+const loadAnonymousState = () => {
+  const savedState = localStorage.getItem("comment-anonymous-state");
+  if (savedState === "true") {
+    isAnonymous.value = true;
+    // 恢复匿名状态时，生成随机名称和使用匿名邮箱
+    form.nickname = generateRandomName();
+    form.email = getAnonymousEmail.value;
+    form.website = "";
+    emit("anonymous-state-change", true);
+  }
+};
+
+// 保存匿名状态到 localStorage
+const saveAnonymousState = (state: boolean) => {
+  localStorage.setItem("comment-anonymous-state", state.toString());
+};
+
 // 从 userStore 中填充用户信息（用于登录后自动填充）
 const fillUserInfoFromStore = () => {
   // 如果用户已登录，检查表单字段是否为空
@@ -668,9 +696,20 @@ watch(activeEmojiPackageIndex, () => {
 
 onMounted(() => {
   fetchEmojis();
-  loadUserInfo();
-  // 如果用户已登录且表单为空，使用用户信息填充
-  fillUserInfoFromStore();
+  // 如果用户未登录，优先检查并恢复匿名状态
+  if (!isLoggedIn.value) {
+    loadAnonymousState();
+    // 如果不是匿名模式，才加载普通用户信息
+    if (!isAnonymous.value) {
+      loadUserInfo();
+    }
+  } else {
+    // 已登录用户不使用匿名模式，清除匿名状态
+    saveAnonymousState(false);
+    loadUserInfo();
+    // 如果用户已登录且表单为空，使用用户信息填充
+    fillUserInfoFromStore();
+  }
   nextTick(() => {
     if (props.showCancelButton) {
       textareaRef.value?.focus();

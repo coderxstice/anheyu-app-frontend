@@ -158,10 +158,15 @@ const handleAvatarError = (event: Event, comment: AdminComment) => {
                   <IconifyIconOffline :icon="EditIcon" />
                 </el-button>
               </el-tooltip>
-              <el-tooltip content="回复" placement="top" :show-arrow="false">
+              <el-tooltip
+                :content="comment.is_anonymous ? '匿名评论无法回复' : '回复'"
+                placement="top"
+                :show-arrow="false"
+              >
                 <el-button
                   type="primary"
                   circle
+                  :disabled="comment.is_anonymous"
                   @click="emit('reply', comment)"
                 >
                   <IconifyIconOffline :icon="ReplyIcon" />
