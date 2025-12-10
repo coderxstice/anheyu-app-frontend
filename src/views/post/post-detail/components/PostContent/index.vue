@@ -10,6 +10,196 @@ import {
 } from "./music-player-global";
 import "katex/dist/katex.min.css";
 
+// Mermaid 缩放功能的清理函数
+let mermaidCleanup: (() => void) | null = null;
+
+/**
+ * 初始化 Mermaid 图表的缩放功能
+ * 模拟 md-editor-v3 的行为，动态添加 action 按钮
+ */
+const initMermaidZoom = (container: HTMLElement) => {
+  const mermaidContainers = container.querySelectorAll(".md-editor-mermaid");
+  if (mermaidContainers.length === 0) return;
+
+  const removeEventsMap = new Map<
+    Element,
+    { removeEvent?: () => void; removeClick?: () => void }
+  >();
+
+  // Pin 图标 SVG
+  const pinOffIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pin-off"><path d="M12 17v5"></path><path d="M15 9.34V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H7.89"></path><path d="m2 2 20 20"></path><path d="M9 9v1.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h11"></path></svg>`;
+  const pinIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pin"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"></path></svg>`;
+
+  // 添加缩放/平移事件
+  const addZoomEvent = (mm: Element) => {
+    const el = mm as HTMLElement;
+    let scale = 1;
+    let translateX = 0;
+    let translateY = 0;
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+
+    const updateTransform = () => {
+      const svg = el.querySelector("svg");
+      if (svg) {
+        (svg as unknown as HTMLElement).style.transform =
+          `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+        (svg as unknown as HTMLElement).style.transformOrigin = "center center";
+      }
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      scale = Math.max(0.5, Math.min(3, scale + delta));
+      updateTransform();
+    };
+
+    const onMouseDown = (e: MouseEvent) => {
+      if (e.button !== 0) return;
+      isDragging = true;
+      startX = e.clientX - translateX;
+      startY = e.clientY - translateY;
+      el.style.cursor = "grabbing";
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+      translateX = e.clientX - startX;
+      translateY = e.clientY - startY;
+      updateTransform();
+    };
+
+    const onMouseUp = () => {
+      isDragging = false;
+      el.style.cursor = "grab";
+    };
+
+    const onMouseLeave = () => {
+      isDragging = false;
+      el.style.cursor = "grab";
+    };
+
+    // 触摸事件支持
+    let lastTouchDistance = 0;
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        lastTouchDistance = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+      } else if (e.touches.length === 1) {
+        isDragging = true;
+        startX = e.touches[0].clientX - translateX;
+        startY = e.touches[0].clientY - translateY;
+      }
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      if (e.touches.length === 2) {
+        const distance = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        const delta = (distance - lastTouchDistance) * 0.01;
+        scale = Math.max(0.5, Math.min(3, scale + delta));
+        lastTouchDistance = distance;
+        updateTransform();
+      } else if (isDragging && e.touches.length === 1) {
+        translateX = e.touches[0].clientX - startX;
+        translateY = e.touches[0].clientY - startY;
+        updateTransform();
+      }
+    };
+
+    const onTouchEnd = () => {
+      isDragging = false;
+      lastTouchDistance = 0;
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    el.addEventListener("mousedown", onMouseDown);
+    el.addEventListener("mousemove", onMouseMove);
+    el.addEventListener("mouseup", onMouseUp);
+    el.addEventListener("mouseleave", onMouseLeave);
+    el.addEventListener("touchstart", onTouchStart, { passive: false });
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    el.addEventListener("touchend", onTouchEnd);
+
+    el.style.cursor = "grab";
+    el.style.overflow = "hidden";
+
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      el.removeEventListener("mousedown", onMouseDown);
+      el.removeEventListener("mousemove", onMouseMove);
+      el.removeEventListener("mouseup", onMouseUp);
+      el.removeEventListener("mouseleave", onMouseLeave);
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+
+      // 重置变换
+      const svg = el.querySelector("svg");
+      if (svg) {
+        (svg as unknown as HTMLElement).style.transform = "";
+      }
+      el.style.cursor = "";
+      el.removeAttribute("data-grab");
+    };
+  };
+
+  mermaidContainers.forEach(mm => {
+    // 检查是否已有 action div
+    let actionDiv = mm.querySelector(".md-editor-mermaid-action");
+    if (!actionDiv) {
+      // 创建 action div
+      const div = document.createElement("div");
+      div.className = "md-editor-mermaid-action";
+      div.innerHTML = pinOffIcon;
+      mm.appendChild(div);
+      actionDiv = div;
+    }
+
+    const onClick = () => {
+      const current = removeEventsMap.get(mm);
+      if (current?.removeEvent) {
+        // 已启用缩放，点击后禁用
+        current.removeEvent();
+        mm.removeAttribute("data-grab");
+        removeEventsMap.set(mm, { removeClick: current.removeClick });
+        actionDiv!.innerHTML = pinOffIcon;
+      } else {
+        // 未启用缩放，点击后启用
+        const removeEvent = addZoomEvent(mm);
+        mm.setAttribute("data-grab", "");
+        removeEventsMap.set(mm, {
+          removeEvent,
+          removeClick: current?.removeClick
+        });
+        actionDiv!.innerHTML = pinIcon;
+      }
+    };
+
+    (actionDiv as HTMLElement).addEventListener("click", onClick);
+    removeEventsMap.set(mm, {
+      removeClick: () =>
+        (actionDiv as HTMLElement).removeEventListener("click", onClick)
+    });
+  });
+
+  // 返回清理函数
+  return () => {
+    removeEventsMap.forEach(({ removeEvent, removeClick }) => {
+      removeEvent?.();
+      removeClick?.();
+    });
+    removeEventsMap.clear();
+  };
+};
+
 interface ArticleInfo {
   isReprint: boolean; // 是否为转载文章
   copyrightAuthor?: string; // 原作者
@@ -269,6 +459,9 @@ onMounted(async () => {
     // 初始化音乐播放器（仅绑定audio事件，点击事件由HTML的onclick处理）
     initAllMusicPlayers(postContentRef.value);
 
+    // 初始化 Mermaid 缩放功能
+    mermaidCleanup = initMermaidZoom(postContentRef.value);
+
     // 懒加载 Fancybox
     if (!Fancybox) {
       const fancyboxModule = await import("@fancyapps/ui");
@@ -300,6 +493,11 @@ onUnmounted(() => {
       Fancybox.close(true);
     }
   }
+  // 清理 Mermaid 缩放功能
+  if (mermaidCleanup) {
+    mermaidCleanup();
+    mermaidCleanup = null;
+  }
   // 清理懒加载资源
   cleanup();
   // 清理全局函数
@@ -317,6 +515,11 @@ watch(
           reinitialize(postContentRef.value);
           // 重新初始化音乐播放器
           initAllMusicPlayers(postContentRef.value);
+          // 重新初始化 Mermaid 缩放功能
+          if (mermaidCleanup) {
+            mermaidCleanup();
+          }
+          mermaidCleanup = initMermaidZoom(postContentRef.value);
           // 重新绑定 Fancybox
           if (Fancybox) {
             Fancybox.unbind(postContentRef.value);
