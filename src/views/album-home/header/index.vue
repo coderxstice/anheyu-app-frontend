@@ -34,6 +34,11 @@ const policeRecordNumber = computed(
   () => siteConfig.value?.POLICE_RECORD_NUMBER || ""
 );
 
+// 动态获取公安联网备案图标
+const policeRecordIcon = computed(
+  () => siteConfig.value?.POLICE_RECORD_ICON || ""
+);
+
 // 前往首页
 const goHome = () => {
   router.push("/");
@@ -181,12 +186,19 @@ onUnmounted(() => {
         </li>
         <li v-if="policeRecordNumber" class="nav-item nav-police">
           <a
-            class="footer-bar-link"
+            class="footer-bar-link police-record-link"
             target="_blank"
             rel="noopener external nofollow noreferrer"
             href="http://www.beian.gov.cn/portal/registerSystemInfo"
             :title="policeRecordNumber"
-            >{{ policeRecordNumber }}
+          >
+            <img
+              v-if="policeRecordIcon"
+              :src="policeRecordIcon"
+              alt="公安备案"
+              class="police-record-icon"
+            />
+            {{ policeRecordNumber }}
           </a>
         </li>
       </ul>
@@ -425,6 +437,18 @@ onUnmounted(() => {
 
   .site-name {
     color: #fff;
+  }
+
+  .police-record-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    .police-record-icon {
+      width: 14px;
+      height: 14px;
+      object-fit: contain;
+    }
   }
 
   /* 平板适配 (768px - 1024px) */

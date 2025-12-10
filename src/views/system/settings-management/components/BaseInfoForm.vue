@@ -91,6 +91,16 @@
     <div class="form-item-help">网站的公安联网备案号，用于页脚显示。</div>
   </el-form-item>
 
+  <el-form-item label="公安联网备案图标">
+    <el-input
+      v-model="formData.policeRecordIcon"
+      placeholder="例如：https://www.beian.gov.cn/img/new/gongan.png"
+    />
+    <div class="form-item-help">
+      公安联网备案图标URL，显示在备案号前面。留空则不显示图标。
+    </div>
+  </el-form-item>
+
   <el-form-item label="Gravatar 服务器地址">
     <div>
       <el-input
