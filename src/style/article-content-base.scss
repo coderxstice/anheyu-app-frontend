@@ -29,6 +29,8 @@
 // 混入：编辑器预览容器样式（重要！）
 @mixin editor-preview-styles {
   .md-editor-preview {
+    overflow-x: hidden; // 防止 tip 等绝对定位元素导致横向滚动条
+
     figure {
       margin: 0 auto !important;
       img {
@@ -264,6 +266,8 @@
       margin-bottom: 0;
       overflow: hidden;
       font-size: 1rem;
+      padding: 0;
+      margin: 0;
       color: var(--hltools-color);
       list-style: none;
       cursor: pointer;
@@ -322,7 +326,7 @@
       // 自定义颜色不设置 CSS 背景，完全由 JS 的行内样式控制
     }
 
-    summary {
+    summary:not(.md-editor-code-head) {
       cursor: pointer;
       padding: 16px;
       margin: -16px;
@@ -359,7 +363,7 @@
       }
     }
 
-    &:not(.custom-color)[open] > summary {
+    &:not(.custom-color)[open] > summary:not(.md-editor-code-head) {
       color: var(--anzhiyu-white) !important;
       background: var(--anzhiyu-main);
       border-top: none !important;
@@ -370,7 +374,7 @@
       margin-bottom: 0;
     }
 
-    &.custom-color[open] > summary {
+    &.custom-color[open] > summary:not(.md-editor-code-head) {
       color: var(--anzhiyu-white) !important;
       border-top: none !important;
       border-left: none !important;
@@ -380,12 +384,12 @@
       margin-bottom: 0;
     }
 
-    &[open] > summary::marker {
+    &[open] > summary:not(.md-editor-code-head)::marker {
       color: var(--anzhiyu-white);
       font-size: 16px;
     }
 
-    &[open] > summary:hover:after {
+    &[open] > summary:not(.md-editor-code-head):hover:after {
       content: "-";
     }
 
@@ -396,7 +400,7 @@
       margin-top: 0;
     }
 
-    &:not(.custom-color) summary:hover {
+    &:not(.custom-color) summary:not(.md-editor-code-head):hover {
       cursor: pointer;
       background: var(--anzhiyu-main);
       color: var(--anzhiyu-white) !important;
@@ -404,7 +408,7 @@
       box-shadow: var(--anzhiyu-shadow-main);
     }
 
-    &.custom-color summary:hover {
+    &.custom-color summary:not(.md-editor-code-head):hover {
       cursor: pointer;
       color: var(--anzhiyu-white) !important;
       transition: 0.3s;
@@ -859,12 +863,7 @@
           border-color: #409eff;
 
           .btn-icon {
-            background: #409eff;
             transform: scale(1.1);
-
-            i {
-              color: var(--anzhiyu-white);
-            }
           }
         }
       }
@@ -883,12 +882,7 @@
           border-color: #ff69b4;
 
           .btn-icon {
-            background: #ff69b4;
             transform: scale(1.1);
-
-            i {
-              color: var(--anzhiyu-white);
-            }
           }
         }
       }
@@ -907,12 +901,7 @@
           border-color: #f56c6c;
 
           .btn-icon {
-            background: #f56c6c;
             transform: scale(1.1);
-
-            i {
-              color: var(--anzhiyu-white);
-            }
           }
         }
       }
@@ -931,12 +920,7 @@
           border-color: #9d5cff;
 
           .btn-icon {
-            background: #9d5cff;
             transform: scale(1.1);
-
-            i {
-              color: var(--anzhiyu-white);
-            }
           }
         }
       }
@@ -955,12 +939,7 @@
           border-color: #ff9800;
 
           .btn-icon {
-            background: #ff9800;
             transform: scale(1.1);
-
-            i {
-              color: var(--anzhiyu-white);
-            }
           }
         }
       }
@@ -979,12 +958,7 @@
           border-color: #67c23a;
 
           .btn-icon {
-            background: #67c23a;
             transform: scale(1.1);
-
-            i {
-              color: var(--anzhiyu-white);
-            }
           }
         }
       }
@@ -993,12 +967,7 @@
       &:not([class*="btn-color-"]):hover {
         .btn-icon {
           border-color: var(--anzhiyu-main);
-          background: var(--anzhiyu-main);
           transform: scale(1.1);
-
-          i {
-            color: var(--anzhiyu-white);
-          }
         }
       }
     }
