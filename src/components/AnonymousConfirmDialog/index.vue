@@ -290,7 +290,7 @@ watch(
 
     &.btn-primary {
       color: var(--anzhiyu-white);
-      background: var(--anzhiyu-fontcolor);
+      background: var(--anzhiyu-main);
 
       &:hover {
         filter: brightness(1.1);

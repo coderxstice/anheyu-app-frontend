@@ -159,7 +159,9 @@ const isDev = computed(() => {
 const isBlogger = computed(() => !!props.comment.is_admin_comment);
 
 const isReplyFormVisible = computed(
-  () => commentStore.activeReplyCommentId === props.comment.id
+  () =>
+    commentStore.activeReplyCommentId === props.comment.id &&
+    !props.comment.is_anonymous
 );
 
 // 记录上一次的排序结果（用于保持已显示评论的顺序）
@@ -632,6 +634,7 @@ onMounted(() => {
       <CommentForm
         :target-path="comment.target_path"
         :parent-id="comment.id"
+        :reply-to-is-anonymous="comment.is_anonymous"
         :placeholder="`回复 @${comment.nickname}`"
         show-cancel-button
         @submitted="handleReplySubmitted"
