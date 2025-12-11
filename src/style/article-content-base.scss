@@ -824,8 +824,16 @@
         border-radius: 50%;
         transition: all 0.3s ease;
         overflow: hidden;
+        flex-shrink: 0;
 
         i {
+          font-size: 32px;
+          color: var(--anzhiyu-fontcolor);
+          transition: all 0.3s ease;
+        }
+
+        // Iconify 图标支持
+        .iconify {
           font-size: 32px;
           color: var(--anzhiyu-fontcolor);
           transition: all 0.3s ease;
@@ -839,6 +847,16 @@
         }
       }
 
+      // 内容容器（标题+描述）
+      .btn-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        flex: 1;
+        min-width: 0;
+      }
+
       .btn-title {
         font-size: 14px;
         font-weight: 500;
@@ -848,13 +866,51 @@
         transition: color 0.3s ease;
       }
 
+      // 描述文字样式
+      .btn-desc {
+        font-size: 12px;
+        color: var(--anzhiyu-secondtext);
+        text-align: center;
+        word-break: break-word;
+        line-height: 1.4;
+        opacity: 0.8;
+      }
+
+      // 有描述时的布局调整
+      &.has-desc {
+        flex-direction: row;
+        padding: 16px 20px !important;
+        gap: 16px;
+
+        .btn-icon {
+          margin-bottom: 0;
+          width: 48px;
+          height: 48px;
+
+          i,
+          .iconify {
+            font-size: 24px;
+          }
+        }
+
+        .btn-content {
+          align-items: flex-start;
+        }
+
+        .btn-title,
+        .btn-desc {
+          text-align: left;
+        }
+      }
+
       // 颜色主题
       &.btn-color-blue {
         .btn-icon {
           border-color: #409eff;
           background: rgba(64, 158, 255, 0.1);
 
-          i {
+          i,
+          .iconify {
             color: #409eff;
           }
         }
@@ -873,7 +929,8 @@
           border-color: #ff69b4;
           background: rgba(255, 105, 180, 0.1);
 
-          i {
+          i,
+          .iconify {
             color: #ff69b4;
           }
         }
@@ -892,7 +949,8 @@
           border-color: #f56c6c;
           background: rgba(245, 108, 108, 0.1);
 
-          i {
+          i,
+          .iconify {
             color: #f56c6c;
           }
         }
@@ -911,7 +969,8 @@
           border-color: #9d5cff;
           background: rgba(157, 92, 255, 0.1);
 
-          i {
+          i,
+          .iconify {
             color: #9d5cff;
           }
         }
@@ -930,7 +989,8 @@
           border-color: #ff9800;
           background: rgba(255, 152, 0, 0.1);
 
-          i {
+          i,
+          .iconify {
             color: #ff9800;
           }
         }
@@ -949,7 +1009,8 @@
           border-color: #67c23a;
           background: rgba(103, 194, 58, 0.1);
 
-          i {
+          i,
+          .iconify {
             color: #67c23a;
           }
         }

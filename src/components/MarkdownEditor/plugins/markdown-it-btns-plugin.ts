@@ -1,5 +1,33 @@
 import type MarkdownIt from "markdown-it";
 
+/**
+ * Btns 插件 - 按钮组组件
+ *
+ * @description 用于在 Markdown 中创建美观的按钮组/卡片组
+ *
+ * @usage
+ * ```markdown
+ * :::btns cols=3 style=default
+ * - icon=ri:github-fill title=GitHub url=https://github.com
+ * - icon=https://example.com/logo.png title=网站 url=https://example.com desc=这是描述
+ * - icon=anzhiyu-icon-rocket title=快速开始 url=/docs color=blue
+ * :::
+ * ```
+ *
+ * @param cols - 列数，1-6，默认 3
+ * @param style - 样式风格：default（默认）、card（卡片）、simple（简约）
+ *
+ * @item-params
+ * - icon: 图标，支持三种格式：
+ *   1. HTTP/HTTPS URL（图片链接）
+ *   2. Iconify 格式（如 ri:github-fill、mdi:home）
+ *   3. anzhiyufont 图标类名（如 anzhiyu-icon-rocket）
+ * - title: 标题（必填）
+ * - url: 链接地址，默认 #
+ * - desc: 描述文字（可选）
+ * - color: 颜色主题：blue、pink、red、purple、orange、green（可选）
+ */
+
 // 定义按钮项接口
 interface BtnItem {
   icon: string;
@@ -7,6 +35,48 @@ interface BtnItem {
   url: string;
   desc?: string;
   color?: string;
+}
+
+/**
+ * 判断图标类型
+ * @param icon 图标字符串
+ * @returns 'url' | 'iconify' | 'iconfont'
+ */
+function getIconType(icon: string): "url" | "iconify" | "iconfont" {
+  // HTTP/HTTPS URL
+  if (/^https?:\/\//i.test(icon)) {
+    return "url";
+  }
+  // Iconify 格式：包含冒号，如 ri:github-fill、mdi:home
+  if (icon.includes(":")) {
+    return "iconify";
+  }
+  // 默认为 iconfont
+  return "iconfont";
+}
+
+/**
+ * 生成图标 HTML
+ * @param icon 图标字符串
+ * @param title 标题（用于 alt）
+ * @param escapeHtml HTML 转义函数
+ */
+function renderIcon(
+  icon: string,
+  title: string,
+  escapeHtml: (str: string) => string
+): string {
+  const iconType = getIconType(icon);
+
+  switch (iconType) {
+    case "url":
+      return `<img src="${escapeHtml(icon)}" alt="${escapeHtml(title)}" />`;
+    case "iconify":
+      return `<span class="iconify" data-icon="${escapeHtml(icon)}"></span>`;
+    case "iconfont":
+    default:
+      return `<i class="anzhiyufont ${escapeHtml(icon)}"></i>`;
+  }
 }
 
 export default function btnsPlugin(md: MarkdownIt): void {
@@ -143,26 +213,36 @@ export default function btnsPlugin(md: MarkdownIt): void {
     }
 
     // --- 生成 HTML ---
+    // 如果有 desc，添加 has-desc 类以启用不同的布局
+    const hasDesc = btns.some(btn => btn.desc);
     const containerClass = [
       "btns-container",
       `btns-cols-${cols}`,
-      `btns-style-${style}`
-    ];
+      `btns-style-${style}`,
+      hasDesc ? "btns-has-desc" : ""
+    ].filter(Boolean);
+
     let html = `<div class="${containerClass.join(" ")}">`;
 
     btns.forEach(btn => {
       const colorClass = btn.color ? `btn-color-${btn.color}` : "";
-      html += `<a class="btn-item ${colorClass}" href="${md.utils.escapeHtml(btn.url)}" target="_blank" rel="noopener noreferrer" draggable="false">`;
+      const itemClass = ["btn-item", colorClass, btn.desc ? "has-desc" : ""]
+        .filter(Boolean)
+        .join(" ");
 
-      // 判断 icon 是否是 URL（以 http:// 或 https:// 开头）
-      const isImageUrl = /^https?:\/\//i.test(btn.icon);
-      if (isImageUrl) {
-        html += `<div class="btn-icon"><img src="${md.utils.escapeHtml(btn.icon)}" alt="${md.utils.escapeHtml(btn.title)}" /></div>`;
-      } else {
-        html += `<div class="btn-icon"><i class="anzhiyufont ${btn.icon}"></i></div>`;
-      }
+      html += `<a class="${itemClass}" href="${md.utils.escapeHtml(btn.url)}" target="_blank" rel="noopener noreferrer" draggable="false">`;
 
+      // 渲染图标
+      html += `<div class="btn-icon">${renderIcon(btn.icon, btn.title, md.utils.escapeHtml)}</div>`;
+
+      // 渲染标题和描述
+      html += `<div class="btn-content">`;
       html += `<div class="btn-title">${md.utils.escapeHtml(btn.title)}</div>`;
+      if (btn.desc) {
+        html += `<div class="btn-desc">${md.utils.escapeHtml(btn.desc)}</div>`;
+      }
+      html += `</div>`;
+
       html += `</a>`;
     });
 
@@ -179,6 +259,4 @@ export default function btnsPlugin(md: MarkdownIt): void {
 
   // 注册块级规则
   md.block.ruler.before("fence", "btns", btnsBlockRule);
-
-  console.log("Btns plugin registered successfully");
 }
