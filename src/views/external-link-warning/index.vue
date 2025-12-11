@@ -15,28 +15,28 @@
       <p class="description">您即将离开本站并访问外部链接</p>
 
       <div class="link-display">
-        <i class="anzhiyu-icon-link link-icon" />
+        <i class="anzhiyufont anzhiyu-icon-link link-icon" />
         <span class="link-text">{{ targetUrl }}</span>
       </div>
 
       <div class="warning-tips">
-        <i class="anzhiyu-icon-warning-one tip-icon" />
+        <i class="anzhiyufont anzhiyu-icon-warning-one tip-icon" />
         <span class="tip-text">请注意验证链接的安全性，谨防钓鱼网站</span>
       </div>
 
       <div v-if="countdown > 0" class="countdown-tip">
-        <i class="anzhiyu-icon-time" />
+        <i class="anzhiyufont anzhiyu-icon-time" />
         <span>{{ countdown }} 秒后自动跳转</span>
       </div>
 
       <div class="action-buttons">
         <button class="btn btn-secondary" @click="handleCancel">
-          <i class="anzhiyu-icon-left" />
+          <i class="anzhiyufont anzhiyu-icon-left" />
           返回
         </button>
         <button class="btn btn-primary" @click="handleContinue">
           继续访问
-          <i class="anzhiyu-icon-right" />
+          <i class="anzhiyufont anzhiyu-icon-right" />
         </button>
       </div>
 
