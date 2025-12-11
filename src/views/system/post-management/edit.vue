@@ -58,7 +58,7 @@ const form = reactive<ArticleForm>({
   content_md: "## 在这里开始你的创作...",
   cover_url: "",
   ip_location: "",
-  status: "DRAFT",
+  status: "PUBLISHED",
   post_tag_ids: [],
   post_category_ids: [],
   show_on_home: true,
