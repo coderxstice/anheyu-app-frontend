@@ -16,6 +16,17 @@ const formatTime = (seconds: number) => {
 };
 
 /**
+ * 将 http:// 链接转换为 https://
+ */
+const ensureHttps = (url: string) => {
+  if (!url) return url;
+  if (url.startsWith("http://")) {
+    return url.replace("http://", "https://");
+  }
+  return url;
+};
+
+/**
  * 初始化音乐播放器数据（通过API动态获取音频源）
  * 此函数作为预加载失败时的后备方案
  */
@@ -72,7 +83,7 @@ const initMusicPlayerData = async (playerId: string) => {
     const response = await getSongResourcesApi(musicData.neteaseId);
 
     if (response.code === 200 && response.data?.audioUrl) {
-      audio.src = response.data.audioUrl;
+      audio.src = ensureHttps(response.data.audioUrl);
       audio.preload = "metadata";
 
       // 监听 loadedmetadata 事件以更新播放时长
@@ -257,7 +268,7 @@ export const initAllMusicPlayers = (container: HTMLElement) => {
         const response = await getSongResourcesApi(musicData.neteaseId);
 
         if (response.code === 200 && response.data?.audioUrl) {
-          audio.src = response.data.audioUrl;
+          audio.src = ensureHttps(response.data.audioUrl);
           audio.preload = "metadata"; // 只预加载元数据，不下载整个音频
           player.dataset.audioLoaded = "true";
 

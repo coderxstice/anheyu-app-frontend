@@ -790,11 +790,12 @@ const initMusicPlayer = (player: HTMLElement) => {
 
     if (dataUrl && dataName) {
       // 使用data属性中的完整数据，不发起API请求
+      // 对 pic 和 url 进行 https 转换
       resources = {
-        audioUrl: dataUrl,
+        audioUrl: ensureHttps(dataUrl),
         name: dataName,
         artist: dataArtist || "未知艺术家",
-        pic: dataPic || ""
+        pic: ensureHttps(dataPic || "")
       };
       console.log("[音乐播放器] 使用已保存的音乐数据:", dataName);
     } else {
