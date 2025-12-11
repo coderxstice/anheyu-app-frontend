@@ -76,7 +76,7 @@
   <el-form-item label="IP属地查询 API 地址">
     <el-input
       v-model="formData.ipApi"
-      placeholder="例如：https://api.nsmao.net/api/ipip/query"
+      placeholder="例如：https://v1.nsuuu.com/api/ipip"
     />
     <div class="form-item-help">
       用于在发布/更新文章时获取IP属地信息的 API 地址。
