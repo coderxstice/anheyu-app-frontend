@@ -55,10 +55,10 @@ export function useFileModals({
     try {
       const response = await getFileDetailsApi(id);
       if (response.code === 200 && response.data) {
-        // 将 FileItem 包装为 FileInfoResponse 格式
+        // 后端返回的 data 已经是 FileInfoResponse 结构
         detailsPanelFile.value = {
-          file: response.data,
-          storagePolicy: null
+          file: response.data.file,
+          storagePolicy: response.data.storagePolicy
         };
       } else {
         ElMessage.error(response.message || "获取文件详情失败");
