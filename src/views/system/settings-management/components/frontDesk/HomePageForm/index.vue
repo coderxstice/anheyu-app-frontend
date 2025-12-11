@@ -797,7 +797,14 @@
     :new-item-template="{ title: '', link: '', icon: '' }"
     @update:model-value="updateFooterSocialBarLeft(JSON.parse($event || '[]'))"
     @item-deleted="syncDeleteRight"
-  />
+  >
+    <template #icon="{ scope }">
+      <IconSelector
+        :model-value="scope.row.icon"
+        @update:model-value="scope.row.icon = $event"
+      />
+    </template>
+  </JsonEditorTable>
 
   <JsonEditorTable
     :model-value="JSON.stringify(model.footerSocialBarRight)"
@@ -806,7 +813,14 @@
     :new-item-template="{ title: '', link: '', icon: '' }"
     @update:model-value="updateFooterSocialBarRight(JSON.parse($event || '[]'))"
     @item-deleted="syncDeleteLeft"
-  />
+  >
+    <template #icon="{ scope }">
+      <IconSelector
+        :model-value="scope.row.icon"
+        @update:model-value="scope.row.icon = $event"
+      />
+    </template>
+  </JsonEditorTable>
 
   <el-button
     style="width: 100%; margin-top: -12px; margin-bottom: 24px"
@@ -983,7 +997,7 @@ const badgeColumns = ref<JsonEditorTableColumn[]>([
 const socialLinkColumns = ref<JsonEditorTableColumn[]>([
   { prop: "title", label: "标题" },
   { prop: "link", label: "链接" },
-  { prop: "icon", label: "图标类名" }
+  { prop: "icon", label: "图标类名", slot: "icon" }
 ]);
 
 const footerBarLinkColumns = ref<JsonEditorTableColumn[]>([
