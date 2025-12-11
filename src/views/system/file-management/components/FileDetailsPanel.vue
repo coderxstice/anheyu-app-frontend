@@ -84,7 +84,7 @@
 
             <el-descriptions title="存储" :column="1" border class="mt-4">
               <el-descriptions-item label="存储策略">
-                {{ fileInfo?.storagePolicy.name }}
+                {{ fileInfo?.storagePolicy?.name || "未知" }}
               </el-descriptions-item>
               <el-descriptions-item label="我的权限"
                 >读写文件</el-descriptions-item
