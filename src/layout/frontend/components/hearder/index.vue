@@ -208,6 +208,44 @@
                       />
                       <span>{{ item.title }}</span>
                     </a>
+                    <a
+                      v-else-if="
+                        item.path &&
+                        (item.path.startsWith('http://') ||
+                          item.path.startsWith('https://'))
+                      "
+                      :href="item.path"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="site-page"
+                    >
+                      <!-- 图片 URL -->
+                      <img
+                        v-if="
+                          item.icon &&
+                          (item.icon.startsWith('http://') ||
+                            item.icon.startsWith('https://'))
+                        "
+                        :src="item.icon"
+                        :alt="item.title"
+                        class="menu-icon menu-icon-img"
+                      />
+                      <!-- Iconify 图标 -->
+                      <IconifyIconOnline
+                        v-else-if="item.icon && item.icon.includes(':')"
+                        :icon="item.icon"
+                        width="16"
+                        height="16"
+                        class="menu-icon menu-icon-iconify"
+                      />
+                      <!-- anzhiyu 图标 -->
+                      <i
+                        v-else-if="item.icon"
+                        :class="['anzhiyufont', item.icon]"
+                        class="menu-icon"
+                      />
+                      <span>{{ item.title }}</span>
+                    </a>
                     <router-link v-else :to="item.path" class="site-page">
                       <!-- 图片 URL -->
                       <img

@@ -410,40 +410,53 @@ onMounted(() => {
 
   .social-icon {
     display: flex;
+    align-items: center;
+    justify-content: center;
     margin: 0 0 0 10px;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
     font-size: 1.4em;
     color: var(--anzhiyu-fontcolor);
+    background: var(--anzhiyu-white-op);
+    border-radius: 32px;
     cursor: pointer;
+    transition: all 0.3s ease 0s;
+
+    &:hover {
+      color: var(--anzhiyu-main);
+      background: var(--anzhiyu-secondbg);
+      box-shadow: none;
+      transform: scale(1.1);
+
+      i {
+        color: var(--anzhiyu-main);
+      }
+
+      .social-iconify {
+        color: var(--anzhiyu-main);
+      }
+    }
 
     i {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
-      height: 40px;
-      padding: 8px;
+      width: 100%;
+      height: 100%;
       font-size: 1rem;
       color: var(--anzhiyu-white);
-      background: var(--anzhiyu-white-op);
-      border-radius: 32px;
-      transition: all 0.3s ease 0s;
-
-      &:hover {
-        color: var(--anzhiyu-main);
-        background: var(--anzhiyu-secondbg);
-        box-shadow: none;
-        transform: scale(1.1);
-      }
     }
 
     .social-icon-img {
       width: 24px;
       height: 24px;
       object-fit: contain;
-      border-radius: 50%;
     }
 
     .social-iconify {
+      width: 20px;
+      height: 20px;
       color: var(--anzhiyu-white);
     }
   }

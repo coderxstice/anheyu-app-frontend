@@ -92,6 +92,16 @@ function escapeHtml(text: string): string {
 }
 
 /**
+ * 将 http:// 链接转换为 https://
+ */
+function ensureHttps(url: string): string {
+  if (url && url.startsWith("http://")) {
+    return url.replace("http://", "https://");
+  }
+  return url;
+}
+
+/**
  * 生成音乐播放器HTML（包含服务端渲染的数据）
  * 注意：所有参数都应该是已经转义过的安全字符串
  */
@@ -241,7 +251,7 @@ export default function musicPlugin(md: MarkdownIt): void {
       return false;
     }
 
-    // 转义 HTML 字符
+    // 转义 HTML 字符，并对 pic 和 url 进行 https 转换
     const escapedId = md.utils.escapeHtml(neteaseId);
     const escapedName = parsedParams.name
       ? md.utils.escapeHtml(parsedParams.name)
@@ -250,10 +260,10 @@ export default function musicPlugin(md: MarkdownIt): void {
       ? md.utils.escapeHtml(parsedParams.artist)
       : undefined;
     const escapedPic = parsedParams.pic
-      ? md.utils.escapeHtml(parsedParams.pic)
+      ? md.utils.escapeHtml(ensureHttps(parsedParams.pic))
       : undefined;
     const escapedUrl = parsedParams.url
-      ? md.utils.escapeHtml(parsedParams.url)
+      ? md.utils.escapeHtml(ensureHttps(parsedParams.url))
       : undefined;
     const escapedColor = parsedParams.color
       ? md.utils.escapeHtml(parsedParams.color)
@@ -342,10 +352,10 @@ export default function musicPlugin(md: MarkdownIt): void {
       ? md.utils.escapeHtml(parsedParams.artist)
       : undefined;
     const escapedPic = parsedParams.pic
-      ? md.utils.escapeHtml(parsedParams.pic)
+      ? md.utils.escapeHtml(ensureHttps(parsedParams.pic))
       : undefined;
     const escapedUrl = parsedParams.url
-      ? md.utils.escapeHtml(parsedParams.url)
+      ? md.utils.escapeHtml(ensureHttps(parsedParams.url))
       : undefined;
     const escapedColor = parsedParams.color
       ? md.utils.escapeHtml(parsedParams.color)

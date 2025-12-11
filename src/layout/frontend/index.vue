@@ -21,6 +21,8 @@
         :key="effectiveBackground"
         :src="effectiveBackground"
         :loop="effectiveVideoLoop"
+        muted
+        autoplay
         playsinline
         webkit-playsinline
         x5-playsinline
@@ -33,6 +35,8 @@
         controlsList="nodownload nofullscreen noremoteplayback noplaybackrate"
         class="one-image-video-background"
         @loadedmetadata="handleVideoLoaded"
+        @canplay="handleVideoCanPlay"
+        @loadeddata="handleVideoLoadedData"
       />
       <!-- 视频声音控制按钮 -->
       <div
@@ -143,6 +147,13 @@ const fetchController = ref<AbortController | null>(null); // 用于取消正在
 const videoRef = ref<HTMLVideoElement | null>(null);
 const showUnmuteButton = ref(false);
 const isVideoMuted = ref(true); // 跟踪当前视频静音状态
+const videoPlayAttempted = ref(false); // 是否已尝试播放视频
+
+// 检测是否为微信浏览器
+const isWechatBrowser = () => {
+  const ua = navigator.userAgent.toLowerCase();
+  return ua.includes("micromessenger");
+};
 
 // 移动设备检测
 const isMobile = ref(false);
@@ -346,8 +357,8 @@ const scrollToMain = () => {
   }
 };
 
-// 处理视频加载完成
-const handleVideoLoaded = async () => {
+// 尝试播放视频的核心函数
+const tryPlayVideo = async () => {
   const video = videoRef.value;
   if (!video || !currentOneImageConfig.value) return;
 
@@ -393,6 +404,40 @@ const handleVideoLoaded = async () => {
   }
 };
 
+// 处理视频加载完成
+const handleVideoLoaded = async () => {
+  if (videoPlayAttempted.value) return;
+  videoPlayAttempted.value = true;
+  await tryPlayVideo();
+};
+
+// 处理视频可以播放事件（作为备用触发）
+const handleVideoCanPlay = async () => {
+  const video = videoRef.value;
+  if (!video) return;
+
+  // 如果视频已经暂停且未播放过，尝试播放
+  if (video.paused && !videoPlayAttempted.value) {
+    videoPlayAttempted.value = true;
+    await tryPlayVideo();
+  }
+};
+
+// 处理视频数据加载完成事件（微信浏览器备用触发）
+const handleVideoLoadedData = async () => {
+  const video = videoRef.value;
+  if (!video) return;
+
+  // 如果视频已经暂停，尝试播放
+  if (video.paused) {
+    try {
+      await video.play();
+    } catch {
+      // 忽略错误，其他事件会处理
+    }
+  }
+};
+
 // 切换视频静音状态
 const toggleVideoMute = () => {
   const video = videoRef.value;
@@ -416,6 +461,8 @@ watch(
   async config => {
     // 重置视频静音提示状态
     showUnmuteButton.value = false;
+    // 重置视频播放尝试标记，允许新页面重新尝试播放
+    videoPlayAttempted.value = false;
 
     // 生成新的配置 ID，用于标识当前配置
     typingId.value++;
@@ -522,18 +569,83 @@ onBeforeMount(() => {
   useDataThemeChange().dataThemeChange($storage.layout?.overallStyle);
 });
 
+// 微信浏览器视频播放处理
+const handleWechatVideoPlay = () => {
+  const video = videoRef.value;
+  if (!video) return;
+
+  // 确保视频静音
+  video.muted = true;
+  isVideoMuted.value = true;
+
+  // 尝试播放
+  video.play().catch(() => {
+    // 播放失败时静默处理
+  });
+};
+
+// 用户首次交互时尝试播放视频（微信浏览器需要）
+const handleUserInteraction = () => {
+  const video = videoRef.value;
+  if (!video || !video.paused) return;
+
+  video.muted = true;
+  isVideoMuted.value = true;
+  video.play().catch(() => {
+    // 播放失败时静默处理
+  });
+};
+
 onMounted(() => {
   // 初始化移动设备检测
   checkIsMobile();
   window.addEventListener("resize", checkIsMobile);
   // 监听移动端菜单切换事件
   window.addEventListener("toggle-mobile-menu", toggleMobileMenu);
+
+  // 微信浏览器特殊处理
+  if (isWechatBrowser()) {
+    // 使用 WeixinJSBridgeReady 事件确保微信环境下视频能播放
+    if (typeof (window as any).WeixinJSBridge !== "undefined") {
+      handleWechatVideoPlay();
+    } else {
+      document.addEventListener(
+        "WeixinJSBridgeReady",
+        handleWechatVideoPlay,
+        false
+      );
+    }
+
+    // 监听用户首次交互事件（微信浏览器需要用户交互才能播放视频）
+    document.addEventListener("touchstart", handleUserInteraction, {
+      once: true,
+      passive: true
+    });
+    document.addEventListener("click", handleUserInteraction, { once: true });
+
+    // 多次尝试播放视频（微信浏览器可能需要等待）
+    const retryIntervals = [100, 300, 500, 1000, 2000];
+    retryIntervals.forEach(delay => {
+      setTimeout(() => {
+        const video = videoRef.value;
+        if (video && video.paused) {
+          handleWechatVideoPlay();
+        }
+      }, delay);
+    });
+  }
 });
 
 onUnmounted(() => {
   // 清理事件监听器
   window.removeEventListener("resize", checkIsMobile);
   window.removeEventListener("toggle-mobile-menu", toggleMobileMenu);
+  // 清理微信浏览器事件监听器
+  if (isWechatBrowser()) {
+    document.removeEventListener("WeixinJSBridgeReady", handleWechatVideoPlay);
+    document.removeEventListener("touchstart", handleUserInteraction);
+    document.removeEventListener("click", handleUserInteraction);
+  }
   // 确保移除body样式
   document.body.style.overflow = "";
   // 清除打字机定时器
