@@ -120,7 +120,7 @@ const commentInfoConfig = computed(() => {
     login_required: config.login_required,
     anonymous_email: config.anonymous_email || "",
     allow_image_upload: config.allow_image_upload !== false, // 默认允许上传
-    qq_api_url: config.qq_api_url || "https://api.nsmao.net/api/qq/query",
+    qq_api_url: config.qq_api_url || "https://v1.nsuuu.com/api/qqname",
     qq_api_key: config.qq_api_key || ""
   };
 });
@@ -174,7 +174,7 @@ const fetchQQNickname = async (qq: string): Promise<string | null> => {
   }
 
   try {
-    // 构建请求 URL，格式：https://api.nsmao.net/api/qq/query?key=你的key&qq=1645253
+    // 构建请求 URL，格式：https://v1.nsuuu.com/api/qqname?qq=1645253&key=你的key
     const url = `${apiURL}?key=${encodeURIComponent(apiKey)}&qq=${encodeURIComponent(qq)}`;
     const response = await fetch(url, {
       headers: {

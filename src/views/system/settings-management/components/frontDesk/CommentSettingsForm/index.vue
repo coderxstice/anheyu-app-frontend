@@ -206,7 +206,7 @@ const formatJson = () => {
         <el-form-item label="QQ API 地址">
           <el-input
             v-model="model.qqAPIURL"
-            placeholder="https://api.nsmao.net/api/qq/query"
+            placeholder="https://v1.nsuuu.com/api/qqname"
           />
         </el-form-item>
       </el-col>

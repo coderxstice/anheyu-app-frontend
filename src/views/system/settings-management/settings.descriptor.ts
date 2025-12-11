@@ -1384,7 +1384,7 @@ const commentDescriptors: SettingDescriptor[] = [
   {
     frontendPath: "frontDesk.comment.qqAPIURL",
     backendKey: constant.KeyCommentQQAPIURL,
-    defaultValue: "https://api.nsmao.net/api/qq/query",
+    defaultValue: "https://v1.nsuuu.com/api/qqname",
     type: "string"
   },
   {
