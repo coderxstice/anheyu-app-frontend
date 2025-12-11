@@ -106,6 +106,20 @@
                 <i :class="['anzhiyufont', child.icon]" />
                 <span>{{ child.name }}</span>
               </a>
+              <a
+                v-else-if="
+                  child.href &&
+                  (child.href.startsWith('http://') ||
+                    child.href.startsWith('https://'))
+                "
+                :href="child.href"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="menu-group-item"
+              >
+                <i :class="['anzhiyufont', child.icon]" />
+                <span>{{ child.name }}</span>
+              </a>
               <router-link
                 v-else
                 :to="child.href"
@@ -134,6 +148,20 @@
               href="#"
               class="menu-group-item"
               @click.prevent="handleTreasureLinkClick"
+            >
+              <i :class="['anzhiyufont', menu.icon]" />
+              <span>{{ menu.name }}</span>
+            </a>
+            <a
+              v-else-if="
+                menu.href &&
+                (menu.href.startsWith('http://') ||
+                  menu.href.startsWith('https://'))
+              "
+              :href="menu.href"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="menu-group-item"
             >
               <i :class="['anzhiyufont', menu.icon]" />
               <span>{{ menu.name }}</span>
