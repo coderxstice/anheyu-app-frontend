@@ -680,7 +680,14 @@
       style="font-size: 12px; color: var(--anzhiyu-secondtext); margin-top: 8px"
     >
       音乐API基础地址（不带末尾斜杠），用于获取歌曲信息和播放地址。默认为
-      https://metings.qjqq.cn
+      https://metings.qjqq.cn。可使用
+      <a
+        href="https://github.com/Suxiaoqinx/Netease_url"
+        target="_blank"
+        style="color: var(--anzhiyu-main)"
+        >Netease_url</a
+      >
+      项目自行部署音乐API，支持无损音质解析。
     </div>
   </el-form-item>
   <el-form-item label="唱片背景图">

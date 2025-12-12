@@ -5,6 +5,7 @@ import HomeTop from "./components/HomeTop/index.vue";
 import CategoryBar from "./components/CategoryBar/index.vue";
 import TagBar from "./components/TagBar/index.vue";
 import ArticleCard from "./components/ArticleCard/index.vue";
+import ArticleCardSkeleton from "./components/ArticleCardSkeleton/index.vue";
 import Archives from "./components/Archives/index.vue";
 import Pagination from "./components/Pagination/index.vue";
 import Sidebar from "../components/Sidebar/index.vue";
@@ -130,8 +131,17 @@ onMounted(() => {
             '!justify-center': !isLoading && articles.length === 0
           }"
         >
+          <!-- 骨架屏加载状态 -->
+          <template v-if="isLoading && articles.length === 0">
+            <ArticleCardSkeleton
+              v-for="i in 6"
+              :key="'skeleton-' + i"
+              :is-double-column="isDoubleColumn"
+            />
+          </template>
+
           <!-- 文章内容 -->
-          <template v-if="articles.length > 0">
+          <template v-else-if="articles.length > 0">
             <!-- 归档视图 -->
             <Archives
               v-if="pageType === 'archive'"
