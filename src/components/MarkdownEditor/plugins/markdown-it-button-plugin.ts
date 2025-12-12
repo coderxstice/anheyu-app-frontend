@@ -1,5 +1,45 @@
 import type MarkdownIt from "markdown-it";
 
+/**
+ * 判断是否为外部链接
+ */
+function isExternalUrl(url: string): boolean {
+  return /^https?:\/\//i.test(url);
+}
+
+/**
+ * 判断图标类型
+ * @returns 'anzhiyufont' | 'iconify' | 'imageUrl'
+ */
+function getIconType(icon: string): "anzhiyufont" | "iconify" | "imageUrl" {
+  if (icon.startsWith("anzhiyu-icon-")) {
+    return "anzhiyufont";
+  }
+  if (icon.includes(":")) {
+    return "iconify";
+  }
+  if (/^https?:\/\//i.test(icon)) {
+    return "imageUrl";
+  }
+  return "anzhiyufont"; // 默认为 anzhiyufont
+}
+
+/**
+ * 渲染图标 HTML
+ */
+function renderIcon(icon: string, md: MarkdownIt): string {
+  const type = getIconType(icon);
+  const escapedIcon = md.utils.escapeHtml(icon);
+
+  if (type === "imageUrl") {
+    return `<img class="btn-icon-img" src="${escapedIcon}" alt="" />`;
+  } else if (type === "iconify") {
+    return `<span class="iconify" data-icon="${escapedIcon}"></span>`;
+  } else {
+    return `<i class="anzhiyufont ${escapedIcon}"></i>`;
+  }
+}
+
 export default function buttonPlugin(md: MarkdownIt): void {
   function buttonRule(state: any, silent: boolean): boolean {
     const start = state.pos;
@@ -72,8 +112,16 @@ export default function buttonPlugin(md: MarkdownIt): void {
 
     const classAttr = classList.join(" ");
 
+    // 判断是否为外链，添加相应属性
+    const isExternal = isExternalUrl(url);
+    const targetAttr = isExternal ? ' target="_blank"' : "";
+    const relAttr = isExternal ? ' rel="external nofollow noreferrer"' : "";
+
+    // 渲染图标
+    const iconHtml = renderIcon(icon, md);
+
     // 生成按钮 HTML
-    const buttonHtml = `<a class="${classAttr}" href="${md.utils.escapeHtml(url)}" title="${md.utils.escapeHtml(text)}" draggable="false"><i class="anzhiyufont ${icon}"></i><span>${md.utils.escapeHtml(text)}</span></a>`;
+    const buttonHtml = `<a class="${classAttr}" href="${md.utils.escapeHtml(url)}" title="${md.utils.escapeHtml(text)}"${targetAttr}${relAttr} draggable="false">${iconHtml}<span>${md.utils.escapeHtml(text)}</span></a>`;
 
     // 如果是块级布局，用容器包裹
     let html = buttonHtml;

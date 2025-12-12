@@ -163,29 +163,24 @@ const form = reactive<
 
 const isQQNumber = (val: string) => /^[1-9]\d{4,10}$/.test((val || "").trim());
 
-// 获取 QQ 昵称的函数
+// 判断是否为QQ邮箱格式，返回QQ号或null
+const extractQQFromEmail = (email: string): string | null => {
+  const match = /^([1-9]\d{4,10})@qq\.com$/i.exec((email || "").trim());
+  return match ? match[1] : null;
+};
+
+// 获取 QQ 昵称的函数（通过后端代理API，避免暴露API密钥）
 const fetchQQNickname = async (qq: string): Promise<string | null> => {
-  const apiURL = commentInfoConfig.value.qq_api_url;
-  const apiKey = commentInfoConfig.value.qq_api_key;
-
-  // 如果没有配置 API 地址或密钥，跳过
-  if (!apiURL || !apiKey) {
-    return null;
-  }
-
   try {
-    // 构建请求 URL，格式：https://v1.nsuuu.com/api/qqname?qq=1645253&key=你的key
-    const url = `${apiURL}?key=${encodeURIComponent(apiKey)}&qq=${encodeURIComponent(qq)}`;
-    const response = await fetch(url, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
-      }
-    });
+    // 调用后端API获取QQ信息
+    const response = await fetch(
+      `/api/public/comments/qq-info?qq=${encodeURIComponent(qq)}`
+    );
     if (!response.ok) return null;
-    const data = await response.json();
-    // API 返回格式: { code: 200, msg: "Success", data: { nick: "昵称", ... }, ... }
-    if (data && data.code === 200 && data.data && data.data.nick) {
-      return data.data.nick;
+    const result = await response.json();
+    // 后端API返回格式: { code: 200, data: { nickname: "昵称", avatar: "头像URL" }, message: "..." }
+    if (result && result.code === 200 && result.data && result.data.nickname) {
+      return result.data.nickname;
     }
     return null;
   } catch (error) {
@@ -196,6 +191,8 @@ const fetchQQNickname = async (qq: string): Promise<string | null> => {
 
 // 用于防止重复请求的标记
 let lastFetchedQQ = "";
+// 标记昵称是否由用户手动修改过（用于邮箱自动填充昵称的判断）
+let nicknameManuallyEdited = false;
 
 const formRules = reactive<FormRules>({
   email: [
@@ -563,26 +560,75 @@ watch(showEmojiPicker, isShown => {
 
 watch(
   () => form.nickname,
-  async val => {
+  val => {
     const v = (val || "").trim();
     if (isQQNumber(v)) {
       // 自动填写邮箱
       form.email = `${v}@qq.com`;
       nextTick(() => formRef.value?.validateField("email"));
-
-      // 如果已经获取过这个 QQ 的昵称，跳过
-      if (lastFetchedQQ === v) return;
-      lastFetchedQQ = v;
-
-      // 异步获取 QQ 昵称
-      const nickname = await fetchQQNickname(v);
-      // 确保用户没有在获取期间修改昵称字段
-      if (nickname && form.nickname.trim() === v) {
-        form.nickname = nickname;
+    } else {
+      // 用户手动修改了昵称（非QQ号）
+      if (v) {
+        nicknameManuallyEdited = true;
       }
     }
   }
 );
+
+// 昵称输入框失去焦点时，检测QQ号并自动获取昵称
+const handleNicknameBlur = async () => {
+  const v = form.nickname.trim();
+  if (isQQNumber(v)) {
+    // 如果已经获取过这个 QQ 的昵称，跳过
+    if (lastFetchedQQ === v) return;
+    lastFetchedQQ = v;
+
+    // 异步获取 QQ 昵称
+    const nickname = await fetchQQNickname(v);
+    // 确保用户没有在获取期间修改昵称字段
+    if (nickname && form.nickname.trim() === v) {
+      form.nickname = nickname;
+      nicknameManuallyEdited = false; // QQ昵称自动填充后重置标记
+    }
+  }
+};
+
+// 邮箱输入框失去焦点时，检测QQ邮箱并自动获取昵称
+const handleEmailBlur = async () => {
+  const email = form.email.trim();
+  const qqNumber = extractQQFromEmail(email);
+
+  if (qqNumber) {
+    // 如果已经获取过这个 QQ 的昵称，跳过
+    if (lastFetchedQQ === qqNumber) return;
+
+    // 如果昵称字段为空或者是QQ号本身，则自动填充QQ昵称
+    const currentNickname = form.nickname.trim();
+    const shouldAutoFillNickname =
+      !currentNickname ||
+      isQQNumber(currentNickname) ||
+      !nicknameManuallyEdited;
+
+    if (shouldAutoFillNickname) {
+      lastFetchedQQ = qqNumber;
+
+      // 异步获取 QQ 昵称
+      const nickname = await fetchQQNickname(qqNumber);
+      // 确保用户没有在获取期间修改邮箱或昵称字段
+      const currentEmail = form.email.trim();
+      const stillSameQQ = extractQQFromEmail(currentEmail) === qqNumber;
+
+      if (nickname && stillSameQQ) {
+        // 只在昵称为空或未手动修改时填充
+        const nickNow = form.nickname.trim();
+        if (!nickNow || isQQNumber(nickNow) || !nicknameManuallyEdited) {
+          form.nickname = nickname;
+          nicknameManuallyEdited = false;
+        }
+      }
+    }
+  }
+};
 
 // 实时保存用户信息到 localStorage
 watch(
@@ -860,6 +906,7 @@ defineExpose({
                 v-model="form.nickname"
                 placeholder="必填"
                 :disabled="isAnonymous"
+                @blur="handleNicknameBlur"
               >
                 <template #prepend>昵称</template>
               </el-input>
@@ -869,6 +916,7 @@ defineExpose({
                 v-model="form.email"
                 placeholder="必填"
                 :disabled="isAnonymous"
+                @blur="handleEmailBlur"
               >
                 <template #prepend>邮箱</template>
               </el-input>
