@@ -201,6 +201,20 @@ const formatJson = () => {
     </el-form-item>
 
     <el-divider content-position="left">QQ信息查询配置</el-divider>
+    <el-alert type="info" :closable="false" style="margin-bottom: 16px">
+      <template #title>
+        <div style="font-size: 14px; line-height: 1.6">
+          用于在评论时输入QQ号自动获取昵称和头像。请前往
+          <a
+            href="https://api.nsuuu.com/"
+            target="_blank"
+            style="color: var(--el-color-primary)"
+            >鸭梨API (api.nsuuu.com)</a
+          >
+          注册并获取API密钥。
+        </div>
+      </template>
+    </el-alert>
     <el-row :gutter="20">
       <el-col :span="12">
         <el-form-item label="QQ API 地址">
@@ -216,7 +230,7 @@ const formatJson = () => {
             v-model="model.qqAPIKey"
             type="password"
             show-password
-            placeholder="在控制台->密钥管理查看"
+            placeholder="在鸭梨API控制台获取"
           />
         </el-form-item>
       </el-col>

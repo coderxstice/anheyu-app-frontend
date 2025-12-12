@@ -31,6 +31,7 @@ export interface Comment {
   pinned_at: string | null;
   nickname: string;
   email_md5: string;
+  qq_number?: string; // QQ号（如果邮箱是QQ邮箱格式，用于前端显示QQ头像）
   avatar_url?: string; // 用户自定义头像URL（如果有关联用户且用户上传了头像）
   website: string | null;
   content_html: string;

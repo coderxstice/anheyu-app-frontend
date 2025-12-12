@@ -156,6 +156,12 @@ const avatarSrc = computed(() => {
     return url.toString();
   }
 
+  // 如果后端返回了QQ号（邮箱是QQ邮箱格式），使用QQ头像
+  if (props.comment.qq_number) {
+    return `https://thirdqq.qlogo.cn/g?b=sdk&nk=${props.comment.qq_number}&s=140`;
+  }
+
+  // 向后兼容：检查昵称是否为QQ号且邮箱MD5匹配
   const isQQ = /^[1-9]\d{4,10}$/.test(props.comment.nickname?.trim() || "");
   const qqEmailMd5 = md5(
     `${props.comment.nickname?.trim()}@qq.com`
