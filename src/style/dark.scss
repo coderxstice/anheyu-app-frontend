@@ -74,6 +74,43 @@ html.dark {
     background: var(--el-bg-color) !important;
   }
 
+  /* 深色模式下的菜单样式 */
+  .sidebar-container {
+    /* 统一菜单项激活状态 - 浅色背景（一级和二级菜单） */
+    .el-menu-item.submenu-title-noDropdown.outer-most.is-active,
+    .el-menu-item.nest-menu.is-active {
+      > * {
+        color: var(--anzhiyu-white) !important;
+      }
+
+      .sub-menu-icon,
+      .sub-menu-icon svg {
+        color: var(--anzhiyu-white) !important;
+      }
+
+      &::before {
+        background: rgb(255 255 255 / 15%) !important;
+      }
+
+      &:hover::before {
+        background: rgb(255 255 255 / 20%) !important;
+      }
+    }
+
+    /* 统一菜单项 hover 状态（一级和二级菜单） */
+    .el-menu-item.submenu-title-noDropdown.outer-most:hover:not(
+        .is-active
+      )::before,
+    .el-menu-item.nest-menu:hover:not(.is-active)::before {
+      background: rgb(255 255 255 / 8%) !important;
+    }
+
+    /* 父菜单 hover */
+    .el-sub-menu__title:hover::before {
+      background: rgb(255 255 255 / 8%) !important;
+    }
+  }
+
   /* 标签页 */
   .tags-view {
     .arrow-left,

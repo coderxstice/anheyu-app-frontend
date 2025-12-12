@@ -55,10 +55,11 @@
     margin-left: $sideBarWidth;
     background: var(--anzhiyu-theme-menu-bg);
 
-    /* main-content 属性动画 */
+    /* main-content 属性动画 - 使用丝滑缓动 */
     transition:
-      margin-left var(--anzhiyu-transition-duration),
-      width var(--anzhiyu-transition-duration);
+      margin-left var(--anzhiyu-transition-duration)
+        cubic-bezier(0.4, 0, 0.2, 1),
+      width var(--anzhiyu-transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
 
     .el-scrollbar__wrap {
       height: 100%;
@@ -74,7 +75,8 @@
     width: 100%;
 
     /* fixed-header 属性左上角动画 */
-    transition: width var(--anzhiyu-transition-duration);
+    transition: width var(--anzhiyu-transition-duration)
+      cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .main-container.main-hidden {
@@ -105,8 +107,9 @@
     font-size: 0;
     background: var(--anzhiyu-theme-menu-bg) !important;
 
-    /* 展开动画 */
-    transition: width var(--anzhiyu-transition-duration);
+    /* 展开动画 - 使用丝滑缓动 */
+    transition: width var(--anzhiyu-transition-duration)
+      cubic-bezier(0.4, 0, 0.2, 1);
 
     .scrollbar-wrapper {
       overflow-x: hidden !important;
@@ -164,20 +167,11 @@
       background-color: transparent !important;
 
       .sub-menu-icon svg {
-        transition: transform 0.25s;
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       }
+
       &:hover {
         color: var(--anzhiyu-theme-menu-text);
-        &::before {
-          position: absolute;
-          inset: 0 8px;
-          margin: 4px 0;
-          clear: both;
-          content: "";
-          background: rgb(244 244 245) !important;
-          border-radius: 12px;
-          z-index: -1;
-        }
 
         .sub-menu-icon svg {
           transform: scale(1.2);
@@ -198,8 +192,17 @@
       }
     }
 
-    .is-active > .el-sub-menu__title,
-    .is-active.submenu-title-noDropdown {
+    /* 展开的父菜单标题变蓝色 */
+    .el-sub-menu.is-opened > .el-sub-menu__title {
+      color: var(--anzhiyu-theme) !important;
+
+      .sub-menu-icon,
+      i {
+        color: var(--anzhiyu-theme) !important;
+      }
+    }
+
+    .is-active > .el-sub-menu__title {
       color: var(--anzhiyu-theme-sub-menu-active-text) !important;
 
       i {
@@ -207,31 +210,88 @@
       }
     }
 
-    .is-active {
-      color: var(--anzhiyu-theme-sub-menu-active-text) !important;
-      transition: color 0.3s;
+    /* 统一菜单项样式（一级菜单和二级菜单） */
+    .el-menu-item.submenu-title-noDropdown.outer-most,
+    .el-menu-item.nest-menu {
+      position: relative;
+
+      /* 始终存在的背景伪元素 */
+      &::before {
+        position: absolute;
+        inset: 4px 12px;
+        content: "";
+        background: transparent;
+        border-radius: 10px;
+        transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 0;
+      }
+
+      /* 确保内容在背景之上 */
+      > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      /* hover 状态背景 */
+      &:hover:not(.is-active)::before {
+        background: var(--anzhiyu-theme-menu-hover) !important;
+      }
+
+      /* 激活状态 - 主题色背景，白色文字图标 */
+      &.is-active {
+        background-color: transparent !important;
+
+        > * {
+          color: var(--anzhiyu-white) !important;
+        }
+
+        .sub-menu-icon,
+        .sub-menu-icon svg {
+          color: var(--anzhiyu-white) !important;
+        }
+
+        &::before {
+          background: var(--anzhiyu-main) !important;
+        }
+
+        /* 激活状态下 hover */
+        &:hover::before {
+          background: var(--anzhiyu-main) !important;
+        }
+      }
     }
 
-    .el-menu-item.is-active.nest-menu > * {
-      z-index: 1;
-      color: #fff;
-    }
+    /* 父菜单 hover 效果 */
+    .el-sub-menu__title {
+      position: relative;
 
-    .el-menu-item.is-active.nest-menu::before {
-      position: absolute;
-      inset: 0 8px;
-      margin: 4px 0;
-      clear: both;
-      content: "";
-      background: var(--anzhiyu-theme) !important;
-      border-radius: 12px;
+      &::before {
+        position: absolute;
+        inset: 4px 12px;
+        content: "";
+        background: transparent;
+        border-radius: 10px;
+        transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 0;
+      }
+
+      /* 只对内容元素设置 z-index，排除箭头 */
+      .sub-menu-icon,
+      span {
+        position: relative;
+        z-index: 1;
+      }
+
+      &:hover::before {
+        background: var(--anzhiyu-theme-menu-hover) !important;
+      }
     }
 
     .el-menu .el-menu--inline .el-sub-menu__title,
     & .el-sub-menu .el-menu-item {
       min-width: $sideBarWidth !important;
       font-size: 14px;
-      background-color: var(--anzhiyu-theme-sub-menu-bg) !important;
+      background-color: transparent !important;
     }
 
     /* 有子集的激活菜单左侧小竖条 */
@@ -258,22 +318,6 @@
       height: 0;
       content: "";
       transform: translateY(-50%);
-    }
-
-    /* 无子集的激活菜单背景 */
-    .is-active.submenu-title-noDropdown.outer-most > * {
-      z-index: 1;
-      color: #fff;
-    }
-
-    .is-active.submenu-title-noDropdown.outer-most::before {
-      position: absolute;
-      inset: 0 8px;
-      margin: 4px 0;
-      clear: both;
-      content: "";
-      background: var(--anzhiyu-theme) !important;
-      border-radius: 12px;
     }
   }
 
@@ -309,7 +353,7 @@
     .el-menu .el-sub-menu__title {
       min-width: $sideBarWidth !important;
       font-size: 14px;
-      background-color: var(--anzhiyu-theme-sub-menu-bg) !important;
+      background-color: transparent !important;
     }
 
     .el-menu-item,
@@ -317,7 +361,7 @@
       height: 50px;
       line-height: 50px;
       color: var(--anzhiyu-theme-menu-text);
-      background-color: var(--anzhiyu-theme-sub-menu-bg);
+      background-color: transparent;
 
       &:hover {
         color: var(--anzhiyu-theme-menu-title-hover) !important;
@@ -326,21 +370,54 @@
 
     .is-active {
       color: var(--anzhiyu-theme-sub-menu-active-text) !important;
-      transition: color 0.3s;
+      transition: color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .el-menu-item.is-active.nest-menu > * {
-      z-index: 1;
-      color: #fff;
-    }
+    /* 子菜单项样式 */
+    /* 子菜单项样式 */
+    .el-menu-item.nest-menu {
+      position: relative;
 
-    .el-menu-item.is-active.nest-menu::before {
-      position: absolute;
-      inset: 0 8px;
-      clear: both;
-      content: "";
-      background: var(--anzhiyu-theme) !important;
-      border-radius: 12px;
+      &::before {
+        position: absolute;
+        inset: 4px 12px;
+        content: "";
+        background: transparent;
+        border-radius: 10px;
+        transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 0;
+      }
+
+      > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      &:hover:not(.is-active)::before {
+        background: var(--anzhiyu-theme-menu-hover) !important;
+      }
+
+      /* 激活状态 - 主题色背景，白色文字图标 */
+      &.is-active {
+        background-color: transparent !important;
+
+        > * {
+          color: var(--anzhiyu-white) !important;
+        }
+
+        .sub-menu-icon,
+        .sub-menu-icon svg {
+          color: var(--anzhiyu-white) !important;
+        }
+
+        &::before {
+          background: var(--anzhiyu-main) !important;
+        }
+
+        &:hover::before {
+          background: var(--anzhiyu-main) !important;
+        }
+      }
     }
 
     .el-menu-item,
@@ -377,7 +454,7 @@
 
       .el-menu-item {
         color: var(--anzhiyu-theme-menu-text);
-        background-color: var(--anzhiyu-theme-sub-menu-bg);
+        background-color: transparent;
 
         span {
           font-size: 14px;
@@ -418,21 +495,53 @@
 
     .el-menu-item.is-active {
       color: var(--anzhiyu-theme-sub-menu-active-text) !important;
-      transition: color 0.3s;
+      transition: color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .el-menu-item.is-active.nest-menu > * {
-      z-index: 1;
-      color: #fff;
-    }
+    /* 子菜单项样式 */
+    .el-menu-item.nest-menu {
+      position: relative;
 
-    .el-menu-item.is-active.nest-menu::before {
-      position: absolute;
-      inset: 0 5px;
-      clear: both;
-      content: "";
-      background: var(--anzhiyu-theme) !important;
-      border-radius: 12px;
+      &::before {
+        position: absolute;
+        inset: 4px 12px;
+        content: "";
+        background: transparent;
+        border-radius: 10px;
+        transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 0;
+      }
+
+      > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      &:hover:not(.is-active)::before {
+        background: var(--anzhiyu-theme-menu-hover) !important;
+      }
+
+      /* 激活状态 - 主题色背景，白色文字图标 */
+      &.is-active {
+        background-color: transparent !important;
+
+        > * {
+          color: var(--anzhiyu-white) !important;
+        }
+
+        .sub-menu-icon,
+        .sub-menu-icon svg {
+          color: var(--anzhiyu-white) !important;
+        }
+
+        &::before {
+          background: var(--anzhiyu-main) !important;
+        }
+
+        &:hover::before {
+          background: var(--anzhiyu-main) !important;
+        }
+      }
     }
   }
 
@@ -567,7 +676,7 @@
 
     .is-active {
       color: var(--anzhiyu-theme-sub-menu-active-text) !important;
-      transition: color 0.3s;
+      transition: color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
   }
 

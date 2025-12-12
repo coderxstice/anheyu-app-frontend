@@ -42,13 +42,58 @@
 }
 
 /**
- * @description 重置el-menu的展开收起动画时长
+ * @description 重置el-menu的展开收起动画时长 - 使用更丝滑的缓动函数
  */
 .outer-most .el-collapse-transition-leave-active,
 .outer-most .el-collapse-transition-enter-active {
-  transition: 0.2s all ease-in-out !important;
+  transition: 0.25s all cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .horizontal-collapse-transition {
-  transition: var(--anzhiyu-transition-duration) all !important;
+  transition: var(--anzhiyu-transition-duration) all
+    cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/**
+ * @description 子菜单展开收起动画优化
+ */
+.el-menu--inline {
+  overflow: hidden;
+}
+
+.el-sub-menu.is-opened > .el-menu--inline {
+  animation: slideDown 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/**
+ * @description 菜单项 hover 和 active 状态的过渡优化
+ */
+.el-menu-item,
+.el-sub-menu__title {
+  transition:
+    color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/**
+ * @description 子菜单箭头旋转动画
+ */
+.el-sub-menu__icon-arrow {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.el-sub-menu.is-opened > .el-sub-menu__title .el-sub-menu__icon-arrow {
+  transform: rotate(180deg);
 }
