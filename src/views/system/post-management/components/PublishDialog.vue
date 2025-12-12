@@ -808,7 +808,7 @@ const handleFetchPrimaryColor = async () => {
         <el-table
           v-loading="!categoryOptions"
           :data="categoryOptions"
-          style="width: 100%"
+          :style="{ width: '100%' }"
           height="350px"
         >
           <el-table-column prop="name" label="分类名称" min-width="150">
