@@ -388,3 +388,150 @@ body.el-popup-parent--hidden {
   overflow: auto;
   width: auto !important;
 }
+
+// ==================== el-select 样式覆盖（与 AnSelect 保持一致） ====================
+.el-select {
+  width: 100%;
+
+  .el-select__wrapper {
+    min-height: 40px;
+    padding: 0 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--anzhiyu-fontcolor);
+    cursor: pointer;
+    background: var(--anzhiyu-card-bg);
+    border: 1px solid var(--anzhiyu-card-border);
+    border-radius: 8px;
+    box-shadow: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      border-color: var(--anzhiyu-main);
+      box-shadow: 0 0 0 2px rgba(var(--anzhiyu-main-rgb), 0.1);
+    }
+
+    &.is-focused {
+      border-color: var(--anzhiyu-main);
+      box-shadow: 0 0 0 3px rgba(var(--anzhiyu-main-rgb), 0.15);
+    }
+  }
+
+  .el-select__placeholder {
+    color: var(--anzhiyu-secondtext);
+  }
+
+  .el-select__suffix {
+    .el-icon {
+      color: var(--anzhiyu-secondtext);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
+
+  &.is-focused .el-select__wrapper {
+    border-color: var(--anzhiyu-main);
+    box-shadow: 0 0 0 3px rgba(var(--anzhiyu-main-rgb), 0.15);
+  }
+
+  // 禁用状态
+  &.is-disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+
+    .el-select__wrapper {
+      cursor: not-allowed;
+      background: var(--anzhiyu-secondbg);
+    }
+  }
+}
+
+// el-select 下拉框样式
+.el-select__popper.el-popper {
+  padding: 6px;
+  overflow: hidden;
+  background: var(--anzhiyu-card-bg) !important;
+  border: var(--style-border) !important;
+  border-radius: 12px !important;
+  box-shadow:
+    0 3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 6px 16px 0 rgba(0, 0, 0, 0.08),
+    0 9px 28px 8px rgba(0, 0, 0, 0.05) !important;
+  backdrop-filter: blur(8px);
+
+  .el-select-dropdown__list {
+    padding: 0;
+  }
+
+  .el-select-dropdown__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 36px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: var(--anzhiyu-fontcolor);
+    cursor: pointer;
+    background: transparent;
+    border-radius: 6px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      color: var(--anzhiyu-fontcolor);
+      background: var(--anzhiyu-secondbg);
+    }
+
+    &.is-selected,
+    &.selected {
+      color: var(--anzhiyu-main);
+      font-weight: 500;
+      background: rgba(var(--anzhiyu-main-rgb), 0.1);
+
+      &:hover {
+        background: rgba(var(--anzhiyu-main-rgb), 0.15);
+      }
+    }
+
+    &.is-disabled {
+      color: var(--anzhiyu-lighttext);
+      cursor: not-allowed;
+      opacity: 0.5;
+
+      &:hover {
+        background: transparent;
+      }
+    }
+  }
+
+  // 滚动条样式
+  .el-scrollbar__bar {
+    opacity: 0.3;
+    transition: opacity 0.3s;
+  }
+
+  &:hover .el-scrollbar__bar {
+    opacity: 1;
+  }
+
+  .el-scrollbar__thumb {
+    background: var(--anzhiyu-secondtext);
+    border-radius: 3px;
+
+    &:hover {
+      background: var(--anzhiyu-fontcolor);
+    }
+  }
+}
+
+// 移动端适配
+@media (width <= 768px) {
+  .el-select .el-select__wrapper {
+    min-height: 44px;
+    font-size: 16px; // 防止 iOS 自动缩放
+  }
+
+  .el-select__popper.el-popper .el-select-dropdown__item {
+    min-height: 44px;
+    font-size: 16px;
+  }
+}
