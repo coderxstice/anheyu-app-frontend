@@ -567,9 +567,17 @@
     border-radius: 8px;
     transition: all 0.3s ease;
 
-    i {
+    i,
+    .iconify {
       font-size: 1em;
       transition: transform 0.3s ease;
+    }
+
+    .btn-icon-img {
+      width: 1em;
+      height: 1em;
+      object-fit: contain;
+      border-radius: 2px;
     }
 
     &:hover {
