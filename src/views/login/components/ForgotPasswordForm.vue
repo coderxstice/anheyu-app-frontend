@@ -111,7 +111,9 @@ onMounted(refreshCaptcha);
 
 <template>
   <div>
-    <h2 class="text-xl font-semibold text-center text-gray-800">忘记密码</h2>
+    <h2 class="text-xl font-semibold text-center text-[--anzhiyu-fontcolor]">
+      忘记密码
+    </h2>
     <p class="mt-2 text-sm text-center text-gray-500">
       请输入您的注册邮箱地址，我们将发送重置链接。
     </p>

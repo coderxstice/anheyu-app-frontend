@@ -245,6 +245,10 @@ export const useSiteConfigStore = defineStore("anheyu-site-config", {
           this.updateSettingsByDotKeys(optimisticState);
         }
 
+        // 🔧 强制从服务器重新获取最新配置，确保缓存与服务器同步
+        // 这解决了没有 Redis 时配置保存后需要重启才能生效的问题
+        await this.forceRefreshFromServer();
+
         message("设置已保存成功", { type: "success" });
         return Promise.resolve();
       } catch (error: any) {
@@ -306,6 +310,37 @@ export const useSiteConfigStore = defineStore("anheyu-site-config", {
       const changes: Partial<CombinedSiteSettings> = {};
       set(changes, key, value);
       this._updateStateAndCache(changes);
+    },
+
+    /**
+     * 强制从服务器重新获取配置，清除本地缓存
+     * 用于确保配置保存后立即生效，特别是在没有 Redis 的情况下
+     */
+    async forceRefreshFromServer() {
+      // 清除本地缓存
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      this.isLoaded = false;
+
+      try {
+        const res = await getSiteConfigApi();
+        if (res.code === 200 && res.data) {
+          this._updateStateAndCache(res.data);
+          this.isLoaded = true;
+          console.info("配置已从服务器重新加载");
+        }
+      } catch (error) {
+        console.error("从服务器重新加载配置失败:", error);
+      }
+    },
+
+    /**
+     * 清除前端配置缓存
+     * 在需要强制刷新配置时调用
+     */
+    clearCache() {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      this.isLoaded = false;
+      console.info("配置缓存已清除");
     }
   }
 });

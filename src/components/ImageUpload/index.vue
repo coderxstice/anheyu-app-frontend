@@ -39,9 +39,16 @@ const CUSTOM_CROPPER_TEMPLATE = `
   </cropper-canvas>
 `;
 
-const props = defineProps<{
-  modelValue: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    modelValue: string;
+    /** 是否允许上传文件（false时只显示网络链接选项） */
+    canUpload?: boolean;
+  }>(),
+  {
+    canUpload: true
+  }
+);
 
 const emit = defineEmits(["update:modelValue"]);
 
@@ -227,12 +234,14 @@ const _uid = Math.random().toString(36).substring(2);
         </el-button>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item :icon="Upload" command="direct-upload"
-              >直接上传</el-dropdown-item
-            >
-            <el-dropdown-item :icon="Scissor" command="crop-upload"
-              >裁剪上传</el-dropdown-item
-            >
+            <template v-if="props.canUpload">
+              <el-dropdown-item :icon="Upload" command="direct-upload"
+                >直接上传</el-dropdown-item
+              >
+              <el-dropdown-item :icon="Scissor" command="crop-upload"
+                >裁剪上传</el-dropdown-item
+              >
+            </template>
             <el-dropdown-item :icon="Link" command="link"
               >网络链接</el-dropdown-item
             >

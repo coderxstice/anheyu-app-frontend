@@ -27,7 +27,9 @@ defineExpose({ focus: () => passwordInputRef.value?.focus() });
 
 <template>
   <div>
-    <h2 class="text-xl font-semibold text-center text-gray-800">重设密码</h2>
+    <h2 class="text-xl font-semibold text-center text-[--anzhiyu-fontcolor]">
+      重设密码
+    </h2>
     <div class="mt-6">
       <el-form-item prop="password">
         <el-input

@@ -315,9 +315,11 @@ const onKeyDown = (event: KeyboardEvent) => {
 };
 
 onMounted(() => {
-  if (route.path === "/login/reset" && route.query.id && route.query.secret) {
+  // 支持 sign 和 secret 两个参数名（兼容性处理）
+  const signParam = (route.query.secret || route.query.sign) as string;
+  if (route.path === "/login/reset" && route.query.id && signParam) {
     form.resetToken.id = route.query.id as string;
-    form.resetToken.secret = route.query.secret as string;
+    form.resetToken.secret = signParam;
     step.value = "reset-password";
   }
   window.document.addEventListener("keydown", onKeyDown);

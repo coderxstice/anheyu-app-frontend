@@ -22,19 +22,42 @@ const siteConfigStore = useSiteConfigStore();
 const siteConfig = siteConfigStore.getSiteConfig;
 const showRewardPanel = ref(false);
 
+// 获取文章的实际作者信息（优先使用文章发布者的信息，否则使用站点所有者）
+const articleAuthor = computed(() => {
+  // 优先使用发布者的 nickname
+  if (props.article.owner_nickname) {
+    return props.article.owner_nickname;
+  }
+  // 其次使用发布者名称（已废弃，兼容旧数据）
+  if (props.article.owner_name) {
+    return props.article.owner_name;
+  }
+  // 否则使用站点所有者名称
+  return siteConfig.frontDesk?.siteOwner?.name || "本站博主";
+});
+
+// 获取文章发布者的头像（优先使用发布者头像，否则使用站点所有者头像）
+const articleAuthorAvatar = computed(() => {
+  // 优先使用发布者的头像
+  if (props.article.owner_avatar) {
+    return props.article.owner_avatar;
+  }
+  // 否则使用站点所有者头像
+  return siteConfig.USER_AVATAR;
+});
+
 const copyrightInfo = computed(() => {
   const license = siteConfig.copyright?.license ?? "CC BY-NC-SA 4.0";
   const licenseUrl =
     siteConfig.copyright?.license_url ??
     "https://creativecommons.org/licenses/by-nc-sa/4.0/";
-  const author = siteConfig.frontDesk?.siteOwner?.name ?? "本站博主";
   const siteUrl = siteConfig.site?.url ?? "/";
-  const siteOwnerName = siteConfig.frontDesk?.siteOwner?.name;
+  const actualAuthor = articleAuthor.value; // 使用文章的实际作者
 
   // 判断是否为转载文章
   const isReprint =
     props.article.copyright_author &&
-    props.article.copyright_author !== siteOwnerName;
+    props.article.copyright_author !== actualAuthor;
 
   if (isReprint) {
     // 转载文章的版权声明
@@ -47,8 +70,8 @@ const copyrightInfo = computed(() => {
       return `本文是转载或翻译文章，版权归 ${originalAuthor} 所有。建议访问原文，转载本文请联系原作者。`;
     }
   } else {
-    // 原创文章的版权声明
-    return `本文是原创文章，采用 <a href="${licenseUrl}" target="_blank">${license}</a> 协议，完整转载请注明来自 <a href="${siteUrl}" target="_blank">${author}</a>`;
+    // 原创文章的版权声明（使用文章的实际作者）
+    return `本文是原创文章，采用 <a href="${licenseUrl}" target="_blank">${license}</a> 协议，完整转载请注明来自 <a href="${siteUrl}" target="_blank">${actualAuthor}</a>`;
   }
 });
 
@@ -100,11 +123,11 @@ const isAlipayEnabled = computed(() => {
 
 <template>
   <div v-if="article.copyright" class="post-copyright">
-    <div class="author-avatar" title="关于博主" @click="goAbout">
-      <img :src="siteConfig.USER_AVATAR" alt="作者形象" />
+    <div class="author-avatar" title="关于作者" @click="goAbout">
+      <img :src="articleAuthorAvatar" alt="作者头像" />
     </div>
     <div class="author-name">
-      {{ siteConfig.frontDesk.siteOwner?.name }}
+      {{ articleAuthor }}
     </div>
     <div class="author-desc">{{ siteConfig?.SUB_TITLE }}</div>
 

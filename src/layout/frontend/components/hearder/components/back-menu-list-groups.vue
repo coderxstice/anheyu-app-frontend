@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { IconifyIconOnline } from "@/components/ReIcon";
+
 defineOptions({
   name: "BackMenuListGroups"
 });
@@ -16,6 +18,16 @@ const props = defineProps<{
     }>;
   };
 }>();
+
+// 判断是否为图片 URL
+const isImageUrl = (icon: string) => {
+  return icon && (icon.startsWith("http://") || icon.startsWith("https://"));
+};
+
+// 判断是否为 Iconify 图标
+const isIconifyIcon = (icon: string) => {
+  return icon && icon.includes(":");
+};
 </script>
 
 <template>
@@ -38,10 +50,26 @@ const props = defineProps<{
             target="_blank"
             rel="noopener noreferrer"
           >
+            <!-- 图片 URL -->
             <img
+              v-if="isImageUrl(item.icon)"
               class="back-menu-item-icon"
               :src="item.icon"
               :alt="item.name"
+            />
+            <!-- Iconify 图标 -->
+            <IconifyIconOnline
+              v-else-if="isIconifyIcon(item.icon)"
+              :icon="item.icon"
+              width="24"
+              height="24"
+              class="back-menu-item-icon back-menu-item-icon-iconify"
+            />
+            <!-- anzhiyu 图标 -->
+            <i
+              v-else-if="item.icon"
+              :class="['anzhiyufont', item.icon]"
+              class="back-menu-item-icon back-menu-item-icon-font"
             />
             <span class="back-menu-item-text">{{ item.name }}</span>
           </a>
@@ -174,6 +202,18 @@ const props = defineProps<{
   width: 24px;
   height: 24px;
   border-radius: 50%;
+
+  &.back-menu-item-icon-iconify {
+    border-radius: 0;
+  }
+
+  &.back-menu-item-icon-font {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    border-radius: 0;
+  }
 }
 
 .back-menu-item-text {
