@@ -21,8 +21,10 @@ const backIcon = useRenderIcon(ArrowLeftSLine);
 
 <template>
   <div>
-    <h2 class="text-xl font-semibold text-center text-gray-800">最后一步</h2>
-    <div class="my-8 flex flex-col items-center text-center">
+    <h2 class="text-xl font-semibold text-center text-[--anzhiyu-fontcolor]">
+      最后一步
+    </h2>
+    <div class="flex flex-col items-center my-8 text-center">
       <component :is="icon" class="text-6xl text-gray-400" />
       <p class="mt-4 text-sm text-gray-600">
         一封激活邮件已经发送至您的邮箱

@@ -49,7 +49,9 @@ defineExpose({ focus });
 
 <template>
   <div>
-    <h2 class="text-xl font-semibold text-center">创建新账号</h2>
+    <h2 class="text-xl font-semibold text-center text-[--anzhiyu-fontcolor]">
+      创建新账号
+    </h2>
     <div class="mt-6">
       <el-form-item prop="email">
         <el-input

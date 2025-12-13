@@ -110,6 +110,11 @@ export interface Article {
   prev_article: ArticleLink | null;
   next_article: ArticleLink | null;
   related_articles: ArticleLink[];
+  // 发布者信息（多人共创功能）
+  owner_id?: number;
+  owner_name?: string; // 已废弃，使用 owner_nickname
+  owner_nickname?: string; // 发布者昵称
+  owner_avatar?: string; // 发布者头像
 }
 
 /**

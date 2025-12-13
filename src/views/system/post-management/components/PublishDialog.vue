@@ -19,6 +19,14 @@ import {
   getPrimaryColor
 } from "@/api/post";
 import AnDialog from "@/components/AnDialog/index.vue";
+import { useUserStoreHook } from "@/store/modules/user";
+
+const userStore = useUserStoreHook();
+
+// 判断是否是管理员
+const isAdmin = computed(() => {
+  return userStore.roles.includes("1");
+});
 
 const props = defineProps<{
   modelValue: boolean;
@@ -499,7 +507,10 @@ const handleFetchPrimaryColor = async () => {
 
               <el-col :span="12">
                 <el-form-item label="封面图" prop="cover_url">
-                  <ImageUpload v-model="internalForm.cover_url" />
+                  <ImageUpload
+                    v-model="internalForm.cover_url"
+                    :can-upload="isAdmin"
+                  />
                   <el-input
                     v-model="internalForm.cover_url"
                     placeholder="或直接输入图片URL"
@@ -513,7 +524,10 @@ const handleFetchPrimaryColor = async () => {
               </el-col>
               <el-col :span="12">
                 <el-form-item label="顶部大图 (可选)" prop="top_img_url">
-                  <ImageUpload v-model="internalForm.top_img_url" />
+                  <ImageUpload
+                    v-model="internalForm.top_img_url"
+                    :can-upload="isAdmin"
+                  />
                   <el-input
                     v-model="internalForm.top_img_url"
                     placeholder="或直接输入图片URL"
