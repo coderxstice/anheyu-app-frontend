@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, watch } from "vue";
+import { ref, onMounted, onUnmounted, computed, watch, nextTick } from "vue";
 import { useSnackbar } from "@/composables/useSnackbar";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useLazyLoading } from "@/composables/useLazyLoading";
@@ -13,12 +13,17 @@ import "katex/dist/katex.min.css";
 // Mermaid 缩放功能的清理函数
 let mermaidCleanup: (() => void) | null = null;
 
+// Mermaid 虚拟渲染（进入视口再注入 SVG）
+let mermaidVirtualObserver: IntersectionObserver | null = null;
+
 /**
  * 初始化 Mermaid 图表的缩放功能
  * 模拟 md-editor-v3 的行为，动态添加 action 按钮
  */
 const initMermaidZoom = (container: HTMLElement) => {
-  const mermaidContainers = container.querySelectorAll(".md-editor-mermaid");
+  const mermaidContainers = container.matches(".md-editor-mermaid")
+    ? [container]
+    : Array.from(container.querySelectorAll(".md-editor-mermaid"));
   if (mermaidContainers.length === 0) return;
 
   const removeEventsMap = new Map<
@@ -200,6 +205,23 @@ const initMermaidZoom = (container: HTMLElement) => {
   };
 };
 
+const props = defineProps({
+  content: {
+    type: String,
+    default: "PostContent"
+  },
+  // Mermaid 虚拟渲染：原始 HTML（包含 SVG），用于按需 slice 注入
+  rawContent: {
+    type: String,
+    default: ""
+  },
+  // Mermaid 虚拟渲染：id -> slice 索引
+  mermaidBlocks: {
+    type: Object as () => Record<string, { start: number; end: number }>,
+    default: () => ({})
+  }
+});
+
 interface ArticleInfo {
   isReprint: boolean; // 是否为转载文章
   copyrightAuthor?: string; // 原作者
@@ -209,12 +231,70 @@ interface ArticleInfo {
 // Fancybox 懒加载，避免影响首屏性能
 let Fancybox: any = null;
 
-const props = defineProps({
-  content: {
-    type: String,
-    default: "PostContent"
+const setupVirtualMermaid = (container: HTMLElement) => {
+  // 清理旧 observer
+  if (mermaidVirtualObserver) {
+    mermaidVirtualObserver.disconnect();
+    mermaidVirtualObserver = null;
   }
-});
+
+  if (!props.rawContent || !props.mermaidBlocks) return;
+  const blockIds = Object.keys(props.mermaidBlocks);
+  if (blockIds.length === 0) return;
+
+  // 找到所有占位符
+  const placeholders = container.querySelectorAll<HTMLElement>(
+    '.md-editor-mermaid[data-mermaid-virtual="1"][data-mermaid-vid]'
+  );
+  if (placeholders.length === 0) return;
+
+  mermaidVirtualObserver = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target as HTMLElement;
+        const id = el.getAttribute("data-mermaid-vid") || "";
+        const meta = props.mermaidBlocks?.[id];
+        if (!meta) {
+          mermaidVirtualObserver?.unobserve(el);
+          return;
+        }
+
+        // 注入原始 mermaid 块 HTML（包含 SVG）
+        const blockHtml = props.rawContent.slice(meta.start, meta.end);
+        try {
+          const range = document.createRange();
+          range.selectNode(el);
+          const frag = range.createContextualFragment(blockHtml);
+          const newNode = frag.firstElementChild as HTMLElement | null;
+          if (newNode) {
+            el.replaceWith(newNode);
+            // 为新注入的 mermaid 块补齐缩放 action
+            const cleanupFn = initMermaidZoom(newNode);
+            if (cleanupFn) {
+              // 合并到全局清理
+              const prevCleanup = mermaidCleanup;
+              mermaidCleanup = () => {
+                prevCleanup?.();
+                cleanupFn();
+              };
+            }
+          } else {
+            // fallback: 清空占位符，避免重复触发
+            el.innerHTML = "";
+          }
+        } catch (e) {
+          console.error("[MermaidVirtual] 注入失败:", e);
+        } finally {
+          mermaidVirtualObserver?.unobserve(el);
+        }
+      });
+    },
+    { rootMargin: "800px 0px", threshold: 0.01 }
+  );
+
+  placeholders.forEach(el => mermaidVirtualObserver?.observe(el));
+};
 
 const { showSnackbar } = useSnackbar();
 const siteConfigStore = useSiteConfigStore();
@@ -462,6 +542,9 @@ onMounted(async () => {
     // 初始化 Mermaid 缩放功能
     mermaidCleanup = initMermaidZoom(postContentRef.value);
 
+    // 初始化 Mermaid 虚拟渲染（进入视口再注入 SVG）
+    setupVirtualMermaid(postContentRef.value);
+
     // 懒加载 Fancybox
     if (!Fancybox) {
       const fancyboxModule = await import("@fancyapps/ui");
@@ -498,6 +581,11 @@ onUnmounted(() => {
     mermaidCleanup();
     mermaidCleanup = null;
   }
+  // 清理 Mermaid 虚拟渲染 observer
+  if (mermaidVirtualObserver) {
+    mermaidVirtualObserver.disconnect();
+    mermaidVirtualObserver = null;
+  }
   // 清理懒加载资源
   cleanup();
   // 清理全局函数
@@ -510,7 +598,7 @@ watch(
   () => {
     if (postContentRef.value) {
       // 等待 DOM 更新完成后重新初始化懒加载
-      setTimeout(() => {
+      setTimeout(async () => {
         if (postContentRef.value) {
           reinitialize(postContentRef.value);
           // 重新初始化音乐播放器
@@ -520,6 +608,9 @@ watch(
             mermaidCleanup();
           }
           mermaidCleanup = initMermaidZoom(postContentRef.value);
+          // 重新初始化 Mermaid 虚拟渲染
+          await nextTick();
+          setupVirtualMermaid(postContentRef.value);
           // 重新绑定 Fancybox
           if (Fancybox) {
             Fancybox.unbind(postContentRef.value);
