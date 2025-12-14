@@ -96,6 +96,23 @@ defineExpose({ getRef });
       </re-col>
 
       <re-col :value="12" :xs="24" :sm="24">
+        <el-form-item label="用户组" prop="userGroupID">
+          <el-select
+            v-model="newFormInline.userGroupID"
+            placeholder="请选择用户组"
+            class="w-full"
+          >
+            <el-option
+              v-for="group in props.userGroups"
+              :key="group.id"
+              :label="group.name"
+              :value="group.id"
+            />
+          </el-select>
+        </el-form-item>
+      </re-col>
+
+      <re-col :value="12" :xs="24" :sm="24">
         <el-form-item label="状态" prop="status">
           <el-select
             v-model="newFormInline.status"
