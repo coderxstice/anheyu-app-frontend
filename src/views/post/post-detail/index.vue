@@ -248,6 +248,16 @@ const fetchRequiredData = async (id: string) => {
           created_at: p.created_at
         }));
       });
+
+      // SSR路径也需要获取系列文章
+      if (seriesCategory.value) {
+        getPublicArticles({
+          category: seriesCategory.value.name,
+          pageSize: 6
+        }).then(res => {
+          seriesArticles.value = res.data.list;
+        });
+      }
       return;
     } else {
       // 数据过期，清除并重新获取
@@ -282,11 +292,11 @@ const fetchRequiredData = async (id: string) => {
       created_at: p.created_at
     }));
 
-    // 获取系列文章
+    // 获取系列文章（最多获取6篇）
     if (seriesCategory.value) {
       const seriesResponse = await getPublicArticles({
         category: seriesCategory.value.name,
-        pageSize: 9999
+        pageSize: 6
       });
       seriesArticles.value = seriesResponse.data.list;
     } else {

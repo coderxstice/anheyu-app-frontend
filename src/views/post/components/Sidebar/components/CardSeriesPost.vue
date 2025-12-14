@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { computed, inject, ref } from "vue";
+import {
+  computed,
+  inject,
+  ref,
+  watch,
+  nextTick,
+  onMounted,
+  onUnmounted
+} from "vue";
 import type { Ref } from "vue";
 import type { Article, PostCategory } from "@/api/post/type";
 import { useArticleStore } from "@/store/modules/articleStore";
@@ -19,6 +27,43 @@ const seriesCategory = inject<Ref<PostCategory | null>>(
 
 const displayPosts = computed(() => seriesPosts.value);
 
+// 溢出检测
+const listRef = ref<HTMLElement | null>(null);
+const isOverflow = ref(false);
+
+const checkOverflow = () => {
+  if (listRef.value) {
+    isOverflow.value = listRef.value.scrollHeight > listRef.value.clientHeight;
+  }
+};
+
+// 监视文章列表变化，检查溢出
+watch(displayPosts, async () => {
+  if (displayPosts.value.length > 0) {
+    await nextTick();
+    checkOverflow();
+  }
+});
+
+onMounted(() => {
+  window.addEventListener("resize", checkOverflow);
+  nextTick(() => {
+    checkOverflow();
+  });
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", checkOverflow);
+});
+
+// 生成分类页面链接
+const categoryLink = computed(() => {
+  if (seriesCategory.value?.name) {
+    return `/categories/${encodeURIComponent(seriesCategory.value.name)}/`;
+  }
+  return "/categories/";
+});
+
 const formatDate = (dateString: string) => {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -34,28 +79,39 @@ const formatDate = (dateString: string) => {
       <i class="anzhiyufont anzhiyu-icon-cube" />
       <span>{{ seriesCategory?.name || "系列文章" }}</span>
     </div>
-    <div class="aside-list">
-      <router-link
-        v-for="post in displayPosts"
-        :key="post.id"
-        class="aside-list-item"
-        :to="`/posts/${post.id}`"
-        :title="post.title"
+    <div class="card-content">
+      <div
+        ref="listRef"
+        class="aside-list"
+        :class="{ 'is-overflow': isOverflow }"
       >
-        <div class="thumbnail">
-          <img :src="post.cover_url || defaultCover" :alt="post.title" />
-        </div>
-        <div class="content">
-          <div class="title">
-            {{ post.title }}
+        <router-link
+          v-for="post in displayPosts"
+          :key="post.id"
+          class="aside-list-item"
+          :to="`/posts/${post.id}`"
+          :title="post.title"
+        >
+          <div class="thumbnail">
+            <img :src="post.cover_url || defaultCover" :alt="post.title" />
           </div>
-          <time
-            :datetime="post.created_at"
-            :title="`发表于 ${post.created_at}`"
-          >
-            {{ formatDate(post.created_at) }}
-          </time>
-        </div>
+          <div class="content">
+            <div class="title">
+              {{ post.title }}
+            </div>
+            <time
+              :datetime="post.created_at"
+              :title="`发表于 ${post.created_at}`"
+            >
+              {{ formatDate(post.created_at) }}
+            </time>
+          </div>
+        </router-link>
+      </div>
+    </div>
+    <div v-if="isOverflow" class="card-footer">
+      <router-link :to="categoryLink" class="view-all-button">
+        更多文章
       </router-link>
     </div>
   </div>
@@ -77,10 +133,34 @@ const formatDate = (dateString: string) => {
   }
 }
 
+.card-content {
+  position: relative;
+}
+
 .aside-list {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  // 5.5 篇文章的高度：(4rem + 0.75rem) * 5.5 ≈ 26.125rem
+  // 每项高度 4rem，间距 0.75rem，显示 5.5 项
+  max-height: calc((4rem + 0.75rem) * 5 + 4rem * 0.5);
+  overflow: hidden;
+
+  &.is-overflow::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 80px;
+    pointer-events: none;
+    content: "";
+    background-image: linear-gradient(
+      to top,
+      var(--anzhiyu-card-bg),
+      transparent
+    );
+  }
 }
 
 .aside-list-item {
@@ -136,6 +216,35 @@ const formatDate = (dateString: string) => {
   time {
     font-size: 0.75rem;
     color: var(--anzhiyu-fontcolor-grey);
+  }
+}
+
+.card-footer {
+  margin-top: 0.75rem;
+  text-align: center;
+
+  .view-all-button {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 4px 0;
+    font-size: 14px;
+    color: var(--anzhiyu-fontcolor);
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    background: var(--anzhiyu-secondbg);
+    border: var(--style-border-always);
+    border-radius: 8px;
+    box-shadow: var(--anzhiyu-shadow-border);
+    transition: all 0.3s ease;
+
+    &:hover {
+      color: var(--anzhiyu-white);
+      background-color: var(--anzhiyu-theme);
+      border-color: var(--anzhiyu-theme);
+      box-shadow: var(--anzhiyu-shadow-theme);
+    }
   }
 }
 </style>
