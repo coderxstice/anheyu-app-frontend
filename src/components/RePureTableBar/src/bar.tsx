@@ -7,7 +7,8 @@ import {
   computed,
   nextTick,
   defineComponent,
-  getCurrentInstance
+  getCurrentInstance,
+  watch
 } from "vue";
 import {
   delay,
@@ -24,6 +25,50 @@ import ExpandIcon from "@/assets/table-bar/expand.svg?component";
 import RefreshIcon from "@/assets/table-bar/refresh.svg?component";
 import SettingIcon from "@/assets/table-bar/settings.svg?component";
 import CollapseIcon from "@/assets/table-bar/collapse.svg?component";
+
+/** 列设置存储数据结构 */
+interface ColumnSettings {
+  /** 选中显示的列标签列表 */
+  checkedColumns: string[];
+  /** 列顺序（按标签排序） */
+  columnOrder: string[];
+  /** 表格密度 */
+  size?: string;
+}
+
+/** 从 localStorage 读取列设置 */
+function loadColumnSettings(storageKey: string): ColumnSettings | null {
+  if (!storageKey) return null;
+  try {
+    const data = localStorage.getItem(`table-columns-${storageKey}`);
+    return data ? JSON.parse(data) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** 保存列设置到 localStorage */
+function saveColumnSettings(storageKey: string, settings: ColumnSettings) {
+  if (!storageKey) return;
+  try {
+    localStorage.setItem(
+      `table-columns-${storageKey}`,
+      JSON.stringify(settings)
+    );
+  } catch (e) {
+    console.warn("保存列设置失败:", e);
+  }
+}
+
+/** 清除列设置 */
+function clearColumnSettings(storageKey: string) {
+  if (!storageKey) return;
+  try {
+    localStorage.removeItem(`table-columns-${storageKey}`);
+  } catch (e) {
+    console.warn("清除列设置失败:", e);
+  }
+}
 
 const props = {
   /** 头部最左边的标题 */
@@ -47,6 +92,11 @@ const props = {
   tableKey: {
     type: [String, Number] as PropType<string | number>,
     default: "0"
+  },
+  /** 列设置存储键，用于持久化列配置。不传则不持久化 */
+  storageKey: {
+    type: String,
+    default: ""
   }
 };
 
@@ -55,21 +105,92 @@ export default defineComponent({
   props,
   emits: ["refresh", "fullscreen"],
   setup(props, { emit, slots, attrs }) {
-    const size = ref("default");
     const loading = ref(false);
     const checkAll = ref(true);
     const isFullscreen = ref(false);
     const isIndeterminate = ref(false);
     const instance = getCurrentInstance()!;
     const isExpandAll = ref(props.isExpandAll);
+
+    // 获取默认显示的列（hide 不为 true 的列）
     const filterColumns = cloneDeep(props?.columns).filter(column =>
       isBoolean(column?.hide)
         ? !column.hide
         : !(isFunction(column?.hide) && column?.hide())
     );
+
     let checkColumnList = getKeyList(cloneDeep(props?.columns), "label");
-    const checkedColumns = ref(getKeyList(cloneDeep(filterColumns), "label"));
     const dynamicColumns = ref(cloneDeep(props?.columns));
+
+    // 从 localStorage 读取已保存的设置
+    const savedSettings = loadColumnSettings(props.storageKey);
+
+    // 初始化 size，优先使用已保存的设置
+    const size = ref(savedSettings?.size || "default");
+
+    // 初始化 checkedColumns，优先使用已保存的设置
+    const checkedColumns = ref(
+      savedSettings?.checkedColumns?.length
+        ? savedSettings.checkedColumns
+        : getKeyList(cloneDeep(filterColumns), "label")
+    );
+
+    // 如果有保存的设置，应用到 dynamicColumns
+    if (savedSettings) {
+      // 应用列顺序
+      if (savedSettings.columnOrder?.length) {
+        const orderedColumns: typeof dynamicColumns.value = [];
+        const columnsMap = new Map(
+          dynamicColumns.value.map(col => [col.label, col])
+        );
+
+        // 按保存的顺序重排列
+        savedSettings.columnOrder.forEach(label => {
+          const col = columnsMap.get(label);
+          if (col) {
+            orderedColumns.push(col);
+            columnsMap.delete(label);
+          }
+        });
+
+        // 添加新增的列（保存设置后新增的列）
+        columnsMap.forEach(col => orderedColumns.push(col));
+
+        dynamicColumns.value = orderedColumns;
+      }
+
+      // 应用列显示/隐藏状态
+      if (savedSettings.checkedColumns?.length) {
+        dynamicColumns.value.forEach(column => {
+          if (column.label) {
+            column.hide = !savedSettings.checkedColumns.includes(column.label);
+          }
+        });
+      }
+
+      // 更新全选状态
+      const checkedCount = checkedColumns.value.length;
+      checkAll.value = checkedCount === checkColumnList.length;
+      isIndeterminate.value =
+        checkedCount > 0 && checkedCount < checkColumnList.length;
+    }
+
+    /** 保存当前列设置 */
+    function persistColumnSettings() {
+      if (!props.storageKey) return;
+      saveColumnSettings(props.storageKey, {
+        checkedColumns: checkedColumns.value,
+        columnOrder: dynamicColumns.value
+          .map(col => col.label)
+          .filter(Boolean) as string[],
+        size: size.value
+      });
+    }
+
+    // 监听 size 变化，自动保存
+    watch(size, () => {
+      persistColumnSettings();
+    });
 
     const getDropdownItemStyle = computed(() => {
       return s => {
@@ -136,6 +257,7 @@ export default defineComponent({
       dynamicColumns.value.map(column =>
         val ? (column.hide = false) : (column.hide = true)
       );
+      persistColumnSettings();
     }
 
     function handleCheckedColumnsChange(value: string[]) {
@@ -144,10 +266,12 @@ export default defineComponent({
       checkAll.value = checkedCount === checkColumnList.length;
       isIndeterminate.value =
         checkedCount > 0 && checkedCount < checkColumnList.length;
+      persistColumnSettings();
     }
 
     function handleCheckColumnListChange(val: boolean, label: string) {
       dynamicColumns.value.filter(item => item.label === label)[0].hide = !val;
+      persistColumnSettings();
     }
 
     async function onReset() {
@@ -157,6 +281,8 @@ export default defineComponent({
       checkColumnList = [];
       checkColumnList = await getKeyList(cloneDeep(props?.columns), "label");
       checkedColumns.value = getKeyList(cloneDeep(filterColumns), "label");
+      // 清除保存的设置
+      clearColumnSettings(props.storageKey);
     }
 
     const dropdown = {
@@ -214,6 +340,8 @@ export default defineComponent({
             }
             const currentRow = dynamicColumns.value.splice(oldIndex, 1)[0];
             dynamicColumns.value.splice(newIndex, 0, currentRow);
+            // 拖拽完成后保存设置
+            persistColumnSettings();
           }
         });
       });

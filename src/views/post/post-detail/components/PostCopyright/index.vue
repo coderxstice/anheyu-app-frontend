@@ -38,9 +38,19 @@ const articleAuthor = computed(() => {
 
 // 获取文章发布者的头像（优先使用发布者头像，否则使用站点所有者头像）
 const articleAuthorAvatar = computed(() => {
-  // 优先使用发布者的头像
-  if (props.article.owner_avatar) {
-    return props.article.owner_avatar;
+  const avatar = props.article.owner_avatar;
+  if (avatar) {
+    // 如果是完整 URL，直接使用
+    if (avatar.startsWith("http://") || avatar.startsWith("https://")) {
+      return avatar;
+    }
+    // 如果是 Gravatar 相对路径（如 avatar/xxx?d=identicon），拼接 Gravatar base URL
+    if (avatar.startsWith("avatar/")) {
+      const baseUrl = siteConfig?.GRAVATAR_URL || "https://cravatar.cn";
+      return `${baseUrl}/${avatar}`;
+    }
+    // 其他情况直接返回（可能是本地路径）
+    return avatar;
   }
   // 否则使用站点所有者头像
   return siteConfig.USER_AVATAR;

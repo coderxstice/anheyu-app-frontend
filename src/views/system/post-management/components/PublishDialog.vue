@@ -452,6 +452,7 @@ const handleFetchPrimaryColor = async () => {
                     style="width: 100%"
                     no-data-text="暂无分类，请在'管理分类'中添加"
                     :multiple-limit="hasSeriesCategory ? 1 : 3"
+                    popper-class="hide-selected-check"
                     @change="values => emit('change-category', values)"
                   >
                     <el-option
@@ -904,6 +905,13 @@ const handleFetchPrimaryColor = async () => {
     </AnDialog>
   </div>
 </template>
+
+<!-- 全局样式：隐藏下拉框选中项的勾选符号 -->
+<style lang="scss">
+.hide-selected-check .el-select-dropdown__item.is-selected::after {
+  display: none;
+}
+</style>
 
 <style lang="scss" scoped>
 .form-item-help {

@@ -195,6 +195,10 @@ const isIconifyIcon = (icon: string) => {
     .back-menu-item-text {
       color: var(--anzhiyu-white);
     }
+
+    .back-menu-item-icon-font {
+      color: var(--anzhiyu-white);
+    }
   }
 }
 
@@ -213,6 +217,7 @@ const isIconifyIcon = (icon: string) => {
     justify-content: center;
     font-size: 1.2rem;
     border-radius: 0;
+    color: var(--anzhiyu-fontcolor);
   }
 }
 
