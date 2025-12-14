@@ -23,7 +23,21 @@
             target="_blank"
             rel="noopener external nofollow noreferrer"
           >
-            <i :class="getIconClass(item.icon)" />
+            <!-- 图片 URL -->
+            <img
+              v-if="isImageUrl(item.icon)"
+              :src="item.icon"
+              :alt="item.title"
+              class="social-icon-img"
+            />
+            <!-- Iconify 图标 -->
+            <IconifyIconOnline
+              v-else-if="isIconifyIcon(item.icon)"
+              :icon="item.icon"
+              class="social-icon-iconify"
+            />
+            <!-- 其他图标 (anzhiyu/fa) -->
+            <i v-else :class="getIconClass(item.icon)" />
           </a>
         </el-tooltip>
 
@@ -65,7 +79,21 @@
             target="_blank"
             rel="noopener external nofollow noreferrer"
           >
-            <i :class="getIconClass(item.icon)" />
+            <!-- 图片 URL -->
+            <img
+              v-if="isImageUrl(item.icon)"
+              :src="item.icon"
+              :alt="item.title"
+              class="social-icon-img"
+            />
+            <!-- Iconify 图标 -->
+            <IconifyIconOnline
+              v-else-if="isIconifyIcon(item.icon)"
+              :icon="item.icon"
+              class="social-icon-iconify"
+            />
+            <!-- 其他图标 (anzhiyu/fa) -->
+            <i v-else :class="getIconClass(item.icon)" />
           </a>
         </el-tooltip>
       </div>
@@ -274,6 +302,17 @@ import { getIconClass } from "@/utils/icon";
 import { getRandomLinks } from "@/api/postLink";
 import { useLazyLoading } from "@/composables/useLazyLoading";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
+import { IconifyIconOnline } from "@/components/ReIcon";
+
+// 判断是否为图片 URL
+const isImageUrl = (icon: string) => {
+  return icon && (icon.startsWith("http://") || icon.startsWith("https://"));
+};
+
+// 判断是否为 Iconify 图标（包含 :）
+const isIconifyIcon = (icon: string) => {
+  return icon && icon.includes(":");
+};
 
 interface FriendLink {
   name: string;
@@ -475,6 +514,18 @@ a {
     background: var(--anzhiyu-fontcolor);
     border-radius: 3rem;
     transition: 0.3s;
+
+    .social-icon-img {
+      width: 1.2rem;
+      height: 1.2rem;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .social-icon-iconify {
+      width: 1.2rem;
+      height: 1.2rem;
+    }
 
     &:hover {
       color: var(--anzhiyu-white);
