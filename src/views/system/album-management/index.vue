@@ -159,6 +159,7 @@ function openAlbumPage() {
       title="相册图片管理"
       :columns="columns"
       :tableRef="tableRef?.getTableRef()"
+      storageKey="album-management"
       class="table-bar rounded-2xl"
       @refresh="onSearch"
       @fullscreen="onFullscreen"
