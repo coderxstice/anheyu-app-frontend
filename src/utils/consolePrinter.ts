@@ -2,7 +2,7 @@
  * @Description: 控制台打印工具 - 在生产环境中也能显示品牌信息
  * @Author: 安知鱼
  * @Date: 2025-09-26
- * @LastEditTime: 2025-09-30 14:12:57
+ * @LastEditTime: 2025-12-14 14:26:55
  * @LastEditors: 安知鱼
  */
 
@@ -28,7 +28,7 @@ export const initConsolePrinter = async (config?: ConsoleConfig) => {
 
     const finalConfig = {
       author:
-        config?.author ||
+        globalConfig?.frontDesk?.siteOwner?.name ||
         globalConfig?.author?.name ||
         globalConfig?.USER_NAME ||
         "安知鱼",

@@ -39,6 +39,17 @@
   // 应用所有文章内容基础样式
   @include article-content-base;
 
+  // Performance: browser-level "virtual rendering" for very long articles.
+  // Skips layout/paint for offscreen blocks in supported browsers (Chrome/Edge).
+  @supports (content-visibility: auto) {
+    > * {
+      content-visibility: auto;
+      // Reserve a reasonable placeholder height to reduce layout jumps.
+      // (width height) — width is irrelevant for block layout, keep it tiny.
+      contain-intrinsic-size: 1px 800px;
+    }
+  }
+
   // 前台特有：图片缩放效果
   img:not(a img) {
     cursor: zoom-in;

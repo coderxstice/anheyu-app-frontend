@@ -39,6 +39,7 @@ import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useUiStore } from "@/store/modules/uiStore";
 import { storeToRefs } from "pinia";
 import { usePostCustomHTML } from "@/composables/usePostCustomHTML";
+import { virtualizeMermaidBlocks } from "@/utils/virtualizeMermaid";
 
 defineOptions({
   name: "PostDetail"
@@ -111,6 +112,11 @@ const isCommentEnabled = computed(() => {
 // 获取文章页面自定义HTML（支持script执行）
 usePostCustomHTML();
 
+// Mermaid 虚拟渲染：避免首屏/TOC 解析时一次性解析大量 SVG DOM
+const mermaidVirtualized = computed(() =>
+  virtualizeMermaidBlocks(article.value?.content_html || "")
+);
+
 const headingTocItems = ref<{ id: string }[]>([]);
 const commentIds = ref<string[]>([]);
 const allSpyIds = computed(() => [
@@ -123,7 +129,7 @@ provide("seriesArticles", seriesArticles);
 provide("recentArticles", recentArticles);
 provide(
   "articleContentHtml",
-  computed(() => article.value?.content_html)
+  computed(() => mermaidVirtualized.value.virtualHtml)
 );
 provide("allSpyIds", allSpyIds);
 provide("updateHeadingTocItems", (items: { id: string }[]) => {
@@ -399,7 +405,11 @@ watch(
             :summary="article.summaries"
           />
           <PostOutdateNotice :update-date="article.updated_at" />
-          <PostContent :content="article.content_html" />
+          <PostContent
+            :content="mermaidVirtualized.virtualHtml"
+            :raw-content="mermaidVirtualized.rawHtml"
+            :mermaid-blocks="mermaidVirtualized.blocks"
+          />
           <PostCopyright :article="article" />
           <PostTools :article="article" />
           <PostPagination
