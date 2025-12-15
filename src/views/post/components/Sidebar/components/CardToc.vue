@@ -291,6 +291,34 @@ const updateIndicator = () => {
   }
 };
 
+const scrollActiveIntoView = () => {
+  const tocElement = tocRef.value;
+  if (!tocElement) return;
+
+  const container = tocElement.parentElement; // .toc-content
+  const activeLink = tocElement.querySelector("a.active") as HTMLElement | null;
+
+  if (!container || !activeLink) return;
+
+  const linkTop = activeLink.offsetTop;
+  const linkBottom = linkTop + activeLink.offsetHeight;
+  const visibleTop = container.scrollTop;
+  const visibleBottom = visibleTop + container.clientHeight;
+  const padding = 12; // 少量内边距，避免贴边
+
+  if (linkTop < visibleTop + padding) {
+    container.scrollTo({
+      top: Math.max(linkTop - container.clientHeight * 0.3, 0),
+      behavior: "smooth"
+    });
+  } else if (linkBottom > visibleBottom - padding) {
+    container.scrollTo({
+      top: linkBottom - container.clientHeight * 0.7,
+      behavior: "smooth"
+    });
+  }
+};
+
 watch(
   articleContentHtml,
   () => {
@@ -302,12 +330,18 @@ watch(
 );
 
 watch(activeTocId, () => {
-  nextTick(updateIndicator);
+  nextTick(() => {
+    updateIndicator();
+    scrollActiveIntoView();
+  });
 });
 
 // 当可见项变化时也更新指示器
 watch(visibleTocItems, () => {
-  nextTick(updateIndicator);
+  nextTick(() => {
+    updateIndicator();
+    scrollActiveIntoView();
+  });
 });
 
 let scrollEndHandler: () => void;
@@ -325,7 +359,10 @@ onMounted(() => {
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("scroll", scrollEndHandler);
 
-  nextTick(updateIndicator);
+  nextTick(() => {
+    updateIndicator();
+    scrollActiveIntoView();
+  });
 });
 
 onUnmounted(() => {
