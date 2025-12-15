@@ -831,6 +831,10 @@ a {
     z-index: 99;
     background: var(--anzhiyu-card-bg);
     margin-top: -1px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    touch-action: pan-y;
   }
 }
 </style>
