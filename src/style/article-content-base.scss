@@ -2089,16 +2089,16 @@
       // - `contain` helps isolate layout/paint in browsers without content-visibility
       // - `content-visibility` skips offscreen rendering in supported browsers (Chrome/Edge)
       contain: layout paint style;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
       @supports (content-visibility: auto) {
         content-visibility: auto;
         // Placeholder size to reduce layout jumps before the diagram is rendered
         contain-intrinsic-size: 400px;
       }
-
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
 
       svg {
         transform-origin: top left;
