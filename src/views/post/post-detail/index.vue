@@ -582,5 +582,19 @@ div#anzhiyu-footer-bar {
     padding: 1rem 1rem;
     z-index: 1;
   }
+
+  .post-content-inner {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    touch-action: pan-y;
+  }
+
+  div#anzhiyu-footer-bar {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    touch-action: pan-y;
+  }
 }
 </style>
