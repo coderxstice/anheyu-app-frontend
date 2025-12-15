@@ -75,7 +75,9 @@
                 label="跳过重复友链"
                 size="large"
               />
-              <div class="option-desc">基于 URL 检测重复友链并跳过</div>
+              <div class="option-desc">
+                基于 URL 检测重复友链并跳过（JSON 中无需配置）
+              </div>
             </el-col>
             <el-col :span="12">
               <el-checkbox
@@ -83,7 +85,9 @@
                 label="自动创建分类"
                 size="large"
               />
-              <div class="option-desc">不存在的分类将自动创建</div>
+              <div class="option-desc">
+                不存在的分类将自动创建（JSON 中无需配置）
+              </div>
             </el-col>
           </el-row>
           <el-row :gutter="20" class="mt-3">
@@ -93,7 +97,9 @@
                 label="自动创建标签"
                 size="large"
               />
-              <div class="option-desc">不存在的标签将自动创建</div>
+              <div class="option-desc">
+                不存在的标签将自动创建（JSON 中无需配置）
+              </div>
             </el-col>
             <el-col :span="12">
               <div class="default-category">
@@ -302,31 +308,26 @@ const formData = ref({
 });
 
 // 示例 JSON
-const exampleJson = `{
-  "links": [
-    {
-      "name": "安知鱼",
-      "url": "https://blog.anheyu.com",
-      "logo": "https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg",
-      "description": "生活明朗，万物可爱",
-      "siteshot": "https://blog.anheyu.com/screenshot.png",
-      "category_name": "好友",
-      "tag_name": "博客",
-      "status": "APPROVED"
-    },
-    {
-      "name": "GitHub",
-      "url": "https://github.com",
-      "logo": "https://github.com/favicon.ico",
-      "description": "代码托管平台",
-      "category_name": "工具",
-      "tag_name": "开发工具"
-    }
-  ],
-  "skip_duplicates": true,
-  "create_categories": true,
-  "create_tags": true
-}`;
+const exampleJson = `[
+  {
+    "name": "安知鱼",
+    "url": "https://blog.anheyu.com",
+    "logo": "https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg",
+    "description": "生活明朗，万物可爱",
+    "siteshot": "https://blog.anheyu.com/screenshot.png",
+    "category_name": "好友",
+    "tag_name": "博客",
+    "status": "APPROVED"
+  },
+  {
+    "name": "GitHub",
+    "url": "https://github.com",
+    "logo": "https://github.com/favicon.ico",
+    "description": "代码托管平台",
+    "category_name": "工具",
+    "tag_name": "开发工具"
+  }
+]`;
 
 // 验证 JSON
 const validateJson = () => {
@@ -340,39 +341,37 @@ const validateJson = () => {
   try {
     const parsed = JSON.parse(formData.value.jsonContent);
 
-    // 检查数据结构
-    if (!parsed.links || !Array.isArray(parsed.links)) {
-      jsonError.value = "JSON 格式错误：缺少 'links' 数组";
+    // 支持直接数组或包含 links 的对象
+    let links: ImportLinkItem[] | undefined;
+    if (Array.isArray(parsed)) {
+      links = parsed;
+    } else if (parsed.links && Array.isArray(parsed.links)) {
+      links = parsed.links;
+    }
+
+    if (!links) {
+      jsonError.value = "JSON 格式错误：请提供友链数组";
       return;
     }
 
-    if (parsed.links.length === 0) {
+    if (links.length === 0) {
       jsonError.value = "友链数据为空";
       return;
     }
 
     // 检查每个友链的必要字段
-    for (let i = 0; i < parsed.links.length; i++) {
-      const link = parsed.links[i];
+    for (let i = 0; i < links.length; i++) {
+      const link = links[i];
       if (!link.name || !link.url) {
         jsonError.value = `第 ${i + 1} 个友链缺少必要字段 'name' 或 'url'`;
         return;
       }
     }
 
-    parsedData.value = parsed.links;
+    parsedData.value = links;
 
-    // 更新选项
-    if (parsed.skip_duplicates !== undefined) {
-      formData.value.skipDuplicates = parsed.skip_duplicates;
-    }
-    if (parsed.create_categories !== undefined) {
-      formData.value.createCategories = parsed.create_categories;
-    }
-    if (parsed.create_tags !== undefined) {
-      formData.value.createTags = parsed.create_tags;
-    }
-    if (parsed.default_category_id !== undefined) {
+    // 可选默认分类
+    if (!Array.isArray(parsed) && parsed.default_category_id !== undefined) {
       formData.value.defaultCategoryId = parsed.default_category_id;
     }
   } catch (error) {
