@@ -111,12 +111,18 @@ export default function linkCardPlugin(md: MarkdownIt): void {
     const icon = parsedParams.icon || "anzhiyu-icon-link";
     const tips = parsedParams.tips || "引用站外地址";
 
-    // 判断图标是否为 HTTP 链接
+    // 图标支持三种格式：
+    // 1) anzhiyufont 图标类名（如 anzhiyu-icon-link）
+    // 2) Iconify 图标（如 ri:github-fill）
+    // 3) HTTP/HTTPS 图片链接
     const isHttpIcon =
       icon.startsWith("http://") || icon.startsWith("https://");
+    const isIconify = icon.includes(":");
     const iconHtml = isHttpIcon
       ? `<img src="${md.utils.escapeHtml(icon)}" alt="icon" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin: 0; padding: 0; display: block;">`
-      : `<i class="anzhiyufont ${md.utils.escapeHtml(icon)}"></i>`;
+      : isIconify
+        ? `<img src="https://api.iconify.design/${md.utils.escapeHtml(icon)}.svg" alt="${md.utils.escapeHtml(icon)}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin: 0; padding: 0; display: block;">`
+        : `<i class="anzhiyufont ${md.utils.escapeHtml(icon)}"></i>`;
 
     // 生成链接卡片 HTML
     const html = `<div class="anzhiyu-tag-link"><a class="tag-Link" target="_blank" href="${md.utils.escapeHtml(url)}" rel="external nofollow noreferrer">
@@ -195,14 +201,24 @@ export default function linkCardPlugin(md: MarkdownIt): void {
     const icon = parsedParams.icon || "anzhiyu-icon-link";
     const tips = parsedParams.tips || "引用站外地址";
 
-    // 判断图标是否为 HTTP 链接
+    // 图标支持三种格式：
+    // 1) anzhiyufont 图标类名（如 anzhiyu-icon-link）
+    // 2) Iconify 图标（如 ri:github-fill）
+    // 3) HTTP/HTTPS 图片链接
     const isHttpIcon =
       icon.startsWith("http://") || icon.startsWith("https://");
+    const isIconify = icon.includes(":");
     const iconHtml = isHttpIcon
       ? `<img src="${md.utils.escapeHtml(
           icon
         )}" alt="icon" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin: 0; padding: 0; display: block;">`
-      : `<i class="anzhiyufont ${md.utils.escapeHtml(icon)}"></i>`;
+      : isIconify
+        ? `<img src="https://api.iconify.design/${md.utils.escapeHtml(
+            icon
+          )}.svg" alt="${md.utils.escapeHtml(
+            icon
+          )}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin: 0; padding: 0; display: block;">`
+        : `<i class="anzhiyufont ${md.utils.escapeHtml(icon)}"></i>`;
 
     const html = `<div class="anzhiyu-tag-link"><a class="tag-Link" target="_blank" href="${md.utils.escapeHtml(
       url

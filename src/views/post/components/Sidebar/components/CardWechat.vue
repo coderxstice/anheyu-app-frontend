@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-04 17:57:59
- * @LastEditTime: 2025-08-06 15:10:28
+ * @LastEditTime: 2025-12-16 16:49:21
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -73,7 +73,6 @@ const props = defineProps({
     background-repeat: no-repeat;
     background-position: center center;
     background-size: cover;
-    backdrop-filter: blur(10px);
     transition: 0.2s cubic-bezier(0.45, 0.04, 0.43, 1.21);
   }
 }
