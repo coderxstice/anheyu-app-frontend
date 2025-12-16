@@ -320,114 +320,45 @@ const fetchRequiredData = async (id: string) => {
 };
 
 /**
- * @description 滚动到目标元素，支持等待图片加载
- * @param targetElement - 目标DOM元素
- * @param smooth - 是否使用平滑滚动
+ * @description 滚动到目标元素
+ * @param id - 目标元素ID
  */
-const scrollToTarget = (targetElement: HTMLElement, smooth = false) => {
-  const top = targetElement.getBoundingClientRect().top + window.scrollY - 80;
-  window.scrollTo({ top, behavior: smooth ? "smooth" : "instant" });
-};
-
-/**
- * @description 等待文章内容区域的图片加载完成
- * @param container - 文章内容容器
- * @param timeout - 超时时间（毫秒）
- */
-const waitForImages = (
-  container: HTMLElement,
-  timeout = 5000
-): Promise<void> => {
-  return new Promise(resolve => {
-    const images = container.querySelectorAll("img");
-    if (images.length === 0) {
-      resolve();
-      return;
+const scrollToTargetElement = (id: string) => {
+  const targetElement = document.getElementById(id);
+  if (targetElement) {
+    if (id.startsWith("comment-")) {
+      commentRef.value?.scrollToComment(id);
+    } else {
+      targetElement.scrollIntoView({ behavior: "instant", block: "start" });
     }
-
-    let loadedCount = 0;
-    let resolved = false;
-
-    const checkComplete = () => {
-      if (resolved) return;
-      loadedCount++;
-      if (loadedCount >= images.length) {
-        resolved = true;
-        resolve();
-      }
-    };
-
-    // 设置超时，避免无限等待
-    const timeoutId = setTimeout(() => {
-      if (!resolved) {
-        resolved = true;
-        resolve();
-      }
-    }, timeout);
-
-    images.forEach(img => {
-      if (img.complete) {
-        checkComplete();
-      } else {
-        img.addEventListener("load", checkComplete, { once: true });
-        img.addEventListener("error", checkComplete, { once: true });
-      }
-    });
-
-    // 如果所有图片都已加载完成
-    if (loadedCount >= images.length && !resolved) {
-      resolved = true;
-      clearTimeout(timeoutId);
-      resolve();
-    }
-  });
+  }
 };
 
 /**
  * @description 处理URL哈希值变化，滚动到对应元素
  * @param hash - URL中的hash值 (例如 #comment-123)
- * @param isInitial - 是否为页面初始加载
  */
-const handleHashChange = async (hash: string, isInitial = false) => {
+const handleHashChange = (hash: string) => {
   if (!hash) return;
 
   try {
     const id = decodeURIComponent(hash.slice(1));
 
-    // 等待DOM更新
-    await nextTick();
+    // 立即定位一次
+    scrollToTargetElement(id);
 
-    // 短暂延迟确保内容已渲染
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    const targetElement = document.getElementById(id);
-    if (!targetElement) return;
-
-    if (id.startsWith("comment-")) {
-      commentRef.value?.scrollToComment(id);
-      return;
-    }
-
-    // 初始加载时直接跳转（不平滑滚动），避免从顶部开始滚动
-    scrollToTarget(targetElement, !isInitial);
-
-    // 等待文章内容区域的图片加载完成后，再次校正位置
-    const articleContainer = document.getElementById("article-container");
-    if (articleContainer && isInitial) {
-      await waitForImages(articleContainer);
-      // 图片加载完成后，重新获取目标元素并校正位置
-      const updatedTarget = document.getElementById(id);
-      if (updatedTarget) {
-        scrollToTarget(updatedTarget, false);
-      }
-    }
+    // 图片加载会导致高度变化，多次校正位置
+    const delays = [100, 300, 600, 1000, 2000];
+    delays.forEach(delay => {
+      setTimeout(() => scrollToTargetElement(id), delay);
+    });
   } catch (e) {
     console.error("处理URL哈希值失败:", e);
   }
 };
 
 onMounted(() => {
-  handleHashChange(route.hash, true);
+  // hash定位在article watch中处理，确保文章内容加载完成后再定位
 });
 
 watch(
@@ -447,7 +378,7 @@ watch(
   { immediate: true }
 );
 
-// 监听文章变化，发送文章信息更新事件（用于复制版权功能）
+// 监听文章变化，发送文章信息更新事件（用于复制版权功能）并处理hash定位
 watch(
   () => article.value,
   newArticle => {
@@ -466,6 +397,11 @@ watch(
           }
         })
       );
+
+      // 文章加载完成后处理hash定位
+      if (route.hash) {
+        handleHashChange(route.hash);
+      }
     }
   },
   { immediate: true }
