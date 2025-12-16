@@ -64,11 +64,12 @@ export function handleLinkClick(url: string, event?: Event): void {
   // 如果未启用警告或不是外链，直接跳转
   if (!enableWarning || !isExternalLink(url)) {
     if (event) {
-      // 让浏览器正常处理链接
-      return;
+      // 阻止默认行为，改为新标签页打开
+      event.preventDefault();
+      window.open(url, "_blank");
     } else {
-      // 编程式跳转
-      window.location.href = url;
+      // 编程式跳转 - 新标签页打开
+      window.open(url, "_blank");
     }
     return;
   }
@@ -77,9 +78,10 @@ export function handleLinkClick(url: string, event?: Event): void {
   const skipWarning = sessionStorage.getItem("skip-external-link-warning");
   if (skipWarning === "true") {
     if (event) {
-      return;
+      event.preventDefault();
+      window.open(url, "_blank");
     } else {
-      window.location.href = url;
+      window.open(url, "_blank");
     }
     return;
   }
