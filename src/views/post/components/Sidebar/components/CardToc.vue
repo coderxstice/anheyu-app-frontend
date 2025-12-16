@@ -219,22 +219,11 @@ const parseHeadings = () => {
   const doc = parser.parseFromString(articleContentHtml.value, "text/html");
   const headings = doc.querySelectorAll("h1, h2, h3, h4, h5, h6");
   const newTocItems: TocItem[] = [];
-  const idMap = new Map<string, number>(); // 用于跟踪重复的ID
 
   headings.forEach(heading => {
     if (heading.id) {
-      let uniqueId = heading.id;
-      // 如果ID已经存在，添加数字后缀确保唯一性
-      if (idMap.has(uniqueId)) {
-        const count = idMap.get(uniqueId)! + 1;
-        idMap.set(uniqueId, count);
-        uniqueId = `${uniqueId}-${count}`;
-      } else {
-        idMap.set(uniqueId, 0);
-      }
-
       newTocItems.push({
-        id: uniqueId,
+        id: heading.id,
         text: heading.textContent || "",
         level: parseInt(heading.tagName.substring(1), 10)
       });
@@ -254,13 +243,17 @@ const onScroll = () => {
   const fixedHeaderHeight = 80;
   let newActiveId: string | null = null;
 
-  for (let i = allSpyIds.value.length - 1; i >= 0; i--) {
-    const id = allSpyIds.value[i];
+  // 使用 tocItems 而不是 allSpyIds，确保只检测标题元素
+  const headingIds = tocItems.value.map(item => item.id);
+
+  // 从前往后遍历，找到最后一个 top <= fixedHeaderHeight 的元素
+  for (let i = 0; i < headingIds.length; i++) {
+    const id = headingIds[i];
     const element = document.getElementById(id);
     if (element) {
-      if (element.getBoundingClientRect().top <= fixedHeaderHeight) {
+      const rect = element.getBoundingClientRect();
+      if (rect.top <= fixedHeaderHeight) {
         newActiveId = id;
-        break;
       }
     }
   }
@@ -283,8 +276,12 @@ const updateIndicator = () => {
   if (!tocRef.value || !indicatorRef.value) return;
   const activeLink = tocRef.value.querySelector("a.active") as HTMLElement;
   if (activeLink) {
-    indicatorRef.value.style.top = `${activeLink.offsetTop}px`;
-    indicatorRef.value.style.height = `${activeLink.offsetHeight / 2}px`;
+    const indicatorHeight = activeLink.offsetHeight / 2;
+    // 计算垂直居中的偏移量
+    const topOffset =
+      activeLink.offsetTop + (activeLink.offsetHeight - indicatorHeight) / 2;
+    indicatorRef.value.style.top = `${topOffset}px`;
+    indicatorRef.value.style.height = `${indicatorHeight}px`;
     indicatorRef.value.style.opacity = "1";
   } else {
     indicatorRef.value.style.opacity = "0";
@@ -502,7 +499,7 @@ defineExpose({
 
 .toc-indicator {
   position: absolute;
-  top: 50%;
+  top: 0;
   left: 0;
   z-index: 2;
   width: 4px;
@@ -513,7 +510,6 @@ defineExpose({
     top 0.2s cubic-bezier(0, 1, 0.5, 1),
     height 0.2s cubic-bezier(0, 1, 0.5, 1),
     opacity 0.2s ease-in-out;
-  transform: translateY(50%);
 }
 
 // 目录项过渡动画
