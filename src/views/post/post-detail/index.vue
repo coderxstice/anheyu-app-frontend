@@ -320,34 +320,114 @@ const fetchRequiredData = async (id: string) => {
 };
 
 /**
+ * @description 滚动到目标元素，支持等待图片加载
+ * @param targetElement - 目标DOM元素
+ * @param smooth - 是否使用平滑滚动
+ */
+const scrollToTarget = (targetElement: HTMLElement, smooth = false) => {
+  const top = targetElement.getBoundingClientRect().top + window.scrollY - 80;
+  window.scrollTo({ top, behavior: smooth ? "smooth" : "instant" });
+};
+
+/**
+ * @description 等待文章内容区域的图片加载完成
+ * @param container - 文章内容容器
+ * @param timeout - 超时时间（毫秒）
+ */
+const waitForImages = (
+  container: HTMLElement,
+  timeout = 5000
+): Promise<void> => {
+  return new Promise(resolve => {
+    const images = container.querySelectorAll("img");
+    if (images.length === 0) {
+      resolve();
+      return;
+    }
+
+    let loadedCount = 0;
+    let resolved = false;
+
+    const checkComplete = () => {
+      if (resolved) return;
+      loadedCount++;
+      if (loadedCount >= images.length) {
+        resolved = true;
+        resolve();
+      }
+    };
+
+    // 设置超时，避免无限等待
+    const timeoutId = setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        resolve();
+      }
+    }, timeout);
+
+    images.forEach(img => {
+      if (img.complete) {
+        checkComplete();
+      } else {
+        img.addEventListener("load", checkComplete, { once: true });
+        img.addEventListener("error", checkComplete, { once: true });
+      }
+    });
+
+    // 如果所有图片都已加载完成
+    if (loadedCount >= images.length && !resolved) {
+      resolved = true;
+      clearTimeout(timeoutId);
+      resolve();
+    }
+  });
+};
+
+/**
  * @description 处理URL哈希值变化，滚动到对应元素
  * @param hash - URL中的hash值 (例如 #comment-123)
+ * @param isInitial - 是否为页面初始加载
  */
-const handleHashChange = (hash: string) => {
+const handleHashChange = async (hash: string, isInitial = false) => {
   if (!hash) return;
 
-  setTimeout(() => {
-    try {
-      const id = decodeURIComponent(hash.slice(1));
-      const targetElement = document.getElementById(id);
+  try {
+    const id = decodeURIComponent(hash.slice(1));
 
-      if (targetElement) {
-        if (id.startsWith("comment-")) {
-          commentRef.value?.scrollToComment(id);
-        } else {
-          const top =
-            targetElement.getBoundingClientRect().top + window.scrollY - 80;
-          window.scrollTo({ top, behavior: "smooth" });
-        }
-      }
-    } catch (e) {
-      console.error("处理URL哈希值失败:", e);
+    // 等待DOM更新
+    await nextTick();
+
+    // 短暂延迟确保内容已渲染
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    const targetElement = document.getElementById(id);
+    if (!targetElement) return;
+
+    if (id.startsWith("comment-")) {
+      commentRef.value?.scrollToComment(id);
+      return;
     }
-  }, 800);
+
+    // 初始加载时直接跳转（不平滑滚动），避免从顶部开始滚动
+    scrollToTarget(targetElement, !isInitial);
+
+    // 等待文章内容区域的图片加载完成后，再次校正位置
+    const articleContainer = document.getElementById("article-container");
+    if (articleContainer && isInitial) {
+      await waitForImages(articleContainer);
+      // 图片加载完成后，重新获取目标元素并校正位置
+      const updatedTarget = document.getElementById(id);
+      if (updatedTarget) {
+        scrollToTarget(updatedTarget, false);
+      }
+    }
+  } catch (e) {
+    console.error("处理URL哈希值失败:", e);
+  }
 };
 
 onMounted(() => {
-  handleHashChange(route.hash);
+  handleHashChange(route.hash, true);
 });
 
 watch(
