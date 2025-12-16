@@ -113,7 +113,7 @@ const handleContinue = () => {
     sessionStorage.setItem("skip-external-link-warning", "true");
   }
   if (targetUrl.value) {
-    window.location.href = targetUrl.value;
+    window.open(targetUrl.value, "_blank");
   }
 };
 </script>
