@@ -320,34 +320,45 @@ const fetchRequiredData = async (id: string) => {
 };
 
 /**
+ * @description 滚动到目标元素
+ * @param id - 目标元素ID
+ */
+const scrollToTargetElement = (id: string) => {
+  const targetElement = document.getElementById(id);
+  if (targetElement) {
+    if (id.startsWith("comment-")) {
+      commentRef.value?.scrollToComment(id);
+    } else {
+      targetElement.scrollIntoView({ behavior: "instant", block: "start" });
+    }
+  }
+};
+
+/**
  * @description 处理URL哈希值变化，滚动到对应元素
  * @param hash - URL中的hash值 (例如 #comment-123)
  */
 const handleHashChange = (hash: string) => {
   if (!hash) return;
 
-  setTimeout(() => {
-    try {
-      const id = decodeURIComponent(hash.slice(1));
-      const targetElement = document.getElementById(id);
+  try {
+    const id = decodeURIComponent(hash.slice(1));
 
-      if (targetElement) {
-        if (id.startsWith("comment-")) {
-          commentRef.value?.scrollToComment(id);
-        } else {
-          const top =
-            targetElement.getBoundingClientRect().top + window.scrollY - 80;
-          window.scrollTo({ top, behavior: "smooth" });
-        }
-      }
-    } catch (e) {
-      console.error("处理URL哈希值失败:", e);
-    }
-  }, 800);
+    // 立即定位一次
+    scrollToTargetElement(id);
+
+    // 图片加载会导致高度变化，多次校正位置
+    const delays = [100, 300, 600, 1000, 2000];
+    delays.forEach(delay => {
+      setTimeout(() => scrollToTargetElement(id), delay);
+    });
+  } catch (e) {
+    console.error("处理URL哈希值失败:", e);
+  }
 };
 
 onMounted(() => {
-  handleHashChange(route.hash);
+  // hash定位在article watch中处理，确保文章内容加载完成后再定位
 });
 
 watch(
@@ -367,7 +378,7 @@ watch(
   { immediate: true }
 );
 
-// 监听文章变化，发送文章信息更新事件（用于复制版权功能）
+// 监听文章变化，发送文章信息更新事件（用于复制版权功能）并处理hash定位
 watch(
   () => article.value,
   newArticle => {
@@ -386,6 +397,11 @@ watch(
           }
         })
       );
+
+      // 文章加载完成后处理hash定位
+      if (route.hash) {
+        handleHashChange(route.hash);
+      }
     }
   },
   { immediate: true }
