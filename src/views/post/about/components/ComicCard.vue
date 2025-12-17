@@ -67,48 +67,69 @@ defineProps<Props>();
   .comic-box {
     position: absolute;
     top: 0;
-    left: 50%;
+    left: 0;
     display: flex;
-    width: 120%;
+    gap: 2px;
+    width: 100%;
     height: 100%;
-    transform: translateX(-50%);
+    padding: 0;
   }
 
   .comic-item {
     position: relative;
-    width: 20%;
+    flex: 1;
     height: 100%;
     overflow: hidden;
     color: white;
     text-decoration: none;
-    transition: 0.8s;
-    transform: skew(-10deg, 0deg);
+    transition: flex 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+
+    &::before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      content: "";
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 0.3) 50%,
+        rgba(0, 0, 0, 0.7) 100%
+      );
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
 
     &:hover {
-      width: 46%;
+      flex: 2.5;
+      z-index: 3;
 
-      .comic-item-cover {
-        left: 16%;
-        transform: skew(10deg, 0deg) scale(1.6);
+      &::before {
+        opacity: 1;
+      }
+
+      .comic-item-cover img {
+        transform: scale(1.15);
       }
     }
 
     .comic-item-cover {
       position: absolute;
       top: 0;
-      left: -50%;
+      left: 0;
+      width: 100%;
       height: 100%;
-      object-fit: cover;
-      transition:
-        scale 0.2s,
-        all 0.8s;
-      transform: skew(10deg, 0deg);
+      overflow: hidden;
 
       img {
-        max-width: none;
+        width: 100%;
         height: 100%;
-        border-radius: 0;
-        transition: 0.8s;
+        object-fit: cover;
+        object-position: center;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
       }
     }
   }
