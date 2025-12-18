@@ -1648,6 +1648,7 @@ onBeforeUnmount(() => {
 <style lang="scss" scoped>
 .music-home {
   min-height: 100vh;
+  min-height: 100dvh; // 使用动态视口高度，适配移动端浏览器底部导航栏
   position: relative;
   background: transparent; // 移除黑色背景，让动态背景显示
   color: #fff;
@@ -2567,6 +2568,7 @@ onBeforeUnmount(() => {
   position: relative;
   width: 420px;
   height: 100vh;
+  height: 100dvh; // 使用动态视口高度
   background: var(--anzhiyu-card-bg);
   border-left: var(--style-border);
   box-shadow: var(--anzhiyu-shadow-blackdeep);
@@ -2582,6 +2584,7 @@ onBeforeUnmount(() => {
     right: 0;
     width: 100%;
     height: 85vh;
+    height: 85dvh; // 使用动态视口高度
     max-height: 540px;
     border-left: none;
     border-top-left-radius: 24px;
@@ -2924,7 +2927,9 @@ onBeforeUnmount(() => {
     margin: 0;
     max-width: 100%;
     height: calc(100vh - 60px);
+    height: calc(100dvh - 60px); // 使用动态视口高度，适配移动端浏览器底部导航栏
     max-height: calc(100vh - 60px);
+    max-height: calc(100dvh - 60px);
     width: 100vw;
     display: flex;
     flex-direction: column;
@@ -2939,19 +2944,25 @@ onBeforeUnmount(() => {
     // 确保在不同高度下都不出现滚动条
     @media (max-height: 750px) {
       height: calc(100vh - 60px);
+      height: calc(100dvh - 60px);
       max-height: calc(100vh - 60px);
+      max-height: calc(100dvh - 60px);
       overflow: hidden !important;
     }
 
     @media (max-height: 650px) {
       height: calc(100vh - 60px);
+      height: calc(100dvh - 60px);
       max-height: calc(100vh - 60px);
+      max-height: calc(100dvh - 60px);
       overflow: hidden !important;
     }
 
     @media (max-height: 550px) {
       height: calc(100vh - 60px);
+      height: calc(100dvh - 60px);
       max-height: calc(100vh - 60px);
+      max-height: calc(100dvh - 60px);
       overflow: hidden !important;
     }
   }
@@ -2995,30 +3006,36 @@ onBeforeUnmount(() => {
     max-height: calc(
       100vh - 60px - 180px
     ); // 减去 header(60px) 和 playback-controls(180px)
+    max-height: calc(100dvh - 60px - 180px); // 使用动态视口高度
 
     // 针对不同屏幕高度的适配 - 减少内边距和最大高度
     @media (max-height: 750px) {
       max-height: calc(100vh - 60px - 160px);
+      max-height: calc(100dvh - 60px - 160px);
       padding: 6px 20px 3px;
     }
 
     @media (max-height: 650px) {
       max-height: calc(100vh - 60px - 140px);
+      max-height: calc(100dvh - 60px - 140px);
       padding: 4px 20px 2px;
     }
 
     @media (max-height: 550px) {
       max-height: calc(100vh - 60px - 120px);
+      max-height: calc(100dvh - 60px - 120px);
       padding: 2px 20px 1px;
     }
 
     @media (max-height: 480px) {
       max-height: calc(100vh - 60px - 100px);
+      max-height: calc(100dvh - 60px - 100px);
       padding: 1px 20px 0px;
     }
 
     @media (max-height: 400px) {
       max-height: calc(100vh - 60px - 80px);
+      max-height: calc(100dvh - 60px - 80px);
       padding: 0px 20px 0px;
     }
   }
@@ -3402,31 +3419,37 @@ onBeforeUnmount(() => {
       padding: 0px 16px 0px;
       // 超小屏幕也需要考虑 header 高度
       max-height: calc(100vh - 60px - 180px);
+      max-height: calc(100dvh - 60px - 180px); // 使用动态视口高度
 
       // 超小屏幕高度适配
       @media (max-height: 750px) {
         padding: 0px 14px 0px;
         max-height: calc(100vh - 60px - 160px);
+        max-height: calc(100dvh - 60px - 160px);
       }
 
       @media (max-height: 650px) {
         padding: 0px 12px 0px;
         max-height: calc(100vh - 60px - 140px);
+        max-height: calc(100dvh - 60px - 140px);
       }
 
       @media (max-height: 550px) {
         padding: 0px 10px 0px;
         max-height: calc(100vh - 60px - 120px);
+        max-height: calc(100dvh - 60px - 120px);
       }
 
       @media (max-height: 480px) {
         padding: 0px 8px 0px;
         max-height: calc(100vh - 60px - 100px);
+        max-height: calc(100dvh - 60px - 100px);
       }
 
       @media (max-height: 400px) {
         padding: 0px 6px 0px;
         max-height: calc(100vh - 60px - 80px);
+        max-height: calc(100dvh - 60px - 80px);
       }
     }
 
@@ -3568,6 +3591,7 @@ onBeforeUnmount(() => {
   z-index: 1008;
   width: 100vw;
   height: 100vh;
+  height: 100dvh; // 使用动态视口高度，适配移动端浏览器底部导航栏
   background: var(--anzhiyu-maskbg);
   backdrop-filter: saturate(180%) blur(20px);
   transition: all 0.3s ease;
