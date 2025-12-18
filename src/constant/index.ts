@@ -266,6 +266,10 @@ const KeyCommentAllowImageUpload: SettingKey = "comment.allow_image_upload";
 const KeyCommentLimitPerMinute: SettingKey = "comment.limit_per_minute";
 const KeyCommentLimitLength: SettingKey = "comment.limit_length";
 const KeyCommentForbiddenWords: SettingKey = "comment.forbidden_words";
+const KeyCommentAIDetectEnable: SettingKey = "comment.ai_detect_enable";
+const KeyCommentAIDetectAPIURL: SettingKey = "comment.ai_detect_api_url";
+const KeyCommentAIDetectAction: SettingKey = "comment.ai_detect_action";
+const KeyCommentAIDetectRiskLevel: SettingKey = "comment.ai_detect_risk_level";
 const KeyCommentQQAPIURL: SettingKey = "comment.qq_api_url";
 const KeyCommentQQAPIKey: SettingKey = "comment.qq_api_key";
 const KeyCommentNotifyAdmin: SettingKey = "comment.notify_admin";
@@ -569,6 +573,10 @@ export const constant = {
   KeyCommentLimitPerMinute,
   KeyCommentLimitLength,
   KeyCommentForbiddenWords,
+  KeyCommentAIDetectEnable,
+  KeyCommentAIDetectAPIURL,
+  KeyCommentAIDetectAction,
+  KeyCommentAIDetectRiskLevel,
   KeyCommentQQAPIURL,
   KeyCommentQQAPIKey,
   KeyCommentNotifyAdmin,
