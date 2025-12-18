@@ -443,6 +443,10 @@ export interface CommentSettingsInfo {
   limitPerMinute: number;
   limitLength: number;
   forbiddenWords: string;
+  aiDetectEnable: boolean;
+  aiDetectAPIURL: string;
+  aiDetectAction: string;
+  aiDetectRiskLevel: string;
   qqAPIURL: string;
   qqAPIKey: string;
   notifyAdmin: boolean;

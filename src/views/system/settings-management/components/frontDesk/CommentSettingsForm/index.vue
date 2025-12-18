@@ -200,6 +200,80 @@ const formatJson = () => {
       />
     </el-form-item>
 
+    <el-divider content-position="left">AI 违禁词检测</el-divider>
+    <el-alert type="info" :closable="false" style="margin-bottom: 16px">
+      <template #title>
+        <div style="font-size: 14px; line-height: 1.6">
+          基于AI的智能文本内容检测，支持中英文混合检测、智能变体识别（同音字、谐音字、形近字等）、上下文感知避免误判。
+          <a
+            href="https://api.nsuuu.com/"
+            target="_blank"
+            style="color: var(--el-color-primary)"
+            >了解更多 →</a
+          >
+        </div>
+      </template>
+    </el-alert>
+    <el-row :gutter="20">
+      <el-col :span="8">
+        <el-form-item label="启用 AI 违禁词检测">
+          <el-switch v-model="model.aiDetectEnable" />
+        </el-form-item>
+      </el-col>
+      <el-col :span="16">
+        <el-form-item label="检测 API 地址">
+          <el-input
+            v-model="model.aiDetectAPIURL"
+            :disabled="!model.aiDetectEnable"
+            placeholder="https://v1.nsuuu.com/api/AiDetect"
+          />
+        </el-form-item>
+      </el-col>
+    </el-row>
+    <el-row :gutter="20">
+      <el-col :span="12">
+        <el-form-item label="检测到违规时的处理方式">
+          <el-select
+            v-model="model.aiDetectAction"
+            :disabled="!model.aiDetectEnable"
+            placeholder="选择处理方式"
+          >
+            <el-option label="设为待审核" value="pending" />
+            <el-option label="直接拒绝" value="reject" />
+          </el-select>
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item>
+          <template #label>
+            <span>触发处理的最低风险等级</span>
+            <el-tooltip
+              content="high: 仅高风险触发; medium: 中高风险触发; low: 所有风险都触发"
+              placement="top"
+            >
+              <i
+                class="anzhiyufont anzhiyu-icon-question-circle"
+                style="
+                  margin-left: 4px;
+                  color: var(--anzhiyu-fontcolor);
+                  cursor: help;
+                "
+              />
+            </el-tooltip>
+          </template>
+          <el-select
+            v-model="model.aiDetectRiskLevel"
+            :disabled="!model.aiDetectEnable"
+            placeholder="选择风险等级"
+          >
+            <el-option label="高风险" value="high" />
+            <el-option label="中风险及以上" value="medium" />
+            <el-option label="所有风险" value="low" />
+          </el-select>
+        </el-form-item>
+      </el-col>
+    </el-row>
+
     <el-divider content-position="left">QQ信息查询配置</el-divider>
     <el-alert type="info" :closable="false" style="margin-bottom: 16px">
       <template #title>
