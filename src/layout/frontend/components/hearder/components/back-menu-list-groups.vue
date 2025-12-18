@@ -196,7 +196,8 @@ const isIconifyIcon = (icon: string) => {
       color: var(--anzhiyu-white);
     }
 
-    .back-menu-item-icon-font {
+    .back-menu-item-icon-font,
+    .back-menu-item-icon-iconify {
       color: var(--anzhiyu-white);
     }
   }
@@ -209,6 +210,8 @@ const isIconifyIcon = (icon: string) => {
 
   &.back-menu-item-icon-iconify {
     border-radius: 0;
+    color: var(--anzhiyu-fontcolor);
+    transition: 0.2s;
   }
 
   &.back-menu-item-icon-font {
