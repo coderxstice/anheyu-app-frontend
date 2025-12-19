@@ -152,13 +152,17 @@ export default function tipPlugin(md: MarkdownIt): void {
     const tooltipPositionStyle = positionStyles[position] || positionStyles.top;
     const tooltipThemeStyle = themeStyles[theme] || themeStyles.dark;
 
-    // 生成事件处理函数
-    const showEvent = `var t=this.querySelector('.anzhiyu-tip');if(t)t.style.visibility='visible';t.style.opacity='1';`;
-    const hideEvent = `var t=this.querySelector('.anzhiyu-tip');if(t)t.style.visibility='hidden';t.style.opacity='0';`;
+    // 生成事件处理函数 - 支持延迟显示
+    const delayMs = parseInt(delay, 10) || 300;
+    const showEvent = `var t=this.querySelector('.anzhiyu-tip'),w=this;if(t){clearTimeout(w._tipHideTimer);w._tipShowTimer=setTimeout(function(){t.style.visibility='visible';t.style.opacity='1';},${delayMs});}`;
+    const hideEvent = `var t=this.querySelector('.anzhiyu-tip'),w=this;if(t){clearTimeout(w._tipShowTimer);w._tipHideTimer=setTimeout(function(){t.style.visibility='hidden';t.style.opacity='0';},100);}`;
+
+    // 点击事件 - 使用 dataset 来跟踪状态，避免 style.visibility 初始值问题
+    const clickEvent = `var t=this.querySelector('.anzhiyu-tip');if(t){var isVisible=t.dataset.visible==='true';if(isVisible){t.style.visibility='hidden';t.style.opacity='0';t.dataset.visible='false';}else{t.style.visibility='visible';t.style.opacity='1';t.dataset.visible='true';}}event.stopPropagation();`;
 
     const eventHandlers =
       trigger === "click"
-        ? `onclick="var t=this.querySelector('.anzhiyu-tip');if(t){if(t.style.visibility==='visible'){t.style.visibility='hidden';t.style.opacity='0';}else{t.style.visibility='visible';t.style.opacity='1';}}event.stopPropagation();"`
+        ? `onclick="${clickEvent}"`
         : `onmouseenter="${showEvent}" onmouseleave="${hideEvent}"`;
 
     // 生成 tip HTML - 使用内联样式确保默认隐藏
@@ -168,7 +172,7 @@ export default function tipPlugin(md: MarkdownIt): void {
       "border-bottom: 1px dashed currentColor; text-decoration: none;";
     const tooltipStyle = `position: absolute; ${tooltipPositionStyle} ${tooltipThemeStyle} padding: 8px 12px; border-radius: 6px; font-size: 13px; line-height: 1.5; max-width: 300px; width: max-content; text-align: center; white-space: pre-wrap; z-index: 1000; visibility: hidden; opacity: 0; transition: opacity 0.2s, visibility 0.2s; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);`;
 
-    const html = `<span class="anzhiyu-tip-wrapper" data-tip-id="${tipId}" style="${wrapperStyle}" ${eventHandlers}><span class="anzhiyu-tip-text" style="${textStyle}">${md.utils.escapeHtml(text)}</span><span class="${classAttr}" data-content="${md.utils.escapeHtml(content)}" data-position="${position}" data-theme="${theme}" data-trigger="${trigger}" data-delay="${delay}" role="tooltip" aria-hidden="true" style="${tooltipStyle}">${md.utils.escapeHtml(content)}</span></span>`;
+    const html = `<span class="anzhiyu-tip-wrapper" data-tip-id="${tipId}" style="${wrapperStyle}" ${eventHandlers}><span class="anzhiyu-tip-text" style="${textStyle}">${md.utils.escapeHtml(text)}</span><span class="${classAttr}" data-content="${md.utils.escapeHtml(content)}" data-position="${position}" data-theme="${theme}" data-trigger="${trigger}" data-delay="${delay}" data-visible="false" role="tooltip" aria-hidden="true" style="${tooltipStyle}">${md.utils.escapeHtml(content)}</span></span>`;
 
     const token = state.push("html_inline", "", 0);
     token.content = html;
@@ -272,13 +276,17 @@ export default function tipPlugin(md: MarkdownIt): void {
     const tooltipPositionStyle = positionStyles[position] || positionStyles.top;
     const tooltipThemeStyle = themeStyles[theme] || themeStyles.dark;
 
-    // 生成事件处理函数
-    const showEvent = `var t=this.querySelector('.anzhiyu-tip');if(t)t.style.visibility='visible';t.style.opacity='1';`;
-    const hideEvent = `var t=this.querySelector('.anzhiyu-tip');if(t)t.style.visibility='hidden';t.style.opacity='0';`;
+    // 生成事件处理函数 - 支持延迟显示
+    const delayMs = parseInt(delay, 10) || 300;
+    const showEvent = `var t=this.querySelector('.anzhiyu-tip'),w=this;if(t){clearTimeout(w._tipHideTimer);w._tipShowTimer=setTimeout(function(){t.style.visibility='visible';t.style.opacity='1';},${delayMs});}`;
+    const hideEvent = `var t=this.querySelector('.anzhiyu-tip'),w=this;if(t){clearTimeout(w._tipShowTimer);w._tipHideTimer=setTimeout(function(){t.style.visibility='hidden';t.style.opacity='0';},100);}`;
+
+    // 点击事件 - 使用 dataset 来跟踪状态，避免 style.visibility 初始值问题
+    const clickEvent = `var t=this.querySelector('.anzhiyu-tip');if(t){var isVisible=t.dataset.visible==='true';if(isVisible){t.style.visibility='hidden';t.style.opacity='0';t.dataset.visible='false';}else{t.style.visibility='visible';t.style.opacity='1';t.dataset.visible='true';}}event.stopPropagation();`;
 
     const eventHandlers =
       trigger === "click"
-        ? `onclick="var t=this.querySelector('.anzhiyu-tip');if(t){if(t.style.visibility==='visible'){t.style.visibility='hidden';t.style.opacity='0';}else{t.style.visibility='visible';t.style.opacity='1';}}event.stopPropagation();"`
+        ? `onclick="${clickEvent}"`
         : `onmouseenter="${showEvent}" onmouseleave="${hideEvent}"`;
 
     // 生成 tip HTML - 使用内联样式确保默认隐藏
@@ -288,7 +296,7 @@ export default function tipPlugin(md: MarkdownIt): void {
       "border-bottom: 1px dashed currentColor; text-decoration: none;";
     const tooltipStyle = `position: absolute; ${tooltipPositionStyle} ${tooltipThemeStyle} padding: 8px 12px; border-radius: 6px; font-size: 13px; line-height: 1.5; max-width: 300px; width: max-content; text-align: center; white-space: pre-wrap; z-index: 1000; visibility: hidden; opacity: 0; transition: opacity 0.2s, visibility 0.2s; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);`;
 
-    const html = `<span class="anzhiyu-tip-wrapper" data-tip-id="${tipId}" style="${wrapperStyle}" ${eventHandlers}><span class="anzhiyu-tip-text" style="${textStyle}">${md.utils.escapeHtml(text)}</span><span class="${classAttr}" data-content="${md.utils.escapeHtml(content)}" data-position="${position}" data-theme="${theme}" data-trigger="${trigger}" data-delay="${delay}" role="tooltip" aria-hidden="true" style="${tooltipStyle}">${md.utils.escapeHtml(content)}</span></span>`;
+    const html = `<span class="anzhiyu-tip-wrapper" data-tip-id="${tipId}" style="${wrapperStyle}" ${eventHandlers}><span class="anzhiyu-tip-text" style="${textStyle}">${md.utils.escapeHtml(text)}</span><span class="${classAttr}" data-content="${md.utils.escapeHtml(content)}" data-position="${position}" data-theme="${theme}" data-trigger="${trigger}" data-delay="${delay}" data-visible="false" role="tooltip" aria-hidden="true" style="${tooltipStyle}">${md.utils.escapeHtml(content)}</span></span>`;
 
     const token = state.push("html_block", "", 0);
     token.content = html;
