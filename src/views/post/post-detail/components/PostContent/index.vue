@@ -510,8 +510,76 @@ const handleArticleInfoUpdate = (event: CustomEvent<ArticleInfo>) => {
 // 文章内容点击事件处理 - 现在大部分逻辑已内置到 HTML 中
 // 这里保留是为了未来可能需要的额外处理
 const handleContentClick = (event: Event) => {
-  // 所有交互逻辑已经通过 onclick 内联事件处理器实现
-  // 如果未来需要添加额外的全局处理逻辑，可以在这里扩展
+  const target = event.target as HTMLElement;
+
+  // ========== Tip插件点击事件处理（v-html不执行内联事件） ==========
+  const tipWrapper = target.closest(".anzhiyu-tip-wrapper") as HTMLElement;
+  if (tipWrapper) {
+    const tipElement = tipWrapper.querySelector(".anzhiyu-tip") as HTMLElement;
+    if (
+      (tipElement && tipWrapper.classList.contains("tip-click")) ||
+      tipElement?.getAttribute("data-trigger") === "click"
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+      // 切换tip的显示/隐藏状态
+      if (tipElement.style.visibility === "visible") {
+        tipElement.style.visibility = "hidden";
+        tipElement.style.opacity = "0";
+      } else {
+        tipElement.style.visibility = "visible";
+        tipElement.style.opacity = "1";
+      }
+    }
+    return;
+  }
+};
+
+// ========== Tip插件hover事件委托处理 ==========
+// 由于v-html不执行内联事件处理器（onmouseenter/onmouseleave），需要通过事件委托实现
+let tipCleanupFns: (() => void)[] = [];
+
+const initTipHoverEvents = (container: HTMLElement) => {
+  // 清理之前的事件监听
+  tipCleanupFns.forEach(fn => fn());
+  tipCleanupFns = [];
+
+  // 查找所有tip wrapper元素
+  const tipWrappers = container.querySelectorAll(".anzhiyu-tip-wrapper");
+
+  tipWrappers.forEach(wrapper => {
+    const wrapperEl = wrapper as HTMLElement;
+    const tipElement = wrapperEl.querySelector(".anzhiyu-tip") as HTMLElement;
+    if (!tipElement) return;
+
+    // 检查触发方式，只为hover触发的tip添加事件
+    const trigger = tipElement.getAttribute("data-trigger");
+    if (trigger === "click") return; // click触发的tip由handleContentClick处理
+
+    const showTip = () => {
+      tipElement.style.visibility = "visible";
+      tipElement.style.opacity = "1";
+    };
+
+    const hideTip = () => {
+      tipElement.style.visibility = "hidden";
+      tipElement.style.opacity = "0";
+    };
+
+    wrapperEl.addEventListener("mouseenter", showTip);
+    wrapperEl.addEventListener("mouseleave", hideTip);
+
+    // 添加清理函数
+    tipCleanupFns.push(() => {
+      wrapperEl.removeEventListener("mouseenter", showTip);
+      wrapperEl.removeEventListener("mouseleave", hideTip);
+    });
+  });
+};
+
+const cleanupTipHoverEvents = () => {
+  tipCleanupFns.forEach(fn => fn());
+  tipCleanupFns = [];
 };
 
 onMounted(async () => {
@@ -556,6 +624,13 @@ onMounted(async () => {
       groupAll: true
     });
   }
+
+  // 初始化Tip插件的hover事件委托（v-html不执行内联事件处理器）
+  // 必须在nextTick之后，确保v-html内容已渲染到DOM
+  await nextTick();
+  if (postContentRef.value) {
+    initTipHoverEvents(postContentRef.value);
+  }
 });
 
 onUnmounted(() => {
@@ -588,6 +663,8 @@ onUnmounted(() => {
   }
   // 清理懒加载资源
   cleanup();
+  // 清理Tip插件hover事件
+  cleanupTipHoverEvents();
   // 清理全局函数
   delete (window as any).__markdownEditorCopyHandler;
 });
@@ -618,6 +695,8 @@ watch(
               groupAll: true
             });
           }
+          // 重新初始化Tip插件hover事件
+          initTipHoverEvents(postContentRef.value);
         }
       }, 100);
     }

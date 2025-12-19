@@ -50,6 +50,11 @@
     }
   }
 
+  // 修复：tip插件需要覆盖content-visibility: auto，避免绝对定位的tooltip无法显示
+  .anzhiyu-tip-wrapper {
+    content-visibility: visible;
+  }
+
   // 前台特有：图片缩放效果
   img:not(a img) {
     cursor: zoom-in;
