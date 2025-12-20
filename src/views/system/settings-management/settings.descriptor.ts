@@ -1282,6 +1282,12 @@ const sidebarDescriptors: SettingDescriptor[] = [
     type: "number"
   },
   {
+    frontendPath: "frontDesk.sidebar.seriesPostCount",
+    backendKey: constant.KeySidebarSeriesPostCount,
+    defaultValue: 6,
+    type: "number"
+  },
+  {
     frontendPath: "frontDesk.sidebar.customSidebarBlocks",
     backendKey: constant.KeyCustomSidebar,
     defaultValue: [],

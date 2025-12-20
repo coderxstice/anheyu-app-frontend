@@ -420,6 +420,24 @@ const moveSidebarBlock = (index: number, direction: number) => {
       </el-col>
     </el-row>
 
+    <el-divider content-position="left">系列文章</el-divider>
+    <el-row :gutter="20">
+      <el-col :span="12">
+        <el-form-item label="系列文章显示篇数">
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <el-input-number
+              v-model="model.seriesPostCount"
+              :min="1"
+              :max="20"
+            />
+            <div class="form-item-help">
+              文章详情页侧边栏中，系列分类文章最多显示的篇数（默认 6 篇）
+            </div>
+          </div>
+        </el-form-item>
+      </el-col>
+    </el-row>
+
     <el-form-item v-if="model.tagsEnable" label="选择高亮的标签">
       <HighlightTagSelector v-model="model.tagsHighlight" />
     </el-form-item>

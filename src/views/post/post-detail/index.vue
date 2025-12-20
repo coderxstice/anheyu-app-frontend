@@ -94,6 +94,11 @@ const siteName = computed(() => {
   return siteConfig?.APP_NAME || "安和鱼";
 });
 
+// 获取系列文章显示篇数配置
+const seriesPostCount = computed(() => {
+  return siteConfig?.sidebar?.seriesPostCount || 6;
+});
+
 const authorInfoConfig = computed(() => {
   return {
     ownerName: siteConfig.frontDesk.siteOwner.name
@@ -253,7 +258,7 @@ const fetchRequiredData = async (id: string) => {
       if (seriesCategory.value) {
         getPublicArticles({
           category: seriesCategory.value.name,
-          pageSize: 6
+          pageSize: seriesPostCount.value
         }).then(res => {
           seriesArticles.value = res.data.list;
         });
@@ -292,11 +297,11 @@ const fetchRequiredData = async (id: string) => {
       created_at: p.created_at
     }));
 
-    // 获取系列文章（最多获取6篇）
+    // 获取系列文章（根据配置的篇数获取）
     if (seriesCategory.value) {
       const seriesResponse = await getPublicArticles({
         category: seriesCategory.value.name,
-        pageSize: 6
+        pageSize: seriesPostCount.value
       });
       seriesArticles.value = seriesResponse.data.list;
     } else {

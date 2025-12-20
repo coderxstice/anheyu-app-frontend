@@ -421,6 +421,7 @@ export interface SidebarPageSettingsInfo {
   siteInfoRuntimeEnable: boolean;
   siteInfoTotalWordCount: number;
   archiveDisplayMonths: number;
+  seriesPostCount: number; // 系列分类文章侧边栏显示篇数
   customSidebarBlocks: CustomSidebarBlock[]; // 自定义侧边栏块数组（0-3个）
   tocCollapseMode: boolean;
 }
