@@ -83,8 +83,8 @@
 .el-menu-item,
 .el-sub-menu__title {
   transition:
-    color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    color 0.15s ease,
+    background-color 0.15s ease !important;
 }
 
 /**

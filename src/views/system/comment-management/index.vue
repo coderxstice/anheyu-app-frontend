@@ -1,288 +1,288 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from "vue";
-import { useSiteConfigStore } from "@/store/modules/siteConfig";
-import {
-  getAdminComments,
-  pinAdminComment,
-  updateAdminCommentStatus,
-  deleteAdminComments,
-  createPublicComment,
-  updateAdminComment
-} from "@/api/comment";
-import type {
-  AdminComment,
-  CommentQuery,
-  CreateCommentPayload
-} from "@/api/comment/type";
-import CommentFilter from "./components/CommentFilter.vue";
-import CommentList from "./components/CommentList.vue";
-import {
-  ElCard,
-  ElPagination,
-  ElMessageBox,
-  ElMessage,
-  ElButton
-} from "element-plus";
-import { IconifyIconOffline } from "@/components/ReIcon";
-import DeleteIcon from "@iconify-icons/ri/delete-bin-line";
+import { ref } from "vue";
+import { useCommentManagement } from "./utils/hook";
+import { PureTableBar } from "@/components/RePureTableBar";
+import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 
-// 站点配置
-const siteConfigStore = useSiteConfigStore();
-const siteOwner = computed(
-  () => siteConfigStore.getSiteConfig.frontDesk?.siteOwner || {}
-);
-const siteUrl = computed(() => siteConfigStore.getSiteConfig.SITE_URL || "");
+import Delete from "@iconify-icons/ep/delete";
+import EditPen from "@iconify-icons/ep/edit-pen";
+import Refresh from "@iconify-icons/ep/refresh";
+import Search from "@iconify-icons/ri/search-line";
+import StarFill from "@iconify-icons/ri/star-fill";
+import Star from "@iconify-icons/ri/star-line";
+import ChatLine from "@iconify-icons/ri/chat-1-line";
 
-const queryParams = reactive<CommentQuery>({
-  page: 1,
-  pageSize: 10
+defineOptions({
+  name: "CommentManagement"
 });
-const commentList = ref<AdminComment[]>([]);
-const total = ref(0);
-const loading = ref(true);
-const selectedIds = ref<string[]>([]);
 
-const getList = async () => {
-  loading.value = true;
-  try {
-    const res = await getAdminComments(queryParams);
-    commentList.value = res.data.list;
-    total.value = res.data.total;
-  } catch (error) {
-    console.error("获取评论列表失败:", error);
-  } finally {
-    loading.value = false;
-  }
-};
+const formRef = ref();
+const tableRef = ref();
 
-onMounted(getList);
+const {
+  form,
+  loading,
+  columns,
+  dataList,
+  pagination,
+  loadingConfig,
+  selectedIds,
+  statusOptions,
+  onSizeChange,
+  onCurrentChange,
+  onSearch,
+  resetForm,
+  handlePinUpdate,
+  handleDelete,
+  handleBatchDelete,
+  handleEdit,
+  handleReply,
+  handleSelectionChange
+} = useCommentManagement();
 
-const onQueryUpdate = (newQuery: CommentQuery) => {
-  Object.assign(queryParams, newQuery);
-};
-
-const handleSearch = () => {
-  queryParams.page = 1;
-  getList();
-};
-
-const handleSelectionChange = (ids: string[]) => {
-  selectedIds.value = ids;
-};
-
-const handlePinUpdate = async (comment: AdminComment, pinned: boolean) => {
-  try {
-    await pinAdminComment(comment.id, pinned);
-    ElMessage.success(`操作成功`);
-    getList();
-  } catch (error) {
-    ElMessage.error(`操作失败`);
-  }
-};
-
-const handleStatusUpdate = async (comment: AdminComment, status: number) => {
-  try {
-    const res = await updateAdminCommentStatus(comment.id, status);
-    const index = commentList.value.findIndex(c => c.id === comment.id);
-    if (index !== -1) {
-      commentList.value[index] = res.data;
-    }
-    ElMessage.success(`状态更新成功`);
-  } catch (error) {
-    ElMessage.error(`状态更新失败`);
-  }
-};
-
-const handleDelete = (id: string) => {
-  ElMessageBox.confirm("确定要删除这条评论吗？此操作不可逆。", "警告", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "warning"
-  }).then(async () => {
-    try {
-      await deleteAdminComments([id]);
-      ElMessage.success("删除成功");
-
-      const index = selectedIds.value.indexOf(id);
-      if (index > -1) {
-        selectedIds.value.splice(index, 1);
-      }
-
-      getList();
-    } catch (error) {
-      ElMessage.error("删除失败");
-    }
-  });
-};
-
-const handleDeleteBatch = () => {
-  ElMessageBox.confirm(
-    `确定要删除选中的 ${selectedIds.value.length} 条评论吗？`,
-    "警告",
-    {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      type: "warning"
-    }
-  ).then(async () => {
-    try {
-      await deleteAdminComments(selectedIds.value);
-      ElMessage.success(`成功删除 ${selectedIds.value.length} 条评论`);
-      getList();
-    } catch (error) {
-      ElMessage.error("删除失败");
-    }
-  });
-};
-
-const handleEdit = (comment: AdminComment) => {
-  ElMessageBox.prompt(`编辑评论（支持 Markdown 语法）:`, "编辑评论", {
-    inputType: "textarea",
-    inputValue: comment.content,
-    confirmButtonText: "保存",
-    cancelButtonText: "取消",
-    inputValidator: (val: string) => {
-      if (!val || val.trim() === "") {
-        return "评论内容不能为空";
-      }
-      if (val.length > 1000) {
-        return "评论内容不能超过 1000 字符";
-      }
-      return true;
-    }
-  })
-    .then(async ({ value }) => {
-      try {
-        const res = await updateAdminComment(comment.id, value);
-        const index = commentList.value.findIndex(c => c.id === comment.id);
-        if (index !== -1) {
-          commentList.value[index] = res.data;
-        }
-        ElMessage.success("编辑成功");
-      } catch (error) {
-        console.error("编辑失败:", error);
-        ElMessage.error("编辑失败，请稍后重试");
-      }
-    })
-    .catch(() => {
-      ElMessage.info("已取消编辑");
-    });
-};
-
-const handleReply = (comment: AdminComment) => {
-  // 匿名评论不允许回复
-  if (comment.is_anonymous) {
-    ElMessage.warning("匿名评论无法回复");
-    return;
-  }
-
-  ElMessageBox.prompt(`回复 @${comment.nickname}:`, "回复评论", {
-    inputType: "textarea",
-    confirmButtonText: "提交",
-    cancelButtonText: "取消",
-    inputValidator: (val: string) => {
-      if (!val || val.trim() === "") {
-        return "回复内容不能为空";
-      }
-      return true;
-    }
-  })
-    .then(async ({ value }) => {
-      if (!siteOwner.value.name || !siteOwner.value.email) {
-        ElMessage.error("未找到站点所有者配置，无法回复。请检查配置！");
-        return;
-      }
-
-      const payload: CreateCommentPayload = {
-        target_path: comment.target_path,
-        parent_id: comment.id,
-        nickname: siteOwner.value.name,
-        email: siteOwner.value.email,
-        website: siteUrl.value,
-        content: value
-      };
-
-      try {
-        await createPublicComment(payload);
-        ElMessage.success("回复成功");
-        getList();
-      } catch (error) {
-        console.error("回复失败:", error);
-        ElMessage.error("回复失败，请稍后重试");
-      }
-    })
-    .catch(() => {
-      ElMessage.info("已取消回复");
-    });
-};
+function onFullscreen() {
+  tableRef.value?.setAdaptive();
+}
 </script>
 
 <template>
-  <div class="app-container">
-    <el-card shadow="never">
-      <template #header>
-        <div class="card-header">
-          <span>评论管理</span>
+  <div class="main">
+    <!-- 搜索表单 -->
+    <el-form
+      ref="formRef"
+      :inline="true"
+      :model="form"
+      class="search-form bg-bg_color w-full pl-8 pt-[12px] overflow-auto"
+    >
+      <el-form-item label="昵称：" prop="nickname">
+        <el-input
+          v-model="form.nickname"
+          placeholder="输入昵称搜索"
+          clearable
+          class="!w-[140px]"
+          @keyup.enter="onSearch"
+        />
+      </el-form-item>
+      <el-form-item label="邮箱：" prop="email">
+        <el-input
+          v-model="form.email"
+          placeholder="输入邮箱搜索"
+          clearable
+          class="!w-[180px]"
+          @keyup.enter="onSearch"
+        />
+      </el-form-item>
+      <el-form-item label="来源路径：" prop="target_path">
+        <el-input
+          v-model="form.target_path"
+          placeholder="输入路径搜索"
+          clearable
+          class="!w-[180px]"
+          @keyup.enter="onSearch"
+        />
+      </el-form-item>
+      <el-form-item label="IP地址：" prop="ip_address">
+        <el-input
+          v-model="form.ip_address"
+          placeholder="输入IP搜索"
+          clearable
+          class="!w-[140px]"
+          @keyup.enter="onSearch"
+        />
+      </el-form-item>
+      <el-form-item label="内容：" prop="content">
+        <el-input
+          v-model="form.content"
+          placeholder="输入内容搜索"
+          clearable
+          class="!w-[180px]"
+          @keyup.enter="onSearch"
+        />
+      </el-form-item>
+      <el-form-item label="状态：" prop="status">
+        <el-select
+          v-model="form.status"
+          placeholder="状态筛选"
+          clearable
+          class="!w-[120px]"
+        >
+          <el-option
+            v-for="item in statusOptions.filter(s => s.value !== undefined)"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          >
+            <span class="status-option">
+              <span
+                class="status-dot"
+                :style="{ backgroundColor: item.color }"
+              />
+              <span>{{ item.label }}</span>
+            </span>
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item class="search-buttons">
+        <el-button
+          v-ripple
+          type="primary"
+          :icon="useRenderIcon(Search)"
+          :loading="loading"
+          @click="onSearch"
+        >
+          搜索
+        </el-button>
+        <el-button
+          v-ripple
+          :icon="useRenderIcon(Refresh)"
+          @click="resetForm(formRef)"
+        >
+          重置
+        </el-button>
+      </el-form-item>
+    </el-form>
+
+    <!-- 表格区域 -->
+    <PureTableBar
+      title="评论管理"
+      :columns="columns"
+      :tableRef="tableRef?.getTableRef()"
+      class="table-bar"
+      @refresh="onSearch"
+      @fullscreen="onFullscreen"
+    >
+      <template #title>
+        <div class="table-title">
+          <span class="title-text">评论管理</span>
+          <span class="title-desc">
+            管理站点评论，支持审核、编辑、回复和置顶功能
+          </span>
         </div>
       </template>
 
-      <CommentFilter
-        :model-value="queryParams"
-        @update:model-value="onQueryUpdate"
-        @search="handleSearch"
-      />
-
-      <div class="toolbar">
+      <template #buttons>
         <el-button
+          v-if="selectedIds.length > 0"
+          v-ripple
           type="danger"
-          :disabled="selectedIds.length === 0"
-          @click="handleDeleteBatch"
+          :icon="useRenderIcon(Delete)"
+          @click="handleBatchDelete"
         >
-          <IconifyIconOffline :icon="DeleteIcon" class="mr-1" />
-          删除选中 ({{ selectedIds.length }})
+          批量删除 ({{ selectedIds.length }})
         </el-button>
-      </div>
+      </template>
 
-      <CommentList
-        :comments="commentList"
-        :loading="loading"
-        @selection-change="handleSelectionChange"
-        @update:pin="handlePinUpdate"
-        @update:status="handleStatusUpdate"
-        @delete="handleDelete"
-        @edit="handleEdit"
-        @reply="handleReply"
-      />
+      <template v-slot="{ dynamicColumns }">
+        <pure-table
+          ref="tableRef"
+          adaptive
+          :adaptiveConfig="{ offsetBottom: 108 }"
+          align-whole="center"
+          row-key="id"
+          table-layout="fixed"
+          :loading-config="loadingConfig"
+          :loading="loading"
+          :data="dataList"
+          :columns="dynamicColumns"
+          :pagination="pagination"
+          :header-cell-style="{
+            background: 'var(--el-fill-color-light)',
+            color: 'var(--el-text-color-primary)'
+          }"
+          @selection-change="handleSelectionChange"
+          @page-size-change="onSizeChange"
+          @page-current-change="onCurrentChange"
+        >
+          <template #operation="{ row }">
+            <div class="operation-btns">
+              <!-- 置顶/取消置顶 -->
+              <el-tooltip
+                :content="row.pinned_at ? '取消置顶' : '置顶评论'"
+                placement="top"
+              >
+                <el-button
+                  v-ripple
+                  :type="row.pinned_at ? 'warning' : 'default'"
+                  size="small"
+                  :icon="useRenderIcon(row.pinned_at ? StarFill : Star)"
+                  @click="handlePinUpdate(row, !row.pinned_at)"
+                />
+              </el-tooltip>
 
-      <el-pagination
-        v-if="total > 0"
-        v-model:current-page="queryParams.page"
-        v-model:page-size="queryParams.pageSize"
-        :page-sizes="[10, 20, 50, 100]"
-        :total="total"
-        layout="total, sizes, prev, pager, next, jumper"
-        class="pagination"
-        @size-change="getList"
-        @current-change="getList"
-      />
-    </el-card>
+              <!-- 编辑 -->
+              <el-tooltip content="编辑" placement="top">
+                <el-button
+                  v-ripple
+                  type="primary"
+                  size="small"
+                  :icon="useRenderIcon(EditPen)"
+                  @click="handleEdit(row)"
+                />
+              </el-tooltip>
+
+              <!-- 回复 -->
+              <el-tooltip
+                :content="row.is_anonymous ? '匿名评论无法回复' : '回复'"
+                placement="top"
+              >
+                <el-button
+                  v-ripple
+                  type="success"
+                  size="small"
+                  :icon="useRenderIcon(ChatLine)"
+                  :disabled="row.is_anonymous"
+                  @click="handleReply(row)"
+                />
+              </el-tooltip>
+
+              <!-- 删除 -->
+              <el-tooltip content="删除" placement="top">
+                <el-button
+                  v-ripple
+                  type="danger"
+                  size="small"
+                  :icon="useRenderIcon(Delete)"
+                  @click="handleDelete(row)"
+                />
+              </el-tooltip>
+            </div>
+          </template>
+        </pure-table>
+      </template>
+    </PureTableBar>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.card-header {
-  font-size: 18px;
-  font-weight: 500;
+.main {
+  margin: 24px;
 }
 
-.toolbar {
-  margin-top: 16px;
-  margin-bottom: 16px;
-}
-
-.pagination {
+// 搜索表单
+.search-form {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 16px;
+  border: var(--style-border);
+  border-radius: 12px;
+
+  :deep(.search-buttons) {
+    margin-left: auto;
+    margin-right: 16px;
+  }
+}
+
+// 表格公共样式已移至 @/style/table-bar.scss
+
+// 响应式调整
+@media (max-width: 768px) {
+  .main {
+    margin: 10px;
+  }
+
+  .search-form {
+    padding: 12px !important;
+  }
 }
 </style>

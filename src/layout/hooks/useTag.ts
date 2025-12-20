@@ -47,7 +47,7 @@ export function useTags() {
   const showModel = ref(
     storageLocal().getItem<StorageConfigs>(
       `${responsiveStorageNameSpace()}configure`
-    )?.showModel || "smart"
+    )?.showModel || "chrome"
   );
   /** 是否隐藏标签页，默认显示 */
   const showTags = ref(false);

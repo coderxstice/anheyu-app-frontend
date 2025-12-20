@@ -1,0 +1,197 @@
+/**
+ * 表格管理页面公共样式
+ * 用于 PureTableBar 组件的统一样式
+ * 注意：这是全局样式，不使用 :deep() 选择器
+ */
+
+// 表格栏 - 全局样式
+.table-bar {
+  background-color: var(--anzhiyu-card-bg);
+  border: var(--style-border);
+  border-radius: 12px !important;
+  overflow: visible; // 允许分页组件溢出
+
+  // 表格容器圆角
+  .pure-table {
+    border: 1px solid var(--el-border-color-lighter);
+    border-radius: 8px;
+    overflow: clip;
+    // 使用 calc 确保左右 margin 都能正确生效，!important 覆盖内联样式
+    width: calc(100% - 32px) !important;
+    margin: 0 16px 16px;
+
+    .el-table {
+      border-radius: 8px !important;
+
+      // 移除默认边框线
+      &::before,
+      &::after {
+        display: none !important;
+      }
+
+      // 内层包装器圆角 - 关键修复：裁剪固定列
+      .el-table__inner-wrapper {
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      // 表头样式
+      .el-table__header-wrapper,
+      .el-table__body-wrapper thead {
+        border-radius: 8px 8px 0 0;
+
+        th.el-table__cell {
+          border-bottom: 1px solid var(--el-border-color-lighter);
+        }
+      }
+
+      // 表体样式
+      .el-table__body-wrapper {
+        border-radius: 0 0 8px 8px;
+
+        td.el-table__cell {
+          border-bottom: 1px solid var(--el-border-color-lighter);
+        }
+
+        // 最后一行不需要底部边框
+        .el-table__row:last-child td.el-table__cell {
+          border-bottom: none;
+        }
+      }
+
+      // 固定列阴影优化
+      .el-table-fixed-column--right::before,
+      .el-table-fixed-column--left::before {
+        box-shadow: none;
+      }
+
+      // 固定列圆角处理 - 表头右上角
+      .el-table__header-wrapper {
+        th.el-table-fixed-column--right:last-child {
+          border-top-right-radius: 8px;
+        }
+      }
+
+      // 固定列圆角处理 - 表体右下角
+      .el-table__body-wrapper {
+        .el-table__row:last-child {
+          td.el-table-fixed-column--right:last-child {
+            border-bottom-right-radius: 8px;
+          }
+        }
+      }
+    }
+  }
+
+  // 分页区域样式 - 放在表格外面
+  .el-pagination {
+    padding: 16px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    background: transparent;
+    border: none;
+    box-sizing: border-box;
+    justify-content: flex-end;
+  }
+}
+
+// 表格标题
+.table-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .title-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--anzhiyu-fontcolor);
+    line-height: 1.4;
+  }
+
+  .title-desc {
+    font-size: 13px;
+    color: var(--anzhiyu-secondtext);
+    line-height: 1.4;
+    opacity: 0.85;
+  }
+}
+
+// 状态选项样式
+.status-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+}
+
+// 操作按钮容器
+.operation-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+
+  .el-button {
+    margin: 0 !important;
+    border-radius: 6px;
+    font-size: 12px;
+    padding: 5px 10px;
+    height: 28px;
+
+    &.el-button--success {
+      --el-button-bg-color: #67c23a;
+      --el-button-border-color: #67c23a;
+      --el-button-hover-bg-color: #85ce61;
+      --el-button-hover-border-color: #85ce61;
+    }
+
+    &.el-button--danger {
+      --el-button-bg-color: #f56c6c;
+      --el-button-border-color: #f56c6c;
+      --el-button-hover-bg-color: #f78989;
+      --el-button-hover-border-color: #f78989;
+    }
+
+    &.el-button--warning {
+      --el-button-bg-color: #e6a23c;
+      --el-button-border-color: #e6a23c;
+      --el-button-hover-bg-color: #ebb563;
+      --el-button-hover-border-color: #ebb563;
+    }
+
+    &.el-button--primary {
+      --el-button-bg-color: var(--anzhiyu-main);
+      --el-button-border-color: var(--anzhiyu-main);
+      --el-button-hover-bg-color: var(--anzhiyu-main-op-deep);
+      --el-button-hover-border-color: var(--anzhiyu-main-op-deep);
+    }
+  }
+}
+
+// 响应式调整
+@media (max-width: 768px) {
+  .table-title {
+    .title-text {
+      font-size: 14px;
+    }
+
+    .title-desc {
+      display: none;
+    }
+  }
+
+  .operation-btns {
+    flex-wrap: wrap;
+
+    .el-button {
+      padding: 4px 8px;
+      font-size: 11px;
+      height: 26px;
+    }
+  }
+}

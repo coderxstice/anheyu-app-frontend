@@ -71,14 +71,20 @@ const {
 
 <style lang="scss" scoped>
 .navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
   height: 48px;
+  padding: 0 16px;
   overflow: hidden;
+  background: var(--el-bg-color);
+  border-bottom: 1px solid var(--el-border-color);
 
   .hamburger-container {
-    float: left;
+    display: flex;
+    align-items: center;
     height: 100%;
-    line-height: 48px;
     cursor: pointer;
   }
 
@@ -113,8 +119,61 @@ const {
   }
 
   .breadcrumb-container {
-    float: left;
-    margin-left: 16px;
+    display: flex;
+    align-items: center;
+    height: 100%;
+
+    :deep(.el-breadcrumb) {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      line-height: 1;
+
+      .el-breadcrumb__item {
+        display: flex;
+        align-items: center;
+
+        .el-breadcrumb__inner {
+          display: flex;
+          align-items: center;
+          color: var(--el-text-color-secondary);
+          transition: color 0.2s;
+
+          a {
+            color: var(--el-text-color-secondary);
+            font-weight: normal;
+
+            &:hover {
+              color: var(--el-color-primary);
+            }
+          }
+        }
+
+        &:last-child {
+          .el-breadcrumb__inner {
+            color: var(--el-text-color-primary);
+            font-weight: 500;
+
+            a {
+              color: var(--el-text-color-primary);
+              font-weight: 500;
+              cursor: default;
+
+              &:hover {
+                color: var(--el-text-color-primary);
+              }
+            }
+          }
+        }
+
+        .el-breadcrumb__separator {
+          display: flex;
+          align-items: center;
+          margin: 0 8px;
+          color: var(--el-text-color-placeholder);
+        }
+      }
+    }
   }
 }
 

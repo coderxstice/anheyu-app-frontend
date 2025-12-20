@@ -24,7 +24,7 @@ import { reactive, ref, onMounted, h } from "vue";
 import type { FormItemProps } from "./types";
 import { deviceDetection } from "@pureadmin/utils";
 import type { PaginationProps, LoadingConfig } from "@pureadmin/table";
-import { ElTag, ElMessageBox, ElInput } from "element-plus";
+import { ElTag, ElMessageBox, ElInput, ElAvatar, ElLink } from "element-plus";
 import type { AdminUser, UserGroupOption } from "@/api/user-management/type";
 
 export function useUserManagement() {
@@ -74,41 +74,78 @@ export function useUserManagement() {
       showOverflowTooltip: true
     },
     {
-      label: "用户名",
+      label: "用户信息",
       prop: "username",
-      minWidth: 120,
-      showOverflowTooltip: true
-    },
-    {
-      label: "昵称",
-      prop: "nickname",
-      minWidth: 120,
-      showOverflowTooltip: true
-    },
-    {
-      label: "邮箱",
-      prop: "email",
-      minWidth: 180,
-      showOverflowTooltip: true
-    },
-    {
-      label: "头像",
-      prop: "avatar",
-      minWidth: 80,
+      minWidth: 280,
+      align: "left",
+      headerAlign: "left",
       cellRenderer: ({ row }) => {
-        if (row.avatar) {
-          return h("img", {
-            src: row.avatar,
-            alt: "头像",
-            style: {
-              width: "40px",
-              height: "40px",
-              borderRadius: "50%",
-              objectFit: "cover"
-            }
-          });
-        }
-        return h("span", "无头像");
+        return h(
+          "div",
+          { style: "display: flex; align-items: center; gap: 12px;" },
+          [
+            h(ElAvatar, {
+              src: row.avatar,
+              size: 40,
+              style: "flex-shrink: 0;"
+            }),
+            h(
+              "div",
+              {
+                style:
+                  "flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px;"
+              },
+              [
+                h(
+                  "div",
+                  {
+                    style:
+                      "display: flex; align-items: center; gap: 6px;"
+                  },
+                  [
+                    h(
+                      "span",
+                      {
+                        style:
+                          "font-size: 14px; font-weight: 600; color: var(--anzhiyu-fontcolor);"
+                      },
+                      row.nickname || row.username
+                    ),
+                    row.nickname
+                      ? h(
+                          "span",
+                          {
+                            style:
+                              "font-size: 12px; color: var(--anzhiyu-secondfontcolor);"
+                          },
+                          `@${row.username}`
+                        )
+                      : null
+                  ]
+                ),
+                row.email
+                  ? h(
+                      ElLink,
+                      {
+                        href: `mailto:${row.email}`,
+                        type: "primary",
+                        underline: false,
+                        style:
+                          "font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;"
+                      },
+                      () => row.email
+                    )
+                  : h(
+                      "span",
+                      {
+                        style: "font-size: 12px; color: var(--anzhiyu-secondfontcolor);"
+                      },
+                      "无邮箱"
+                    )
+              ]
+            )
+          ]
+        );
       }
     },
     {

@@ -18,6 +18,7 @@ export interface CreateCommentPayload {
   email?: string;
   website?: string;
   content: string; // 内容现在可能包含 anzhiyu://file/{ID} 格式的图片URI
+  allow_notification?: boolean;
   is_anonymous?: boolean; // 是否为匿名评论（前端明确标识）
 }
 

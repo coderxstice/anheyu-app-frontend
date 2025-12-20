@@ -47,8 +47,18 @@ const selectionMode = ref(false);
 
 const statusOptions = [
   { value: "", label: "全部状态" },
-  { value: "PUBLISHED", label: "已发布", type: "success", color: "var(--anzhiyu-green)" },
-  { value: "DRAFT", label: "草稿", type: "warning", color: "var(--anzhiyu-yellow)" },
+  {
+    value: "PUBLISHED",
+    label: "已发布",
+    type: "success",
+    color: "var(--anzhiyu-green)"
+  },
+  {
+    value: "DRAFT",
+    label: "草稿",
+    type: "warning",
+    color: "var(--anzhiyu-yellow)"
+  },
   { value: "ARCHIVED", label: "已归档", type: "info", color: "#909399" }
 ];
 
@@ -291,10 +301,12 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="content-area">
-      <div v-if="loading" v-loading="loading" class="loading-placeholder" />
-
-      <div v-if="!loading && tableData.length > 0" class="article-list">
+    <div
+      v-loading="loading"
+      element-loading-text="正在加载文章列表..."
+      class="content-area"
+    >
+      <div v-if="tableData.length > 0" class="article-list">
         <div
           v-for="article in tableData"
           :key="article.id"
@@ -496,21 +508,25 @@ onMounted(() => {
   margin: 0;
 }
 .post-management-container {
-  padding: 1rem;
-  min-height: calc(100vh - 140px);
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  height: 100%;
+  min-height: 0;
 }
 
 // 控制面板
 .control-panel {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 20px;
-  margin-bottom: 24px;
+  gap: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
   background: var(--anzhiyu-card-bg);
   border: var(--style-border);
-  border-radius: 16px;
+  border-radius: 12px;
   box-shadow: var(--anzhiyu-shadow-border);
+  flex-shrink: 0;
 
   @media (min-width: 768px) {
     flex-direction: row;
@@ -633,36 +649,57 @@ onMounted(() => {
 
 // 内容区域
 .content-area {
-  position: relative;
-  min-height: 400px;
-}
-
-.loading-placeholder {
-  width: 100%;
-  height: 400px;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  flex: 1;
+  min-height: 300px; // 防止 loading 时高度塌陷
+  background: var(--anzhiyu-card-bg);
+  border: var(--style-border);
+  border-radius: 12px;
+  box-shadow: var(--anzhiyu-shadow-border);
+  overflow: hidden;
+
+  // loading 遮罩样式
+  :deep(.el-loading-mask) {
+    background-color: var(--anzhiyu-card-bg);
+    opacity: 0.9;
+    border-radius: 12px;
+  }
+
+  :deep(.el-loading-spinner) {
+    .path {
+      stroke: var(--anzhiyu-main);
+    }
+
+    .el-loading-text {
+      color: var(--anzhiyu-fontcolor);
+      margin-top: 10px;
+    }
+  }
 }
 
 // 文章列表
 .article-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+  padding: 12px;
+  flex: 1;
+  height: 0; // 配合 flex: 1 让列表填充剩余空间并内部滚动
+  min-height: 300px; // 防止 loading 时高度塌陷
+  overflow-y: auto;
 }
 
 // 文章列表项
 .article-item {
   display: flex;
   align-items: stretch;
-  gap: 16px;
-  padding: 16px;
-  background: var(--anzhiyu-card-bg);
+  gap: 14px;
+  padding: 14px;
+  background: var(--anzhiyu-secondbg);
   border: var(--style-border);
-  border-radius: 12px;
-  box-shadow: var(--anzhiyu-shadow-border);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 10px;
+  transition: all 0.2s ease;
 
   &.is-selected {
     border-color: var(--anzhiyu-main);
@@ -755,11 +792,19 @@ onMounted(() => {
     z-index: 1;
 
     &.status-published {
-      background: linear-gradient(135deg, var(--anzhiyu-green) 0%, #85ce61 100%);
+      background: linear-gradient(
+        135deg,
+        var(--anzhiyu-green) 0%,
+        #85ce61 100%
+      );
     }
 
     &.status-draft {
-      background: linear-gradient(135deg, var(--anzhiyu-yellow) 0%, #f0c78a 100%);
+      background: linear-gradient(
+        135deg,
+        var(--anzhiyu-yellow) 0%,
+        #f0c78a 100%
+      );
     }
 
     &.status-archived {
@@ -901,19 +946,17 @@ onMounted(() => {
 .pagination-container {
   display: flex;
   justify-content: center;
-  margin-top: 32px;
-  padding: 20px;
+  padding: 12px 16px;
+  border-top: var(--style-border);
   background: var(--anzhiyu-card-bg);
-  border: var(--style-border);
-  border-radius: 12px;
-  box-shadow: var(--anzhiyu-shadow-border);
+  flex-shrink: 0;
 
   :deep(.el-pagination) {
     .btn-prev,
     .btn-next,
     .el-pager li {
-      border-radius: 8px;
-      transition: all 0.3s ease;
+      border-radius: 6px;
+      transition: all 0.2s ease;
 
       &:hover {
         background: var(--anzhiyu-main-op-light);
@@ -930,23 +973,21 @@ onMounted(() => {
 
 // 空状态
 .el-empty {
-  margin: 80px auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding: 40px;
-  background: var(--anzhiyu-card-bg);
-  border: var(--style-border);
-  border-radius: 16px;
-  box-shadow: var(--anzhiyu-shadow-border);
 }
 
 // 响应式调整
 @media (max-width: 768px) {
   .post-management-container {
-    padding: 0px;
-    margin: 10px !important;
+    padding: 10px;
   }
 
   .control-panel {
-    padding: 16px;
+    padding: 12px;
   }
 
   .search-area {
@@ -956,11 +997,12 @@ onMounted(() => {
   }
 
   .article-list {
-    gap: 12px;
+    gap: 8px;
+    padding: 10px;
   }
 
   .article-item {
-    padding: 12px;
+    padding: 10px;
   }
 }
 </style>

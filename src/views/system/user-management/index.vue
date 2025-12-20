@@ -143,7 +143,7 @@ function onFullscreen() {
           批量删除
         </el-button>
       </template>
-      <template v-slot="{ size, dynamicColumns }">
+      <template v-slot="{ dynamicColumns }">
         <pure-table
           ref="tableRef"
           adaptive
@@ -165,56 +165,50 @@ function onFullscreen() {
           @page-current-change="onCurrentChange"
         >
           <template #operation="{ row }">
-            <el-button
-              v-ripple
-              class="reset-margin"
-              link
-              type="primary"
-              :size="size"
-              :icon="useRenderIcon(EditPen)"
-              @click="openDialog('修改', row)"
-            >
-              修改
-            </el-button>
-            <el-button
-              v-ripple
-              class="reset-margin"
-              link
-              type="warning"
-              :size="size"
-              :icon="useRenderIcon(Key)"
-              @click="handleResetPassword(row)"
-            >
-              重置密码
-            </el-button>
-            <el-button
-              v-ripple
-              class="reset-margin"
-              link
-              :type="row.status === 1 ? 'warning' : 'success'"
-              :size="size"
-              :icon="useRenderIcon(row.status === 1 ? Lock : Unlock)"
-              @click="handleToggleStatus(row)"
-            >
-              {{ row.status === 1 ? "封禁" : "启用" }}
-            </el-button>
-            <el-popconfirm
-              :title="`是否确认删除用户 ${row.username}？`"
-              @confirm="handleDelete(row)"
-            >
-              <template #reference>
-                <el-button
-                  v-ripple
-                  class="reset-margin"
-                  link
-                  type="danger"
-                  :size="size"
-                  :icon="useRenderIcon(Delete)"
-                >
-                  删除
-                </el-button>
-              </template>
-            </el-popconfirm>
+            <div class="operation-btns">
+              <el-button
+                v-ripple
+                type="primary"
+                size="small"
+                :icon="useRenderIcon(EditPen)"
+                @click="openDialog('修改', row)"
+              >
+                修改
+              </el-button>
+              <el-button
+                v-ripple
+                type="warning"
+                size="small"
+                :icon="useRenderIcon(Key)"
+                @click="handleResetPassword(row)"
+              >
+                重置密码
+              </el-button>
+              <el-button
+                v-ripple
+                :type="row.status === 1 ? 'warning' : 'success'"
+                size="small"
+                :icon="useRenderIcon(row.status === 1 ? Lock : Unlock)"
+                @click="handleToggleStatus(row)"
+              >
+                {{ row.status === 1 ? "封禁" : "启用" }}
+              </el-button>
+              <el-popconfirm
+                :title="`是否确认删除用户 ${row.username}？`"
+                @confirm="handleDelete(row)"
+              >
+                <template #reference>
+                  <el-button
+                    v-ripple
+                    type="danger"
+                    size="small"
+                    :icon="useRenderIcon(Delete)"
+                  >
+                    删除
+                  </el-button>
+                </template>
+              </el-popconfirm>
+            </div>
           </template>
         </pure-table>
       </template>
@@ -229,9 +223,8 @@ function onFullscreen() {
 
 .search-form {
   margin-bottom: 16px;
+  border: var(--style-border);
 }
 
-.table-bar {
-  background-color: var(--anzhiyu-card-bg);
-}
+// 表格公共样式已移至 @/style/table-bar.scss
 </style>
