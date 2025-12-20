@@ -27,6 +27,7 @@ import {
   WarningFilled,
   InfoFilled
 } from "@element-plus/icons-vue";
+import { IconifyIconOnline } from "@/components/ReIcon";
 
 export function useAlbum() {
   const form = reactive({
@@ -103,12 +104,14 @@ export function useAlbum() {
     {
       label: "大图参数",
       prop: "bigParam",
-      minWidth: 120
+      minWidth: 120,
+      hide: true
     },
     {
       label: "缩略参数",
       prop: "thumbParam",
-      minWidth: 120
+      minWidth: 120,
+      hide: true
     },
     {
       label: "标签",
@@ -116,10 +119,49 @@ export function useAlbum() {
       minWidth: 120
     },
     {
-      label: "查看次数",
+      label: "统计",
       prop: "viewCount",
-      minWidth: 70,
-      hide: true
+      width: 100,
+      align: "center",
+      headerAlign: "left",
+      cellRenderer: ({ row }) => {
+        return h(
+          "div",
+          { style: "display: flex; flex-direction: column; gap: 4px;" },
+          [
+            h(
+              "span",
+              {
+                style:
+                  "display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--anzhiyu-secondtext);"
+              },
+              [
+                h(IconifyIconOnline, {
+                  icon: "ep:view",
+                  width: 14,
+                  height: 14
+                }),
+                row.viewCount || 0
+              ]
+            ),
+            h(
+              "span",
+              {
+                style:
+                  "display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--anzhiyu-secondtext);"
+              },
+              [
+                h(IconifyIconOnline, {
+                  icon: "ep:download",
+                  width: 14,
+                  height: 14
+                }),
+                row.downloadCount || 0
+              ]
+            )
+          ]
+        );
+      }
     },
     {
       label: "图片大小",
@@ -140,12 +182,6 @@ export function useAlbum() {
     {
       label: "长宽比",
       prop: "aspectRatio",
-      minWidth: 70,
-      hide: true
-    },
-    {
-      label: "下载次数",
-      prop: "downloadCount",
       minWidth: 70,
       hide: true
     },

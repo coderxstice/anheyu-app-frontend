@@ -80,79 +80,65 @@ function openAlbumPage() {
       ref="formRef"
       :inline="true"
       :model="form"
-      class="search-form bg-bg_color w-full pl-3 pr-3 md:pl-8 md:pr-4 pt-3 pb-3 md:pt-[12px] md:pb-[12px] overflow-auto rounded-2xl"
+      class="search-form bg-bg_color w-full pl-8 pt-[12px] overflow-auto"
     >
-      <!-- 第一行：分类和时间 -->
-      <div class="search-row">
-        <el-form-item label="分类：" prop="categoryId" class="search-form-item">
-          <el-select
-            v-model="form.categoryId"
-            placeholder="请选择分类"
-            clearable
-            class="!w-full md:!w-[180px]"
-          >
-            <el-option
-              v-for="category in categories"
-              :key="category.id"
-              :label="category.name"
-              :value="category.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item
-          label="上传时间："
-          prop="created_at"
-          class="search-form-item time-picker-item"
+      <el-form-item label="分类：" prop="categoryId">
+        <el-select
+          v-model="form.categoryId"
+          placeholder="请选择分类"
+          clearable
+          class="!w-[180px]"
         >
-          <el-date-picker
-            v-model="form.created_at"
-            type="datetimerange"
-            range-separator="至"
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
-            format="YYYY/MM/DD hh:mm:ss"
-            value-format="YYYY/MM/DD hh:mm:ss"
-            class="w-full md:w-auto"
+          <el-option
+            v-for="category in categories"
+            :key="category.id"
+            :label="category.name"
+            :value="category.id"
           />
-        </el-form-item>
-      </div>
-
-      <!-- 第二行：排序和按钮 -->
-      <div class="search-row">
-        <el-form-item label="排序：" prop="sort" class="search-form-item">
-          <el-select
-            v-model="form.sort"
-            placeholder="请选择"
-            clearable
-            class="!w-full md:!w-[180px]"
-          >
-            <el-option label="按排序号" value="display_order_asc" />
-            <el-option label="最新创建" value="created_at_desc" />
-            <el-option label="最早创建" value="created_at_asc" />
-            <el-option label="热度排序" value="view_count_desc" />
-          </el-select>
-        </el-form-item>
-        <el-form-item class="search-form-item search-buttons">
-          <el-button
-            v-ripple
-            type="primary"
-            :icon="useRenderIcon(Search)"
-            :loading="loading"
-            class="flex-1 md:flex-none"
-            @click="onSearch"
-          >
-            搜索
-          </el-button>
-          <el-button
-            v-ripple
-            :icon="useRenderIcon(Refresh)"
-            class="flex-1 md:flex-none"
-            @click="resetForm(formRef)"
-          >
-            重置
-          </el-button>
-        </el-form-item>
-      </div>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="上传时间：" prop="created_at">
+        <el-date-picker
+          v-model="form.created_at"
+          type="datetimerange"
+          range-separator="至"
+          start-placeholder="开始时间"
+          end-placeholder="结束时间"
+          format="YYYY/MM/DD hh:mm:ss"
+          value-format="YYYY/MM/DD hh:mm:ss"
+        />
+      </el-form-item>
+      <el-form-item label="排序：" prop="sort">
+        <el-select
+          v-model="form.sort"
+          placeholder="请选择"
+          clearable
+          class="!w-[180px]"
+        >
+          <el-option label="按排序号" value="display_order_asc" />
+          <el-option label="最新创建" value="created_at_desc" />
+          <el-option label="最早创建" value="created_at_asc" />
+          <el-option label="热度排序" value="view_count_desc" />
+        </el-select>
+      </el-form-item>
+      <el-form-item class="search-buttons">
+        <el-button
+          v-ripple
+          type="primary"
+          :icon="useRenderIcon(Search)"
+          :loading="loading"
+          @click="onSearch"
+        >
+          搜索
+        </el-button>
+        <el-button
+          v-ripple
+          :icon="useRenderIcon(Refresh)"
+          @click="resetForm(formRef)"
+        >
+          重置
+        </el-button>
+      </el-form-item>
     </el-form>
 
     <PureTableBar
@@ -160,10 +146,18 @@ function openAlbumPage() {
       :columns="columns"
       :tableRef="tableRef?.getTableRef()"
       storageKey="album-management"
-      class="table-bar rounded-2xl"
+      class="table-bar"
       @refresh="onSearch"
       @fullscreen="onFullscreen"
     >
+      <template #title>
+        <div class="table-title">
+          <span class="title-text">相册图片管理</span>
+          <span class="title-desc">
+            管理相册图片，支持分类、标签、批量导入导出等功能
+          </span>
+        </div>
+      </template>
       <template #buttons>
         <div class="button-group">
           <el-button
@@ -298,112 +292,26 @@ function openAlbumPage() {
   height: 0;
 }
 
-.main-content {
-  margin: 24px 24px 0 !important;
+.main {
+  margin: 24px;
 }
 
-:deep(.table-bar) {
-  border: var(--style-border);
-}
-
+// 搜索表单
 .search-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 16px;
   border: var(--style-border);
+  border-radius: 12px;
 
-  :deep(.el-form-item) {
-    margin-bottom: 12px;
-  }
-
-  // 搜索行布局
-  .search-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0;
-    width: 100%;
-
-    // 桌面端横向排列
-    @media (width > 768px) {
-      flex-wrap: nowrap;
-      align-items: flex-start;
-    }
-
-    // 移动端纵向排列
-    @media (width <= 768px) {
-      flex-direction: column;
-    }
-  }
-
-  // 时间选择器在桌面端占据剩余空间
-  .time-picker-item {
-    @media (width > 768px) {
-      flex: 1;
-      min-width: 400px;
-    }
-  }
-
-  // 移动端适配
-  @media (width <= 768px) {
-    .search-form-item {
-      display: flex;
-      align-items: center;
-      margin-bottom: 0 !important;
-      margin-right: 0 !important;
-      width: 100%;
-
-      :deep(.el-form-item__content) {
-        flex: 1;
-        display: flex;
-        gap: 6px;
-        margin-left: 0 !important;
-      }
-
-      :deep(.el-form-item__label) {
-        font-size: 13px;
-        width: 70px !important;
-        min-width: 70px;
-        padding-right: 6px;
-        flex-shrink: 0;
-      }
-    }
-
-    // 按钮组特殊处理
-    .search-buttons {
-      :deep(.el-form-item__label) {
-        display: none;
-      }
-
-      :deep(.el-form-item__content) {
-        flex: 1;
-        width: 100%;
-        margin-left: 0 !important;
-      }
-    }
-
-    // 日期选择器移动端优化
-    :deep(.el-date-editor) {
-      .el-range-separator {
-        padding: 0 2px;
-      }
-
-      .el-range-input {
-        font-size: 12px;
-      }
-    }
-
-    // 选择器优化
-    :deep(.el-select) {
-      .el-select__wrapper {
-        font-size: 13px;
-      }
-    }
-
-    // 按钮移动端优化
-    :deep(.el-button) {
-      padding: 7px 12px;
-      font-size: 13px;
-      min-height: 32px;
-    }
+  :deep(.search-buttons) {
+    margin-left: auto;
+    margin-right: 16px;
   }
 }
+
+// 表格公共样式已移至 @/style/table-bar.scss
 
 // 表格操作列移动端适配
 :deep(.el-table) {
@@ -418,28 +326,6 @@ function openAlbumPage() {
     // 图片缩略图在移动端缩小
     img {
       max-width: 60px !important;
-    }
-  }
-}
-
-:deep(.table-bar) {
-  @media (width <= 768px) {
-    & > div > p {
-      display: none;
-    }
-    & > div > div > svg,
-    & > div > div > .el-divider,
-    & > div > div > .el-dropdown {
-      display: none;
-    }
-  }
-}
-
-// 表格标题栏移动端适配
-:deep(.pure-table-bar) {
-  @media (width <= 768px) {
-    .pure-table-bar-left {
-      font-size: 16px;
     }
   }
 }

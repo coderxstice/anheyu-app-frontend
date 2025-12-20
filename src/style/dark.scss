@@ -109,41 +109,93 @@ html.dark {
     .el-sub-menu__title:hover::before {
       background: rgb(255 255 255 / 8%) !important;
     }
+
+    /* 一级父菜单展开时文字颜色为白色 */
+    .el-sub-menu.is-opened > .el-sub-menu__title {
+      .sub-menu-icon,
+      .sub-menu-icon svg,
+      span {
+        color: #fff !important;
+      }
+    }
   }
 
   /* 标签页 */
   .tags-view {
-    .arrow-left,
-    .arrow-right {
-      border-right: 1px solid $border-style;
-      box-shadow: none;
-    }
+    background: var(--el-bg-color);
+    border-bottom-color: var(--el-border-color);
 
-    .arrow-right {
-      border-left: 1px solid $border-style;
+    .arrow-left,
+    .arrow-right,
+    .arrow-down {
+      background: transparent;
+
+      &:hover {
+        background: rgb(255 255 255 / 8%);
+      }
     }
 
     .scroll-item {
+      background: transparent;
+
+      &:hover:not(.is-active) {
+        background: rgb(255 255 255 / 8%);
+      }
+
+      &.is-active {
+        background: var(--el-color-primary-light-9) !important;
+      }
+
+      .tag-title {
+        color: rgb(255 255 255 / 85%);
+      }
+
       .el-icon-close {
+        color: rgb(255 255 255 / 45%);
+
         &:hover {
-          color: rgb(255 255 255 / 85%) !important;
-          background-color: rgb(255 255 255 / 12%);
+          color: #fff !important;
+          background-color: var(--el-color-primary);
         }
       }
 
-      .chrome-tab {
-        .tag-title {
-          color: #666;
+      /* Chrome 模式 */
+      &.chrome-item {
+        background: transparent !important;
+
+        &:hover:not(.is-active) {
+          .chrome-tab__bg-content {
+            background: rgb(255 255 255 / 10%);
+          }
         }
 
-        &:hover {
-          .chrome-tab__bg {
-            color: #333;
+        &.is-active {
+          .chrome-tab__bg-content {
+            background: rgb(255 255 255 / 10%);
           }
 
-          .tag-title {
-            color: #adadad;
+          .chrome-tab__bg-foot {
+            fill: rgb(255 255 255 / 10%);
           }
+        }
+
+        .chrome-tab {
+          .tag-title {
+            color: rgb(255 255 255 / 65%);
+          }
+
+          .chrome-tab-divider {
+            background-color: rgb(255 255 255 / 15%);
+          }
+        }
+
+        &:hover .chrome-tab .tag-title,
+        &.is-active .chrome-tab .tag-title {
+          color: rgb(255 255 255 / 90%);
+        }
+
+        &.is-active .chrome-tab .tag-title {
+          color: var(--el-color-primary) !important;
         }
       }
     }

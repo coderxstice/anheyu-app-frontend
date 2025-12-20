@@ -113,17 +113,11 @@ watch(
 </script>
 
 <template>
-  <el-breadcrumb class="!leading-[50px] select-none" separator="">
-    <!-- <transition-group name="breadcrumb"> -->
-    <el-breadcrumb-item
-      v-for="item in levelList"
-      :key="item.path"
-      class="!inline !items-stretch"
-    >
+  <el-breadcrumb class="select-none" separator="/">
+    <el-breadcrumb-item v-for="item in levelList" :key="item.path">
       <a @click.prevent="handleLink(item)">
         {{ item.meta.title }}
       </a>
     </el-breadcrumb-item>
-    <!-- </transition-group> -->
   </el-breadcrumb>
 </template>

@@ -570,7 +570,7 @@ onBeforeUnmount(() => {
       :class="showModel === 'chrome' && 'chrome-scroll-container'"
       @wheel.prevent="handleWheel"
     >
-      <div ref="tabDom" class="tab select-none" :style="getTabStyle">
+      <div ref="tabDom" class="select-none tab" :style="getTabStyle">
         <div
           v-for="(item, index) in multiTags"
           :ref="'dynamic' + index"
@@ -611,20 +611,38 @@ onBeforeUnmount(() => {
             />
           </template>
           <div v-else class="chrome-tab">
+            <!-- 分隔线 -->
+            <span v-if="index !== 0" class="chrome-tab-divider" />
+            <!-- 背景容器（含"脚"） -->
             <div class="chrome-tab__bg">
-              <TagChrome />
+              <div class="chrome-tab__bg-content" />
+              <!-- 左脚 -->
+              <svg
+                class="chrome-tab__bg-foot chrome-tab__bg-foot--left"
+                width="8"
+                height="8"
+              >
+                <path d="M 0 8 A 8 8 0 0 0 8 0 L 8 8 Z" />
+              </svg>
+              <!-- 右脚 -->
+              <svg
+                class="chrome-tab__bg-foot chrome-tab__bg-foot--right"
+                width="8"
+                height="8"
+              >
+                <path d="M 0 0 A 8 8 0 0 0 8 8 L 0 8 Z" />
+              </svg>
             </div>
             <span class="tag-title">
               {{ item.meta.title }}
             </span>
             <span
-              v-if="isFixedTag(item) ? false : index !== 0"
+              v-if="!isFixedTag(item) && index !== 0"
               class="chrome-close-btn"
               @click.stop="deleteMenu(item)"
             >
               <IconifyIconOffline :icon="Close" />
             </span>
-            <span class="chrome-tab-divider" />
           </div>
         </div>
       </div>
