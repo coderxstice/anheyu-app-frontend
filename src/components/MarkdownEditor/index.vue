@@ -427,72 +427,9 @@ const enrichHtmlMusicPlayers = async (html: string): Promise<string> => {
   return doc.body.innerHTML;
 };
 
-/**
- * 等待 Mermaid 图表渲染完成
- * Mermaid 渲染是异步的，需要等待所有图表都渲染完成后再保存
- * @param maxWaitTime 最大等待时间（毫秒），默认 5000ms
- * @param checkInterval 检查间隔（毫秒），默认 100ms
- */
-const waitForMermaidRender = async (
-  maxWaitTime = 5000,
-  checkInterval = 100
-): Promise<void> => {
-  const previewContainer = containerRef.value?.querySelector(
-    ".md-editor-preview-wrapper"
-  );
-  if (!previewContainer) {
-    console.log("[保存文章] 未找到预览容器，跳过 Mermaid 等待");
-    return;
-  }
-
-  const startTime = Date.now();
-
-  while (Date.now() - startTime < maxWaitTime) {
-    // 查找所有 Mermaid 图表元素
-    const mermaidElements =
-      previewContainer.querySelectorAll(".md-editor-mermaid");
-
-    if (mermaidElements.length === 0) {
-      // 没有 Mermaid 图表，直接返回
-      console.log("[保存文章] 未检测到 Mermaid 图表");
-      return;
-    }
-
-    // 检查是否所有 Mermaid 都已渲染完成（有 data-processed 属性且包含 SVG）
-    let allRendered = true;
-    let pendingCount = 0;
-
-    mermaidElements.forEach(el => {
-      const hasProcessed = el.hasAttribute("data-processed");
-      const hasSvg = el.querySelector("svg") !== null;
-      if (!hasProcessed || !hasSvg) {
-        allRendered = false;
-        pendingCount++;
-      }
-    });
-
-    if (allRendered) {
-      console.log(
-        `[保存文章] 所有 Mermaid 图表已渲染完成 (${mermaidElements.length} 个)`
-      );
-      return;
-    }
-
-    console.log(
-      `[保存文章] 等待 Mermaid 渲染... (${pendingCount}/${mermaidElements.length} 待渲染)`
-    );
-    await new Promise(resolve => setTimeout(resolve, checkInterval));
-  }
-
-  console.warn(`[保存文章] Mermaid 渲染等待超时 (${maxWaitTime}ms)，继续保存`);
-};
-
 const handleSave = async (markdown: string, htmlPromise: Promise<string>) => {
   console.log("[保存文章] 开始处理...");
   console.log("[保存文章] Markdown长度:", markdown.length);
-
-  // 等待 Mermaid 图表渲染完成
-  await waitForMermaidRender();
 
   // 获取原始HTML
   const rawHtml = await htmlPromise;
