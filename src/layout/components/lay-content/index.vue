@@ -167,12 +167,11 @@ const transitionMain = defineComponent({
 .scrollbar-container {
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .main-content {
   margin: 24px;
-  height: calc(100% - 48px);
-  overflow: hidden;
+  min-height: calc(100% - 48px);
 }
 </style>

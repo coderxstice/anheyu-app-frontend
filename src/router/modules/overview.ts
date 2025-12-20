@@ -14,7 +14,7 @@ export default [
     redirect: "/admin/dashboard",
     name: "Home",
     meta: {
-      icon: "ep:data-board",
+      icon: "ri:dashboard-horizontal-fill",
       title: "概览",
       rank: 0
     },
