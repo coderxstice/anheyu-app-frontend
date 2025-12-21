@@ -174,7 +174,13 @@ watch(
 const getAvatarSrc = (comment: Comment): string => {
   // 优先使用用户自定义头像
   if (comment.avatar_url) {
-    return comment.avatar_url;
+    // 检查是否是完整 URL（以 http:// 或 https:// 开头）
+    const isAbsoluteUrl = /^https?:\/\//i.test(comment.avatar_url);
+    if (isAbsoluteUrl) {
+      return comment.avatar_url;
+    }
+    // 如果是相对路径，拼接基础 URL
+    return `${props.gravatarUrl}${comment.avatar_url}`;
   }
 
   // 如果是匿名评论，使用匿名头像
