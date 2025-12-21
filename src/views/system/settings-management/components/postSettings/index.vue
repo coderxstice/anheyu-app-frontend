@@ -301,6 +301,38 @@
   </el-form-item>
 
   <el-divider content-position="left">
+    <h3>目录配置</h3>
+  </el-divider>
+
+  <el-form-item label="目录滚动Hash更新模式">
+    <div>
+      <el-select
+        :model-value="formData.toc?.hashUpdateMode ?? 'replace'"
+        placeholder="请选择Hash更新模式"
+        style="width: 200px"
+        @update:model-value="
+          (val: string) => {
+            if (!formData.toc) {
+              formData.toc = { hashUpdateMode: 'replace' };
+            }
+            formData.toc.hashUpdateMode = val;
+          }
+        "
+      >
+        <el-option label="替换（不产生历史记录）" value="replace" />
+        <el-option label="不更新（URL保持不变）" value="none" />
+      </el-select>
+      <div class="form-item-help">
+        控制阅读文章时，目录滚动导致的URL Hash变化行为。<br />
+        <strong>替换模式</strong>：使用 history.replaceState
+        更新Hash，浏览器后退不会逐个回退Hash。<br />
+        <strong>不更新模式</strong
+        >：滚动时不自动更新URL中的Hash，避免产生任何历史记录。
+      </div>
+    </div>
+  </el-form-item>
+
+  <el-divider content-position="left">
     <h3>CDN 缓存刷新配置</h3>
   </el-divider>
 
