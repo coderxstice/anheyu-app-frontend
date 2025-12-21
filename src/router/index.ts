@@ -144,7 +144,21 @@ const { VITE_HIDE_HOME } = import.meta.env;
 
 router.beforeEach((to: ToRouteType, _from, next) => {
   const loadingStore = useLoadingStore();
-  loadingStore.startLoading();
+
+  // 检查是否是后台页面之间的切换
+  const isAdminRoute = (path: string) =>
+    path?.startsWith("/admin/") || path === "/admin";
+  const isAdminToAdmin =
+    isAdminRoute(_from?.path) &&
+    isAdminRoute(to.path) &&
+    _from.path !== to.path;
+
+  // 后台页面切换使用即时 loading，前台页面使用延迟 loading
+  if (isAdminToAdmin) {
+    loadingStore.startLoadingImmediate();
+  } else {
+    loadingStore.startLoading();
+  }
 
   // 1. 处理 keepAlive 逻辑
   if (to.meta?.keepAlive) {
