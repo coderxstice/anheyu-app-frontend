@@ -46,14 +46,37 @@ const renderChart = () => {
           chartData.length > 0
             ? chartData.sort((a, b) => a.value - b.value)
             : [{ name: "暂无数据", value: 1 }],
+        emphasis: {
+          label: {
+            fontSize: 14,
+            fontWeight: "bold",
+            show: true
+          }
+        },
+        label: {
+          show: true,
+          formatter: "{b}\n{c}",
+          fontSize: 12,
+          color: "#333"
+        },
+        labelLine: {
+          show: true,
+          length: 15,
+          length2: 10,
+          lineStyle: {
+            width: 1
+          }
+        },
         name: "操作系统占比",
-        radius: "75%",
+        radius: "65%",
         roseType: "radius",
-        type: "pie"
+        type: "pie",
+        avoidLabelOverlap: true
       }
     ],
     tooltip: {
-      trigger: "item"
+      trigger: "item",
+      formatter: "{b}: {c} ({d}%)"
     }
   });
 };
