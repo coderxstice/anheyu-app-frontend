@@ -1513,75 +1513,85 @@
 
 // 混入：列表样式
 @mixin list-styles {
+  // 基础列表样式
+  ol,
+  ul {
+    margin-top: 0.4rem;
+    padding: 0 0 0 0.8rem;
+    list-style: none;
+  }
+
+  // 有序列表：每个 ol 都有独立的 counter 作用域
+  ol {
+    counter-reset: list-item 0;
+  }
+
+  // 无序列表
   ul {
     counter-reset: li 0;
   }
 
-  ol > li::before {
-    margin-top: 0.5em;
-    width: 1.5em;
-    height: 1.5em;
-    border-radius: 0.75em;
-    content: counter(li);
-    counter-increment: li 1;
-    text-align: center;
-    font-size: 0.85em;
-    line-height: 1.5em;
+  // 有序列表项样式
+  ol > li {
+    position: relative;
+    margin: 0.3rem 0;
+    font-size: 17px;
+    line-height: 1.7;
+    font-weight: 400;
+    padding: 0.2em 0.2em 0.2em 2em;
+    counter-increment: list-item 1;
+
+    &::before {
+      position: absolute;
+      top: 0.5em;
+      left: 0;
+      margin-top: 0;
+      width: 1.5em;
+      height: 1.5em;
+      border-radius: 0.75em;
+      content: counter(list-item);
+      text-align: center;
+      font-size: 0.85em;
+      line-height: 1.5em;
+      background: var(--anzhiyu-main);
+      color: #fff;
+      transition: all 0.3s ease-out 0s;
+    }
+
+    &.tab {
+      padding-left: 0;
+    }
   }
 
-  ol li:not(.tab),
+  // 无序列表项样式
   ul li:not(.tab) {
     position: relative;
     margin: 0.3rem 0;
     font-size: 17px;
     line-height: 1.7;
     font-weight: 400;
+    padding: 0.2em 0.2em 0.2em 1.5em;
+
+    &::before {
+      position: absolute;
+      top: 0.65em;
+      left: 0;
+      width: 0.42rem;
+      height: 0.42rem;
+      border-radius: 50%;
+      content: "";
+      box-sizing: content-box;
+      border: 0.2081rem solid var(--anzhiyu-main);
+      background: 0;
+    }
   }
 
-  ol > li:not(.tab) {
-    padding: 0.2em 0.2em 0.2em 2em;
-  }
-
+  // 任务列表项
   .task-list-item::before {
     display: none;
   }
 
-  ul > li:not(.tab)::before {
-    top: 0.65em;
-    width: 0.42rem;
-    height: 0.42rem;
-    border-radius: 50%;
-    content: "";
-    box-sizing: content-box;
-  }
-
-  ul > li:not(.tab) {
-    padding: 0.2em 0.2em 0.2em 1.5em;
-  }
-
-  ul > li:not(.tab)::before {
-    border: 0.2081rem solid var(--anzhiyu-main);
-    background: 0;
-  }
-
-  ol,
-  ul {
-    margin-top: 0.4rem;
-    padding: 0 0 0 0.8rem;
-    list-style: none;
-    counter-reset: li 0;
-  }
-
-  ol li::before,
-  ul li::before {
-    position: absolute;
-    top: 0;
-    left: 0;
-    background: var(--anzhiyu-main);
-    color: #fff;
-    transition: all 0.3s ease-out 0s;
-  }
-
+  // 列表中的段落
   ol,
   ul {
     p {
@@ -1601,9 +1611,11 @@
       }
     }
 
+    // 嵌套列表：每个嵌套列表都有独立的 counter 作用域
     ol,
     ul {
       padding-left: 20px;
+      counter-reset: list-item 0;
     }
   }
 }
