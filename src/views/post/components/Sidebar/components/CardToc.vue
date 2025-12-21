@@ -47,6 +47,14 @@ const tocCollapseMode = computed(() => {
   return config === "true" || config === true;
 });
 
+// 获取目录Hash更新模式配置
+// "replace" - 使用 replaceState 更新Hash（默认）
+// "none" - 不更新Hash
+const tocHashUpdateMode = computed(() => {
+  const config = siteConfigStore.siteConfig?.post?.toc?.hashUpdateMode;
+  return config || "replace";
+});
+
 // 计算可见的目录项（折叠模式下）
 const visibleTocItems = computed(() => {
   if (!tocCollapseMode.value || tocItems.value.length === 0) {
@@ -194,7 +202,10 @@ const scrollToHeading = (event: MouseEvent, id: string) => {
   event.preventDefault();
   activeTocId.value = id;
 
-  history.replaceState(history.state, "", `#${id}`);
+  // 根据配置决定是否更新URL Hash
+  if (tocHashUpdateMode.value !== "none") {
+    history.replaceState(history.state, "", `#${id}`);
+  }
 
   isClickScrolling.value = true;
 
@@ -260,14 +271,17 @@ const onScroll = () => {
 
   if (activeTocId.value !== newActiveId) {
     activeTocId.value = newActiveId;
-    if (newActiveId) {
-      history.replaceState(history.state, "", `#${newActiveId}`);
-    } else {
-      history.replaceState(
-        history.state,
-        "",
-        window.location.pathname + window.location.search
-      );
+    // 根据配置决定是否更新URL Hash
+    if (tocHashUpdateMode.value !== "none") {
+      if (newActiveId) {
+        history.replaceState(history.state, "", `#${newActiveId}`);
+      } else {
+        history.replaceState(
+          history.state,
+          "",
+          window.location.pathname + window.location.search
+        );
+      }
     }
   }
 };

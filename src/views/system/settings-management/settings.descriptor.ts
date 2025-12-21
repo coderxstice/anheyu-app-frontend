@@ -533,6 +533,12 @@ const postDescriptors: SettingDescriptor[] = [
     type: "string"
   },
   {
+    frontendPath: "post.toc.hashUpdateMode",
+    backendKey: constant.KeyPostTocHashUpdateMode,
+    defaultValue: "replace",
+    type: "string"
+  },
+  {
     frontendPath: "post.cdn.enable",
     backendKey: constant.KeyCDNEnable,
     defaultValue: false,

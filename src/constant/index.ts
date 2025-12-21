@@ -178,6 +178,9 @@ const KeyPostCopyCopyrightEnable: SettingKey = "post.copy.copyright_enable";
 const KeyPostCopyCopyrightOriginal: SettingKey = "post.copy.copyright_original";
 const KeyPostCopyCopyrightReprint: SettingKey = "post.copy.copyright_reprint";
 
+// 文章目录 Hash 更新配置
+const KeyPostTocHashUpdateMode: SettingKey = "post.toc.hash_update_mode";
+
 // --- 装备页面配置 ---
 const KeyPostEquipmentBannerBackground: SettingKey =
   "equipment.banner.background";
@@ -496,6 +499,9 @@ export const constant = {
   KeyPostCopyCopyrightEnable,
   KeyPostCopyCopyrightOriginal,
   KeyPostCopyCopyrightReprint,
+
+  // 文章目录 Hash 更新配置
+  KeyPostTocHashUpdateMode,
 
   // --- 装备页面配置 ---
   KeyPostEquipmentBannerBackground,

@@ -193,6 +193,9 @@ export interface PostSettingsInfo {
     copyrightOriginal: string; // 原创文章版权模板
     copyrightReprint: string; // 转载文章版权模板
   };
+  toc: {
+    hashUpdateMode: string; // 目录滚动时URL Hash更新模式: replace(替换不产生历史), none(不更新)
+  };
   cdn: {
     enable: boolean;
     provider: string;

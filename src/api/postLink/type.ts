@@ -167,6 +167,7 @@ export interface ImportLinkItem {
   email?: string;
   category_name?: string; // 分类名称
   tag_name?: string; // 标签名称
+  tag_color?: string; // 标签颜色，创建新标签时使用
   status?: LinkStatus; // 状态，默认为 PENDING
 }
 

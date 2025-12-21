@@ -317,6 +317,7 @@ const exampleJson = `[
     "siteshot": "https://blog.anheyu.com/screenshot.png",
     "category_name": "好友",
     "tag_name": "博客",
+    "tag_color": "#409EFF",
     "status": "APPROVED"
   },
   {
@@ -325,7 +326,8 @@ const exampleJson = `[
     "logo": "https://github.com/favicon.ico",
     "description": "代码托管平台",
     "category_name": "工具",
-    "tag_name": "开发工具"
+    "tag_name": "开发工具",
+    "tag_color": "#67C23A"
   }
 ]`;
 
