@@ -51,6 +51,12 @@ const defaultActive = computed(() =>
   !isAllEmpty(route.meta?.activePath) ? route.meta.activePath : route.path
 );
 
+// 默认展开的菜单（当前路由的所有父级路径）
+const defaultOpeneds = computed(() => {
+  const path = defaultActive.value;
+  return getParentPaths(path, usePermissionStoreHook().wholeMenus);
+});
+
 function getSubMenuData() {
   let path = "";
   path = defaultActive.value;
@@ -151,6 +157,7 @@ onBeforeUnmount(() => {
         :collapse-transition="false"
         :popper-effect="tooltipEffect"
         :default-active="defaultActive"
+        :default-openeds="defaultOpeneds"
       >
         <LaySidebarItem
           v-for="routes in menuData"
