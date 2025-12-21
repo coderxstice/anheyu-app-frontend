@@ -57,9 +57,13 @@ defineProps<Props>();
     box-shadow: 0 -48px 203px 11px #fbe9b8 inset;
   }
 
+  .card-content {
+    z-index: 4;
+  }
+
   .author-content-item-tips,
   .author-content-item-title {
-    z-index: 2;
+    z-index: 4;
     color: var(--anzhiyu-white);
     pointer-events: none;
   }
