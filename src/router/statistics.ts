@@ -20,6 +20,19 @@ const isAdminPath = (path: string): boolean => {
   return path.startsWith("/admin/") || path === "/admin";
 };
 
+/**
+ * 获取安全的 referer（排除后台路径）
+ * @param fromPath - 来源路径
+ * @returns 安全的 referer 字符串
+ */
+const getSafeReferer = (fromPath?: string): string => {
+  // 如果来源路径是后台路径，使用 document.referrer 或空字符串
+  if (fromPath && isAdminPath(fromPath)) {
+    return document.referrer || "";
+  }
+  return fromPath || document.referrer;
+};
+
 // 记录路由变化
 export function recordRouteChange(
   to: RouteLocationNormalized,
@@ -57,7 +70,7 @@ export function recordRouteChange(
       recordVisit({
         url_path: to.fullPath,
         page_title: document.title,
-        referer: from?.fullPath || document.referrer,
+        referer: getSafeReferer(from?.fullPath),
         duration: 0
       });
 
@@ -77,7 +90,7 @@ export function recordRouteChange(
       recordVisit({
         url_path: currentPath,
         page_title: currentPageTitle,
-        referer: from?.fullPath || document.referrer,
+        referer: getSafeReferer(from?.fullPath),
         duration: duration
       });
       console.log(`📊 记录页面停留时间: ${currentPath}, 停留${duration}秒`);
@@ -100,7 +113,7 @@ export function recordRouteChange(
     recordVisit({
       url_path: to.fullPath,
       page_title: document.title,
-      referer: from?.fullPath || document.referrer,
+      referer: getSafeReferer(from?.fullPath),
       duration: 0
     });
 
