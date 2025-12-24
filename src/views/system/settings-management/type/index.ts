@@ -645,6 +645,7 @@ export interface AboutPageSettingsInfo {
   enableLikeTech?: boolean;
   enableMusic?: boolean;
   enableCustomCode?: boolean;
+  enableComment?: boolean;
 }
 
 export interface RecentCommentsSettingsInfo {

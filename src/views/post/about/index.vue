@@ -19,6 +19,7 @@ import GameCard from "./components/GameCard.vue";
 import ComicCard from "./components/ComicCard.vue";
 import LikeTechCard from "./components/LikeTechCard.vue";
 import MusicCard from "./components/MusicCard.vue";
+import PostComment from "@/views/post/components/PostComment/index.vue";
 
 defineOptions({
   name: "PostAbout"
@@ -47,7 +48,8 @@ const enableConfig = computed(() => {
     comic: config?.comic !== false,
     like_tech: config?.like_tech !== false,
     music: config?.music !== false,
-    custom_code: config?.custom_code !== false
+    custom_code: config?.custom_code !== false,
+    comment: config?.comment !== false
   };
 });
 
@@ -173,6 +175,13 @@ onMounted(async () => {
       class="custom-content-block"
       v-html="customCodeHtml"
     />
+
+    <!-- 评论板块 -->
+    <div v-if="enableConfig.comment" class="author-content">
+      <div class="author-content-item single comment-section">
+        <PostComment target-path="/about" />
+      </div>
+    </div>
   </div>
 
   <div v-else class="loading-container">
@@ -340,6 +349,14 @@ onMounted(async () => {
     .content {
       padding: 1em;
     }
+  }
+}
+
+.comment-section {
+  width: 100%;
+
+  :deep(#post-comment) {
+    margin-bottom: 0;
   }
 }
 

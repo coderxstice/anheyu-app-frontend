@@ -149,6 +149,17 @@
       />
       <div class="form-item-help">控制关于页面自定义内容块的显示。</div>
     </el-form-item>
+
+    <el-form-item label="评论板块">
+      <el-switch
+        v-model="formData.enableComment"
+        active-text="显示"
+        inactive-text="隐藏"
+      />
+      <div class="form-item-help">
+        控制关于页面评论板块的显示，显示在页面最下面。
+      </div>
+    </el-form-item>
   </div>
 
   <!-- 基本信息 -->

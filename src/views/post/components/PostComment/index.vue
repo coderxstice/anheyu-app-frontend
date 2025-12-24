@@ -408,6 +408,7 @@ defineExpose({
 #post-comment {
   margin-bottom: 3rem;
   border-radius: 8px;
+  scroll-margin-top: 100px; // 滚动偏移，避免被固定导航栏遮挡
 
   :deep(.comment--highlight) {
     border-radius: 8px;

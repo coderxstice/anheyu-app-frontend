@@ -244,6 +244,7 @@ const KeyAboutPageEnableLikeTech: SettingKey = "about.page.enable.like_tech";
 const KeyAboutPageEnableMusic: SettingKey = "about.page.enable.music";
 const KeyAboutPageEnableCustomCode: SettingKey =
   "about.page.enable.custom_code";
+const KeyAboutPageEnableComment: SettingKey = "about.page.enable.comment";
 
 const KeyMusicPlayerEnable: SettingKey = "music.player.enable";
 const KeyMusicPlayerPlaylistID: SettingKey = "music.player.playlist_id";
@@ -555,6 +556,7 @@ export const constant = {
   KeyAboutPageEnableLikeTech,
   KeyAboutPageEnableMusic,
   KeyAboutPageEnableCustomCode,
+  KeyAboutPageEnableComment,
 
   KeyMusicPlayerEnable,
   KeyMusicPlayerPlaylistID,

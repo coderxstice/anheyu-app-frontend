@@ -232,40 +232,66 @@
           />
         </div>
         <div class="bar-right">
-          <a
-            v-for="link in footerConfig.bar.linkList"
-            :key="link.text"
-            class="bar-link"
-            :href="link.link"
-            target="_blank"
-            rel="noopener"
-          >
-            {{ link.text }}
-          </a>
-          <a
+          <template v-for="link in footerConfig.bar.linkList" :key="link.text">
+            <router-link
+              v-if="isInternalLink(link.link)"
+              :to="link.link"
+              class="bar-link"
+            >
+              {{ link.text }}
+            </router-link>
+            <a
+              v-else
+              class="bar-link"
+              :href="link.link"
+              target="_blank"
+              rel="noopener"
+            >
+              {{ link.text }}
+            </a>
+          </template>
+          <el-tooltip
             v-if="icpNumber"
-            class="bar-link"
-            href="https://beian.miit.gov.cn/"
-            target="_blank"
-            rel="noopener"
+            content="前往工业和信息化部政务服务平台的备案信息查询页面"
+            placement="top"
+            :show-arrow="false"
+            :offset="8"
+            popper-class="custom-tooltip"
+            :transition-props="{ onEnter, onLeave }"
           >
-            {{ icpNumber }}
-          </a>
-          <a
+            <a
+              class="bar-link"
+              href="https://beian.miit.gov.cn/"
+              target="_blank"
+              rel="noopener"
+            >
+              {{ icpNumber }}
+            </a>
+          </el-tooltip>
+          <el-tooltip
             v-if="policeRecordNumber"
-            class="bar-link police-record-link"
-            href="http://www.beian.gov.cn/portal/registerSystemInfo"
-            target="_blank"
-            rel="noopener"
+            content="前往全国互联网安全管理服务平台的备案信息查询页面"
+            placement="top"
+            :show-arrow="false"
+            :offset="8"
+            popper-class="custom-tooltip"
+            :transition-props="{ onEnter, onLeave }"
           >
-            <img
-              v-if="policeRecordIcon"
-              :src="policeRecordIcon"
-              alt="公安备案"
-              class="police-record-icon"
-            />
-            {{ policeRecordNumber }}
-          </a>
+            <a
+              class="bar-link police-record-link"
+              href="http://www.beian.gov.cn/portal/registerSystemInfo"
+              target="_blank"
+              rel="noopener"
+            >
+              <img
+                v-if="policeRecordIcon"
+                :src="policeRecordIcon"
+                alt="公安备案"
+                class="police-record-icon"
+              />
+              {{ policeRecordNumber }}
+            </a>
+          </el-tooltip>
 
           <el-tooltip
             v-if="footerConfig.bar.cc && footerConfig.bar.cc.link"
@@ -312,6 +338,16 @@ const isImageUrl = (icon: string) => {
 // 判断是否为 Iconify 图标（包含 :）
 const isIconifyIcon = (icon: string) => {
   return icon && icon.includes(":");
+};
+
+// 判断是否为内部链接
+const isInternalLink = (link: string) => {
+  if (!link) return false;
+  return (
+    link.startsWith("/") ||
+    link.startsWith("#") ||
+    (!link.startsWith("http://") && !link.startsWith("https://"))
+  );
 };
 
 interface FriendLink {
@@ -677,13 +713,19 @@ a {
   color: var(--anzhiyu-main);
 }
 
-:deep(.bar-link) {
+:deep(.bar-link),
+.bar-link {
   margin-top: 8px;
   margin-bottom: 8px;
   font-size: 1rem;
   font-weight: 700;
   color: var(--anzhiyu-fontcolor);
   white-space: nowrap;
+  text-decoration: none;
+
+  &:hover {
+    color: var(--anzhiyu-main);
+  }
 }
 
 .cc-link {

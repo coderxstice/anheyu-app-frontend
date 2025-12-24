@@ -258,4 +258,5 @@ export interface BackendAboutPageConfig {
   enable_like_tech?: boolean;
   enable_music?: boolean;
   enable_custom_code?: boolean;
+  enable_comment?: boolean;
 }
