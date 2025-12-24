@@ -1068,6 +1068,37 @@ const frontDeskDescriptors: SettingDescriptor[] = [
     defaultValue: "",
     type: "string"
   },
+  // --- Uptime Kuma 状态监控配置 ---
+  {
+    frontendPath: "frontDesk.home.footerUptimeKumaEnable",
+    backendKey: constant.KeyFooterUptimeKumaEnable,
+    defaultValue: false,
+    type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.home.footerUptimeKumaApiURL",
+    backendKey: constant.KeyFooterUptimeKumaApiURL,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.home.footerUptimeKumaSlug",
+    backendKey: constant.KeyFooterUptimeKumaSlug,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.home.footerUptimeKumaPageURL",
+    backendKey: constant.KeyFooterUptimeKumaPageURL,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.home.footerUptimeKumaButtonText",
+    backendKey: constant.KeyFooterUptimeKumaButtonText,
+    defaultValue: "查看我的项目状态",
+    type: "string"
+  },
   {
     frontendPath: "frontDesk.home.navTravel",
     backendKey: constant.KeyHeaderNavTravel,

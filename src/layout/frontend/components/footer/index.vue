@@ -274,6 +274,23 @@
               </a>
             </el-tooltip>
           </div>
+
+          <!-- Uptime Kuma 状态显示 -->
+          <div v-if="uptimeKumaConfig?.enable" class="uptime-status-wrapper">
+            <a
+              v-if="uptimeKumaConfig.page_url"
+              class="uptime-status-link"
+              :href="uptimeKumaConfig.page_url"
+              target="_blank"
+              rel="noopener"
+            >
+              {{ uptimeKumaConfig.button_text || "查看我的项目状态" }}
+            </a>
+            <span class="uptime-status-indicator" :class="uptimeStatusClass">
+              <span class="status-dot" />
+              <span class="status-text">{{ uptimeStatusText }}</span>
+            </span>
+          </div>
         </div>
         <div class="bar-right">
           <template v-for="link in footerConfig.bar.linkList" :key="link.text">
@@ -508,6 +525,96 @@ const calculateRuntime = () => {
   }
 };
 
+// --- Uptime Kuma 状态监控 ---
+const uptimeKumaConfig = computed(() => {
+  const config = siteConfig.value?.footer?.uptime_kuma;
+  if (!config) return null;
+  return {
+    enable: config.enable === true || config.enable === "true",
+    api_url: config.api_url || "",
+    slug: config.slug || "",
+    page_url: config.page_url || "",
+    button_text: config.button_text || "查看我的项目状态"
+  };
+});
+
+// 状态：loading | ok | partial | error
+const uptimeStatus = ref<"loading" | "ok" | "partial" | "error">("loading");
+let uptimeKumaInterval: number | null = null;
+
+const uptimeStatusClass = computed(() => {
+  return {
+    "status-loading": uptimeStatus.value === "loading",
+    "status-ok": uptimeStatus.value === "ok",
+    "status-partial": uptimeStatus.value === "partial",
+    "status-error": uptimeStatus.value === "error"
+  };
+});
+
+const uptimeStatusText = computed(() => {
+  switch (uptimeStatus.value) {
+    case "loading":
+      return "状态获取中...";
+    case "ok":
+      return "所有业务正常";
+    case "partial":
+      return "部分服务异常";
+    case "error":
+      return "状态获取失败";
+    default:
+      return "";
+  }
+});
+
+// 获取 Uptime Kuma 状态
+const fetchUptimeKumaStatus = async () => {
+  const config = uptimeKumaConfig.value;
+  if (!config?.enable || !config.api_url || !config.slug) {
+    return;
+  }
+
+  try {
+    const apiUrl = config.api_url.replace(/\/$/, "");
+    const response = await fetch(
+      `${apiUrl}/api/status-page/heartbeat/${config.slug}`
+    );
+
+    if (!response.ok) {
+      uptimeStatus.value = "error";
+      return;
+    }
+
+    const data = await response.json();
+
+    // 检查所有监控项的状态
+    // Uptime Kuma 返回格式: { heartbeatList: { [monitorId]: [heartbeats] }, uptimeList: { ... } }
+    if (data.heartbeatList) {
+      const monitors = Object.values(data.heartbeatList) as Array<
+        Array<{ status: number }>
+      >;
+      let hasDown = false;
+
+      for (const heartbeats of monitors) {
+        if (heartbeats.length > 0) {
+          // 获取最新的心跳状态，status: 1 = up, 0 = down
+          const latestStatus = heartbeats[heartbeats.length - 1]?.status;
+          if (latestStatus !== 1) {
+            hasDown = true;
+            break;
+          }
+        }
+      }
+
+      uptimeStatus.value = hasDown ? "partial" : "ok";
+    } else {
+      uptimeStatus.value = "ok";
+    }
+  } catch (error) {
+    console.error("Failed to fetch Uptime Kuma status:", error);
+    uptimeStatus.value = "error";
+  }
+};
+
 onMounted(() => {
   if (footerConfig.value) refreshFriendLinks();
   // 初始化footer区域的懒加载
@@ -521,12 +628,25 @@ onMounted(() => {
     // 每秒更新一次运行时间
     runtimeInterval = window.setInterval(calculateRuntime, 1000);
   }
+
+  // 初始化 Uptime Kuma 状态
+  if (uptimeKumaConfig.value?.enable) {
+    fetchUptimeKumaStatus();
+    // 每5分钟更新一次状态
+    uptimeKumaInterval = window.setInterval(
+      fetchUptimeKumaStatus,
+      5 * 60 * 1000
+    );
+  }
 });
 
 onUnmounted(() => {
   // 清除定时器
   if (runtimeInterval) {
     clearInterval(runtimeInterval);
+  }
+  if (uptimeKumaInterval) {
+    clearInterval(uptimeKumaInterval);
   }
 });
 </script>
@@ -777,6 +897,100 @@ a {
     width: 14px;
     height: 14px;
     object-fit: contain;
+  }
+}
+
+// Uptime Kuma 状态样式
+.uptime-status-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.uptime-status-link {
+  padding: 0.35rem 0.75rem;
+  font-weight: 500;
+  color: var(--anzhiyu-fontcolor);
+  text-decoration: none;
+  background: var(--anzhiyu-card-bg);
+  border: 1px solid var(--anzhiyu-card-border);
+  border-radius: 0.5rem;
+  transition: all 0.3s;
+
+  &:hover {
+    color: var(--anzhiyu-main);
+    background: var(--anzhiyu-main-op);
+    border-color: var(--anzhiyu-main);
+  }
+}
+
+.uptime-status-indicator {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+  }
+
+  .status-text {
+    color: var(--anzhiyu-secondtext);
+  }
+
+  &.status-loading {
+    .status-dot {
+      background-color: #9ca3af;
+      animation: pulse 1.5s infinite;
+    }
+  }
+
+  &.status-ok {
+    .status-dot {
+      background-color: #10b981;
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+    }
+
+    .status-text {
+      color: #10b981;
+    }
+  }
+
+  &.status-partial {
+    .status-dot {
+      background-color: #f59e0b;
+      box-shadow: 0 0 6px rgba(245, 158, 11, 0.5);
+    }
+
+    .status-text {
+      color: #f59e0b;
+    }
+  }
+
+  &.status-error {
+    .status-dot {
+      background-color: #ef4444;
+      box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+    }
+
+    .status-text {
+      color: #ef4444;
+    }
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
   }
 }
 
