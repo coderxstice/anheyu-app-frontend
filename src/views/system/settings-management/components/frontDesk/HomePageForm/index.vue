@@ -616,6 +616,61 @@
     <div class="form-item-help">下班时间显示的状态描述文字</div>
   </el-form-item>
 
+  <el-divider content-position="left">Uptime Kuma 状态监控</el-divider>
+  <el-form-item label="启用状态显示">
+    <el-switch
+      :model-value="model.footerUptimeKumaEnable"
+      @update:model-value="updateFooterUptimeKumaEnable"
+    />
+    <div class="form-item-help">
+      在页脚显示 Uptime Kuma 业务状态，需要配置 Uptime Kuma 状态页
+    </div>
+  </el-form-item>
+
+  <el-form-item label="API 地址">
+    <el-input
+      :model-value="model.footerUptimeKumaApiURL"
+      placeholder="例如：https://status.example.com"
+      clearable
+      @update:model-value="updateFooterUptimeKumaApiURL"
+    />
+    <div class="form-item-help">
+      Uptime Kuma 实例的访问地址（不带末尾斜杠）
+    </div>
+  </el-form-item>
+
+  <el-form-item label="状态页 Slug">
+    <el-input
+      :model-value="model.footerUptimeKumaSlug"
+      placeholder="例如：main"
+      clearable
+      @update:model-value="updateFooterUptimeKumaSlug"
+    />
+    <div class="form-item-help">
+      Uptime Kuma 状态页的 slug，用于调用 /api/status-page/heartbeat/{slug}
+    </div>
+  </el-form-item>
+
+  <el-form-item label="状态页链接">
+    <el-input
+      :model-value="model.footerUptimeKumaPageURL"
+      placeholder="例如：https://status.example.com/status/main"
+      clearable
+      @update:model-value="updateFooterUptimeKumaPageURL"
+    />
+    <div class="form-item-help">点击按钮时跳转到的状态页面地址</div>
+  </el-form-item>
+
+  <el-form-item label="按钮文字">
+    <el-input
+      :model-value="model.footerUptimeKumaButtonText"
+      placeholder="例如：查看我的项目状态"
+      clearable
+      @update:model-value="updateFooterUptimeKumaButtonText"
+    />
+    <div class="form-item-help">页脚状态按钮显示的文字</div>
+  </el-form-item>
+
   <el-divider content-position="left">链接配置</el-divider>
   <el-form-item label="页脚列表随机友链数量">
     <el-input
@@ -1546,6 +1601,42 @@ const updateFooterRuntimeOffDutyDesc = (newValue: string) => {
   model.value = {
     ...model.value,
     footerRuntimeOffDutyDesc: newValue
+  };
+};
+
+// --- Uptime Kuma 状态监控更新函数 ---
+const updateFooterUptimeKumaEnable = (newValue: boolean) => {
+  model.value = {
+    ...model.value,
+    footerUptimeKumaEnable: !!newValue
+  };
+};
+
+const updateFooterUptimeKumaApiURL = (newValue: string) => {
+  model.value = {
+    ...model.value,
+    footerUptimeKumaApiURL: newValue
+  };
+};
+
+const updateFooterUptimeKumaSlug = (newValue: string) => {
+  model.value = {
+    ...model.value,
+    footerUptimeKumaSlug: newValue
+  };
+};
+
+const updateFooterUptimeKumaPageURL = (newValue: string) => {
+  model.value = {
+    ...model.value,
+    footerUptimeKumaPageURL: newValue
+  };
+};
+
+const updateFooterUptimeKumaButtonText = (newValue: string) => {
+  model.value = {
+    ...model.value,
+    footerUptimeKumaButtonText: newValue
   };
 };
 
