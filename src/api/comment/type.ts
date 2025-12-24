@@ -105,3 +105,32 @@ export interface SuccessResponseUploadImage {
   message: string;
   data: UploadImageResponseData;
 }
+
+// --- 导入导出相关类型 ---
+
+/**
+ * @description 导出评论的请求参数
+ */
+export interface ExportCommentRequest {
+  ids: string[]; // 要导出的评论ID列表，为空则导出所有
+}
+
+/**
+ * @description 导入评论的选项
+ */
+export interface ImportCommentOptions {
+  skip_existing: boolean; // 是否跳过已存在的评论
+  default_status: number; // 默认状态 (1: 已发布, 2: 待审核)
+  keep_create_time: boolean; // 是否保留原创建时间
+}
+
+/**
+ * @description 导入评论的结果
+ */
+export interface ImportCommentResult {
+  total_count: number; // 总数
+  success_count: number; // 成功数
+  skipped_count: number; // 跳过数
+  failed_count: number; // 失败数
+  error_messages: string[]; // 错误信息列表
+}
