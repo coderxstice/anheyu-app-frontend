@@ -230,42 +230,71 @@
             class="copyright-info"
             v-html="copyrightText"
           />
+          <div v-if="policeRecordNumber || icpNumber" class="record-info">
+            <el-tooltip
+              v-if="policeRecordNumber"
+              content="前往全国互联网安全管理服务平台的备案信息查询页面"
+              placement="top"
+              :show-arrow="false"
+              :offset="8"
+              popper-class="custom-tooltip"
+              :transition-props="{ onEnter, onLeave }"
+            >
+              <a
+                class="record-link police-record-link"
+                href="http://www.beian.gov.cn/portal/registerSystemInfo"
+                target="_blank"
+                rel="noopener"
+              >
+                <img
+                  v-if="policeRecordIcon"
+                  :src="policeRecordIcon"
+                  alt="公安备案"
+                  class="police-record-icon"
+                />
+                {{ policeRecordNumber }}
+              </a>
+            </el-tooltip>
+            <el-tooltip
+              v-if="icpNumber"
+              content="前往工业和信息化部政务服务平台的备案信息查询页面"
+              placement="top"
+              :show-arrow="false"
+              :offset="8"
+              popper-class="custom-tooltip"
+              :transition-props="{ onEnter, onLeave }"
+            >
+              <a
+                class="record-link"
+                href="https://beian.miit.gov.cn/"
+                target="_blank"
+                rel="noopener"
+              >
+                {{ icpNumber }}
+              </a>
+            </el-tooltip>
+          </div>
         </div>
         <div class="bar-right">
-          <a
-            v-for="link in footerConfig.bar.linkList"
-            :key="link.text"
-            class="bar-link"
-            :href="link.link"
-            target="_blank"
-            rel="noopener"
-          >
-            {{ link.text }}
-          </a>
-          <a
-            v-if="icpNumber"
-            class="bar-link"
-            href="https://beian.miit.gov.cn/"
-            target="_blank"
-            rel="noopener"
-          >
-            {{ icpNumber }}
-          </a>
-          <a
-            v-if="policeRecordNumber"
-            class="bar-link police-record-link"
-            href="http://www.beian.gov.cn/portal/registerSystemInfo"
-            target="_blank"
-            rel="noopener"
-          >
-            <img
-              v-if="policeRecordIcon"
-              :src="policeRecordIcon"
-              alt="公安备案"
-              class="police-record-icon"
-            />
-            {{ policeRecordNumber }}
-          </a>
+          <template v-for="link in footerConfig.bar.linkList" :key="link.text">
+            <a
+              v-if="isInternalLink(link.link)"
+              class="bar-link"
+              :href="link.link"
+              @click="handleInternalLinkClick($event, link.link)"
+            >
+              {{ link.text }}
+            </a>
+            <a
+              v-else
+              class="bar-link"
+              :href="link.link"
+              target="_blank"
+              rel="noopener"
+            >
+              {{ link.text }}
+            </a>
+          </template>
 
           <el-tooltip
             v-if="footerConfig.bar.cc && footerConfig.bar.cc.link"
@@ -296,6 +325,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { onEnter, onLeave } from "@/utils/transitions";
 import { getIconClass } from "@/utils/icon";
@@ -303,6 +333,9 @@ import { getRandomLinks } from "@/api/postLink";
 import { useLazyLoading } from "@/composables/useLazyLoading";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { IconifyIconOnline } from "@/components/ReIcon";
+
+const route = useRoute();
+const router = useRouter();
 
 // 判断是否为图片 URL
 const isImageUrl = (icon: string) => {
@@ -312,6 +345,42 @@ const isImageUrl = (icon: string) => {
 // 判断是否为 Iconify 图标（包含 :）
 const isIconifyIcon = (icon: string) => {
   return icon && icon.includes(":");
+};
+
+// 判断是否为内部链接
+const isInternalLink = (link: string) => {
+  if (!link) return false;
+  return (
+    link.startsWith("/") ||
+    link.startsWith("#") ||
+    (!link.startsWith("http://") && !link.startsWith("https://"))
+  );
+};
+
+// 处理内部链接点击（支持同页面锚点跳转）
+const handleInternalLinkClick = (event: MouseEvent, link: string) => {
+  event.preventDefault();
+
+  // 解析链接中的路径和哈希
+  const [path, hash] = link.split("#");
+  const currentPath = route.path;
+
+  // 如果是同一页面的锚点链接
+  if (hash && (path === currentPath || path === "")) {
+    const targetElement = document.getElementById(hash);
+    if (targetElement) {
+      // 使用 scrollIntoView，配合 CSS scroll-margin-top 属性
+      targetElement.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+      // 更新 URL 哈希
+      window.history.pushState(null, "", link);
+    }
+  } else {
+    // 不同页面，使用 router 导航
+    router.push(link);
+  }
 };
 
 interface FriendLink {
@@ -645,7 +714,7 @@ a {
 
 .footer-bottom-bar {
   display: flex;
-  padding: 1rem;
+  padding: 1.5rem 1rem;
   margin-top: 1rem;
   overflow: hidden;
   color: var(--anzhiyu-fontcolor);
@@ -664,7 +733,14 @@ a {
   line-height: 1;
 }
 
-.bar-left,
+.bar-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+  min-height: 32px;
+}
+
 .bar-right {
   display: flex;
   flex-wrap: wrap;
@@ -677,13 +753,46 @@ a {
   color: var(--anzhiyu-main);
 }
 
-:deep(.bar-link) {
+.record-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  font-size: 0.8rem;
+
+  .record-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--anzhiyu-secondtext);
+    text-decoration: none;
+    transition: color 0.3s;
+
+    &:hover {
+      color: var(--anzhiyu-main);
+    }
+  }
+
+  .police-record-icon {
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
+  }
+}
+
+:deep(.bar-link),
+.bar-link {
   margin-top: 8px;
   margin-bottom: 8px;
   font-size: 1rem;
   font-weight: 700;
   color: var(--anzhiyu-fontcolor);
   white-space: nowrap;
+  text-decoration: none;
+
+  &:hover {
+    color: var(--anzhiyu-main);
+  }
 }
 
 .cc-link {

@@ -74,23 +74,55 @@ const fancyboxOptions = {
 };
 
 /**
- * @description 处理URL哈希值变化，滚动到对应评论
- * @param hash - URL中的hash值 (例如 #comment-123)
+ * @description 处理URL哈希值变化，滚动到对应评论或评论区
+ * @param hash - URL中的hash值 (例如 #comment-123 或 #post-comment)
  */
 const handleHashChange = (hash: string) => {
   if (!hash) return;
 
-  setTimeout(() => {
-    try {
-      const id = decodeURIComponent(hash.slice(1));
+  try {
+    const id = decodeURIComponent(hash.slice(1));
 
-      if (id.startsWith("comment-")) {
-        scrollToComment(id);
+    // 处理 #post-comment 锚点 - 滚动到评论区
+    if (id === "post-comment") {
+      // 如果是直接访问评论区，需要立即显示评论列表（跳过懒加载）
+      isCommentListVisible.value = true;
+      // 断开 Intersection Observer，因为不需要再监听了
+      if (intersectionObserver) {
+        intersectionObserver.disconnect();
       }
-    } catch (e) {
-      console.error("处理URL哈希值失败:", e);
+      // 等待 DOM 渲染后滚动
+      nextTick(() => {
+        setTimeout(() => {
+          const postCommentElement = document.getElementById("post-comment");
+          if (postCommentElement) {
+            const rect = postCommentElement.getBoundingClientRect();
+            const absoluteTop = rect.top + window.scrollY;
+            const top = absoluteTop - 120; // 考虑固定导航栏的高度
+            window.scrollTo({
+              top: top,
+              behavior: "smooth"
+            });
+          }
+        }, 100);
+      });
+      return;
     }
-  }, 800);
+
+    // 处理 #comment-xxx 锚点 - 滚动到具体评论
+    if (id.startsWith("comment-")) {
+      // 如果是跳转到具体评论，也需要先显示评论列表
+      isCommentListVisible.value = true;
+      if (intersectionObserver) {
+        intersectionObserver.disconnect();
+      }
+      setTimeout(() => {
+        scrollToComment(id);
+      }, 800);
+    }
+  } catch (e) {
+    console.error("处理URL哈希值失败:", e);
+  }
 };
 
 // 设置 Intersection Observer 监听评论区可见性
@@ -408,6 +440,7 @@ defineExpose({
 #post-comment {
   margin-bottom: 3rem;
   border-radius: 8px;
+  scroll-margin-top: 100px; // 滚动偏移，避免被固定导航栏遮挡
 
   :deep(.comment--highlight) {
     border-radius: 8px;

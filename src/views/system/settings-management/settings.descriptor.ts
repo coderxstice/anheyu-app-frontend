@@ -974,6 +974,12 @@ const aboutPageDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyAboutPageEnableCustomCode,
     defaultValue: true,
     type: "boolean"
+  },
+  {
+    frontendPath: "frontDesk.about.enableComment",
+    backendKey: constant.KeyAboutPageEnableComment,
+    defaultValue: true,
+    type: "boolean"
   }
 ];
 
