@@ -154,11 +154,7 @@ const KeyFooterBarLinkList: SettingKey = "footer.bar.linkList";
 
 // --- Uptime Kuma 状态监控配置 ---
 const KeyFooterUptimeKumaEnable: SettingKey = "footer.uptime_kuma.enable";
-const KeyFooterUptimeKumaApiURL: SettingKey = "footer.uptime_kuma.api_url";
-const KeyFooterUptimeKumaSlug: SettingKey = "footer.uptime_kuma.slug";
 const KeyFooterUptimeKumaPageURL: SettingKey = "footer.uptime_kuma.page_url";
-const KeyFooterUptimeKumaButtonText: SettingKey =
-  "footer.uptime_kuma.button_text";
 
 // --- 文章配置 ---
 const KeyDefaultCover: SettingKey = "post.default.cover";
@@ -462,10 +458,7 @@ export const constant = {
 
   // --- Uptime Kuma 状态监控配置 ---
   KeyFooterUptimeKumaEnable,
-  KeyFooterUptimeKumaApiURL,
-  KeyFooterUptimeKumaSlug,
   KeyFooterUptimeKumaPageURL,
-  KeyFooterUptimeKumaButtonText,
 
   // 友链配置
   KeyFriendLinkDefaultCategory,

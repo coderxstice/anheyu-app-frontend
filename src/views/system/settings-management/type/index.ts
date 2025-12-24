@@ -365,10 +365,7 @@ export interface HomePageSettingsInfo {
 
   // Uptime Kuma 状态监控配置
   footerUptimeKumaEnable: boolean;
-  footerUptimeKumaApiURL: string;
-  footerUptimeKumaSlug: string;
   footerUptimeKumaPageURL: string;
-  footerUptimeKumaButtonText: string;
 
   navTravel: boolean;
   navClock: boolean;

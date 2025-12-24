@@ -273,23 +273,28 @@
                 {{ icpNumber }}
               </a>
             </el-tooltip>
-          </div>
 
-          <!-- Uptime Kuma 状态显示 -->
-          <div v-if="uptimeKumaConfig?.enable" class="uptime-status-wrapper">
-            <a
-              v-if="uptimeKumaConfig.page_url"
-              class="uptime-status-link"
-              :href="uptimeKumaConfig.page_url"
-              target="_blank"
-              rel="noopener"
+            <!-- Uptime Kuma 状态显示 -->
+            <el-tooltip
+              v-if="uptimeKumaConfig?.enable"
+              content="查看我的项目状态"
+              placement="top"
+              :show-arrow="false"
+              :offset="8"
+              popper-class="custom-tooltip"
+              :transition-props="{ onEnter, onLeave }"
             >
-              {{ uptimeKumaConfig.button_text || "查看我的项目状态" }}
-            </a>
-            <span class="uptime-status-indicator" :class="uptimeStatusClass">
-              <span class="status-dot" />
-              <span class="status-text">{{ uptimeStatusText }}</span>
-            </span>
+              <a
+                class="uptime-status-indicator"
+                :class="uptimeStatusClass"
+                :href="uptimeKumaConfig.page_url || 'javascript:void(0)'"
+                :target="uptimeKumaConfig.page_url ? '_blank' : undefined"
+                rel="noopener"
+              >
+                <span class="status-dot" />
+                <span class="status-text">{{ uptimeStatusText }}</span>
+              </a>
+            </el-tooltip>
           </div>
         </div>
         <div class="bar-right">
@@ -526,15 +531,27 @@ const calculateRuntime = () => {
 };
 
 // --- Uptime Kuma 状态监控 ---
+// 从状态页 URL 解析 API 地址和 slug
+// 例如：https://status.example.com/status/main -> api_url: https://status.example.com, slug: main
+const parseUptimeKumaUrl = (pageUrl: string) => {
+  if (!pageUrl) return { api_url: "", slug: "" };
+  const match = pageUrl.match(/^(https?:\/\/[^/]+)\/status\/(.+)$/);
+  if (match) {
+    return { api_url: match[1], slug: match[2] };
+  }
+  return { api_url: "", slug: "" };
+};
+
 const uptimeKumaConfig = computed(() => {
   const config = siteConfig.value?.footer?.uptime_kuma;
   if (!config) return null;
+  const pageUrl = (config.page_url || "").replace(/\/$/, "");
+  const { api_url, slug } = parseUptimeKumaUrl(pageUrl);
   return {
     enable: config.enable === true || config.enable === "true",
-    api_url: config.api_url || "",
-    slug: config.slug || "",
-    page_url: config.page_url || "",
-    button_text: config.button_text || "查看我的项目状态"
+    api_url,
+    slug,
+    page_url: pageUrl
   };
 });
 
@@ -570,16 +587,21 @@ const uptimeStatusText = computed(() => {
 const fetchUptimeKumaStatus = async () => {
   const config = uptimeKumaConfig.value;
   if (!config?.enable || !config.api_url || !config.slug) {
+    console.warn("[Uptime Kuma] 配置不完整:", {
+      enable: config?.enable,
+      api_url: config?.api_url,
+      slug: config?.slug
+    });
     return;
   }
 
+  const apiUrl = `${config.api_url}/api/status-page/heartbeat/${config.slug}`;
+
   try {
-    const apiUrl = config.api_url.replace(/\/$/, "");
-    const response = await fetch(
-      `${apiUrl}/api/status-page/heartbeat/${config.slug}`
-    );
+    const response = await fetch(apiUrl);
 
     if (!response.ok) {
+      console.error(`[Uptime Kuma] API 返回错误: ${response.status}`, apiUrl);
       uptimeStatus.value = "error";
       return;
     }
@@ -610,7 +632,12 @@ const fetchUptimeKumaStatus = async () => {
       uptimeStatus.value = "ok";
     }
   } catch (error) {
-    console.error("Failed to fetch Uptime Kuma status:", error);
+    // CORS 跨域问题会导致 TypeError: Failed to fetch
+    console.error(
+      `[Uptime Kuma] 获取状态失败 (可能是 CORS 跨域问题):`,
+      error,
+      `\n请确保 Uptime Kuma 实例允许跨域访问，或配置反向代理。\nAPI 地址: ${apiUrl}`
+    );
     uptimeStatus.value = "error";
   }
 };
@@ -901,96 +928,132 @@ a {
 }
 
 // Uptime Kuma 状态样式
-.uptime-status-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: center;
-  font-size: 0.8rem;
-}
-
-.uptime-status-link {
-  padding: 0.35rem 0.75rem;
-  font-weight: 500;
-  color: var(--anzhiyu-fontcolor);
-  text-decoration: none;
-  background: var(--anzhiyu-card-bg);
-  border: 1px solid var(--anzhiyu-card-border);
-  border-radius: 0.5rem;
-  transition: all 0.3s;
-
-  &:hover {
-    color: var(--anzhiyu-main);
-    background: var(--anzhiyu-main-op);
-    border-color: var(--anzhiyu-main);
-  }
-}
-
 .uptime-status-indicator {
   display: inline-flex;
   gap: 0.35rem;
   align-items: center;
+  font-size: 0.8rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+
+    .status-dot {
+      transform: scale(1.2);
+    }
+  }
 
   .status-dot {
+    position: relative;
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    transition: background-color 0.3s;
+    transition:
+      background-color 0.3s,
+      transform 0.2s ease,
+      box-shadow 0.3s;
   }
 
   .status-text {
     color: var(--anzhiyu-secondtext);
+    transition: color 0.3s;
   }
 
   &.status-loading {
     .status-dot {
       background-color: #9ca3af;
-      animation: pulse 1.5s infinite;
+      animation: statusPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
   }
 
   &.status-ok {
     .status-dot {
       background-color: #10b981;
-      box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+      animation: statusGlow 2s ease-in-out infinite;
     }
 
     .status-text {
       color: #10b981;
+    }
+
+    &:hover .status-dot {
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.8);
     }
   }
 
   &.status-partial {
     .status-dot {
       background-color: #f59e0b;
-      box-shadow: 0 0 6px rgba(245, 158, 11, 0.5);
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+      animation: statusBlink 1.5s ease-in-out infinite;
     }
 
     .status-text {
       color: #f59e0b;
+    }
+
+    &:hover .status-dot {
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.8);
     }
   }
 
   &.status-error {
     .status-dot {
       background-color: #ef4444;
-      box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+      animation: statusBlink 1s ease-in-out infinite;
     }
 
     .status-text {
       color: #ef4444;
     }
+
+    &:hover .status-dot {
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.8);
+    }
   }
 }
 
-@keyframes pulse {
+// 状态正常时的柔和呼吸动画
+@keyframes statusGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+    opacity: 1;
+  }
+
+  50% {
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+    opacity: 0.9;
+  }
+}
+
+// 加载中的脉冲动画
+@keyframes statusPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
+}
+
+// 异常/错误时的闪烁动画
+@keyframes statusBlink {
   0%,
   100% {
     opacity: 1;
   }
 
   50% {
-    opacity: 0.5;
+    opacity: 0.4;
   }
 }
 
