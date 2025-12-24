@@ -618,57 +618,25 @@
 
   <el-divider content-position="left">Uptime Kuma 状态监控</el-divider>
   <el-form-item label="启用状态显示">
-    <el-switch
-      :model-value="model.footerUptimeKumaEnable"
-      @update:model-value="updateFooterUptimeKumaEnable"
-    />
-    <div class="form-item-help">
-      在页脚显示 Uptime Kuma 业务状态，需要配置 Uptime Kuma 状态页
+    <div>
+      <el-switch
+        :model-value="model.footerUptimeKumaEnable"
+        @update:model-value="updateFooterUptimeKumaEnable"
+      />
+      <div class="form-item-help">在页脚显示 Uptime Kuma 业务状态</div>
     </div>
   </el-form-item>
 
-  <el-form-item label="API 地址">
-    <el-input
-      :model-value="model.footerUptimeKumaApiURL"
-      placeholder="例如：https://status.example.com"
-      clearable
-      @update:model-value="updateFooterUptimeKumaApiURL"
-    />
-    <div class="form-item-help">
-      Uptime Kuma 实例的访问地址（不带末尾斜杠）
-    </div>
-  </el-form-item>
-
-  <el-form-item label="状态页 Slug">
-    <el-input
-      :model-value="model.footerUptimeKumaSlug"
-      placeholder="例如：main"
-      clearable
-      @update:model-value="updateFooterUptimeKumaSlug"
-    />
-    <div class="form-item-help">
-      Uptime Kuma 状态页的 slug，用于调用 /api/status-page/heartbeat/{slug}
-    </div>
-  </el-form-item>
-
-  <el-form-item label="状态页链接">
+  <el-form-item label="状态页地址">
     <el-input
       :model-value="model.footerUptimeKumaPageURL"
       placeholder="例如：https://status.example.com/status/main"
       clearable
       @update:model-value="updateFooterUptimeKumaPageURL"
     />
-    <div class="form-item-help">点击按钮时跳转到的状态页面地址</div>
-  </el-form-item>
-
-  <el-form-item label="按钮文字">
-    <el-input
-      :model-value="model.footerUptimeKumaButtonText"
-      placeholder="例如：查看我的项目状态"
-      clearable
-      @update:model-value="updateFooterUptimeKumaButtonText"
-    />
-    <div class="form-item-help">页脚状态按钮显示的文字</div>
+    <div class="form-item-help">
+      Uptime Kuma 状态页完整地址，点击状态指示器将跳转到此页面
+    </div>
   </el-form-item>
 
   <el-divider content-position="left">链接配置</el-divider>
@@ -683,18 +651,12 @@
 
   <el-divider content-position="left">音乐播放器配置</el-divider>
   <el-form-item label="启用音乐播放器">
-    <el-switch
-      :model-value="model.music?.player?.enable"
-      @update:model-value="updateMusicPlayerEnable"
-    />
-    <div
-      style="
-        font-size: 12px;
-        color: var(--anzhiyu-secondtext);
-        margin-left: 8px;
-      "
-    >
-      是否在前端页面显示音乐播放器组件
+    <div>
+      <el-switch
+        :model-value="model.music?.player?.enable"
+        @update:model-value="updateMusicPlayerEnable"
+      />
+      <div class="form-item-help">是否在前端页面显示音乐播放器组件</div>
     </div>
   </el-form-item>
   <el-form-item label="播放列表ID">
@@ -1612,31 +1574,10 @@ const updateFooterUptimeKumaEnable = (newValue: boolean) => {
   };
 };
 
-const updateFooterUptimeKumaApiURL = (newValue: string) => {
-  model.value = {
-    ...model.value,
-    footerUptimeKumaApiURL: newValue
-  };
-};
-
-const updateFooterUptimeKumaSlug = (newValue: string) => {
-  model.value = {
-    ...model.value,
-    footerUptimeKumaSlug: newValue
-  };
-};
-
 const updateFooterUptimeKumaPageURL = (newValue: string) => {
   model.value = {
     ...model.value,
     footerUptimeKumaPageURL: newValue
-  };
-};
-
-const updateFooterUptimeKumaButtonText = (newValue: string) => {
-  model.value = {
-    ...model.value,
-    footerUptimeKumaButtonText: newValue
   };
 };
 

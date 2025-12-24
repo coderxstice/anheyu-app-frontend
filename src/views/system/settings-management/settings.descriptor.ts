@@ -1076,27 +1076,9 @@ const frontDeskDescriptors: SettingDescriptor[] = [
     type: "boolean"
   },
   {
-    frontendPath: "frontDesk.home.footerUptimeKumaApiURL",
-    backendKey: constant.KeyFooterUptimeKumaApiURL,
-    defaultValue: "",
-    type: "string"
-  },
-  {
-    frontendPath: "frontDesk.home.footerUptimeKumaSlug",
-    backendKey: constant.KeyFooterUptimeKumaSlug,
-    defaultValue: "",
-    type: "string"
-  },
-  {
     frontendPath: "frontDesk.home.footerUptimeKumaPageURL",
     backendKey: constant.KeyFooterUptimeKumaPageURL,
     defaultValue: "",
-    type: "string"
-  },
-  {
-    frontendPath: "frontDesk.home.footerUptimeKumaButtonText",
-    backendKey: constant.KeyFooterUptimeKumaButtonText,
-    defaultValue: "查看我的项目状态",
     type: "string"
   },
   {
