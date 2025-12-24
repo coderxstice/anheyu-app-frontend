@@ -118,9 +118,17 @@ export function useCopyProtection() {
   };
 
   /**
-   * 检查目标元素是否在文章内容区域
+   * 检查目标元素是否在文章内容区域（排除评论区）
    */
   const isInArticleContent = (target: HTMLElement): boolean => {
+    // 如果目标元素在评论区内，不算作文章内容区域
+    if (
+      target.closest("#post-comment") ||
+      target.closest(".comment-form") ||
+      target.closest(".comment-reply-form")
+    ) {
+      return false;
+    }
     return !!(
       target.closest(".post-content") || target.closest(".post-detail-content")
     );
@@ -269,6 +277,21 @@ export function useCopyProtection() {
           user-select: none !important;
           -webkit-touch-callout: none !important;
           -webkit-tap-highlight-color: transparent !important;
+        }
+        /* 排除评论区的输入框，允许正常输入 */
+        #post-comment input,
+        #post-comment textarea,
+        #post-comment .el-input__inner,
+        #post-comment .el-textarea__inner,
+        .comment-form input,
+        .comment-form textarea,
+        .comment-form .el-input__inner,
+        .comment-form .el-textarea__inner {
+          -webkit-user-select: text !important;
+          -moz-user-select: text !important;
+          -ms-user-select: text !important;
+          user-select: text !important;
+          -webkit-touch-callout: default !important;
         }
       `;
     } else {
