@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { useCommentManagement } from "./utils/hook";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
+import ImportExportDialog from "./components/ImportExportDialog.vue";
 
 import Delete from "@iconify-icons/ep/delete";
 import EditPen from "@iconify-icons/ep/edit-pen";
@@ -11,6 +12,7 @@ import Search from "@iconify-icons/ri/search-line";
 import StarFill from "@iconify-icons/ri/star-fill";
 import Star from "@iconify-icons/ri/star-line";
 import ChatLine from "@iconify-icons/ri/chat-1-line";
+import Upload from "@iconify-icons/ep/upload";
 
 defineOptions({
   name: "CommentManagement"
@@ -18,6 +20,7 @@ defineOptions({
 
 const formRef = ref();
 const tableRef = ref();
+const importExportDialogVisible = ref(false);
 
 const {
   form,
@@ -42,6 +45,16 @@ const {
 
 function onFullscreen() {
   tableRef.value?.setAdaptive();
+}
+
+// 打开导入导出对话框
+function openImportExportDialog() {
+  importExportDialogVisible.value = true;
+}
+
+// 导入导出成功后刷新列表
+function onImportExportSuccess() {
+  onSearch();
 }
 </script>
 
@@ -162,6 +175,14 @@ function onFullscreen() {
 
       <template #buttons>
         <el-button
+          v-ripple
+          type="primary"
+          :icon="useRenderIcon(Upload)"
+          @click="openImportExportDialog"
+        >
+          导入/导出
+        </el-button>
+        <el-button
           v-if="selectedIds.length > 0"
           v-ripple
           type="danger"
@@ -250,6 +271,13 @@ function onFullscreen() {
         </pure-table>
       </template>
     </PureTableBar>
+
+    <!-- 导入导出对话框 -->
+    <ImportExportDialog
+      v-model="importExportDialogVisible"
+      :selected-ids="selectedIds"
+      @success="onImportExportSuccess"
+    />
   </div>
 </template>
 

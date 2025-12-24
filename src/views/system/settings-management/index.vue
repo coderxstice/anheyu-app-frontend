@@ -1,51 +1,67 @@
 <template>
-  <el-card v-loading="siteConfigStore.loading" shadow="never">
-    <el-tabs v-model="activeName" class="setting-tabs">
-      <el-tab-pane label="站点信息" name="siteConfig">
-        <el-form :model="form" label-position="top" class="setting-form">
-          <BaseInfoForm v-model="form.site" />
-          <IconSettingsForm v-model="form.site" />
-        </el-form>
-      </el-tab-pane>
+  <div class="settings-page">
+    <el-card v-loading="siteConfigStore.loading" shadow="never">
+      <el-tabs v-model="activeName" class="setting-tabs">
+        <el-tab-pane label="站点信息" name="siteConfig">
+          <el-form :model="form" label-position="top" class="setting-form">
+            <BaseInfoForm v-model="form.site" />
+            <IconSettingsForm v-model="form.site" />
+          </el-form>
+        </el-tab-pane>
 
-      <el-tab-pane label="页面配置" name="pageSetting">
-        <el-form :model="form" label-position="top" class="setting-form">
-          <PageSittingForm v-model="form.page" />
-        </el-form>
-      </el-tab-pane>
+        <el-tab-pane label="页面配置" name="pageSetting">
+          <el-form :model="form" label-position="top" class="setting-form">
+            <PageSittingForm v-model="form.page" />
+          </el-form>
+        </el-tab-pane>
 
-      <el-tab-pane label="文件配置" name="fileSetting">
-        <el-form :model="form" label-position="top" class="setting-form">
-          <FileSettings v-model="form.file" />
-        </el-form>
-      </el-tab-pane>
+        <el-tab-pane label="文件配置" name="fileSetting">
+          <el-form :model="form" label-position="top" class="setting-form">
+            <FileSettings v-model="form.file" />
+          </el-form>
+        </el-tab-pane>
 
-      <el-tab-pane label="文章配置" name="postSetting">
-        <el-form :model="form" label-position="top" class="setting-form">
-          <PostSettings v-model="form.post" />
-        </el-form>
-      </el-tab-pane>
+        <el-tab-pane label="文章配置" name="postSetting">
+          <el-form :model="form" label-position="top" class="setting-form">
+            <PostSettings v-model="form.post" />
+          </el-form>
+        </el-tab-pane>
 
-      <el-tab-pane label="前台配置" name="frontDeskSetting">
-        <FrontDeskSettings ref="frontDeskRef" v-model="form.frontDesk" />
-      </el-tab-pane>
+        <el-tab-pane label="前台配置" name="frontDeskSetting">
+          <FrontDeskSettings ref="frontDeskRef" v-model="form.frontDesk" />
+        </el-tab-pane>
 
-      <el-tab-pane label="页面管理" name="pageManagement">
-        <PageManagement />
-      </el-tab-pane>
-    </el-tabs>
+        <el-tab-pane label="页面管理" name="pageManagement">
+          <PageManagement />
+        </el-tab-pane>
+      </el-tabs>
 
-    <div class="save-button-container">
-      <el-button type="primary" size="large" @click="handleSave">
-        保存设置
-      </el-button>
-    </div>
-  </el-card>
+      <div class="save-button-container">
+        <el-button type="primary" size="large" @click="handleSave">
+          保存设置
+        </el-button>
+      </div>
+    </el-card>
+
+    <!-- 返回顶部按钮 -->
+    <el-backtop
+      target=".scrollbar-container"
+      :right="40"
+      :bottom="100"
+      :visibility-height="200"
+      class="settings-backtop"
+    >
+      <div class="backtop-content">
+        <el-icon :size="20"><ArrowUp /></el-icon>
+      </div>
+    </el-backtop>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { reactive, onMounted, watch, ref } from "vue";
 import { ElMessage } from "element-plus";
+import { ArrowUp } from "@element-plus/icons-vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { get, set, isEqual, cloneDeep } from "lodash-es";
 
@@ -176,5 +192,23 @@ const handleSave = async () => {
   padding-top: 24px;
   margin-top: 24px;
   border-top: 1px solid var(--el-border-color-lighter);
+}
+
+.settings-backtop {
+  :deep(.el-backtop) {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.backtop-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--el-color-primary);
 }
 </style>
