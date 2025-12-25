@@ -8,13 +8,163 @@ import type { SettingKey } from "@/constant";
  * @param backendKey - 在后端API中的键名 (e.g., 'APP_NAME')
  * @param defaultValue - 该项的默认值
  * @param type - 数据类型，用于自动转换。'string' | 'boolean' | 'number' | 'json'
+ * @param label - 配置项的显示名称，用于搜索
+ * @param searchKeywords - 额外的搜索关键词
  */
 export interface SettingDescriptor {
   frontendPath: string;
   backendKey: SettingKey;
   defaultValue: any;
   type: "string" | "boolean" | "number" | "json";
+  /** 配置项的显示名称，用于搜索 */
+  label?: string;
+  /** 额外的搜索关键词 */
+  searchKeywords?: string[];
 }
+
+/**
+ * @description 设置菜单项接口
+ */
+export interface SettingsMenuItem {
+  /** 唯一标识 */
+  key: string;
+  /** 显示名称 */
+  label: string;
+  /** 图标名称 (iconify 格式) */
+  icon?: string;
+  /** 子菜单项 */
+  children?: SettingsMenuChild[];
+}
+
+export interface SettingsMenuChild {
+  /** 唯一标识 */
+  key: string;
+  /** 显示名称 */
+  label: string;
+  /** 对应的表单组件名称 */
+  component: string;
+  /** 搜索关键词 */
+  keywords?: string[];
+}
+
+/**
+ * @description 设置页面左侧菜单配置
+ */
+export const settingsMenuConfig: SettingsMenuItem[] = [
+  {
+    key: "site",
+    label: "站点信息",
+    icon: "ri:global-line",
+    children: [
+      {
+        key: "site-basic",
+        label: "基本信息",
+        component: "BaseInfoForm",
+        keywords: ["站点名称", "描述", "URL", "备案", "公告"]
+      },
+      {
+        key: "site-icon",
+        label: "Logo 与图标",
+        component: "IconSettingsForm",
+        keywords: ["favicon", "logo", "图标", "PWA"]
+      }
+    ]
+  },
+  {
+    key: "appearance",
+    label: "外观配置",
+    icon: "ri:palette-line",
+    children: [
+      {
+        key: "appearance-home",
+        label: "首页设置",
+        component: "HomePageForm",
+        keywords: ["首页", "顶部", "banner", "分类"]
+      },
+      {
+        key: "appearance-sidebar",
+        label: "侧边栏",
+        component: "SidebarPageForm",
+        keywords: ["侧边栏", "作者", "标签", "天气"]
+      },
+      {
+        key: "appearance-page",
+        label: "页面样式",
+        component: "PageSittingForm",
+        keywords: ["外链", "图片", "一图流", "CSS", "JS"]
+      }
+    ]
+  },
+  {
+    key: "content",
+    label: "内容管理",
+    icon: "ri:article-line",
+    children: [
+      {
+        key: "content-post",
+        label: "文章配置",
+        component: "PostSettings",
+        keywords: ["文章", "封面", "打赏", "代码块", "复制"]
+      },
+      {
+        key: "content-file",
+        label: "文件处理",
+        component: "FileSettings",
+        keywords: ["上传", "缩略图", "EXIF", "视频"]
+      }
+    ]
+  },
+  {
+    key: "user",
+    label: "用户与通知",
+    icon: "ri:user-settings-line",
+    children: [
+      {
+        key: "user-comment",
+        label: "评论系统",
+        component: "CommentSettingsForm",
+        keywords: ["评论", "敏感词", "通知", "审核"]
+      },
+      {
+        key: "user-email",
+        label: "邮件服务",
+        component: "EmailSettingsForm",
+        keywords: ["SMTP", "邮件", "模板", "激活"]
+      }
+    ]
+  },
+  {
+    key: "advanced",
+    label: "高级功能",
+    icon: "ri:settings-4-line",
+    children: [
+      {
+        key: "advanced-flink",
+        label: "友链管理",
+        component: "FLinkPageSettingsForm",
+        keywords: ["友链", "申请", "审核"]
+      },
+      {
+        key: "advanced-about",
+        label: "关于页",
+        component: "AboutPageForm",
+        keywords: ["关于", "技能", "生涯"]
+      },
+      {
+        key: "advanced-equipment",
+        label: "装备页",
+        component: "EquipmentPageForm",
+        keywords: ["装备", "好物"]
+      },
+      {
+        key: "advanced-comments-page",
+        label: "评论页",
+        component: "RecentCommentsPageForm",
+        keywords: ["最近评论"]
+      }
+    ]
+  }
+];
 
 const siteDescriptors: SettingDescriptor[] = [
   {

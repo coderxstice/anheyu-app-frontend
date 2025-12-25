@@ -1,71 +1,159 @@
 <template>
-  <div class="settings-page">
-    <el-card v-loading="siteConfigStore.loading" shadow="never">
-      <el-tabs v-model="activeName" class="setting-tabs">
-        <el-tab-pane label="站点信息" name="siteConfig">
-          <el-form :model="form" label-position="top" class="setting-form">
-            <BaseInfoForm v-model="form.site" />
-            <IconSettingsForm v-model="form.site" />
-          </el-form>
-        </el-tab-pane>
-
-        <el-tab-pane label="页面配置" name="pageSetting">
-          <el-form :model="form" label-position="top" class="setting-form">
-            <PageSittingForm v-model="form.page" />
-          </el-form>
-        </el-tab-pane>
-
-        <el-tab-pane label="文件配置" name="fileSetting">
-          <el-form :model="form" label-position="top" class="setting-form">
-            <FileSettings v-model="form.file" />
-          </el-form>
-        </el-tab-pane>
-
-        <el-tab-pane label="文章配置" name="postSetting">
-          <el-form :model="form" label-position="top" class="setting-form">
-            <PostSettings v-model="form.post" />
-          </el-form>
-        </el-tab-pane>
-
-        <el-tab-pane label="前台配置" name="frontDeskSetting">
-          <FrontDeskSettings ref="frontDeskRef" v-model="form.frontDesk" />
-        </el-tab-pane>
-
-        <el-tab-pane label="页面管理" name="pageManagement">
-          <PageManagement />
-        </el-tab-pane>
-      </el-tabs>
-
-      <div class="save-button-container">
-        <el-button type="primary" size="large" @click="handleSave">
-          保存设置
-        </el-button>
-      </div>
-    </el-card>
-
-    <!-- 返回顶部按钮 -->
-    <el-backtop
-      target=".scrollbar-container"
-      :right="40"
-      :bottom="100"
-      :visibility-height="200"
-      class="settings-backtop"
+  <div class="settings-page" v-loading="siteConfigStore.loading">
+    <SettingsLayout
+      :has-changes="hasChanges"
+      :loading="saving"
+      @save="handleSave"
+      @export="handleExportConfig"
+      @import="handleImportConfig"
     >
-      <div class="backtop-content">
-        <el-icon :size="20"><ArrowUp /></el-icon>
-      </div>
-    </el-backtop>
+      <template #default="{ activeComponent }">
+        <el-form :model="form" label-position="top" class="setting-form">
+          <!-- 站点信息 - 基本信息 -->
+          <template v-if="activeComponent === 'BaseInfoForm'">
+            <div class="section-header">
+              <h2>基本信息</h2>
+              <p class="section-desc">
+                配置站点的基本信息，包括名称、描述、URL 等
+              </p>
+            </div>
+            <BaseInfoForm v-model="form.site" />
+          </template>
+
+          <!-- 站点信息 - Logo与图标 -->
+          <template v-else-if="activeComponent === 'IconSettingsForm'">
+            <div class="section-header">
+              <h2>Logo 与图标</h2>
+              <p class="section-desc">配置站点的 Logo、Favicon 和 PWA 图标</p>
+            </div>
+            <IconSettingsForm v-model="form.site" />
+          </template>
+
+          <!-- 外观配置 - 首页设置 -->
+          <template v-else-if="activeComponent === 'HomePageForm'">
+            <div class="section-header">
+              <h2>首页设置</h2>
+              <p class="section-desc">
+                配置首页顶部、Banner、分类卡片、页眉页脚等
+              </p>
+            </div>
+            <HomePageForm v-model="form.frontDesk.home" />
+          </template>
+
+          <!-- 外观配置 - 侧边栏 -->
+          <template v-else-if="activeComponent === 'SidebarPageForm'">
+            <div class="section-header">
+              <h2>侧边栏</h2>
+              <p class="section-desc">
+                配置侧边栏的作者信息、标签云、天气等模块
+              </p>
+            </div>
+            <SidebarPageForm v-model="form.frontDesk.sidebar" />
+          </template>
+
+          <!-- 外观配置 - 页面样式 -->
+          <template v-else-if="activeComponent === 'PageSittingForm'">
+            <div class="section-header">
+              <h2>页面样式</h2>
+              <p class="section-desc">
+                配置外链警告、图片参数、自定义 CSS/JS 等
+              </p>
+            </div>
+            <PageSittingForm v-model="form.page" />
+          </template>
+
+          <!-- 内容管理 - 文章配置 -->
+          <template v-else-if="activeComponent === 'PostSettings'">
+            <div class="section-header">
+              <h2>文章配置</h2>
+              <p class="section-desc">
+                配置文章的默认封面、分页、代码块、打赏等
+              </p>
+            </div>
+            <PostSettings v-model="form.post" />
+          </template>
+
+          <!-- 内容管理 - 文件处理 -->
+          <template v-else-if="activeComponent === 'FileSettings'">
+            <div class="section-header">
+              <h2>文件处理</h2>
+              <p class="section-desc">
+                配置文件上传限制、缩略图生成、EXIF 提取等
+              </p>
+            </div>
+            <FileSettings v-model="form.file" />
+          </template>
+
+          <!-- 用户与通知 - 评论系统 -->
+          <template v-else-if="activeComponent === 'CommentSettingsForm'">
+            <div class="section-header">
+              <h2>评论系统</h2>
+              <p class="section-desc">配置评论功能、敏感词过滤、通知设置等</p>
+            </div>
+            <CommentSettingsForm v-model="form.frontDesk.comment" />
+          </template>
+
+          <!-- 用户与通知 - 邮件服务 -->
+          <template v-else-if="activeComponent === 'EmailSettingsForm'">
+            <div class="section-header">
+              <h2>邮件服务</h2>
+              <p class="section-desc">配置 SMTP 服务器和邮件模板</p>
+            </div>
+            <EmailSettingsForm v-model="form.frontDesk.email" />
+          </template>
+
+          <!-- 高级功能 - 友链管理 -->
+          <template v-else-if="activeComponent === 'FLinkPageSettingsForm'">
+            <div class="section-header">
+              <h2>友链管理</h2>
+              <p class="section-desc">配置友链申请条件、通知和审核设置</p>
+            </div>
+            <FLinkPageSettingsForm
+              ref="fLinkFormRef"
+              v-model="form.frontDesk.fLink"
+            />
+          </template>
+
+          <!-- 高级功能 - 关于页 -->
+          <template v-else-if="activeComponent === 'AboutPageForm'">
+            <div class="section-header">
+              <h2>关于页</h2>
+              <p class="section-desc">配置关于页的个人信息、技能、生涯等</p>
+            </div>
+            <AboutPageForm ref="aboutFormRef" v-model="form.frontDesk.about" />
+          </template>
+
+          <!-- 高级功能 - 装备页 -->
+          <template v-else-if="activeComponent === 'EquipmentPageForm'">
+            <div class="section-header">
+              <h2>装备页</h2>
+              <p class="section-desc">配置装备/好物展示页面</p>
+            </div>
+            <EquipmentPageForm v-model="form.frontDesk.equipment" />
+          </template>
+
+          <!-- 高级功能 - 评论页 -->
+          <template v-else-if="activeComponent === 'RecentCommentsPageForm'">
+            <div class="section-header">
+              <h2>最近评论页</h2>
+              <p class="section-desc">配置最近评论页面的 Banner 等</p>
+            </div>
+            <RecentCommentsPageForm v-model="form.frontDesk.recentComments" />
+          </template>
+        </el-form>
+      </template>
+    </SettingsLayout>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { reactive, onMounted, watch, ref } from "vue";
-import { ElMessage } from "element-plus";
-import { ArrowUp } from "@element-plus/icons-vue";
+import { reactive, ref, onMounted, watch, computed } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { get, set, isEqual, cloneDeep } from "lodash-es";
+import { exportConfig, importConfig } from "@/api/config";
 
-// 引入描述符和新的工具函数
+// 引入描述符和工具函数
 import { allSettingDescriptors } from "./settings.descriptor";
 import {
   createInitialFormState,
@@ -75,25 +163,54 @@ import {
   validateJsonConfig
 } from "./utils";
 
-// 引入所有子组件
+// 引入布局组件
+import SettingsLayout from "./components/SettingsLayout.vue";
+
+// 引入所有表单子组件
 import BaseInfoForm from "./components/BaseInfoForm.vue";
 import IconSettingsForm from "./components/IconSettingsForm.vue";
 import PageSittingForm from "./components/PageSittingForm.vue";
 import FileSettings from "./components/fileSetting/FileSettingsForm.vue";
 import PostSettings from "./components/postSettings/index.vue";
-import FrontDeskSettings from "./components/FrontDeskSettings.vue";
-import PageManagement from "../page-management/index.vue";
 
-let activeName = "siteConfig";
+// 引入前台相关组件
+import HomePageForm from "./components/frontDesk/HomePageForm/index.vue";
+import SidebarPageForm from "./components/frontDesk/SidebarPageForm/index.vue";
+import CommentSettingsForm from "./components/frontDesk/CommentSettingsForm/index.vue";
+import EmailSettingsForm from "./components/frontDesk/EmailSettingsForm/index.vue";
+import FLinkPageSettingsForm from "./components/frontDesk/FLinkPageSettingsForm/index.vue";
+import EquipmentPageForm from "./components/frontDesk/EquipmentPageForm/index.vue";
+import AboutPageForm from "./components/frontDesk/AboutPageForm/index.vue";
+import RecentCommentsPageForm from "./components/frontDesk/RecentCommentsPageForm/index.vue";
+
 const siteConfigStore = useSiteConfigStore();
-const frontDeskRef = ref<InstanceType<typeof FrontDeskSettings>>();
+const fLinkFormRef = ref<InstanceType<typeof FLinkPageSettingsForm>>();
+const aboutFormRef = ref<InstanceType<typeof AboutPageForm>>();
+const saving = ref(false);
 
-// 1. 根据描述符创建 Map，方便查找
+// 根据描述符创建 Map，方便查找
 const descriptorMap = createDescriptorMap(allSettingDescriptors);
-// 2. 根据描述符获取所有需要从后端请求的键
+// 根据描述符获取所有需要从后端请求的键
 const allBackendKeys = allSettingDescriptors.map(d => d.backendKey);
-// 3. 根据描述符自动生成包含所有默认值的、具有正确嵌套结构的 form 对象
+// 根据描述符自动生成包含所有默认值的、具有正确嵌套结构的 form 对象
 const form = reactive(createInitialFormState(allSettingDescriptors));
+// 保存原始数据用于比较变更
+const originalFormData = ref<any>(null);
+
+// 检测是否有未保存的更改
+const hasChanges = computed(() => {
+  if (!originalFormData.value) return false;
+
+  for (const [frontendPath, desc] of descriptorMap) {
+    const currentValue = get(form, frontendPath);
+    const originalValue = get(originalFormData.value, frontendPath);
+
+    if (!isEqual(currentValue, originalValue)) {
+      return true;
+    }
+  }
+  return false;
+});
 
 watch(
   () => siteConfigStore.siteConfig,
@@ -112,6 +229,9 @@ watch(
         set(form, frontendPath, cloneDeep(parsedValue));
       }
     });
+
+    // 保存原始数据用于比较
+    originalFormData.value = cloneDeep(form);
   },
   { deep: true, immediate: true }
 );
@@ -121,9 +241,12 @@ onMounted(() => {
 });
 
 const handleSave = async () => {
-  // 在保存前，先同步友链页 Markdown 编辑器的内容，确保 HTML 字段也被更新
-  if (frontDeskRef.value?.syncBeforeSave) {
-    await frontDeskRef.value.syncBeforeSave();
+  // 在保存前，先同步编辑器的内容
+  if (fLinkFormRef.value?.syncEditorContent) {
+    await fLinkFormRef.value.syncEditorContent();
+  }
+  if (aboutFormRef.value?.syncEditorContent) {
+    await aboutFormRef.value.syncEditorContent();
   }
 
   const settingsToUpdate: Record<string, any> = {};
@@ -140,7 +263,6 @@ const handleSave = async () => {
       desc.backendKey
     );
 
-    // 使用 lodash.isEqual 进行深度比较，完美处理对象和数组
     if (!isEqual(currentValue, originalValueParsed)) {
       const formattedValue = formatValueForSave(currentValue, desc.type);
 
@@ -149,7 +271,7 @@ const handleSave = async () => {
         const validation = validateJsonConfig(formattedValue, desc.backendKey);
         if (!validation.isValid) {
           validationErrors.push(`${desc.backendKey}: ${validation.error}`);
-          return; // 跳过这个无效的配置项
+          return;
         }
       }
 
@@ -168,47 +290,120 @@ const handleSave = async () => {
     return;
   }
 
-  console.log("准备保存的设置:", settingsToUpdate);
+  saving.value = true;
 
   try {
-    // 传递描述符以启用乐观更新
     await siteConfigStore.saveSystemSettings(
       settingsToUpdate,
       allSettingDescriptors
     );
+    // 更新原始数据
+    originalFormData.value = cloneDeep(form);
   } catch (error: any) {
     console.error("保存设置时发生错误:", error);
     ElMessage.error(`保存失败: ${error.message || String(error)}`);
+  } finally {
+    saving.value = false;
   }
+};
+
+// 导出配置
+const handleExportConfig = async () => {
+  try {
+    ElMessage.info("正在导出配置数据...");
+    const response = await exportConfig();
+
+    const blob = new Blob([response], { type: "application/json" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `anheyu-settings-${new Date().getTime()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    ElMessage.success("配置数据导出成功");
+  } catch (error: any) {
+    console.error("导出配置失败:", error);
+    ElMessage.error(`导出配置失败: ${error.message || "未知错误"}`);
+  }
+};
+
+// 导入配置
+const handleImportConfig = () => {
+  ElMessageBox.confirm(
+    "导入新配置将会覆盖数据库中的配置数据，此操作会立即生效。确定要导入配置吗？",
+    "导入配置确认",
+    {
+      confirmButtonText: "确定导入",
+      cancelButtonText: "取消",
+      type: "warning"
+    }
+  )
+    .then(() => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".json";
+      input.onchange = async (e: Event) => {
+        const target = e.target as HTMLInputElement;
+        const file = target.files?.[0];
+        if (!file) return;
+
+        if (!file.name.endsWith(".json")) {
+          ElMessage.error("请选择 .json 格式的配置文件");
+          return;
+        }
+
+        try {
+          ElMessage.info("正在导入配置数据...");
+          await importConfig(file);
+          ElMessage.success("配置数据导入成功！请刷新页面查看最新配置");
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000);
+        } catch (error: any) {
+          console.error("导入配置失败:", error);
+          ElMessage.error(
+            `导入配置失败: ${error.response?.data?.message || error.message || "未知错误"}`
+          );
+        }
+      };
+      input.click();
+    })
+    .catch(() => {
+      // 用户取消
+    });
 };
 </script>
 
 <style scoped lang="scss">
-.setting-form {
-  max-width: 800px;
-}
-
-.save-button-container {
-  padding-top: 24px;
-  margin-top: 24px;
-  border-top: 1px solid var(--el-border-color-lighter);
-}
-
-.settings-backtop {
-  :deep(.el-backtop) {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-}
-
-.backtop-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
+.settings-page {
   height: 100%;
-  color: var(--el-color-primary);
+  overflow: hidden;
+  margin: 0;
+}
+
+.setting-form {
+  width: 100%;
+}
+
+.section-header {
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+
+  h2 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--el-text-color-primary);
+  }
+
+  .section-desc {
+    margin: 0;
+    font-size: 14px;
+    color: var(--el-text-color-secondary);
+  }
 }
 </style>
