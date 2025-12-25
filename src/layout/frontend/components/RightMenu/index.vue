@@ -23,6 +23,14 @@
         <i class="anzhiyufont anzhiyu-icon-copy" />
         <span>复制选中文本</span>
       </div>
+      <div
+        v-if="isTextInPostDetailContent"
+        class="rightMenu-item"
+        @click.stop="quoteToComment"
+      >
+        <IconifyIconOffline icon="ri:chat-1-fill" />
+        <span>引用到评论</span>
+      </div>
       <div class="rightMenu-item" @click.stop="searchLocal">
         <i class="anzhiyufont anzhiyu-icon-magnifying-glass" />
         <span>站内搜索</span>
@@ -127,6 +135,7 @@ const hasCommentSection = ref(false);
 const isClickOnMusicPlayer = ref(false);
 const transformOrigin = ref("top left");
 const musicIsPlaying = ref(false);
+const isTextInPostDetailContent = ref(false);
 
 const router = useRouter();
 const route = useRoute();
@@ -181,8 +190,25 @@ const handleContextMenu = (event: MouseEvent) => {
   // 修改：在菜单显示时就捕获选中的文本
   if (isTextSelected.value && selection) {
     capturedText.value = selection.toString();
+
+    // 检查选中的文本是否在 post-detail-content 中
+    const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+    if (range) {
+      const container = range.commonAncestorContainer;
+      const targetElement =
+        container.nodeType === Node.TEXT_NODE
+          ? container.parentElement
+          : (container as HTMLElement);
+
+      // 检查是否在 post-detail-content 中
+      const postDetailContent = targetElement?.closest(".post-detail-content");
+      isTextInPostDetailContent.value = !!postDetailContent;
+    } else {
+      isTextInPostDetailContent.value = false;
+    }
   } else {
     capturedText.value = "";
+    isTextInPostDetailContent.value = false;
   }
 
   // 初始设置菜单位置
@@ -352,6 +378,21 @@ const searchLocal = () => {
     window.dispatchEvent(
       new CustomEvent("frontend-open-search", { detail: { keyword: text } })
     );
+  }
+  hideMenu();
+};
+
+/**
+ * 引用到评论
+ */
+const quoteToComment = () => {
+  const text = capturedText.value;
+  if (text) {
+    // 通过全局事件通知文章详情页
+    window.dispatchEvent(
+      new CustomEvent("quote-text-to-comment", { detail: { quoteText: text } })
+    );
+    showSnackbar("已引用到评论");
   }
   hideMenu();
 };
