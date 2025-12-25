@@ -47,6 +47,11 @@ const isCommentEnabled = computed(() => {
   return siteConfigStore.getSiteConfig?.comment?.enable === true;
 });
 
+// 检查波浪区域是否启用（默认为 true）
+const isWavesEnabled = computed(() => {
+  return siteConfigStore.siteConfig?.post?.waves?.enable !== false;
+});
+
 onMounted(() => {
   // 初始化封面图片懒加载
   observer = initLazyLoad(document, {
@@ -414,7 +419,7 @@ const scrollToComment = (event: Event) => {
         @load="handleImageLoad"
       />
     </div>
-    <section class="main-hero-waves-area waves-area">
+    <section v-if="isWavesEnabled" class="main-hero-waves-area waves-area">
       <svg
         class="waves-svg"
         xmlns="http://www.w3.org/2000/svg"

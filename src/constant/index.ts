@@ -185,6 +185,9 @@ const KeyPostCopyCopyrightReprint: SettingKey = "post.copy.copyright_reprint";
 // 文章目录 Hash 更新配置
 const KeyPostTocHashUpdateMode: SettingKey = "post.toc.hash_update_mode";
 
+// 文章页面波浪区域配置
+const KeyPostWavesEnable: SettingKey = "post.waves.enable";
+
 // --- 装备页面配置 ---
 const KeyPostEquipmentBannerBackground: SettingKey =
   "equipment.banner.background";
@@ -511,6 +514,9 @@ export const constant = {
 
   // 文章目录 Hash 更新配置
   KeyPostTocHashUpdateMode,
+
+  // 文章页面波浪区域配置
+  KeyPostWavesEnable,
 
   // --- 装备页面配置 ---
   KeyPostEquipmentBannerBackground,

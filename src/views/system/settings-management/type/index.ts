@@ -196,6 +196,9 @@ export interface PostSettingsInfo {
   toc: {
     hashUpdateMode: string; // 目录滚动时URL Hash更新模式: replace(替换不产生历史), none(不更新)
   };
+  waves: {
+    enable: boolean; // 是否显示文章页面波浪区域
+  };
   cdn: {
     enable: boolean;
     provider: string;

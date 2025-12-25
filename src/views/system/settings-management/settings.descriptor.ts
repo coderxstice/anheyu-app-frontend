@@ -539,6 +539,12 @@ const postDescriptors: SettingDescriptor[] = [
     type: "string"
   },
   {
+    frontendPath: "post.waves.enable",
+    backendKey: constant.KeyPostWavesEnable,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
     frontendPath: "post.cdn.enable",
     backendKey: constant.KeyCDNEnable,
     defaultValue: false,
