@@ -442,6 +442,8 @@ const scrollToComment = (event: Event) => {
         </g>
       </svg>
     </section>
+    <!-- 当波浪区域关闭时，显示圆角过渡元素 -->
+    <div v-if="!isWavesEnabled" class="post-radius-bottom" />
   </div>
 </template>
 
@@ -665,6 +667,19 @@ const scrollToComment = (event: Event) => {
   left: 0;
   z-index: 5;
   width: 100%;
+  pointer-events: none;
+}
+
+.post-radius-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 5;
+  width: 100%;
+  height: 16px;
+  background-color: var(--anzhiyu-background);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
   pointer-events: none;
 }
 

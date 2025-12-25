@@ -77,6 +77,12 @@ const articleWithCommentCount = computed(() => {
 });
 
 const siteConfigStore = useSiteConfigStore();
+
+// 检查波浪区域是否启用（默认为 true）
+const isWavesEnabled = computed(() => {
+  return siteConfigStore.siteConfig?.post?.waves?.enable !== false;
+});
+
 const commentBarrageConfig = computed(() => {
   const siteConfig = siteConfigStore.getSiteConfig;
   if (!siteConfig || !siteConfig.GRAVATAR_URL) {
@@ -422,7 +428,7 @@ watch(
       :article="articleWithCommentCount"
     />
 
-    <div class="layout">
+    <div class="layout" :class="{ 'no-waves-padding': !isWavesEnabled }">
       <main
         class="post-content-inner"
         :class="{ 'full-width': !isSidebarVisible }"
@@ -581,6 +587,11 @@ div#anzhiyu-footer-bar {
     width: 75%;
     flex: 1;
     min-width: 0;
+  }
+
+  // 当存在 post-radius-bottom 元素时，减少 padding-top
+  &.no-waves-padding {
+    padding-top: 10px;
   }
 }
 
