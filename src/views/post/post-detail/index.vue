@@ -196,6 +196,22 @@ const useArticleTheme = (articleRef: Ref<Article | null>) => {
 
 useArticleTheme(article);
 
+/**
+ * 处理引用到评论的全局事件
+ */
+const handleQuoteToComment = (event: CustomEvent<{ quoteText: string }>) => {
+  const { quoteText } = event.detail;
+  if (commentRef.value && quoteText) {
+    commentRef.value.setQuoteText(quoteText);
+
+    // 滚动到评论区域
+    const commentSection = document.getElementById("post-comment");
+    if (commentSection) {
+      commentSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+};
+
 const handleCommentIdsLoaded = (ids: string[]) => {
   commentIds.value = ids;
 };
@@ -370,6 +386,20 @@ const handleHashChange = (hash: string) => {
 
 onMounted(() => {
   // hash定位在article watch中处理，确保文章内容加载完成后再定位
+
+  // 监听引用到评论的全局事件
+  window.addEventListener(
+    "quote-text-to-comment",
+    handleQuoteToComment as EventListener
+  );
+});
+
+onUnmounted(() => {
+  // 移除引用到评论的事件监听
+  window.removeEventListener(
+    "quote-text-to-comment",
+    handleQuoteToComment as EventListener
+  );
 });
 
 watch(
