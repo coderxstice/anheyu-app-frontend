@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-02 18:04:48
- * @LastEditTime: 2025-12-03 11:13:32
+ * @LastEditTime: 2025-12-25 10:49:25
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -104,11 +104,13 @@
   </el-form-item>
 
   <el-form-item label="开启微信打赏">
-    <el-switch
-      v-model="formData.reward.weChatEnable"
-      :disabled="!formData.reward.enable"
-    />
-    <div class="form-item-help">单独控制是否显示微信打赏方式。</div>
+    <div>
+      <el-switch
+        v-model="formData.reward.weChatEnable"
+        :disabled="!formData.reward.enable"
+      />
+      <div class="form-item-help">单独控制是否显示微信打赏方式。</div>
+    </div>
   </el-form-item>
 
   <el-form-item label="文章打赏微信二维码图片">
@@ -129,11 +131,13 @@
   </el-form-item>
 
   <el-form-item label="开启支付宝打赏">
-    <el-switch
-      v-model="formData.reward.aliPayEnable"
-      :disabled="!formData.reward.enable"
-    />
-    <div class="form-item-help">单独控制是否显示支付宝打赏方式。</div>
+    <div>
+      <el-switch
+        v-model="formData.reward.aliPayEnable"
+        :disabled="!formData.reward.enable"
+      />
+      <div class="form-item-help">单独控制是否显示支付宝打赏方式。</div>
+    </div>
   </el-form-item>
 
   <el-form-item label="文章打赏支付宝二维码图片">
@@ -198,16 +202,37 @@
   </el-form-item>
 
   <el-form-item label="代码块最大行数">
-    <el-input-number
-      v-model="formData.codeBlock.codeMaxLines"
-      :min="1"
-      :max="1000"
-      controls-position="right"
-      style="width: 100px"
-      placeholder="例如: 50"
-    />
-    <div class="form-item-help">
-      代码块超过此行数时将显示滚动条，默认为10行。
+    <div>
+      <el-input-number
+        v-model="formData.codeBlock.codeMaxLines"
+        :min="1"
+        :max="1000"
+        controls-position="right"
+        style="width: 100px"
+        placeholder="例如: 50"
+      />
+      <div class="form-item-help">
+        代码块超过此行数时将显示滚动条，默认为10行。
+      </div>
+    </div>
+  </el-form-item>
+
+  <el-form-item label="显示文章波浪区域">
+    <div>
+      <el-switch
+        :model-value="formData.waves?.enable ?? true"
+        @update:model-value="
+          (val: boolean) => {
+            if (!formData.waves) {
+              formData.waves = { enable: true };
+            }
+            formData.waves.enable = val;
+          }
+        "
+      />
+      <div class="form-item-help">
+        控制文章详情页顶部的波浪装饰区域是否显示。关闭后将隐藏文章头部下方的波浪动画效果。
+      </div>
     </div>
   </el-form-item>
 
