@@ -438,9 +438,11 @@ const moveSidebarBlock = (index: number, direction: number) => {
       </el-col>
     </el-row>
 
-    <el-form-item v-if="model.tagsEnable" label="选择高亮的标签">
-      <HighlightTagSelector v-model="model.tagsHighlight" />
-    </el-form-item>
+    <el-collapse-transition>
+      <el-form-item v-if="model.tagsEnable" label="选择高亮的标签">
+        <HighlightTagSelector v-model="model.tagsHighlight" />
+      </el-form-item>
+    </el-collapse-transition>
 
     <el-divider content-position="left">网站资讯</el-divider>
     <el-row :gutter="20">

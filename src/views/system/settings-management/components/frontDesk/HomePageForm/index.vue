@@ -627,17 +627,33 @@
     </div>
   </el-form-item>
 
-  <el-form-item label="状态页地址">
-    <el-input
-      :model-value="model.footerUptimeKumaPageURL"
-      placeholder="例如：https://status.example.com/status/main"
-      clearable
-      @update:model-value="updateFooterUptimeKumaPageURL"
-    />
-    <div class="form-item-help">
-      Uptime Kuma 状态页完整地址，点击状态指示器将跳转到此页面
+  <el-collapse-transition>
+    <div v-if="model.footerUptimeKumaEnable">
+      <el-form-item
+        label="状态页地址"
+        :class="{
+          'is-warning':
+            model.footerUptimeKumaEnable && !model.footerUptimeKumaPageURL
+        }"
+      >
+        <el-input
+          :model-value="model.footerUptimeKumaPageURL"
+          placeholder="例如：https://status.example.com/status/main"
+          clearable
+          @update:model-value="updateFooterUptimeKumaPageURL"
+        />
+        <div class="form-item-help">
+          Uptime Kuma 状态页完整地址，点击状态指示器将跳转到此页面
+          <span
+            v-if="!model.footerUptimeKumaPageURL"
+            style="color: var(--el-color-warning); margin-left: 4px"
+          >
+            （请填写状态页地址）
+          </span>
+        </div>
+      </el-form-item>
     </div>
-  </el-form-item>
+  </el-collapse-transition>
 
   <el-divider content-position="left">链接配置</el-divider>
   <el-form-item label="页脚列表随机友链数量">
