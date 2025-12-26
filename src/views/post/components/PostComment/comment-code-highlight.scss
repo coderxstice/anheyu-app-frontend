@@ -1,7 +1,9 @@
 // 评论代码高亮样式
 // 用于评论中的代码块语法高亮（基于 highlight.js）
+// 同时适用于评论内容和 Markdown 预览区域
 
-.comment-content {
+.comment-content,
+.markdown-preview {
   pre code.hljs {
     display: block;
     padding: 1em;
