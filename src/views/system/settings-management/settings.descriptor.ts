@@ -161,6 +161,12 @@ export const settingsMenuConfig: SettingsMenuItem[] = [
         label: "评论页",
         component: "RecentCommentsPageForm",
         keywords: ["最近评论"]
+      },
+      {
+        key: "advanced-page-management",
+        label: "页面管理",
+        component: "PageManagement",
+        keywords: ["页面", "自定义"]
       }
     ]
   }

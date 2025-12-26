@@ -140,6 +140,15 @@
             </div>
             <RecentCommentsPageForm v-model="form.frontDesk.recentComments" />
           </template>
+
+          <!-- 高级功能 - 页面管理 -->
+          <template v-else-if="activeComponent === 'PageManagement'">
+            <div class="section-header">
+              <h2>页面管理</h2>
+              <p class="section-desc">管理自定义页面</p>
+            </div>
+            <PageManagement />
+          </template>
         </el-form>
       </template>
     </SettingsLayout>
@@ -172,6 +181,7 @@ import IconSettingsForm from "./components/IconSettingsForm.vue";
 import PageSittingForm from "./components/PageSittingForm.vue";
 import FileSettings from "./components/fileSetting/FileSettingsForm.vue";
 import PostSettings from "./components/postSettings/index.vue";
+import PageManagement from "../page-management/index.vue";
 
 // 引入前台相关组件
 import HomePageForm from "./components/frontDesk/HomePageForm/index.vue";
