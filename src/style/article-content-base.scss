@@ -1704,7 +1704,9 @@
     }
   }
 
-  code {
+  // 行内代码样式 - 只应用于非代码块内的 code 标签
+  // 使用 :not(pre) > code 避免影响 pre code.hljs 代码块样式
+  :not(pre) > code {
     padding: 0.2rem 0.4rem;
     padding: 2px 4px;
     margin: 0 4px;

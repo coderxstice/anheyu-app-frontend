@@ -333,17 +333,23 @@ onMounted(() => {
             <span class="timestamp">{{ formattedDate }}</span>
           </div>
           <div class="comment-actions">
-            <button
-              class="action-btn"
-              :class="{ 'is-liked': isLiked }"
-              title="点赞"
-              @click="handleLike"
+            <el-tooltip
+              :content="isLiked ? '取消点赞' : '点赞'"
+              placement="top"
+              :show-arrow="false"
             >
-              <IconLike />
-              <span v-if="comment.like_count > 0" class="like-count">{{
-                comment.like_count
-              }}</span>
-            </button>
+              <button
+                class="action-btn"
+                :class="{ 'is-liked': isLiked }"
+                :title="isLiked ? '取消点赞' : '点赞'"
+                @click="handleLike"
+              >
+                <IconLike />
+                <span v-if="comment.like_count > 0" class="like-count">{{
+                  comment.like_count
+                }}</span>
+              </button>
+            </el-tooltip>
             <el-tooltip
               :content="comment.is_anonymous ? '匿名评论无法回复' : '回复'"
               placement="top"

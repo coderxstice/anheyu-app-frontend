@@ -25,8 +25,10 @@ import type { FormInstance, FormRules } from "element-plus";
 
 import IconEmoji from "../icon/IconEmoji.vue";
 import IconImage from "../icon/IconImage.vue";
+import IconifyIconOnline from "@/components/ReIcon/src/iconifyIconOnline";
 import LoginDialog from "@/components/LoginDialog/index.vue";
 import UserProfileDialog from "@/components/UserProfileDialog/index.vue";
+import hljs from "highlight.js";
 import AnonymousConfirmDialog from "@/components/AnonymousConfirmDialog/index.vue";
 import { gsap } from "gsap";
 import { uploadCommentImage } from "@/api/comment";
@@ -111,6 +113,7 @@ const loginDialogInitialStep = ref<"check-email" | "register-form">(
 );
 const showAnonymousConfirmDialog = ref(false);
 const showProfileDialog = ref(false);
+const isMarkdownPreview = ref(false);
 
 const commentInfoConfig = computed(() => {
   const config = siteConfigStore.getSiteConfig.comment;
@@ -740,6 +743,141 @@ watch(activeEmojiPackageIndex, () => {
   }
 });
 
+/**
+ * 轻量级 Markdown 简单解析（纯正则，无依赖）
+ * 支持：标题、粗体、斜体、代码、链接、图片、引用、换行
+ */
+const simpleMarkdownParse = (text: string): string => {
+  if (!text.trim()) return "";
+
+  // 使用不含下划线的占位符，避免被斜体规则处理
+  const PLACEHOLDER_PREFIX = "\x00CB";
+  const PLACEHOLDER_SUFFIX = "CB\x00";
+
+  // 先提取代码块，用占位符替换，避免代码块内容被其他规则处理
+  const codeBlocks: string[] = [];
+  let html = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
+    const index = codeBlocks.length;
+    // 转义代码块内的 HTML 特殊字符
+    const escapedCode = code
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    codeBlocks.push(`<pre><code>${escapedCode}</code></pre>`);
+    return `${PLACEHOLDER_PREFIX}${index}${PLACEHOLDER_SUFFIX}`;
+  });
+
+  // 转义 HTML 特殊字符（防止 XSS）
+  html = html
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  // 标题 # ~ ######（需要在换行处理之前）
+  html = html
+    .replace(/^#{6}\s+(.+)$/gm, "<h6>$1</h6>")
+    .replace(/^#{5}\s+(.+)$/gm, "<h5>$1</h5>")
+    .replace(/^#{4}\s+(.+)$/gm, "<h4>$1</h4>")
+    .replace(/^#{3}\s+(.+)$/gm, "<h3>$1</h3>")
+    .replace(/^#{2}\s+(.+)$/gm, "<h2>$1</h2>")
+    .replace(/^#\s+(.+)$/gm, "<h1>$1</h1>");
+
+  // 其他 Markdown 语法
+  html = html
+    // 行内代码 `code`
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    // 图片 ![alt](url)
+    .replace(
+      /!\[([^\]]*)\]\(([^)]+)\)/g,
+      '<img src="$2" alt="$1" style="max-width:100%;">'
+    )
+    // 链接 [text](url)
+    .replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+    )
+    // 粗体 **text** 或 __text__
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/__([^_]+)__/g, "<strong>$1</strong>")
+    // 斜体 *text* 或 _text_
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+    .replace(/_([^_]+)_/g, "<em>$1</em>")
+    // 删除线 ~~text~~
+    .replace(/~~([^~]+)~~/g, "<del>$1</del>")
+    // 引用 > text（需要在换行处理之前）
+    .replace(/^&gt;\s*(.+)$/gm, "<blockquote>$1</blockquote>")
+    // 换行
+    .replace(/\n/g, "<br>");
+
+  // 合并连续的 blockquote
+  html = html.replace(/<\/blockquote><br><blockquote>/g, "<br>");
+
+  // 移除块级元素后面紧跟的 <br>
+  html = html.replace(/<\/blockquote><br>/g, "</blockquote>");
+  html = html.replace(/<\/h([1-6])><br>/g, "</h$1>");
+
+  // 移除代码块前后的 <br>（代码块是块级元素）
+  const placeholderRegex = new RegExp(
+    `<br>(${PLACEHOLDER_PREFIX}\\d+${PLACEHOLDER_SUFFIX})`,
+    "g"
+  );
+  const placeholderRegex2 = new RegExp(
+    `(${PLACEHOLDER_PREFIX}\\d+${PLACEHOLDER_SUFFIX})<br>`,
+    "g"
+  );
+  html = html.replace(placeholderRegex, "$1");
+  html = html.replace(placeholderRegex2, "$1");
+
+  // 还原代码块
+  codeBlocks.forEach((block, index) => {
+    html = html.replace(
+      `${PLACEHOLDER_PREFIX}${index}${PLACEHOLDER_SUFFIX}`,
+      block
+    );
+  });
+
+  return html;
+};
+
+// 预览内容（计算属性）
+const previewContent = computed(() => {
+  if (!form.content) {
+    return '<p class="preview-empty">暂无内容</p>';
+  }
+  return simpleMarkdownParse(form.content);
+});
+
+// 预览区域 ref
+const markdownPreviewRef = ref<HTMLElement | null>(null);
+
+// 高亮预览区域的代码块
+const highlightPreviewCode = () => {
+  if (!markdownPreviewRef.value) return;
+  const codeBlocks = markdownPreviewRef.value.querySelectorAll("pre code");
+  codeBlocks.forEach(block => {
+    // 移除之前的高亮标记，避免重复高亮
+    block.removeAttribute("data-highlighted");
+    hljs.highlightElement(block as HTMLElement);
+  });
+};
+
+// 监听预览内容变化，触发代码高亮
+watch(
+  () => [isMarkdownPreview.value, previewContent.value],
+  () => {
+    if (isMarkdownPreview.value) {
+      nextTick(() => {
+        highlightPreviewCode();
+      });
+    }
+  }
+);
+
+// 切换预览模式
+const togglePreview = () => {
+  isMarkdownPreview.value = !isMarkdownPreview.value;
+};
+
 onMounted(() => {
   fetchEmojis();
   // 如果用户未登录，优先检查并恢复匿名状态
@@ -798,6 +936,7 @@ defineExpose({
       <div v-if="shouldShowCommentForm" class="textarea-container">
         <el-form-item prop="content">
           <div :class="['textarea-wrapper', { 'is-logged-in': isLoggedIn }]">
+            <!-- 输入框始终显示 -->
             <el-input
               ref="textareaRef"
               v-model="form.content"
@@ -871,6 +1010,15 @@ defineExpose({
                 accept="image/*"
                 @change="handleFileChange"
               />
+              <button
+                class="action-icon preview-btn"
+                :class="{ 'action-icon-active': isMarkdownPreview }"
+                type="button"
+                :title="isMarkdownPreview ? '编辑' : '预览'"
+                @click.stop="togglePreview"
+              >
+                <IconifyIconOnline icon="fa6-brands:markdown" />
+              </button>
             </div>
             <!-- 登录后显示的发送按钮 -->
             <div v-if="isLoggedIn" class="logged-in-submit-wrapper">
@@ -895,6 +1043,15 @@ defineExpose({
             </div>
           </div>
         </el-form-item>
+        <!-- Markdown 预览区域 - 在输入框下方显示 -->
+        <div v-if="isMarkdownPreview" class="markdown-preview-container">
+          <div class="preview-label">预览</div>
+          <div
+            ref="markdownPreviewRef"
+            class="markdown-preview comment-content"
+            v-html="previewContent"
+          />
+        </div>
       </div>
       <div v-if="shouldShowCommentForm && !isLoggedIn">
         <div
@@ -1016,6 +1173,8 @@ defineExpose({
 </template>
 
 <style lang="scss" scoped>
+@use "@/style/article-content-base.scss" as *;
+
 // owoIn 动画已在 animation.scss 中定义
 
 .emoji-preview {
@@ -1119,6 +1278,113 @@ defineExpose({
 
   & > .el-form-item {
     margin-bottom: 0;
+  }
+
+  // Markdown 预览容器
+  .markdown-preview-container {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--anzhiyu-card-border);
+
+    .preview-label {
+      font-size: 12px;
+      color: var(--anzhiyu-secondtext);
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed var(--anzhiyu-card-border);
+    }
+
+    // Markdown 预览样式 - 与 .comment-content 保持一致
+    // 使用 :deep() 穿透 scoped 样式，使 v-html 渲染的内容也能应用样式
+    :deep(.markdown-preview) {
+      // 应用文章内容基础样式（与 .comment-content 相同）
+      @include article-content-base;
+
+      // 使用 & {} 包装在 mixin 之后的普通声明，符合 Sass 新规范
+      & {
+        max-width: 100%;
+        overflow-wrap: break-word;
+        word-break: break-word;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: var(--anzhiyu-fontcolor);
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .preview-empty {
+        color: var(--anzhiyu-secondtext);
+        margin: 0;
+      }
+
+      // 覆盖文章样式中的部分规则以适应评论区（与 .comment-content 相同）
+      p {
+        margin: 0.5rem 0;
+      }
+
+      // 行内代码样式 - 使用 code:not(.hljs) 区分行内代码和代码块
+      code:not(.hljs) {
+        padding: 0.2rem 0.4rem;
+        padding: 2px 4px;
+        margin: 0 4px;
+        line-height: 2;
+        color: #fff;
+        background: var(--anzhiyu-code-stress);
+        border-radius: 4px;
+        box-shadow: var(--anzhiyu-shadow-border);
+      }
+
+      // 代码块溢出处理
+      pre,
+      .md-editor-code {
+        max-width: 100%;
+        overflow-x: auto;
+      }
+
+      // 表格溢出处理
+      table {
+        max-width: 100%;
+        overflow-x: auto;
+        display: block;
+      }
+
+      // 图片样式（与 .comment-content 相同）
+      img {
+        max-width: 100%;
+        max-height: 300px;
+        height: auto;
+        vertical-align: middle;
+        border-radius: 4px;
+
+        &:not(.anzhiyu-owo-emotion) {
+          cursor: zoom-in;
+        }
+      }
+
+      .anzhiyu-owo-emotion {
+        width: 3rem;
+        height: auto;
+        margin: 0;
+        display: inline;
+      }
+
+      // 排除 fancybox 图片链接的样式
+      a[data-fancybox] {
+        padding: 0 !important;
+        border-bottom: none !important;
+
+        &:hover {
+          background: transparent !important;
+          box-shadow: none !important;
+        }
+      }
+
+      // 覆盖 article-content-base 中的 last-child 样式
+      > :last-child {
+        margin-bottom: 0.5rem !important;
+      }
+    }
   }
 }
 
@@ -1241,26 +1507,41 @@ defineExpose({
     }
 
     .action-icon {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
-      align-self: center;
-      width: 1.25em;
-      margin-right: 10px;
-      line-height: 0;
+      width: 1.5em;
+      height: 1.5em;
+      margin-right: 8px;
       color: var(--anzhiyu-fontcolor);
       cursor: pointer;
       user-select: none;
-      background: var(--anzhiyu-secondbg);
-      border-radius: 50%;
-      transition: background-color 0.2s;
+      background: transparent;
+      border-radius: 4px;
+      transition:
+        background-color 0.2s,
+        color 0.2s;
 
       &:hover {
         background-color: var(--anzhiyu-post-blockquote-bg);
       }
 
+      // 预览按钮特殊样式
+      &.preview-btn {
+        width: auto;
+        height: auto;
+        padding: 0 0.35rem;
+      }
+
       &[disabled] {
         cursor: not-allowed;
         opacity: 0.5;
+      }
+
+      &.action-icon-active {
+        background-color: var(--anzhiyu-post-blockquote-bg);
+        color: var(--anzhiyu-theme);
       }
     }
   }
