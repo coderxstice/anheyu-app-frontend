@@ -1,32 +1,16 @@
 <script setup lang="ts">
-import type { ArticleForm, PostCategory, PostTag } from "@/api/post/type";
-import {
-  Plus,
-  Remove,
-  Setting,
-  InfoFilled,
-  Edit,
-  Delete,
-  Link
-} from "@element-plus/icons-vue";
-import { computed, ref, watch, nextTick } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
-import ImageUpload from "@/components/ImageUpload/index.vue";
-import {
-  updateCategory,
-  deleteCategory,
-  createCategory,
-  getPrimaryColor
-} from "@/api/post";
+import type {
+  ArticleForm,
+  PostCategory,
+  PostTag
+} from "@/api/post/type";
+import { computed, ref, watch } from "vue";
+import { ElMessage } from "element-plus";
 import AnDialog from "@/components/AnDialog/index.vue";
-import { useUserStoreHook } from "@/store/modules/user";
 
-const userStore = useUserStoreHook();
-
-// 判断是否是管理员
-const isAdmin = computed(() => {
-  return userStore.roles.includes("1");
-});
+// 导入子组件
+import { CommonSettingsTab, AdvancedSettingsTab } from "./tabs";
+import { CategoryManagerDialog } from "./dialogs";
 
 const props = defineProps<{
   modelValue: boolean;
@@ -51,17 +35,6 @@ const internalForm = props.form;
 const copyrightType = ref<"original" | "reprint">("original");
 const isCategoryManagerVisible = ref(false);
 
-// === 分类管理弹窗所需状态 ===
-const newCategoryForm = ref({
-  name: "",
-  is_series: false
-});
-const isCreating = ref(false);
-const editingCategoryId = ref<string | null>(null);
-const editingCategoryName = ref("");
-const loadingStates = ref<Record<string, boolean>>({}); // 用于跟踪每行的加载状态
-const isFetchingColor = ref(false); // 用于跟踪主色调获取状态
-
 // === 关键词标签相关状态 ===
 const keywordTags = ref<string[]>([]);
 
@@ -70,34 +43,12 @@ const isVisible = computed({
   set: val => emit("update:modelValue", val)
 });
 
-const hasSeriesCategory = computed(() => {
-  if (
-    !internalForm.post_category_ids ||
-    internalForm.post_category_ids.length === 0
-  ) {
-    return false;
-  }
-  const selectedId = internalForm.post_category_ids[0];
-  const category = props.categoryOptions.find(c => c.id === selectedId);
-  return category?.is_series ?? false;
-});
-
-const hasMultipleRegularCategories = computed(() => {
-  return (
-    internalForm.post_category_ids &&
-    internalForm.post_category_ids.length > 0 &&
-    !hasSeriesCategory.value
-  );
-});
-
 watch(
   () => props.modelValue,
   isVisible => {
     if (isVisible) {
       activeTab.value = "common";
-      copyrightType.value = props.form.copyright_author
-        ? "reprint"
-        : "original";
+      copyrightType.value = props.form.copyright_author ? "reprint" : "original";
       // 初始化关键词标签
       if (internalForm.keywords) {
         keywordTags.value = internalForm.keywords
@@ -119,243 +70,6 @@ watch(copyrightType, newType => {
   }
 });
 
-const statusOptions = [
-  { value: "PUBLISHED", label: "发布" },
-  { value: "DRAFT", label: "草稿" },
-  { value: "ARCHIVED", label: "归档" }
-];
-
-const isCategoryNameExists = (name: string): boolean => {
-  return props.categoryOptions.some(
-    cat => cat.name.toLowerCase() === name.toLowerCase()
-  );
-};
-
-// === 分类管理弹窗相关方法 ===
-
-// 开始行内编辑
-const handleEditCategory = (category: PostCategory) => {
-  editingCategoryId.value = category.id;
-  editingCategoryName.value = category.name;
-  nextTick(() => {
-    // 聚焦输入框
-    const inputEl = document.querySelector(
-      `#category-edit-input-${category.id} input`
-    );
-    if (inputEl) {
-      (inputEl as HTMLElement).focus();
-    }
-  });
-};
-
-// 取消编辑
-const cancelEdit = () => {
-  editingCategoryId.value = null;
-  editingCategoryName.value = "";
-};
-
-// 提交名称更新
-const handleUpdateCategoryName = async (category: PostCategory) => {
-  if (
-    !editingCategoryName.value.trim() ||
-    editingCategoryName.value.trim() === category.name
-  ) {
-    cancelEdit();
-    return;
-  }
-  loadingStates.value[category.id] = true;
-  try {
-    await updateCategory(category.id, { name: editingCategoryName.value });
-    ElMessage.success("分类名称更新成功");
-    emit("refresh-categories");
-    cancelEdit();
-  } catch (error: any) {
-    ElMessage.error(error.message || "更新失败");
-  } finally {
-    loadingStates.value[category.id] = false;
-  }
-};
-
-// 切换分类类型
-const toggleCategoryType = async (category: PostCategory) => {
-  const newIsSeries = !category.is_series;
-  const action = newIsSeries ? "设置为系列" : "设置为普通分类";
-  try {
-    await ElMessageBox.confirm(
-      `确定要将分类 "${category.name}" ${action}吗？`,
-      "确认操作",
-      {
-        type: "warning"
-      }
-    );
-    loadingStates.value[category.id] = true;
-    await updateCategory(category.id, { is_series: newIsSeries });
-    ElMessage.success(`${action}成功`);
-    emit("refresh-categories");
-  } catch (error: any) {
-    if (error !== "cancel") ElMessage.error(error.message || "操作失败");
-  } finally {
-    loadingStates.value[category.id] = false;
-  }
-};
-
-// 删除分类
-const handleDeleteCategory = async (category: PostCategory) => {
-  const message =
-    category.count > 0
-      ? `此操作将删除分类 "${category.name}"，其下的 ${category.count} 篇文章将不再属于该分类。是否继续？`
-      : `确定要删除分类 "${category.name}" 吗？此操作不可恢复。`;
-
-  try {
-    await ElMessageBox.confirm(message, "警告", {
-      type: "warning",
-      confirmButtonText: "确认删除"
-    });
-    loadingStates.value[category.id] = true;
-    await deleteCategory(category.id);
-    ElMessage.success("删除成功");
-    emit("refresh-categories");
-  } catch (error: any) {
-    if (error !== "cancel") ElMessage.error(error.message || "删除失败");
-  } finally {
-    loadingStates.value[category.id] = false;
-  }
-};
-
-// 创建新分类
-const handleCreateCategory = async () => {
-  const name = newCategoryForm.value.name.trim();
-  if (!name) {
-    ElMessage.warning("分类名称不能为空");
-    return;
-  }
-  if (isCategoryNameExists(name)) {
-    ElMessage.error(`分类 "${name}" 已存在`);
-    return;
-  }
-  isCreating.value = true;
-  try {
-    await createCategory({ name, is_series: newCategoryForm.value.is_series });
-    ElMessage.success("创建成功");
-    newCategoryForm.value.name = "";
-    newCategoryForm.value.is_series = false;
-    emit("refresh-categories");
-  } catch (error: any) {
-    ElMessage.error(error.message || "创建失败");
-  } finally {
-    isCreating.value = false;
-  }
-};
-
-const addSummaryInput = () => {
-  if (!internalForm.summaries) internalForm.summaries = [];
-  if (internalForm.summaries.length < 3) internalForm.summaries.push("");
-};
-
-const removeSummaryInput = (index: number) => {
-  internalForm.summaries.splice(index, 1);
-};
-
-// 禁用未来日期
-const disabledFutureDate = (time: Date) => {
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const selectedDate = new Date(
-    time.getFullYear(),
-    time.getMonth(),
-    time.getDate()
-  );
-
-  // 禁用今天之后的所有日期
-  return selectedDate.getTime() > today.getTime();
-};
-
-// 禁用未来的小时（仅当选择的是今天时）
-const disabledFutureHours = () => {
-  const now = new Date();
-  const currentHour = now.getHours();
-  const disabledHours: number[] = [];
-
-  // 如果当前选择的日期是今天，禁用当前小时之后的所有小时
-  if (internalForm.custom_published_at) {
-    const selectedDate = new Date(internalForm.custom_published_at);
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const selectedDay = new Date(
-      selectedDate.getFullYear(),
-      selectedDate.getMonth(),
-      selectedDate.getDate()
-    );
-
-    if (selectedDay.getTime() === today.getTime()) {
-      // 禁用当前小时之后的所有小时（24小时制）
-      for (let i = currentHour + 1; i < 24; i++) {
-        disabledHours.push(i);
-      }
-    }
-  }
-
-  return disabledHours;
-};
-
-// 禁用未来的分钟（仅当选择的是今天且是当前小时时）
-const disabledFutureMinutes = (hour: number) => {
-  const now = new Date();
-  const currentHour = now.getHours();
-  const currentMinute = now.getMinutes();
-  const disabledMinutes: number[] = [];
-
-  if (internalForm.custom_published_at) {
-    const selectedDate = new Date(internalForm.custom_published_at);
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const selectedDay = new Date(
-      selectedDate.getFullYear(),
-      selectedDate.getMonth(),
-      selectedDate.getDate()
-    );
-
-    // 如果选择的是今天且是当前小时，禁用当前分钟之后的所有分钟
-    if (selectedDay.getTime() === today.getTime() && hour === currentHour) {
-      for (let i = currentMinute + 1; i < 60; i++) {
-        disabledMinutes.push(i);
-      }
-    }
-  }
-
-  return disabledMinutes;
-};
-
-// 禁用未来的秒（仅当选择的是今天且是当前小时和当前分钟时）
-const disabledFutureSeconds = (hour: number, minute: number) => {
-  const now = new Date();
-  const currentHour = now.getHours();
-  const currentMinute = now.getMinutes();
-  const currentSecond = now.getSeconds();
-  const disabledSeconds: number[] = [];
-
-  if (internalForm.custom_published_at) {
-    const selectedDate = new Date(internalForm.custom_published_at);
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const selectedDay = new Date(
-      selectedDate.getFullYear(),
-      selectedDate.getMonth(),
-      selectedDate.getDate()
-    );
-
-    // 如果选择的是今天且是当前小时和当前分钟，禁用当前秒之后的所有秒
-    if (
-      selectedDay.getTime() === today.getTime() &&
-      hour === currentHour &&
-      minute === currentMinute
-    ) {
-      for (let i = currentSecond + 1; i < 60; i++) {
-        disabledSeconds.push(i);
-      }
-    }
-  }
-
-  return disabledSeconds;
-};
-
 const handleConfirm = () => {
   // 验证发布时间不能是未来时间
   if (internalForm.custom_published_at) {
@@ -373,38 +87,9 @@ const handleConfirm = () => {
   emit("confirm-publish");
 };
 
-// 手动获取主色调
-const handleFetchPrimaryColor = async () => {
-  const imageUrl = internalForm.top_img_url || internalForm.cover_url;
-
-  if (!imageUrl) {
-    ElMessage.warning("请先上传封面图或顶部大图");
-    return;
-  }
-
-  console.log("[PublishDialog] 开始获取主色调，图片URL:", imageUrl);
-  isFetchingColor.value = true;
-
-  try {
-    const response = await getPrimaryColor(imageUrl);
-    console.log("[PublishDialog] 主色调响应:", response);
-
-    if (response?.data?.primary_color) {
-      internalForm.primary_color = response.data.primary_color;
-      ElMessage.success(`主色调获取成功: ${response.data.primary_color}`);
-    } else {
-      console.error("[PublishDialog] 响应格式异常:", response);
-      ElMessage.error("主色调获取失败：响应格式异常");
-    }
-  } catch (error: any) {
-    console.error("[PublishDialog] 主色调获取失败:", error);
-    const errorMsg =
-      error?.response?.data?.message || error?.message || "主色调获取失败";
-    ElMessage.error(errorMsg);
-  } finally {
-    isFetchingColor.value = false;
-    console.log("[PublishDialog] 主色调获取完成");
-  }
+// 分类管理相关
+const handleRefreshCategories = () => {
+  emit("refresh-categories");
 };
 </script>
 
@@ -419,371 +104,26 @@ const handleFetchPrimaryColor = async () => {
     >
       <el-tabs v-model="activeTab" class="publish-tabs">
         <el-tab-pane label="常用设置" name="common">
-          <el-form :model="internalForm" label-position="top">
-            <el-row :gutter="24">
-              <el-col :span="12">
-                <el-form-item label="分类" prop="post_category_ids">
-                  <template #label>
-                    <span>分类</span>
-                    <el-tooltip placement="top" :show-arrow="false">
-                      <template #content>
-                        一篇文章可选择多个普通分类，或单个系列分类。<br />
-                        如需增改，请点击右侧按钮进行管理。
-                      </template>
-                      <el-icon class="label-icon"><InfoFilled /></el-icon>
-                    </el-tooltip>
-                    <el-button
-                      type="primary"
-                      :icon="Setting"
-                      text
-                      size="small"
-                      class="manage-btn"
-                      @click="isCategoryManagerVisible = true"
-                    >
-                      管理分类
-                    </el-button>
-                  </template>
-                  <el-select
-                    :key="props.categorySelectKey"
-                    v-model="internalForm.post_category_ids"
-                    multiple
-                    filterable
-                    placeholder="请选择分类"
-                    style="width: 100%"
-                    no-data-text="暂无分类，请在'管理分类'中添加"
-                    :multiple-limit="hasSeriesCategory ? 1 : 3"
-                    popper-class="hide-selected-check"
-                    @change="values => emit('change-category', values)"
-                  >
-                    <el-option
-                      v-for="item in categoryOptions"
-                      :key="item.id"
-                      :label="item.name"
-                      :value="item.id"
-                      :disabled="
-                        (hasSeriesCategory &&
-                          item.id !== internalForm.post_category_ids[0]) ||
-                        (hasMultipleRegularCategories && item.is_series)
-                      "
-                    >
-                      <div class="category-option-item">
-                        <span>{{ item.name }}</span>
-                        <el-tag
-                          v-if="item.is_series"
-                          type="success"
-                          size="small"
-                          effect="light"
-                          round
-                          >系列</el-tag
-                        >
-                      </div>
-                    </el-option>
-                  </el-select>
-                </el-form-item>
-              </el-col>
-
-              <el-col :span="12">
-                <el-form-item label="标签" prop="post_tag_ids">
-                  <el-select
-                    :key="props.tagSelectKey"
-                    v-model="internalForm.post_tag_ids"
-                    multiple
-                    filterable
-                    allow-create
-                    default-first-option
-                    placeholder="选择或创建标签"
-                    style="width: 100%"
-                    no-data-text="输入名称后按回车键创建"
-                    @change="values => emit('change-tag', values)"
-                  >
-                    <el-option
-                      v-for="item in tagOptions"
-                      :key="item.id"
-                      :label="item.name"
-                      :value="item.id"
-                    />
-                  </el-select>
-                </el-form-item>
-              </el-col>
-
-              <el-col :span="12">
-                <el-form-item label="封面图" prop="cover_url">
-                  <ImageUpload
-                    v-model="internalForm.cover_url"
-                    :can-upload="isAdmin"
-                  />
-                  <el-input
-                    v-model="internalForm.cover_url"
-                    placeholder="或直接输入图片URL"
-                    style="margin-top: 8px"
-                  >
-                    <template #prefix>
-                      <el-icon><Link /></el-icon>
-                    </template>
-                  </el-input>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="顶部大图 (可选)" prop="top_img_url">
-                  <ImageUpload
-                    v-model="internalForm.top_img_url"
-                    :can-upload="isAdmin"
-                  />
-                  <el-input
-                    v-model="internalForm.top_img_url"
-                    placeholder="或直接输入图片URL"
-                    style="margin-top: 8px"
-                  >
-                    <template #prefix>
-                      <el-icon><Link /></el-icon>
-                    </template>
-                  </el-input>
-                  <div class="form-item-help">若不填, 将自动使用封面图URL</div>
-                </el-form-item>
-              </el-col>
-
-              <el-col :span="12">
-                <el-form-item label="状态" prop="status">
-                  <el-radio-group
-                    v-model="internalForm.status"
-                    class="status-radio-group"
-                  >
-                    <el-radio-button
-                      v-for="item in statusOptions"
-                      :key="item.value"
-                      :value="item.value"
-                      >{{ item.label }}</el-radio-button
-                    >
-                  </el-radio-group>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="文章类型">
-                  <el-radio-group v-model="copyrightType">
-                    <el-radio-button value="original">原创</el-radio-button>
-                    <el-radio-button value="reprint">转载</el-radio-button>
-                  </el-radio-group>
-                </el-form-item>
-                <div v-if="copyrightType === 'reprint'">
-                  <el-form-item label="版权作者 (可选)" prop="copyright_author">
-                    <el-input
-                      v-model="internalForm.copyright_author"
-                      placeholder="请输入原文作者"
-                    />
-                  </el-form-item>
-                </div>
-              </el-col>
-              <el-col :span="24">
-                <el-form-item label="摘要" prop="summaries">
-                  <div
-                    v-for="(summary, index) in internalForm.summaries"
-                    :key="index"
-                    class="summary-item"
-                  >
-                    <el-input
-                      v-model="internalForm.summaries[index]"
-                      placeholder="请输入单行摘要..."
-                    />
-                    <el-button
-                      :icon="Remove"
-                      type="danger"
-                      circle
-                      plain
-                      @click="removeSummaryInput(index)"
-                    />
-                  </div>
-                  <el-button
-                    v-if="
-                      !internalForm.summaries ||
-                      internalForm.summaries.length < 3
-                    "
-                    :icon="Plus"
-                    type="primary"
-                    plain
-                    style="width: 100%"
-                    @click="addSummaryInput"
-                  >
-                    新增摘要 ({{ internalForm.summaries?.length || 0 }}/3)
-                  </el-button>
-                </el-form-item>
-              </el-col>
-            </el-row>
-          </el-form>
+          <CommonSettingsTab
+            :form="internalForm"
+            :category-options="categoryOptions"
+            :tag-options="tagOptions"
+            :category-select-key="categorySelectKey"
+            :tag-select-key="tagSelectKey"
+            :copyright-type="copyrightType"
+            @change-category="values => emit('change-category', values)"
+            @change-tag="values => emit('change-tag', values)"
+            @update:copyright-type="val => (copyrightType = val)"
+            @open-category-manager="isCategoryManagerVisible = true"
+          />
         </el-tab-pane>
 
         <el-tab-pane label="高级设置" name="advanced">
-          <el-form :model="internalForm" label-position="top">
-            <el-row :gutter="24">
-              <el-col :span="12">
-                <el-form-item label="自定义永久链接 (可选)" prop="abbrlink">
-                  <el-input
-                    v-model="internalForm.abbrlink"
-                    placeholder="例如: my-awesome-post"
-                  />
-                  <div class="form-item-help">唯一、友好，留空则自动生成。</div>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="IP 属地 (可选)" prop="ip_location">
-                  <el-input
-                    v-model="internalForm.ip_location"
-                    placeholder="留空则自动获取"
-                  />
-                </el-form-item>
-              </el-col>
-              <el-col :span="24">
-                <el-form-item label="关键词 (可选)" prop="keywords">
-                  <el-input-tag
-                    v-model="keywordTags"
-                    tag-type="primary"
-                    tag-effect="light"
-                    placeholder="输入关键词后按回车添加"
-                  />
-                  <div class="form-item-help">
-                    用于SEO优化，建议添加3-5个关键词
-                  </div>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="在首页显示">
-                  <div>
-                    <el-switch
-                      v-model="internalForm.show_on_home"
-                      active-text="是"
-                      inactive-text="否"
-                    />
-                    <div class="form-item-help">
-                      控制文章发布后是否在首页展示
-                    </div>
-                  </div>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="首页推荐排序">
-                  <el-input-number
-                    v-model="internalForm.home_sort"
-                    :min="0"
-                    controls-position="right"
-                    style="width: 100%"
-                    placeholder="0"
-                  />
-                  <div class="form-item-help">
-                    0则不推荐, >0则推荐, 值越小越靠前
-                  </div>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="文章置顶排序">
-                  <el-input-number
-                    v-model="internalForm.pin_sort"
-                    :min="0"
-                    controls-position="right"
-                    style="width: 100%"
-                    placeholder="0"
-                  />
-                  <div class="form-item-help">
-                    0则不置顶, >0则置顶, 值越小越靠前
-                  </div>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="手动指定主色调">
-                  <el-switch v-model="internalForm.is_primary_color_manual" />
-                </el-form-item>
-                <el-form-item
-                  v-if="internalForm.is_primary_color_manual"
-                  label="主色调"
-                  prop="primary_color"
-                >
-                  <div>
-                    <div class="primary-color-controls">
-                      <el-color-picker v-model="internalForm.primary_color" />
-                      <el-button
-                        type="primary"
-                        size="small"
-                        :loading="isFetchingColor"
-                        :disabled="
-                          !internalForm.cover_url && !internalForm.top_img_url
-                        "
-                        @click="handleFetchPrimaryColor"
-                      >
-                        {{ isFetchingColor ? "获取中..." : "从图片获取" }}
-                      </el-button>
-                    </div>
-                    <div class="form-item-help">
-                      可以从封面图或顶部大图自动提取主色调
-                    </div>
-                  </div>
-                </el-form-item>
-                <el-form-item
-                  v-else-if="
-                    !internalForm.is_primary_color_manual &&
-                    internalForm.primary_color
-                  "
-                  label="主色调 (自动获取)"
-                >
-                  <el-color-picker
-                    v-model="internalForm.primary_color"
-                    disabled
-                  />
-                  <div class="form-item-help" style="margin-left: 10px">
-                    由封面图自动提取
-                  </div>
-                </el-form-item>
-              </el-col>
-              <el-col v-if="copyrightType === 'reprint'" :span="12">
-                <el-form-item
-                  label="版权作者链接 (可选)"
-                  prop="copyright_author_href"
-                >
-                  <el-input
-                    v-model="internalForm.copyright_author_href"
-                    placeholder="https://..."
-                  />
-                </el-form-item>
-                <el-form-item label="版权来源链接 (可选)" prop="copyright_url">
-                  <el-input
-                    v-model="internalForm.copyright_url"
-                    placeholder="转载文章的原始链接"
-                  />
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="自定义发布时间 (可选)">
-                  <el-date-picker
-                    v-model="internalForm.custom_published_at"
-                    type="datetime"
-                    placeholder="选择发布时间"
-                    style="width: 100%"
-                    format="YYYY-MM-DD HH:mm:ss"
-                    value-format="YYYY-MM-DDTHH:mm:ssZ"
-                    :disabled-date="disabledFutureDate"
-                    :disabled-hours="disabledFutureHours"
-                    :disabled-minutes="disabledFutureMinutes"
-                    :disabled-seconds="disabledFutureSeconds"
-                  />
-                  <div class="form-item-help">
-                    留空则使用当前时间，可用于回溯发布（不允许设置未来时间）
-                  </div>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="自定义更新时间 (可选)">
-                  <el-date-picker
-                    v-model="internalForm.custom_updated_at"
-                    type="datetime"
-                    placeholder="选择更新时间"
-                    style="width: 100%"
-                    format="YYYY-MM-DD HH:mm:ss"
-                    value-format="YYYY-MM-DDTHH:mm:ssZ"
-                  />
-                  <div class="form-item-help">
-                    留空则使用当前时间，可用于手动调整更新时间
-                  </div>
-                </el-form-item>
-              </el-col>
-            </el-row>
-          </el-form>
+          <AdvancedSettingsTab
+            :form="internalForm"
+            :copyright-type="copyrightType"
+            v-model:keyword-tags="keywordTags"
+          />
         </el-tab-pane>
       </el-tabs>
 
@@ -799,110 +139,11 @@ const handleFetchPrimaryColor = async () => {
       </template>
     </AnDialog>
 
-    <AnDialog v-model="isCategoryManagerVisible" title="管理分类" width="720px">
-      <div class="category-manager-body">
-        <div class="create-category-form">
-          <el-input
-            v-model="newCategoryForm.name"
-            placeholder="输入新分类名称"
-          />
-          <el-switch
-            v-model="newCategoryForm.is_series"
-            active-text="设为系列"
-            style="margin: 0 20px; width: 250px"
-          />
-          <el-button
-            type="primary"
-            :loading="isCreating"
-            @click="handleCreateCategory"
-          >
-            添加分类
-          </el-button>
-        </div>
-
-        <el-table
-          v-loading="!categoryOptions"
-          :data="categoryOptions"
-          :style="{ width: '100%' }"
-          height="350px"
-        >
-          <el-table-column prop="name" label="分类名称" min-width="150">
-            <template #default="scope">
-              <div v-if="editingCategoryId === scope.row.id" class="edit-cell">
-                <el-input
-                  :id="`category-edit-input-${scope.row.id}`"
-                  v-model="editingCategoryName"
-                  size="small"
-                  @blur="handleUpdateCategoryName(scope.row)"
-                  @keydown.enter="handleUpdateCategoryName(scope.row)"
-                />
-              </div>
-              <span v-else>{{ scope.row.name }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="count"
-            label="文章数"
-            width="90"
-            align="center"
-          />
-          <el-table-column label="类型" width="100" align="center">
-            <template #default="scope">
-              <el-tag
-                :type="scope.row.is_series ? 'success' : 'info'"
-                size="small"
-                effect="light"
-              >
-                {{ scope.row.is_series ? "系列" : "普通" }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="220" align="center">
-            <template #default="scope">
-              <div v-loading="loadingStates[scope.row.id]">
-                <el-button-group>
-                  <el-tooltip
-                    :show-arrow="false"
-                    content="编辑名称"
-                    placement="top"
-                  >
-                    <el-button
-                      :icon="Edit"
-                      type="primary"
-                      link
-                      @click="handleEditCategory(scope.row)"
-                    />
-                  </el-tooltip>
-                  <el-button
-                    type="primary"
-                    style="margin: 0 4px"
-                    link
-                    @click="toggleCategoryType(scope.row)"
-                  >
-                    {{ scope.row.is_series ? "转为普通" : "转为系列" }}
-                  </el-button>
-                  <el-tooltip
-                    content="删除分类"
-                    placement="top"
-                    :show-arrow="false"
-                  >
-                    <el-button
-                      :icon="Delete"
-                      type="danger"
-                      link
-                      @click="handleDeleteCategory(scope.row)"
-                    />
-                  </el-tooltip>
-                </el-button-group>
-              </div>
-            </template>
-          </el-table-column>
-        </el-table>
-      </div>
-      <template #footer>
-        <el-button @click="isCategoryManagerVisible = false">关闭</el-button>
-      </template>
-    </AnDialog>
+    <CategoryManagerDialog
+      v-model="isCategoryManagerVisible"
+      :category-options="categoryOptions"
+      @refresh-categories="handleRefreshCategories"
+    />
   </div>
 </template>
 
@@ -914,28 +155,22 @@ const handleFetchPrimaryColor = async () => {
 </style>
 
 <style lang="scss" scoped>
-.form-item-help {
-  margin-top: 4px;
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--anzhiyu-secondtext);
+.publish-tabs {
+  :deep(.el-tabs__header) {
+    margin-bottom: 20px;
+  }
 }
 
-.primary-color-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+:deep(.el-form-item__label) {
+  .label-icon {
+    margin-left: 4px;
+    color: var(--anzhiyu-secondtext);
+    vertical-align: middle;
+  }
 
-.summary-item {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  width: 100%;
-  margin-bottom: 8px;
-
-  .el-input {
-    flex-grow: 1;
+  .manage-btn {
+    margin-left: auto;
+    font-weight: normal;
   }
 }
 
@@ -948,46 +183,6 @@ const handleFetchPrimaryColor = async () => {
     .el-radio-button__inner {
       width: 100%;
     }
-  }
-}
-
-.publish-tabs {
-  :deep(.el-tabs__header) {
-    margin-bottom: 20px;
-  }
-}
-
-:deep(.el-form-item__label) {
-  .label-icon {
-    margin-left: 4px;
-    vertical-align: middle;
-    color: var(--anzhiyu-secondtext);
-  }
-  .manage-btn {
-    margin-left: auto;
-    font-weight: normal;
-  }
-}
-
-.category-option-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.category-manager-body {
-  .create-category-form {
-    display: flex;
-    align-items: center;
-    padding-bottom: 16px;
-    border-bottom: var(--style-border-always);
-    margin-bottom: 16px;
-  }
-  .edit-cell {
-    display: flex;
-    align-items: center;
-    gap: 8px;
   }
 }
 </style>
