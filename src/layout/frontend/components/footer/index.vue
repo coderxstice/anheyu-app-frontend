@@ -230,7 +230,10 @@
             class="copyright-info"
             v-html="copyrightText"
           />
-          <div v-if="policeRecordNumber || icpNumber" class="record-info">
+          <div
+            v-if="policeRecordNumber || icpNumber || uptimeKumaConfig?.enable"
+            class="record-info"
+          >
             <el-tooltip
               v-if="policeRecordNumber"
               content="前往全国互联网安全管理服务平台的备案信息查询页面"

@@ -24,7 +24,7 @@
       <SettingsSidebar :active-key="activeKey" @select="handleSelect" />
 
       <!-- 右侧内容区 -->
-      <div class="settings-content">
+      <div ref="contentRef" class="settings-content">
         <div class="content-wrapper">
           <slot :active-key="activeKey" :active-component="activeComponent" />
         </div>
@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Upload, Download } from "@element-plus/icons-vue";
 import SettingsSidebar from "./SettingsSidebar.vue";
@@ -63,6 +63,18 @@ const emit = defineEmits<{
 
 const route = useRoute();
 const router = useRouter();
+
+// 内容区域 ref
+const contentRef = ref<HTMLElement | null>(null);
+
+// 滚动到顶部
+const scrollToTop = () => {
+  nextTick(() => {
+    if (contentRef.value) {
+      contentRef.value.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  });
+};
 
 // 默认选中第一个菜单项
 const getDefaultKey = () => {
@@ -89,6 +101,8 @@ const handleSelect = (key: string) => {
   // 更新 URL query 参数
   router.replace({ query: { ...route.query, tab: key } });
   emit("change", key);
+  // 滚动到顶部
+  scrollToTop();
 };
 
 // 处理搜索导航
