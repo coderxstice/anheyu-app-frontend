@@ -12,12 +12,13 @@ export function useContentProcessor() {
   const { showSnackbar } = useSnackbar();
 
   const codeMaxLines = computed(
-    () => siteConfigStore.getSiteConfig?.code_block?.code_max_lines || 10
+    () => siteConfigStore.getSiteConfig?.post?.code_block?.code_max_lines || 10
   );
 
   const collapsedHeight = computed(() => {
     const lines = codeMaxLines.value > 0 ? codeMaxLines.value : 10;
-    const height = lines * 25 + 15;
+    // 每行高度约 26px (font-size 1rem * line-height 1.6)，加上 padding 20px
+    const height = lines * 26 + 20;
     return `${height}px`;
   });
 
