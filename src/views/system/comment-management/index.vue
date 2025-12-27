@@ -4,6 +4,7 @@ import { useCommentManagement } from "./utils/hook";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import ImportExportDialog from "./components/ImportExportDialog.vue";
+import EditCommentDialog from "./components/EditCommentDialog.vue";
 
 import Delete from "@iconify-icons/ep/delete";
 import EditPen from "@iconify-icons/ep/edit-pen";
@@ -31,6 +32,8 @@ const {
   loadingConfig,
   selectedIds,
   statusOptions,
+  editDialogVisible,
+  editingComment,
   onSizeChange,
   onCurrentChange,
   onSearch,
@@ -39,6 +42,7 @@ const {
   handleDelete,
   handleBatchDelete,
   handleEdit,
+  handleEditSuccess,
   handleReply,
   handleSelectionChange
 } = useCommentManagement();
@@ -277,6 +281,13 @@ function onImportExportSuccess() {
       v-model="importExportDialogVisible"
       :selected-ids="selectedIds"
       @success="onImportExportSuccess"
+    />
+
+    <!-- 编辑评论对话框 -->
+    <EditCommentDialog
+      v-model="editDialogVisible"
+      :comment="editingComment"
+      @success="handleEditSuccess"
     />
   </div>
 </template>

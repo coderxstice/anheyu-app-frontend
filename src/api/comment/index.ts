@@ -141,6 +141,27 @@ export const updateAdminComment = (id: string, content: string) => {
 };
 
 /**
+ * @description: [管理员] 更新评论信息（包括昵称、邮箱、网站、内容）
+ */
+export const updateAdminCommentInfo = (
+  id: string,
+  data: {
+    content?: string;
+    nickname?: string;
+    email?: string;
+    website?: string;
+  }
+) => {
+  return http.request<BaseResponse<AdminComment>>(
+    "put",
+    baseUrlApi(`comments/${id}/info`),
+    {
+      data
+    }
+  );
+};
+
+/**
  * @description: [管理员] 批量删除评论
  */
 export const deleteAdminComments = (ids: string[]) => {

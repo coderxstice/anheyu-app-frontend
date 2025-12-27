@@ -91,6 +91,16 @@ export interface CommentQuery {
 }
 
 /**
+ * @description 更新评论信息的请求参数（用于管理员编辑）
+ */
+export interface UpdateCommentRequest {
+  content?: string;
+  nickname?: string;
+  email?: string;
+  website?: string;
+}
+
+/**
  * @description 上传图片成功后，响应体中 data 字段的类型
  */
 export interface UploadImageResponseData {
