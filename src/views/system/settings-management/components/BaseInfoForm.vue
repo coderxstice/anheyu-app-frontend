@@ -93,7 +93,7 @@
     <div>
       <el-input
         v-model="formData.gravatarURL"
-        placeholder="例如：https://cdn.sep.cc/"
+        placeholder="例如：https://cravatar.cn/"
       />
       <div class="form-item-help">
         Gravatar 头像服务器地址，用于生成用户头像。请确保该地址可正常访问。

@@ -12,9 +12,11 @@ import type { Ref } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
 interface TocItem {
-  id: string;
+  id: string; // 原始 HTML 中的 ID，用于滚动定位
+  uniqueId: string; // 唯一标识符，用于 Vue key 和激活状态比较
   text: string;
   level: number;
+  index: number; // 在原始数组中的索引，用于定位 DOM 元素
 }
 
 defineOptions({
@@ -62,13 +64,13 @@ const visibleTocItems = computed(() => {
   }
 
   const items = tocItems.value;
-  const activeId = activeTocId.value;
+  const activeUniqueId = activeTocId.value;
   const visibleItems: TocItem[] = [];
 
-  // 找到当前激活项的索引
+  // 找到当前激活项的索引（使用 uniqueId 进行匹配）
   let activeIndex = -1;
-  if (activeId) {
-    activeIndex = items.findIndex(item => item.id === activeId);
+  if (activeUniqueId) {
+    activeIndex = items.findIndex(item => item.uniqueId === activeUniqueId);
   }
 
   // 获取最小级别（通常是H2）
@@ -198,18 +200,19 @@ function isSiblingOf(
   return true;
 }
 
-const scrollToHeading = (event: MouseEvent, id: string) => {
+const scrollToHeading = (event: MouseEvent, item: TocItem) => {
   event.preventDefault();
-  activeTocId.value = id;
+  activeTocId.value = item.uniqueId;
 
   // 根据配置决定是否更新URL Hash
   if (tocHashUpdateMode.value !== "none") {
-    history.replaceState(history.state, "", `#${id}`);
+    history.replaceState(history.state, "", `#${item.id}`);
   }
 
   isClickScrolling.value = true;
 
-  const headingElement = document.getElementById(id);
+  // 使用 index 找到正确的 DOM 元素（处理重复 ID 的情况）
+  const headingElement = getHeadingElementByIndex(item.index);
   if (headingElement) {
     const rect = headingElement.getBoundingClientRect();
     const absoluteTop = rect.top + window.scrollY;
@@ -219,6 +222,19 @@ const scrollToHeading = (event: MouseEvent, id: string) => {
       behavior: "smooth"
     });
   }
+};
+
+// 根据索引获取标题元素
+const getHeadingElementByIndex = (index: number): HTMLElement | null => {
+  const headingSelector = "h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]";
+  const contentEl = document.querySelector(".post-content");
+  if (!contentEl) {
+    // 回退：直接在整个文档中查找
+    const allHeadings = document.querySelectorAll(headingSelector);
+    return allHeadings[index] as HTMLElement | null;
+  }
+  const headings = contentEl.querySelectorAll(headingSelector);
+  return headings[index] as HTMLElement | null;
 };
 
 const parseHeadings = () => {
@@ -231,13 +247,29 @@ const parseHeadings = () => {
   const headings = doc.querySelectorAll("h1, h2, h3, h4, h5, h6");
   const newTocItems: TocItem[] = [];
 
+  // 用于跟踪重复 ID 的计数器
+  const idCountMap = new Map<string, number>();
+
+  let index = 0;
   headings.forEach(heading => {
     if (heading.id) {
+      const originalId = heading.id;
+
+      // 计算这个 ID 出现的次数
+      const count = idCountMap.get(originalId) || 0;
+      idCountMap.set(originalId, count + 1);
+
+      // 生成唯一标识符：如果是第一次出现用原始ID，否则添加数字后缀
+      const uniqueId = count === 0 ? originalId : `${originalId}-${count}`;
+
       newTocItems.push({
-        id: heading.id,
+        id: originalId,
+        uniqueId: uniqueId,
         text: heading.textContent || "",
-        level: parseInt(heading.tagName.substring(1), 10)
+        level: parseInt(heading.tagName.substring(1), 10),
+        index: index
       });
+      index++;
     }
   });
   tocItems.value = newTocItems;
@@ -252,29 +284,28 @@ const onScroll = () => {
   }
 
   const fixedHeaderHeight = 80;
-  let newActiveId: string | null = null;
-
-  // 使用 tocItems 而不是 allSpyIds，确保只检测标题元素
-  const headingIds = tocItems.value.map(item => item.id);
+  let newActiveUniqueId: string | null = null;
+  let newActiveOriginalId: string | null = null;
 
   // 从前往后遍历，找到最后一个 top <= fixedHeaderHeight 的元素
-  for (let i = 0; i < headingIds.length; i++) {
-    const id = headingIds[i];
-    const element = document.getElementById(id);
+  for (let i = 0; i < tocItems.value.length; i++) {
+    const item = tocItems.value[i];
+    const element = getHeadingElementByIndex(item.index);
     if (element) {
       const rect = element.getBoundingClientRect();
       if (rect.top <= fixedHeaderHeight) {
-        newActiveId = id;
+        newActiveUniqueId = item.uniqueId;
+        newActiveOriginalId = item.id;
       }
     }
   }
 
-  if (activeTocId.value !== newActiveId) {
-    activeTocId.value = newActiveId;
-    // 根据配置决定是否更新URL Hash
+  if (activeTocId.value !== newActiveUniqueId) {
+    activeTocId.value = newActiveUniqueId;
+    // 根据配置决定是否更新URL Hash（使用原始 ID）
     if (tocHashUpdateMode.value !== "none") {
-      if (newActiveId) {
-        history.replaceState(history.state, "", `#${newActiveId}`);
+      if (newActiveOriginalId) {
+        history.replaceState(history.state, "", `#${newActiveOriginalId}`);
       } else {
         history.replaceState(
           history.state,
@@ -399,15 +430,15 @@ defineExpose({
         <TransitionGroup name="toc-item">
           <li
             v-for="item in visibleTocItems"
-            :key="item.id"
+            :key="item.uniqueId"
             class="toc-item"
             :class="`toc-level-${item.level}`"
           >
             <a
               :href="`#${item.id}`"
               class="toc-link"
-              :class="{ active: activeTocId === item.id }"
-              @click="scrollToHeading($event, item.id)"
+              :class="{ active: activeTocId === item.uniqueId }"
+              @click="scrollToHeading($event, item)"
             >
               <span class="toc-text">{{ item.text }}</span>
             </a>

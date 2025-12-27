@@ -260,7 +260,7 @@ const siteDescriptors: SettingDescriptor[] = [
   {
     frontendPath: "site.gravatarURL",
     backendKey: constant.KeyGravatarURL,
-    defaultValue: "https://cdn.sep.cc/",
+    defaultValue: "https://cravatar.cn/",
     type: "string"
   },
   {

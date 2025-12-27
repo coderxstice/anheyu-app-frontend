@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-02 18:04:48
- * @LastEditTime: 2025-12-25 10:49:25
+ * @LastEditTime: 2025-12-27 16:57:21
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -28,18 +28,20 @@
   </el-form-item>
 
   <el-form-item label="文章过期时间">
-    <el-input-number
-      v-model="formData.expirationTime"
-      :min="0"
-      controls-position="right"
-      style="width: 100%"
-      placeholder="例如: 365"
-      :style="{ width: '100px' }"
-      :value-on-clear="null"
-    />
-    <div class="form-item-help">
-      文章过期时间，单位为天。<br />
-      <strong>不填则没有过期时间组件展示。</strong>
+    <div>
+      <el-input-number
+        v-model="formData.expirationTime"
+        :min="0"
+        controls-position="right"
+        style="width: 100%"
+        placeholder="例如: 365"
+        :style="{ width: '130px' }"
+        :value-on-clear="null"
+      />
+      <div class="form-item-help">
+        文章过期时间，单位为天。<br />
+        <strong>不填则没有过期时间组件展示。</strong>
+      </div>
     </div>
   </el-form-item>
 
@@ -212,7 +214,7 @@
         placeholder="例如: 50"
       />
       <div class="form-item-help">
-        代码块超过此行数时将显示滚动条，默认为10行。
+        代码块超过此行数时将显示滚动条，默认为10行。此处为约数，不是准确行数，可以适当上下调整。
       </div>
     </div>
   </el-form-item>

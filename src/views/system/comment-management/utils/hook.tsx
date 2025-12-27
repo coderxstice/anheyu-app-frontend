@@ -10,8 +10,7 @@ import {
   pinAdminComment,
   updateAdminCommentStatus,
   deleteAdminComments,
-  createPublicComment,
-  updateAdminComment
+  createPublicComment
 } from "@/api/comment";
 import type {
   AdminComment,
@@ -580,38 +579,23 @@ export function useCommentManagement() {
     });
   }
 
-  // 编辑评论
+  // 编辑评论相关状态
+  const editDialogVisible = ref(false);
+  const editingComment = ref<AdminComment | null>(null);
+
+  // 打开编辑对话框
   function handleEdit(row: AdminComment) {
-    ElMessageBox.prompt(`编辑评论（支持 Markdown 语法）:`, "编辑评论", {
-      inputType: "textarea",
-      inputValue: row.content,
-      confirmButtonText: "保存",
-      cancelButtonText: "取消",
-      inputValidator: (val: string) => {
-        if (!val || val.trim() === "") {
-          return "评论内容不能为空";
-        }
-        if (val.length > 1000) {
-          return "评论内容不能超过 1000 字符";
-        }
-        return true;
-      }
-    })
-      .then(async ({ value }) => {
-        try {
-          const res = await updateAdminComment(row.id, value);
-          const index = dataList.value.findIndex(c => c.id === row.id);
-          if (index !== -1) {
-            dataList.value[index] = res.data;
-          }
-          message("编辑成功", { type: "success" });
-        } catch {
-          message("编辑失败，请稀后重试", { type: "error" });
-        }
-      })
-      .catch(() => {
-        message("已取消编辑", { type: "info" });
-      });
+    editingComment.value = row;
+    editDialogVisible.value = true;
+  }
+
+  // 编辑成功后的回调
+  function handleEditSuccess(updatedComment: AdminComment) {
+    const index = dataList.value.findIndex(c => c.id === updatedComment.id);
+    if (index !== -1) {
+      dataList.value[index] = updatedComment;
+    }
+    message("编辑成功", { type: "success" });
   }
 
   // 回复评论
@@ -691,6 +675,8 @@ export function useCommentManagement() {
     loadingConfig,
     selectedIds,
     statusOptions,
+    editDialogVisible,
+    editingComment,
     onSizeChange,
     onCurrentChange,
     onSearch,
@@ -700,6 +686,7 @@ export function useCommentManagement() {
     handleDelete,
     handleBatchDelete,
     handleEdit,
+    handleEditSuccess,
     handleReply,
     handleSelectionChange,
     getStatusTagType,
