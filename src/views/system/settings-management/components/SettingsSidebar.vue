@@ -3,6 +3,7 @@
     <el-menu
       :default-active="activeKey"
       :default-openeds="defaultOpeneds"
+      unique-opened
       class="settings-menu"
       @select="handleSelect"
     >
@@ -44,8 +45,15 @@ const emit = defineEmits<{
 
 const menuConfig = computed<SettingsMenuItem[]>(() => settingsMenuConfig);
 
-// 默认展开所有一级菜单
-const defaultOpeneds = computed(() => menuConfig.value.map(item => item.key));
+// 默认展开当前激活项所在的一级菜单
+const defaultOpeneds = computed(() => {
+  const activeItem = menuConfig.value.find(item =>
+    item.children?.some(child => child.key === props.activeKey)
+  );
+  return activeItem
+    ? [activeItem.key]
+    : [menuConfig.value[0]?.key].filter(Boolean);
+});
 
 const handleSelect = (key: string) => {
   emit("select", key);
