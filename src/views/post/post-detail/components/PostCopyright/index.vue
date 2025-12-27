@@ -4,7 +4,14 @@ import type { Article } from "@/api/post/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import HandHeartIcon from "@iconify-icons/ri/hand-heart-fill";
 import RssIcon from "@iconify-icons/ri/plant-fill";
+import ShareIcon from "@iconify-icons/ri/share-box-fill";
+import WeiboIcon from "@iconify-icons/ri/weibo-fill";
+import QQIcon from "@iconify-icons/ri/qq-fill";
 import { useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
+import AnDialog from "@/components/AnDialog/index.vue";
+import { useCopyToClipboard } from "@pureadmin/utils";
+import { generatePoster, downloadPoster } from "@/utils/posterGenerator";
 
 const props = defineProps({
   article: {
@@ -21,6 +28,20 @@ const router = useRouter();
 const siteConfigStore = useSiteConfigStore();
 const siteConfig = siteConfigStore.getSiteConfig;
 const showRewardPanel = ref(false);
+const isGeneratingPoster = ref(false);
+const showPosterDialog = ref(false);
+const posterDataUrl = ref<string>("");
+const { update: copyToClipboard } = useCopyToClipboard();
+
+// 格式化日期
+const formatDate = (dateString: string) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 
 // 获取文章的实际作者信息（优先使用文章发布者的信息，否则使用站点所有者）
 const articleAuthor = computed(() => {
@@ -95,6 +116,83 @@ const goRss = () => {
 
 const goRewardPage = () => {
   router.push({ path: "/about" });
+};
+
+// 生成分享海报
+const handleGeneratePoster = async () => {
+  if (isGeneratingPoster.value) return;
+
+  try {
+    isGeneratingPoster.value = true;
+    ElMessage.info("正在生成海报...");
+
+    // 获取当前文章URL
+    const articleUrl = window.location.href;
+
+    // 获取文章封面图
+    const coverImage = props.article.cover_url || undefined;
+
+    // 获取文章简介（优先使用第一个摘要）
+    const description = props.article.summaries?.[0] || undefined;
+
+    // 格式化发布时间
+    const publishDate = formatDate(props.article.created_at);
+
+    // 生成海报
+    const dataUrl = await generatePoster({
+      title: props.article.title,
+      description: description,
+      author: articleAuthor.value,
+      authorAvatar: articleAuthorAvatar.value,
+      siteName: siteConfig.APP_NAME || siteConfig.frontDesk?.siteOwner?.name,
+      siteSubtitle: siteConfig.SUB_TITLE,
+      articleUrl: articleUrl,
+      coverImage: coverImage,
+      publishDate: publishDate
+    });
+
+    // 保存海报数据并显示弹窗
+    posterDataUrl.value = dataUrl;
+    showPosterDialog.value = true;
+    ElMessage.success("海报生成成功！");
+  } catch (error: any) {
+    console.error("生成海报失败:", error);
+    ElMessage.error(error.message || "生成海报失败，请稍后重试");
+  } finally {
+    isGeneratingPoster.value = false;
+  }
+};
+
+// 下载海报
+const handleDownloadPoster = () => {
+  if (!posterDataUrl.value) return;
+  const filename = `${props.article.title || "文章"}_分享海报.png`;
+  downloadPoster(posterDataUrl.value, filename);
+};
+
+// 获取当前文章URL
+const articleUrl = computed(() => window.location.href);
+
+// 复制链接
+const handleCopyLink = async () => {
+  await copyToClipboard(articleUrl.value);
+  ElMessage.success("链接已复制到剪贴板");
+};
+
+// 分享到社交平台
+const shareToWeibo = () => {
+  const url = `https://service.weibo.com/share/share.php?url=${encodeURIComponent(articleUrl.value)}&title=${encodeURIComponent(props.article.title)}`;
+  window.open(url, "_blank", "width=600,height=400");
+};
+
+const shareToQQ = () => {
+  const url = `https://connect.qq.com/widget/shareqq/index.html?url=${encodeURIComponent(articleUrl.value)}&title=${encodeURIComponent(props.article.title)}&summary=${encodeURIComponent(props.article.summaries?.[0] || "")}`;
+  window.open(url, "_blank", "width=600,height=400");
+};
+
+const shareToQZone = () => {
+  const url = `https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=${encodeURIComponent(articleUrl.value)}&title=${encodeURIComponent(props.article.title)}&summary=${encodeURIComponent(props.article.summaries?.[0] || "")}`;
+  window.open(url, "_blank", "width=600,height=400");
 };
 
 // 检查是否有任何打赏方式可用
@@ -198,11 +296,88 @@ const isAlipayEnabled = computed(() => {
         <IconifyIconOffline :icon="RssIcon" />
         <span>订阅</span>
       </div>
+      <div
+        class="share-button"
+        :class="{ loading: isGeneratingPoster }"
+        @click="handleGeneratePoster"
+      >
+        <IconifyIconOffline :icon="ShareIcon" />
+        <span>{{ isGeneratingPoster ? "生成中..." : "分享" }}</span>
+      </div>
     </div>
 
     <div class="copyright-notice">
       <span v-html="copyrightInfo" />
     </div>
+
+    <!-- 海报预览弹窗 -->
+    <AnDialog
+      v-model="showPosterDialog"
+      title="分享海报"
+      width="720px"
+      max-width="95vw"
+      :show-footer="false"
+      class="share-poster-dialog"
+    >
+      <div class="poster-dialog-content">
+        <!-- 左侧：海报预览 -->
+        <div class="poster-preview-side">
+          <div v-if="posterDataUrl" class="poster-image-wrapper">
+            <img :src="posterDataUrl" alt="分享海报" class="poster-image" />
+          </div>
+          <div v-else class="poster-loading">
+            <p>正在生成海报...</p>
+          </div>
+        </div>
+
+        <!-- 右侧：操作区域 -->
+        <div class="poster-actions-side">
+          <!-- 复制链接 -->
+          <div class="action-section">
+            <div class="section-label">点击复制链接：</div>
+            <el-input
+              :model-value="articleUrl"
+              readonly
+              class="url-input"
+              @click="handleCopyLink"
+            />
+          </div>
+
+          <!-- 分享到 -->
+          <div class="action-section">
+            <div class="section-label">分享到：</div>
+            <div class="share-buttons">
+              <el-button
+                class="share-btn share-btn-weibo"
+                @click="shareToWeibo"
+              >
+                <IconifyIconOffline :icon="WeiboIcon" />
+                <span>微博</span>
+              </el-button>
+              <el-button class="share-btn share-btn-qq" @click="shareToQQ">
+                <IconifyIconOffline :icon="QQIcon" />
+                <span>QQ好友</span>
+              </el-button>
+              <el-button
+                class="share-btn share-btn-qzone"
+                @click="shareToQZone"
+              >
+                <IconifyIconOffline :icon="QQIcon" />
+                <span>QQ空间</span>
+              </el-button>
+            </div>
+          </div>
+
+          <!-- 下载海报 -->
+          <div class="action-section">
+            <div class="section-label">下载海报：</div>
+            <el-button class="download-btn" @click="handleDownloadPoster">
+              <span>点击下载</span>
+            </el-button>
+          </div>
+        </div>
+      </div>
+    </AnDialog>
   </div>
 </template>
 
@@ -300,7 +475,8 @@ const isAlipayEnabled = computed(() => {
   }
 
   .reward-button,
-  .subscribe-button {
+  .subscribe-button,
+  .share-button {
     display: flex;
     gap: 0.5rem;
     align-items: center;
@@ -318,10 +494,19 @@ const isAlipayEnabled = computed(() => {
       background: var(--anzhiyu-theme);
       box-shadow: none;
     }
+
+    &.loading {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
   }
 
   .subscribe-button {
     background: var(--anzhiyu-green);
+  }
+
+  .share-button {
+    background: var(--anzhiyu-blue);
   }
 }
 
@@ -540,5 +725,163 @@ const isAlipayEnabled = computed(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.poster-dialog-content {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+}
+
+.poster-preview-side {
+  flex: 0 0 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  @media (max-width: 768px) {
+    flex: 1;
+    width: 100%;
+  }
+
+  .poster-image-wrapper {
+    width: 100%;
+    max-width: 320px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .poster-image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .poster-loading {
+    padding: 3rem;
+    text-align: center;
+    color: var(--anzhiyu-secondtext);
+    font-size: 14px;
+  }
+}
+
+.poster-actions-side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.5rem 0;
+  justify-content: center;
+
+  .action-section {
+    .section-label {
+      margin-bottom: 0.6rem;
+      font-size: 14px;
+      color: var(--anzhiyu-fontcolor);
+    }
+
+    .url-input {
+      :deep(.el-input__inner) {
+        cursor: pointer;
+        font-size: 13px;
+        background: var(--anzhiyu-card-bg);
+        border: 1px solid var(--anzhiyu-gray-100);
+        border-radius: 6px;
+        transition: all 0.3s ease;
+
+        &:hover {
+          border-color: var(--anzhiyu-main);
+        }
+      }
+    }
+
+    .share-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+
+      .share-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: none;
+        font-weight: 500;
+        padding: 12px 20px;
+        font-size: 14px;
+        border-radius: 6px;
+        width: 100%;
+
+        &:hover {
+          opacity: 0.9;
+        }
+
+        svg {
+          font-size: 18px;
+        }
+
+        &.share-btn-weibo {
+          background: #e6162d;
+          color: #fff;
+
+          &:hover {
+            background: #d1142a;
+          }
+        }
+
+        &.share-btn-qq {
+          background: #12b7f5;
+          color: #fff;
+          margin-top: 0.6rem;
+          margin-left: 0;
+
+          &:hover {
+            background: #0fa5db;
+          }
+        }
+
+        &.share-btn-qzone {
+          background: #fcee21;
+          color: #333;
+          margin-top: 0.6rem;
+          margin-left: 0;
+
+          &:hover {
+            background: #f5e31a;
+          }
+        }
+      }
+    }
+
+    .download-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      background: #4a4a4a;
+      border: none;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 6px;
+      color: #fff;
+
+      &:hover {
+        background: #3a3a3a;
+      }
+    }
+  }
 }
 </style>

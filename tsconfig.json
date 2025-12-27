@@ -26,8 +26,7 @@
       "node",
       "vite/client",
       "element-plus/global",
-      "@pureadmin/table/volar",
-      "vite-plugin-pwa/vue"
+      "@pureadmin/table/volar"
     ]
   },
   "include": [
