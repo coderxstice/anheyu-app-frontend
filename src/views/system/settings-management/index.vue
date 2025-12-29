@@ -141,6 +141,17 @@
             <RecentCommentsPageForm v-model="form.frontDesk.recentComments" />
           </template>
 
+          <!-- 高级功能 - 相册页 -->
+          <template v-else-if="activeComponent === 'AlbumPageForm'">
+            <div class="section-header">
+              <h2>相册页</h2>
+              <p class="section-desc">
+                配置相册页面的 Banner、布局模式、瀑布流等
+              </p>
+            </div>
+            <AlbumPageForm v-model="form.frontDesk.album" />
+          </template>
+
           <!-- 高级功能 - 页面管理 -->
           <template v-else-if="activeComponent === 'PageManagement'">
             <div class="section-header">
@@ -192,6 +203,7 @@ import FLinkPageSettingsForm from "./components/frontDesk/FLinkPageSettingsForm/
 import EquipmentPageForm from "./components/frontDesk/EquipmentPageForm/index.vue";
 import AboutPageForm from "./components/frontDesk/AboutPageForm/index.vue";
 import RecentCommentsPageForm from "./components/frontDesk/RecentCommentsPageForm/index.vue";
+import AlbumPageForm from "./components/frontDesk/AlbumPageForm/index.vue";
 
 const siteConfigStore = useSiteConfigStore();
 const fLinkFormRef = ref<InstanceType<typeof FLinkPageSettingsForm>>();

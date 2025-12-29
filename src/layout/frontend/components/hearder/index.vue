@@ -829,7 +829,7 @@ const scrollToTop = () => {
     }
 
     &.is-transparent {
-      background-color: transparent;
+      background-color: var(--anzhiyu-background);
       outline-color: transparent;
     }
 

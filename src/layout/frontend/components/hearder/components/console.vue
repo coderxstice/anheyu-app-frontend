@@ -116,7 +116,7 @@
             :class="{ on: isCommentBarrageVisible }"
           >
             <button class="commentBarrage" @click="toggleCommentBarrage()">
-              <IconifyIconOffline icon="ri:chat-1-fill" class="w-6 h-6" />
+              <IconifyIconOffline :icon="Chat1Fill" />
             </button>
           </div>
         </el-tooltip>
@@ -199,6 +199,7 @@ import type { Comment } from "@/api/comment/type";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 import { useUiStore } from "@/store/modules/uiStore";
 import IconifyIconOffline from "@/components/ReIcon/src/iconifyIconOffline";
+import Chat1Fill from "@iconify-icons/ri/chat-1-fill";
 
 const { dataTheme, dataThemeChange } = useDataThemeChange();
 
@@ -729,6 +730,16 @@ onMounted(() => {
         color 0.3s,
         background 0.3s,
         filter 0.3s;
+
+      // 确保 IconifyIconOffline 渲染的 SVG 图标正确显示
+      :deep(svg),
+      :deep(.iconify) {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+        color: inherit;
+      }
 
       &:hover {
         color: var(--anzhiyu-white);

@@ -3,10 +3,11 @@
     <img
       ref="imageRef"
       :alt="alt"
-      :class="['az-image', { loaded: isLoaded }]"
+      :class="['az-image', { loaded: isLoaded, error: hasError }]"
       :style="imageStyle"
       loading="lazy"
       @load="handleImageLoad"
+      @error="handleImageError"
       @click="openPreview"
     />
   </div>
@@ -41,7 +42,10 @@ watch(
 const emit = defineEmits<{
   (e: "open-preview"): void;
   (e: "load"): void;
+  (e: "error"): void;
 }>();
+
+const hasError = ref(false);
 
 const currentImage = computed(() => {
   return props.previewSrcList.find(item => item.imageUrl === props.src);
@@ -68,7 +72,14 @@ const imageStyle = computed(
 
 const handleImageLoad = () => {
   isLoaded.value = true;
+  hasError.value = false;
   emit("load");
+};
+
+const handleImageError = () => {
+  hasError.value = true;
+  isLoaded.value = true; // 即使失败也标记为已加载，避免持续 loading 状态
+  emit("error");
 };
 
 const loadImage = () => {
@@ -132,6 +143,11 @@ onUnmounted(() => {
 
   &.loaded {
     opacity: 1;
+  }
+
+  &.error {
+    opacity: 1;
+    min-height: 200px;
   }
 }
 </style>

@@ -163,6 +163,12 @@ export const settingsMenuConfig: SettingsMenuItem[] = [
         keywords: ["最近评论"]
       },
       {
+        key: "advanced-album",
+        label: "相册页",
+        component: "AlbumPageForm",
+        keywords: ["相册", "图片", "瀑布流", "画廊"]
+      },
+      {
         key: "advanced-page-management",
         label: "页面管理",
         component: "PageManagement",
@@ -289,24 +295,6 @@ const pageDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyEnableExternalLinkWarning,
     defaultValue: false,
     type: "boolean"
-  },
-  {
-    frontendPath: "page.albumApiURL",
-    backendKey: constant.KeyApiURL,
-    defaultValue: "",
-    type: "string"
-  },
-  {
-    frontendPath: "page.defaultThumbParam",
-    backendKey: constant.KeyDefaultThumbParam,
-    defaultValue: "",
-    type: "string"
-  },
-  {
-    frontendPath: "page.defaultBigParam",
-    backendKey: constant.KeyDefaultBigParam,
-    defaultValue: "",
-    type: "string"
   },
   {
     frontendPath: "page.customHeaderHTML",
@@ -1913,6 +1901,82 @@ const fLinkDescriptors: SettingDescriptor[] = [
   }
 ];
 
+// --- 相册页配置描述符 ---
+const albumDescriptors: SettingDescriptor[] = [
+  {
+    frontendPath: "frontDesk.album.banner.background",
+    backendKey: constant.KeyAlbumPageBannerBackground,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.album.banner.title",
+    backendKey: constant.KeyAlbumPageBannerTitle,
+    defaultValue: "相册",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.album.banner.description",
+    backendKey: constant.KeyAlbumPageBannerDescription,
+    defaultValue: "记录生活的美好瞬间",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.album.banner.tip",
+    backendKey: constant.KeyAlbumPageBannerTip,
+    defaultValue: "分享精彩图片",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.album.layoutMode",
+    backendKey: constant.KeyAlbumPageLayoutMode,
+    defaultValue: "grid",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.album.waterfall.columnCount",
+    backendKey: constant.KeyAlbumPageWaterfallColumnCount,
+    defaultValue: { large: 4, medium: 3, small: 1 },
+    type: "json"
+  },
+  {
+    frontendPath: "frontDesk.album.waterfall.gap",
+    backendKey: constant.KeyAlbumPageWaterfallGap,
+    defaultValue: 16,
+    type: "number"
+  },
+  {
+    frontendPath: "frontDesk.album.apiURL",
+    backendKey: constant.KeyAlbumApiURL,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.album.defaultThumbParam",
+    backendKey: constant.KeyAlbumDefaultThumbParam,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.album.defaultBigParam",
+    backendKey: constant.KeyAlbumDefaultBigParam,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.album.pageSize",
+    backendKey: constant.KeyAlbumPageSize,
+    defaultValue: 24,
+    type: "number"
+  },
+  {
+    frontendPath: "frontDesk.album.enableComment",
+    backendKey: constant.KeyAlbumPageEnableComment,
+    defaultValue: false,
+    type: "boolean"
+  }
+];
+
 export const allSettingDescriptors = [
   ...siteDescriptors,
   ...pageDescriptors,
@@ -1925,5 +1989,6 @@ export const allSettingDescriptors = [
   ...sidebarDescriptors,
   ...commentDescriptors,
   ...emailDescriptors,
-  ...fLinkDescriptors
+  ...fLinkDescriptors,
+  ...albumDescriptors
 ];

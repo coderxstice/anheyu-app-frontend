@@ -23,40 +23,6 @@
     </div>
   </el-form-item>
 
-  <el-form-item>
-    <template #label>
-      <span>相册页面【/album】请求后端 URL</span>
-      <div class="form-item-help" style="margin-top: 0">
-        相册页面后端 URL
-        用于请求相册数据，如果有比较好的又不想自己传相册的，可以直接使用他人部署的【安和鱼】来直接使用。注意需要以/结尾。
-      </div>
-    </template>
-    <el-input
-      v-model="formData.albumApiURL"
-      placeholder="例如：https://album.anheyu.com/"
-    />
-  </el-form-item>
-
-  <el-form-item label="默认缩略图参数">
-    <el-input
-      v-model="formData.defaultThumbParam"
-      placeholder="例如：size=small (不需要添加 ? 前缀)"
-    />
-    <div class="form-item-help">
-      用于相册页面的缩略图参数，留空则不添加任何参数。
-    </div>
-  </el-form-item>
-
-  <el-form-item label="默认大图参数">
-    <el-input
-      v-model="formData.defaultBigParam"
-      placeholder="例如：size=large (不需要添加 ? 前缀)"
-    />
-    <div class="form-item-help">
-      用于相册页面的大图参数，留空则不添加任何参数。
-    </div>
-  </el-form-item>
-
   <el-divider content-position="left">
     <h3>自定义代码</h3>
   </el-divider>

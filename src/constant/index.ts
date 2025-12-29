@@ -361,6 +361,21 @@ const KeyCDNRegion: SettingKey = "cdn.region";
 const KeyCDNDomain: SettingKey = "cdn.domain";
 const KeyCDNZoneID: SettingKey = "cdn.zone_id";
 
+// --- 相册页面配置 ---
+const KeyAlbumPageBannerBackground: SettingKey = "album.banner.background";
+const KeyAlbumPageBannerTitle: SettingKey = "album.banner.title";
+const KeyAlbumPageBannerDescription: SettingKey = "album.banner.description";
+const KeyAlbumPageBannerTip: SettingKey = "album.banner.tip";
+const KeyAlbumPageLayoutMode: SettingKey = "album.layout_mode";
+const KeyAlbumPageWaterfallColumnCount: SettingKey =
+  "album.waterfall.column_count";
+const KeyAlbumPageWaterfallGap: SettingKey = "album.waterfall.gap";
+const KeyAlbumPageSize: SettingKey = "album.page_size";
+const KeyAlbumPageEnableComment: SettingKey = "album.enable_comment";
+const KeyAlbumApiURL: SettingKey = "album.api_url";
+const KeyAlbumDefaultThumbParam: SettingKey = "album.default_thumb_param";
+const KeyAlbumDefaultBigParam: SettingKey = "album.default_big_param";
+
 const DEFAULT_CHUNK_SIZE = 50 * 1024 * 1024;
 
 /**
@@ -678,6 +693,20 @@ export const constant = {
   KeyCDNRegion,
   KeyCDNDomain,
   KeyCDNZoneID,
+
+  // --- 相册页面配置 ---
+  KeyAlbumPageBannerBackground,
+  KeyAlbumPageBannerTitle,
+  KeyAlbumPageBannerDescription,
+  KeyAlbumPageBannerTip,
+  KeyAlbumPageLayoutMode,
+  KeyAlbumPageWaterfallColumnCount,
+  KeyAlbumPageWaterfallGap,
+  KeyAlbumPageSize,
+  KeyAlbumPageEnableComment,
+  KeyAlbumApiURL,
+  KeyAlbumDefaultThumbParam,
+  KeyAlbumDefaultBigParam,
 
   // --- 其他 ---
   DEFAULT_CHUNK_SIZE
