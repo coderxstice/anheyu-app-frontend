@@ -278,9 +278,51 @@
       .expand {
         position: absolute;
         top: 50%;
-        padding: 0.57rem 0.7rem;
+        left: 0;
+        padding: 0.57rem 0.5rem;
         transition: transform 0.3s;
         transform: translate(0, -47%) rotate(-90deg);
+        z-index: 2;
+      }
+
+      .mac-dots {
+        position: absolute;
+        left: 2.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        gap: 6px;
+        z-index: 1;
+
+        .mac-dot {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          transition: all 0.3s ease;
+
+          &.red {
+            background: linear-gradient(135deg, #ff6159 0%, #ff5f52 100%);
+            box-shadow: 0 1px 3px rgba(255, 97, 89, 0.4);
+          }
+
+          &.yellow {
+            background: linear-gradient(135deg, #ffbd2e 0%, #ffbb28 100%);
+            box-shadow: 0 1px 3px rgba(255, 189, 46, 0.4);
+          }
+
+          &.green {
+            background: linear-gradient(135deg, #28ca42 0%, #27c93f 100%);
+            box-shadow: 0 1px 3px rgba(40, 202, 66, 0.4);
+          }
+        }
+
+        &:hover .mac-dot {
+          transform: scale(1.1);
+        }
+      }
+
+      &.has-mac-dots .code-lang {
+        left: 5.5rem;
       }
 
       .code-lang {
@@ -1564,7 +1606,10 @@
   }
 
   // 无序列表项样式
-  ul li:not(.tab):not(.md-editor-menu-item) {
+  ul
+    li:not(.tab):not(.md-editor-menu-item):not(.cm-tooltip li):not(
+      .cm-tooltip ul li
+    ) {
     position: relative;
     margin: 0.3rem 0;
     font-size: 17px;

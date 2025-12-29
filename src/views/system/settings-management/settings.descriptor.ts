@@ -663,6 +663,12 @@ const postDescriptors: SettingDescriptor[] = [
     type: "number"
   },
   {
+    frontendPath: "post.codeBlock.macStyle",
+    backendKey: constant.KeyPostCodeBlockMacStyle,
+    defaultValue: false,
+    type: "boolean"
+  },
+  {
     frontendPath: "post.copy.enable",
     backendKey: constant.KeyPostCopyEnable,
     defaultValue: true,
