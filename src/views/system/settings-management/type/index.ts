@@ -67,9 +67,6 @@ export interface PageOneImageConfig {
  */
 export interface PageSittingInfo {
   enableExternalLinkWarning: boolean;
-  albumApiURL: string;
-  defaultThumbParam?: string;
-  defaultBigParam?: string;
   customHeaderHTML: string;
   customFooterHTML: string;
   customCSS: string;
@@ -665,6 +662,32 @@ export interface RecentCommentsSettingsInfo {
   };
 }
 
+/**
+ * @description: 相册页配置表单接口
+ */
+export interface AlbumPageSettingsInfo {
+  banner: {
+    background: string;
+    title: string;
+    description: string;
+    tip: string;
+  };
+  layoutMode: "grid" | "waterfall";
+  waterfall: {
+    columnCount: {
+      large: number; // >= 1200px
+      medium: number; // >= 768px
+      small: number; // < 768px
+    };
+    gap: number; // 像素
+  };
+  apiURL: string;
+  defaultThumbParam: string;
+  defaultBigParam: string;
+  pageSize: number;
+  enableComment: boolean;
+}
+
 export interface FrontDeskSettings {
   home: HomePageSettingsInfo;
   sidebar: SidebarPageSettingsInfo;
@@ -674,6 +697,7 @@ export interface FrontDeskSettings {
   equipment: EquipmentSettingsInfo;
   about: AboutPageSettingsInfo;
   recentComments: RecentCommentsSettingsInfo;
+  album: AlbumPageSettingsInfo;
 }
 
 /**
