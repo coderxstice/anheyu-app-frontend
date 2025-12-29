@@ -186,6 +186,7 @@ export interface PostSettingsInfo {
   };
   codeBlock: {
     codeMaxLines: number;
+    macStyle: boolean;
   };
   copy: {
     enable: boolean; // 是否允许复制文章内容

@@ -15,6 +15,10 @@ export function useContentProcessor() {
     () => siteConfigStore.getSiteConfig?.post?.code_block?.code_max_lines || 10
   );
 
+  const macStyle = computed(
+    () => siteConfigStore.getSiteConfig?.post?.code_block?.mac_style || false
+  );
+
   const collapsedHeight = computed(() => {
     const lines = codeMaxLines.value > 0 ? codeMaxLines.value : 10;
     // 每行高度约 26px (font-size 1rem * line-height 1.6)，加上 padding 20px
@@ -81,8 +85,24 @@ export function useContentProcessor() {
           .replace(/\s+/g, " ")
           .trim();
 
+        // 构建 Mac 圆点 HTML（如果启用）
+        const macDotsHtml = macStyle.value
+          ? `<div class="mac-dots">
+              <span class="mac-dot red"></span>
+              <span class="mac-dot yellow"></span>
+              <span class="mac-dot green"></span>
+            </div>`
+          : "";
+
+        // 根据是否启用 Mac 样式添加 class
+        const headClass = macStyle.value ? "has-mac-dots" : "";
+        if (headClass) {
+          summaryElement.classList.add(headClass);
+        }
+
         summaryElement.innerHTML = `
           <i class="anzhiyufont anzhiyu-icon-angle-down expand" onclick="${toggleHandler}"></i>
+          ${macDotsHtml}
           <div class="code-lang">${language}</div>
           <i class="anzhiyufont anzhiyu-icon-paste copy-button" onclick="${copyHandler}"></i>`;
       }

@@ -1,7 +1,12 @@
 <template>
   <Teleport to="body">
     <div v-if="modelValue" class="an-dialog-wrapper">
-      <div ref="overlayRef" class="dialog-overlay" @click="handleOverlayClick">
+      <div
+        ref="overlayRef"
+        class="dialog-overlay"
+        @mousedown="handleOverlayMouseDown"
+        @mouseup="handleOverlayMouseUp"
+      >
         <div
           ref="dialogRef"
           class="dialog-container"
@@ -190,10 +195,24 @@ const closeDialog = () => {
   );
 };
 
-const handleOverlayClick = (event: MouseEvent) => {
-  if (props.closeOnClickModal && event.target === overlayRef.value) {
+// 追踪 mousedown 是否发生在遮罩层上
+const mouseDownOnOverlay = ref(false);
+
+const handleOverlayMouseDown = (event: MouseEvent) => {
+  // 只有当 mousedown 直接发生在遮罩层上时才标记
+  mouseDownOnOverlay.value = event.target === overlayRef.value;
+};
+
+const handleOverlayMouseUp = (event: MouseEvent) => {
+  // 只有当 mousedown 和 mouseup 都发生在遮罩层上时才关闭
+  if (
+    props.closeOnClickModal &&
+    mouseDownOnOverlay.value &&
+    event.target === overlayRef.value
+  ) {
     handleClose();
   }
+  mouseDownOnOverlay.value = false;
 };
 
 const handleClose = () => {

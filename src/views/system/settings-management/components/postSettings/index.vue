@@ -219,6 +219,19 @@
     </div>
   </el-form-item>
 
+  <el-form-item label="Mac 样式代码块">
+    <div>
+      <el-switch
+        v-model="formData.codeBlock.macStyle"
+        placeholder="例如：false"
+      />
+      <div class="form-item-help">
+        开启后，代码块头部将显示 Mac
+        风格的三个装饰圆点（红、黄、绿），提升视觉美观度。
+      </div>
+    </div>
+  </el-form-item>
+
   <el-form-item label="显示文章波浪区域">
     <div>
       <el-switch
