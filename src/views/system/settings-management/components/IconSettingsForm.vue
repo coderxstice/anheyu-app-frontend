@@ -8,6 +8,21 @@
 <template>
   <h3>图标</h3>
 
+  <el-alert type="info" :closable="false" class="icon-description">
+    <template #default>
+      这些图标路径默认是引用的本地前端字段。需要修改可以在文件管理上传图片后获取外链并填写。
+      如果需要直接替换本地资源的话，可以按照
+      <el-link
+        href="https://dev.anheyu.com/docs/configuration/#%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E8%87%AA%E5%AE%9A%E4%B9%89"
+        target="_blank"
+        type="primary"
+      >
+        静态资源自定义
+      </el-link>
+      功能进行操作。
+    </template>
+  </el-alert>
+
   <el-form-item label="LOGO">
     <div class="logo-inputs">
       <div class="logo-input-item">
@@ -124,6 +139,10 @@ const formData = computed({
   font-size: 12px;
   line-height: 1.5;
   color: var(--anzhiyu-secondtext);
+}
+
+.icon-description {
+  margin-bottom: 24px;
 }
 
 .el-divider {
