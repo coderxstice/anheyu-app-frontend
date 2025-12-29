@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-21 18:06:37
- * @LastEditTime: 2025-10-06 23:30:24
+ * @LastEditTime: 2025-12-29 10:00:00
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -26,14 +26,31 @@
   <el-form-item label="LOGO">
     <div class="logo-inputs">
       <div class="logo-input-item">
-        <el-input v-model="formData.logoDay" placeholder="日间模式 LOGO 地址">
-          <template #prepend>日间模式</template>
-        </el-input>
+        <div class="input-with-upload">
+          <el-input v-model="formData.logoDay" placeholder="日间模式 LOGO 地址">
+            <template #prepend>日间模式</template>
+          </el-input>
+          <el-button
+            type="primary"
+            :icon="FolderOpened"
+            @click="openResourceLibrary('logoDay')"
+          />
+        </div>
       </div>
       <div class="logo-input-item">
-        <el-input v-model="formData.logoNight" placeholder="黑暗模式 LOGO 地址">
-          <template #prepend>黑暗模式</template>
-        </el-input>
+        <div class="input-with-upload">
+          <el-input
+            v-model="formData.logoNight"
+            placeholder="黑暗模式 LOGO 地址"
+          >
+            <template #prepend>黑暗模式</template>
+          </el-input>
+          <el-button
+            type="primary"
+            :icon="FolderOpened"
+            @click="openResourceLibrary('logoNight')"
+          />
+        </div>
       </div>
     </div>
     <div class="w-full form-item-help">
@@ -59,7 +76,17 @@
 
   <el-form-item label="小图标 (Favicon)">
     <div class="w-full">
-      <el-input v-model="formData.favicon" placeholder="请输入 .ico 图标地址" />
+      <div class="input-with-upload">
+        <el-input
+          v-model="formData.favicon"
+          placeholder="请输入 .ico 图标地址"
+        />
+        <el-button
+          type="primary"
+          :icon="FolderOpened"
+          @click="openResourceLibrary('favicon')"
+        />
+      </div>
       <div class="form-item-help">扩展名为 ico 的小图标地址。</div>
     </div>
 
@@ -75,10 +102,17 @@
 
   <el-form-item label="中图标 (PWA)">
     <div class="w-full">
-      <el-input
-        v-model="formData.iconMedium"
-        placeholder="请输入 192x192 的 PNG 图标地址"
-      />
+      <div class="input-with-upload">
+        <el-input
+          v-model="formData.iconMedium"
+          placeholder="请输入 192x192 的 PNG 图标地址"
+        />
+        <el-button
+          type="primary"
+          :icon="FolderOpened"
+          @click="openResourceLibrary('iconMedium')"
+        />
+      </div>
       <div class="form-item-help">192x192 的中等图标地址，png 格式。</div>
     </div>
 
@@ -94,10 +128,17 @@
 
   <el-form-item label="大图标 (PWA)">
     <div class="w-full">
-      <el-input
-        v-model="formData.iconLarge"
-        placeholder="请输入 512x512 的 PNG 图标地址"
-      />
+      <div class="input-with-upload">
+        <el-input
+          v-model="formData.iconLarge"
+          placeholder="请输入 512x512 的 PNG 图标地址"
+        />
+        <el-button
+          type="primary"
+          :icon="FolderOpened"
+          @click="openResourceLibrary('iconLarge')"
+        />
+      </div>
       <div class="form-item-help">512x512 的大图标地址，png 格式。</div>
     </div>
 
@@ -110,11 +151,20 @@
       />
     </div>
   </el-form-item>
+
+  <!-- 资源库组件 -->
+  <ResourceLibrary
+    v-model="resourceLibraryVisible"
+    :multiple="false"
+    @confirm="handleResourceConfirm"
+  />
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { ref, computed } from "vue";
+import { FolderOpened } from "@element-plus/icons-vue";
 import type { SiteInfo } from "../type";
+import ResourceLibrary from "@/components/ResourceLibrary/index.vue";
 
 const props = defineProps<{
   modelValue: SiteInfo;
@@ -127,6 +177,24 @@ const formData = computed({
   get: () => props.modelValue,
   set: value => emit("update:modelValue", value)
 });
+
+// 资源库相关状态
+const resourceLibraryVisible = ref(false);
+const currentField = ref<keyof SiteInfo | null>(null);
+
+// 打开资源库
+const openResourceLibrary = (field: keyof SiteInfo) => {
+  currentField.value = field;
+  resourceLibraryVisible.value = true;
+};
+
+// 资源库确认选择
+const handleResourceConfirm = (urls: string[]) => {
+  if (currentField.value && urls.length > 0) {
+    // 使用类型断言来安全地设置值
+    (formData.value as any)[currentField.value] = urls[0];
+  }
+};
 </script>
 
 <style scoped lang="scss">
@@ -175,6 +243,21 @@ const formData = computed({
     &:first-child {
       margin-bottom: 10px;
     }
+  }
+}
+
+// 输入框与上传按钮组合样式
+.input-with-upload {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+
+  .el-input {
+    flex: 1;
+  }
+
+  .el-button {
+    flex-shrink: 0;
   }
 }
 

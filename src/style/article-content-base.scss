@@ -1564,7 +1564,7 @@
   }
 
   // 无序列表项样式
-  ul li:not(.tab) {
+  ul li:not(.tab):not(.md-editor-menu-item) {
     position: relative;
     margin: 0.3rem 0;
     font-size: 17px;
