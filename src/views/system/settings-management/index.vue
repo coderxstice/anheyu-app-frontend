@@ -1,5 +1,5 @@
 <template>
-  <div class="settings-page" v-loading="siteConfigStore.loading">
+  <div v-loading="siteConfigStore.loading" class="settings-page">
     <SettingsLayout
       :has-changes="hasChanges"
       :loading="saving"
