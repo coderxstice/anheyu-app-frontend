@@ -160,8 +160,19 @@ const useArticleTheme = (articleRef: Ref<Article | null>) => {
   watch(
     () => articleRef.value?.primary_color,
     (newColor, oldColor) => {
+      console.log(
+        "[PostDetail] watch primary_color 触发:",
+        "newColor=",
+        newColor,
+        "oldColor=",
+        oldColor,
+        "previousColor=",
+        previousColor
+      );
+
       // 如果颜色没有变化，跳过处理
       if (newColor === previousColor) {
+        console.log("[PostDetail] 颜色未变化，跳过处理");
         return;
       }
 
@@ -170,8 +181,10 @@ const useArticleTheme = (articleRef: Ref<Article | null>) => {
 
       // 如果新颜色为空，重置到默认主题色
       if (!newColor) {
+        console.log("[PostDetail] 新颜色为空，重置到默认主题色");
         resetThemeToDefault();
       } else {
+        console.log("[PostDetail] 设置文章主题色:", newColor);
         setArticleTheme(newColor);
       }
     },

@@ -831,6 +831,11 @@ const scrollToTop = () => {
     &.is-transparent {
       background-color: var(--anzhiyu-background);
       outline-color: transparent;
+
+      // 文章详情页和音乐页顶部时，导航栏完全透明
+      &.text-is-white {
+        background-color: transparent;
+      }
     }
 
     &.text-is-white {

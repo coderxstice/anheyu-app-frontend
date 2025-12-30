@@ -102,7 +102,13 @@ export const resetThemeToDefault = () => {
  * @param primaryColor - 文章的主色调
  */
 export const setArticleTheme = (primaryColor: string) => {
+  console.log(
+    "[ThemeManager] setArticleTheme 被调用，primaryColor:",
+    primaryColor
+  );
+
   if (!primaryColor) {
+    console.log("[ThemeManager] primaryColor 为空，重置到默认主题色");
     currentArticlePrimaryColor = "";
     resetThemeToDefault();
     restoreMetaThemeColor();
@@ -111,6 +117,10 @@ export const setArticleTheme = (primaryColor: string) => {
 
   // 如果要设置的颜色与当前已应用的颜色相同，跳过设置
   if (currentAppliedColor === primaryColor) {
+    console.log(
+      "[ThemeManager] 颜色未变化，跳过设置。当前颜色:",
+      currentAppliedColor
+    );
     return;
   }
 
@@ -119,6 +129,8 @@ export const setArticleTheme = (primaryColor: string) => {
   // 保存当前文章的主色调
   currentArticlePrimaryColor = primaryColor;
   currentAppliedColor = primaryColor;
+
+  console.log("[ThemeManager] 设置新主色调:", primaryColor);
 
   // 使用 requestAnimationFrame 确保在下一帧更新，提升性能
   requestAnimationFrame(() => {
@@ -136,6 +148,7 @@ export const setArticleTheme = (primaryColor: string) => {
 
     // 更新页面meta标签的主题色
     updateMetaThemeColor(primaryColor);
+    console.log("[ThemeManager] 主色调已应用到 CSS 变量");
   });
 };
 
