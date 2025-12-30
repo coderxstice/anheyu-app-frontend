@@ -44,6 +44,28 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
         "/needcache/": {
           target: "http://localhost:8091",
           changeOrigin: true
+        },
+        // SEO 相关文件代理到后端
+        "/sitemap.xml": {
+          target: "http://localhost:8091",
+          changeOrigin: true
+        },
+        "/robots.txt": {
+          target: "http://localhost:8091",
+          changeOrigin: true
+        },
+        // RSS Feed 代理到后端
+        "/rss.xml": {
+          target: "http://localhost:8091",
+          changeOrigin: true
+        },
+        "/feed.xml": {
+          target: "http://localhost:8091",
+          changeOrigin: true
+        },
+        "/atom.xml": {
+          target: "http://localhost:8091",
+          changeOrigin: true
         }
       },
       // 首屏优化：预热关键文件，优化初始页面加载
