@@ -14,6 +14,7 @@ import {
   nextTick,
   onBeforeUnmount
 } from "vue";
+import { useRoute } from "vue-router";
 import AzImage from "@/components/AzImage";
 import AzImagePreview from "@/components/AzImagePreview";
 import { useAlbumStore } from "@/store/modules/album";
@@ -24,6 +25,7 @@ import { storeToRefs } from "pinia";
 import { useWaterfallLayout } from "@/composables/useWaterfallLayout";
 import { Loading } from "@element-plus/icons-vue";
 import gsap from "gsap";
+import { formatRelativeTime } from "@/utils/format";
 
 defineOptions({
   name: "album"
@@ -35,6 +37,7 @@ const isLoading = ref(false);
 
 const albumStore = useAlbumStore();
 const siteConfigStore = useSiteConfigStore();
+const route = useRoute();
 const { sortOrder, categoryId } = storeToRefs(albumStore);
 
 // 从配置获取相册设置
@@ -67,9 +70,16 @@ const albumConfig = computed(() => {
     // 使用默认值
   }
 
+  const enableComment =
+    config?.album?.enable_comment === "true" ||
+    config?.album?.enable_comment === true ||
+    config?.["album.enable_comment"] === "true" ||
+    config?.["album.enable_comment"] === true;
+
   return {
     layoutMode,
     pageSize,
+    enableComment,
     waterfall: {
       columnCount,
       gap
@@ -110,26 +120,26 @@ const animateWaterfallItems = () => {
   // 性能优化：合并 gsap.set 调用，减少重排
   gsap.set(items, {
     opacity: 0,
-    y: 50,
-    scale: 0.92,
+    y: 30, // 减少初始位移，让动画更平滑
+    scale: 0.95, // 减少初始缩放，让动画更自然
     force3D: true,
     clearProps: "transform" // 合并清除 transform
   });
 
   // 使用 requestAnimationFrame 确保 DOM 完全更新后再开始动画
   requestAnimationFrame(() => {
-    // 按顺序逐个显示动画，每个元素依次出现
-    // 增加间隔时间，让每个元素更明显地依次出现
+    // 按顺序逐个显示动画，优化参数让动画更流畅
     gsap.to(items, {
       opacity: 1,
       y: 0,
       scale: 1,
-      duration: 0.7,
-      ease: "power2.out",
+      duration: 0.6, // 稍微缩短时长，让动画更快完成
+      ease: "power1.out", // 使用更平滑的缓动函数
       force3D: true,
       stagger: {
-        each: 0.08, // 每个元素之间间隔0.08秒，让动画更明显
-        from: "start"
+        each: 0.05, // 减少间隔，让动画更连贯
+        from: "start",
+        ease: "power1.inOut" // stagger 也使用平滑缓动
       }
     });
   });
@@ -277,6 +287,22 @@ watch(layoutMode, () => {
 
 const handlePreview = (index: number) => {
   previewRef.value?.open(wallpapers.value, index);
+};
+
+// 处理评论点击
+const handleComment = (item: any) => {
+  // 滚动到评论区域（评论区域在父组件中）
+  const commentSection = document.querySelector(".album-comment-section");
+  if (commentSection) {
+    commentSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    // 延迟一下，确保滚动完成后再聚焦输入框
+    setTimeout(() => {
+      const commentInput = commentSection.querySelector("textarea, input");
+      if (commentInput) {
+        (commentInput as HTMLElement).focus();
+      }
+    }, 500);
+  }
 };
 
 // 监听分页变化
@@ -486,6 +512,29 @@ onBeforeUnmount(() => {
                     {{ tag.trim() }}
                   </a>
                 </span>
+              </div>
+            </div>
+
+            <!-- 底部信息栏 -->
+            <div class="album-item-bottom">
+              <div class="album-item-info">
+                <div v-if="item.created_at" class="album-info-time">
+                  <i class="anzhiyufont anzhiyu-icon-clock" />
+                  <time
+                    class="datatime"
+                    :datetime="item.created_at"
+                    style="display: inline"
+                  >
+                    {{ formatRelativeTime(item.created_at) }}
+                  </time>
+                </div>
+              </div>
+              <div
+                v-if="albumConfig.enableComment"
+                class="album-reply"
+                @click="handleComment(item)"
+              >
+                <IconifyIconOffline icon="ri:chat-1-fill" class="w-6 h-6" />
               </div>
             </div>
           </li>
@@ -873,19 +922,28 @@ onBeforeUnmount(() => {
 }
 
 .waterfall-item {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: flex-start;
+  justify-content: space-between;
   overflow: hidden;
   cursor: pointer;
-  background: var(--anzhiyu-card-bg, #fff);
+  padding: 1rem 1rem 0.5rem;
+  background: var(--anzhiyu-card-bg);
+  border: var(--style-border-always);
   border-radius: 12px;
-  box-shadow: var(--anzhiyu-shadow-border, 0 2px 8px rgba(0, 0, 0, 0.1));
+  box-shadow: var(--anzhiyu-shadow-border);
+  transition: all 0.3s ease 0s;
   will-change: transform, box-shadow;
   backface-visibility: hidden;
   transform: translateZ(0);
 
   .waterfall-item-content {
     position: relative;
+    width: 100%;
     overflow: hidden;
     border-radius: 12px;
+    margin-bottom: 1rem;
 
     :deep(.az-image-wrapper) {
       height: auto; // 覆盖 100%，让容器高度由内容撑开
@@ -1012,6 +1070,60 @@ onBeforeUnmount(() => {
 
     &::after {
       opacity: 1;
+    }
+  }
+
+  // 底部信息栏
+  .album-item-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .album-item-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    font-size: 0.8125rem;
+
+    .album-info-time {
+      display: flex;
+      gap: 0.2rem;
+      align-items: center;
+      padding: 0 8px;
+      font-size: 0.7rem;
+      color: var(--anzhiyu-fontcolor);
+      cursor: default;
+      background-color: var(--anzhiyu-gray-op);
+      border-radius: 20px;
+
+      i {
+        font-size: 0.875rem;
+      }
+    }
+  }
+
+  .album-reply {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    color: var(--anzhiyu-secondtext);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+
+    svg {
+      width: 1.125rem;
+      height: 1.125rem;
+    }
+
+    &:hover {
+      color: var(--anzhiyu-main);
+      background: var(--anzhiyu-main-op);
     }
   }
 }
