@@ -153,10 +153,8 @@ router.beforeEach((to: ToRouteType, _from, next) => {
     isAdminRoute(to.path) &&
     _from.path !== to.path;
 
-  // 后台页面切换使用即时 loading，前台页面使用延迟 loading
-  if (isAdminToAdmin) {
-    loadingStore.startLoadingImmediate();
-  } else {
+  // 后台页面切换不显示 loading，前台页面使用延迟 loading
+  if (!isAdminToAdmin) {
     loadingStore.startLoading();
   }
 

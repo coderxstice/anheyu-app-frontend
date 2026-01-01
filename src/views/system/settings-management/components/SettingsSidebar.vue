@@ -69,6 +69,7 @@ const handleSelect = (key: string) => {
   background: var(--anzhiyu-theme-menu-bg, var(--el-bg-color));
   overflow-y: auto;
   overflow-x: hidden;
+  user-select: none;
 
   &::-webkit-scrollbar {
     width: 4px;

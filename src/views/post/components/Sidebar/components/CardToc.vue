@@ -42,6 +42,9 @@ const activeTocId = ref<string | null>(null);
 
 const isClickScrolling = ref(false);
 let scrollTimer: number | null = null;
+let hashUpdateTimer: number | null = null;
+let headingElements: HTMLElement[] = [];
+let rafId: number | null = null;
 
 // 获取目录折叠模式配置
 const tocCollapseMode = computed(() => {
@@ -226,15 +229,106 @@ const scrollToHeading = (event: MouseEvent, item: TocItem) => {
 
 // 根据索引获取标题元素
 const getHeadingElementByIndex = (index: number): HTMLElement | null => {
+  if (headingElements.length > 0) {
+    return headingElements[index] || null;
+  }
   const headingSelector = "h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]";
   const contentEl = document.querySelector(".post-content");
   if (!contentEl) {
-    // 回退：直接在整个文档中查找
     const allHeadings = document.querySelectorAll(headingSelector);
     return allHeadings[index] as HTMLElement | null;
   }
   const headings = contentEl.querySelectorAll(headingSelector);
   return headings[index] as HTMLElement | null;
+};
+
+// 初始化标题元素引用
+const initHeadingElements = () => {
+  // 获取标题元素 - 选择所有 h1-h6，不要求有 id
+  const headingSelector = "h1, h2, h3, h4, h5, h6";
+  const contentEl = document.querySelector(".post-content");
+  const allHeadings = Array.from(
+    (contentEl || document).querySelectorAll(headingSelector)
+  );
+
+  // 过滤掉空标题，只保留有文本内容的
+  headingElements = allHeadings.filter(el =>
+    el.textContent?.trim()
+  ) as HTMLElement[];
+
+  if (headingElements.length === 0) return;
+
+  // 为没有 id 的标题动态添加 id
+  headingElements.forEach((el, index) => {
+    if (!el.id) {
+      const text = el.textContent?.trim().replace(/\s+/g, "-").toLowerCase();
+      el.id = text || `heading-${index}`;
+    }
+  });
+
+  // 初始化时计算一次激活状态
+  updateActiveHeading();
+};
+
+// 使用 requestAnimationFrame 节流的滚动处理
+const onScroll = () => {
+  if (rafId !== null) return;
+
+  rafId = requestAnimationFrame(() => {
+    rafId = null;
+
+    if (isClickScrolling.value) return;
+
+    updateActiveHeading();
+  });
+};
+
+// 更新激活的标题
+const updateActiveHeading = () => {
+  if (headingElements.length === 0) return;
+
+  let activeIndex = -1;
+  const headerOffset = 100; // header 高度 + 一些余量
+
+  // 找到当前滚动位置下最近的标题
+  for (let i = 0; i < headingElements.length; i++) {
+    const rect = headingElements[i].getBoundingClientRect();
+    if (rect.top <= headerOffset) {
+      activeIndex = i;
+    } else {
+      break;
+    }
+  }
+
+  // 如果没有找到（页面顶部），激活第一个
+  if (activeIndex === -1 && headingElements.length > 0) {
+    activeIndex = 0;
+  }
+
+  if (activeIndex >= 0 && tocItems.value[activeIndex]) {
+    setActiveHeading(activeIndex);
+  }
+};
+
+// 设置激活的标题
+const setActiveHeading = (index: number) => {
+  const item = tocItems.value[index];
+  if (!item) return;
+
+  const newActiveUniqueId = item.uniqueId;
+
+  if (activeTocId.value !== newActiveUniqueId) {
+    activeTocId.value = newActiveUniqueId;
+
+    // 延迟更新 URL hash（防抖 500ms）
+    if (tocHashUpdateMode.value !== "none") {
+      const newOriginalId = item.id;
+      if (hashUpdateTimer) clearTimeout(hashUpdateTimer);
+      hashUpdateTimer = window.setTimeout(() => {
+        history.replaceState(history.state, "", `#${newOriginalId}`);
+      }, 500);
+    }
+  }
 };
 
 const parseHeadings = () => {
@@ -278,43 +372,12 @@ const parseHeadings = () => {
   }
 };
 
-const onScroll = () => {
-  if (isClickScrolling.value) {
-    return;
-  }
-
-  const fixedHeaderHeight = 80;
-  let newActiveUniqueId: string | null = null;
-  let newActiveOriginalId: string | null = null;
-
-  // 从前往后遍历，找到最后一个 top <= fixedHeaderHeight 的元素
-  for (let i = 0; i < tocItems.value.length; i++) {
-    const item = tocItems.value[i];
-    const element = getHeadingElementByIndex(item.index);
-    if (element) {
-      const rect = element.getBoundingClientRect();
-      if (rect.top <= fixedHeaderHeight) {
-        newActiveUniqueId = item.uniqueId;
-        newActiveOriginalId = item.id;
-      }
-    }
-  }
-
-  if (activeTocId.value !== newActiveUniqueId) {
-    activeTocId.value = newActiveUniqueId;
-    // 根据配置决定是否更新URL Hash（使用原始 ID）
-    if (tocHashUpdateMode.value !== "none") {
-      if (newActiveOriginalId) {
-        history.replaceState(history.state, "", `#${newActiveOriginalId}`);
-      } else {
-        history.replaceState(
-          history.state,
-          "",
-          window.location.pathname + window.location.search
-        );
-      }
-    }
-  }
+// 滚动结束检测
+const onScrollEnd = () => {
+  if (scrollTimer) clearTimeout(scrollTimer);
+  scrollTimer = window.setTimeout(() => {
+    isClickScrolling.value = false;
+  }, 150);
 };
 
 const updateIndicator = () => {
@@ -366,6 +429,8 @@ watch(
   () => {
     nextTick(() => {
       parseHeadings();
+      // 延迟初始化标题元素，确保 DOM 已渲染
+      setTimeout(initHeadingElements, 300);
     });
   },
   { immediate: true, deep: true }
@@ -386,20 +451,9 @@ watch(visibleTocItems, () => {
   });
 });
 
-let scrollEndHandler: () => void;
-
 onMounted(() => {
-  scrollEndHandler = () => {
-    if (scrollTimer) {
-      clearTimeout(scrollTimer);
-    }
-    scrollTimer = window.setTimeout(() => {
-      isClickScrolling.value = false;
-    }, 150);
-  };
-
   window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("scroll", scrollEndHandler);
+  window.addEventListener("scroll", onScrollEnd, { passive: true });
 
   nextTick(() => {
     updateIndicator();
@@ -409,9 +463,12 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener("scroll", onScroll);
-  if (scrollEndHandler) {
-    window.removeEventListener("scroll", scrollEndHandler);
+  window.removeEventListener("scroll", onScrollEnd);
+  if (rafId !== null) {
+    cancelAnimationFrame(rafId);
   }
+  if (scrollTimer) clearTimeout(scrollTimer);
+  if (hashUpdateTimer) clearTimeout(hashUpdateTimer);
 });
 
 defineExpose({

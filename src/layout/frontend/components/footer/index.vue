@@ -349,7 +349,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { onEnter, onLeave } from "@/utils/transitions";
@@ -645,6 +645,35 @@ const fetchUptimeKumaStatus = async () => {
   }
 };
 
+// 启动 Uptime Kuma 状态获取的函数
+const startUptimeKumaPolling = () => {
+  if (uptimeKumaInterval) {
+    clearInterval(uptimeKumaInterval);
+  }
+  fetchUptimeKumaStatus();
+  // 每5分钟更新一次状态
+  uptimeKumaInterval = window.setInterval(fetchUptimeKumaStatus, 5 * 60 * 1000);
+};
+
+// 监听 uptimeKumaConfig 变化，确保配置加载后能正确初始化
+// 这解决了未登录用户因 siteConfig 加载延迟导致 uptime 状态不显示的问题
+watch(
+  () => uptimeKumaConfig.value?.enable,
+  (newEnable, oldEnable) => {
+    if (newEnable && !oldEnable) {
+      // 配置刚刚启用，开始获取状态
+      startUptimeKumaPolling();
+    } else if (!newEnable && oldEnable) {
+      // 配置被禁用，清除定时器
+      if (uptimeKumaInterval) {
+        clearInterval(uptimeKumaInterval);
+        uptimeKumaInterval = null;
+      }
+    }
+  },
+  { immediate: true }
+);
+
 onMounted(() => {
   if (footerConfig.value) refreshFriendLinks();
   // 初始化footer区域的懒加载
@@ -659,15 +688,8 @@ onMounted(() => {
     runtimeInterval = window.setInterval(calculateRuntime, 1000);
   }
 
-  // 初始化 Uptime Kuma 状态
-  if (uptimeKumaConfig.value?.enable) {
-    fetchUptimeKumaStatus();
-    // 每5分钟更新一次状态
-    uptimeKumaInterval = window.setInterval(
-      fetchUptimeKumaStatus,
-      5 * 60 * 1000
-    );
-  }
+  // 注意：Uptime Kuma 的初始化已移至 watch 中处理
+  // 这确保了即使 siteConfig 在 onMounted 之后加载，也能正确初始化
 });
 
 onUnmounted(() => {
