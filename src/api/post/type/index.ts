@@ -69,6 +69,9 @@ export interface ArticleLink {
   cover_url: string;
   abbrlink: string;
   created_at: string;
+  // 文档模式相关字段
+  is_doc?: boolean;
+  doc_series_id?: string;
 }
 
 // ===================================
@@ -115,6 +118,10 @@ export interface Article {
   owner_name?: string; // 已废弃，使用 owner_nickname
   owner_nickname?: string; // 发布者昵称
   owner_avatar?: string; // 发布者头像
+  // 文档模式相关字段
+  is_doc?: boolean;
+  doc_series_id?: string;
+  doc_sort?: number;
 }
 
 /**
