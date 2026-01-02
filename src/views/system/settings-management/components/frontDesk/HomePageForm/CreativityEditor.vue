@@ -109,20 +109,18 @@
               </div>
               <div class="skill-grid-actions">
                 <el-button
-                  type="primary"
-                  size="small"
-                  circle
+                  class="action-btn edit-btn"
                   @click.stop="editingIndex = index"
                 >
                   <el-icon><Edit /></el-icon>
+                  <span>编辑</span>
                 </el-button>
                 <el-button
-                  type="danger"
-                  size="small"
-                  circle
+                  class="action-btn delete-btn"
                   @click.stop="removeSkill(index)"
                 >
                   <el-icon><Delete /></el-icon>
+                  <span>删除</span>
                 </el-button>
               </div>
             </div>
@@ -200,22 +198,18 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="150" fixed="right">
+          <el-table-column label="操作" width="120" fixed="right">
             <template #default="{ $index }">
-              <el-button
-                type="primary"
-                size="small"
-                @click="editingIndex = $index"
-              >
-                编辑
-              </el-button>
-              <el-button
-                type="danger"
-                size="small"
-                @click="removeSkill($index)"
-              >
-                删除
-              </el-button>
+              <div class="table-actions">
+                <el-button type="primary" link @click="editingIndex = $index">
+                  <el-icon><Edit /></el-icon>
+                  编辑
+                </el-button>
+                <el-button type="danger" link @click="removeSkill($index)">
+                  <el-icon><Delete /></el-icon>
+                  删除
+                </el-button>
+              </div>
             </template>
           </el-table-column>
         </el-table>
@@ -238,7 +232,7 @@
       :confirm-text="editingIndex === -1 ? '添加' : '保存'"
       cancel-text="取消"
       @confirm="saveEditingSkill"
-      @close="closeEditDialog"
+      @closed="closeEditDialog"
     >
       <el-form v-if="editingSkill" label-width="100px">
         <el-form-item label="技能名称" required>
@@ -513,19 +507,18 @@ const saveEditingSkill = () => {
         background: var(--anzhiyu-secondbg);
         border: 2px solid var(--el-border-color-lighter);
         border-radius: 12px;
-        padding: 20px;
+        padding: 16px;
+        padding-bottom: 52px;
         cursor: pointer;
         transition: all 0.3s ease;
         position: relative;
-        overflow: hidden;
 
         &:hover {
-          transform: translateY(-2px);
           border-color: var(--anzhiyu-theme);
-          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 
           .skill-grid-actions {
             opacity: 1;
+            transform: translateX(-50%) translateY(0);
           }
         }
 
@@ -534,10 +527,10 @@ const saveEditingSkill = () => {
         }
 
         .skill-icon-preview {
-          width: 80px;
-          height: 80px;
-          margin: 0 auto 16px;
-          border-radius: 16px;
+          width: 72px;
+          height: 72px;
+          margin: 0 auto 12px;
+          border-radius: 14px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -546,8 +539,8 @@ const saveEditingSkill = () => {
         }
 
         .skill-icon-img {
-          max-width: 48px;
-          max-height: 48px;
+          max-width: 44px;
+          max-height: 44px;
           object-fit: contain;
         }
 
@@ -556,31 +549,78 @@ const saveEditingSkill = () => {
         }
 
         .skill-icon-font {
-          font-size: 36px;
+          font-size: 32px;
           color: var(--anzhiyu-fontcolor);
         }
 
         .skill-icon-placeholder {
-          font-size: 32px;
+          font-size: 28px;
           color: var(--anzhiyu-secondtext);
         }
 
         .skill-info {
-          margin-bottom: 12px;
+          margin-bottom: 0;
         }
 
         .skill-name {
-          font-size: 16px;
+          font-size: 14px;
           font-weight: 500;
           color: var(--anzhiyu-fontcolor);
         }
 
         .skill-grid-actions {
+          position: absolute;
+          bottom: 12px;
+          left: 50%;
+          transform: translateX(-50%) translateY(8px);
           display: flex;
           justify-content: center;
           gap: 8px;
           opacity: 0;
-          transition: opacity 0.3s ease;
+          transition: all 0.25s ease;
+          pointer-events: none;
+
+          .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            pointer-events: auto;
+
+            .el-icon {
+              font-size: 13px;
+            }
+
+            span {
+              line-height: 1;
+            }
+          }
+
+          .edit-btn {
+            background: var(--el-color-primary);
+            color: #fff;
+
+            &:hover {
+              background: var(--el-color-primary-dark-2);
+              transform: translateY(-1px);
+            }
+          }
+
+          .delete-btn {
+            background: var(--el-color-danger);
+            color: #fff;
+
+            &:hover {
+              background: var(--el-color-danger-dark-2);
+              transform: translateY(-1px);
+            }
+          }
         }
       }
     }
@@ -599,6 +639,24 @@ const saveEditingSkill = () => {
 
         .skill-icon-iconify {
           color: var(--anzhiyu-fontcolor);
+        }
+      }
+
+      .table-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        .el-button {
+          padding: 4px 8px;
+
+          .el-icon {
+            margin-right: 2px;
+          }
+
+          &:hover {
+            background: transparent;
+          }
         }
       }
     }
