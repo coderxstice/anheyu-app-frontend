@@ -103,8 +103,50 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
       rollupOptions: {
         input: {
           index: pathResolve("./index.html", import.meta.url)
+        },
+        output: {
+          // 智能分包策略 - 使用函数形式避免代码重复
+          manualChunks(id) {
+            if (id.includes("node_modules")) {
+              // ECharts 相关
+              if (id.includes("echarts")) {
+                return "vendor-echarts";
+              }
+              // Monaco Editor 相关
+              if (id.includes("monaco-editor")) {
+                return "vendor-monaco";
+              }
+              // Markdown 编辑器
+              if (id.includes("md-editor-v3")) {
+                return "vendor-md-editor";
+              }
+              // 视频播放器
+              if (id.includes("xgplayer")) {
+                return "vendor-xgplayer";
+              }
+              // Element Plus 单独分包
+              if (id.includes("element-plus")) {
+                return "vendor-element";
+              }
+              // Vue 生态核心
+              if (
+                id.includes("/vue/") ||
+                id.includes("/@vue/") ||
+                id.includes("/pinia/") ||
+                id.includes("/vue-router/")
+              ) {
+                return "vendor-vue";
+              }
+            }
+          },
+          // 优化文件命名，便于缓存
+          chunkFileNames: "assets/js/[name]-[hash].js",
+          entryFileNames: "assets/js/[name]-[hash].js",
+          assetFileNames: "assets/[ext]/[name]-[hash].[ext]"
         }
-      }
+      },
+      // 启用 CSS 代码分割
+      cssCodeSplit: true
     },
     define: {
       __INTLIFY_PROD_DEVTOOLS__: false,

@@ -2,9 +2,9 @@
  * ECharts 组合式 API Hook
  * 提供图表渲染、响应式调整等功能
  */
-import type { EChartsOption } from "echarts";
 import type { Ref } from "vue";
 import type EchartsUI from "./EchartsUI.vue";
+import type { ECOption } from "./echarts";
 
 import { computed, nextTick, watch } from "vue";
 import {
@@ -23,7 +23,7 @@ type Nullable<T> = T | null;
 
 export function useEcharts(chartRef: Ref<EchartsUIType>) {
   let chartInstance: echarts.ECharts | null = null;
-  let cacheOptions: EChartsOption = {};
+  let cacheOptions: ECOption = {};
 
   const { dataTheme: isDark } = useDataThemeChange();
   const { height, width } = useWindowSize();
@@ -44,7 +44,7 @@ export function useEcharts(chartRef: Ref<EchartsUIType>) {
     return el.offsetHeight === 0 || el.offsetWidth === 0;
   };
 
-  const getOptions = computed((): EChartsOption => {
+  const getOptions = computed((): ECOption => {
     if (!isDark.value) {
       return {};
     }
@@ -65,7 +65,7 @@ export function useEcharts(chartRef: Ref<EchartsUIType>) {
   };
 
   const renderEcharts = (
-    options: EChartsOption,
+    options: ECOption,
     clear = true
   ): Promise<Nullable<echarts.ECharts>> => {
     cacheOptions = options;
@@ -136,4 +136,3 @@ export function useEcharts(chartRef: Ref<EchartsUIType>) {
 }
 
 export type { EchartsUIType };
-
