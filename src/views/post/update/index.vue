@@ -2,7 +2,7 @@
  * @Description: 更新日志页面
  * @Author: 安知鱼
  * @Date: 2025-09-26
- * @LastEditTime: 2025-10-02 17:49:51
+ * @LastEditTime: 2026-01-04 14:08:28
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -34,7 +34,7 @@
         </div>
 
         <!-- 更新日志列表 -->
-        <div v-else class="update-list">
+        <div v-else class="update-list-wrapper">
           <!-- 全局版本检查区域 -->
           <div v-if="currentVersion" class="global-version-check">
             <div class="version-info">
@@ -60,43 +60,59 @@
             </div>
           </div>
 
-          <div
-            v-for="changelog in changelogs"
-            :key="changelog.id"
-            class="changelog-item"
-            :class="{ latest: changelog.isLatest }"
-          >
-            <div class="changelog-header">
-              <div class="changelog-info">
-                <h2 class="changelog-title">
-                  <FontIcon
-                    :icon="changelog.isLatest ? 'ri:star-line' : 'ri:tag-line'"
-                    class="changelog-icon"
+          <div class="timeline-container">
+            <div
+              v-for="(changelog, index) in changelogs"
+              :key="changelog.id"
+              class="changelog-item"
+              :class="{ latest: changelog.isLatest }"
+              :style="{ animationDelay: `${index * 0.1}s` }"
+            >
+              <!-- 时间轴节点 -->
+              <div class="timeline-node">
+                <div class="node-dot" :class="{ latest: changelog.isLatest }" />
+                <div class="node-line" />
+              </div>
+
+              <div class="changelog-card">
+                <div class="changelog-header">
+                  <div class="changelog-info">
+                    <div class="changelog-title-wrapper">
+                      <h2 class="changelog-title">
+                        {{ changelog.tagName }}
+                      </h2>
+                      <div class="changelog-badges">
+                        <span v-if="changelog.isLatest" class="latest-badge">
+                          <FontIcon icon="ri:rocket-line" />
+                          最新
+                        </span>
+                        <span
+                          v-if="changelog.prerelease"
+                          class="prerelease-badge"
+                        >
+                          <FontIcon icon="ri:test-tube-line" />
+                          预览版
+                        </span>
+                      </div>
+                    </div>
+                    <div class="changelog-meta">
+                      <span class="changelog-date">
+                        <FontIcon icon="ri:calendar-line" />
+                        {{ formatDate(changelog.publishedAt) }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="changelog-body">
+                  <div
+                    v-if="changelog.body"
+                    class="changelog-content"
+                    v-html="renderParsedContent(changelog)"
                   />
-                  {{ changelog.tagName }}
-                  <span v-if="changelog.isLatest" class="latest-badge"
-                    >最新</span
-                  >
-                  <span v-if="changelog.prerelease" class="prerelease-badge"
-                    >预览版</span
-                  >
-                </h2>
-                <div class="changelog-meta">
-                  <span class="changelog-date">
-                    <FontIcon icon="ri:calendar-line" />
-                    {{ formatDate(changelog.publishedAt) }}
-                  </span>
+                  <div v-else class="no-content">暂无详细说明</div>
                 </div>
               </div>
-            </div>
-
-            <div class="changelog-body">
-              <div
-                v-if="changelog.body"
-                class="changelog-content"
-                v-html="renderParsedContent(changelog)"
-              />
-              <div v-else class="no-content">暂无详细说明</div>
             </div>
           </div>
 
@@ -227,13 +243,12 @@ const handleScroll = () => {
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString("zh-CN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${year}年${month}月${day}日 ${hours}:${minutes}`;
 };
 
 const formatReleaseNotes = (body: string) => {
@@ -256,12 +271,15 @@ const renderParsedContent = (changelog: Changelog) => {
     return formatReleaseNotes(changelog.body);
   }
 
+  // 从 htmlUrl 中提取仓库信息
+  const repoMatch = changelog.htmlUrl?.match(/github\.com\/([^/]+\/[^/]+)/);
+  const repoPath = repoMatch ? repoMatch[1] : "";
+
   let html = "";
 
   // 按分类展示更新
   parsedContent.sections
     .filter(section => {
-      // 过滤掉相关链接章节
       const title = section.title.toLowerCase();
       return (
         !title.includes("相关链接") &&
@@ -273,10 +291,10 @@ const renderParsedContent = (changelog: Changelog) => {
     .forEach(section => {
       html += `<div class="changelog-section">
         <div class="section-header">
-          <h4 class="section-title">
+          <div class="section-title">
             <span class="section-icon">${section.icon}</span>
             <span class="section-name">${section.title.replace(section.icon, "").trim()}</span>
-          </h4>
+          </div>
         </div>
         <div class="section-content">`;
 
@@ -284,11 +302,27 @@ const renderParsedContent = (changelog: Changelog) => {
         const shortHash = item.commitHash
           ? item.commitHash.substring(0, 7)
           : "";
-        html += `<div class="change-item ${item.breaking ? "breaking" : ""}" data-type="${item.type}">
-          ${item.scope ? `<span class="change-scope">${item.scope}</span>` : ""}
-          <span class="change-message">${item.message}</span>
-          ${shortHash ? `<span class="change-hash">${shortHash}</span>` : ""}
-          ${item.breaking ? '<span class="breaking-badge">BREAKING</span>' : ""}
+        const authorMatch = item.description?.match(/\(@([^)]+)\)/);
+        const author = authorMatch ? authorMatch[1] : "";
+
+        const commitUrl =
+          repoPath && item.commitHash
+            ? `https://github.com/${repoPath}/commit/${item.commitHash}`
+            : "";
+        const authorUrl = author ? `https://github.com/${author}` : "";
+
+        html += `<div class="change-item ${item.breaking ? "breaking" : ""}">
+          <div class="change-dot"></div>
+          <div class="change-content">
+            <div class="change-main">
+              ${shortHash ? `<a href="${commitUrl}" target="_blank" rel="noopener noreferrer" class="change-hash"><i class="ri-git-commit-line"></i>${shortHash}</a>` : ""}
+              <span class="change-message">${item.scope ? `<span class="change-scope">${item.scope}</span>` : ""}${item.message}</span>
+              ${item.breaking ? '<span class="breaking-badge">BREAKING</span>' : ""}
+            </div>
+            <div class="change-meta">
+              ${author ? `<a href="${authorUrl}" target="_blank" rel="noopener noreferrer" class="change-author">@${author}</a>` : ""}
+            </div>
+          </div>
         </div>`;
       });
 
@@ -408,25 +442,21 @@ onBeforeUnmount(() => {
 
 <style scoped lang="scss">
 .update-page {
-  max-width: 1400px;
+  max-width: 1200px;
   padding: 1.5rem;
   margin: 0 auto;
 
   .update-content {
-    margin-top: 1.5rem;
-    box-shadow: var(--anzhiyu-shadow-border);
-    padding: 2rem;
-    border-radius: 16px;
-    background: var(--anzhiyu-card-bg);
-    border: var(--style-border);
+    margin-top: 1rem;
+    padding: 0;
+    border-radius: 12px;
     width: 100%;
-    align-self: flex-start;
     animation: slide-in 0.6s 0.1s backwards;
     position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    transition: all 0.3s ease 0s;
+
+    .container {
+      padding: 0;
+    }
   }
 
   // 加载状态
@@ -436,21 +466,24 @@ onBeforeUnmount(() => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 4rem 2rem;
+    padding: 6rem 2rem;
     text-align: center;
+    background: var(--anzhiyu-card-bg);
+    border: var(--style-border);
+    border-radius: 16px;
 
     .loading-spinner,
     .error-icon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
+      font-size: 3.5rem;
+      margin-bottom: 1.5rem;
       color: var(--anzhiyu-main);
     }
 
     .spinner {
-      width: 3rem;
-      height: 3rem;
-      border: 3px solid rgba(99, 102, 241, 0.1);
-      border-top: 3px solid var(--anzhiyu-main);
+      width: 3.5rem;
+      height: 3.5rem;
+      border: 4px solid rgba(var(--anzhiyu-main-rgb), 0.1);
+      border-top: 4px solid var(--anzhiyu-main);
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
@@ -463,51 +496,41 @@ onBeforeUnmount(() => {
     }
 
     p {
-      margin: 0 0 1.5rem;
+      margin: 0 0 2rem;
       color: var(--anzhiyu-secondtext);
       font-size: 1rem;
     }
   }
 
-  // 更新日志列表
-  .update-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
   // 全局版本检查区域
   .global-version-check {
-    background: linear-gradient(
-      135deg,
-      rgba(99, 102, 241, 0.08) 0%,
-      rgba(99, 102, 241, 0.03) 100%
-    );
-    border: 1px solid rgba(99, 102, 241, 0.15);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
+    background: var(--anzhiyu-card-bg);
+    border: var(--style-border);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--anzhiyu-shadow-border);
 
     .version-info {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 1rem;
+      gap: 0.75rem;
 
       @media (max-width: 768px) {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
+        flex-direction: row;
+        justify-content: space-between;
+        text-align: left;
       }
     }
 
     .version-current {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.5rem;
 
       .version-label {
-        font-size: 0.9rem;
+        font-size: 0.8125rem;
         color: var(--anzhiyu-secondtext);
         font-weight: 500;
       }
@@ -515,11 +538,11 @@ onBeforeUnmount(() => {
       .version-tag {
         background: var(--anzhiyu-main);
         color: white;
-        padding: 0.4rem 1rem;
-        border-radius: 20px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        font-family: "Monaco", "Menlo", monospace;
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8125rem;
+        font-weight: 700;
+        font-family: "Monaco", "Menlo", "Consolas", monospace;
       }
     }
 
@@ -527,306 +550,341 @@ onBeforeUnmount(() => {
       .status-badge {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 500;
+        gap: 0.3rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.8125rem;
+        font-weight: 600;
 
         &.current {
           background: rgba(16, 185, 129, 0.1);
           color: #10b981;
-          border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
         &.outdated {
           background: rgba(245, 158, 11, 0.1);
           color: #f59e0b;
-          border: 1px solid rgba(245, 158, 11, 0.2);
         }
 
         &.newer {
           background: rgba(99, 102, 241, 0.1);
           color: var(--anzhiyu-main);
-          border: 1px solid rgba(99, 102, 241, 0.2);
-        }
-
-        &.unknown {
-          background: rgba(107, 114, 128, 0.1);
-          color: #6b7280;
-          border: 1px solid rgba(107, 114, 128, 0.2);
         }
 
         .status-icon {
-          font-size: 1rem;
           font-style: normal;
+          font-size: 0.875rem;
         }
       }
+    }
+  }
+
+  // 时间轴容器
+  .timeline-container {
+    position: relative;
+    padding: 1rem 0;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 24px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--anzhiyu-main);
+      opacity: 0.15;
+      border-radius: 2px;
     }
   }
 
   // 更新日志项目
   .changelog-item {
-    background: var(--anzhiyu-card-bg);
-    border: 1px solid var(--anzhiyu-card-border);
-    border-radius: 12px;
+    position: relative;
+    display: flex;
+    gap: 1.5rem;
     margin-bottom: 2rem;
-    padding: 1.5rem;
-    transition: all 0.3s ease;
+    animation: fade-in-up 0.6s ease-out backwards;
 
-    &.latest {
-      border-color: var(--anzhiyu-main);
-      background: linear-gradient(
-        135deg,
-        rgba(99, 102, 241, 0.03) 0%,
-        rgba(99, 102, 241, 0.01) 100%
-      );
-
-      &::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: linear-gradient(
-          90deg,
-          var(--anzhiyu-main),
-          var(--anzhiyu-main-light)
-        );
-        border-radius: 12px 12px 0 0;
+    &:last-child {
+      margin-bottom: 0;
+      .timeline-node .node-line {
+        display: none;
       }
     }
   }
 
-  // 更新日志头部
-  .changelog-header {
+  // 时间轴节点
+  .timeline-node {
+    position: relative;
+    width: 40px;
+    flex-shrink: 0;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1.5rem;
-    gap: 1rem;
+    justify-content: center;
 
-    @media (max-width: 768px) {
-      flex-direction: column;
-      gap: 1rem;
+    .node-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--anzhiyu-card-bg);
+      border: 2px solid var(--anzhiyu-main);
+      z-index: 2;
+      margin-top: 1.25rem;
+      transition: all 0.3s ease;
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        inset: -4px;
+        border-radius: 50%;
+        background: var(--anzhiyu-main);
+        opacity: 0;
+        transition: all 0.3s ease;
+      }
+
+      &.latest {
+        background: var(--anzhiyu-main);
+        box-shadow: 0 0 0 3px rgba(var(--anzhiyu-main-rgb), 0.2);
+
+        &::after {
+          opacity: 0.2;
+          animation: pulse 2s infinite;
+        }
+      }
     }
   }
 
-  .changelog-info {
+  .changelog-card {
     flex: 1;
+    background: var(--anzhiyu-card-bg);
+    border: var(--style-border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: var(--anzhiyu-shadow-border);
     min-width: 0;
   }
 
-  .changelog-title {
+  // 更新日志头部
+  .changelog-header {
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--anzhiyu-border-thin);
+  }
+
+  .changelog-title-wrapper {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin: 0 0 0.75rem;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--anzhiyu-fontcolor);
-    line-height: 1.4;
+    margin-bottom: 0.25rem;
+    flex-wrap: wrap;
+  }
 
-    .changelog-icon {
-      font-size: 1.25rem;
-      color: var(--anzhiyu-main);
-      flex-shrink: 0;
+  .changelog-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--anzhiyu-fontcolor);
+    line-height: 1.2;
+  }
+
+  .changelog-badges {
+    display: flex;
+    gap: 0.4rem;
+
+    span {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+
+      i {
+        font-size: 0.8rem;
+      }
     }
 
     .latest-badge {
-      background: linear-gradient(
-        135deg,
-        var(--anzhiyu-main),
-        var(--anzhiyu-main-light)
-      );
+      background: var(--anzhiyu-main);
       color: white;
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 500;
-      margin-left: auto;
     }
 
     .prerelease-badge {
       background: #f59e0b;
       color: white;
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 500;
     }
   }
 
   .changelog-meta {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
     color: var(--anzhiyu-secondtext);
-    font-size: 0.9rem;
+    font-size: 0.875rem;
+    font-weight: 500;
 
-    span {
+    .changelog-date {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-
-      i {
-        font-size: 1rem;
-      }
+      gap: 0.4rem;
     }
   }
 
   // 更新日志内容
   .changelog-body {
-    position: relative;
-    margin-top: 1rem;
-    padding: 0;
-
     .no-content {
+      padding: 2rem;
       text-align: center;
-      padding: 3rem 2rem;
       color: var(--anzhiyu-secondtext);
+      background: var(--anzhiyu-background);
+      border-radius: 12px;
       font-style: italic;
-      font-size: 1rem;
-      background: rgba(0, 0, 0, 0.02);
-      border-radius: 8px;
-      border: 2px dashed var(--anzhiyu-card-border);
     }
   }
 
   .changelog-content {
-    color: var(--anzhiyu-fontcolor);
-    line-height: 1.7;
-
-    // 更新章节样式
     :deep(.changelog-section) {
+      margin-bottom: 1rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
       .section-header {
-        margin-bottom: 1.25rem;
+        margin-bottom: 0.5rem;
       }
 
       .section-title {
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 0.75rem;
-        margin: 0;
-        font-size: 1.15rem;
+        gap: 0.4rem;
         font-weight: 600;
         color: var(--anzhiyu-fontcolor);
-        padding: 1rem 0 0.75rem;
-        border-bottom: 2px solid var(--anzhiyu-card-border);
+        font-size: 1rem;
 
         .section-icon {
-          font-size: 1.25rem;
+          font-size: 1rem;
         }
 
         .section-name {
           flex: 1;
         }
-
-        .section-count {
-          background: var(--anzhiyu-main);
-          color: var(--anzhiyu-white);
-          padding: 0.25rem 0.75rem;
-          border-radius: 20px;
-          font-size: 0.8rem;
-          font-weight: 500;
-          min-width: 2rem;
-          text-align: center;
-        }
-      }
-
-      .section-content {
-        margin-top: 0.5rem;
       }
 
       .change-item {
+        position: relative;
         display: flex;
         align-items: center;
-        padding: 0.25rem 0;
-        gap: 0.5rem;
+        gap: 1rem;
+        padding: 0.5rem 0;
         transition: all 0.2s ease;
 
-        &.breaking {
-          background: rgba(239, 68, 68, 0.03);
-          padding: 0.25rem 0.5rem;
+        .change-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: var(--anzhiyu-main);
+          opacity: 0.3;
+          flex-shrink: 0;
+        }
+
+        .change-content {
+          flex: 1;
+          min-width: 0;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+        }
+
+        .change-main {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          flex: 1;
+          min-width: 0;
+        }
+
+        .change-hash {
+          display: inline-flex;
+          align-items: center;
+          background: var(--anzhiyu-main);
+          color: white;
+          padding: 0.15rem 0.5rem;
           border-radius: 4px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          flex-shrink: 0;
+          text-decoration: none;
+          margin-right: 0.5rem;
+
+          i {
+            margin-right: 0.25rem;
+          }
+
+          &:hover {
+            opacity: 0.9;
+          }
         }
 
         .change-scope {
-          background: var(--anzhiyu-main);
-          color: var(--anzhiyu-white);
-          padding: 0.15rem 0.4rem;
-          border-radius: 8px;
-          font-size: 0.7rem;
+          display: inline-block;
+          background: var(--anzhiyu-background);
+          color: var(--anzhiyu-secondtext);
+          padding: 0.1rem 0.4rem;
+          border-radius: 4px;
+          font-size: 0.75rem;
           font-weight: 500;
-          text-transform: uppercase;
-          width: 5rem;
-          text-align: center;
-          flex-shrink: 0;
+          margin-right: 0.4rem;
         }
 
         .change-message {
           flex: 1;
-          font-size: 0.9rem;
-          line-height: 1.4;
+          font-size: 0.9375rem;
           color: var(--anzhiyu-fontcolor);
-          margin: 0;
-        }
-
-        .change-hash {
-          background: rgba(0, 0, 0, 0.05);
-          color: #6b7280;
-          padding: 0.15rem 0.4rem;
-          border-radius: 4px;
-          font-family: "Monaco", "Menlo", monospace;
-          font-size: 0.7rem;
-          flex-shrink: 0;
+          line-height: 1.5;
+          min-width: 0;
         }
 
         .breaking-badge {
           background: #ef4444;
           color: white;
-          padding: 0.15rem 0.4rem;
-          border-radius: 8px;
-          font-size: 0.65rem;
-          font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
+          padding: 0.1rem 0.4rem;
+          border-radius: 4px;
+          font-size: 0.7rem;
+          font-weight: 700;
           flex-shrink: 0;
         }
+
+        .change-meta {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          flex-shrink: 0;
+
+          a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--anzhiyu-secondtext);
+            text-decoration: none;
+            padding: 0.15rem 0.4rem;
+            background: var(--anzhiyu-background);
+            border-radius: 4px;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+
+            &:hover {
+              color: var(--anzhiyu-main);
+              border-color: var(--anzhiyu-main);
+              background: rgba(var(--anzhiyu-main-rgb), 0.05);
+            }
+
+            i {
+              font-size: 0.8rem;
+            }
+          }
+        }
       }
-    }
-
-    // 通用 Markdown 样式
-    :deep(h1),
-    :deep(h2),
-    :deep(h3),
-    :deep(h4),
-    :deep(h5),
-    :deep(h6) {
-      margin: 1.5rem 0 0.75rem;
-      font-weight: 600;
-      line-height: 1.3;
-      color: var(--anzhiyu-fontcolor);
-
-      &:first-child {
-        margin-top: 0;
-      }
-    }
-
-    :deep(p) {
-      margin: 1rem 0;
-      line-height: 1.7;
-    }
-
-    :deep(strong) {
-      font-weight: 600;
-      color: var(--anzhiyu-fontcolor);
-    }
-
-    :deep(em) {
-      font-style: italic;
-      color: var(--anzhiyu-secondtext);
     }
   }
 
@@ -838,71 +896,73 @@ onBeforeUnmount(() => {
     justify-content: center;
     gap: 0.75rem;
     padding: 2rem;
+    margin-top: 2rem;
     color: var(--anzhiyu-secondtext);
-    font-size: 0.9rem;
-
-    .loading-spinner .spinner {
-      width: 1.5rem;
-      height: 1.5rem;
-      border-width: 2px;
-    }
+    font-size: 0.9375rem;
+    font-weight: 500;
   }
 
   .no-more {
-    background: rgba(16, 185, 129, 0.06);
-    border-radius: 8px;
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px dashed rgba(16, 185, 129, 0.3);
+    border-radius: 12px;
     color: #10b981;
-
-    i {
-      color: #10b981;
-      font-size: 1.25rem;
-    }
   }
 }
 
-// 响应式设计
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 768px) {
   .update-page {
     padding: 1rem;
 
-    .update-content {
-      padding: 1.5rem;
-      margin-top: 1rem;
-      border-radius: 12px;
+    .timeline-container::before {
+      left: 12px;
     }
 
     .changelog-item {
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .timeline-node {
+      width: 24px;
+      .node-dot {
+        margin-top: 1.25rem;
+      }
+    }
+
+    .changelog-card {
       padding: 1.25rem;
-      margin-bottom: 1.5rem;
+      border-radius: 12px;
     }
 
     .changelog-title {
       font-size: 1.25rem;
-      flex-wrap: wrap;
-
-      .latest-badge,
-      .prerelease-badge {
-        margin-left: 0;
-        margin-top: 0.5rem;
-      }
-    }
-
-    .changelog-meta {
-      gap: 1rem;
-    }
-
-    .global-version-check {
-      .version-info {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-      }
-    }
-
-    .change-item {
-      .change-meta {
-        gap: 0.5rem;
-      }
     }
   }
 }

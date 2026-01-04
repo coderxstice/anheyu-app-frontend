@@ -576,7 +576,7 @@ const creativityPairs = computed(() => {
   }
 
   .todayCard-title {
-    color: rgba(0, 0, 0, 0.9);
+    color: rgb(3 145 150 / 82%);
   }
 }
 
@@ -655,7 +655,7 @@ const creativityPairs = computed(() => {
 // 当显示 Lottie 动画时，按钮颜色适配浅色背景
 .topGroup .todayCard.has-lottie .banner-button {
   background: rgba(255, 255, 255, 0.9);
-  color: rgba(0, 0, 0, 0.8);
+  color: rgb(215 83 126);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: var(--style-border);
