@@ -237,7 +237,8 @@ const handleOpenPublishDialog = () => {
 };
 const handleConfirmPublish = () => {
   isPublishDialogVisible.value = false;
-  handleSubmit(true);
+  // 不再强制设置状态，使用用户在 PublishDialog 中选择的状态
+  editorRef.value?.triggerSave();
 };
 
 const handleImageUploadForMdV3 = async (
