@@ -137,6 +137,10 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
               ) {
                 return "vendor-vue";
               }
+              // lottie-web 库 - 用于 SVG 渲染，独立分包，按需加载
+              if (id.includes("lottie-web")) {
+                return "vendor-lottie-web";
+              }
             }
           },
           // 优化文件命名，便于缓存

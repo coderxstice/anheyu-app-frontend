@@ -1,9 +1,20 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import {
+  computed,
+  onMounted,
+  onUnmounted,
+  ref,
+  defineAsyncComponent
+} from "vue";
 import { useRouter } from "vue-router";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useArticleStore } from "@/store/modules/articleStore";
 import { initLazyLoad, destroyLazyLoad } from "@/utils/lazyload";
+
+// 按需加载 Lottie 组件 - 仅当 banner.image 为空时才加载
+const HelloLottie = defineAsyncComponent(
+  () => import("@/components/HelloLottie/index.vue")
+);
 
 defineOptions({
   name: "HomeTop"
@@ -18,6 +29,19 @@ const homeTopConfig = computed(() => siteConfig.value?.HOME_TOP);
 const creativityConfig = computed(() => siteConfig.value?.CREATIVITY);
 
 const recommendedArticles = computed(() => articleStore.homeArticles);
+
+// 判断是否需要加载 Lottie 组件（仅当 banner.image 为空时）
+// 处理各种空值情况：undefined、null、空字符串
+const shouldLoadLottie = computed(() => {
+  const banner = homeTopConfig.value?.banner;
+  if (!banner) return false;
+
+  const imageUrl = banner.image;
+  // 判断图片 URL 是否为空（处理 undefined、null、空字符串、只有空格的情况）
+  const hasImage = imageUrl && imageUrl.trim().length > 0;
+
+  return !hasImage; // 没有图片时显示 Lottie
+});
 
 const isTopGroupExpanded = ref(false);
 const hasRecommendedArticles = computed(
@@ -236,7 +260,7 @@ const creativityPairs = computed(() => {
           v-if="homeTopConfig.banner"
           id="todayCard"
           class="todayCard"
-          :class="{ hide: isTopGroupExpanded }"
+          :class="{ hide: isTopGroupExpanded, 'has-lottie': shouldLoadLottie }"
           :href="homeTopConfig.banner.link"
           target="_blank"
           rel="noopener external nofollow noreferrer"
@@ -246,10 +270,21 @@ const creativityPairs = computed(() => {
             <div class="todayCard-title">{{ homeTopConfig.banner.title }}</div>
           </div>
           <img
+            v-if="
+              homeTopConfig?.banner?.image && homeTopConfig.banner.image.trim()
+            "
             class="todayCard-cover lazy-loading"
-            :data-src="homeTopConfig?.banner?.image"
+            :data-src="homeTopConfig.banner.image"
             alt="封面"
           />
+          <Suspense v-else-if="shouldLoadLottie">
+            <template #default>
+              <HelloLottie />
+            </template>
+            <template #fallback>
+              <div class="todayCard-cover lazy-loading" />
+            </template>
+          </Suspense>
           <div class="banner-button-group">
             <div class="banner-button" @click="handleMoreClick">
               <i class="anzhiyufont anzhiyu-icon-arrow-circle-right" />
@@ -519,6 +554,7 @@ const creativityPairs = computed(() => {
   display: flex;
   cursor: pointer;
   pointer-events: all;
+  border: var(--style-border);
 }
 
 .topGroup .todayCard .todayCard-info {
@@ -529,6 +565,19 @@ const creativityPairs = computed(() => {
   color: var(--anzhiyu-white);
   max-width: 60%;
   transition: 0.3s;
+}
+
+// 当显示 Lottie 动画时，文字颜色适配浅色背景
+.topGroup .todayCard.has-lottie .todayCard-info {
+  color: rgba(0, 0, 0, 0.8);
+
+  .todayCard-tips {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .todayCard-title {
+    color: rgba(0, 0, 0, 0.9);
+  }
 }
 
 .topGroup .todayCard .todayCard-info .todayCard-tips {
@@ -603,6 +652,21 @@ const creativityPairs = computed(() => {
   color: var(--anzhiyu-white);
 }
 
+// 当显示 Lottie 动画时，按钮颜色适配浅色背景
+.topGroup .todayCard.has-lottie .banner-button {
+  background: rgba(255, 255, 255, 0.9);
+  color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: var(--style-border);
+  box-shadow: var(--anzhiyu-shadow-border);
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: rgba(0, 0, 0, 0.9);
+  }
+}
+
 .topGroup .banner-button-group .banner-button .banner-button-text {
   white-space: nowrap;
   overflow: hidden;
@@ -612,16 +676,6 @@ const creativityPairs = computed(() => {
 .topGroup .banner-button svg {
   margin-right: 8px;
   font-size: 22px;
-}
-.topGroup .todayCard::after {
-  position: absolute;
-  content: "";
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  box-shadow: 0 -109px 133px -9px #000000 inset;
-  z-index: 1;
 }
 
 .topGroup .todayCard.hide {
