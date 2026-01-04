@@ -102,7 +102,7 @@ const siteName = computed(() => {
 
 // 获取系列文章显示篇数配置
 const seriesPostCount = computed(() => {
-  return siteConfig?.sidebar?.seriesPostCount || 6;
+  return siteConfig?.sidebar?.series?.postCount || 6;
 });
 
 const authorInfoConfig = computed(() => {
