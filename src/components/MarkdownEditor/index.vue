@@ -97,10 +97,63 @@ const themeObserver = new MutationObserver(() => {
   }
 });
 
+// === 等待 Mermaid 渲染完成 ===
+const waitForMermaidRender = async (
+  maxWaitMs: number = 5000,
+  checkIntervalMs: number = 100
+): Promise<boolean> => {
+  const previewContainer = containerRef.value?.querySelector(
+    ".md-editor-preview-wrapper"
+  );
+  if (!previewContainer) return true;
+
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < maxWaitMs) {
+    // 找到所有 mermaid 块
+    const mermaidBlocks =
+      previewContainer.querySelectorAll(".md-editor-mermaid");
+
+    if (mermaidBlocks.length === 0) {
+      return true; // 没有 mermaid 块，直接返回
+    }
+
+    // 检查是否所有 mermaid 块都已渲染完成（包含 SVG）
+    let allRendered = true;
+    for (const block of Array.from(mermaidBlocks)) {
+      const hasSvg = block.querySelector("svg");
+      const isProcessed = block.hasAttribute("data-processed");
+
+      if (!hasSvg || !isProcessed) {
+        allRendered = false;
+        break;
+      }
+    }
+
+    if (allRendered) {
+      console.log(
+        `[保存文章] 所有 Mermaid 图表已渲染完成 (${mermaidBlocks.length} 个)`
+      );
+      return true;
+    }
+
+    // 等待一段时间后再检查
+    await new Promise(resolve => setTimeout(resolve, checkIntervalMs));
+  }
+
+  console.warn(
+    `[保存文章] Mermaid 渲染超时 (${maxWaitMs}ms)，部分图表可能未完成渲染`
+  );
+  return false;
+};
+
 // 保存处理
 const handleSave = async (markdown: string, htmlPromise: Promise<string>) => {
   console.log("[保存文章] 开始处理...");
   console.log("[保存文章] Markdown长度:", markdown.length);
+
+  // 等待 Mermaid 渲染完成（最多等待5秒）
+  await waitForMermaidRender(5000, 100);
 
   // 获取原始HTML
   const rawHtml = await htmlPromise;
