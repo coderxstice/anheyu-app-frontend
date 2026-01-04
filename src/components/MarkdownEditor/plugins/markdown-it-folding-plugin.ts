@@ -37,9 +37,11 @@ export default function customFoldingPlugin(md: MarkdownIt): void {
     // 记录起始行的缩进量
     const startIndent = state.tShift[startLine];
 
-    // 寻找结束标记 :::
+    // 寻找结束标记 ::: （需要考虑嵌套情况）
     let nextLine = startLine + 1;
     let endLineFound = false;
+    let nestingLevel = 1; // 从 1 开始，表示当前 folding 块
+
     while (nextLine < endLine) {
       // 如果遇到空行，继续
       if (state.isEmpty(nextLine)) {
@@ -57,9 +59,21 @@ export default function customFoldingPlugin(md: MarkdownIt): void {
       }
 
       const lineText = state.src.slice(pos, max).trim();
-      if (lineText === startMarker) {
-        endLineFound = true;
-        break;
+
+      // 检查是否是新的 ::: 块开始（gallery, tabs, hidden, folding 等）
+      if (
+        lineText.startsWith(startMarker) &&
+        lineText.length > startMarker.length
+      ) {
+        // 这是一个新的嵌套块开始
+        nestingLevel++;
+      } else if (lineText === startMarker) {
+        // 这是一个块的结束标记
+        nestingLevel--;
+        if (nestingLevel === 0) {
+          endLineFound = true;
+          break;
+        }
       }
       nextLine++;
     }
