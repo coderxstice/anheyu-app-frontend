@@ -423,6 +423,7 @@ export interface SidebarPageSettingsInfo {
   wechatFace: string;
   wechatBackFace: string;
   wechatBlurredBackground: string;
+  wechatLink: string;
   tagsEnable: boolean;
   tagsHighlight: string[];
   siteInfoTotalPostCount: number;

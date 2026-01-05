@@ -2,7 +2,7 @@
 import { reactive, onMounted, toRefs, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox, ElDivider } from "element-plus";
-import { getArticleList, deleteArticle } from "@/api/post";
+import { getArticleList, deleteArticle, batchDeleteArticles } from "@/api/post";
 import type { Article, GetArticleListParams } from "@/api/post/type";
 import {
   Search,
@@ -186,6 +186,50 @@ const handleImportExportSuccess = () => {
   selectionMode.value = false;
 };
 
+// 批量删除
+const batchDeleting = ref(false);
+
+const handleBatchDelete = async () => {
+  if (selectedArticles.value.length === 0) {
+    ElMessage.warning("请先选择要删除的文章");
+    return;
+  }
+
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${selectedArticles.value.length} 篇文章吗？此操作不可恢复。`,
+      "批量删除确认",
+      {
+        confirmButtonText: "确定删除",
+        cancelButtonText: "取消",
+        type: "warning"
+      }
+    );
+
+    batchDeleting.value = true;
+    const { data } = await batchDeleteArticles(selectedArticles.value);
+
+    if (data.failed_count > 0) {
+      ElMessage.warning(
+        `删除完成：成功 ${data.success_count} 篇，失败 ${data.failed_count} 篇`
+      );
+    } else {
+      ElMessage.success(`成功删除 ${data.success_count} 篇文章`);
+    }
+
+    // 清空选择并刷新列表
+    selectedArticles.value = [];
+    selectionMode.value = false;
+    fetchData();
+  } catch (error) {
+    if (error !== "cancel") {
+      ElMessage.error("批量删除失败");
+    }
+  } finally {
+    batchDeleting.value = false;
+  }
+};
+
 onMounted(() => {
   fetchData();
 });
@@ -254,6 +298,16 @@ onMounted(() => {
           批量操作
         </el-button>
         <template v-else>
+          <el-button
+            v-if="selectedArticles.length > 0"
+            class="action-btn"
+            type="danger"
+            :icon="Delete"
+            :loading="batchDeleting"
+            @click="handleBatchDelete"
+          >
+            删除 ({{ selectedArticles.length }})
+          </el-button>
           <el-button
             v-if="selectedArticles.length > 0"
             class="action-btn"

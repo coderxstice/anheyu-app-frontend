@@ -21,7 +21,13 @@ export interface StoragePolicy {
   created_at: string;
   updated_at: string;
   name: string;
-  type: "local" | "onedrive" | "tencent_cos" | "aliyun_oss" | "aws_s3";
+  type:
+    | "local"
+    | "onedrive"
+    | "tencent_cos"
+    | "aliyun_oss"
+    | "aws_s3"
+    | "qiniu_kodo";
   server?: string;
   bucket_name?: string;
   is_private: boolean;

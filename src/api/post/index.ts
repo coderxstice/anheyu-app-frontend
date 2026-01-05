@@ -29,7 +29,9 @@ import type {
   SuccessResponseUploadImage,
   // 导入导出
   ImportArticleOptions,
-  ImportArticleResult
+  ImportArticleResult,
+  // 批量删除
+  BatchDeleteResult
 } from "./type";
 
 // ===================================
@@ -85,6 +87,17 @@ export const deleteArticle = (id: string): Promise<BaseResponse<null>> => {
   return http.request<BaseResponse<null>>(
     "delete",
     baseUrlApi(`articles/${id}`)
+  );
+};
+
+/** @description 批量删除文章 */
+export const batchDeleteArticles = (
+  ids: string[]
+): Promise<BaseResponse<BatchDeleteResult>> => {
+  return http.request<BaseResponse<BatchDeleteResult>>(
+    "delete",
+    baseUrlApi("articles/batch"),
+    { data: { ids } }
   );
 };
 

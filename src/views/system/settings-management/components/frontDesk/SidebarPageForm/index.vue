@@ -399,6 +399,15 @@ const moveSidebarBlock = (index: number, direction: number) => {
             <el-input v-model="model.wechatBlurredBackground" clearable />
           </el-form-item>
         </el-col>
+        <el-col :span="12">
+          <el-form-item label="点击跳转链接">
+            <el-input
+              v-model="model.wechatLink"
+              placeholder="留空则不跳转，填写后点击卡片会打开此链接"
+              clearable
+            />
+          </el-form-item>
+        </el-col>
       </el-row>
     </template>
 

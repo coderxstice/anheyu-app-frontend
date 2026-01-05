@@ -42,7 +42,8 @@ const wechatConfig = computed(() => {
   return {
     face: siteConfig.value.sidebar.wechat.face,
     backFace: siteConfig.value.sidebar.wechat.backFace,
-    blurBackground: siteConfig.value.sidebar.wechat.blurBackground
+    blurBackground: siteConfig.value.sidebar.wechat.blurBackground,
+    link: siteConfig.value.sidebar.wechat.link
   };
 });
 </script>

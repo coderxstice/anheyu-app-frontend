@@ -15,8 +15,7 @@
     <span ref="iconRef" class="theme-icon-wrapper">
       <component
         :is="themeIcon"
-        class="text-xl theme-icon"
-        :style="{ color: iconColor }"
+        class="text-xl text-black theme-icon dark:text-white"
       />
     </span>
   </span>
@@ -39,10 +38,6 @@ const iconRef = ref<any>(null);
 
 const themeIcon = computed(() => {
   return dataTheme.value ? DarkIcon : DayIcon;
-});
-
-const iconColor = computed(() => {
-  return dataTheme.value ? "white" : "black";
 });
 
 const handleThemeToggle = async (event: MouseEvent) => {

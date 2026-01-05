@@ -1427,6 +1427,12 @@ const sidebarDescriptors: SettingDescriptor[] = [
     type: "string"
   },
   {
+    frontendPath: "frontDesk.sidebar.wechatLink",
+    backendKey: constant.KeySidebarWechatLink,
+    defaultValue: "",
+    type: "string"
+  },
+  {
     frontendPath: "frontDesk.sidebar.tagsEnable",
     backendKey: constant.KeySidebarTagsEnable,
     defaultValue: true,

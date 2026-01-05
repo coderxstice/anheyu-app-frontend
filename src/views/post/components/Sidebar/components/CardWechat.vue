@@ -12,6 +12,7 @@ interface WechatConfig {
   face: string;
   backFace: string;
   blurBackground: string;
+  link?: string;
 }
 
 const props = defineProps({
@@ -20,12 +21,19 @@ const props = defineProps({
     required: true
   }
 });
+
+const handleClick = () => {
+  if (props.config.link) {
+    window.open(props.config.link, "_blank");
+  }
+};
 </script>
 
 <template>
   <div
     class="card-widget card-wechat"
     :style="{ '--blur-background': `url(${config.blurBackground})` }"
+    @click="handleClick"
   >
     <div id="flip-wrapper">
       <div id="flip-content">
