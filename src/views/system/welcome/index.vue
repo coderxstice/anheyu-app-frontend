@@ -22,6 +22,15 @@
         <p class="header-time">{{ currentTime }}</p>
       </header>
 
+      <!-- 节日公告 -->
+      <div v-if="showAnnouncement" class="announcement-banner">
+        <span class="announcement-icon">{{ currentAnnouncement.icon }}</span>
+        <span class="announcement-text">{{ currentAnnouncement.text }}</span>
+        <button class="announcement-close" @click="showAnnouncement = false">
+          ×
+        </button>
+      </div>
+
       <main class="dashboard-main">
         <!-- 数据概览卡片 -->
         <AnalysisOverview :items="overviewItems" />
@@ -63,7 +72,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, onUnmounted } from "vue";
 import {
   getStatistics,
   getStatisticsSummary,
@@ -97,6 +106,119 @@ import AnalyticsDevices from "./components/AnalyticsDevices.vue";
 
 defineOptions({
   name: "Welcome"
+});
+
+// 节日公告数据
+interface Announcement {
+  icon: string;
+  text: string;
+  type?: string;
+}
+
+const showAnnouncement = ref(true);
+
+// 获取今天的节日和有趣的提醒
+const getAnnouncements = (): Announcement[] => {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  const dayOfWeek = now.getDay();
+  const hour = now.getHours();
+
+  const announcements: Announcement[] = [];
+
+  // 节日检测
+  const holidays: Record<string, Announcement> = {
+    "1-1": { icon: "🎉", text: "新年快乐！新的一年，新的开始，愿你万事顺意！" },
+    "2-14": { icon: "💕", text: "情人节快乐！愿你被爱包围，代码也零 bug！" },
+    "3-8": { icon: "👩", text: "女神节快乐！致敬每一位了不起的她！" },
+    "3-12": { icon: "🌲", text: "植树节到了！种下希望，收获未来！" },
+    "4-1": {
+      icon: "🤡",
+      text: "愚人节快乐！小心身边的恶作剧，代码里也可能有！"
+    },
+    "5-1": { icon: "💪", text: "劳动节快乐！劳动最光荣，今天也要元气满满！" },
+    "5-4": { icon: "🌟", text: "青年节快乐！愿你永葆青春，代码永远年轻！" },
+    "6-1": { icon: "🧸", text: "儿童节快乐！愿你童心未泯，快乐依旧！" },
+    "7-1": { icon: "🎊", text: "建党节快乐！不忘初心，砥砺前行！" },
+    "8-1": { icon: "🎖️", text: "建军节快乐！向人民子弟兵致敬！" },
+    "9-10": { icon: "📚", text: "教师节快乐！感恩每一位辛勤的老师！" },
+    "10-1": { icon: "🇨🇳", text: "国庆节快乐！祝福祖国繁荣昌盛！" },
+    "10-31": { icon: "🎃", text: "万圣节快乐！Trick or Treat，代码不捣蛋！" },
+    "11-11": { icon: "🛒", text: "双十一快乐！剁手需谨慎，存款要留神！" },
+    "12-24": { icon: "🎄", text: "平安夜快乐！愿你代码平安，bug 都走远！" },
+    "12-25": {
+      icon: "🎅",
+      text: "圣诞节快乐！Merry Christmas! 愿你收到满满的祝福！"
+    },
+    "12-31": { icon: "🎆", text: "跨年夜快乐！告别旧年，迎接新的精彩！" }
+  };
+
+  const holidayKey = `${month}-${day}`;
+  if (holidays[holidayKey]) {
+    announcements.push(holidays[holidayKey]);
+  }
+
+  // 程序员特殊日期
+  if (month === 10 && day === 24) {
+    announcements.push({
+      icon: "👨‍💻",
+      text: "程序员节快乐！1024，属于你的节日！今天必须不加班！"
+    });
+  }
+
+  // 星期提醒
+  const weekdayMessages: Record<number, Announcement> = {
+    1: { icon: "☕", text: "周一加油！新的一周，从一杯咖啡开始！" },
+    5: { icon: "🎊", text: "周五啦！再坚持一下，周末就在眼前！" },
+    6: { icon: "🎮", text: "周六愉快！好好休息，打打游戏，给自己充充电！" },
+    0: { icon: "😴", text: "周日快乐！珍惜假期的最后时光，明天继续加油！" }
+  };
+
+  if (!holidays[holidayKey] && weekdayMessages[dayOfWeek]) {
+    announcements.push(weekdayMessages[dayOfWeek]);
+  }
+
+  // 时段提醒
+  if (hour >= 23 || hour < 5) {
+    announcements.push({
+      icon: "🌙",
+      text: "夜深了，程序员也需要睡眠！记得早点休息哦～"
+    });
+  } else if (hour >= 11 && hour < 13) {
+    announcements.push({
+      icon: "🍜",
+      text: "午餐时间到！先吃饭，代码跑不掉～"
+    });
+  } else if (hour >= 17 && hour < 19) {
+    announcements.push({ icon: "🌅", text: "下班时间快到了！该准备收工啦～" });
+  }
+
+  // 默认有趣提醒
+  const defaultAnnouncements: Announcement[] = [
+    { icon: "✨", text: "今天也要做一个快乐的管理员！" },
+    { icon: "🚀", text: "效率满分！今天的任务一定能完成！" },
+    { icon: "💡", text: "灵感满满的一天，期待你的精彩创作！" },
+    { icon: "🌈", text: "美好的一天从管理后台开始！" },
+    { icon: "🔥", text: "今天的你也是最棒的！冲冲冲！" },
+    { icon: "🎯", text: "专注当下，每一步都算数！" },
+    { icon: "🌸", text: "愿你今天心情如花般灿烂！" },
+    { icon: "⚡", text: "能量满格，效率拉满！" }
+  ];
+
+  // 随机选择默认提醒
+  const randomDefault =
+    defaultAnnouncements[
+      Math.floor(Math.random() * defaultAnnouncements.length)
+    ];
+  announcements.push(randomDefault);
+
+  return announcements;
+};
+
+const currentAnnouncement = computed(() => {
+  const announcements = getAnnouncements();
+  return announcements[0] || { icon: "📢", text: "欢迎使用管理后台！" };
 });
 
 // 响应式数据
@@ -494,6 +616,57 @@ onMounted(async () => {
   background: var(--anzhiyu-gray);
   box-shadow: none;
   transform: none;
+}
+
+/* 节日公告样式 */
+.announcement-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: 1rem;
+  background: var(--anzhiyu-card-bg);
+  border: var(--style-border);
+  border-radius: 8px;
+  box-shadow: var(--anzhiyu-shadow-border);
+}
+
+.announcement-icon {
+  flex-shrink: 0;
+  font-size: 1.1rem;
+}
+
+.announcement-text {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--anzhiyu-fontcolor);
+}
+
+.announcement-close {
+  flex-shrink: 0;
+  padding: 0;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--anzhiyu-secondtext);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.announcement-close:hover {
+  opacity: 1;
+}
+
+@media (width <= 768px) {
+  .announcement-banner {
+    padding: 8px 12px;
+  }
+
+  .announcement-text {
+    font-size: 0.8rem;
+  }
 }
 
 .dashboard-header {
