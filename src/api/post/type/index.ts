@@ -226,3 +226,16 @@ export interface ImportArticleResult {
   created_ids: string[];
   error_messages: string[];
 }
+
+// ===================================
+//         文章批量删除功能
+// ===================================
+
+/**
+ * @description 批量删除文章结果
+ */
+export interface BatchDeleteResult {
+  success_count: number;
+  failed_count: number;
+  failed_ids: string[];
+}

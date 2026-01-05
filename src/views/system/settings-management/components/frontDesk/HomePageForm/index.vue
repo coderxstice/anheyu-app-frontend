@@ -232,13 +232,17 @@
       </el-empty>
 
       <!-- 菜单项列表 -->
-      <div v-else class="menu-items">
+      <div v-else ref="menuListRef" class="menu-items">
         <div
           v-for="(menuItem, index) in model.menu"
           :key="`menu-${index}`"
           class="menu-item-row"
         >
           <div class="item-main">
+            <!-- 拖拽手柄 -->
+            <div class="drag-handle" title="拖拽排序">
+              <el-icon><Rank /></el-icon>
+            </div>
             <div class="item-info">
               <div class="item-title">
                 <el-icon
@@ -899,7 +903,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import {
   Plus,
@@ -911,8 +915,10 @@ import {
   Menu,
   Setting,
   Warning,
-  CircleCheck
+  CircleCheck,
+  Rank
 } from "@element-plus/icons-vue";
+import Sortable from "sortablejs";
 import type {
   HomePageSettingsInfo,
   JsonEditorTableColumn,
@@ -1274,6 +1280,70 @@ const validateAndShowResults = () => {
 // 内联编辑状态
 const editingMenuIndex = ref(-1);
 const editingMenuTitle = ref("");
+
+// 拖拽排序相关
+const menuListRef = ref<HTMLElement | null>(null);
+let sortableInstance: Sortable | null = null;
+
+// 初始化拖拽排序
+const initSortable = () => {
+  nextTick(() => {
+    if (menuListRef.value && !sortableInstance) {
+      sortableInstance = Sortable.create(menuListRef.value, {
+        animation: 200,
+        handle: ".drag-handle",
+        ghostClass: "menu-item-ghost",
+        chosenClass: "menu-item-chosen",
+        dragClass: "menu-item-drag",
+        onEnd: (evt: Sortable.SortableEvent) => {
+          const { oldIndex, newIndex } = evt;
+          if (
+            oldIndex !== undefined &&
+            newIndex !== undefined &&
+            oldIndex !== newIndex
+          ) {
+            const currentMenu = [...(model.value.menu || [])];
+            const [movedItem] = currentMenu.splice(oldIndex, 1);
+            currentMenu.splice(newIndex, 0, movedItem);
+            updateMenu(currentMenu);
+            ElMessage.success("菜单顺序已更新");
+          }
+        }
+      });
+    }
+  });
+};
+
+// 销毁拖拽排序实例
+const destroySortable = () => {
+  if (sortableInstance) {
+    sortableInstance.destroy();
+    sortableInstance = null;
+  }
+};
+
+// 监听菜单数据变化，重新初始化拖拽
+watch(
+  () => model.value.menu?.length,
+  newLength => {
+    // 无论菜单是否为空，都先销毁旧实例避免内存泄漏
+    destroySortable();
+    // 只有当菜单有数据时才重新初始化
+    if (newLength && newLength > 0) {
+      initSortable();
+    }
+  }
+);
+
+onMounted(() => {
+  if (model.value.menu && model.value.menu.length > 0) {
+    initSortable();
+  }
+});
+
+onBeforeUnmount(() => {
+  destroySortable();
+});
 
 // 设置面板状态
 const settingsDrawerVisible = ref(false);
@@ -1857,6 +1927,39 @@ const updateMusicVinylGroove = (newGroove: string) => {
           &:hover {
             border-color: var(--anzhiyu-theme);
             box-shadow: var(--anzhiyu-shadow-border);
+
+            .drag-handle {
+              opacity: 1;
+            }
+          }
+
+          .drag-handle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            margin-right: 12px;
+            color: var(--anzhiyu-secondtext);
+            cursor: grab;
+            background: var(--anzhiyu-card-bg);
+            border-radius: 6px;
+            opacity: 0.6;
+            transition: all 0.2s;
+
+            &:hover {
+              color: var(--anzhiyu-theme);
+              background: var(--anzhiyu-theme-op);
+              opacity: 1;
+            }
+
+            &:active {
+              cursor: grabbing;
+            }
+
+            .el-icon {
+              font-size: 18px;
+            }
           }
 
           .item-info {
@@ -2133,6 +2236,33 @@ const updateMusicVinylGroove = (newGroove: string) => {
         font-size: 14px;
       }
     }
+  }
+}
+
+/* 拖拽排序样式 */
+.menu-item-ghost {
+  opacity: 0.5;
+
+  .item-main {
+    background: var(--anzhiyu-theme-op) !important;
+    border-color: var(--anzhiyu-theme) !important;
+    border-style: dashed !important;
+  }
+}
+
+.menu-item-chosen {
+  .item-main {
+    box-shadow: 0 4px 16px rgb(0 0 0 / 15%) !important;
+    transform: scale(1.02);
+  }
+}
+
+.menu-item-drag {
+  opacity: 0.9;
+
+  .item-main {
+    background: var(--anzhiyu-card-bg) !important;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 20%) !important;
   }
 }
 

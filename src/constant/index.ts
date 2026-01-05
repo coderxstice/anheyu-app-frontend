@@ -75,6 +75,7 @@ const KeySidebarWechatFace: SettingKey = "sidebar.wechat.face";
 const KeySidebarWechatBackFace: SettingKey = "sidebar.wechat.backFace";
 const KeySidebarWechatBlurredBackground: SettingKey =
   "sidebar.wechat.blurBackground";
+const KeySidebarWechatLink: SettingKey = "sidebar.wechat.link";
 const KeySidebarTagsEnable: SettingKey = "sidebar.tags.enable";
 const KeySidebarTagsHighlight: SettingKey = "sidebar.tags.highlight";
 const KeySidebarSiteInfoTotalPostCount: SettingKey =
@@ -442,6 +443,7 @@ export const constant = {
   KeySidebarWechatFace,
   KeySidebarWechatBackFace,
   KeySidebarWechatBlurredBackground,
+  KeySidebarWechatLink,
   KeySidebarTagsEnable,
   KeySidebarTagsHighlight,
   KeySidebarSiteInfoTotalPostCount,
