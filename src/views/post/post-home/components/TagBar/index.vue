@@ -41,18 +41,17 @@ onMounted(() => {
 
 <template>
   <div class="tag-bar-container">
-    <a
+    <router-link
       v-for="tag in tags"
       :key="tag.id"
       class="tag-item"
       :class="{ selected: selectedTagName === tag.name }"
-      :href="`/tags/${tag.name}/`"
-      @click.prevent="handleSelect(tag)"
+      :to="`/tags/${tag.name}/`"
     >
       <span class="tags-punctuation">#</span>
       <span class="tag-name">{{ tag.name }}</span>
       <span class="tags-page-count">{{ tag.count }}</span>
-    </a>
+    </router-link>
   </div>
 </template>
 

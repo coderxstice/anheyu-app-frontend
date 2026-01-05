@@ -31,12 +31,7 @@ const defaultCover = articleStore.defaultCover;
       <i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" />
       <span>喜欢这篇文章的人也看了</span>
       <div class="relatedPosts-link">
-        <a
-          href="javascript:void(0);"
-          rel="external nofollow"
-          @click.prevent="toRandomPost"
-          >随便逛逛</a
-        >
+        <router-link to="/random" @click="toRandomPost">随便逛逛</router-link>
       </div>
     </div>
     <div class="relatedPosts-list">

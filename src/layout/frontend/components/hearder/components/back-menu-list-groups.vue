@@ -55,7 +55,7 @@ const isIconifyIcon = (icon: string) => {
               v-if="isImageUrl(item.icon)"
               class="back-menu-item-icon"
               :src="item.icon"
-              :alt="item.name"
+              alt=""
             />
             <!-- Iconify 图标 -->
             <IconifyIconOnline

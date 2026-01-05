@@ -20,6 +20,7 @@
           <a
             class="social-link"
             :href="item.link"
+            :aria-label="item.title"
             target="_blank"
             rel="noopener external nofollow noreferrer"
           >
@@ -76,6 +77,7 @@
           <a
             class="social-link"
             :href="item.link"
+            :aria-label="item.title"
             target="_blank"
             rel="noopener external nofollow noreferrer"
           >
@@ -131,9 +133,10 @@
               popper-class="custom-tooltip"
               :transition-props="{ onEnter, onLeave }"
             >
-              <a
+              <button
+                type="button"
                 class="random-friends-btn"
-                href="javascript:void(0);"
+                aria-label="换一批友情链接"
                 @click="refreshFriendLinks"
               >
                 <i
@@ -141,7 +144,7 @@
                   :class="{ 'is-animating': isAnimating }"
                   :style="{ transform: `rotate(${rotationCount * 360}deg)` }"
                 />
-              </a>
+              </button>
             </el-tooltip>
           </div>
           <div class="footer-links">
@@ -290,7 +293,7 @@
               <a
                 class="uptime-status-indicator"
                 :class="uptimeStatusClass"
-                :href="uptimeKumaConfig.page_url || 'javascript:void(0)'"
+                :href="uptimeKumaConfig.page_url || '#'"
                 :target="uptimeKumaConfig.page_url ? '_blank' : undefined"
                 rel="noopener"
               >
@@ -333,6 +336,7 @@
             <a
               class="bar-link cc-link"
               :href="footerConfig.bar.cc.link"
+              aria-label="CC BY-NC-ND 4.0 协议"
               target="_blank"
               rel="noopener"
             >

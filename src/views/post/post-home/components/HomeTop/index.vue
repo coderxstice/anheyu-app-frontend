@@ -176,13 +176,16 @@ const creativityPairs = computed(() => {
           :key="item.name"
           class="category-item"
         >
+          <!-- 外部链接使用 a 标签 -->
           <a
+            v-if="item.isExternal || /^https?:\/\//.test(item.path)"
             class="category-button"
+            :href="item.path"
+            target="_blank"
+            rel="noopener noreferrer"
             :style="{ background: item.background }"
-            @click="handleCategoryClick(item, $event)"
           >
             <span class="category-button-text">{{ item.name }}</span>
-            <!-- 支持HTTP链接图标 -->
             <img
               v-if="
                 item.icon &&
@@ -193,13 +196,36 @@ const creativityPairs = computed(() => {
               :alt="item.name"
               class="category-icon category-icon-img"
             />
-            <!-- 字体图标 -->
             <i
               v-else-if="item.icon"
               :class="['anzhiyufont', item.icon]"
               class="category-icon"
             />
           </a>
+          <!-- 内部链接使用 router-link -->
+          <router-link
+            v-else
+            class="category-button"
+            :to="item.path"
+            :style="{ background: item.background }"
+          >
+            <span class="category-button-text">{{ item.name }}</span>
+            <img
+              v-if="
+                item.icon &&
+                (item.icon.startsWith('http://') ||
+                  item.icon.startsWith('https://'))
+              "
+              :src="item.icon"
+              :alt="item.name"
+              class="category-icon category-icon-img"
+            />
+            <i
+              v-else-if="item.icon"
+              :class="['anzhiyufont', item.icon]"
+              class="category-icon"
+            />
+          </router-link>
         </div>
       </div>
     </div>
