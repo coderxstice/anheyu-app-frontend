@@ -116,7 +116,7 @@ export const settingsMenuConfig: SettingsMenuItem[] = [
   },
   {
     key: "user",
-    label: "用户与通知",
+    label: "用户通知",
     icon: "ri:user-settings-line",
     children: [
       {
@@ -134,45 +134,58 @@ export const settingsMenuConfig: SettingsMenuItem[] = [
     ]
   },
   {
-    key: "advanced",
-    label: "高级功能",
-    icon: "ri:settings-4-line",
+    key: "pages",
+    label: "页面＆显示",
+    icon: "ri:layout-grid-line",
     children: [
       {
-        key: "advanced-flink",
+        key: "pages-flink",
         label: "友链管理",
         component: "FLinkPageSettingsForm",
         keywords: ["友链", "申请", "审核"]
       },
       {
-        key: "advanced-about",
-        label: "关于页",
+        key: "pages-about",
+        label: "关于页面",
         component: "AboutPageForm",
         keywords: ["关于", "技能", "生涯"]
       },
       {
-        key: "advanced-equipment",
-        label: "装备页",
+        key: "pages-equipment",
+        label: "装备页面",
         component: "EquipmentPageForm",
         keywords: ["装备", "好物"]
       },
       {
-        key: "advanced-comments-page",
-        label: "评论页",
+        key: "pages-comments-page",
+        label: "评论页面",
         component: "RecentCommentsPageForm",
         keywords: ["最近评论"]
       },
       {
-        key: "advanced-album",
-        label: "相册页",
+        key: "pages-album",
+        label: "相册页面",
         component: "AlbumPageForm",
         keywords: ["相册", "图片", "瀑布流", "画廊"]
       },
       {
-        key: "advanced-page-management",
+        key: "pages-page-management",
         label: "页面管理",
         component: "PageManagement",
         keywords: ["页面", "自定义"]
+      }
+    ]
+  },
+  {
+    key: "advanced",
+    label: "高级功能",
+    icon: "ri:settings-4-line",
+    children: [
+      {
+        key: "advanced-backup",
+        label: "备份导入",
+        component: "BackupImportForm",
+        keywords: ["备份", "导入", "导出", "恢复", "配置"]
       }
     ]
   }

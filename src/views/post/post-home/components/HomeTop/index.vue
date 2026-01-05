@@ -1,15 +1,8 @@
 <script setup lang="ts">
-import {
-  computed,
-  onMounted,
-  onUnmounted,
-  ref,
-  defineAsyncComponent
-} from "vue";
+import { computed, onMounted, ref, defineAsyncComponent } from "vue";
 import { useRouter } from "vue-router";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useArticleStore } from "@/store/modules/articleStore";
-import { initLazyLoad, destroyLazyLoad } from "@/utils/lazyload";
 
 // 按需加载 Lottie 组件 - 仅当 banner.image 为空时才加载
 const HelloLottie = defineAsyncComponent(
@@ -99,22 +92,9 @@ const handleCategoryClick = (item: any, event: MouseEvent) => {
   }
 };
 
-let observer: IntersectionObserver | null = null;
-
 onMounted(() => {
   articleStore.fetchHomeArticles();
-  // 初始化封面图片懒加载
-  observer = initLazyLoad(document, {
-    selector: "img[data-src]",
-    threshold: 0.1,
-    rootMargin: "100px",
-    loadedClass: "lazy-loaded",
-    loadingClass: "lazy-loading"
-  });
-});
-
-onUnmounted(() => {
-  destroyLazyLoad(observer);
+  // 注意：懒加载已由父组件 post-home 统一管理
 });
 
 const creativityList = computed(() => {
@@ -390,6 +370,10 @@ const creativityPairs = computed(() => {
   display: flex;
   flex-wrap: nowrap;
   animation: rowup 60s linear infinite;
+  /* GPU 加速优化 - 避免帧率下降 */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 #skills-tags-group-all .tags-group-icon-pair {
   margin-left: 1rem;

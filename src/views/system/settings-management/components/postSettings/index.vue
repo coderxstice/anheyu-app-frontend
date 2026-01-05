@@ -344,7 +344,7 @@
     <h3>目录配置</h3>
   </el-divider>
 
-  <el-form-item label="目录滚动Hash更新模式">
+  <el-form-item label="目录滚动更新Hash">
     <div>
       <el-select
         :model-value="formData.toc?.hashUpdateMode ?? 'replace'"
@@ -359,15 +359,15 @@
           }
         "
       >
-        <el-option label="替换（不产生历史记录）" value="replace" />
-        <el-option label="不更新（URL保持不变）" value="none" />
+        <el-option label="启用（滚动时更新Hash）" value="replace" />
+        <el-option label="禁用（滚动时不更新Hash）" value="none" />
       </el-select>
       <div class="form-item-help">
-        控制阅读文章时，目录滚动导致的URL Hash变化行为。<br />
-        <strong>替换模式</strong>：使用 history.replaceState
-        更新Hash，浏览器后退不会逐个回退Hash。<br />
-        <strong>不更新模式</strong
-        >：滚动时不自动更新URL中的Hash，避免产生任何历史记录。
+        控制阅读文章时，目录滚动是否同步更新URL中的Hash值。<br />
+        <strong>启用</strong
+        >：滚动时自动更新URL中的Hash，方便分享定位到具体章节。<br />
+        <strong>禁用</strong>：滚动时保持URL不变，Hash始终为空。<br />
+        注：无论哪种模式，都使用 replaceState 更新，浏览器后退不会逐个回退Hash。
       </div>
     </div>
   </el-form-item>

@@ -4,8 +4,8 @@
       :has-changes="hasChanges"
       :loading="saving"
       @save="handleSave"
-      @export="handleExportConfig"
-      @import="handleImportConfig"
+      @reset-current="handleResetCurrent"
+      @reset-all="handleResetAll"
     >
       <template #default="{ activeComponent }">
         <el-form :model="form" label-position="top" class="setting-form">
@@ -160,6 +160,17 @@
             </div>
             <PageManagement />
           </template>
+
+          <!-- 高级功能 - 备份&导入 -->
+          <template v-else-if="activeComponent === 'BackupImportForm'">
+            <div class="section-header">
+              <h2>备份 & 导入</h2>
+              <p class="section-desc">
+                管理系统配置备份，支持导出、导入和恢复配置
+              </p>
+            </div>
+            <BackupImportForm />
+          </template>
         </el-form>
       </template>
     </SettingsLayout>
@@ -171,7 +182,6 @@ import { reactive, ref, onMounted, watch, computed } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { get, set, isEqual, cloneDeep } from "lodash-es";
-import { exportConfig, importConfig } from "@/api/config";
 
 // 引入描述符和工具函数
 import { allSettingDescriptors } from "./settings.descriptor";
@@ -204,6 +214,7 @@ import EquipmentPageForm from "./components/frontDesk/EquipmentPageForm/index.vu
 import AboutPageForm from "./components/frontDesk/AboutPageForm/index.vue";
 import RecentCommentsPageForm from "./components/frontDesk/RecentCommentsPageForm/index.vue";
 import AlbumPageForm from "./components/frontDesk/AlbumPageForm/index.vue";
+import BackupImportForm from "./components/BackupImportForm.vue";
 
 const siteConfigStore = useSiteConfigStore();
 const fLinkFormRef = ref<InstanceType<typeof FLinkPageSettingsForm>>();
@@ -329,69 +340,140 @@ const handleSave = async () => {
   }
 };
 
-// 导出配置
-const handleExportConfig = async () => {
-  try {
-    ElMessage.info("正在导出配置数据...");
-    const response = await exportConfig();
-
-    const blob = new Blob([response], { type: "application/json" });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `anheyu-settings-${new Date().getTime()}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-
-    ElMessage.success("配置数据导出成功");
-  } catch (error: any) {
-    console.error("导出配置失败:", error);
-    ElMessage.error(`导出配置失败: ${error.message || "未知错误"}`);
-  }
+// 组件名到 frontendPath 前缀的映射
+const componentToPathPrefix: Record<string, string[]> = {
+  BaseInfoForm: ["site."],
+  IconSettingsForm: ["site."],
+  HomePageForm: ["frontDesk.home."],
+  SidebarPageForm: ["frontDesk.sidebar."],
+  PageSittingForm: ["page."],
+  PostSettings: ["post."],
+  FileSettings: ["file."],
+  CommentSettingsForm: ["frontDesk.comment."],
+  EmailSettingsForm: ["frontDesk.email."],
+  FLinkPageSettingsForm: ["frontDesk.fLink."],
+  AboutPageForm: ["frontDesk.about."],
+  EquipmentPageForm: ["frontDesk.equipment."],
+  RecentCommentsPageForm: ["frontDesk.recentComments."],
+  AlbumPageForm: ["frontDesk.album."]
 };
 
-// 导入配置
-const handleImportConfig = () => {
+// 重置选区 - 重置当前 tab 的配置
+const handleResetCurrent = (activeComponent: string) => {
+  const prefixes = componentToPathPrefix[activeComponent];
+  if (!prefixes || prefixes.length === 0) {
+    ElMessage.warning("当前页面不支持重置操作");
+    return;
+  }
+
+  if (!originalFormData.value) {
+    ElMessage.warning("没有可重置的数据");
+    return;
+  }
+
+  // 先检查当前页面是否有变更
+  let changedCount = 0;
+  descriptorMap.forEach((desc, frontendPath) => {
+    const belongsToComponent = prefixes.some(prefix =>
+      frontendPath.startsWith(prefix)
+    );
+    if (belongsToComponent) {
+      const currentValue = get(form, frontendPath);
+      const originalValue = get(originalFormData.value, frontendPath);
+      if (!isEqual(currentValue, originalValue)) {
+        changedCount++;
+      }
+    }
+  });
+
+  if (changedCount === 0) {
+    ElMessage.info("当前页面没有需要重置的更改");
+    return;
+  }
+
   ElMessageBox.confirm(
-    "导入新配置将会覆盖数据库中的配置数据，此操作会立即生效。确定要导入配置吗？",
-    "导入配置确认",
+    `确定要重置当前页面的 ${changedCount} 项配置更改吗？`,
+    "重置选区确认",
     {
-      confirmButtonText: "确定导入",
+      confirmButtonText: "确定重置",
       cancelButtonText: "取消",
       type: "warning"
     }
   )
     .then(() => {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = ".json";
-      input.onchange = async (e: Event) => {
-        const target = e.target as HTMLInputElement;
-        const file = target.files?.[0];
-        if (!file) return;
-
-        if (!file.name.endsWith(".json")) {
-          ElMessage.error("请选择 .json 格式的配置文件");
-          return;
+      let resetCount = 0;
+      descriptorMap.forEach((desc, frontendPath) => {
+        const belongsToComponent = prefixes.some(prefix =>
+          frontendPath.startsWith(prefix)
+        );
+        if (belongsToComponent) {
+          const currentValue = get(form, frontendPath);
+          const originalValue = get(originalFormData.value, frontendPath);
+          // 只重置有变更的配置
+          if (
+            !isEqual(currentValue, originalValue) &&
+            originalValue !== undefined
+          ) {
+            set(form, frontendPath, cloneDeep(originalValue));
+            resetCount++;
+          }
         }
+      });
 
-        try {
-          ElMessage.info("正在导入配置数据...");
-          await importConfig(file);
-          ElMessage.success("配置数据导入成功！请刷新页面查看最新配置");
-          setTimeout(() => {
-            window.location.reload();
-          }, 3000);
-        } catch (error: any) {
-          console.error("导入配置失败:", error);
-          ElMessage.error(
-            `导入配置失败: ${error.response?.data?.message || error.message || "未知错误"}`
-          );
+      ElMessage.success(`已重置 ${resetCount} 项配置`);
+    })
+    .catch(() => {
+      // 用户取消
+    });
+};
+
+// 重置全部 - 重置所有配置
+const handleResetAll = () => {
+  if (!originalFormData.value) {
+    ElMessage.warning("没有可重置的数据");
+    return;
+  }
+
+  // 先统计变更数量
+  let changedCount = 0;
+  descriptorMap.forEach((desc, frontendPath) => {
+    const currentValue = get(form, frontendPath);
+    const originalValue = get(originalFormData.value, frontendPath);
+    if (!isEqual(currentValue, originalValue)) {
+      changedCount++;
+    }
+  });
+
+  if (changedCount === 0) {
+    ElMessage.info("没有需要重置的更改");
+    return;
+  }
+
+  ElMessageBox.confirm(
+    `确定要重置所有 ${changedCount} 项配置更改吗？`,
+    "重置全部确认",
+    {
+      confirmButtonText: "确定重置",
+      cancelButtonText: "取消",
+      type: "warning"
+    }
+  )
+    .then(() => {
+      let resetCount = 0;
+      descriptorMap.forEach((desc, frontendPath) => {
+        const currentValue = get(form, frontendPath);
+        const originalValue = get(originalFormData.value, frontendPath);
+        // 只重置有变更的配置
+        if (
+          !isEqual(currentValue, originalValue) &&
+          originalValue !== undefined
+        ) {
+          set(form, frontendPath, cloneDeep(originalValue));
+          resetCount++;
         }
-      };
-      input.click();
+      });
+
+      ElMessage.success(`已重置 ${resetCount} 项配置`);
     })
     .catch(() => {
       // 用户取消

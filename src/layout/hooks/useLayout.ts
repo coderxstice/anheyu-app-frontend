@@ -16,15 +16,27 @@ export function useLayout() {
     }
     /** 导航 */
     if (!$storage.layout) {
+      // 辅助函数：根据时间判断是否应该是暗色模式（早8点至晚8点为亮色）
+      const shouldBeDarkByTime = (): boolean => {
+        const hour = new Date().getHours();
+        return hour < 8 || hour >= 20;
+      };
+
       // 确定默认主题模式：优先使用后端配置的 DEFAULT_THEME_MODE
-      let defaultOverallStyle = $config?.OverallStyle ?? "light";
+      let defaultOverallStyle: "light" | "dark" | "system" | "auto" =
+        $config?.OverallStyle ?? "light";
       let defaultDarkMode = $config?.DarkMode ?? false;
 
       // 如果后端配置了 DEFAULT_THEME_MODE，使用它作为默认值
       if ($config?.DEFAULT_THEME_MODE) {
+        if ($config.DEFAULT_THEME_MODE === "auto") {
+          defaultOverallStyle = "auto";
+          defaultDarkMode = shouldBeDarkByTime();
+        } else {
         defaultOverallStyle =
           $config.DEFAULT_THEME_MODE === "dark" ? "dark" : "light";
         defaultDarkMode = $config.DEFAULT_THEME_MODE === "dark";
+        }
       }
 
       $storage.layout = {

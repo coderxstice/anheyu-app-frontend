@@ -192,7 +192,7 @@ export interface PostSettingsInfo {
     copyrightReprint: string; // 转载文章版权模板
   };
   toc: {
-    hashUpdateMode: string; // 目录滚动时URL Hash更新模式: replace(替换不产生历史), none(不更新)
+    hashUpdateMode: string; // 目录滚动是否更新URL Hash: replace(启用), none(禁用)
   };
   waves: {
     enable: boolean; // 是否显示文章页面波浪区域

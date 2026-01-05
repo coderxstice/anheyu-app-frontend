@@ -8,12 +8,30 @@
       <div class="header-right">
         <SettingsSearch @navigate="handleNavigate" />
         <div class="header-actions">
-          <el-button :icon="Upload" @click="$emit('export')">
-            导出配置
-          </el-button>
-          <el-button :icon="Download" @click="$emit('import')">
-            导入配置
-          </el-button>
+          <el-tooltip
+            content="重置当前页面的配置为上次保存的状态"
+            placement="bottom"
+          >
+            <el-button
+              :icon="RefreshLeft"
+              :disabled="!hasChanges"
+              @click="$emit('resetCurrent', activeComponent)"
+            >
+              重置选区
+            </el-button>
+          </el-tooltip>
+          <el-tooltip
+            content="重置所有页面的配置为上次保存的状态"
+            placement="bottom"
+          >
+            <el-button
+              :icon="Refresh"
+              :disabled="!hasChanges"
+              @click="$emit('resetAll')"
+            >
+              重置全部
+            </el-button>
+          </el-tooltip>
         </div>
       </div>
     </div>
@@ -43,7 +61,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Upload, Download } from "@element-plus/icons-vue";
+import { RefreshLeft, Refresh } from "@element-plus/icons-vue";
 import SettingsSidebar from "./SettingsSidebar.vue";
 import SettingsSearch from "./SettingsSearch.vue";
 import FloatingSaveButton from "./FloatingSaveButton.vue";
@@ -56,8 +74,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "save"): void;
-  (e: "export"): void;
-  (e: "import"): void;
+  (e: "resetCurrent", component: string): void;
+  (e: "resetAll"): void;
   (e: "change", key: string): void;
 }>();
 
