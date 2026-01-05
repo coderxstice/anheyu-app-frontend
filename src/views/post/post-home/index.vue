@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { ref, reactive, watch, computed, onMounted } from "vue";
+import {
+  ref,
+  reactive,
+  watch,
+  computed,
+  onMounted,
+  onUnmounted,
+  onActivated,
+  nextTick
+} from "vue";
 import { useRoute } from "vue-router";
 import HomeTop from "./components/HomeTop/index.vue";
 import CategoryBar from "./components/CategoryBar/index.vue";
@@ -13,6 +22,7 @@ import { getPublicArticles } from "@/api/post";
 import type { Article, GetArticleListParams } from "@/api/post/type";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { resetThemeToDefault } from "@/utils/themeManager";
+import { initLazyLoad, destroyLazyLoad } from "@/utils/lazyload";
 
 defineOptions({
   name: "PostHome"
@@ -21,6 +31,9 @@ defineOptions({
 const route = useRoute();
 const siteConfigStore = useSiteConfigStore();
 const postConfig = computed(() => siteConfigStore.getSiteConfig?.post?.default);
+
+// 记录上次加载的路由路径，避免重复加载
+let lastLoadedPath = "";
 
 type PageType = "home" | "tag" | "category" | "archive";
 
@@ -44,6 +57,25 @@ const pagination = reactive({
   pageSize: postConfig.value?.page_size || 12,
   total: 0
 });
+
+// 统一管理懒加载 Observer（避免每个 ArticleCard 重复创建）
+let lazyLoadObserver: IntersectionObserver | null = null;
+
+// 初始化懒加载
+const initArticleLazyLoad = () => {
+  // 先销毁旧的 observer
+  if (lazyLoadObserver) {
+    lazyLoadObserver.disconnect();
+  }
+  // 创建新的 observer
+  lazyLoadObserver = initLazyLoad(document, {
+    selector: "img[data-src]",
+    threshold: 0.1,
+    rootMargin: "100px",
+    loadedClass: "lazy-loaded",
+    loadingClass: "lazy-loading"
+  });
+};
 
 // 计算最新文章的ID（只在首页第一页时有效）
 const newestArticleId = computed(() => {
@@ -81,6 +113,11 @@ const fetchData = async () => {
     const { data } = await getPublicArticles(params);
     articles.value = data.list;
     pagination.total = data.total;
+
+    // 数据加载完成后，在下一个渲染周期初始化懒加载
+    nextTick(() => {
+      initArticleLazyLoad();
+    });
   } catch (error) {
     console.error("获取文章列表失败:", error);
     articles.value = [];
@@ -94,9 +131,17 @@ const handlePageChange = (newPage: number) => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
+// 监听路由变化，只在路由真正变化时重新加载
 watch(
   () => route.fullPath,
-  () => {
+  newPath => {
+    // 如果路由没有变化，不重新加载（避免 keep-alive 激活时重复加载）
+    if (lastLoadedPath === newPath) {
+      return;
+    }
+    lastLoadedPath = newPath;
+
+    // 只有在路由参数变化时才清空列表（如切换分类/标签/分页）
     articles.value = [];
     pagination.page = route.params.id ? Number(route.params.id) : 1;
     fetchData();
@@ -104,8 +149,24 @@ watch(
   { immediate: true }
 );
 
+// keep-alive 激活时，只初始化懒加载（不重新获取数据）
+onActivated(() => {
+  // 如果已有数据，只需要重新初始化懒加载
+  if (articles.value.length > 0) {
+    nextTick(() => {
+      initArticleLazyLoad();
+    });
+  }
+});
+
 onMounted(() => {
   resetThemeToDefault();
+});
+
+onUnmounted(() => {
+  destroyLazyLoad(lazyLoadObserver);
+  // 清理路由记录，确保下次进入时重新加载
+  lastLoadedPath = "";
 });
 </script>
 

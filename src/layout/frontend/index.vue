@@ -99,6 +99,9 @@
       class="mobile-menu-overlay"
       @click="closeMobileMenu"
     />
+
+    <!-- FPS 监控（仅开发环境显示） -->
+    <FpsMonitor />
   </div>
 </template>
 
@@ -130,6 +133,7 @@ import RightMenu from "./components/RightMenu/index.vue";
 import KeyboardTips from "./components/KeyboardTips/index.vue";
 import MobileMenu from "./components/MobileMenu/index.vue";
 import MusicPlayer from "./components/MusicPlayer/index.vue";
+import FpsMonitor from "@/components/FpsMonitor/index.vue";
 import { useCopyProtection } from "@/composables/useCopyProtection";
 
 const { $storage } = useGlobal<GlobalPropertiesApi>();
@@ -719,6 +723,10 @@ onUnmounted(() => {
     z-index: -1;
     opacity: 1;
     transition: opacity 0.6s ease;
+    /* GPU 加速优化 */
+    will-change: opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 
   /* 视频声音控制按钮 */

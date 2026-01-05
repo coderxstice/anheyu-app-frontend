@@ -628,11 +628,13 @@ const scrollToTop = () => {
           cursor: pointer;
           border-radius: 12px;
           opacity: 0;
+          /* 优化过渡：使用 GPU 加速 + 更流畅的缓动 */
           transition:
-            transform 0.2s ease-out,
-            opacity 0.2s ease-out;
-          transform: translateY(20px) scale(1.1);
-          animation-timing-function: ease-out;
+            transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+            opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          transform: translateY(10px) translateZ(0);
+          will-change: transform, opacity;
+          backface-visibility: hidden;
 
           &:hover .page-name {
             color: var(--anzhiyu-main);
@@ -824,7 +826,8 @@ const scrollToTop = () => {
         z-index: 1;
         pointer-events: auto;
         opacity: 1;
-        transform: translateY(-52px) scale(1);
+        /* 优化：减少位移幅度，移除 scale 变化 */
+        transform: translateY(-52px) translateZ(0);
       }
     }
 

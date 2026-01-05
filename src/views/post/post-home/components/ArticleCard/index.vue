@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, type PropType, computed } from "vue";
+import { ref, onMounted, type PropType, computed } from "vue";
 import type { Article } from "@/api/post/type";
 import { useArticleStore } from "@/store/modules/articleStore";
 import { formatRelativeTime } from "@/utils/format";
 import { useRouter } from "vue-router";
-import { initLazyLoad, destroyLazyLoad } from "@/utils/lazyload";
 
 const articleStore = useArticleStore();
 const router = useRouter();
@@ -31,9 +30,6 @@ const coverUrl = computed(() => {
   return props.article.cover_url || articleStore.defaultCover;
 });
 
-// Observer 实例
-let observer: IntersectionObserver | null = null;
-
 onMounted(() => {
   // 检查已读状态
   const readArticlesStr = localStorage.getItem(READ_ARTICLES_KEY);
@@ -44,18 +40,8 @@ onMounted(() => {
     }
   }
 
-  // 初始化懒加载
-  observer = initLazyLoad(document, {
-    selector: "img[data-src]",
-    threshold: 0.1,
-    rootMargin: "100px",
-    loadedClass: "lazy-loaded",
-    loadingClass: "lazy-loading"
-  });
-});
-
-onUnmounted(() => {
-  destroyLazyLoad(observer);
+  // 注意：懒加载已由父组件 (HomeTop 或 post-home) 统一管理
+  // 不再在每个 ArticleCard 中重复创建 IntersectionObserver
 });
 
 const goPost = (id: string) => {
