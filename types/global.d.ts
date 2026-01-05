@@ -100,8 +100,8 @@ declare global {
     Layout?: string;
     Theme?: string;
     DarkMode?: boolean;
-    OverallStyle?: "light" | "dark" | "system";
-    DEFAULT_THEME_MODE?: "light" | "dark";
+    OverallStyle?: "light" | "dark" | "system" | "auto";
+    DEFAULT_THEME_MODE?: "light" | "dark" | "auto";
     Grey?: boolean;
     Weak?: boolean;
     HideTabs?: boolean;
@@ -161,7 +161,7 @@ declare global {
       sidebarStatus?: boolean;
       epThemeColor?: string;
       themeColor?: string;
-      overallStyle?: "light" | "dark" | "system";
+      overallStyle?: "light" | "dark" | "system" | "auto";
     };
     configure: {
       grey?: boolean;

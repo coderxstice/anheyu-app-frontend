@@ -58,7 +58,9 @@ const migrateConfig = (
     // 自动为旧用户启用标签页缓存
     if (migratedConfig.multiTagsCache === false) {
       migratedConfig.multiTagsCache = true;
-      console.log("📦 配置迁移: multiTagsCache 已启用，刷新页面将保持标签页状态");
+      console.log(
+        "📦 配置迁移: multiTagsCache 已启用，刷新页面将保持标签页状态"
+      );
     }
   }
 
@@ -74,15 +76,27 @@ const migrateConfig = (
 export const injectResponsiveStorage = (app: App, config: PlatformConfigs) => {
   const nameSpace = responsiveStorageNameSpace();
 
+  // 辅助函数：根据时间判断是否应该是暗色模式（早8点至晚8点为亮色）
+  const shouldBeDarkByTime = (): boolean => {
+    const hour = new Date().getHours();
+    return hour < 8 || hour >= 20;
+  };
+
   // 确定默认主题模式：优先使用后端配置的 DEFAULT_THEME_MODE
-  let defaultOverallStyle = config.OverallStyle ?? "light";
+  let defaultOverallStyle: "light" | "dark" | "system" | "auto" =
+    config.OverallStyle ?? "light";
   let defaultDarkMode = config.DarkMode ?? false;
 
   // 如果后端配置了 DEFAULT_THEME_MODE，使用它作为默认值
   if (config.DEFAULT_THEME_MODE) {
-    defaultOverallStyle =
-      config.DEFAULT_THEME_MODE === "dark" ? "dark" : "light";
-    defaultDarkMode = config.DEFAULT_THEME_MODE === "dark";
+    if (config.DEFAULT_THEME_MODE === "auto") {
+      defaultOverallStyle = "auto";
+      defaultDarkMode = shouldBeDarkByTime();
+    } else {
+      defaultOverallStyle =
+        config.DEFAULT_THEME_MODE === "dark" ? "dark" : "light";
+      defaultDarkMode = config.DEFAULT_THEME_MODE === "dark";
+    }
   }
 
   // 获取现有配置并进行迁移
@@ -103,7 +117,7 @@ export const injectResponsiveStorage = (app: App, config: PlatformConfigs) => {
         sidebarStatus: config.SidebarStatus ?? true,
         epThemeColor: config.EpThemeColor ?? "#409EFF",
         themeColor: config.Theme ?? "light", // 主题色（对应系统配置中的主题色，与theme不同的是它不会受到浅色、深色整体风格切换的影响，只会在手动点击主题色时改变）
-        overallStyle: defaultOverallStyle // 整体风格（浅色：light、深色：dark、自动：system）
+        overallStyle: defaultOverallStyle // 整体风格（浅色：light、深色：dark、跟随系统：system、早晚自动：auto）
       },
       // 系统配置-界面显示（使用迁移后的配置）
       configure: migratedConfigure

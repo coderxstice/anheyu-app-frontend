@@ -125,9 +125,14 @@
       <el-radio-group v-model="formData.defaultThemeMode">
         <el-radio value="light">亮色模式</el-radio>
         <el-radio value="dark">暗色模式</el-radio>
+        <el-radio value="auto">早晚自动切换</el-radio>
       </el-radio-group>
       <div class="form-item-help">
-        设置新访问者进入网站时默认使用的主题模式。用户可以在访问后自行切换主题。
+        设置新访问者进入网站时默认使用的主题模式。<br />
+        <strong>亮色/暗色模式</strong>：固定使用选择的主题。<br />
+        <strong>早晚自动切换</strong
+        >：早8点至晚8点使用亮色模式，其他时间使用暗色模式。<br />
+        用户可以在访问后自行切换主题。
       </div>
     </div>
   </el-form-item>
