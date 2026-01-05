@@ -116,7 +116,7 @@ export const settingsMenuConfig: SettingsMenuItem[] = [
   },
   {
     key: "user",
-    label: "用户与通知",
+    label: "用户通知",
     icon: "ri:user-settings-line",
     children: [
       {
@@ -146,25 +146,25 @@ export const settingsMenuConfig: SettingsMenuItem[] = [
       },
       {
         key: "advanced-about",
-        label: "关于页",
+        label: "关于页面",
         component: "AboutPageForm",
         keywords: ["关于", "技能", "生涯"]
       },
       {
         key: "advanced-equipment",
-        label: "装备页",
+        label: "装备页面",
         component: "EquipmentPageForm",
         keywords: ["装备", "好物"]
       },
       {
         key: "advanced-comments-page",
-        label: "评论页",
+        label: "评论页面",
         component: "RecentCommentsPageForm",
         keywords: ["最近评论"]
       },
       {
         key: "advanced-album",
-        label: "相册页",
+        label: "相册页面",
         component: "AlbumPageForm",
         keywords: ["相册", "图片", "瀑布流", "画廊"]
       },
@@ -173,6 +173,12 @@ export const settingsMenuConfig: SettingsMenuItem[] = [
         label: "页面管理",
         component: "PageManagement",
         keywords: ["页面", "自定义"]
+      },
+      {
+        key: "advanced-backup",
+        label: "备份导入",
+        component: "BackupImportForm",
+        keywords: ["备份", "导入", "导出", "恢复", "配置"]
       }
     ]
   }
