@@ -22,6 +22,7 @@ import OneDriveCreateForm from "./components/onedrive/CreateForm.vue";
 import TencentCosCreateForm from "./components/tencent-cos/CreateForm.vue";
 import AliyunOssCreateForm from "./components/aliyun-oss/CreateForm.vue";
 import AwsS3CreateForm from "./components/aws-s3/CreateForm.vue";
+import QiniuKodoCreateForm from "./components/qiniu-kodo/CreateForm.vue";
 
 defineOptions({
   name: "StoragePolicyManagement"
@@ -50,7 +51,13 @@ const createdPolicyType = ref("");
 
 // 当前选中的存储类型
 const currentStorageType = ref<
-  "local" | "onedrive" | "tencent_cos" | "aliyun_oss" | "aws_s3" | null
+  | "local"
+  | "onedrive"
+  | "tencent_cos"
+  | "aliyun_oss"
+  | "aws_s3"
+  | "qiniu_kodo"
+  | null
 >(null);
 
 const storageTypes = [
@@ -88,6 +95,13 @@ const storageTypes = [
     icon: DatabaseIcon,
     component: AwsS3CreateForm,
     dialogTitle: "添加AWS S3存储策略"
+  },
+  {
+    type: "qiniu_kodo",
+    name: "七牛云存储",
+    icon: DatabaseIcon,
+    component: QiniuKodoCreateForm,
+    dialogTitle: "添加七牛云存储策略"
   }
 ];
 
@@ -98,7 +112,13 @@ const currentStorageConfig = computed(() => {
 
 // 根据类型分发创建流程
 function triggerCreateFlow(
-  type: "local" | "onedrive" | "tencent_cos" | "aliyun_oss" | "aws_s3"
+  type:
+    | "local"
+    | "onedrive"
+    | "tencent_cos"
+    | "aliyun_oss"
+    | "aws_s3"
+    | "qiniu_kodo"
 ) {
   chooseTypeDialogVisible.value = false;
   currentStorageType.value = type;
@@ -123,7 +143,7 @@ async function handleCreateSubmit(payload: Partial<StoragePolicy>) {
     }
     // 云存储显示 CORS 成功弹窗
     else if (
-      ["tencent_cos", "aliyun_oss", "aws_s3"].includes(
+      ["tencent_cos", "aliyun_oss", "aws_s3", "qiniu_kodo"].includes(
         currentStorageType.value || ""
       )
     ) {
@@ -157,7 +177,8 @@ const typeIconMap = {
   onedrive: CloudIcon,
   tencent_cos: DatabaseIcon,
   aliyun_oss: DatabaseIcon,
-  aws_s3: DatabaseIcon
+  aws_s3: DatabaseIcon,
+  qiniu_kodo: DatabaseIcon
 };
 
 // 用于将 flag 转换为可读的文本
@@ -231,9 +252,12 @@ function getFlagDisplayName(flag: string): string {
                 </el-tag>
                 <el-tag
                   v-if="
-                    ['tencent_cos', 'aliyun_oss', 'aws_s3'].includes(
-                      item.type as string
-                    )
+                    [
+                      'tencent_cos',
+                      'aliyun_oss',
+                      'aws_s3',
+                      'qiniu_kodo'
+                    ].includes(item.type as string)
                   "
                   :type="
                     item.access_key && item.secret_key ? 'success' : 'warning'
@@ -333,7 +357,7 @@ function getFlagDisplayName(flag: string): string {
       confirm-text="创建"
       :confirm-loading="isCreating"
       :content-class="
-        ['tencent_cos', 'aliyun_oss', 'aws_s3'].includes(
+        ['tencent_cos', 'aliyun_oss', 'aws_s3', 'qiniu_kodo'].includes(
           currentStorageType || ''
         )
           ? ''

@@ -15,6 +15,8 @@ import AliyunOssForm from "./components/aliyun-oss/Form.vue";
 import { aliyunOssRules } from "./components/aliyun-oss/config";
 import AwsS3Form from "./components/aws-s3/Form.vue";
 import { awsS3Rules } from "./components/aws-s3/config";
+import QiniuKodoForm from "./components/qiniu-kodo/Form.vue";
+import { qiniuKodoRules } from "./components/qiniu-kodo/config";
 
 // 注册动态组件和规则
 const providerForms = shallowRef({
@@ -22,14 +24,16 @@ const providerForms = shallowRef({
   onedrive: OneDriveForm,
   tencent_cos: TencentCosForm,
   aliyun_oss: AliyunOssForm,
-  aws_s3: AwsS3Form
+  aws_s3: AwsS3Form,
+  qiniu_kodo: QiniuKodoForm
 });
 const providerRules = {
   local: localRules,
   onedrive: oneDriveRules,
   tencent_cos: tencentCosRules,
   aliyun_oss: aliyunOssRules,
-  aws_s3: awsS3Rules
+  aws_s3: awsS3Rules,
+  qiniu_kodo: qiniuKodoRules
 };
 
 const props = defineProps<{ modelValue: Partial<StoragePolicy> }>();
@@ -154,6 +158,7 @@ defineExpose({ getRef });
         <el-option label="腾讯云COS" value="tencent_cos" />
         <el-option label="阿里云OSS" value="aliyun_oss" />
         <el-option label="AWS S3" value="aws_s3" />
+        <el-option label="七牛云存储" value="qiniu_kodo" />
       </el-select>
     </el-form-item>
 
