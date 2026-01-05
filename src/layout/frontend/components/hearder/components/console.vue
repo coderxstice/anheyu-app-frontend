@@ -8,14 +8,15 @@
               <div class="author-content-item-tips">互动</div>
               <div class="card-hor-content">
                 <span class="author-content-item-title">最近评论</span>
-                <a
+                <router-link
                   class="go_to_recent_comments !text-[var(--anzhiyu-fontcolor)]"
-                  href="/recentcomments"
+                  to="/recentcomments"
                   title="最近评论"
+                  @click="appStore.toggleConsole(false)"
                 >
                   <i
                     class="anzhiyufont anzhiyu-icon-circle-arrow-right !text-[22px]"
-                /></a>
+                /></router-link>
               </div>
             </div>
             <div class="console_recentcomments">
@@ -56,15 +57,16 @@
               <div class="author-content-item-title">寻找感兴趣的领域</div>
             </div>
             <div class="card-tag-cloud">
-              <a
+              <router-link
                 v-for="tag in tags"
                 :key="tag.id"
                 class="tag-item"
-                @click="goToTag(tag.name)"
+                :to="`/tags/${tag.name}/`"
+                @click="appStore.toggleConsole(false)"
               >
                 {{ tag.name }}
                 <sup>{{ tag.count }}</sup>
-              </a>
+              </router-link>
             </div>
           </div>
           <div class="console-card history">
@@ -98,7 +100,11 @@
           popper-class="custom-tooltip"
         >
           <div class="console-btn-item" :class="{ on: dataTheme }">
-            <button class="darkmode_switch_button" @click="handleThemeToggle">
+            <button
+              class="darkmode_switch_button"
+              aria-label="显示模式切换"
+              @click="handleThemeToggle"
+            >
               <i class="anzhiyufont anzhiyu-icon-moon" />
             </button>
           </div>
@@ -115,7 +121,11 @@
             class="console-btn-item"
             :class="{ on: isCommentBarrageVisible }"
           >
-            <button class="commentBarrage" @click="toggleCommentBarrage()">
+            <button
+              class="commentBarrage"
+              aria-label="热评开关"
+              @click="toggleCommentBarrage()"
+            >
               <IconifyIconOffline :icon="Chat1Fill" />
             </button>
           </div>
@@ -133,7 +143,11 @@
             class="console-btn-item"
             :class="{ on: isShortcutsEnabled }"
           >
-            <button class="keyboard-switch" @click="toggleShortcuts()">
+            <button
+              class="keyboard-switch"
+              aria-label="快捷键开关"
+              @click="toggleShortcuts()"
+            >
               <i class="anzhiyufont anzhiyu-icon-keyboard" />
             </button>
           </div>
@@ -148,7 +162,11 @@
           popper-class="custom-tooltip"
         >
           <div class="console-btn-item" :class="{ on: isMusicPlayerVisible }">
-            <button class="music-player-switch" @click="toggleMusicPlayer()">
+            <button
+              class="music-player-switch"
+              aria-label="音乐胶囊开关"
+              @click="toggleMusicPlayer()"
+            >
               <i class="anzhiyufont anzhiyu-icon-music" />
             </button>
           </div>
@@ -162,7 +180,11 @@
           popper-class="custom-tooltip"
         >
           <div class="console-btn-item" :class="{ on: isSidebarVisible }">
-            <button class="sidebar-switch" @click="toggleSidebar()">
+            <button
+              class="sidebar-switch"
+              aria-label="侧边栏开关"
+              @click="toggleSidebar()"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"

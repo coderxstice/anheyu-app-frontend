@@ -7,7 +7,12 @@
       :show-arrow="false"
       :offset="8"
     >
-      <a class="nav-button" @click="handleTravelClick">
+      <a
+        class="nav-button"
+        href="https://www.travellings.cn/go.html"
+        aria-label="开往-随机前往一个开往项目网站"
+        @click.prevent="handleTravelClick"
+      >
         <i class="anzhiyufont anzhiyu-icon-train" />
       </a>
     </el-tooltip>
@@ -50,9 +55,9 @@
       :show-arrow="false"
       :offset="8"
     >
-      <a class="nav-button" @click="goToUserCenter">
+      <router-link class="nav-button" to="/user-center" aria-label="用户中心">
         <IconifyIconOffline icon="ri:user-fill" class="w-[1.4rem] h-[1.4rem]" />
-      </a>
+      </router-link>
     </el-tooltip>
     <el-tooltip
       content="随机前往一个文章"
@@ -68,7 +73,12 @@
       </div>
     </el-tooltip>
     <el-tooltip content="搜索" placement="top" :show-arrow="false" :offset="8">
-      <a class="nav-button" @click="handleSearchClick">
+      <a
+        class="nav-button"
+        href="/search"
+        aria-label="搜索"
+        @click.prevent="handleSearchClick"
+      >
         <i class="anzhiyufont anzhiyu-icon-magnifying-glass" />
       </a>
     </el-tooltip>

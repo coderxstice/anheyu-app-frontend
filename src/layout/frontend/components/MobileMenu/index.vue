@@ -68,10 +68,26 @@
             class="back-menu-item"
             @click="item.target === '_self' ? handleInternalLinkClick() : null"
           >
+            <!-- 图片 URL -->
             <img
-              :alt="`${item.name}图标`"
+              v-if="isImageUrl(item.icon)"
+              alt=""
               :src="item.icon"
               class="back-menu-item-icon"
+            />
+            <!-- Iconify 图标 -->
+            <IconifyIconOnline
+              v-else-if="isIconifyIcon(item.icon)"
+              :icon="item.icon"
+              width="24"
+              height="24"
+              class="back-menu-item-icon back-menu-item-icon-iconify"
+            />
+            <!-- anzhiyu 图标 -->
+            <i
+              v-else-if="item.icon"
+              :class="['anzhiyufont', item.icon]"
+              class="back-menu-item-icon back-menu-item-icon-font"
             />
             <span class="back-menu-item-text">{{ item.name }}</span>
           </a>
@@ -219,6 +235,17 @@ import { useArticleStore } from "@/store/modules/articleStore";
 import { useCommentStore } from "@/store/modules/commentStore";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
+import { IconifyIconOnline } from "@/components/ReIcon";
+
+// 判断是否为图片 URL
+const isImageUrl = (icon: string) => {
+  return icon && (icon.startsWith("http://") || icon.startsWith("https://"));
+};
+
+// 判断是否为 Iconify 图标（包含 :）
+const isIconifyIcon = (icon: string) => {
+  return icon && icon.includes(":");
+};
 
 defineOptions({
   name: "MobileMenu"

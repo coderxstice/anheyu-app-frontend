@@ -51,16 +51,16 @@ onMounted(() => {
   <div v-loading="loading" class="tag-cloud-amount">
     <h1 v-if="!isOneImageEnabled" class="page-title">标签</h1>
     <div class="tag-cloud-list">
-      <a
+      <router-link
         v-for="tag in tags"
         :key="tag.id"
         class="tag-item"
-        @click="goToTag(tag.name)"
+        :to="`/tags/${tag.name}/`"
       >
         <i class="anzhiyufont anzhiyu-icon-hashtag tags-punctuation" />
         {{ tag.name }}
         <span class="tags-page-count">{{ tag.count }}</span>
-      </a>
+      </router-link>
     </div>
   </div>
 </template>

@@ -42,18 +42,30 @@
     </div>
 
     <div v-else class="rightMenu-group rightMenu-line">
-      <a class="rightMenu-item menu-link" @click.stop="randomNavigate">
+      <router-link
+        class="rightMenu-item menu-link"
+        to="/random"
+        @click.stop="randomNavigate"
+      >
         <i class="anzhiyufont anzhiyu-icon-shuffle" />
         <span>随便逛逛</span>
-      </a>
-      <a class="rightMenu-item menu-link" @click.stop="gotoCategory">
+      </router-link>
+      <router-link
+        class="rightMenu-item menu-link"
+        to="/categories"
+        @click.stop="hideMenu"
+      >
         <i class="anzhiyufont anzhiyu-icon-cube" />
         <span>博客分类</span>
-      </a>
-      <a class="rightMenu-item menu-link" @click.stop="gotoTag">
+      </router-link>
+      <router-link
+        class="rightMenu-item menu-link"
+        to="/tags"
+        @click.stop="hideMenu"
+      >
         <i class="anzhiyufont anzhiyu-icon-tags" />
         <span>文章标签</span>
-      </a>
+      </router-link>
     </div>
 
     <div v-if="isClickOnMusicPlayer" class="rightMenu-group rightMenu-line">
