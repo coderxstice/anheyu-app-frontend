@@ -25,6 +25,17 @@ function getIconType(icon: string): "anzhiyufont" | "iconify" | "imageUrl" {
 }
 
 /**
+ * 将 Iconify 图标名称转换为 API URL
+ */
+function getIconifyUrl(icon: string): string {
+  const [prefix, name] = icon.split(":");
+  if (prefix && name) {
+    return `https://api.iconify.design/${prefix}/${name}.svg?color=currentColor`;
+  }
+  return "";
+}
+
+/**
  * 渲染图标 HTML
  */
 function renderIcon(icon: string, md: MarkdownIt): string {
@@ -34,7 +45,11 @@ function renderIcon(icon: string, md: MarkdownIt): string {
   if (type === "imageUrl") {
     return `<img class="btn-icon-img" src="${escapedIcon}" alt="" />`;
   } else if (type === "iconify") {
-    return `<span class="iconify" data-icon="${escapedIcon}"></span>`;
+    const iconUrl = getIconifyUrl(icon);
+    if (iconUrl) {
+      return `<img class="btn-icon-img iconify-img" src="${md.utils.escapeHtml(iconUrl)}" alt="" />`;
+    }
+    return `<i class="anzhiyufont anzhiyu-icon-circle-arrow-right"></i>`;
   } else {
     return `<i class="anzhiyufont ${escapedIcon}"></i>`;
   }
