@@ -243,6 +243,7 @@ import {
   cleanOldBackups,
   type BackupInfo
 } from "@/api/config";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
 // 状态
 const loading = ref(false);
@@ -318,8 +319,9 @@ const handleFileChange = async (uploadFile: UploadFile) => {
   try {
     await ElMessageBox.confirm(
       `<p>导入配置将覆盖数据库中的系统设置。</p>
+       <p style="margin-top: 8px;">系统会在导入前<strong>自动备份</strong>当前配置。</p>
        <p style="color: var(--el-color-warning); margin-top: 8px;">
-         <strong>注意：</strong>导入后请刷新页面以查看最新配置。
+         <strong>注意：</strong>导入成功后页面将自动刷新以应用新配置。
        </p>`,
       "确认导入配置",
       {
@@ -331,12 +333,36 @@ const handleFileChange = async (uploadFile: UploadFile) => {
     );
 
     importing.value = true;
+
+    // 导入前自动备份当前配置
+    try {
+      await createBackup("导入配置前自动备份");
+      console.info("✅ 导入前自动备份成功");
+    } catch (backupError) {
+      console.warn("⚠️ 导入前自动备份失败:", backupError);
+      // 备份失败不阻止导入，但给用户提示
+      ElMessage.warning("自动备份失败，将继续导入配置");
+    }
+
     await importConfig(uploadFile.raw);
+
+    // 刷新备份列表
+    await fetchBackups();
+
+    // 清除本地缓存，确保使用服务器最新数据
+    const siteConfigStore = useSiteConfigStore();
+    siteConfigStore.clearCache();
+
     ElMessage({
       type: "success",
-      message: "配置导入成功！建议刷新页面以查看最新配置",
-      duration: 5000
+      message: "配置导入成功！页面将在 2 秒后刷新...",
+      duration: 2000
     });
+
+    // 延迟刷新页面，让用户看到提示
+    setTimeout(() => {
+      window.location.reload();
+    }, 2000);
   } catch (error: unknown) {
     if (error !== "cancel") {
       console.error("导入配置失败:", error);
@@ -370,7 +396,7 @@ const handleRestore = async (backup: BackupInfo) => {
       `<p>确定要恢复备份 <strong>"${backup.filename}"</strong> 吗？</p>
        <p style="margin-top: 8px;">系统会在恢复前自动创建当前配置的备份。</p>
        <p style="color: var(--el-color-warning); margin-top: 8px;">
-         <strong>注意：</strong>恢复后请刷新页面以查看最新配置。
+         <strong>注意：</strong>恢复成功后页面将自动刷新以应用配置。
        </p>`,
       "确认恢复备份",
       {
@@ -382,12 +408,21 @@ const handleRestore = async (backup: BackupInfo) => {
     );
 
     await restoreBackup(backup.filename);
+
+    // 清除本地缓存，确保使用服务器最新数据
+    const siteConfigStore = useSiteConfigStore();
+    siteConfigStore.clearCache();
+
     ElMessage({
       type: "success",
-      message: "备份恢复成功！建议刷新页面以查看最新配置",
-      duration: 5000
+      message: "备份恢复成功！页面将在 2 秒后刷新...",
+      duration: 2000
     });
-    await fetchBackups();
+
+    // 延迟刷新页面，让用户看到提示
+    setTimeout(() => {
+      window.location.reload();
+    }, 2000);
   } catch (error: unknown) {
     if (error !== "cancel") {
       console.error("恢复备份失败:", error);

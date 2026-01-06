@@ -270,7 +270,8 @@ watch(
 );
 
 onMounted(() => {
-  siteConfigStore.fetchSystemSettings(allBackendKeys);
+  // 使用 fetchSystemSettingsFresh 完全替换本地状态，避免 lodash.merge 对数组的合并问题
+  siteConfigStore.fetchSystemSettingsFresh(allBackendKeys);
 });
 
 const handleSave = async () => {
