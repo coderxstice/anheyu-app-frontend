@@ -6,7 +6,7 @@
  * @LastEditors: 安知鱼
  */
 
-import dayjs from "dayjs";
+import { formatToChina } from "@/utils/dayjs";
 import editForm from "../form.vue";
 import { message } from "@/utils/message";
 import {
@@ -99,8 +99,7 @@ export function useUserManagement() {
                 h(
                   "div",
                   {
-                    style:
-                      "display: flex; align-items: center; gap: 6px;"
+                    style: "display: flex; align-items: center; gap: 6px;"
                   },
                   [
                     h(
@@ -138,7 +137,8 @@ export function useUserManagement() {
                   : h(
                       "span",
                       {
-                        style: "font-size: 12px; color: var(--anzhiyu-secondfontcolor);"
+                        style:
+                          "font-size: 12px; color: var(--anzhiyu-secondfontcolor);"
                       },
                       "无邮箱"
                     )
@@ -183,17 +183,14 @@ export function useUserManagement() {
       prop: "lastLoginAt",
       minWidth: 180,
       formatter: ({ lastLoginAt }) => {
-        return lastLoginAt
-          ? dayjs(lastLoginAt).format("YYYY-MM-DD HH:mm:ss")
-          : "从未登录";
+        return lastLoginAt ? formatToChina(lastLoginAt) : "从未登录";
       }
     },
     {
       label: "创建时间",
       minWidth: 180,
       prop: "created_at",
-      formatter: ({ created_at }) =>
-        dayjs(created_at).format("YYYY-MM-DD HH:mm:ss")
+      formatter: ({ created_at }) => formatToChina(created_at)
     },
     {
       label: "操作",
