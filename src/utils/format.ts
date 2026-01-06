@@ -2,10 +2,12 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-24 22:29:06
- * @LastEditTime: 2025-07-19 10:00:31
+ * @LastEditTime: 2025-01-06 00:00:00
  * @LastEditors: 安知鱼
  */
 // @/utils/format.ts
+
+import dayjs from "./dayjs";
 
 /**
  * 格式化文件大小
@@ -26,7 +28,7 @@ export const formatSize = (bytes: number | undefined | null): string => {
 };
 
 /**
- * 格式化 ISO 8601 日期时间字符串
+ * 格式化 ISO 8601 日期时间字符串（使用中国时区 +8）
  * @param isoString - 后端返回的日期字符串
  * @returns 'YYYY-MM-DD HH:mm:ss' 格式的字符串，或在无效时返回原始字符串
  */
@@ -35,17 +37,11 @@ export const formatDateTime = (
 ): string => {
   if (!isoString) return "未知";
   try {
-    const date = new Date(isoString);
-    if (isNaN(date.getTime())) {
+    const d = dayjs(isoString).tz("Asia/Shanghai");
+    if (!d.isValid()) {
       return isoString;
     }
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    return d.format("YYYY-MM-DD HH:mm:ss");
   } catch (error) {
     console.error("日期格式化错误:", error);
     return isoString;
@@ -53,21 +49,18 @@ export const formatDateTime = (
 };
 
 /**
- * 格式化为日期字符串（仅日期，不含时间）
+ * 格式化为日期字符串（仅日期，不含时间，使用中国时区 +8）
  * @param isoString - 后端返回的日期字符串
  * @returns 'YYYY-MM-DD' 格式的字符串
  */
 export const formatDate = (isoString: string | undefined | null): string => {
   if (!isoString) return "未知";
   try {
-    const date = new Date(isoString);
-    if (isNaN(date.getTime())) {
+    const d = dayjs(isoString).tz("Asia/Shanghai");
+    if (!d.isValid()) {
       return isoString;
     }
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
+    return d.format("YYYY-MM-DD");
   } catch (error) {
     console.error("日期格式化错误:", error);
     return isoString;
@@ -75,7 +68,7 @@ export const formatDate = (isoString: string | undefined | null): string => {
 };
 
 /**
- * 格式化为动态的相对时间
+ * 格式化为动态的相对时间（使用中国时区 +8）
  * - 1 分钟内: "刚刚", "xx 秒前"
  * - 1 小时内: "xx 分钟前"
  * - 24 小时内: "xx 小时前"
@@ -88,9 +81,13 @@ export const formatDate = (isoString: string | undefined | null): string => {
 export const formatRelativeTime = (dateStr: string): string => {
   if (!dateStr) return "";
 
-  const now = new Date();
-  const past = new Date(dateStr);
-  const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
+  // 使用中国时区
+  const now = dayjs().tz("Asia/Shanghai");
+  const past = dayjs(dateStr).tz("Asia/Shanghai");
+
+  if (!past.isValid()) return "";
+
+  const diffInSeconds = now.diff(past, "second");
 
   const oneMinute = 60;
   const oneHour = oneMinute * 60;
@@ -111,22 +108,14 @@ export const formatRelativeTime = (dateStr: string): string => {
     return `${Math.floor(diffInSeconds / oneHour)} 小时前`;
   }
 
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const yesterdayStart = new Date(todayStart.getTime() - oneDay * 1000);
-  const beforeYesterdayStart = new Date(
-    yesterdayStart.getTime() - oneDay * 1000
-  );
+  const todayStart = now.startOf("day");
+  const yesterdayStart = todayStart.subtract(1, "day");
+  const beforeYesterdayStart = todayStart.subtract(2, "day");
 
-  if (
-    past.getTime() >= yesterdayStart.getTime() &&
-    past.getTime() < todayStart.getTime()
-  ) {
+  if (past.isAfter(yesterdayStart) && past.isBefore(todayStart)) {
     return "昨天";
   }
-  if (
-    past.getTime() >= beforeYesterdayStart.getTime() &&
-    past.getTime() < yesterdayStart.getTime()
-  ) {
+  if (past.isAfter(beforeYesterdayStart) && past.isBefore(yesterdayStart)) {
     return "前天";
   }
 

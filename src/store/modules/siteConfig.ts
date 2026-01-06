@@ -191,6 +191,38 @@ export const useSiteConfigStore = defineStore("anheyu-site-config", {
       }
     },
 
+    /**
+     * 从服务器获取系统设置，并完全替换本地状态（不是合并）
+     * 用于设置页面加载时，确保显示的是服务器最新数据，避免数组合并导致的重复问题
+     */
+    async fetchSystemSettingsFresh(keys: string[]) {
+      this.loading = true;
+      try {
+        // 先清除本地缓存
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+
+        const res = await getSettingsApi(keys);
+        if (res.code === 200 && res.data) {
+          // 直接用服务器数据替换整个 siteConfig，而不是合并
+          // 这样可以避免 lodash.merge 对数组的按索引合并问题
+          this.siteConfig = res.data;
+
+          // 更新缓存
+          const dataToCache = {
+            config: this.siteConfig,
+            timestamp: Date.now()
+          };
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToCache));
+        } else {
+          return Promise.reject(new Error(res.message));
+        }
+      } catch (error) {
+        return Promise.reject(error);
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async saveSystemSettings(
       settingsToUpdate: SettingsMap,
       descriptors: SettingDescriptor[] = allSettingDescriptors

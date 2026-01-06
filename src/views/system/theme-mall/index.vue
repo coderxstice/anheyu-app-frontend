@@ -421,13 +421,7 @@ import type {
 } from "@/api/theme-mall/type";
 import { useDebounceFn } from "@vueuse/core";
 import { getToken } from "@/utils/auth";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import "dayjs/locale/zh-cn";
-
-// 配置 dayjs
-dayjs.extend(relativeTime);
-dayjs.locale("zh-cn");
+import dayjs from "@/utils/dayjs";
 
 defineOptions({
   name: "ThemeMall"
@@ -1230,7 +1224,11 @@ onMounted(() => {
             font-weight: 500;
 
             &.type-pro {
-              background: linear-gradient(45deg, var(--anzhiyu-orange), #f97316);
+              background: linear-gradient(
+                45deg,
+                var(--anzhiyu-orange),
+                #f97316
+              );
               color: white;
             }
           }
@@ -1364,12 +1362,20 @@ onMounted(() => {
             }
 
             &.pro-action {
-              background: linear-gradient(45deg, var(--anzhiyu-orange), #f97316);
+              background: linear-gradient(
+                45deg,
+                var(--anzhiyu-orange),
+                #f97316
+              );
               border-color: var(--anzhiyu-orange);
               color: white;
 
               &:hover {
-                background: linear-gradient(45deg, var(--anzhiyu-orange), #ea580c);
+                background: linear-gradient(
+                  45deg,
+                  var(--anzhiyu-orange),
+                  #ea580c
+                );
                 border-color: var(--anzhiyu-orange);
               }
 

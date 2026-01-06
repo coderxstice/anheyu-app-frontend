@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import NoticeIcon from "@iconify-icons/ri/notification-fill";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 
 const props = defineProps<{

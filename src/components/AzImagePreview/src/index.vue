@@ -76,11 +76,7 @@
                 </span>
                 <span class="tag-time">
                   <TimeLine />
-                  {{
-                    dayjs(previewSrcList[currentIndex].createTime).format(
-                      "YYYY-MM-DD HH:mm:ss"
-                    )
-                  }}
+                  {{ formatToChina(previewSrcList[currentIndex].createTime) }}
                 </span>
               </div>
               <div
@@ -121,7 +117,7 @@ import Size from "@/assets/svg/size.svg?component";
 import Fire from "@/assets/svg/fire.svg?component";
 import TimeLine from "@/assets/svg/time-line.svg?component";
 import { getFileExtension } from "@/utils/down";
-import dayjs from "dayjs";
+import { formatToChina } from "@/utils/dayjs";
 import { updateWallpaperStat } from "@/api/album-home";
 import DownloadProgressBar from "./downloadProgressBar.vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";

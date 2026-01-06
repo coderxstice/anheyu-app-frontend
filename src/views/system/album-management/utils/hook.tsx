@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import { formatToChina } from "@/utils/dayjs";
 import editForm from "../form.vue";
 import importExportForm from "../import-export-form.vue";
 import { message } from "@/utils/message";
@@ -200,8 +200,7 @@ export function useAlbum() {
       label: "创建时间",
       minWidth: 180,
       prop: "created_at",
-      formatter: ({ created_at }) =>
-        dayjs(created_at).format("YYYY-MM-DD HH:mm:ss")
+      formatter: ({ created_at }) => formatToChina(created_at)
     },
     {
       label: "操作",

@@ -3,7 +3,7 @@
  * @Author: 安知鱼
  */
 
-import dayjs from "dayjs";
+import { formatToChina } from "@/utils/dayjs";
 import { message } from "@/utils/message";
 import {
   getAdminComments,
@@ -124,7 +124,7 @@ export function useCommentManagement() {
   // 格式化日期
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return "N/A";
-    return dayjs(dateStr).format("YYYY-MM-DD HH:mm:ss");
+    return formatToChina(dateStr);
   };
 
   // 表格列配置
@@ -423,7 +423,7 @@ export function useCommentManagement() {
                 {
                   style: "font-size: 12px; color: var(--anzhiyu-secondtext);"
                 },
-                dayjs(row.created_at).format("YYYY-MM-DD HH:mm")
+                formatToChina(row.created_at, "YYYY-MM-DD HH:mm")
               )
           }
         );
