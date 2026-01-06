@@ -55,24 +55,59 @@ function getIconType(icon: string): "url" | "iconify" | "iconfont" {
   return "iconfont";
 }
 
+// 颜色主题映射（URL 编码的颜色值）
+const colorMap: Record<string, string> = {
+  blue: "%23409eff",
+  pink: "%23ff69b4",
+  red: "%23f56c6c",
+  purple: "%239d5cff",
+  orange: "%23ff9800",
+  green: "%2367c23a"
+};
+
+/**
+ * 将 Iconify 图标名称转换为 API URL
+ * @param icon Iconify 图标名称，如 mdi:github、ri:home-line
+ * @param color 可选的颜色主题
+ * @returns Iconify API SVG URL
+ */
+function getIconifyUrl(icon: string, color?: string): string {
+  // 格式: prefix:name -> https://api.iconify.design/prefix/name.svg
+  const [prefix, name] = icon.split(":");
+  if (prefix && name) {
+    // 如果有颜色主题，使用对应颜色；否则使用默认颜色（适合深色模式的浅色）
+    const iconColor = color && colorMap[color] ? colorMap[color] : "%23a0a0a0";
+    return `https://api.iconify.design/${prefix}/${name}.svg?color=${iconColor}`;
+  }
+  return "";
+}
+
 /**
  * 生成图标 HTML
  * @param icon 图标字符串
  * @param title 标题（用于 alt）
  * @param escapeHtml HTML 转义函数
+ * @param color 可选的颜色主题
  */
 function renderIcon(
   icon: string,
   title: string,
-  escapeHtml: (str: string) => string
+  escapeHtml: (str: string) => string,
+  color?: string
 ): string {
   const iconType = getIconType(icon);
 
   switch (iconType) {
     case "url":
       return `<img src="${escapeHtml(icon)}" alt="${escapeHtml(title)}" />`;
-    case "iconify":
-      return `<span class="iconify" data-icon="${escapeHtml(icon)}"></span>`;
+    case "iconify": {
+      // 使用 Iconify API 获取 SVG 图标
+      const iconUrl = getIconifyUrl(icon, color);
+      if (iconUrl) {
+        return `<img src="${escapeHtml(iconUrl)}" alt="${escapeHtml(title)}" class="iconify-img" />`;
+      }
+      return `<i class="anzhiyufont anzhiyu-icon-circle-arrow-right"></i>`;
+    }
     case "iconfont":
     default:
       return `<i class="anzhiyufont ${escapeHtml(icon)}"></i>`;
@@ -232,8 +267,8 @@ export default function btnsPlugin(md: MarkdownIt): void {
 
       html += `<a class="${itemClass}" href="${md.utils.escapeHtml(btn.url)}" target="_blank" rel="noopener noreferrer" draggable="false">`;
 
-      // 渲染图标
-      html += `<div class="btn-icon">${renderIcon(btn.icon, btn.title, md.utils.escapeHtml)}</div>`;
+      // 渲染图标（传入颜色主题以支持 Iconify 图标颜色）
+      html += `<div class="btn-icon">${renderIcon(btn.icon, btn.title, md.utils.escapeHtml, btn.color)}</div>`;
 
       // 渲染标题和描述
       html += `<div class="btn-content">`;

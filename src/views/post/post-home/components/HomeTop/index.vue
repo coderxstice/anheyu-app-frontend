@@ -867,3 +867,11 @@ const creativityPairs = computed(() => {
   }
 }
 </style>
+
+<style lang="scss">
+/* 暗色模式下 todayCard banner-button 不显示边框 */
+html.dark .topGroup .todayCard.has-lottie .banner-button {
+  border: none;
+  box-shadow: none;
+}
+</style>

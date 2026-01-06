@@ -118,10 +118,14 @@ export default function linkCardPlugin(md: MarkdownIt): void {
     const isHttpIcon =
       icon.startsWith("http://") || icon.startsWith("https://");
     const isIconify = icon.includes(":");
+    // 将 Iconify 格式 prefix:name 转换为 API URL prefix/name
+    const iconifyUrl = isIconify
+      ? `https://api.iconify.design/${icon.replace(":", "/")}.svg?color=currentColor`
+      : "";
     const iconHtml = isHttpIcon
       ? `<img src="${md.utils.escapeHtml(icon)}" alt="icon" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin: 0; padding: 0; display: block;">`
       : isIconify
-        ? `<img src="https://api.iconify.design/${md.utils.escapeHtml(icon)}.svg" alt="${md.utils.escapeHtml(icon)}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin: 0; padding: 0; display: block;">`
+        ? `<img src="${md.utils.escapeHtml(iconifyUrl)}" alt="${md.utils.escapeHtml(icon)}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin: 0; padding: 0; display: block;">`
         : `<i class="anzhiyufont ${md.utils.escapeHtml(icon)}"></i>`;
 
     // 生成链接卡片 HTML
@@ -208,14 +212,18 @@ export default function linkCardPlugin(md: MarkdownIt): void {
     const isHttpIcon =
       icon.startsWith("http://") || icon.startsWith("https://");
     const isIconify = icon.includes(":");
+    // 将 Iconify 格式 prefix:name 转换为 API URL prefix/name
+    const iconifyUrl = isIconify
+      ? `https://api.iconify.design/${icon.replace(":", "/")}.svg?color=currentColor`
+      : "";
     const iconHtml = isHttpIcon
       ? `<img src="${md.utils.escapeHtml(
           icon
         )}" alt="icon" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin: 0; padding: 0; display: block;">`
       : isIconify
-        ? `<img src="https://api.iconify.design/${md.utils.escapeHtml(
-            icon
-          )}.svg" alt="${md.utils.escapeHtml(
+        ? `<img src="${md.utils.escapeHtml(
+            iconifyUrl
+          )}" alt="${md.utils.escapeHtml(
             icon
           )}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin: 0; padding: 0; display: block;">`
         : `<i class="anzhiyufont ${md.utils.escapeHtml(icon)}"></i>`;
