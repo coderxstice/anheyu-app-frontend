@@ -622,13 +622,13 @@
       height: 1em;
       object-fit: contain;
       border-radius: 2px;
+      margin: 0;
     }
 
     &:hover {
       background: var(--anzhiyu-main-op-deep);
       border-color: var(--anzhiyu-main-op-deep);
       box-shadow: var(--anzhiyu-shadow-main);
-      transform: translateY(-2px);
       border-radius: 8px !important;
     }
 
