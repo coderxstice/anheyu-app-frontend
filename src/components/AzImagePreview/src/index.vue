@@ -722,6 +722,7 @@ $transition: opacity 0.2s ease-in-out;
         font-size: 12px;
         line-height: 1.4;
         color: rgb(255 255 255 / 80%);
+        line-clamp: 2;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
       }
