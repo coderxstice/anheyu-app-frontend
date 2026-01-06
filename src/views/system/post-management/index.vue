@@ -761,7 +761,6 @@ onMounted(() => {
   }
 
   &:hover {
-    box-shadow: var(--anzhiyu-shadow-blackdeep);
     border-color: var(--anzhiyu-main-op);
 
     .item-cover .cover-image {
