@@ -101,7 +101,7 @@
     />
 
     <!-- FPS 监控（仅开发环境显示） -->
-    <FpsMonitor />
+    <FpsMonitor v-if="isDev" />
   </div>
 </template>
 
@@ -139,6 +139,9 @@ import { useCopyProtection } from "@/composables/useCopyProtection";
 const { $storage } = useGlobal<GlobalPropertiesApi>();
 const route = useRoute();
 const siteConfigStore = useSiteConfigStore();
+
+// 是否为开发环境
+const isDev = import.meta.env.DEV;
 
 // 一图流相关
 const displaySubtitle = ref("");
