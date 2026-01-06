@@ -185,14 +185,16 @@ onMounted(() => {
 
 @media (width >= 1400px) {
   .analysis-overview-grid {
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
 .overview-card {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   padding: 1.25rem;
+  overflow: hidden;
   background: var(--anzhiyu-card-bg);
   border: var(--style-border);
   border-radius: 12px;
@@ -218,15 +220,20 @@ onMounted(() => {
 
 .overview-value-wrapper {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 0.25rem;
+  min-width: 0;
 }
 
 .overview-value {
+  overflow: hidden;
   font-size: 1.75rem;
   font-weight: 700;
   line-height: 1;
   color: var(--anzhiyu-fontcolor);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .overview-change {
