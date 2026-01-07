@@ -115,8 +115,8 @@
                 <IconifyIconOnline
                   v-else-if="menuItem.icon && menuItem.icon.includes(':')"
                   :icon="menuItem.icon"
-                  width="16"
-                  height="16"
+                  width="1em"
+                  height="1em"
                   class="menu-icon menu-icon-iconify"
                 />
                 <!-- anzhiyu 图标 -->
@@ -163,8 +163,8 @@
                       <IconifyIconOnline
                         v-else-if="item.icon && item.icon.includes(':')"
                         :icon="item.icon"
-                        width="16"
-                        height="16"
+                        width="1em"
+                        height="1em"
                         class="menu-icon menu-icon-iconify"
                       />
                       <!-- anzhiyu 图标 -->
@@ -196,8 +196,8 @@
                       <IconifyIconOnline
                         v-else-if="item.icon && item.icon.includes(':')"
                         :icon="item.icon"
-                        width="16"
-                        height="16"
+                        width="1em"
+                        height="1em"
                         class="menu-icon menu-icon-iconify"
                       />
                       <!-- anzhiyu 图标 -->
@@ -234,8 +234,8 @@
                       <IconifyIconOnline
                         v-else-if="item.icon && item.icon.includes(':')"
                         :icon="item.icon"
-                        width="16"
-                        height="16"
+                        width="1em"
+                        height="1em"
                         class="menu-icon menu-icon-iconify"
                       />
                       <!-- anzhiyu 图标 -->
@@ -262,8 +262,8 @@
                       <IconifyIconOnline
                         v-else-if="item.icon && item.icon.includes(':')"
                         :icon="item.icon"
-                        width="16"
-                        height="16"
+                        width="1em"
+                        height="1em"
                         class="menu-icon menu-icon-iconify"
                       />
                       <!-- anzhiyu 图标 -->
@@ -772,6 +772,7 @@ const scrollToTop = () => {
               .site-page {
                 display: flex;
                 align-items: center;
+                min-height: 35px;
                 padding: 0.3rem 0.8rem;
                 color: var(--anzhiyu-fontcolor);
                 text-shadow: none;
@@ -787,11 +788,29 @@ const scrollToTop = () => {
                   transform: scale(1);
                 }
 
-                i {
+                i.menu-icon {
                   margin-right: 6px;
                   font-size: 0.9rem;
-                  line-height: 1;
-                  line-height: 35px;
+                }
+
+                .menu-icon-iconify {
+                  display: inline-flex;
+                  flex-shrink: 0;
+                  align-items: center;
+                  justify-content: center;
+                  width: 0.9rem;
+                  height: 0.9rem;
+                  margin-right: 6px;
+
+                  :deep(svg) {
+                    width: 100%;
+                    height: 100%;
+                  }
+                }
+
+                // 当 site-page 包含 Iconify 图标时，整体下移对齐
+                &:has(.menu-icon-iconify) {
+                  transform: translateY(2px);
                 }
               }
             }
@@ -952,11 +971,11 @@ const scrollToTop = () => {
 
 /* 支持一级菜单的直接链接样式 */
 .menus-items .menus-item a.direct-link {
+  display: flex;
+  gap: 4px;
+  align-items: center;
   color: inherit;
   text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 4px;
   cursor: pointer;
 
   &:hover {
@@ -975,8 +994,18 @@ const scrollToTop = () => {
 
   .menu-icon-iconify {
     display: inline-flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+    vertical-align: middle;
+
+    :deep(svg) {
+      width: 100%;
+      height: 100%;
+    }
   }
 }
 </style>

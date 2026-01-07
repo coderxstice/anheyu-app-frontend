@@ -190,6 +190,14 @@ const KeyPostTocHashUpdateMode: SettingKey = "post.toc.hash_update_mode";
 // 文章页面波浪区域配置
 const KeyPostWavesEnable: SettingKey = "post.waves.enable";
 
+// 文章底部版权声明配置
+const KeyPostCopyrightOriginalTemplate: SettingKey =
+  "post.copyright.original_template";
+const KeyPostCopyrightReprintTemplateWithUrl: SettingKey =
+  "post.copyright.reprint_template_with_url";
+const KeyPostCopyrightReprintTemplateWithoutUrl: SettingKey =
+  "post.copyright.reprint_template_without_url";
+
 // --- 装备页面配置 ---
 const KeyPostEquipmentBannerBackground: SettingKey =
   "equipment.banner.background";
@@ -536,6 +544,11 @@ export const constant = {
 
   // 文章页面波浪区域配置
   KeyPostWavesEnable,
+
+  // 文章底部版权声明配置
+  KeyPostCopyrightOriginalTemplate,
+  KeyPostCopyrightReprintTemplateWithUrl,
+  KeyPostCopyrightReprintTemplateWithoutUrl,
 
   // --- 装备页面配置 ---
   KeyPostEquipmentBannerBackground,

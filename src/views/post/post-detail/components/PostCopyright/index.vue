@@ -85,6 +85,9 @@ const copyrightInfo = computed(() => {
   const siteUrl = siteConfig.site?.url ?? "/";
   const actualAuthor = articleAuthor.value; // 使用文章的实际作者
 
+  // 获取自定义版权声明模板配置
+  const copyrightConfig = siteConfig.post?.copyright;
+
   // 判断是否为转载文章
   const isReprint =
     props.article.copyright_author &&
@@ -96,13 +99,33 @@ const copyrightInfo = computed(() => {
     const originalUrl = props.article.copyright_url;
 
     if (originalUrl) {
-      return `本文是转载或翻译文章，版权归 <a href="${originalUrl}" target="_blank">${originalAuthor}</a> 所有。建议访问原文，转载本文请联系原作者。`;
+      // 有原文链接的转载文章
+      const templateWithUrl =
+        copyrightConfig?.reprintTemplateWithUrl ||
+        copyrightConfig?.reprint_template_with_url ||
+        '本文是转载或翻译文章，版权归 <a href="{originalUrl}" target="_blank">{originalAuthor}</a> 所有。建议访问原文，转载本文请联系原作者。';
+      return templateWithUrl
+        .replace(/{originalAuthor}/g, originalAuthor)
+        .replace(/{originalUrl}/g, originalUrl);
     } else {
-      return `本文是转载或翻译文章，版权归 ${originalAuthor} 所有。建议访问原文，转载本文请联系原作者。`;
+      // 无原文链接的转载文章
+      const templateWithoutUrl =
+        copyrightConfig?.reprintTemplateWithoutUrl ||
+        copyrightConfig?.reprint_template_without_url ||
+        "本文是转载或翻译文章，版权归 {originalAuthor} 所有。建议访问原文，转载本文请联系原作者。";
+      return templateWithoutUrl.replace(/{originalAuthor}/g, originalAuthor);
     }
   } else {
     // 原创文章的版权声明（使用文章的实际作者）
-    return `本文是原创文章，采用 <a href="${licenseUrl}" target="_blank">${license}</a> 协议，完整转载请注明来自 <a href="${siteUrl}" target="_blank">${actualAuthor}</a>`;
+    const originalTemplate =
+      copyrightConfig?.originalTemplate ||
+      copyrightConfig?.original_template ||
+      '本文是原创文章，采用 <a href="{licenseUrl}" target="_blank">{license}</a> 协议，完整转载请注明来自 <a href="{siteUrl}" target="_blank">{author}</a>';
+    return originalTemplate
+      .replace(/{license}/g, license)
+      .replace(/{licenseUrl}/g, licenseUrl)
+      .replace(/{author}/g, actualAuthor)
+      .replace(/{siteUrl}/g, siteUrl);
   }
 });
 

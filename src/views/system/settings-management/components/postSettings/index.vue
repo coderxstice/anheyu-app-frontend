@@ -341,6 +341,70 @@
   </el-form-item>
 
   <el-divider content-position="left">
+    <h3>文章底部版权声明配置</h3>
+  </el-divider>
+
+  <el-form-item label="原创文章版权声明模板">
+    <el-input
+      :model-value="formData.copyright?.originalTemplate ?? ''"
+      type="textarea"
+      :rows="3"
+      placeholder='本文是原创文章，采用 <a href="{licenseUrl}" target="_blank">{license}</a> 协议，完整转载请注明来自 <a href="{siteUrl}" target="_blank">{author}</a>'
+      @update:model-value="
+        (val: string) => {
+          initCopyright();
+          formData.copyright!.originalTemplate = val;
+        }
+      "
+    />
+    <div class="form-item-help">
+      文章底部显示的原创文章版权声明文案，支持 HTML 标签。<br />
+      支持变量：<code>{license}</code> 许可协议名称、<code>{licenseUrl}</code>
+      许可协议链接、<code>{author}</code> 文章作者、<code>{siteUrl}</code>
+      站点链接
+    </div>
+  </el-form-item>
+
+  <el-form-item label="转载文章版权声明模板（有原文链接）">
+    <el-input
+      :model-value="formData.copyright?.reprintTemplateWithUrl ?? ''"
+      type="textarea"
+      :rows="3"
+      placeholder='本文是转载或翻译文章，版权归 <a href="{originalUrl}" target="_blank">{originalAuthor}</a> 所有。建议访问原文，转载本文请联系原作者。'
+      @update:model-value="
+        (val: string) => {
+          initCopyright();
+          formData.copyright!.reprintTemplateWithUrl = val;
+        }
+      "
+    />
+    <div class="form-item-help">
+      转载文章（有原文链接）的版权声明文案，支持 HTML 标签。<br />
+      支持变量：<code>{originalAuthor}</code> 原作者、<code>{originalUrl}</code>
+      原文链接
+    </div>
+  </el-form-item>
+
+  <el-form-item label="转载文章版权声明模板（无原文链接）">
+    <el-input
+      :model-value="formData.copyright?.reprintTemplateWithoutUrl ?? ''"
+      type="textarea"
+      :rows="3"
+      placeholder="本文是转载或翻译文章，版权归 {originalAuthor} 所有。建议访问原文，转载本文请联系原作者。"
+      @update:model-value="
+        (val: string) => {
+          initCopyright();
+          formData.copyright!.reprintTemplateWithoutUrl = val;
+        }
+      "
+    />
+    <div class="form-item-help">
+      转载文章（无原文链接）的版权声明文案，支持 HTML 标签。<br />
+      支持变量：<code>{originalAuthor}</code> 原作者
+    </div>
+  </el-form-item>
+
+  <el-divider content-position="left">
     <h3>目录配置</h3>
   </el-divider>
 
@@ -522,6 +586,17 @@ const formData = computed({
   get: () => props.modelValue,
   set: value => emit("update:modelValue", value)
 });
+
+// 初始化版权声明配置对象
+const initCopyright = () => {
+  if (!formData.value.copyright) {
+    formData.value.copyright = {
+      originalTemplate: "",
+      reprintTemplateWithUrl: "",
+      reprintTemplateWithoutUrl: ""
+    };
+  }
+};
 </script>
 
 <style scoped lang="scss">
