@@ -40,6 +40,7 @@ const isAdmin = computed(() => userStore.roles.includes("1"));
 const statusOptions = [
   { value: "PUBLISHED", label: "发布" },
   { value: "DRAFT", label: "草稿" },
+  { value: "SCHEDULED", label: "定时发布" },
   { value: "ARCHIVED", label: "归档" }
 ];
 
@@ -305,4 +306,3 @@ const internalCopyrightType = computed({
   }
 }
 </style>
-

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, onMounted, toRefs, ref } from "vue";
 import { useRouter } from "vue-router";
-import { ElMessage, ElMessageBox, ElDivider } from "element-plus";
+import { ElMessage, ElMessageBox, ElDivider, ElTooltip } from "element-plus";
 import { getArticleList, deleteArticle, batchDeleteArticles } from "@/api/post";
 import type { Article, GetArticleListParams } from "@/api/post/type";
 import {
@@ -58,6 +58,12 @@ const statusOptions = [
     label: "草稿",
     type: "warning",
     color: "var(--anzhiyu-yellow)"
+  },
+  {
+    value: "SCHEDULED",
+    label: "定时发布",
+    type: "primary",
+    color: "var(--anzhiyu-blue)"
   },
   { value: "ARCHIVED", label: "已归档", type: "info", color: "#909399" }
 ];
@@ -405,7 +411,20 @@ onMounted(() => {
               </template>
             </el-image>
             <!-- 状态标签 -->
+            <el-tooltip
+              v-if="article.status === 'SCHEDULED' && article.scheduled_at"
+              :content="`计划发布：${formatDate(article.scheduled_at)}`"
+              placement="top"
+            >
+              <div
+                class="status-badge"
+                :class="`status-${article.status.toLowerCase()}`"
+              >
+                {{ getStatusInfo(article.status)?.label }}
+              </div>
+            </el-tooltip>
             <div
+              v-else
               class="status-badge"
               :class="`status-${article.status.toLowerCase()}`"
             >
@@ -857,6 +876,14 @@ onMounted(() => {
         135deg,
         var(--anzhiyu-yellow) 0%,
         #f0c78a 100%
+      );
+    }
+
+    &.status-scheduled {
+      background: linear-gradient(
+        135deg,
+        var(--anzhiyu-blue, #409eff) 0%,
+        #79bbff 100%
       );
     }
 

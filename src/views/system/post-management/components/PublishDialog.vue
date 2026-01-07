@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import type {
-  ArticleForm,
-  PostCategory,
-  PostTag
-} from "@/api/post/type";
+import type { ArticleForm, PostCategory, PostTag } from "@/api/post/type";
 import { computed, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import AnDialog from "@/components/AnDialog/index.vue";
 
 // 导入子组件
-import { CommonSettingsTab, AdvancedSettingsTab } from "./tabs";
+import {
+  CommonSettingsTab,
+  AdvancedSettingsTab,
+  ScheduledPublishTab
+} from "./tabs";
 import { CategoryManagerDialog } from "./dialogs";
 
 const props = defineProps<{
@@ -48,7 +48,9 @@ watch(
   isVisible => {
     if (isVisible) {
       activeTab.value = "common";
-      copyrightType.value = props.form.copyright_author ? "reprint" : "original";
+      copyrightType.value = props.form.copyright_author
+        ? "reprint"
+        : "original";
       // 初始化关键词标签
       if (internalForm.keywords) {
         keywordTags.value = internalForm.keywords
@@ -120,10 +122,14 @@ const handleRefreshCategories = () => {
 
         <el-tab-pane label="高级设置" name="advanced">
           <AdvancedSettingsTab
+            v-model:keyword-tags="keywordTags"
             :form="internalForm"
             :copyright-type="copyrightType"
-            v-model:keyword-tags="keywordTags"
           />
+        </el-tab-pane>
+
+        <el-tab-pane label="定时发布" name="scheduled">
+          <ScheduledPublishTab :form="internalForm" />
         </el-tab-pane>
       </el-tabs>
 
@@ -134,7 +140,13 @@ const handleRefreshCategories = () => {
           :loading="isSubmitting"
           @click="handleConfirm"
         >
-          {{ form.status === "PUBLISHED" ? "确认更新" : "确认发布" }}
+          {{
+            form.status === "SCHEDULED"
+              ? "设置定时发布"
+              : form.status === "PUBLISHED"
+                ? "确认更新"
+                : "确认发布"
+          }}
         </el-button>
       </template>
     </AnDialog>
