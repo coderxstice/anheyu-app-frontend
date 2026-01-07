@@ -833,6 +833,7 @@ a {
   margin-left: 0.5rem;
   font-size: 1.1rem;
   cursor: pointer;
+  background: transparent;
 
   > i {
     display: inline-block;
