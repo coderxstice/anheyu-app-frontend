@@ -127,63 +127,113 @@ const executeScripts = () => {
 
     // 获取所有 script 标签
     const scripts = containerRef.querySelectorAll("script");
+    // 将 NodeList 转换为数组，分离内联脚本和外部脚本
+    const scriptArray = Array.from(scripts);
+    const inlineScripts: HTMLScriptElement[] = [];
+    const externalScripts: HTMLScriptElement[] = [];
 
-    scripts.forEach(oldScript => {
-      // 创建新的 script 元素
+    scriptArray.forEach(script => {
+      if (script.src) {
+        externalScripts.push(script);
+      } else {
+        inlineScripts.push(script);
+      }
+    });
+
+    // 先执行内联脚本
+    inlineScripts.forEach(oldScript => {
       const newScript = document.createElement("script");
 
-      // 复制所有属性
+      // 复制除 src 外的所有属性
       Array.from(oldScript.attributes).forEach(attr => {
-        newScript.setAttribute(attr.name, attr.value);
+        if (attr.name !== "src") {
+          newScript.setAttribute(attr.name, attr.value);
+        }
       });
 
-      // 复制脚本内容
-      if (oldScript.src) {
-        // 外部脚本
-        newScript.src = oldScript.src;
-      } else {
-        // 内联脚本
-        let scriptContent = oldScript.textContent || "";
+      let scriptContent = oldScript.textContent || "";
 
-        // 处理 DOMContentLoaded 事件监听器，改为立即执行
+      // 处理 DOMContentLoaded 事件监听器，改为立即执行
+      scriptContent = scriptContent.replace(
+        /document\.addEventListener\s*\(\s*['"]DOMContentLoaded['"]\s*,\s*function\s*\(\s*\)\s*\{([\s\S]*?)\}\s*\)\s*;?/g,
+        "(function(){$1})();"
+      );
+
+      // 也处理箭头函数形式的 DOMContentLoaded
+      scriptContent = scriptContent.replace(
+        /document\.addEventListener\s*\(\s*['"]DOMContentLoaded['"]\s*,\s*\(\s*\)\s*=>\s*\{([\s\S]*?)\}\s*\)\s*;?/g,
+        "(function(){$1})();"
+      );
+
+      // 将脚本内容包装在 IIFE 中，避免重复声明冲突
+      const isAlreadyIIFE =
+        scriptContent.trim().startsWith("(function") ||
+        scriptContent.trim().startsWith("(()") ||
+        scriptContent.trim().startsWith("!function") ||
+        scriptContent.trim().startsWith("+function");
+
+      if (!isAlreadyIIFE && scriptContent.trim().length > 0) {
+        // 自动将普通函数声明转换为 window 属性，使其可以被全局访问
         scriptContent = scriptContent.replace(
-          /document\.addEventListener\s*\(\s*['"]DOMContentLoaded['"]\s*,\s*function\s*\(\s*\)\s*\{([\s\S]*?)\}\s*\)\s*;?/g,
-          "(function(){$1})();"
+          /(?<!window\.)function\s+(\w+)\s*\(/g,
+          "window.$1 = function("
         );
 
-        // 也处理箭头函数形式的 DOMContentLoaded
-        scriptContent = scriptContent.replace(
-          /document\.addEventListener\s*\(\s*['"]DOMContentLoaded['"]\s*,\s*\(\s*\)\s*=>\s*\{([\s\S]*?)\}\s*\)\s*;?/g,
-          "(function(){$1})();"
-        );
-
-        // 将脚本内容包装在 IIFE 中，避免重复声明冲突
-        // 只有已经是 IIFE 的脚本才不包装
-        const isAlreadyIIFE =
-          scriptContent.trim().startsWith("(function") ||
-          scriptContent.trim().startsWith("(()") ||
-          scriptContent.trim().startsWith("!function") ||
-          scriptContent.trim().startsWith("+function");
-
-        if (!isAlreadyIIFE && scriptContent.trim().length > 0) {
-          // 自动将普通函数声明转换为 window 属性，使其可以被全局访问
-          // 匹配 function functionName(...) {...} 但不匹配已有 window. 的
-          scriptContent = scriptContent.replace(
-            /(?<!window\.)function\s+(\w+)\s*\(/g,
-            "window.$1 = function("
-          );
-
-          // 包装在 IIFE 中，内部的 const/let 变量不会污染全局
-          // 但通过 window.xxx = 赋值的函数会暴露到全局
-          scriptContent = `(function(){\n${scriptContent}\n})();`;
-        }
-
-        newScript.textContent = scriptContent;
+        scriptContent = `(function(){\n${scriptContent}\n})();`;
       }
 
-      // 替换旧的 script 标签
+      newScript.textContent = scriptContent;
       oldScript.parentNode?.replaceChild(newScript, oldScript);
     });
+
+    // 处理外部脚本：需要按顺序加载
+    const loadExternalScript = (script: HTMLScriptElement): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        const newScript = document.createElement("script");
+
+        // 复制属性，但移除 defer（动态脚本不支持 defer）
+        Array.from(script.attributes).forEach(attr => {
+          // 跳过 defer 属性，因为动态添加的脚本不支持 defer
+          if (attr.name === "defer") return;
+          newScript.setAttribute(attr.name, attr.value);
+        });
+
+        newScript.src = script.src;
+
+        // 监听加载完成事件
+        newScript.onload = () => {
+          resolve();
+        };
+
+        newScript.onerror = () => {
+          console.error(`Failed to load script: ${script.src}`);
+          reject(new Error(`Failed to load script: ${script.src}`));
+        };
+
+        // 移除原脚本标签
+        script.parentNode?.removeChild(script);
+
+        // 将新脚本追加到 body 末尾以确保执行
+        document.body.appendChild(newScript);
+      });
+    };
+
+    // 按顺序加载外部脚本（保持脚本的执行顺序）
+    const loadExternalScriptsSequentially = async () => {
+      for (const script of externalScripts) {
+        try {
+          await loadExternalScript(script);
+        } catch (error) {
+          // 继续加载下一个脚本
+          console.error(error);
+        }
+      }
+    };
+
+    // 执行外部脚本加载
+    if (externalScripts.length > 0) {
+      loadExternalScriptsSequentially();
+    }
   });
 };
 
