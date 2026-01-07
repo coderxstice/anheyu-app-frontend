@@ -486,7 +486,7 @@ const handleResetAll = () => {
 .settings-page {
   height: 100%;
   overflow: hidden;
-  margin: 0;
+  margin: 0 !important;
 }
 
 .setting-form {
