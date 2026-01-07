@@ -104,7 +104,7 @@ const handleFetchPrimaryColor = async () => {
 </script>
 
 <template>
-  <el-form :model="form" label-position="top">
+  <el-form :model="form" label-position="top" @submit.prevent>
     <el-row :gutter="24">
       <el-col :span="12">
         <el-form-item label="自定义永久链接 (可选)" prop="abbrlink">
@@ -278,4 +278,3 @@ const handleFetchPrimaryColor = async () => {
   gap: 12px;
 }
 </style>
-
