@@ -557,14 +557,39 @@ const initTipHoverEvents = (container: HTMLElement) => {
     const trigger = tipElement.getAttribute("data-trigger");
     if (trigger === "click") return; // click触发的tip由handleContentClick处理
 
+    // 获取延迟时间（毫秒），默认无延迟
+    const delay = parseInt(tipElement.getAttribute("data-delay") || "0", 10);
+
+    // 存储定时器
+    let showTimer: ReturnType<typeof setTimeout> | null = null;
+    let hideTimer: ReturnType<typeof setTimeout> | null = null;
+
     const showTip = () => {
-      tipElement.style.visibility = "visible";
-      tipElement.style.opacity = "1";
+      // 清除隐藏定时器
+      if (hideTimer) {
+        clearTimeout(hideTimer);
+        hideTimer = null;
+      }
+      // 设置延迟显示
+      showTimer = setTimeout(() => {
+        tipElement.style.visibility = "visible";
+        tipElement.style.opacity = "1";
+        tipElement.dataset.visible = "true";
+      }, delay);
     };
 
     const hideTip = () => {
-      tipElement.style.visibility = "hidden";
-      tipElement.style.opacity = "0";
+      // 清除显示定时器
+      if (showTimer) {
+        clearTimeout(showTimer);
+        showTimer = null;
+      }
+      // 设置延迟隐藏（100ms）
+      hideTimer = setTimeout(() => {
+        tipElement.style.visibility = "hidden";
+        tipElement.style.opacity = "0";
+        tipElement.dataset.visible = "false";
+      }, 100);
     };
 
     wrapperEl.addEventListener("mouseenter", showTip);
@@ -572,6 +597,8 @@ const initTipHoverEvents = (container: HTMLElement) => {
 
     // 添加清理函数
     tipCleanupFns.push(() => {
+      if (showTimer) clearTimeout(showTimer);
+      if (hideTimer) clearTimeout(hideTimer);
       wrapperEl.removeEventListener("mouseenter", showTip);
       wrapperEl.removeEventListener("mouseleave", hideTip);
     });

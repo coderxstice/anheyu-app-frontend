@@ -2,10 +2,94 @@
  * @Description: Markdown Tip Plugin - 鼠标悬停显示提示信息
  * @Author: 安知鱼
  * @Date: 2025-10-13 00:00:00
- * @LastEditTime: 2025-12-10 16:08:08
+ * @LastEditTime: 2025-01-07 12:00:00
  * @LastEditors: 安知鱼
  */
 import type MarkdownIt from "markdown-it";
+
+/**
+ * 初始化 tip 组件的事件监听器
+ * 需要在 HTML 渲染完成后调用此函数
+ * @param container 容器元素，默认为 document
+ */
+export function initTipEvents(
+  container: HTMLElement | Document = document
+): void {
+  const tipWrappers = container.querySelectorAll<HTMLElement>(
+    ".anzhiyu-tip-wrapper:not([data-tip-initialized])"
+  );
+
+  tipWrappers.forEach(wrapper => {
+    const tooltip = wrapper.querySelector<HTMLElement>(".anzhiyu-tip");
+    if (!tooltip) return;
+
+    const trigger = tooltip.dataset.trigger || "hover";
+    const delay = parseInt(tooltip.dataset.delay || "0", 10);
+
+    // 标记为已初始化
+    wrapper.dataset.tipInitialized = "true";
+
+    // 存储定时器
+    let showTimer: ReturnType<typeof setTimeout> | null = null;
+    let hideTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const showTooltip = () => {
+      if (hideTimer) {
+        clearTimeout(hideTimer);
+        hideTimer = null;
+      }
+      showTimer = setTimeout(() => {
+        tooltip.style.visibility = "visible";
+        tooltip.style.opacity = "1";
+        tooltip.dataset.visible = "true";
+      }, delay);
+    };
+
+    const hideTooltip = () => {
+      if (showTimer) {
+        clearTimeout(showTimer);
+        showTimer = null;
+      }
+      hideTimer = setTimeout(() => {
+        tooltip.style.visibility = "hidden";
+        tooltip.style.opacity = "0";
+        tooltip.dataset.visible = "false";
+      }, 100);
+    };
+
+    const toggleTooltip = (e: Event) => {
+      e.stopPropagation();
+      const isVisible = tooltip.dataset.visible === "true";
+      if (isVisible) {
+        tooltip.style.visibility = "hidden";
+        tooltip.style.opacity = "0";
+        tooltip.dataset.visible = "false";
+      } else {
+        tooltip.style.visibility = "visible";
+        tooltip.style.opacity = "1";
+        tooltip.dataset.visible = "true";
+      }
+    };
+
+    if (trigger === "click") {
+      wrapper.addEventListener("click", toggleTooltip);
+      // 点击其他区域关闭
+      document.addEventListener("click", e => {
+        if (
+          !wrapper.contains(e.target as Node) &&
+          tooltip.dataset.visible === "true"
+        ) {
+          tooltip.style.visibility = "hidden";
+          tooltip.style.opacity = "0";
+          tooltip.dataset.visible = "false";
+        }
+      });
+    } else {
+      wrapper.addEventListener("mouseenter", showTooltip);
+      wrapper.addEventListener("mouseleave", hideTooltip);
+    }
+  });
+}
 
 export default function tipPlugin(md: MarkdownIt): void {
   // 解析参数的辅助函数，支持带引号的值（包含空格、逗号、中文等）
@@ -43,10 +127,19 @@ export default function tipPlugin(md: MarkdownIt): void {
         }
         if (i < paramsStr.length) i++; // 跳过结束引号
       } else {
-        // 不带引号的值，读取到下一个空格或结束
-        while (i < paramsStr.length && paramsStr[i] !== " ") {
-          paramValue += paramsStr[i];
-          i++;
+        // 不带引号的值：查找下一个 key= 模式的位置，而不是简单地读取到空格
+        // 这样可以支持值中包含空格的情况，如 content=延迟 500ms 显示的提示 delay=500
+        const remaining = paramsStr.slice(i);
+        // 匹配下一个 "空格+字母/数字+=" 的模式
+        const nextParamMatch = remaining.match(/\s+([a-zA-Z_][a-zA-Z0-9_]*)=/);
+        if (nextParamMatch) {
+          // 找到了下一个参数，取到它之前的内容作为当前值
+          paramValue = remaining.slice(0, nextParamMatch.index).trim();
+          i += nextParamMatch.index!;
+        } else {
+          // 没有下一个参数了，取剩余所有内容
+          paramValue = remaining.trim();
+          i = paramsStr.length;
         }
       }
 
@@ -56,6 +149,74 @@ export default function tipPlugin(md: MarkdownIt): void {
     }
 
     return parsedParams;
+  }
+
+  function generateTipHtml(
+    parsedParams: Record<string, string>,
+    md: MarkdownIt
+  ): string {
+    // 获取参数值
+    const text = parsedParams.text || "提示文本";
+    const content = parsedParams.content || "这里是提示内容";
+    const position = parsedParams.position || "top"; // top/bottom/left/right
+    const theme = parsedParams.theme || "dark"; // dark/light/info/warning/error/success
+    const trigger = parsedParams.trigger || "hover"; // hover/click
+    const delay = parsedParams.delay || "0"; // 延迟显示时间（毫秒），默认无延迟
+
+    // 生成唯一ID
+    const tipId = `tip-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+    // 构建 class 名称
+    const classList = ["anzhiyu-tip"];
+
+    // 添加主题类
+    if (theme) {
+      classList.push(`tip-${theme}`);
+    }
+
+    // 添加位置类
+    if (position) {
+      classList.push(`tip-${position}`);
+    }
+
+    // 添加触发方式类
+    if (trigger === "click") {
+      classList.push("tip-click");
+    }
+
+    const classAttr = classList.join(" ");
+
+    // 根据位置计算 tooltip 的定位样式（居中显示）
+    const positionStyles: Record<string, string> = {
+      top: "bottom: 100%; left: 50%; transform: translateX(-50%) translateY(-8px);",
+      bottom:
+        "top: 100%; left: 50%; transform: translateX(-50%) translateY(8px);",
+      left: "right: 100%; top: 50%; transform: translateY(-50%) translateX(-8px);",
+      right:
+        "left: 100%; top: 50%; transform: translateY(-50%) translateX(8px);"
+    };
+
+    // 根据主题计算颜色
+    const themeStyles: Record<string, string> = {
+      dark: "background: #333; color: #fff;",
+      light: "background: #fff; color: #333; border: 1px solid #ddd;",
+      info: "background: #3498db; color: #fff;",
+      warning: "background: #f39c12; color: #fff;",
+      error: "background: #e74c3c; color: #fff;",
+      success: "background: #27ae60; color: #fff;"
+    };
+
+    const tooltipPositionStyle = positionStyles[position] || positionStyles.top;
+    const tooltipThemeStyle = themeStyles[theme] || themeStyles.dark;
+
+    // 生成 tip HTML - 使用内联样式确保默认隐藏，不使用内联事件处理程序
+    const wrapperStyle =
+      "position: relative; display: inline-block; cursor: pointer;";
+    const textStyle =
+      "border-bottom: 1px dashed currentColor; text-decoration: none;";
+    const tooltipStyle = `position: absolute; ${tooltipPositionStyle} ${tooltipThemeStyle} padding: 8px 12px; border-radius: 6px; font-size: 13px; line-height: 1.5; max-width: 300px; width: max-content; text-align: center; white-space: pre-wrap; z-index: 1000; visibility: hidden; opacity: 0; transition: opacity 0.2s, visibility 0.2s; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);`;
+
+    return `<span class="anzhiyu-tip-wrapper" data-tip-id="${tipId}" style="${wrapperStyle}"><span class="anzhiyu-tip-text" style="${textStyle}">${md.utils.escapeHtml(text)}</span><span class="${classAttr}" data-content="${md.utils.escapeHtml(content)}" data-position="${position}" data-theme="${theme}" data-trigger="${trigger}" data-delay="${delay}" data-visible="false" role="tooltip" aria-hidden="true" style="${tooltipStyle}">${md.utils.escapeHtml(content)}</span></span>`;
   }
 
   function tipRule(state: any, silent: boolean): boolean {
@@ -98,81 +259,7 @@ export default function tipPlugin(md: MarkdownIt): void {
     const paramsStr = contentMatch[1];
     const parsedParams = parseParams(paramsStr);
 
-    // 获取参数值
-    const text = parsedParams.text || "提示文本";
-    const content = parsedParams.content || "这里是提示内容";
-    const position = parsedParams.position || "top"; // top/bottom/left/right
-    const theme = parsedParams.theme || "dark"; // dark/light/info/warning/error/success
-    const trigger = parsedParams.trigger || "hover"; // hover/click
-    const delay = parsedParams.delay || "300"; // 延迟显示时间（毫秒）
-
-    // 生成唯一ID
-    const tipId = `tip-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-
-    // 构建 class 名称
-    const classList = ["anzhiyu-tip"];
-
-    // 添加主题类
-    if (theme) {
-      classList.push(`tip-${theme}`);
-    }
-
-    // 添加位置类
-    if (position) {
-      classList.push(`tip-${position}`);
-    }
-
-    // 添加触发方式类
-    if (trigger === "click") {
-      classList.push("tip-click");
-    }
-
-    const classAttr = classList.join(" ");
-
-    // 根据位置计算 tooltip 的定位样式（居中显示，使用 inset 避免溢出）
-    const positionStyles: Record<string, string> = {
-      top: "bottom: 100%; left: 50%; transform: translateX(-50%) translateY(-8px);",
-      bottom:
-        "top: 100%; left: 50%; transform: translateX(-50%) translateY(8px);",
-      left: "right: 100%; top: 50%; transform: translateY(-50%) translateX(-8px);",
-      right:
-        "left: 100%; top: 50%; transform: translateY(-50%) translateX(8px);"
-    };
-
-    // 根据主题计算颜色
-    const themeStyles: Record<string, string> = {
-      dark: "background: #333; color: #fff;",
-      light: "background: #fff; color: #333; border: 1px solid #ddd;",
-      info: "background: #3498db; color: #fff;",
-      warning: "background: #f39c12; color: #fff;",
-      error: "background: #e74c3c; color: #fff;",
-      success: "background: #27ae60; color: #fff;"
-    };
-
-    const tooltipPositionStyle = positionStyles[position] || positionStyles.top;
-    const tooltipThemeStyle = themeStyles[theme] || themeStyles.dark;
-
-    // 生成事件处理函数 - 支持延迟显示
-    const delayMs = parseInt(delay, 10) || 300;
-    const showEvent = `var t=this.querySelector('.anzhiyu-tip'),w=this;if(t){clearTimeout(w._tipHideTimer);w._tipShowTimer=setTimeout(function(){t.style.visibility='visible';t.style.opacity='1';},${delayMs});}`;
-    const hideEvent = `var t=this.querySelector('.anzhiyu-tip'),w=this;if(t){clearTimeout(w._tipShowTimer);w._tipHideTimer=setTimeout(function(){t.style.visibility='hidden';t.style.opacity='0';},100);}`;
-
-    // 点击事件 - 使用 dataset 来跟踪状态，避免 style.visibility 初始值问题
-    const clickEvent = `var t=this.querySelector('.anzhiyu-tip');if(t){var isVisible=t.dataset.visible==='true';if(isVisible){t.style.visibility='hidden';t.style.opacity='0';t.dataset.visible='false';}else{t.style.visibility='visible';t.style.opacity='1';t.dataset.visible='true';}}event.stopPropagation();`;
-
-    const eventHandlers =
-      trigger === "click"
-        ? `onclick="${clickEvent}"`
-        : `onmouseenter="${showEvent}" onmouseleave="${hideEvent}"`;
-
-    // 生成 tip HTML - 使用内联样式确保默认隐藏
-    const wrapperStyle =
-      "position: relative; display: inline-block; cursor: pointer;";
-    const textStyle =
-      "border-bottom: 1px dashed currentColor; text-decoration: none;";
-    const tooltipStyle = `position: absolute; ${tooltipPositionStyle} ${tooltipThemeStyle} padding: 8px 12px; border-radius: 6px; font-size: 13px; line-height: 1.5; max-width: 300px; width: max-content; text-align: center; white-space: pre-wrap; z-index: 1000; visibility: hidden; opacity: 0; transition: opacity 0.2s, visibility 0.2s; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);`;
-
-    const html = `<span class="anzhiyu-tip-wrapper" data-tip-id="${tipId}" style="${wrapperStyle}" ${eventHandlers}><span class="anzhiyu-tip-text" style="${textStyle}">${md.utils.escapeHtml(text)}</span><span class="${classAttr}" data-content="${md.utils.escapeHtml(content)}" data-position="${position}" data-theme="${theme}" data-trigger="${trigger}" data-delay="${delay}" data-visible="false" role="tooltip" aria-hidden="true" style="${tooltipStyle}">${md.utils.escapeHtml(content)}</span></span>`;
+    const html = generateTipHtml(parsedParams, md);
 
     const token = state.push("html_inline", "", 0);
     token.content = html;
@@ -237,66 +324,7 @@ export default function tipPlugin(md: MarkdownIt): void {
     const paramsStr = contentMatch[1];
     const parsedParams = parseParams(paramsStr);
 
-    const text = parsedParams.text || "提示文本";
-    const content = parsedParams.content || "这里是提示内容";
-    const position = parsedParams.position || "top";
-    const theme = parsedParams.theme || "dark";
-    const trigger = parsedParams.trigger || "hover";
-    const delay = parsedParams.delay || "300";
-
-    const tipId = `tip-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-    const classList = ["anzhiyu-tip"];
-
-    if (theme) classList.push(`tip-${theme}`);
-    if (position) classList.push(`tip-${position}`);
-    if (trigger === "click") classList.push("tip-click");
-
-    const classAttr = classList.join(" ");
-
-    // 根据位置计算 tooltip 的定位样式（居中显示，使用 inset 避免溢出）
-    const positionStyles: Record<string, string> = {
-      top: "bottom: 100%; left: 50%; transform: translateX(-50%) translateY(-8px);",
-      bottom:
-        "top: 100%; left: 50%; transform: translateX(-50%) translateY(8px);",
-      left: "right: 100%; top: 50%; transform: translateY(-50%) translateX(-8px);",
-      right:
-        "left: 100%; top: 50%; transform: translateY(-50%) translateX(8px);"
-    };
-
-    // 根据主题计算颜色
-    const themeStyles: Record<string, string> = {
-      dark: "background: #333; color: #fff;",
-      light: "background: #fff; color: #333; border: 1px solid #ddd;",
-      info: "background: #3498db; color: #fff;",
-      warning: "background: #f39c12; color: #fff;",
-      error: "background: #e74c3c; color: #fff;",
-      success: "background: #27ae60; color: #fff;"
-    };
-
-    const tooltipPositionStyle = positionStyles[position] || positionStyles.top;
-    const tooltipThemeStyle = themeStyles[theme] || themeStyles.dark;
-
-    // 生成事件处理函数 - 支持延迟显示
-    const delayMs = parseInt(delay, 10) || 300;
-    const showEvent = `var t=this.querySelector('.anzhiyu-tip'),w=this;if(t){clearTimeout(w._tipHideTimer);w._tipShowTimer=setTimeout(function(){t.style.visibility='visible';t.style.opacity='1';},${delayMs});}`;
-    const hideEvent = `var t=this.querySelector('.anzhiyu-tip'),w=this;if(t){clearTimeout(w._tipShowTimer);w._tipHideTimer=setTimeout(function(){t.style.visibility='hidden';t.style.opacity='0';},100);}`;
-
-    // 点击事件 - 使用 dataset 来跟踪状态，避免 style.visibility 初始值问题
-    const clickEvent = `var t=this.querySelector('.anzhiyu-tip');if(t){var isVisible=t.dataset.visible==='true';if(isVisible){t.style.visibility='hidden';t.style.opacity='0';t.dataset.visible='false';}else{t.style.visibility='visible';t.style.opacity='1';t.dataset.visible='true';}}event.stopPropagation();`;
-
-    const eventHandlers =
-      trigger === "click"
-        ? `onclick="${clickEvent}"`
-        : `onmouseenter="${showEvent}" onmouseleave="${hideEvent}"`;
-
-    // 生成 tip HTML - 使用内联样式确保默认隐藏
-    const wrapperStyle =
-      "position: relative; display: inline-block; cursor: pointer;";
-    const textStyle =
-      "border-bottom: 1px dashed currentColor; text-decoration: none;";
-    const tooltipStyle = `position: absolute; ${tooltipPositionStyle} ${tooltipThemeStyle} padding: 8px 12px; border-radius: 6px; font-size: 13px; line-height: 1.5; max-width: 300px; width: max-content; text-align: center; white-space: pre-wrap; z-index: 1000; visibility: hidden; opacity: 0; transition: opacity 0.2s, visibility 0.2s; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);`;
-
-    const html = `<span class="anzhiyu-tip-wrapper" data-tip-id="${tipId}" style="${wrapperStyle}" ${eventHandlers}><span class="anzhiyu-tip-text" style="${textStyle}">${md.utils.escapeHtml(text)}</span><span class="${classAttr}" data-content="${md.utils.escapeHtml(content)}" data-position="${position}" data-theme="${theme}" data-trigger="${trigger}" data-delay="${delay}" data-visible="false" role="tooltip" aria-hidden="true" style="${tooltipStyle}">${md.utils.escapeHtml(content)}</span></span>`;
+    const html = generateTipHtml(parsedParams, md);
 
     const token = state.push("html_block", "", 0);
     token.content = html;

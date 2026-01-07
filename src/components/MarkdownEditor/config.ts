@@ -13,15 +13,25 @@ import InlineStylesPlugin from "./plugins/markdown-it-inline-styles-plugin";
 import ButtonPlugin from "./plugins/markdown-it-button-plugin";
 import BtnsPlugin from "./plugins/markdown-it-btns-plugin";
 import LinkCardPlugin from "./plugins/markdown-it-link-card-plugin";
+import TipPlugin from "./plugins/markdown-it-tip-plugin";
 import GalleryPlugin from "./plugins/markdown-it-gallery-plugin";
 import VideoGalleryPlugin from "./plugins/markdown-it-video-gallery-plugin";
 import EnhancedImagePlugin from "./plugins/markdown-it-enhanced-image-plugin";
 import MusicPlugin from "./plugins/markdown-it-music-plugin";
 
-export function installMarkdownEditorExtensions() {
+export async function installMarkdownEditorExtensions() {
   console.log("🔧 Installing markdown editor extensions...");
 
+  // 动态导入 mermaid，只在进入编辑页面时才加载
+  const mermaid = await import("mermaid").then(m => m.default);
+
   config({
+    // 使用本地 mermaid 实例，避免 CDN 加载不稳定导致图表不渲染
+    editorExtensions: {
+      mermaid: {
+        instance: mermaid
+      }
+    },
     markdownItConfig(mdit) {
       console.log("⚙️ Configuring markdown-it with plugins...");
 
@@ -52,6 +62,9 @@ export function installMarkdownEditorExtensions() {
 
         mdit.use(LinkCardPlugin);
         console.log("✅ LinkCardPlugin registered");
+
+        mdit.use(TipPlugin);
+        console.log("✅ TipPlugin registered");
 
         mdit.use(GalleryPlugin);
         console.log("✅ GalleryPlugin registered");
