@@ -302,8 +302,6 @@ const formatJson = () => {
         <el-form-item label="QQ API 密钥">
           <el-input
             v-model="model.qqAPIKey"
-            type="password"
-            show-password
             placeholder="在鸭梨API控制台获取"
           />
         </el-form-item>
