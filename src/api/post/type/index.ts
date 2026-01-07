@@ -16,7 +16,7 @@ export interface BaseResponse<T> {
   data: T;
 }
 
-export type ArticleStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
+export type ArticleStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED" | "SCHEDULED";
 
 // ===================================
 //          文章标签 (PostTag)
@@ -110,6 +110,8 @@ export interface Article {
   copyright_url?: string;
   keywords?: string;
   comment_count: number;
+  // 定时发布相关字段
+  scheduled_at?: string; // ISO 8601 格式的定时发布时间
   prev_article: ArticleLink | null;
   next_article: ArticleLink | null;
   related_articles: ArticleLink[];
@@ -165,6 +167,8 @@ export interface ArticleForm {
   custom_published_at?: string;
   custom_updated_at?: string;
   keywords?: string;
+  // 定时发布相关字段
+  scheduled_at?: string; // ISO 8601 格式的定时发布时间，设置后状态自动变为 SCHEDULED
 }
 
 export type ArticleResponse = Article;
