@@ -7,6 +7,7 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { useMusicPlayer } from "./composables/useMusicPlayer";
 import { useContentProcessor } from "./composables/useContentProcessor";
+import { initTipEvents } from "./plugins/markdown-it-tip-plugin";
 
 // 动态导入类型定义
 type MdEditor = any;
@@ -97,6 +98,76 @@ const themeObserver = new MutationObserver(() => {
   }
 });
 
+// === Mermaid 重渲染防抖定时器 ===
+let mermaidRenderTimer: ReturnType<typeof setTimeout> | null = null;
+
+// === 检查并重新渲染未完成的 Mermaid 图表 ===
+const checkAndRerenderMermaid = async () => {
+  const previewContainer = containerRef.value?.querySelector(
+    ".md-editor-preview-wrapper"
+  );
+  if (!previewContainer) return;
+
+  // 查找所有未渲染的 mermaid 块（没有 SVG 或没有 data-processed 属性）
+  const mermaidBlocks = Array.from(
+    previewContainer.querySelectorAll(".md-editor-mermaid")
+  );
+  const unrenderedBlocks: Element[] = [];
+
+  for (const block of mermaidBlocks) {
+    const hasSvg = block.querySelector("svg");
+    const isProcessed = block.hasAttribute("data-processed");
+    if (!hasSvg || !isProcessed) {
+      unrenderedBlocks.push(block);
+    }
+  }
+
+  if (unrenderedBlocks.length === 0) return;
+
+  console.log(
+    `[Mermaid] 检测到 ${unrenderedBlocks.length} 个未渲染的图表，正在重新渲染...`
+  );
+
+  try {
+    // 使用全局 mermaid 对象（由 md-editor-v3 加载）
+    const mermaid = (window as any).mermaid;
+
+    if (!mermaid) {
+      console.warn("[Mermaid] 全局 mermaid 对象不存在，跳过重渲染");
+      return;
+    }
+
+    // 为未渲染的块重新运行 mermaid
+    await mermaid.run({
+      querySelector: ".md-editor-mermaid:not([data-processed])",
+      suppressErrors: true
+    });
+
+    console.log(`[Mermaid] 重渲染完成`);
+  } catch (error) {
+    console.warn("[Mermaid] 重渲染时出错:", error);
+  }
+};
+
+// === 处理HTML变化事件 ===
+const handleHtmlChanged = () => {
+  // 使用防抖机制检查并重渲染 mermaid 图表
+  // 延迟 300ms 等待 md-editor-v3 完成初始渲染
+  if (mermaidRenderTimer) {
+    clearTimeout(mermaidRenderTimer);
+  }
+  mermaidRenderTimer = setTimeout(() => {
+    checkAndRerenderMermaid();
+    // 初始化 tip 组件的事件监听器
+    const previewContainer = containerRef.value?.querySelector(
+      ".md-editor-preview-wrapper"
+    );
+    if (previewContainer) {
+      initTipEvents(previewContainer as HTMLElement);
+    }
+  }, 300);
+};
+
 // === 等待 Mermaid 渲染完成 ===
 const waitForMermaidRender = async (
   maxWaitMs: number = 5000,
@@ -183,8 +254,8 @@ onMounted(async () => {
     // 动态导入样式
     await import("md-editor-v3/lib/style.css");
 
-    // 初始化编辑器扩展
-    installMarkdownEditorExtensions();
+    // 初始化编辑器扩展（包含 mermaid 动态加载）
+    await installMarkdownEditorExtensions();
 
     MdEditorComponent.value = MdEditor;
     isEditorLoading.value = false;
@@ -274,6 +345,7 @@ defineExpose({
       @update:model-value="val => emit('update:modelValue', val)"
       @onUploadImg="onUploadImg"
       @onSave="handleSave"
+      @onHtmlChanged="handleHtmlChanged"
     />
   </div>
 </template>

@@ -67,6 +67,7 @@
     "localforage": "^1.10.0",
     "lottie-web": "^5.13.0",
     "md-editor-v3": "^5.8.4",
+    "mermaid": "^11.12.2",
     "mitt": "^3.0.1",
     "monaco-editor": "^0.52.2",
     "node-snackbar": "^0.1.16",
