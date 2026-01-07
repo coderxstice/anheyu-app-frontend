@@ -197,6 +197,11 @@ export interface PostSettingsInfo {
   waves: {
     enable: boolean; // 是否显示文章页面波浪区域
   };
+  copyright: {
+    originalTemplate: string; // 原创文章版权声明模板
+    reprintTemplateWithUrl: string; // 转载文章版权声明模板（有原文链接）
+    reprintTemplateWithoutUrl: string; // 转载文章版权声明模板（无原文链接）
+  };
   cdn: {
     enable: boolean;
     provider: string;

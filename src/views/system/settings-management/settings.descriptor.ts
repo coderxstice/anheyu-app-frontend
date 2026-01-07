@@ -708,6 +708,24 @@ const postDescriptors: SettingDescriptor[] = [
     type: "boolean"
   },
   {
+    frontendPath: "post.copyright.originalTemplate",
+    backendKey: constant.KeyPostCopyrightOriginalTemplate,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "post.copyright.reprintTemplateWithUrl",
+    backendKey: constant.KeyPostCopyrightReprintTemplateWithUrl,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "post.copyright.reprintTemplateWithoutUrl",
+    backendKey: constant.KeyPostCopyrightReprintTemplateWithoutUrl,
+    defaultValue: "",
+    type: "string"
+  },
+  {
     frontendPath: "post.cdn.enable",
     backendKey: constant.KeyCDNEnable,
     defaultValue: false,
