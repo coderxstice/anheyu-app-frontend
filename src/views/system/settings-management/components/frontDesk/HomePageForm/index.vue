@@ -702,8 +702,22 @@
     <div
       style="font-size: 12px; color: var(--anzhiyu-secondtext); margin-top: 8px"
     >
-      指向包含歌单信息的JSON文件的链接地址，配置后将不再使用歌单id，而是使用
+      音乐馆页面歌单：指向包含歌单信息的JSON文件的链接地址，配置后将不再使用歌单id，而是使用
       json中的内容作为歌单列表，如果json内容有误将无法显示音乐。
+    </div>
+  </el-form-item>
+  <el-form-item label="音乐胶囊自定义歌单">
+    <el-input
+      :model-value="model.music?.capsule?.custom_playlist || ''"
+      placeholder="https://example.com/capsule-music.json"
+      clearable
+      @update:model-value="updateMusicCapsuleCustomPlaylist"
+    />
+    <div
+      style="font-size: 12px; color: var(--anzhiyu-secondtext); margin-top: 8px"
+    >
+      音乐胶囊专用歌单：独立于音乐馆配置，用于右下角胶囊播放器的自定义歌单 JSON
+      链接。如不配置，胶囊将使用网易云歌单 ID 获取歌曲。
     </div>
   </el-form-item>
   <el-form-item label="音乐API地址">
@@ -1735,6 +1749,19 @@ const updateMusicPlayerCustomPlaylist = (newPlaylist: string) => {
       ...model.value.music,
       player: {
         ...model.value.music?.player,
+        custom_playlist: newPlaylist
+      }
+    }
+  };
+};
+
+const updateMusicCapsuleCustomPlaylist = (newPlaylist: string) => {
+  model.value = {
+    ...model.value,
+    music: {
+      ...model.value.music,
+      capsule: {
+        ...model.value.music?.capsule,
         custom_playlist: newPlaylist
       }
     }
