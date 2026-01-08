@@ -1359,6 +1359,12 @@ const frontDeskDescriptors: SettingDescriptor[] = [
     type: "string"
   },
   {
+    frontendPath: "frontDesk.home.music.capsule.custom_playlist",
+    backendKey: constant.KeyMusicCapsuleCustomPlaylist,
+    defaultValue: "",
+    type: "string"
+  },
+  {
     frontendPath: "frontDesk.home.music.api.base_url",
     backendKey: constant.KeyMusicAPIBaseURL,
     defaultValue: "https://metings.qjqq.cn",

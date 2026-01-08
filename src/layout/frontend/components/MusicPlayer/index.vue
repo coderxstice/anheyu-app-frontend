@@ -284,8 +284,8 @@ const initializePlayer = async () => {
       await siteConfigStore.fetchSiteConfig();
     }
 
-    // 获取歌单
-    const playlistData = await musicAPI.fetchPlaylist();
+    // 获取歌单（使用音乐胶囊专用的歌单获取函数，支持独立配置）
+    const playlistData = await musicAPI.fetchCapsulePlaylist();
     if (playlistData.length === 0) {
       return false;
     }

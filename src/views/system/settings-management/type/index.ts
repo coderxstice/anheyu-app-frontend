@@ -392,6 +392,9 @@ export interface HomePageSettingsInfo {
       playlist_id?: string;
       custom_playlist?: string;
     };
+    capsule?: {
+      custom_playlist?: string;
+    };
     api?: {
       base_url?: string;
     };

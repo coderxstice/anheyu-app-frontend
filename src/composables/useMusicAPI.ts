@@ -43,7 +43,10 @@ export function useMusicAPI() {
 
   // 从配置获取音乐API基础地址
   const getMusicAPIBaseURL = (): string => {
-    const apiBaseURL = get(siteConfigStore.siteConfig, "music.api.base_url");
+    // 优先尝试前端路径格式，降级到后端key格式（兼容两种数据来源）
+    const apiBaseURL =
+      get(siteConfigStore.siteConfig, "frontDesk.home.music.api.base_url") ||
+      get(siteConfigStore.siteConfig, "music.api.base_url");
     return apiBaseURL && apiBaseURL.trim() !== ""
       ? apiBaseURL.trim()
       : "https://metings.qjqq.cn";
@@ -51,11 +54,12 @@ export function useMusicAPI() {
 
   // 从配置获取当前播放列表ID
   const getCurrentPlaylistId = (): string => {
-    // 优先从 siteConfig 中获取设置值
-    const configId = get(
-      siteConfigStore.siteConfig,
-      "music.player.playlist_id"
-    );
+    // 优先尝试前端路径格式，降级到后端key格式（兼容两种数据来源）
+    const configId =
+      get(
+        siteConfigStore.siteConfig,
+        "frontDesk.home.music.player.playlist_id"
+      ) || get(siteConfigStore.siteConfig, "music.player.playlist_id");
     if (configId) {
       return configId;
     }
@@ -70,20 +74,49 @@ export function useMusicAPI() {
     return "8152976493";
   };
 
-  // 从配置获取自定义歌单JSON链接
+  // 从配置获取自定义歌单JSON链接（音乐馆页面使用）
   const getCustomPlaylistUrl = (): string | null => {
-    const customUrl = get(
-      siteConfigStore.siteConfig,
-      "music.player.custom_playlist"
-    );
+    // 优先尝试前端路径格式，降级到后端key格式（兼容两种数据来源）
+    const customUrl =
+      get(
+        siteConfigStore.siteConfig,
+        "frontDesk.home.music.player.custom_playlist"
+      ) || get(siteConfigStore.siteConfig, "music.player.custom_playlist");
     const result =
       customUrl && customUrl.trim() !== "" ? customUrl.trim() : null;
 
-    console.log("[MUSIC_CONFIG] 获取自定义歌单链接:", {
+    console.log("[MUSIC_CONFIG] 获取音乐馆自定义歌单链接:", {
       rawValue: customUrl,
       trimmedValue: result,
       siteConfigExists: !!siteConfigStore.siteConfig,
-      musicConfigExists: !!get(siteConfigStore.siteConfig, "music.player")
+      musicConfigExists: !!(
+        get(siteConfigStore.siteConfig, "frontDesk.home.music.player") ||
+        get(siteConfigStore.siteConfig, "music.player")
+      )
+    });
+
+    return result;
+  };
+
+  // 从配置获取音乐胶囊专用的自定义歌单JSON链接
+  const getCapsuleCustomPlaylistUrl = (): string | null => {
+    // 优先尝试前端路径格式，降级到后端key格式（兼容两种数据来源）
+    const customUrl =
+      get(
+        siteConfigStore.siteConfig,
+        "frontDesk.home.music.capsule.custom_playlist"
+      ) || get(siteConfigStore.siteConfig, "music.capsule.custom_playlist");
+    const result =
+      customUrl && customUrl.trim() !== "" ? customUrl.trim() : null;
+
+    console.log("[MUSIC_CONFIG] 获取音乐胶囊自定义歌单链接:", {
+      rawValue: customUrl,
+      trimmedValue: result,
+      siteConfigExists: !!siteConfigStore.siteConfig,
+      capsuleConfigExists: !!(
+        get(siteConfigStore.siteConfig, "frontDesk.home.music.capsule") ||
+        get(siteConfigStore.siteConfig, "music.capsule")
+      )
     });
 
     return result;
@@ -426,6 +459,163 @@ export function useMusicAPI() {
     }
   };
 
+  // 音乐胶囊专用的缓存配置
+  const CAPSULE_CACHE_KEY = "anheyu-capsule-playlist-cache";
+
+  // 获取音乐胶囊缓存
+  const getCapsulePlaylistCache = (): PlaylistCache | null => {
+    try {
+      const cached = localStorage.getItem(CAPSULE_CACHE_KEY);
+      if (!cached) return null;
+
+      const cache: PlaylistCache = JSON.parse(cached);
+
+      // 检查缓存是否过期
+      if (Date.now() - cache.timestamp > CACHE_DURATION) {
+        console.log("[CAPSULE_CACHE] 缓存已过期，清除缓存");
+        localStorage.removeItem(CAPSULE_CACHE_KEY);
+        return null;
+      }
+
+      // 检查自定义URL是否改变
+      const currentCustomUrl = getCapsuleCustomPlaylistUrl();
+      const cachedCustomUrl = cache.customPlaylistUrl || null;
+
+      if (cachedCustomUrl !== currentCustomUrl) {
+        console.log(`[CAPSULE_CACHE] 胶囊播放列表配置已改变，清除缓存`);
+        console.log(`  Custom URL: ${cachedCustomUrl} -> ${currentCustomUrl}`);
+        localStorage.removeItem(CAPSULE_CACHE_KEY);
+        return null;
+      }
+
+      console.log(
+        `[CAPSULE_CACHE] 使用缓存数据 - 歌曲数: ${cache.data.length}`
+      );
+      return cache;
+    } catch (error) {
+      console.error("[CAPSULE_CACHE] 读取缓存失败:", error);
+      localStorage.removeItem(CAPSULE_CACHE_KEY);
+      return null;
+    }
+  };
+
+  // 设置音乐胶囊缓存
+  const setCapsulePlaylistCache = (data: Song[]): void => {
+    try {
+      const cache: PlaylistCache = {
+        data,
+        playlistId: getCurrentPlaylistId(),
+        customPlaylistUrl: getCapsuleCustomPlaylistUrl(),
+        timestamp: Date.now()
+      };
+
+      localStorage.setItem(CAPSULE_CACHE_KEY, JSON.stringify(cache));
+      console.log(
+        `[CAPSULE_CACHE] 缓存胶囊播放列表 - Custom URL: ${cache.customPlaylistUrl || "无"}, 歌曲数: ${data.length}`
+      );
+    } catch (error) {
+      console.error("[CAPSULE_CACHE] 设置缓存失败:", error);
+    }
+  };
+
+  // 清除音乐胶囊缓存
+  const clearCapsulePlaylistCache = (): void => {
+    localStorage.removeItem(CAPSULE_CACHE_KEY);
+    console.log("[CAPSULE_CACHE] 清除胶囊播放列表缓存");
+  };
+
+  // 获取音乐胶囊专用的歌单数据
+  const fetchCapsulePlaylist = async (
+    forceRefresh = false
+  ): Promise<Song[]> => {
+    try {
+      // 如果不是强制刷新，先检查胶囊专用缓存
+      if (!forceRefresh) {
+        const cached = getCapsulePlaylistCache();
+        if (cached && cached.data.length > 0) {
+          console.log(`[CAPSULE_API] 使用胶囊缓存数据:`, {
+            songsCount: cached.data.length,
+            customPlaylistUrl: cached.customPlaylistUrl || "未设置"
+          });
+          return cached.data;
+        }
+      }
+
+      isLoading.value = true;
+
+      // 优先检查胶囊专用的自定义JSON链接
+      const capsuleCustomUrl = getCapsuleCustomPlaylistUrl();
+
+      if (capsuleCustomUrl) {
+        console.log("[CAPSULE_API] 使用胶囊专用自定义JSON链接获取播放列表...");
+        try {
+          const songs = await fetchPlaylistFromJson(capsuleCustomUrl);
+          // 使用胶囊专用缓存
+          setCapsulePlaylistCache(songs);
+          return songs;
+        } catch (error) {
+          console.error(
+            "[CAPSULE_API] 胶囊自定义JSON链接获取失败，降级到后端API:",
+            error
+          );
+          // 如果自定义JSON获取失败，降级到后端API
+        }
+      }
+
+      // 降级：调用后端API获取播放列表（与音乐馆共用）
+      console.log("[CAPSULE_API] 📡 调用后端API获取播放列表...");
+      try {
+        const response = await getPlaylistApi();
+
+        if (response.code === 200 && response.data && response.data.songs) {
+          const songs = response.data.songs;
+          console.log(`[CAPSULE_API] 后端API成功返回 ${songs.length} 首歌曲`);
+
+          // 转换为统一格式
+          const formattedSongs: Song[] = songs.map((song: any) => ({
+            id: song.id || song.neteaseId || "",
+            name: song.name || "未知歌曲",
+            artist: song.artist || "未知歌手",
+            url: ensureHttps(song.url || ""),
+            pic: ensureHttps(song.pic || ""),
+            lrc: song.lrc || "",
+            neteaseId: song.neteaseId || song.id || ""
+          }));
+
+          // 使用胶囊专用缓存
+          setCapsulePlaylistCache(formattedSongs);
+          return formattedSongs;
+        } else {
+          console.error("[CAPSULE_API] ❌ 后端API返回异常:", response);
+          return [];
+        }
+      } catch (error) {
+        console.error("[CAPSULE_API] ❌ 后端API调用失败:", error);
+        return [];
+      }
+    } catch (error) {
+      console.error("获取胶囊播放列表失败:", error);
+      return [];
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  // 强制刷新音乐胶囊播放列表
+  const refreshCapsulePlaylist = async (): Promise<Song[]> => {
+    console.log("[CAPSULE_API] 强制刷新胶囊播放列表...");
+
+    const currentCapsuleUrl = getCapsuleCustomPlaylistUrl();
+
+    console.log("[CAPSULE_API] 当前胶囊配置状态:", {
+      capsuleCustomUrl: currentCapsuleUrl,
+      useCapsuleCustom: !!currentCapsuleUrl
+    });
+
+    clearCapsulePlaylistCache();
+    return await fetchCapsulePlaylist(true);
+  };
+
   // 直接调用 Song_V1 API 获取单曲资源（音频+歌词）
   const fetchSongV1 = async (
     songId: string,
@@ -726,15 +916,21 @@ export function useMusicAPI() {
     // 状态
     isLoading,
 
-    // 方法
+    // 音乐馆方法
     fetchPlaylist,
     refreshPlaylist,
     fetchSongResources,
     fetchPlaylistFromJson,
 
+    // 音乐胶囊方法
+    fetchCapsulePlaylist,
+    refreshCapsulePlaylist,
+    clearCapsulePlaylistCache,
+
     // 配置获取
     getCurrentPlaylistId,
     getCustomPlaylistUrl,
+    getCapsuleCustomPlaylistUrl,
 
     // 缓存管理
     clearPlaylistCache,
