@@ -3185,11 +3185,15 @@ onBeforeUnmount(() => {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 180px; // 固定高度
-    max-height: 180px; // 限制最大高度
+    height: calc(
+      180px + env(safe-area-inset-bottom, 0px)
+    ); // 固定高度 + 安全区域
+    max-height: calc(
+      180px + env(safe-area-inset-bottom, 0px)
+    ); // 限制最大高度 + 安全区域
     background: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(20px);
-    padding: 20px;
+    padding: 20px 20px calc(20px + env(safe-area-inset-bottom, 0px)); // 底部 padding 加上安全区域
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -3200,33 +3204,33 @@ onBeforeUnmount(() => {
 
     // 针对较矮屏幕的播放控制区域适配
     @media (max-height: 750px) {
-      height: 160px;
-      max-height: 160px;
-      padding: 16px;
+      height: calc(160px + env(safe-area-inset-bottom, 0px));
+      max-height: calc(160px + env(safe-area-inset-bottom, 0px));
+      padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
     }
 
     @media (max-height: 650px) {
-      height: 140px;
-      max-height: 140px;
-      padding: 12px;
+      height: calc(140px + env(safe-area-inset-bottom, 0px));
+      max-height: calc(140px + env(safe-area-inset-bottom, 0px));
+      padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px));
     }
 
     @media (max-height: 550px) {
-      height: 120px;
-      max-height: 120px;
-      padding: 8px;
+      height: calc(120px + env(safe-area-inset-bottom, 0px));
+      max-height: calc(120px + env(safe-area-inset-bottom, 0px));
+      padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
     }
 
     @media (max-height: 480px) {
-      height: 100px;
-      max-height: 100px;
-      padding: 6px;
+      height: calc(100px + env(safe-area-inset-bottom, 0px));
+      max-height: calc(100px + env(safe-area-inset-bottom, 0px));
+      padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
     }
 
     @media (max-height: 400px) {
-      height: 80px;
-      max-height: 80px;
-      padding: 4px;
+      height: calc(80px + env(safe-area-inset-bottom, 0px));
+      max-height: calc(80px + env(safe-area-inset-bottom, 0px));
+      padding: 4px 4px calc(4px + env(safe-area-inset-bottom, 0px));
     }
 
     .progress-container {

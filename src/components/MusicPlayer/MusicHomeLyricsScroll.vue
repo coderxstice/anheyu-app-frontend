@@ -1362,6 +1362,7 @@ defineExpose({
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
+  touch-action: pan-y; // 移动端只允许垂直拖拽，禁止水平拖拽
 
   // 添加渐隐遮罩效果
   -webkit-mask: linear-gradient(
