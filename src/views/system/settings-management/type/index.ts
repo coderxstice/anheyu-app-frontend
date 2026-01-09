@@ -211,6 +211,14 @@ export interface PostSettingsInfo {
     domain: string;
     zoneID: string;
   };
+  subscribe: {
+    enable: boolean;
+    buttonText: string;
+    dialogTitle: string;
+    dialogDesc: string;
+    mailSubject: string;
+    mailTemplate: string;
+  };
 }
 
 /**

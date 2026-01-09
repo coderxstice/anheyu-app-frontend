@@ -766,6 +766,43 @@ const postDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyCDNZoneID,
     defaultValue: "",
     type: "string"
+  },
+  // 文章订阅配置
+  {
+    frontendPath: "post.subscribe.enable",
+    backendKey: constant.KeyPostSubscribeEnable,
+    defaultValue: false,
+    type: "boolean"
+  },
+  {
+    frontendPath: "post.subscribe.buttonText",
+    backendKey: constant.KeyPostSubscribeButtonText,
+    defaultValue: "订阅",
+    type: "string"
+  },
+  {
+    frontendPath: "post.subscribe.dialogTitle",
+    backendKey: constant.KeyPostSubscribeDialogTitle,
+    defaultValue: "订阅博客更新",
+    type: "string"
+  },
+  {
+    frontendPath: "post.subscribe.dialogDesc",
+    backendKey: constant.KeyPostSubscribeDialogDesc,
+    defaultValue: "输入您的邮箱，获取最新文章推送",
+    type: "string"
+  },
+  {
+    frontendPath: "post.subscribe.mailSubject",
+    backendKey: constant.KeyPostSubscribeMailSubject,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "post.subscribe.mailTemplate",
+    backendKey: constant.KeyPostSubscribeMailTemplate,
+    defaultValue: "",
+    type: "string"
   }
 ];
 
