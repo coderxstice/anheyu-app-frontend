@@ -3,11 +3,7 @@ import type { PostCategory } from "@/api/post/type";
 import { Edit, Delete } from "@element-plus/icons-vue";
 import { ref, nextTick, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import {
-  updateCategory,
-  deleteCategory,
-  createCategory
-} from "@/api/post";
+import { updateCategory, deleteCategory, createCategory } from "@/api/post";
 import AnDialog from "@/components/AnDialog/index.vue";
 
 const props = defineProps<{
@@ -36,13 +32,15 @@ watch(isVisible, val => {
 // 新分类表单
 const newCategoryForm = ref({
   name: "",
-  is_series: false
+  is_series: false,
+  sort_order: 0
 });
 const isCreating = ref(false);
 
 // 编辑状态
 const editingCategoryId = ref<string | null>(null);
 const editingCategoryName = ref("");
+const editingSortOrder = ref<number | null>(null);
 const loadingStates = ref<Record<string, boolean>>({});
 
 // 判断分类名是否已存在
@@ -70,6 +68,7 @@ const handleEditCategory = (category: PostCategory) => {
 const cancelEdit = () => {
   editingCategoryId.value = null;
   editingCategoryName.value = "";
+  editingSortOrder.value = null;
 };
 
 // 提交名称更新
@@ -87,6 +86,26 @@ const handleUpdateCategoryName = async (category: PostCategory) => {
     ElMessage.success("分类名称更新成功");
     emit("refresh-categories");
     cancelEdit();
+  } catch (error: any) {
+    ElMessage.error(error.message || "更新失败");
+  } finally {
+    loadingStates.value[category.id] = false;
+  }
+};
+
+// 更新排序值
+const handleUpdateSortOrder = async (
+  category: PostCategory,
+  newSortOrder: number
+) => {
+  if (newSortOrder === category.sort_order) {
+    return;
+  }
+  loadingStates.value[category.id] = true;
+  try {
+    await updateCategory(category.id, { sort_order: newSortOrder });
+    ElMessage.success("排序更新成功");
+    emit("refresh-categories");
   } catch (error: any) {
     ElMessage.error(error.message || "更新失败");
   } finally {
@@ -153,10 +172,15 @@ const handleCreateCategory = async () => {
   }
   isCreating.value = true;
   try {
-    await createCategory({ name, is_series: newCategoryForm.value.is_series });
+    await createCategory({
+      name,
+      is_series: newCategoryForm.value.is_series,
+      sort_order: newCategoryForm.value.sort_order
+    });
     ElMessage.success("创建成功");
     newCategoryForm.value.name = "";
     newCategoryForm.value.is_series = false;
+    newCategoryForm.value.sort_order = 0;
     emit("refresh-categories");
   } catch (error: any) {
     ElMessage.error(error.message || "创建失败");
@@ -170,10 +194,17 @@ const handleCreateCategory = async () => {
   <AnDialog v-model="isVisible" title="管理分类" width="720px">
     <div class="category-manager-body">
       <div class="create-category-form">
-        <el-input
-          v-model="newCategoryForm.name"
-          placeholder="输入新分类名称"
-        />
+        <el-input v-model="newCategoryForm.name" placeholder="输入新分类名称" />
+        <el-tooltip content="数值越小越靠前，默认为 0" placement="top">
+          <el-input-number
+            v-model="newCategoryForm.sort_order"
+            :min="0"
+            :step="1"
+            controls-position="right"
+            placeholder="排序"
+            style="width: 120px"
+          />
+        </el-tooltip>
         <el-switch
           v-model="newCategoryForm.is_series"
           active-text="设为系列"
@@ -193,6 +224,7 @@ const handleCreateCategory = async () => {
         :data="categoryOptions"
         :style="{ width: '100%' }"
         height="350px"
+        :default-sort="{ prop: 'sort_order', order: 'ascending' }"
       >
         <el-table-column prop="name" label="分类名称" min-width="150">
           <template #default="scope">
@@ -206,6 +238,24 @@ const handleCreateCategory = async () => {
               />
             </div>
             <span v-else>{{ scope.row.name }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="sort_order"
+          label="排序"
+          width="120"
+          align="center"
+          sortable
+        >
+          <template #default="scope">
+            <el-input-number
+              :model-value="scope.row.sort_order"
+              :min="0"
+              :step="1"
+              size="small"
+              controls-position="right"
+              @change="val => handleUpdateSortOrder(scope.row, val as number)"
+            />
           </template>
         </el-table-column>
         <el-table-column
@@ -292,4 +342,3 @@ const handleCreateCategory = async () => {
   }
 }
 </style>
-

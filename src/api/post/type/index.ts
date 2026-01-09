@@ -49,12 +49,14 @@ export interface PostCategory {
   description: string;
   count: number;
   is_series: boolean;
+  sort_order: number;
 }
 
 export interface PostCategoryForm {
   name?: string;
   description?: string;
   is_series?: boolean;
+  sort_order?: number;
 }
 
 export type PostCategoryResponse = PostCategory;
