@@ -33,6 +33,15 @@ const showPosterDialog = ref(false);
 const posterDataUrl = ref<string>("");
 const { update: copyToClipboard } = useCopyToClipboard();
 
+// 订阅相关状态
+const showSubscribeDialog = ref(false);
+const subscribeEmail = ref("");
+const subscribeCode = ref("");
+const isSubscribing = ref(false);
+const isSendingCode = ref(false);
+const codeCountdown = ref(0);
+let codeTimer: ReturnType<typeof setInterval> | null = null;
+
 // 格式化日期
 const formatDate = (dateString: string) => {
   if (!dateString) return "";
@@ -135,6 +144,123 @@ const goAbout = () => {
 
 const goRss = () => {
   window.open("/rss.xml", "_blank");
+};
+
+// 订阅配置
+const subscribeConfig = computed(() => ({
+  enable: siteConfig.post?.subscribe?.enable ?? false,
+  buttonText: siteConfig.post?.subscribe?.buttonText || "订阅",
+  dialogTitle: siteConfig.post?.subscribe?.dialogTitle || "订阅博客更新",
+  dialogDesc:
+    siteConfig.post?.subscribe?.dialogDesc || "输入您的邮箱，获取最新文章推送"
+}));
+
+// 处理订阅按钮点击
+const handleSubscribeClick = () => {
+  if (subscribeConfig.value.enable) {
+    subscribeEmail.value = "";
+    subscribeCode.value = "";
+    showSubscribeDialog.value = true;
+  } else {
+    goRss();
+  }
+};
+
+// 发送验证码
+const handleSendCode = async () => {
+  if (!subscribeEmail.value) {
+    ElMessage.warning("请输入邮箱地址");
+    return;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(subscribeEmail.value)) {
+    ElMessage.warning("请输入有效的邮箱地址");
+    return;
+  }
+
+  if (isSendingCode.value || codeCountdown.value > 0) return;
+
+  try {
+    isSendingCode.value = true;
+    const response = await fetch("/api/public/subscribe/code", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email: subscribeEmail.value })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      ElMessage.success("验证码已发送，请查收邮件");
+      codeCountdown.value = 60;
+      codeTimer = setInterval(() => {
+        codeCountdown.value--;
+        if (codeCountdown.value <= 0) {
+          if (codeTimer) clearInterval(codeTimer);
+        }
+      }, 1000);
+    } else {
+      ElMessage.error(data.message || "发送验证码失败，请稍后重试");
+    }
+  } catch (error: any) {
+    ElMessage.error(error.message || "发送验证码失败，请稍后重试");
+  } finally {
+    isSendingCode.value = false;
+  }
+};
+
+// 提交订阅
+const handleSubscribe = async () => {
+  if (!subscribeEmail.value) {
+    ElMessage.warning("请输入邮箱地址");
+    return;
+  }
+
+  // 简单的邮箱格式验证
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(subscribeEmail.value)) {
+    ElMessage.warning("请输入有效的邮箱地址");
+    return;
+  }
+
+  if (!subscribeCode.value) {
+    ElMessage.warning("请输入验证码");
+    return;
+  }
+
+  try {
+    isSubscribing.value = true;
+    const response = await fetch("/api/public/subscribe", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: subscribeEmail.value,
+        code: subscribeCode.value
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      ElMessage.success("订阅成功！您将在新文章发布时收到邮件通知");
+      showSubscribeDialog.value = false;
+      subscribeEmail.value = "";
+      subscribeCode.value = "";
+      codeCountdown.value = 0;
+      if (codeTimer) clearInterval(codeTimer);
+    } else {
+      ElMessage.error(data.message || "订阅失败，请稍后重试");
+    }
+  } catch (error: any) {
+    ElMessage.error(error.message || "订阅失败，请稍后重试");
+  } finally {
+    isSubscribing.value = false;
+  }
 };
 
 const goRewardPage = () => {
@@ -315,9 +441,9 @@ const isAlipayEnabled = computed(() => {
           @click="showRewardPanel = !showRewardPanel"
         />
       </Transition>
-      <div class="subscribe-button" @click="goRss">
+      <div class="subscribe-button" @click="handleSubscribeClick">
         <IconifyIconOffline :icon="RssIcon" />
-        <span>订阅</span>
+        <span>{{ subscribeConfig.buttonText }}</span>
       </div>
       <div
         class="share-button"
@@ -399,6 +525,56 @@ const isAlipayEnabled = computed(() => {
             </el-button>
           </div>
         </div>
+      </div>
+    </AnDialog>
+
+    <!-- 订阅弹窗 -->
+    <AnDialog
+      v-model="showSubscribeDialog"
+      :title="subscribeConfig.dialogTitle"
+      width="400px"
+      max-width="90vw"
+      :show-footer="false"
+      class="subscribe-dialog"
+    >
+      <div class="subscribe-dialog-content">
+        <p class="subscribe-desc">{{ subscribeConfig.dialogDesc }}</p>
+        <el-input
+          v-model="subscribeEmail"
+          placeholder="请输入您的邮箱"
+          size="large"
+          :disabled="isSubscribing"
+          @keyup.enter="handleSubscribe"
+        />
+        <div class="code-input-wrapper">
+          <el-input
+            v-model="subscribeCode"
+            placeholder="请输入验证码"
+            size="large"
+            :disabled="isSubscribing"
+            @keyup.enter="handleSubscribe"
+          />
+          <el-button
+            type="primary"
+            size="large"
+            :disabled="codeCountdown > 0 || isSendingCode"
+            @click="handleSendCode"
+            class="send-code-btn"
+          >
+            {{ codeCountdown > 0 ? `${codeCountdown}s` : "发送验证码" }}
+          </el-button>
+        </div>
+        <div class="subscribe-actions">
+          <el-button
+            type="primary"
+            size="large"
+            :loading="isSubscribing"
+            @click="handleSubscribe"
+          >
+            {{ isSubscribing ? "订阅中..." : "订阅" }}
+          </el-button>
+        </div>
+        <p class="subscribe-tips">您可以随时通过邮件中的链接取消订阅</p>
       </div>
     </AnDialog>
   </div>
@@ -816,11 +992,12 @@ const isAlipayEnabled = computed(() => {
     }
 
     .url-input {
-      :deep(.el-input__inner) {
+      :deep(.el-input__wrapper) {
         cursor: pointer;
         font-size: 13px;
         background: var(--anzhiyu-card-bg);
-        border: 1px solid var(--anzhiyu-gray-100);
+        border: var(--style-border);
+        box-shadow: none;
         border-radius: 6px;
         transition: all 0.3s ease;
 
@@ -905,6 +1082,80 @@ const isAlipayEnabled = computed(() => {
         background: #3a3a3a;
       }
     }
+  }
+}
+
+// 订阅弹窗样式
+.subscribe-dialog-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  text-align: center;
+
+  .subscribe-desc {
+    margin: 0 0 1.5rem;
+    font-size: 15px;
+    color: var(--anzhiyu-secondtext);
+    line-height: 1.6;
+  }
+
+  .code-input-wrapper {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    max-width: 300px;
+    margin-top: 1rem;
+
+    .el-input {
+      flex: 1;
+      width: auto;
+      max-width: none;
+    }
+
+    .send-code-btn {
+      width: 110px;
+      flex-shrink: 0;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+  }
+
+  :deep(.el-input) {
+    width: 100%;
+    max-width: 300px;
+
+    .el-input__wrapper {
+      background: var(--anzhiyu-card-bg);
+      border: var(--style-border);
+      box-shadow: none;
+
+      &:hover,
+      &.is-focus {
+        border-color: var(--anzhiyu-theme);
+        box-shadow: none;
+      }
+      border-radius: 8px;
+    }
+  }
+
+  .subscribe-actions {
+    margin-top: 1.5rem;
+    width: 100%;
+    max-width: 300px;
+
+    .el-button {
+      width: 100%;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+  }
+
+  .subscribe-tips {
+    margin: 1rem 0 0;
+    font-size: 12px;
+    color: var(--anzhiyu-secondtext);
+    opacity: 0.7;
   }
 }
 </style>

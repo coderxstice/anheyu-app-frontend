@@ -186,7 +186,7 @@ const isMobile = deviceDetection();
 }
 
 .keyboard-footer {
-  border-top: 1px solid var(--style-border);
+  border-top: var(--style-border);
   padding-top: 16px;
   text-align: center;
 }

@@ -203,6 +203,179 @@
     </div>
   </el-form-item>
 
+  <el-divider content-position="left">
+    <h3>文章订阅配置</h3>
+  </el-divider>
+
+  <el-form-item label="启用订阅功能">
+    <div>
+      <el-switch
+        :model-value="formData.subscribe?.enable ?? false"
+        @update:model-value="
+          (val: boolean) => {
+            if (!formData.subscribe) {
+              formData.subscribe = {
+                enable: false,
+                buttonText: '订阅',
+                dialogTitle: '订阅博客更新',
+                dialogDesc: '输入您的邮箱，获取最新文章推送',
+                mailSubject: '',
+                mailTemplate: ''
+              };
+            }
+            formData.subscribe.enable = val;
+          }
+        "
+      />
+      <div class="form-item-help">
+        启用后，文章底部的订阅按钮将打开订阅弹窗，用户可以输入邮箱进行订阅。<br />
+        <strong>未启用时，订阅按钮将直接跳转到 RSS 订阅页面。</strong>
+      </div>
+    </div>
+  </el-form-item>
+
+  <el-form-item label="订阅按钮文案">
+    <el-input
+      :model-value="formData.subscribe?.buttonText ?? '订阅'"
+      :disabled="!(formData.subscribe?.enable ?? false)"
+      placeholder="例如：订阅"
+      @update:model-value="
+        (val: string) => {
+          if (!formData.subscribe) {
+            formData.subscribe = {
+              enable: false,
+              buttonText: '订阅',
+              dialogTitle: '订阅博客更新',
+              dialogDesc: '输入您的邮箱，获取最新文章推送',
+              mailSubject: '',
+              mailTemplate: ''
+            };
+          }
+          formData.subscribe.buttonText = val;
+        }
+      "
+    />
+    <div class="form-item-help">文章底部订阅按钮的显示文案，默认为"订阅"。</div>
+  </el-form-item>
+
+  <el-form-item label="订阅弹窗标题">
+    <el-input
+      :model-value="formData.subscribe?.dialogTitle ?? '订阅博客更新'"
+      :disabled="!(formData.subscribe?.enable ?? false)"
+      placeholder="例如：订阅博客更新"
+      @update:model-value="
+        (val: string) => {
+          if (!formData.subscribe) {
+            formData.subscribe = {
+              enable: false,
+              buttonText: '订阅',
+              dialogTitle: '订阅博客更新',
+              dialogDesc: '输入您的邮箱，获取最新文章推送',
+              mailSubject: '',
+              mailTemplate: ''
+            };
+          }
+          formData.subscribe.dialogTitle = val;
+        }
+      "
+    />
+    <div class="form-item-help">订阅弹窗的标题文案。</div>
+  </el-form-item>
+
+  <el-form-item label="订阅弹窗描述">
+    <el-input
+      :model-value="
+        formData.subscribe?.dialogDesc ?? '输入您的邮箱，获取最新文章推送'
+      "
+      :disabled="!(formData.subscribe?.enable ?? false)"
+      placeholder="例如：输入您的邮箱，获取最新文章推送"
+      @update:model-value="
+        (val: string) => {
+          if (!formData.subscribe) {
+            formData.subscribe = {
+              enable: false,
+              buttonText: '订阅',
+              dialogTitle: '订阅博客更新',
+              dialogDesc: '输入您的邮箱，获取最新文章推送',
+              mailSubject: '',
+              mailTemplate: ''
+            };
+          }
+          formData.subscribe.dialogDesc = val;
+        }
+      "
+    />
+    <div class="form-item-help">订阅弹窗的描述文案，显示在邮箱输入框上方。</div>
+  </el-form-item>
+
+  <el-form-item label="订阅邮件主题">
+    <el-input
+      :model-value="formData.subscribe?.mailSubject ?? ''"
+      :disabled="!(formData.subscribe?.enable ?? false)"
+      placeholder="例如：【{{.SITE_NAME}}】新文章发布：{{.TITLE}}"
+      @update:model-value="
+        (val: string) => {
+          if (!formData.subscribe) {
+            formData.subscribe = {
+              enable: false,
+              buttonText: '订阅',
+              dialogTitle: '订阅博客更新',
+              dialogDesc: '输入您的邮箱，获取最新文章推送',
+              mailSubject: '',
+              mailTemplate: ''
+            };
+          }
+          formData.subscribe.mailSubject = val;
+        }
+      "
+    />
+    <div class="form-item-help">
+      新文章发布时发送给订阅者的邮件主题。<br />
+      支持变量：<code v-pre>{{.SITE_NAME}}</code> 站点名称、<code
+        v-pre
+        >{{.TITLE}}</code
+      >
+      文章标题
+    </div>
+  </el-form-item>
+
+  <el-form-item label="订阅邮件模板">
+    <el-input
+      :model-value="formData.subscribe?.mailTemplate ?? ''"
+      :disabled="!(formData.subscribe?.enable ?? false)"
+      type="textarea"
+      :rows="6"
+      placeholder="输入邮件 HTML 模板..."
+      @update:model-value="
+        (val: string) => {
+          if (!formData.subscribe) {
+            formData.subscribe = {
+              enable: false,
+              buttonText: '订阅',
+              dialogTitle: '订阅博客更新',
+              dialogDesc: '输入您的邮箱，获取最新文章推送',
+              mailSubject: '',
+              mailTemplate: ''
+            };
+          }
+          formData.subscribe.mailTemplate = val;
+        }
+      "
+    />
+    <div class="form-item-help">
+      新文章发布时发送给订阅者的邮件 HTML 模板。<br />
+      支持变量：<code v-pre>{{.SITE_NAME}}</code> 站点名称、<code
+        v-pre
+        >{{.TITLE}}</code
+      >
+      文章标题、<code v-pre>{{.SUMMARY}}</code> 文章摘要、<code
+        v-pre
+        >{{.POST_URL}}</code
+      >
+      文章链接、<code v-pre>{{.UNSUBSCRIBE_URL}}</code> 退订链接
+    </div>
+  </el-form-item>
+
   <el-form-item label="代码块最大行数">
     <div>
       <el-input-number
@@ -413,7 +586,7 @@
       <el-select
         :model-value="formData.toc?.hashUpdateMode ?? 'replace'"
         placeholder="请选择Hash更新模式"
-        style="width: 200px"
+        style="width: 260px"
         @update:model-value="
           (val: string) => {
             if (!formData.toc) {

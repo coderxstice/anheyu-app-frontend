@@ -198,6 +198,14 @@ const KeyPostCopyrightReprintTemplateWithUrl: SettingKey =
 const KeyPostCopyrightReprintTemplateWithoutUrl: SettingKey =
   "post.copyright.reprint_template_without_url";
 
+// 文章订阅配置
+const KeyPostSubscribeEnable: SettingKey = "post.subscribe.enable";
+const KeyPostSubscribeButtonText: SettingKey = "post.subscribe.button_text";
+const KeyPostSubscribeDialogTitle: SettingKey = "post.subscribe.dialog_title";
+const KeyPostSubscribeDialogDesc: SettingKey = "post.subscribe.dialog_desc";
+const KeyPostSubscribeMailSubject: SettingKey = "post.subscribe.mail_subject";
+const KeyPostSubscribeMailTemplate: SettingKey = "post.subscribe.mail_template";
+
 // --- 装备页面配置 ---
 const KeyPostEquipmentBannerBackground: SettingKey =
   "equipment.banner.background";
@@ -551,6 +559,14 @@ export const constant = {
   KeyPostCopyrightOriginalTemplate,
   KeyPostCopyrightReprintTemplateWithUrl,
   KeyPostCopyrightReprintTemplateWithoutUrl,
+
+  // 文章订阅配置
+  KeyPostSubscribeEnable,
+  KeyPostSubscribeButtonText,
+  KeyPostSubscribeDialogTitle,
+  KeyPostSubscribeDialogDesc,
+  KeyPostSubscribeMailSubject,
+  KeyPostSubscribeMailTemplate,
 
   // --- 装备页面配置 ---
   KeyPostEquipmentBannerBackground,
