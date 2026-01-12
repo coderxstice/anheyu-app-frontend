@@ -94,13 +94,59 @@ const scrollToTop = () => {
   });
 };
 
+// localStorage key 用于持久化保存菜单状态
+const SETTINGS_MENU_KEY = "settings-active-menu-key";
+
+// 保存菜单状态到 localStorage
+const saveMenuKey = (key: string) => {
+  try {
+    localStorage.setItem(SETTINGS_MENU_KEY, key);
+  } catch {
+    // ignore localStorage errors
+  }
+};
+
+// 从 localStorage 获取保存的菜单状态
+const getSavedMenuKey = (): string | null => {
+  try {
+    return localStorage.getItem(SETTINGS_MENU_KEY);
+  } catch {
+    return null;
+  }
+};
+
+// 验证 key 是否有效（存在于菜单配置中）
+const isValidMenuKey = (key: string): boolean => {
+  for (const category of settingsMenuConfig) {
+    const found = category.children?.find(child => child.key === key);
+    if (found) return true;
+  }
+  return false;
+};
+
 // 默认选中第一个菜单项
 const getDefaultKey = () => {
   const firstCategory = settingsMenuConfig[0];
   return firstCategory?.children?.[0]?.key || "site-basic";
 };
 
-const activeKey = ref((route.query.tab as string) || getDefaultKey());
+// 获取初始 activeKey：优先 URL 参数 > localStorage > 默认值
+const getInitialKey = (): string => {
+  // 1. 优先使用 URL 参数
+  const urlTab = route.query.tab as string;
+  if (urlTab && isValidMenuKey(urlTab)) {
+    return urlTab;
+  }
+  // 2. 其次使用 localStorage 保存的值
+  const savedKey = getSavedMenuKey();
+  if (savedKey && isValidMenuKey(savedKey)) {
+    return savedKey;
+  }
+  // 3. 最后使用默认值
+  return getDefaultKey();
+};
+
+const activeKey = ref(getInitialKey());
 
 // 获取当前选中项对应的组件名
 const activeComponent = computed(() => {
@@ -116,6 +162,8 @@ const activeComponent = computed(() => {
 // 处理菜单选择
 const handleSelect = (key: string) => {
   activeKey.value = key;
+  // 保存到 localStorage
+  saveMenuKey(key);
   // 更新 URL query 参数
   router.replace({ query: { ...route.query, tab: key } });
   emit("change", key);
