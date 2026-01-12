@@ -5,7 +5,7 @@
 -->
 <script setup lang="ts">
 /* eslint-disable vue/no-mutating-props */
-import { ref, watch } from "vue";
+import { ref, computed } from "vue";
 import type { ArticleForm } from "@/api/post/type";
 import { getPrimaryColor } from "@/api/post";
 import { ElMessage } from "element-plus";
@@ -21,23 +21,14 @@ const emit = defineEmits<{
 }>();
 
 const isFetchingColor = ref(false);
-const internalKeywordTags = ref<string[]>([...props.keywordTags]);
 
-// 同步关键词标签
-watch(
-  () => props.keywordTags,
-  newTags => {
-    internalKeywordTags.value = [...newTags];
+// 使用 computed getter/setter 模式处理双向绑定，避免 watch 循环
+const internalKeywordTags = computed({
+  get: () => props.keywordTags,
+  set: (value: string[]) => {
+    emit("update:keywordTags", value);
   }
-);
-
-watch(
-  internalKeywordTags,
-  newTags => {
-    emit("update:keywordTags", newTags);
-  },
-  { deep: true }
-);
+});
 
 // 禁用未来日期
 const disabledFutureDate = (time: Date) => {
