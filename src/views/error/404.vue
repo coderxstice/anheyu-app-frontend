@@ -2,7 +2,7 @@
  * @Description: 404 页面
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-11-05 16:31:49
+ * @LastEditTime: 2026-01-12 15:38:09
  * @LastEditors: 安知鱼
 -->
 <script setup lang="ts">
@@ -206,7 +206,7 @@ onMounted(() => {
           display: inline-flex;
           align-items: center;
           gap: 0.5rem;
-          padding: 0.875rem 2rem;
+          padding: 0.375rem 1.8rem;
           font-size: 1rem;
           font-weight: 500;
           color: #fff;

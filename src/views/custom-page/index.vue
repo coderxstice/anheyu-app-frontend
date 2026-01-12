@@ -214,9 +214,9 @@ const goToArticle = (id: string) => {
   router.push(`/posts/${id}`);
 };
 
-// 尝试作为文章路径查询
+// 尝试作为文章 abbrlink（自定义文章ID）查询
 const tryLoadArticleByPath = async (path: string): Promise<boolean> => {
-  // 去掉开头的 / 作为 abbrlink 查询
+  // 去掉开头的 / 作为 abbrlink 查询（注意：不支持包含 / 的路径格式）
   const abbrlink = path.startsWith("/") ? path.substring(1) : path;
   if (!abbrlink) return false;
 
@@ -408,7 +408,7 @@ onMounted(() => {
           display: inline-flex;
           align-items: center;
           gap: 0.5rem;
-          padding: 0.875rem 2rem;
+          padding: 0.375rem 1.8rem;
           font-size: 1rem;
           font-weight: 500;
           color: #fff;
