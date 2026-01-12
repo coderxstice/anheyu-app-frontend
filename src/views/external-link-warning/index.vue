@@ -98,10 +98,11 @@ const handleCancel = () => {
   if (countdownTimer) {
     clearInterval(countdownTimer);
   }
-  if (window.history.length > 1) {
-    router.back();
+  // 如果是新 tab 打开的（没有历史记录），直接关闭窗口
+  if (window.history.length <= 1) {
+    window.close();
   } else {
-    router.push("/");
+    router.back();
   }
 };
 
@@ -113,7 +114,8 @@ const handleContinue = () => {
     sessionStorage.setItem("skip-external-link-warning", "true");
   }
   if (targetUrl.value) {
-    window.open(targetUrl.value, "_blank");
+    // 直接在当前页面跳转到目标链接
+    window.location.href = targetUrl.value;
   }
 };
 </script>

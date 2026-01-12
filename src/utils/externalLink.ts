@@ -5,7 +5,6 @@
  */
 
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
-import router from "@/router";
 
 /**
  * 检查URL是否为外部链接
@@ -92,9 +91,9 @@ export function handleLinkClick(url: string, event?: Event): void {
     event.stopPropagation();
   }
 
-  // 跳转到警告页面
+  // 在新 tab 打开警告页面
   const encodedUrl = encodeURIComponent(url);
-  router.push(`/external-link-warning?url=${encodedUrl}`);
+  window.open(`/external-link-warning?url=${encodedUrl}`, "_blank");
 }
 
 /**
