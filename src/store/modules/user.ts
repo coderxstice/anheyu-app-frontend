@@ -8,6 +8,7 @@ import {
   type CheckEmailExistsResult,
   type RegisterUserResult,
   type RegisterData,
+  type LoginData,
   getLogin,
   refreshTokenApi,
   checkEmailExistsApi,
@@ -68,7 +69,7 @@ export const useUserStore = defineStore("anheyu-user", () => {
   /**
    * @description 登入
    */
-  async function loginByEmail(data: object): Promise<LoginResultData> {
+  async function loginByEmail(data: LoginData): Promise<LoginResultData> {
     const response = await getLogin(data);
     if (response?.code === 200) {
       setToken(response.data);

@@ -110,6 +110,16 @@ export type RegisterData = {
   nickname: string;
   password: string;
   repeat_password: string;
+  turnstile_token?: string; // Cloudflare Turnstile 验证 token
+};
+
+/**
+ * @description 用户登录时需要提交的数据类型
+ */
+export type LoginData = {
+  email: string;
+  password: string;
+  turnstile_token?: string; // Cloudflare Turnstile 验证 token
 };
 
 export type BasicResponse = {
@@ -118,7 +128,7 @@ export type BasicResponse = {
 };
 
 /** 登录 */
-export const getLogin = (data?: object) => {
+export const getLogin = (data?: LoginData) => {
   return http.request<UserResult>("post", baseUrlApi("auth/login"), { data });
 };
 

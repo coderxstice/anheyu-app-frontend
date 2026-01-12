@@ -26,6 +26,7 @@ import RegisterForm from "./components/RegisterForm.vue";
 import ForgotPasswordForm from "./components/ForgotPasswordForm.vue";
 import ResetPasswordForm from "./components/ResetPasswordForm.vue";
 import ActivatePrompt from "./components/ActivatePrompt.vue";
+import Turnstile from "@/components/Turnstile/index.vue";
 
 defineOptions({ name: "Login" });
 
@@ -34,6 +35,43 @@ const router = useRouter();
 const route = useRoute();
 const { dataTheme, dataThemeChange } = useDataThemeChange();
 const { enableRegistration } = storeToRefs(siteConfigStore);
+
+// Turnstile 相关
+const turnstileRef = ref();
+const turnstileToken = ref("");
+const turnstileReset = ref(false);
+
+// 判断是否启用了 Turnstile
+const isTurnstileEnabled = computed(() => {
+  const config = siteConfigStore.getSiteConfig;
+  return config?.["turnstile.enable"] === "true";
+});
+
+// Turnstile 验证成功回调
+const onTurnstileVerified = (token: string) => {
+  turnstileToken.value = token;
+};
+
+// Turnstile 错误回调
+const onTurnstileError = () => {
+  turnstileToken.value = "";
+  message("人机验证加载失败，请刷新页面重试", { type: "error" });
+};
+
+// Turnstile 过期回调
+const onTurnstileExpired = () => {
+  turnstileToken.value = "";
+  message("人机验证已过期，请重新验证", { type: "warning" });
+};
+
+// 重置 Turnstile
+const resetTurnstile = () => {
+  turnstileToken.value = "";
+  turnstileReset.value = true;
+  nextTick(() => {
+    turnstileReset.value = false;
+  });
+};
 
 // 让 siteIcon 依赖于 dataTheme，实现日间/夜间 Logo 自动切换
 const siteIcon = computed(() => {
@@ -166,10 +204,20 @@ const apiHandlers = {
     return res.code === 200 && res.data.exists;
   },
   login: async () => {
+    // 检查 Turnstile 验证
+    if (isTurnstileEnabled.value && !turnstileToken.value) {
+      message("请完成人机验证", { type: "warning" });
+      return;
+    }
+
     await useUserStoreHook().loginByEmail({
       email: form.email,
-      password: form.password
+      password: form.password,
+      turnstile_token: turnstileToken.value
     });
+
+    // 登录成功后重置 Turnstile
+    resetTurnstile();
 
     // 等待路由初始化
     await initRouter();
@@ -189,13 +237,23 @@ const apiHandlers = {
     message("登录成功", { type: "success" });
   },
   register: async () => {
+    // 检查 Turnstile 验证
+    if (isTurnstileEnabled.value && !turnstileToken.value) {
+      message("请完成人机验证", { type: "warning" });
+      return;
+    }
+
     try {
       const res = await useUserStoreHook().registeredUser({
         email: form.email,
         nickname: form.nickname,
         password: form.password,
-        repeat_password: form.confirmPassword
+        repeat_password: form.confirmPassword,
+        turnstile_token: turnstileToken.value
       });
+
+      // 注册成功后重置 Turnstile
+      resetTurnstile();
       if (res.code === 200) {
         if (res.data?.activation_required) {
           switchStep("activate-prompt", "next");
@@ -350,6 +408,16 @@ onBeforeUnmount(() =>
       </div>
 
       <el-form ref="formRef" :model="form" :rules="rules" size="large">
+        <!-- Turnstile 人机验证 - 在登录和注册步骤显示 -->
+        <Turnstile
+          v-if="step === 'login-password' || step === 'register-form'"
+          ref="turnstileRef"
+          :reset="turnstileReset"
+          @verified="onTurnstileVerified"
+          @error="onTurnstileError"
+          @expired="onTurnstileExpired"
+        />
+
         <div class="relative overflow-hidden">
           <transition
             :name="transitionName"
