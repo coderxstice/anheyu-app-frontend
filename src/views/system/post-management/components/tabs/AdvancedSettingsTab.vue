@@ -101,9 +101,12 @@ const handleFetchPrimaryColor = async () => {
         <el-form-item label="自定义永久链接 (可选)" prop="abbrlink">
           <el-input
             v-model="form.abbrlink"
-            placeholder="例如: my-awesome-post"
+            placeholder="例如: my-post 或 2024/01/my-post"
           />
-          <div class="form-item-help">唯一、友好，留空则自动生成。</div>
+          <div class="form-item-help">
+            支持完整路径格式，可用 /
+            分隔。不能与系统路径或已有页面冲突，留空则使用文章ID。
+          </div>
         </el-form-item>
       </el-col>
 
