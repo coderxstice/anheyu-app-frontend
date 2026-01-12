@@ -1,7 +1,7 @@
 <template>
   <div class="header-right">
     <el-tooltip
-      v-if="navConfig?.travelling && isHomePage"
+      v-if="navConfig?.travelling === true && isHomePage"
       content="随机前往一个开往项目网站"
       placement="top"
       :show-arrow="false"
@@ -16,9 +16,28 @@
         <i class="anzhiyufont anzhiyu-icon-train" />
       </a>
     </el-tooltip>
+    <!-- 通知图标 -->
+    <el-tooltip
+      v-if="isLoggedIn"
+      content="通知"
+      placement="top"
+      :show-arrow="false"
+      :offset="8"
+    >
+      <a
+        class="nav-button notification-button"
+        @click="handleGoToNotifications"
+      >
+        <IconifyIconOffline
+          icon="ri:notification-2-fill"
+          class="w-[1.25rem] h-[1.25rem]"
+        />
+        <span v-if="hasUnreadNotifications" class="notification-dot" />
+      </a>
+    </el-tooltip>
     <!-- 用户中心/登录注册 -->
     <div
-      v-if="!isLoggedIn && !isHomePage"
+      v-if="!isLoggedIn"
       class="user-dropdown-wrapper"
       @mouseenter="showUserDropdown = true"
       @mouseleave="showUserDropdown = false"
@@ -48,17 +67,79 @@
         </div>
       </Transition>
     </div>
-    <el-tooltip
-      v-else-if="isLoggedIn && !isHomePage"
-      content="用户中心"
-      placement="top"
-      :show-arrow="false"
-      :offset="8"
+    <!-- 已登录用户弹窗 -->
+    <el-popover
+      v-else-if="isLoggedIn"
+      :visible="userPopoverVisible"
+      placement="bottom-end"
+      :width="320"
+      trigger="click"
+      popper-class="user-popover"
+      :popper-options="{
+        strategy: 'fixed',
+        modifiers: [{ name: 'offset', options: { offset: [0, 8] } }]
+      }"
+      :teleported="true"
+      @hide="userPopoverVisible = false"
     >
-      <router-link class="nav-button" to="/user-center" aria-label="用户中心">
-        <IconifyIconOffline icon="ri:user-fill" class="w-[1.4rem] h-[1.4rem]" />
-      </router-link>
-    </el-tooltip>
+      <template #reference>
+        <a
+          class="nav-button user-center-button"
+          title="用户中心"
+          @click.stop="userPopoverVisible = !userPopoverVisible"
+        >
+          <IconifyIconOffline
+            icon="ri:user-fill"
+            class="w-[1.4rem] h-[1.4rem]"
+          />
+        </a>
+      </template>
+
+      <div class="user-panel">
+        <!-- 用户信息头部 -->
+        <div class="panel-header">
+          <img :src="userAvatar" class="user-avatar" alt="头像" />
+          <div class="user-info">
+            <div class="user-name">
+              {{ userStore.nickname || userStore.username }}
+            </div>
+            <div class="user-desc">{{ userStore.email }}</div>
+          </div>
+        </div>
+
+        <!-- 功能网格 -->
+        <div class="panel-grid">
+          <div class="grid-item" @click="handleGoToUserCenter">
+            <div class="grid-icon" style="background: #e8f4ff; color: #409eff">
+              <IconifyIconOffline icon="ri:user-3-line" />
+            </div>
+            <span>用户中心</span>
+          </div>
+          <div
+            v-if="isAdmin"
+            class="grid-item"
+            @click="handleGoToPostManagement"
+          >
+            <div class="grid-icon" style="background: #e8fff0; color: #67c23a">
+              <IconifyIconOffline icon="ri:article-line" />
+            </div>
+            <span>发布文章</span>
+          </div>
+          <div v-if="isAdmin" class="grid-item" @click="handleGoToAdmin">
+            <div class="grid-icon" style="background: #fff3e8; color: #e6a23c">
+              <IconifyIconOffline icon="ri:settings-3-line" />
+            </div>
+            <span>后台管理</span>
+          </div>
+          <div class="grid-item logout" @click="handleLogout">
+            <div class="grid-icon" style="background: #ffebe8; color: #f56c6c">
+              <IconifyIconOffline icon="ri:logout-box-r-line" />
+            </div>
+            <span>退出登录</span>
+          </div>
+        </div>
+      </div>
+    </el-popover>
     <el-tooltip
       content="随机前往一个文章"
       placement="top"
@@ -125,7 +206,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, nextTick, onMounted, type PropType } from "vue";
+import {
+  computed,
+  ref,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  watch,
+  type PropType
+} from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 import { useSnackbar } from "@/composables/useSnackbar";
@@ -135,6 +224,7 @@ import { useUserStoreHook } from "@/store/modules/user";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import Console from "./console.vue";
 import LoginDialog from "@/components/LoginDialog/index.vue";
+import { ElMessageBox } from "element-plus";
 
 defineOptions({
   name: "HeaderRight"
@@ -177,6 +267,46 @@ const loginDialogInitialStep = ref<"check-email" | "register-form">(
 
 // 用户下拉菜单控制
 const showUserDropdown = ref(false);
+
+// 用户弹窗控制
+const userPopoverVisible = ref(false);
+
+// 是否有未读通知（暂时模拟）
+const hasUnreadNotifications = ref(false);
+
+// 用户头像
+const userAvatar = computed(() => {
+  return (
+    userStore.avatar ||
+    `https://cravatar.cn/avatar/${userStore.email}?s=200&d=mp`
+  );
+});
+
+// 检查是否为管理员
+const isAdmin = computed(() => userStore.roles.includes("1"));
+
+// 点击外部关闭弹窗
+const handleClickOutside = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  const popoverEl = document.querySelector(".user-popover");
+  const triggerEl = document.querySelector(".user-center-button");
+
+  if (popoverEl && popoverEl.contains(target)) return;
+  if (triggerEl && triggerEl.contains(target)) return;
+
+  userPopoverVisible.value = false;
+};
+
+// 监听弹窗显示状态
+watch(userPopoverVisible, visible => {
+  if (visible) {
+    setTimeout(() => {
+      document.addEventListener("click", handleClickOutside);
+    }, 0);
+  } else {
+    document.removeEventListener("click", handleClickOutside);
+  }
+});
 
 // 判断是否在首页
 const isHomePage = computed(() => route.path === "/");
@@ -254,6 +384,45 @@ const goToUserCenter = () => {
   router.push("/user-center");
 };
 
+// 进入用户中心（从弹窗）
+const handleGoToUserCenter = () => {
+  userPopoverVisible.value = false;
+  window.open("/user-center", "_blank");
+};
+
+// 跳转到通知页面
+const handleGoToNotifications = () => {
+  window.open("/notifications", "_blank");
+};
+
+// 进入后台
+const handleGoToAdmin = () => {
+  userPopoverVisible.value = false;
+  window.open("/admin/dashboard", "_blank");
+};
+
+// 发布文章
+const handleGoToPostManagement = () => {
+  userPopoverVisible.value = false;
+  window.open("/admin/post-management", "_blank");
+};
+
+// 退出登录
+const handleLogout = async () => {
+  try {
+    await ElMessageBox.confirm("确定要退出登录吗？", "提示", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning"
+    });
+    userPopoverVisible.value = false;
+    userStore.logOut();
+    showSnackbar("已退出登录");
+  } catch {
+    // 用户取消
+  }
+};
+
 // 移动端菜单控制
 const toggleMobileMenu = () => {
   // 触发自定义事件来切换移动端菜单
@@ -276,6 +445,10 @@ onMounted(() => {
       openLoginDialog("check-email");
     });
   }
+});
+
+onUnmounted(() => {
+  document.removeEventListener("click", handleClickOutside);
 });
 </script>
 
@@ -451,6 +624,20 @@ onMounted(() => {
     &:not(.nav-totop):hover {
       color: var(--anzhiyu-white);
       background: var(--anzhiyu-lighttext);
+    }
+
+    &.notification-button {
+      position: relative;
+
+      .notification-dot {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 8px;
+        height: 8px;
+        background: #f56c6c;
+        border-radius: 50%;
+      }
     }
   }
 
@@ -677,6 +864,113 @@ onMounted(() => {
   100% {
     opacity: 0;
     transform: translateY(-8px) scale(0.95);
+  }
+}
+</style>
+
+<!-- 全局样式，用于 el-popover (teleport 到 body) -->
+<style lang="scss">
+.user-popover {
+  padding: 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgb(0 0 0 / 8%) !important;
+  border: 1px solid var(--anzhiyu-card-border) !important;
+
+  .user-panel {
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border-bottom: 1px solid var(--anzhiyu-card-border);
+
+      .user-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .user-info {
+        flex: 1;
+        min-width: 0;
+
+        .user-name {
+          font-size: 15px;
+          font-weight: 600;
+          color: var(--anzhiyu-fontcolor);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .user-desc {
+          font-size: 12px;
+          color: var(--anzhiyu-secondtext);
+          margin-top: 2px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+    }
+
+    .panel-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      padding: 12px;
+
+      .grid-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 4px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        .grid-icon {
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.2s ease;
+
+          svg {
+            width: 20px;
+            height: 20px;
+          }
+        }
+
+        span {
+          font-size: 11px;
+          color: var(--anzhiyu-secondtext);
+          font-weight: 500;
+          white-space: nowrap;
+        }
+
+        &:hover {
+          background: var(--anzhiyu-theme-op);
+
+          .grid-icon {
+            transform: scale(1.05);
+          }
+
+          span {
+            color: var(--anzhiyu-fontcolor);
+          }
+        }
+
+        &:active {
+          transform: scale(0.97);
+        }
+      }
+    }
   }
 }
 </style>

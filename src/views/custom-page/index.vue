@@ -105,7 +105,7 @@ import { ref, onMounted, computed, watch, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { getCustomPage } from "@/api/custom-page";
-import { getPublicArticles } from "@/api/post";
+import { getPublicArticles, getPublicArticle } from "@/api/post";
 import type { Article } from "@/api/post/type";
 import { formatDate } from "@/utils/format";
 import { useArticleStore } from "@/store/modules/articleStore";
@@ -214,6 +214,25 @@ const goToArticle = (id: string) => {
   router.push(`/posts/${id}`);
 };
 
+// 尝试作为文章 abbrlink（自定义文章ID）查询
+const tryLoadArticleByPath = async (path: string): Promise<boolean> => {
+  // 去掉开头的 / 作为 abbrlink 查询（注意：不支持包含 / 的路径格式）
+  const abbrlink = path.startsWith("/") ? path.substring(1) : path;
+  if (!abbrlink) return false;
+
+  try {
+    const response = await getPublicArticle(abbrlink);
+    if (response.code === 200 && response.data) {
+      // 文章存在，跳转到文章详情页
+      router.replace(`/posts/${abbrlink}`);
+      return true;
+    }
+  } catch {
+    // 文章也不存在，返回 false
+  }
+  return false;
+};
+
 // 加载页面数据
 const loadPage = async () => {
   loading.value = true;
@@ -234,17 +253,19 @@ const loadPage = async () => {
     console.error("加载页面失败:", err);
 
     // 检查是否是404错误
-    if (err.response && err.response.status === 404) {
-      error.value = "页面不存在";
-      document.title = "404 - 页面不存在";
-      // 加载随机文章
-      fetchRandomArticles();
-    } else if (
-      err.response &&
-      err.response.data &&
-      err.response.data.code === 404
-    ) {
-      // 后端返回的业务层404
+    const is404 =
+      (err.response && err.response.status === 404) ||
+      (err.response && err.response.data && err.response.data.code === 404);
+
+    if (is404) {
+      // 自定义页面不存在，尝试作为文章路径查询
+      const foundArticle = await tryLoadArticleByPath(currentPath.value);
+      if (foundArticle) {
+        // 已跳转到文章页，不需要继续处理
+        return;
+      }
+
+      // 文章也不存在，显示 404
       error.value = "页面不存在";
       document.title = "404 - 页面不存在";
       // 加载随机文章
@@ -387,7 +408,7 @@ onMounted(() => {
           display: inline-flex;
           align-items: center;
           gap: 0.5rem;
-          padding: 0.875rem 2rem;
+          padding: 0.375rem 1.8rem;
           font-size: 1rem;
           font-weight: 500;
           color: #fff;
