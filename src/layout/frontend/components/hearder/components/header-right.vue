@@ -1,7 +1,7 @@
 <template>
   <div class="header-right">
     <el-tooltip
-      v-if="navConfig?.travelling === true && isHomePage"
+      v-if="navConfig?.travelling === true && isHomePage && !isMobile"
       content="随机前往一个开往项目网站"
       placement="top"
       :show-arrow="false"
@@ -18,7 +18,7 @@
     </el-tooltip>
     <!-- 通知图标 -->
     <el-tooltip
-      v-if="isLoggedIn"
+      v-if="isLoggedIn && !isMobile"
       content="通知"
       placement="top"
       :show-arrow="false"
@@ -311,6 +311,12 @@ watch(userPopoverVisible, visible => {
 // 判断是否在首页
 const isHomePage = computed(() => route.path === "/");
 
+// 移动端判断
+const isMobile = ref(false);
+const checkMobile = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
+
 // 检查用户是否已登录
 const isLoggedIn = computed(() => {
   return !!userStore.username && userStore.roles.length > 0;
@@ -445,10 +451,15 @@ onMounted(() => {
       openLoginDialog("check-email");
     });
   }
+
+  // 初始化移动端判断
+  checkMobile();
+  window.addEventListener("resize", checkMobile);
 });
 
 onUnmounted(() => {
   document.removeEventListener("click", handleClickOutside);
+  window.removeEventListener("resize", checkMobile);
 });
 </script>
 
@@ -766,6 +777,7 @@ onUnmounted(() => {
   position: relative;
   display: flex;
   align-items: center;
+  margin-left: 1rem;
 }
 
 // 桥接区域，填补按钮和下拉菜单之间的空隙

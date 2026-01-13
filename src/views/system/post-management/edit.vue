@@ -22,6 +22,8 @@ const MarkdownEditor = defineAsyncComponent(
 );
 import PostActionButtons from "./components/PostActionButtons.vue";
 import PublishDialog from "./components/PublishDialog.vue";
+import ArticleHistoryDrawer from "./components/ArticleHistoryDrawer.vue";
+import type { ArticleHistory } from "@/api/article-history/types";
 
 import { useNav } from "@/layout/hooks/useNav";
 import {
@@ -52,6 +54,7 @@ const loading = ref(true);
 const isSubmitting = ref(false);
 const articleId = ref<string | null>(null);
 const isPublishDialogVisible = ref(false);
+const isHistoryDrawerVisible = ref(false);
 
 const form = reactive<ArticleForm>({
   title: "",
@@ -250,6 +253,32 @@ const handleConfirmPublish = () => {
   editorRef.value?.triggerSave();
 };
 
+// 显示历史版本抽屉
+const handleShowHistory = () => {
+  if (!articleId.value) {
+    ElMessage.warning("请先保存文章后再查看历史版本");
+    return;
+  }
+  isHistoryDrawerVisible.value = true;
+};
+
+// 从历史版本恢复
+const handleRestoreFromHistory = (history: ArticleHistory) => {
+  // 使用历史版本的内容替换当前编辑器内容
+  form.title = history.title;
+  form.content_md = history.content_md;
+  form.cover_url = history.cover_url;
+  form.top_img_url = history.top_img_url;
+  form.primary_color = history.primary_color;
+  form.summaries = history.summaries || [];
+  form.keywords = history.keywords;
+
+  // 更新初始状态，避免恢复后被认为是脏数据
+  updateInitialState();
+
+  ElMessage.success(`已恢复到版本 v${history.version} 的内容`);
+};
+
 const handleImageUploadForMdV3 = async (
   files: File[],
   callback: (urls: string[]) => void
@@ -409,6 +438,7 @@ onUnmounted(() => {
           :post-slug="form.abbrlink"
           @save="handleSubmit(false)"
           @publish="handleOpenPublishDialog"
+          @show-history="handleShowHistory"
         />
       </div>
     </header>
@@ -434,6 +464,13 @@ onUnmounted(() => {
       @change-tag="handleTagChange"
       @confirm-publish="handleConfirmPublish"
       @refresh-categories="refreshCategories"
+    />
+
+    <!-- 历史版本抽屉 -->
+    <ArticleHistoryDrawer
+      v-model:visible="isHistoryDrawerVisible"
+      :article-id="articleId || ''"
+      @restore="handleRestoreFromHistory"
     />
   </div>
 </template>
