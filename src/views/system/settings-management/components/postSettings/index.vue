@@ -763,25 +763,25 @@
         <strong>不需要v1结尾：https://api.example.com</strong>
       </div>
     </el-form-item>
-    <el-form-item label="CDNFLY API 密钥 Key">
+    <el-form-item label="CDNFLY API Key">
       <el-input
         v-model="formData.cdn.secretKey"
         placeholder="请输入 API Key"
         show-password
       />
       <div class="form-item-help">
-        CDNFLY 的密钥 Secret <br />
+        CDNFLY 的 API Key（对应请求头 api-key）。<br />
         <strong>请妥善保管，不要泄露给他人。</strong>
       </div>
     </el-form-item>
-    <el-form-item label="CDNFLY API 密钥 Secret">
+    <el-form-item label="CDNFLY API Secret">
       <el-input
         v-model="formData.cdn.secretID"
         placeholder="请输入 API Secret"
         show-password
       />
       <div class="form-item-help">
-        CDNFLY 的密钥<br />
+        CDNFLY 的 API Secret（对应请求头 api-secret）。<br />
         <strong>请妥善保管，不要泄露给他人。</strong>
       </div>
     </el-form-item>
