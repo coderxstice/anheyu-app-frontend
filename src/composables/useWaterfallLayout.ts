@@ -152,7 +152,7 @@ export function useWaterfallLayout(
       const left = minColumnIndex * (itemWidth + gap);
       const top = columnHeights[minColumnIndex];
 
-      // 设置位置
+      // 设置位置（不带过渡动画，避免初始渲染时的"飞入"效果）
       itemPositions.value[index] = {
         position: "absolute",
         width: `${itemWidth}px`,
@@ -243,6 +243,11 @@ export function useWaterfallLayout(
 
     // 立即计算布局（使用 aspectRatio 预设的高度）
     calculateLayout();
+
+    // 等待浏览器完成位置样式的应用（等待下一帧）
+    await new Promise(resolve =>
+      requestAnimationFrame(() => requestAnimationFrame(resolve))
+    );
 
     // 标记布局就绪，立即显示
     layoutReady.value = true;
