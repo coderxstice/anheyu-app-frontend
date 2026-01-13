@@ -119,8 +119,6 @@ onMounted(async () => {
       <StatisticCard
         v-if="enableConfig.statistic"
         :cover="aboutConfig.statistics_background"
-        link="/statistics"
-        text="更多统计"
       />
       <MapAndInfoCard
         v-if="enableConfig.map_and_info"

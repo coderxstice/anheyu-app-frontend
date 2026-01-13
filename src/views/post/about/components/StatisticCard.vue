@@ -6,11 +6,10 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
 import { useStatistics } from "@/composables/useStatistics";
+import { IconifyIconOnline } from "@/components/ReIcon";
 
 interface Props {
   cover: string;
-  link: string;
-  text: string;
 }
 
 defineProps<Props>();
@@ -141,12 +140,10 @@ onMounted(() => {
         {{ error }}
       </div>
 
-      <!-- <div class="banner-button-group">
-        <a class="banner-button" @click="$router.push(link)">
-          <i class="anzhiyufont anzhiyu-icon-arrow-circle-right" />
-          <span class="banner-button-text">{{ text }}</span>
-        </a>
-      </div> -->
+      <div class="statistic-footer">
+        <IconifyIconOnline icon="ri:pie-chart-2-line" class="footer-icon" />
+        <span class="data-source">数据由本站自主统计</span>
+      </div>
     </div>
   </div>
 </template>
@@ -181,7 +178,7 @@ onMounted(() => {
   justify-content: space-between;
   width: 100%;
   margin-top: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
   font-size: 16px;
   color: var(--anzhiyu-white);
   border-radius: 15px;
@@ -224,12 +221,16 @@ onMounted(() => {
   opacity: 0.8;
 }
 
-.post-tips {
+.statistic-footer {
   position: absolute;
-  bottom: 1rem;
+  bottom: 1.5rem;
   left: 2rem;
-  font-size: 14px;
-  color: var(--anzhiyu-gray);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--anzhiyu-white);
+  opacity: 0.6;
 
   @media screen and (width <= 768px) {
     position: relative;
@@ -238,74 +239,9 @@ onMounted(() => {
     margin-top: 1rem;
   }
 
-  a {
-    color: var(--anzhiyu-gray) !important;
-    border: none !important;
-
-    &:hover {
-      color: var(--anzhiyu-main) !important;
-      background: none !important;
-    }
-  }
-}
-
-.banner-button-group {
-  position: absolute;
-  right: 2rem;
-  bottom: 1.5rem;
-
-  @media screen and (width <= 768px) {
-    position: relative;
-    right: auto;
-    bottom: auto;
-    margin-top: 1rem;
-    text-align: center;
-  }
-
-  .banner-button {
-    z-index: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 40px;
-    padding: 10px;
-    color: var(--anzhiyu-white);
-    text-decoration: none;
-    cursor: pointer;
-    background: var(--anzhiyu-white-op);
-    backdrop-filter: blur(20px);
-    backdrop-filter: saturate(180%) blur(20px);
-    border-bottom: 0 !important;
-    border-radius: 20px;
-    transition: 0.3s;
-    transform: translateZ(0);
-
-    @media screen and (width <= 768px) {
-      justify-content: center;
-      width: 100%;
-    }
-
-    i,
-    svg {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      max-width: 40px;
-      height: 40px;
-      margin-right: 0.25rem;
-      font-size: 22px;
-      border-radius: 50px;
-    }
-
-    .banner-button-text {
-      margin-left: 4px;
-    }
-
-    &:hover {
-      color: var(--anzhiyu-white);
-      background: var(--anzhiyu-main);
-      border-radius: 20px !important;
-    }
+  .footer-icon {
+    width: 14px;
+    height: 14px;
   }
 }
 </style>
