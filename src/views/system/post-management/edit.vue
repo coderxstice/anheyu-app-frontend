@@ -172,6 +172,7 @@ const onSaveHandler = async (markdown: string, sanitizedHtml: string) => {
         message: "文章标题不能为空，请输入标题后再保存。",
         type: "error"
       });
+      isSubmitting.value = false;
       return;
     }
     const dataToSubmit = {
