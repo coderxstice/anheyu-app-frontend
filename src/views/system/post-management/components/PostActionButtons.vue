@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Clock } from "@element-plus/icons-vue";
+
 defineProps<{
   isSubmitting: boolean;
   isEditMode: boolean;
@@ -7,11 +9,18 @@ defineProps<{
   postSlug?: string;
 }>();
 
-const emit = defineEmits(["save", "publish"]);
+const emit = defineEmits(["save", "publish", "showHistory"]);
 </script>
 
 <template>
   <div class="action-buttons">
+    <el-tooltip
+      v-if="isEditMode && status === 'PUBLISHED'"
+      content="历史版本"
+      placement="bottom"
+    >
+      <el-button :icon="Clock" @click="emit('showHistory')" />
+    </el-tooltip>
     <el-button :loading="isSubmitting" @click="emit('save')"
       >存为草稿</el-button
     >

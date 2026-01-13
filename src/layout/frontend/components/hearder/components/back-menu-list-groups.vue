@@ -88,6 +88,7 @@ const isIconifyIcon = (icon: string) => {
   width: 35px;
   height: 35px;
   margin-right: 5px;
+  margin-left: 4px;
   cursor: pointer;
   border-radius: 50px;
   transition: 0.3s;

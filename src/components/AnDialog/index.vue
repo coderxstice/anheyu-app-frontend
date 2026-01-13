@@ -256,7 +256,7 @@ defineExpose({
 .an-dialog-wrapper {
   position: fixed;
   inset: 0;
-  z-index: 2000;
+  z-index: 2100;
 }
 
 .dialog-overlay {
