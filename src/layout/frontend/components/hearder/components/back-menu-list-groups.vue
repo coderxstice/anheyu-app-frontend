@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { IconifyIconOnline } from "@/components/ReIcon";
+import { IconifyIconOnline, IconifyIconOffline } from "@/components/ReIcon";
+import "@/components/ReIcon/src/offlineIcon";
 
 defineOptions({
   name: "BackMenuListGroups"
 });
 
 const props = defineProps<{
-  navConfig: {
-    enable: boolean;
-    menu: Array<{
+  navConfig?: {
+    enable?: boolean;
+    menu?: Array<{
       title: string;
       items: Array<{
         name: string;
@@ -16,7 +17,7 @@ const props = defineProps<{
         icon: string;
       }>;
     }>;
-  };
+  } | null;
 }>();
 
 // 判断是否为图片 URL
@@ -31,7 +32,7 @@ const isIconifyIcon = (icon: string) => {
 </script>
 
 <template>
-  <div v-if="navConfig?.menu.length > 0" class="back-home-button">
+  <div v-if="navConfig?.menu?.length > 0" class="back-home-button">
     <IconifyIconOffline icon="ri:apps-fill" class="w-[1.375rem] h-[1.375rem]" />
     <div class="back-menu-list-groups">
       <div

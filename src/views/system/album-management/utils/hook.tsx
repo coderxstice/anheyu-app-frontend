@@ -1076,43 +1076,52 @@ export function useAlbum() {
         });
       });
 
-      const exportMessage = hasSelection
+      const exportMessageText = hasSelection
         ? `正在导出选中的 ${albumIds.length} 个相册...`
         : `正在导出所有相册...`;
-      message(exportMessage, {
+      const loadingMessage = message(exportMessageText, {
         type: "info",
         duration: 0
       });
 
-      // 调用导出接口，如果 albumIds 为空数组，后端会导出所有
-      const response: any = await exportAlbums({
-        album_ids: albumIds,
-        format: selectedFormat.value
-      });
+      try {
+        // 调用导出接口，如果 albumIds 为空数组，后端会导出所有
+        const response: any = await exportAlbums({
+          album_ids: albumIds,
+          format: selectedFormat.value
+        });
 
-      // 创建下载链接
-      let blob: Blob;
-      if (response instanceof Blob) {
-        blob = response;
-      } else if (response?.data instanceof Blob) {
-        blob = response.data;
-      } else {
-        throw new Error("响应数据格式不正确");
+        // 创建下载链接
+        let blob: Blob;
+        if (response instanceof Blob) {
+          blob = response;
+        } else if (response?.data instanceof Blob) {
+          blob = response.data;
+        } else {
+          throw new Error("响应数据格式不正确");
+        }
+
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `albums-export-${new Date().getTime()}.${selectedFormat.value}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        // 关闭加载中消息
+        loadingMessage.close();
+
+        const successMessage = hasSelection
+          ? `成功导出 ${albumIds.length} 个相册！`
+          : `成功导出所有相册！`;
+        message(successMessage, { type: "success" });
+      } catch (error) {
+        // 关闭加载中消息
+        loadingMessage.close();
+        throw error;
       }
-
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `albums-export-${new Date().getTime()}.${selectedFormat.value}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      const successMessage = hasSelection
-        ? `成功导出 ${albumIds.length} 个相册！`
-        : `成功导出所有相册！`;
-      message(successMessage, { type: "success" });
     } catch (error) {
       if (error?.message !== "cancelled") {
         console.error("导出失败:", error);
