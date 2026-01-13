@@ -767,6 +767,12 @@ const postDescriptors: SettingDescriptor[] = [
     defaultValue: "",
     type: "string"
   },
+  {
+    frontendPath: "post.cdn.baseUrl",
+    backendKey: constant.KeyCDNBaseUrl,
+    defaultValue: "",
+    type: "string"
+  },
   // 文章订阅配置
   {
     frontendPath: "post.subscribe.enable",
