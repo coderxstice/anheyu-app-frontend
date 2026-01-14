@@ -17,6 +17,7 @@ interface Props {
     width?: number;
     height?: number;
     created_at?: string;
+    location?: string;
   };
   index: number;
   wallpapers: any[];
@@ -103,6 +104,10 @@ const handleComment = () => {
           <time class="datatime" :datetime="item.created_at">
             {{ formatRelativeTime(item.created_at) }}
           </time>
+        </div>
+        <div v-if="item.location" class="album-info-location">
+          <i class="anzhiyufont anzhiyu-icon-location-dot" />
+          <span>{{ item.location }}</span>
         </div>
       </div>
       <div v-if="enableComment" class="album-reply" @click="handleComment">
@@ -270,7 +275,8 @@ const handleComment = () => {
     align-items: center;
     font-size: 0.8125rem;
 
-    .album-info-time {
+    .album-info-time,
+    .album-info-location {
       display: flex;
       gap: 0.2rem;
       align-items: center;
@@ -283,6 +289,15 @@ const handleComment = () => {
 
       i {
         font-size: 0.875rem;
+      }
+    }
+
+    .album-info-location {
+      span {
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
     }
   }

@@ -407,7 +407,8 @@ export function useAlbum() {
           fileSize: row?.fileSize ?? 0,
           displayOrder: row?.displayOrder ?? 0,
           imageTitle: (row as any)?.title ?? "",
-          description: row?.description ?? ""
+          description: row?.description ?? "",
+          location: (row as any)?.location ?? ""
         },
         categories: categories.value
       },

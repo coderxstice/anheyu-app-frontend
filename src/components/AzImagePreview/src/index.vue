@@ -76,7 +76,22 @@
                 </span>
                 <span class="tag-time">
                   <TimeLine />
-                  {{ formatToChina(previewSrcList[currentIndex].createTime) }}
+                  {{
+                    formatToChina(
+                      previewSrcList[currentIndex].created_at ||
+                        previewSrcList[currentIndex].createTime
+                    )
+                  }}
+                </span>
+                <span
+                  v-if="
+                    props.page === 'album' &&
+                    previewSrcList[currentIndex].location
+                  "
+                  class="tag-location"
+                >
+                  <Location />
+                  {{ previewSrcList[currentIndex].location }}
                 </span>
               </div>
               <div
@@ -116,6 +131,7 @@ import Downloads from "@/assets/svg/downloads.svg?component";
 import Size from "@/assets/svg/size.svg?component";
 import Fire from "@/assets/svg/fire.svg?component";
 import TimeLine from "@/assets/svg/time-line.svg?component";
+import Location from "@/assets/svg/map-pin-2-line.svg?component";
 import { getFileExtension } from "@/utils/down";
 import { formatToChina } from "@/utils/dayjs";
 import { updateWallpaperStat } from "@/api/album-home";
