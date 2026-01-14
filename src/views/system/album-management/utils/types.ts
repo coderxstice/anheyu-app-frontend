@@ -23,6 +23,7 @@ interface FormItemProps {
   displayOrder: number;
   imageTitle: string;
   description: string;
+  location: string;
 }
 interface FormProps {
   formInline: FormItemProps;

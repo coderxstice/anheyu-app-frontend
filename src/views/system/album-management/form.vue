@@ -26,7 +26,8 @@ const props = withDefaults(defineProps<FormProps>(), {
     fileSize: 0,
     displayOrder: 0,
     imageTitle: "",
-    description: ""
+    description: "",
+    location: ""
   }),
   categories: () => []
 });
@@ -109,6 +110,21 @@ defineExpose({ getRef });
               maxlength="1000"
               show-word-limit
             />
+          </el-form-item>
+        </re-col>
+
+        <re-col :value="24" :xs="24" :sm="24">
+          <el-form-item label="拍摄地点" prop="location">
+            <el-input
+              v-model="newFormInline.location"
+              clearable
+              placeholder="请输入拍摄地点（可选）"
+              maxlength="200"
+            >
+              <template #prefix>
+                <i class="anzhiyufont anzhiyu-icon-location-dot" />
+              </template>
+            </el-input>
           </el-form-item>
         </re-col>
 
