@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import ReCol from "@/components/ReCol";
 import { useWindowSize } from "@vueuse/core";
 import type { UploadFile, UploadFiles } from "element-plus";
 import { UploadFilled } from "@element-plus/icons-vue";
+import {
+  getAlbumCategoryList,
+  type AlbumCategoryDTO
+} from "@/api/album-category";
 
 interface ImportExportFormProps {
   formInline?: {
@@ -40,6 +44,23 @@ const props = withDefaults(defineProps<ImportExportFormProps>(), {
 const ruleFormRef = ref();
 const newFormInline = ref(props.formInline);
 const uploadRef = ref();
+const localCategories = ref<AlbumCategoryDTO[]>([]);
+
+// 组件内部获取分类数据
+async function loadCategories() {
+  try {
+    const { data } = await getAlbumCategoryList();
+    if (data) {
+      localCategories.value = data;
+    }
+  } catch (error) {
+    console.error("加载分类列表失败:", error);
+  }
+}
+
+onMounted(() => {
+  loadCategories();
+});
 
 // 响应式窗口大小
 const { width } = useWindowSize();
@@ -341,9 +362,10 @@ https://example.com/image3.webp
               placeholder="为没有分类的相册指定默认分类（可选）"
               clearable
               class="w-full!"
+              :teleported="false"
             >
               <el-option
-                v-for="category in categories"
+                v-for="category in localCategories"
                 :key="category.id"
                 :label="category.name"
                 :value="category.id"

@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import ReCol from "@/components/ReCol";
 import { formRules } from "./utils/rule";
 import { FormProps } from "./utils/types";
+import {
+  getAlbumCategoryList,
+  type AlbumCategoryDTO
+} from "@/api/album-category";
 
 const props = withDefaults(defineProps<FormProps>(), {
   formInline: () => ({
@@ -29,8 +33,23 @@ const props = withDefaults(defineProps<FormProps>(), {
 
 const ruleFormRef = ref();
 const newFormInline = ref(props.formInline);
+const localCategories = ref<AlbumCategoryDTO[]>([]);
 
-console.log("newFormInline", newFormInline.value);
+// 组件内部获取分类数据
+async function loadCategories() {
+  try {
+    const { data } = await getAlbumCategoryList();
+    if (data) {
+      localCategories.value = data;
+    }
+  } catch (error) {
+    console.error("加载分类列表失败:", error);
+  }
+}
+
+onMounted(() => {
+  loadCategories();
+});
 
 function getRef() {
   return ruleFormRef.value;
@@ -55,9 +74,10 @@ defineExpose({ getRef });
               placeholder="请选择分类"
               clearable
               class="w-full!"
+              :teleported="false"
             >
               <el-option
-                v-for="category in categories"
+                v-for="category in localCategories"
                 :key="category.id"
                 :label="category.name"
                 :value="category.id"
