@@ -360,7 +360,11 @@ const goToTagPage = (tagName: string) => {
     margin-right: 8px;
     color: var(--anzhiyu-red);
 
-    .hot-interaction {
+    i.hot-interaction {
+      font-size: 0.75rem;
+    }
+
+    span.hot-interaction {
       margin-left: 4px;
       font-size: 0.75rem;
     }
