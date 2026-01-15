@@ -680,7 +680,12 @@ onMounted(() => {
     <div
       v-if="isDev"
       class="debug-info"
-      style="margin-top: 8px; margin-left: 56px; font-size: 12px; color: #999"
+      :style="{
+        marginTop: '8px',
+        marginLeft: 'calc(40px + 0.5rem)',
+        fontSize: '12px',
+        color: '#999'
+      }"
     >
       调试: total_children={{ comment.total_children }}, children.length={{
         comment.children?.length || 0
@@ -929,24 +934,24 @@ onMounted(() => {
   flex-direction: column;
   padding-top: 1rem;
   margin-top: 1rem;
-  margin-left: 56px;
+  margin-left: calc(40px + 0.5rem); // 与父评论内容区域左边缘对齐
 }
 
 :deep(.reply-item-container) {
   padding: 1.25rem;
   border-top: var(--style-border-dashed);
-  padding-left: calc(40px + 0.5rem);
+  padding-left: 0;
   padding-right: 0;
 }
 
 .reply-form-wrapper {
   margin-top: 1rem;
-  margin-left: 56px;
+  margin-left: calc(40px + 0.5rem);
 }
 
 .load-more-children-wrapper {
   margin-top: 1rem;
-  margin-left: 56px;
+  margin-left: calc(40px + 0.5rem);
   text-align: center;
 }
 
