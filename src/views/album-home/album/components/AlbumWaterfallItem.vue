@@ -110,7 +110,7 @@ const handleComment = () => {
           <span>{{ item.location }}</span>
         </div>
       </div>
-      <div v-if="enableComment" class="album-reply" @click="handleComment">
+      <div v-if="enableComment" class="album-reply" @click.stop="handleComment">
         <IconifyIconOffline icon="ri:chat-1-fill" class="w-6 h-6" />
       </div>
     </div>
