@@ -329,7 +329,22 @@ const loadRecentImages = () => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      recentImages.value = JSON.parse(stored);
+      const images: StoredImage[] = JSON.parse(stored);
+      // 迁移旧数据：将绝对 URL 转换为相对路径
+      let needsSave = false;
+      const migratedImages = images.map(img => {
+        const normalizedUrl = normalizeStorageUrl(img.url);
+        if (normalizedUrl !== img.url) {
+          needsSave = true;
+          return { ...img, url: normalizedUrl };
+        }
+        return img;
+      });
+      recentImages.value = migratedImages;
+      // 如果有数据需要迁移，保存更新后的数据
+      if (needsSave) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(migratedImages));
+      }
     }
   } catch (error) {
     console.error("加载最近图片失败:", error);
@@ -349,10 +364,27 @@ const loadSavedPolicyId = () => {
   }
 };
 
+// 处理存储 URL，将绝对 URL 转换为相对路径（用于本地存储策略）
+const normalizeStorageUrl = (url: string): string => {
+  // 检查是否是完整的URL（包含协议和域名），并且是本地 API 路径
+  const urlPattern = /^https?:\/\/[^\/]+(\/api\/f\/[^?#]+)/;
+  const match = url.match(urlPattern);
+
+  if (match) {
+    // 提取路径部分，这样可以通过前端代理正确访问
+    return match[1];
+  }
+
+  return url;
+};
+
 // 保存图片到 localStorage
 const saveImageToStorage = (url: string, name: string) => {
+  // 在保存前处理 URL，将绝对 URL 转换为相对路径
+  const normalizedUrl = normalizeStorageUrl(url);
+
   const newImage: StoredImage = {
-    url,
+    url: normalizedUrl,
     name,
     uploadedAt: Date.now()
   };
@@ -677,18 +709,17 @@ const handleCancel = () => {
   emit("update:modelValue", false);
 };
 
-// 处理本地存储URL，移除本地前缀
+// 处理 URL，将绝对 URL 转换为相对路径
+// 注意：无论使用什么存储策略，系统返回的直链 URL 格式都是 {siteURL}/api/f/{publicID}/{fileName}
+// 所以需要统一处理，不区分存储策略类型
 const normalizeUrl = (url: string): string => {
-  // 如果当前存储策略类型是 local，则移除本地前缀
-  if (currentPolicyType.value === "local") {
-    // 检查是否是完整的URL（包含协议和域名）
-    const urlPattern = /^https?:\/\/[^\/]+(\/api\/f\/[^?#]+)/;
-    const match = url.match(urlPattern);
+  // 检查是否是完整的URL（包含协议和域名），并且是本站 API 路径
+  const urlPattern = /^https?:\/\/[^\/]+(\/api\/f\/[^?#]+)/;
+  const match = url.match(urlPattern);
 
-    if (match) {
-      // 提取路径部分
-      return match[1];
-    }
+  if (match) {
+    // 提取路径部分，这样可以通过前端代理正确访问
+    return match[1];
   }
 
   return url;
