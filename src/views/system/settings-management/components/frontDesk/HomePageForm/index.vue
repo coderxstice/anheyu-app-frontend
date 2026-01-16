@@ -560,8 +560,32 @@
       @update:model-value="updateFooterOwnerSince"
     />
   </el-form-item>
+  <el-form-item label="底部栏作者链接">
+    <el-input
+      :model-value="model.footerBarAuthorLink"
+      placeholder="/about"
+      clearable
+      @update:model-value="updateFooterBarAuthorLink"
+    />
+  </el-form-item>
+  <el-form-item label="底部栏CC协议链接">
+    <el-input
+      :model-value="model.footerBarCCLink"
+      placeholder="/copyright"
+      clearable
+      @update:model-value="updateFooterBarCCLink"
+    />
+  </el-form-item>
+  <el-form-item label="页脚列表随机友链数量">
+    <el-input
+      :model-value="model.footerListRandomFriends"
+      placeholder="例如：3"
+      clearable
+      @update:model-value="updateFooterListRandomFriends"
+    />
+  </el-form-item>
 
-  <el-divider content-position="left">网站运行时间</el-divider>
+  <el-divider content-position="left">页脚运行时间</el-divider>
   <el-form-item label="启用页脚运行时间模块">
     <el-switch
       :model-value="model.footerRuntimeEnable"
@@ -658,16 +682,6 @@
       </el-form-item>
     </div>
   </el-collapse-transition>
-
-  <el-divider content-position="left">链接配置</el-divider>
-  <el-form-item label="页脚列表随机友链数量">
-    <el-input
-      :model-value="model.footerListRandomFriends"
-      placeholder="例如：3"
-      clearable
-      @update:model-value="updateFooterListRandomFriends"
-    />
-  </el-form-item>
 
   <el-divider content-position="left">音乐播放器配置</el-divider>
   <el-form-item label="启用音乐播放器">
@@ -806,24 +820,8 @@
       音乐播放器凹槽背景图片，默认为 /static/img/music-vinyl-groove.png
     </div>
   </el-form-item>
-  <el-form-item label="底部栏作者链接">
-    <el-input
-      :model-value="model.footerBarAuthorLink"
-      placeholder="/about"
-      clearable
-      @update:model-value="updateFooterBarAuthorLink"
-    />
-  </el-form-item>
-  <el-form-item label="底部栏CC协议链接">
-    <el-input
-      :model-value="model.footerBarCCLink"
-      placeholder="/copyright"
-      clearable
-      @update:model-value="updateFooterBarCCLink"
-    />
-  </el-form-item>
 
-  <el-divider content-position="left">图片配置</el-divider>
+  <el-divider content-position="left">页脚社交与徽标配置</el-divider>
   <el-form-item label="社交链接栏中间图片 URL">
     <el-input
       :model-value="model.footerSocialBarCenterImg"
