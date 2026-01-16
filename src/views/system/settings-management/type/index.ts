@@ -395,25 +395,30 @@ export interface HomePageSettingsInfo {
   footerBarLinkList: FooterBarLinkItem[];
   menu: MainMenuItem[];
   navMenuItems: NavMenuGroup[];
-  music?: {
-    player?: {
-      enable?: boolean;
-      playlist_id?: string;
-      custom_playlist?: string;
-    };
-    capsule?: {
-      custom_playlist?: string;
-    };
-    api?: {
-      base_url?: string;
-    };
-    vinyl?: {
-      background?: string;
-      outer?: string;
-      inner?: string;
-      needle?: string;
-      groove?: string;
-    };
+}
+
+/**
+ * @description: 音乐页面配置接口
+ */
+export interface MusicPageSettingsInfo {
+  enable: boolean;
+  capsule?: {
+    playlist_id?: string;
+    custom_playlist?: string;
+  };
+  page?: {
+    playlist_id?: string;
+    custom_playlist?: string;
+  };
+  api?: {
+    base_url?: string;
+  };
+  vinyl?: {
+    background?: string;
+    outer?: string;
+    inner?: string;
+    needle?: string;
+    groove?: string;
   };
 }
 

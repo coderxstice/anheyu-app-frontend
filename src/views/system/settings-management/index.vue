@@ -152,6 +152,17 @@
             <AlbumPageForm v-model="form.frontDesk.album" />
           </template>
 
+          <!-- 高级功能 - 音乐页 -->
+          <template v-else-if="activeComponent === 'MusicPageForm'">
+            <div class="section-header">
+              <h2>音乐页</h2>
+              <p class="section-desc">
+                配置音乐胶囊和音乐馆页面的播放列表、唱片外观等
+              </p>
+            </div>
+            <MusicPageForm v-model="form.frontDesk.music" />
+          </template>
+
           <!-- 高级功能 - 页面管理 -->
           <template v-else-if="activeComponent === 'PageManagement'">
             <div class="section-header">
@@ -225,6 +236,7 @@ import EquipmentPageForm from "./components/frontDesk/EquipmentPageForm/index.vu
 import AboutPageForm from "./components/frontDesk/AboutPageForm/index.vue";
 import RecentCommentsPageForm from "./components/frontDesk/RecentCommentsPageForm/index.vue";
 import AlbumPageForm from "./components/frontDesk/AlbumPageForm/index.vue";
+import MusicPageForm from "./components/frontDesk/MusicPageForm/index.vue";
 import TurnstileSettingsForm from "./components/frontDesk/TurnstileSettingsForm/index.vue";
 import BackupImportForm from "./components/BackupImportForm.vue";
 
@@ -369,6 +381,7 @@ const componentToPathPrefix: Record<string, string[]> = {
   EquipmentPageForm: ["frontDesk.equipment."],
   RecentCommentsPageForm: ["frontDesk.recentComments."],
   AlbumPageForm: ["frontDesk.album."],
+  MusicPageForm: ["frontDesk.music."],
   TurnstileSettingsForm: ["frontDesk.turnstile."]
 };
 
