@@ -706,6 +706,15 @@ export interface AlbumPageSettingsInfo {
   enableComment: boolean;
 }
 
+/**
+ * @description: Cloudflare Turnstile 人机验证配置表单接口
+ */
+export interface TurnstileSettingsInfo {
+  enable: boolean; // 是否启用 Turnstile 人机验证
+  siteKey: string; // Site Key（公钥，前端使用）
+  secretKey: string; // Secret Key（私钥，后端验证使用）
+}
+
 export interface FrontDeskSettings {
   home: HomePageSettingsInfo;
   sidebar: SidebarPageSettingsInfo;
@@ -716,6 +725,7 @@ export interface FrontDeskSettings {
   about: AboutPageSettingsInfo;
   recentComments: RecentCommentsSettingsInfo;
   album: AlbumPageSettingsInfo;
+  turnstile: TurnstileSettingsInfo;
 }
 
 /**

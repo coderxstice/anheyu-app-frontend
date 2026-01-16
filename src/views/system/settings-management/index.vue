@@ -161,6 +161,17 @@
             <PageManagement />
           </template>
 
+          <!-- 高级功能 - 人机验证 -->
+          <template v-else-if="activeComponent === 'TurnstileSettingsForm'">
+            <div class="section-header">
+              <h2>人机验证</h2>
+              <p class="section-desc">
+                配置 Cloudflare Turnstile 人机验证，保护登录和注册接口
+              </p>
+            </div>
+            <TurnstileSettingsForm v-model="form.frontDesk.turnstile" />
+          </template>
+
           <!-- 高级功能 - 备份&导入 -->
           <template v-else-if="activeComponent === 'BackupImportForm'">
             <div class="section-header">
@@ -214,6 +225,7 @@ import EquipmentPageForm from "./components/frontDesk/EquipmentPageForm/index.vu
 import AboutPageForm from "./components/frontDesk/AboutPageForm/index.vue";
 import RecentCommentsPageForm from "./components/frontDesk/RecentCommentsPageForm/index.vue";
 import AlbumPageForm from "./components/frontDesk/AlbumPageForm/index.vue";
+import TurnstileSettingsForm from "./components/frontDesk/TurnstileSettingsForm/index.vue";
 import BackupImportForm from "./components/BackupImportForm.vue";
 
 const siteConfigStore = useSiteConfigStore();
@@ -356,7 +368,8 @@ const componentToPathPrefix: Record<string, string[]> = {
   AboutPageForm: ["frontDesk.about."],
   EquipmentPageForm: ["frontDesk.equipment."],
   RecentCommentsPageForm: ["frontDesk.recentComments."],
-  AlbumPageForm: ["frontDesk.album."]
+  AlbumPageForm: ["frontDesk.album."],
+  TurnstileSettingsForm: ["frontDesk.turnstile."]
 };
 
 // 重置选区 - 重置当前 tab 的配置
