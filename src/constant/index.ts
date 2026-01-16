@@ -381,6 +381,11 @@ const KeyCDNDomain: SettingKey = "cdn.domain";
 const KeyCDNZoneID: SettingKey = "cdn.zone_id";
 const KeyCDNBaseUrl: SettingKey = "cdn.base_url";
 
+// --- Cloudflare Turnstile 人机验证配置 ---
+const KeyTurnstileEnable: SettingKey = "turnstile.enable";
+const KeyTurnstileSiteKey: SettingKey = "turnstile.site_key";
+const KeyTurnstileSecretKey: SettingKey = "turnstile.secret_key";
+
 // --- 相册页面配置 ---
 const KeyAlbumPageBannerBackground: SettingKey = "album.banner.background";
 const KeyAlbumPageBannerTitle: SettingKey = "album.banner.title";
@@ -743,6 +748,11 @@ export const constant = {
   KeyAlbumApiURL,
   KeyAlbumDefaultThumbParam,
   KeyAlbumDefaultBigParam,
+
+  // --- Cloudflare Turnstile 人机验证配置 ---
+  KeyTurnstileEnable,
+  KeyTurnstileSiteKey,
+  KeyTurnstileSecretKey,
 
   // --- 其他 ---
   DEFAULT_CHUNK_SIZE

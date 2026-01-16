@@ -182,6 +182,12 @@ export const settingsMenuConfig: SettingsMenuItem[] = [
     icon: "ri:settings-4-line",
     children: [
       {
+        key: "advanced-turnstile",
+        label: "人机验证",
+        component: "TurnstileSettingsForm",
+        keywords: ["Turnstile", "Cloudflare", "人机验证", "登录", "安全"]
+      },
+      {
         key: "advanced-backup",
         label: "备份导入",
         component: "BackupImportForm",
@@ -2063,6 +2069,34 @@ const albumDescriptors: SettingDescriptor[] = [
   }
 ];
 
+// --- Cloudflare Turnstile 人机验证配置描述符 ---
+const turnstileDescriptors: SettingDescriptor[] = [
+  {
+    frontendPath: "frontDesk.turnstile.enable",
+    backendKey: constant.KeyTurnstileEnable,
+    defaultValue: false,
+    type: "boolean",
+    label: "启用 Turnstile 人机验证",
+    searchKeywords: ["Turnstile", "Cloudflare", "人机验证", "登录", "安全"]
+  },
+  {
+    frontendPath: "frontDesk.turnstile.siteKey",
+    backendKey: constant.KeyTurnstileSiteKey,
+    defaultValue: "",
+    type: "string",
+    label: "Turnstile Site Key",
+    searchKeywords: ["Turnstile", "公钥", "前端"]
+  },
+  {
+    frontendPath: "frontDesk.turnstile.secretKey",
+    backendKey: constant.KeyTurnstileSecretKey,
+    defaultValue: "",
+    type: "string",
+    label: "Turnstile Secret Key",
+    searchKeywords: ["Turnstile", "私钥", "后端"]
+  }
+];
+
 export const allSettingDescriptors = [
   ...siteDescriptors,
   ...pageDescriptors,
@@ -2076,5 +2110,6 @@ export const allSettingDescriptors = [
   ...commentDescriptors,
   ...emailDescriptors,
   ...fLinkDescriptors,
-  ...albumDescriptors
+  ...albumDescriptors,
+  ...turnstileDescriptors
 ];
