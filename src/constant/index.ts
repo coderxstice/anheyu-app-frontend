@@ -274,8 +274,11 @@ const KeyAboutPageEnableComment: SettingKey = "about.page.enable.comment";
 const KeyMusicPlayerEnable: SettingKey = "music.player.enable";
 const KeyMusicPlayerPlaylistID: SettingKey = "music.player.playlist_id";
 const KeyMusicPlayerCustomPlaylist: SettingKey = "music.player.custom_playlist";
+const KeyMusicCapsulePlaylistID: SettingKey = "music.capsule.playlist_id";
 const KeyMusicCapsuleCustomPlaylist: SettingKey =
   "music.capsule.custom_playlist";
+const KeyMusicPagePlaylistID: SettingKey = "music.page.playlist_id";
+const KeyMusicPageCustomPlaylist: SettingKey = "music.page.custom_playlist";
 const KeyMusicAPIBaseURL: SettingKey = "music.api.base_url";
 const KeyMusicVinylBackground: SettingKey = "music.vinyl.background";
 const KeyMusicVinylOuter: SettingKey = "music.vinyl.outer";
@@ -631,7 +634,10 @@ export const constant = {
   KeyMusicPlayerEnable,
   KeyMusicPlayerPlaylistID,
   KeyMusicPlayerCustomPlaylist,
+  KeyMusicCapsulePlaylistID,
   KeyMusicCapsuleCustomPlaylist,
+  KeyMusicPagePlaylistID,
+  KeyMusicPageCustomPlaylist,
   KeyMusicAPIBaseURL,
   KeyMusicVinylBackground,
   KeyMusicVinylOuter,

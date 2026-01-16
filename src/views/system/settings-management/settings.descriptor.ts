@@ -169,6 +169,12 @@ export const settingsMenuConfig: SettingsMenuItem[] = [
         keywords: ["相册", "图片", "瀑布流", "画廊"]
       },
       {
+        key: "pages-music",
+        label: "音乐页面",
+        component: "MusicPageForm",
+        keywords: ["音乐", "播放器", "歌单", "胶囊", "唱片"]
+      },
+      {
         key: "pages-page-management",
         label: "页面管理",
         component: "PageManagement",
@@ -1388,63 +1394,73 @@ const frontDeskDescriptors: SettingDescriptor[] = [
     backendKey: constant.KeyHeaderNavMenu,
     defaultValue: [],
     type: "json"
-  },
+  }
+];
+
+// --- 音乐页面配置 ---
+const musicPageDescriptors: SettingDescriptor[] = [
   {
-    frontendPath: "frontDesk.home.music.player.enable",
+    frontendPath: "frontDesk.music.enable",
     backendKey: constant.KeyMusicPlayerEnable,
     defaultValue: true,
     type: "boolean"
   },
   {
-    frontendPath: "frontDesk.home.music.player.playlist_id",
-    backendKey: constant.KeyMusicPlayerPlaylistID,
-    defaultValue: "8152976493",
-    type: "string"
-  },
-  {
-    frontendPath: "frontDesk.home.music.player.custom_playlist",
-    backendKey: constant.KeyMusicPlayerCustomPlaylist,
+    frontendPath: "frontDesk.music.capsule.playlist_id",
+    backendKey: constant.KeyMusicCapsulePlaylistID,
     defaultValue: "",
     type: "string"
   },
   {
-    frontendPath: "frontDesk.home.music.capsule.custom_playlist",
+    frontendPath: "frontDesk.music.capsule.custom_playlist",
     backendKey: constant.KeyMusicCapsuleCustomPlaylist,
     defaultValue: "",
     type: "string"
   },
   {
-    frontendPath: "frontDesk.home.music.api.base_url",
+    frontendPath: "frontDesk.music.page.playlist_id",
+    backendKey: constant.KeyMusicPagePlaylistID,
+    defaultValue: "8152976493",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.music.page.custom_playlist",
+    backendKey: constant.KeyMusicPageCustomPlaylist,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.music.api.base_url",
     backendKey: constant.KeyMusicAPIBaseURL,
     defaultValue: "https://metings.qjqq.cn",
     type: "string"
   },
   {
-    frontendPath: "frontDesk.home.music.vinyl.background",
+    frontendPath: "frontDesk.music.vinyl.background",
     backendKey: constant.KeyMusicVinylBackground,
     defaultValue: "/static/img/music-vinyl-background.png",
     type: "string"
   },
   {
-    frontendPath: "frontDesk.home.music.vinyl.outer",
+    frontendPath: "frontDesk.music.vinyl.outer",
     backendKey: constant.KeyMusicVinylOuter,
     defaultValue: "/static/img/music-vinyl-outer.png",
     type: "string"
   },
   {
-    frontendPath: "frontDesk.home.music.vinyl.inner",
+    frontendPath: "frontDesk.music.vinyl.inner",
     backendKey: constant.KeyMusicVinylInner,
     defaultValue: "/static/img/music-vinyl-inner.png",
     type: "string"
   },
   {
-    frontendPath: "frontDesk.home.music.vinyl.needle",
+    frontendPath: "frontDesk.music.vinyl.needle",
     backendKey: constant.KeyMusicVinylNeedle,
     defaultValue: "/static/img/music-vinyl-needle.png",
     type: "string"
   },
   {
-    frontendPath: "frontDesk.home.music.vinyl.groove",
+    frontendPath: "frontDesk.music.vinyl.groove",
     backendKey: constant.KeyMusicVinylGroove,
     defaultValue: "/static/img/music-vinyl-groove.png",
     type: "string"
@@ -2106,6 +2122,7 @@ export const allSettingDescriptors = [
   ...recentCommentsDescriptors,
   ...aboutPageDescriptors,
   ...frontDeskDescriptors,
+  ...musicPageDescriptors,
   ...sidebarDescriptors,
   ...commentDescriptors,
   ...emailDescriptors,
