@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-14 13:56:16
- * @LastEditTime: 2025-09-30 16:56:09
+ * @LastEditTime: 2026-01-16 18:49:33
  * @LastEditors: 安知鱼
  */
 import { config } from "md-editor-v3";
@@ -24,6 +24,83 @@ export async function installMarkdownEditorExtensions() {
 
   // 动态导入 mermaid，只在进入编辑页面时才加载
   const mermaid = await import("mermaid").then(m => m.default);
+
+  // 初始化 mermaid，启用所有图表类型
+  // 注意：mermaid 11.x 需要正确的 securityLevel 才能渲染某些图表
+  mermaid.initialize({
+    startOnLoad: false,
+    // loose 模式允许渲染更多复杂图表（如 journey、er 等）
+    securityLevel: "loose",
+    // 自动检测主题
+    theme: document.documentElement.classList.contains("dark")
+      ? "dark"
+      : "default",
+    // 图表通用配置
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: true,
+      curve: "basis"
+    },
+    sequence: {
+      useMaxWidth: true,
+      diagramMarginX: 50,
+      diagramMarginY: 10
+    },
+    gantt: {
+      useMaxWidth: true,
+      leftPadding: 75,
+      gridLineStartPadding: 35,
+      barHeight: 20,
+      barGap: 4
+    },
+    journey: {
+      useMaxWidth: true,
+      diagramMarginX: 50,
+      diagramMarginY: 10
+    },
+    timeline: {
+      useMaxWidth: true
+    },
+    class: {
+      useMaxWidth: true
+    },
+    state: {
+      useMaxWidth: true,
+      dividerMargin: 10,
+      sizeUnit: 5
+    },
+    er: {
+      useMaxWidth: true,
+      layoutDirection: "TB",
+      minEntityWidth: 100,
+      minEntityHeight: 75
+    },
+    pie: {
+      useMaxWidth: true,
+      textPosition: 0.75
+    },
+    quadrantChart: {
+      useMaxWidth: true
+    },
+    requirement: {
+      useMaxWidth: true
+    },
+    mindmap: {
+      useMaxWidth: true
+    },
+    gitGraph: {
+      useMaxWidth: true,
+      mainBranchName: "main"
+    },
+    c4: {
+      useMaxWidth: true
+    },
+    // 日志级别，开发时可以设为 1 查看详细日志
+    logLevel: 3
+  });
+
+  // 将 mermaid 挂载到全局，供重渲染使用
+  (window as any).mermaid = mermaid;
 
   config({
     // 使用本地 mermaid 实例，避免 CDN 加载不稳定导致图表不渲染
