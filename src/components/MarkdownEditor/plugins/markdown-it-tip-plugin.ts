@@ -268,7 +268,7 @@ export default function tipPlugin(md: MarkdownIt): void {
     return true;
   }
 
-  // 块级规则处理独立行的 tip
+  // 块级规则处理独立行的 tip（只有当 {/tip} 后面没有内容时才使用块级规则）
   function tipBlockRule(
     state: any,
     start: number,
@@ -304,6 +304,15 @@ export default function tipPlugin(md: MarkdownIt): void {
 
       if (currentLine.includes("{/tip}")) {
         foundEnd = true;
+        // 检查 {/tip} 后面是否还有内容
+        const closeIndex = currentLine.indexOf("{/tip}");
+        const afterClose = currentLine
+          .slice(closeIndex + "{/tip}".length)
+          .trim();
+        if (afterClose.length > 0) {
+          // {/tip} 后面还有内容，让行内规则处理，而不是块级规则
+          return false;
+        }
         break;
       }
     }
