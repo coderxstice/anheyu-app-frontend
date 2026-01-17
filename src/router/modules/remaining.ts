@@ -289,6 +289,19 @@ export default [
         }
       },
       {
+        path: "article-statistics",
+        name: "ArticleStatistics",
+        component: () => import("@/views/post/article-statistics/index.vue"),
+        meta: {
+          title: () => {
+            const configs = getConfig();
+            const appName = configs?.APP_NAME;
+            return `${appName} - 文章统计`;
+          },
+          showLink: false
+        }
+      },
+      {
         path: "about",
         name: "PostAbout",
         component: () => import("@/views/post/about/index.vue"),

@@ -245,3 +245,55 @@ export interface BatchDeleteResult {
   failed_count: number;
   failed_ids: string[];
 }
+
+// ===================================
+//         文章统计 (Article Statistics)
+// ===================================
+
+/**
+ * @description 分类统计项
+ */
+export interface CategoryStatItem {
+  name: string;
+  count: number;
+}
+
+/**
+ * @description 标签统计项
+ */
+export interface TagStatItem {
+  name: string;
+  count: number;
+}
+
+/**
+ * @description 热门文章项
+ */
+export interface TopViewedPostItem {
+  id: string;
+  title: string;
+  views: number;
+  cover_url: string;
+}
+
+/**
+ * @description 发布趋势项
+ */
+export interface PublishTrendItem {
+  month: string;
+  count: number;
+}
+
+/**
+ * @description 文章统计数据
+ */
+export interface ArticleStatistics {
+  total_posts: number;
+  total_words: number;
+  avg_words: number;
+  total_views: number;
+  category_stats: CategoryStatItem[];
+  tag_stats: TagStatItem[];
+  top_viewed_posts: TopViewedPostItem[];
+  publish_trend: PublishTrendItem[];
+}
