@@ -172,18 +172,30 @@ const extractQQFromEmail = (email: string): string | null => {
   return match ? match[1] : null;
 };
 
-// 获取 QQ 昵称的函数（通过后端代理API，避免暴露API密钥）
+// 获取 QQ 昵称的函数（直接调用第三方API）
 const fetchQQNickname = async (qq: string): Promise<string | null> => {
+  const apiUrl = commentInfoConfig.value.qq_api_url;
+  const apiKey = commentInfoConfig.value.qq_api_key;
+
+  // 如果没有配置API URL或Key，返回null
+  if (!apiUrl || !apiKey) {
+    return null;
+  }
+
   try {
-    // 调用后端API获取QQ信息
-    const response = await fetch(
-      `/api/public/comments/qq-info?qq=${encodeURIComponent(qq)}`
-    );
+    const response = await fetch(`${apiUrl}?qq=${encodeURIComponent(qq)}`, {
+      method: "GET",
+      headers: {
+        // 使用 Bearer Token 方式传递 API Key（推荐方式）
+        Authorization: `Bearer ${apiKey}`
+      }
+    });
+
     if (!response.ok) return null;
     const result = await response.json();
-    // 后端API返回格式: { code: 200, data: { nickname: "昵称", avatar: "头像URL" }, message: "..." }
-    if (result && result.code === 200 && result.data && result.data.nickname) {
-      return result.data.nickname;
+    // API返回格式: { code: 200, msg: "查询成功！", data: { qq: "xxx", nick: "昵称", ... } }
+    if (result && result.code === 200 && result.data && result.data.nick) {
+      return result.data.nick;
     }
     return null;
   } catch (error) {
