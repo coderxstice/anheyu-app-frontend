@@ -141,8 +141,14 @@ onMounted(() => {
       </div>
 
       <div class="statistic-footer">
-        <IconifyIconOnline icon="ri:pie-chart-2-line" class="footer-icon" />
-        <span class="data-source">数据由本站自主统计</span>
+        <div class="footer-left">
+          <IconifyIconOnline icon="ri:pie-chart-2-line" class="footer-icon" />
+          <span class="data-source">数据由本站自主统计</span>
+        </div>
+        <router-link to="/article-statistics" class="article-stats-btn">
+          <IconifyIconOnline icon="ep:arrow-right" class="btn-icon" />
+          <span>文章统计</span>
+        </router-link>
       </div>
     </div>
   </div>
@@ -225,23 +231,61 @@ onMounted(() => {
   position: absolute;
   bottom: 1.5rem;
   left: 2rem;
+  right: 2rem;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
   font-size: 12px;
   color: var(--anzhiyu-white);
-  opacity: 0.6;
 
   @media screen and (width <= 768px) {
     position: relative;
     bottom: auto;
     left: auto;
+    right: auto;
     margin-top: 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .footer-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0.6;
   }
 
   .footer-icon {
     width: 14px;
     height: 14px;
+  }
+}
+
+.article-stats-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #fff;
+  text-decoration: none;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 20px;
+  transition: all 0.3s;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: translateX(4px);
+  }
+
+  .btn-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  @media screen and (width <= 768px) {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>

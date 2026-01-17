@@ -31,7 +31,9 @@ import type {
   ImportArticleOptions,
   ImportArticleResult,
   // 批量删除
-  BatchDeleteResult
+  BatchDeleteResult,
+  // 文章统计
+  ArticleStatistics
 } from "./type";
 
 // ===================================
@@ -239,6 +241,16 @@ export const getArticleArchives = (): Promise<
   return http.request<BaseResponse<ArchiveSummaryResponse>>(
     "get",
     baseUrlApi("public/articles/archives")
+  );
+};
+
+/** @description [公开]获取文章统计数据 */
+export const getArticleStatistics = (): Promise<
+  BaseResponse<ArticleStatistics>
+> => {
+  return http.request<BaseResponse<ArticleStatistics>>(
+    "get",
+    baseUrlApi("public/articles/statistics")
   );
 };
 
