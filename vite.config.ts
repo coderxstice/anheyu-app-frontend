@@ -2,20 +2,14 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2025-09-22 12:08:58
+ * @LastEditTime: 2026-01-17 16:43:46
  * @LastEditors: 安知鱼
  */
 import { getPluginsList } from "./build/plugins";
 import { include, exclude } from "./build/optimize";
 import { type UserConfigExport, type ConfigEnv, loadEnv } from "vite";
 import ElementPlus from "unplugin-element-plus/vite";
-import {
-  root,
-  alias,
-  wrapperEnv,
-  pathResolve,
-  __APP_INFO__
-} from "./build/utils";
+import { root, alias, wrapperEnv, __APP_INFO__ } from "./build/utils";
 
 export default ({ mode }: ConfigEnv): UserConfigExport => {
   const { VITE_CDN, VITE_PORT, VITE_COMPRESSION, VITE_PUBLIC_PATH } =
@@ -100,23 +94,6 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
       sourcemap: false,
       // 消除打包大小超过500kb警告
       chunkSizeWarningLimit: 4000,
-      rollupOptions: {
-        input: {
-          index: pathResolve("./index.html", import.meta.url)
-        },
-        // 忽略第三方库的 eval 警告（如 lottie-web）
-        onwarn(warning, warn) {
-          if (warning.code === "EVAL" && warning.id?.includes("lottie-web")) {
-            return;
-          }
-          warn(warning);
-        },
-        output: {
-          chunkFileNames: "assets/js/[name]-[hash].js",
-          entryFileNames: "assets/js/[name]-[hash].js",
-          assetFileNames: "assets/[ext]/[name]-[hash].[ext]"
-        }
-      },
       // 启用 CSS 代码分割
       cssCodeSplit: true
     },
