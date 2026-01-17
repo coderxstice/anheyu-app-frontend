@@ -163,6 +163,7 @@ export interface PostSettingsInfo {
     defaultCover: string;
     doubleColumn: boolean;
     pageSize: number;
+    enablePrimaryColorTag: boolean; // 是否启用分类主色调标签样式
   };
   expirationTime: number | null;
   page404: {
@@ -481,6 +482,7 @@ export interface CommentSettingsInfo {
   aiDetectRiskLevel: string;
   qqAPIURL: string;
   qqAPIKey: string;
+  qqAPIReferer: string;
   notifyAdmin: boolean;
   notifyReply: boolean;
   pushooChannel: string;

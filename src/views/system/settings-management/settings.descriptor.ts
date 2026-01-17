@@ -598,6 +598,12 @@ const postDescriptors: SettingDescriptor[] = [
     type: "number"
   },
   {
+    frontendPath: "post.default.enablePrimaryColorTag",
+    backendKey: constant.KeyEnablePrimaryColorTag,
+    defaultValue: false,
+    type: "boolean"
+  },
+  {
     frontendPath: "post.page404.defaultImage",
     backendKey: constant.Key404PageDefaultImage,
     defaultValue: "/static/img/background-effect.gif",
@@ -1709,6 +1715,12 @@ const commentDescriptors: SettingDescriptor[] = [
   {
     frontendPath: "frontDesk.comment.qqAPIKey",
     backendKey: constant.KeyCommentQQAPIKey,
+    defaultValue: "",
+    type: "string"
+  },
+  {
+    frontendPath: "frontDesk.comment.qqAPIReferer",
+    backendKey: constant.KeyCommentQQAPIReferer,
     defaultValue: "",
     type: "string"
   },

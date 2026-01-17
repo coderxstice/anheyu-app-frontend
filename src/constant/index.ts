@@ -162,6 +162,8 @@ const KeyDefaultCover: SettingKey = "post.default.cover";
 const KeyPostExpirationTime: SettingKey = "post.expiration_time";
 const KeyDoubleColumn: SettingKey = "post.default.double_column";
 const KeyPostDefaultPageSize: SettingKey = "post.default.page_size";
+const KeyEnablePrimaryColorTag: SettingKey =
+  "post.default.enable_primary_color_tag";
 const Key404PageDefaultImage: SettingKey = "post.page404.default_image";
 const KeyPostRewardEnable: SettingKey = "post.reward.enable";
 const KeyPostRewardWeChatQR: SettingKey = "post.reward.wechat_qr";
@@ -307,6 +309,7 @@ const KeyCommentAIDetectAction: SettingKey = "comment.ai_detect_action";
 const KeyCommentAIDetectRiskLevel: SettingKey = "comment.ai_detect_risk_level";
 const KeyCommentQQAPIURL: SettingKey = "comment.qq_api_url";
 const KeyCommentQQAPIKey: SettingKey = "comment.qq_api_key";
+const KeyCommentQQAPIReferer: SettingKey = "comment.qq_api_referer";
 const KeyCommentNotifyAdmin: SettingKey = "comment.notify_admin";
 const KeyCommentNotifyReply: SettingKey = "comment.notify_reply";
 const KeyPushooChannel: SettingKey = "pushoo.channel";
@@ -536,6 +539,7 @@ export const constant = {
   KeyDefaultCover,
   KeyDoubleColumn,
   KeyPostDefaultPageSize,
+  KeyEnablePrimaryColorTag,
   Key404PageDefaultImage,
   KeyPostRewardEnable,
   KeyPostRewardWeChatQR,
@@ -666,6 +670,7 @@ export const constant = {
   KeyCommentAIDetectRiskLevel,
   KeyCommentQQAPIURL,
   KeyCommentQQAPIKey,
+  KeyCommentQQAPIReferer,
   KeyCommentNotifyAdmin,
   KeyCommentNotifyReply,
   KeyPushooChannel,

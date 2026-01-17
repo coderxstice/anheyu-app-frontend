@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { PostCategory } from "@/api/post/type";
-import { Edit, Delete } from "@element-plus/icons-vue";
-import { ref, nextTick, watch } from "vue";
+import { Edit, Delete, Plus } from "@element-plus/icons-vue";
+import { ref, nextTick, watch, computed } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { updateCategory, deleteCategory, createCategory } from "@/api/post";
 import AnDialog from "@/components/AnDialog/index.vue";
@@ -29,6 +29,14 @@ watch(isVisible, val => {
   emit("update:modelValue", val);
 });
 
+// 统计数据
+const stats = computed(() => {
+  const total = props.categoryOptions?.length || 0;
+  const series = props.categoryOptions?.filter(c => c.is_series).length || 0;
+  const regular = total - series;
+  return { total, series, regular };
+});
+
 // 新分类表单
 const newCategoryForm = ref({
   name: "",
@@ -40,8 +48,36 @@ const isCreating = ref(false);
 // 编辑状态
 const editingCategoryId = ref<string | null>(null);
 const editingCategoryName = ref("");
-const editingSortOrder = ref<number | null>(null);
 const loadingStates = ref<Record<string, boolean>>({});
+
+// 本地排序值状态（避免编辑时跳动）
+const localSortOrders = ref<Record<string, number>>({});
+
+// 初始化/同步本地排序值
+watch(
+  () => props.categoryOptions,
+  categories => {
+    if (categories) {
+      categories.forEach(cat => {
+        // 只在没有本地值时初始化
+        if (localSortOrders.value[cat.id] === undefined) {
+          localSortOrders.value[cat.id] = cat.sort_order;
+        }
+      });
+    }
+  },
+  { immediate: true, deep: true }
+);
+
+// 获取显示的排序值
+const getDisplaySortOrder = (category: PostCategory) => {
+  return localSortOrders.value[category.id] ?? category.sort_order;
+};
+
+// 更新本地排序值
+const updateLocalSortOrder = (category: PostCategory, value: number | null) => {
+  localSortOrders.value[category.id] = value ?? 0;
+};
 
 // 判断分类名是否已存在
 const isCategoryNameExists = (name: string) => {
@@ -68,7 +104,6 @@ const handleEditCategory = (category: PostCategory) => {
 const cancelEdit = () => {
   editingCategoryId.value = null;
   editingCategoryName.value = "";
-  editingSortOrder.value = null;
 };
 
 // 提交名称更新
@@ -93,11 +128,10 @@ const handleUpdateCategoryName = async (category: PostCategory) => {
   }
 };
 
-// 更新排序值
-const handleUpdateSortOrder = async (
-  category: PostCategory,
-  newSortOrder: number
-) => {
+// 提交排序值更新（blur时触发）
+const handleSubmitSortOrder = async (category: PostCategory) => {
+  const newSortOrder = localSortOrders.value[category.id];
+  // 值没有变化，不提交
   if (newSortOrder === category.sort_order) {
     return;
   }
@@ -107,6 +141,8 @@ const handleUpdateSortOrder = async (
     ElMessage.success("排序更新成功");
     emit("refresh-categories");
   } catch (error: any) {
+    // 更新失败，恢复原值
+    localSortOrders.value[category.id] = category.sort_order;
     ElMessage.error(error.message || "更新失败");
   } finally {
     loadingStates.value[category.id] = false;
@@ -121,9 +157,7 @@ const toggleCategoryType = async (category: PostCategory) => {
     await ElMessageBox.confirm(
       `确定要将分类 "${category.name}" ${action}吗？`,
       "确认操作",
-      {
-        type: "warning"
-      }
+      { type: "warning" }
     );
     loadingStates.value[category.id] = true;
     await updateCategory(category.id, { is_series: newIsSeries });
@@ -192,131 +226,147 @@ const handleCreateCategory = async () => {
 
 <template>
   <AnDialog v-model="isVisible" title="管理分类" width="720px">
-    <div class="category-manager-body">
-      <div class="create-category-form">
-        <el-input v-model="newCategoryForm.name" placeholder="输入新分类名称" />
-        <el-tooltip content="数值越小越靠前，默认为 0" placement="top">
+    <div class="category-manager">
+      <!-- 统计信息 -->
+      <div class="stats-bar">
+        <span class="stat-item">
+          <span class="stat-label">总计</span>
+          <span class="stat-value">{{ stats.total }}</span>
+        </span>
+        <span class="stat-divider" />
+        <span class="stat-item">
+          <span class="stat-label">系列</span>
+          <span class="stat-value success">{{ stats.series }}</span>
+        </span>
+        <span class="stat-divider" />
+        <span class="stat-item">
+          <span class="stat-label">普通</span>
+          <span class="stat-value">{{ stats.regular }}</span>
+        </span>
+      </div>
+
+      <!-- 添加分类 -->
+      <div class="add-section">
+        <el-input
+          v-model="newCategoryForm.name"
+          placeholder="输入新分类名称"
+          clearable
+          @keydown.enter="handleCreateCategory"
+        />
+        <el-tooltip content="排序值，越小越靠前" placement="top">
           <el-input-number
             v-model="newCategoryForm.sort_order"
             :min="0"
             :step="1"
             controls-position="right"
-            placeholder="排序"
-            style="width: 120px"
+            class="sort-input"
           />
         </el-tooltip>
-        <el-switch
-          v-model="newCategoryForm.is_series"
-          active-text="设为系列"
-          style="width: 250px; margin: 0 20px"
-        />
+        <el-checkbox v-model="newCategoryForm.is_series">系列</el-checkbox>
         <el-button
           type="primary"
+          :icon="Plus"
           :loading="isCreating"
           @click="handleCreateCategory"
         >
-          添加分类
+          添加
         </el-button>
       </div>
 
-      <el-table
-        v-loading="!categoryOptions"
-        :data="categoryOptions"
-        :style="{ width: '100%' }"
-        height="350px"
-        :default-sort="{ prop: 'sort_order', order: 'ascending' }"
-      >
-        <el-table-column prop="name" label="分类名称" min-width="150">
-          <template #default="scope">
-            <div v-if="editingCategoryId === scope.row.id" class="edit-cell">
-              <el-input
-                :id="`category-edit-input-${scope.row.id}`"
-                v-model="editingCategoryName"
-                size="small"
-                @blur="handleUpdateCategoryName(scope.row)"
-                @keydown.enter="handleUpdateCategoryName(scope.row)"
-              />
-            </div>
-            <span v-else>{{ scope.row.name }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column
-          prop="sort_order"
-          label="排序"
-          width="120"
-          align="center"
-          sortable
+      <!-- 分类列表 -->
+      <div class="list-section">
+        <el-table
+          v-loading="!categoryOptions"
+          :data="categoryOptions"
+          :show-header="true"
+          height="320px"
         >
-          <template #default="scope">
-            <el-input-number
-              :model-value="scope.row.sort_order"
-              :min="0"
-              :step="1"
-              size="small"
-              controls-position="right"
-              @change="val => handleUpdateSortOrder(scope.row, val as number)"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column
-          prop="count"
-          label="文章数"
-          width="90"
-          align="center"
-        />
-        <el-table-column label="类型" width="100" align="center">
-          <template #default="scope">
-            <el-tag
-              :type="scope.row.is_series ? 'success' : 'info'"
-              size="small"
-              effect="light"
-            >
-              {{ scope.row.is_series ? "系列" : "普通" }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="220" align="center">
-          <template #default="scope">
-            <div v-loading="loadingStates[scope.row.id]">
-              <el-button-group>
-                <el-tooltip
-                  :show-arrow="false"
-                  content="编辑名称"
-                  placement="top"
+          <el-table-column prop="name" label="名称" min-width="140">
+            <template #default="{ row }">
+              <div v-if="editingCategoryId === row.id" class="edit-name">
+                <el-input
+                  :id="`category-edit-input-${row.id}`"
+                  v-model="editingCategoryName"
+                  size="small"
+                  @blur="handleUpdateCategoryName(row)"
+                  @keydown.enter="handleUpdateCategoryName(row)"
+                  @keydown.escape="cancelEdit"
+                />
+              </div>
+              <div v-else class="name-cell">
+                <span>{{ row.name }}</span>
+                <el-tag
+                  v-if="row.is_series"
+                  type="success"
+                  size="small"
+                  effect="plain"
                 >
-                  <el-button
-                    :icon="Edit"
-                    type="primary"
-                    link
-                    @click="handleEditCategory(scope.row)"
-                  />
-                </el-tooltip>
+                  系列
+                </el-tag>
+              </div>
+            </template>
+          </el-table-column>
+
+          <el-table-column
+            prop="sort_order"
+            label="排序"
+            width="90"
+            align="center"
+            sortable
+          >
+            <template #default="{ row }">
+              <el-input-number
+                :model-value="getDisplaySortOrder(row)"
+                :min="0"
+                :step="1"
+                size="small"
+                :controls="false"
+                class="sort-input-small"
+                @update:model-value="val => updateLocalSortOrder(row, val)"
+                @blur="handleSubmitSortOrder(row)"
+                @keydown.enter="($event.target as HTMLInputElement)?.blur()"
+              />
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="count" label="文章" width="70" align="center">
+            <template #default="{ row }">
+              <span class="count-badge">{{ row.count }}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="操作" width="200" align="center">
+            <template #default="{ row }">
+              <div v-loading="loadingStates[row.id]" class="action-buttons">
                 <el-button
-                  type="primary"
-                  style="margin: 0 4px"
-                  link
-                  @click="toggleCategoryType(scope.row)"
+                  size="small"
+                  :icon="Edit"
+                  @click="handleEditCategory(row)"
                 >
-                  {{ scope.row.is_series ? "转为普通" : "转为系列" }}
+                  编辑
                 </el-button>
-                <el-tooltip
-                  content="删除分类"
-                  placement="top"
-                  :show-arrow="false"
+                <el-button
+                  size="small"
+                  type="warning"
+                  plain
+                  @click="toggleCategoryType(row)"
                 >
-                  <el-button
-                    :icon="Delete"
-                    type="danger"
-                    link
-                    @click="handleDeleteCategory(scope.row)"
-                  />
-                </el-tooltip>
-              </el-button-group>
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
+                  {{ row.is_series ? "转普通" : "转系列" }}
+                </el-button>
+                <el-button
+                  size="small"
+                  type="danger"
+                  plain
+                  :icon="Delete"
+                  @click="handleDeleteCategory(row)"
+                />
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
     </div>
+
     <template #footer>
       <el-button @click="isVisible = false">关闭</el-button>
     </template>
@@ -324,21 +374,108 @@ const handleCreateCategory = async () => {
 </template>
 
 <style lang="scss" scoped>
-.category-manager-body {
-  .create-category-form {
+.category-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: var(--el-fill-color-light);
+  border-radius: 6px;
+
+  .stat-item {
     display: flex;
     align-items: center;
-    margin-bottom: 16px;
-    gap: 12px;
+    gap: 6px;
+  }
 
-    .el-input {
-      flex: 1;
+  .stat-label {
+    color: var(--el-text-color-secondary);
+    font-size: 13px;
+  }
+
+  .stat-value {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--el-text-color-primary);
+
+    &.success {
+      color: var(--el-color-success);
     }
   }
 
-  .edit-cell {
-    display: flex;
-    align-items: center;
+  .stat-divider {
+    width: 1px;
+    height: 16px;
+    background: var(--el-border-color);
   }
+}
+
+.add-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--el-fill-color-lighter);
+  border-radius: 6px;
+
+  .el-input {
+    flex: 1;
+  }
+
+  .sort-input {
+    width: 100px;
+  }
+}
+
+.list-section {
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: 6px;
+  overflow: hidden;
+
+  :deep(.el-table) {
+    --el-table-border-color: var(--el-border-color-lighter);
+  }
+}
+
+.name-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-name {
+  .el-input {
+    width: 100%;
+  }
+}
+
+.sort-input-small {
+  width: 60px;
+
+  :deep(.el-input__inner) {
+    text-align: center;
+  }
+}
+
+.count-badge {
+  display: inline-block;
+  min-width: 24px;
+  padding: 2px 6px;
+  font-size: 12px;
+  text-align: center;
+  background: var(--el-fill-color);
+  border-radius: 10px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
 }
 </style>

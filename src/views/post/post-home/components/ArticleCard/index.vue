@@ -2,11 +2,20 @@
 import { ref, onMounted, type PropType, computed } from "vue";
 import type { Article } from "@/api/post/type";
 import { useArticleStore } from "@/store/modules/articleStore";
+import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { formatRelativeTime } from "@/utils/format";
 import { useRouter } from "vue-router";
 
 const articleStore = useArticleStore();
+const siteConfigStore = useSiteConfigStore();
 const router = useRouter();
+
+// 是否启用主色调标签样式
+const enablePrimaryColorTag = computed(() => {
+  const postConfig = siteConfigStore.getSiteConfig?.post?.default;
+  const value = postConfig?.enable_primary_color_tag;
+  return value === true || value === "true";
+});
 
 const props = defineProps({
   article: {
@@ -28,6 +37,29 @@ const isRead = ref(false);
 
 const coverUrl = computed(() => {
   return props.article.cover_url || articleStore.defaultCover;
+});
+
+// 获取文章主色调，用于分类标签背景色
+const primaryColor = computed(() => {
+  return props.article.primary_color || "var(--anzhiyu-main)";
+});
+
+// 根据背景色计算合适的文字颜色
+const getContrastColor = (hexColor: string): string => {
+  // 如果是 CSS 变量，返回白色
+  if (hexColor.startsWith("var(")) return "#ffffff";
+  // 移除 # 号
+  const hex = hexColor.replace("#", "");
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  // 计算亮度
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 128 ? "#333333" : "#ffffff";
+};
+
+const categoryTextColor = computed(() => {
+  return getContrastColor(primaryColor.value);
 });
 
 onMounted(() => {
@@ -86,7 +118,43 @@ const goToTagPage = (tagName: string) => {
     </div>
     <div class="recent-post-info">
       <div class="recent-post-info-top">
-        <div class="recent-post-info-top-tips">
+        <!-- 新版标签样式：启用主色调标签 -->
+        <div v-if="enablePrimaryColorTag" class="recent-post-info-top-tips">
+          <!-- 分类标签：使用文章主色调 -->
+          <span
+            v-for="category in article.post_categories"
+            :key="category.id"
+            class="meta-tag category-tag"
+            :style="{
+              backgroundColor: primaryColor,
+              color: categoryTextColor
+            }"
+            @click.stop="goToCategoryPage(category.name)"
+          >
+            {{ category.name }}
+          </span>
+
+          <!-- 置顶标签 -->
+          <span v-if="article.pin_sort > 0" class="meta-tag sticky-tag">
+            <i class="anzhiyufont anzhiyu-icon-thumbtack" />
+            <span>置顶</span>
+          </span>
+
+          <!-- 多人互动标签 -->
+          <span v-if="article.comment_count > 10" class="meta-tag hot-tag">
+            <i class="anzhiyufont anzhiyu-icon-fire" />
+            <span>多人互动</span>
+          </span>
+
+          <!-- 最新标签 -->
+          <span v-if="isNewest" class="meta-tag newest-tag">最新</span>
+
+          <!-- 未读标签 -->
+          <span v-if="!isRead" class="meta-tag unread-tag">未读</span>
+        </div>
+
+        <!-- 旧版标签样式：默认样式 -->
+        <div v-else class="recent-post-info-top-tips legacy">
           <span v-if="article.pin_sort > 0" class="article-meta sticky-warp">
             <i class="sticky anzhiyufont anzhiyu-icon-thumbtack" />
             <span class="sticky">置顶</span>
@@ -113,6 +181,7 @@ const goToTagPage = (tagName: string) => {
           >
           <span v-if="isNewest" class="newPost">最新</span>
         </div>
+
         <h2 class="article-title" :title="article.title">
           {{ article.title }}
         </h2>
@@ -179,15 +248,6 @@ const goToTagPage = (tagName: string) => {
   &.double-column-item {
     height: 18em;
     margin: 0;
-  }
-
-  .unvisited-post,
-  .newPost {
-    position: relative;
-    display: inline;
-    margin-right: 4px;
-    font-size: 0.75rem;
-    color: var(--anzhiyu-secondtext);
   }
 
   &:active {
@@ -328,59 +388,131 @@ const goToTagPage = (tagName: string) => {
   }
 }
 
+// 新版标签容器样式
 .recent-post-info-top-tips {
-  display: block;
-  height: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-height: 24px;
   margin-bottom: 0.5rem;
   overflow: hidden;
-  font-size: 0.75rem;
-  color: var(--anzhiyu-secondtext);
-  text-overflow: ellipsis;
-  white-space: nowrap;
 
-  &:has(.sticky-warp) {
-    transform: translateX(-4px);
-  }
-
-  .sticky-warp {
-    display: inline-flex;
-    align-items: center;
-    margin-right: 8px;
-    color: #ff5722;
-
-    .sticky {
-      margin-left: 4px;
-      font-size: 0.75rem;
-    }
-  }
-
-  .hot-interaction-warp {
-    display: inline-flex;
-    align-items: center;
-    margin-right: 8px;
-    color: var(--anzhiyu-red);
-
-    i.hot-interaction {
-      font-size: 0.75rem;
-    }
-
-    span.hot-interaction {
-      margin-left: 4px;
-      font-size: 0.75rem;
-    }
-  }
-
-  .category-tip {
-    display: inline;
-    margin-right: 4px;
+  // 旧版标签容器样式
+  &.legacy {
+    display: block;
+    height: 20px;
+    gap: 0;
     font-size: 0.75rem;
     color: var(--anzhiyu-secondtext);
-    transition: color 0.3s;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
-    &:hover {
-      color: var(--anzhiyu-main);
+    &:has(.sticky-warp) {
+      transform: translateX(-4px);
+    }
+
+    .sticky-warp {
+      display: inline-flex;
+      align-items: center;
+      margin-right: 8px;
+      color: #ff5722;
+
+      .sticky {
+        margin-left: 4px;
+        font-size: 0.75rem;
+      }
+    }
+
+    .hot-interaction-warp {
+      display: inline-flex;
+      align-items: center;
+      margin-right: 8px;
+      color: var(--anzhiyu-red);
+
+      i.hot-interaction {
+        font-size: 0.75rem;
+      }
+
+      span.hot-interaction {
+        margin-left: 4px;
+        font-size: 0.75rem;
+      }
+    }
+
+    .category-tip {
+      display: inline;
+      margin-right: 4px;
+      font-size: 0.75rem;
+      color: var(--anzhiyu-secondtext);
+      transition: color 0.3s;
+
+      &:hover {
+        color: var(--anzhiyu-main);
+      }
+    }
+
+    .unvisited-post,
+    .newPost {
+      position: relative;
+      display: inline;
+      margin-right: 4px;
+      font-size: 0.75rem;
+      color: var(--anzhiyu-secondtext);
     }
   }
+}
+
+// 统一的标签基础样式
+.meta-tag {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 3px 10px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+
+  i {
+    font-size: 0.7rem;
+  }
+}
+
+// 分类标签 - 使用文章主色调
+.category-tag {
+  cursor: pointer;
+
+  &:hover {
+    filter: brightness(0.9);
+    transform: translateY(-1px);
+  }
+}
+
+// 置顶标签 - 橙色
+.sticky-tag {
+  color: #ffffff;
+  background-color: #ff5722;
+}
+
+// 多人互动标签 - 红色
+.hot-tag {
+  color: #ffffff;
+  background-color: #f56c6c;
+}
+
+// 最新标签 - 绿色
+.newest-tag {
+  color: #ffffff;
+  background-color: #10ac84;
+}
+
+// 未读标签 - 灰色透明
+.unread-tag {
+  color: var(--anzhiyu-secondtext);
+  background-color: var(--anzhiyu-secondbg);
 }
 
 .article-meta-wrap {
@@ -465,6 +597,15 @@ const goToTagPage = (tagName: string) => {
         font-size: 1.2rem;
       }
     }
+  }
+
+  .recent-post-info-top-tips {
+    gap: 4px;
+  }
+
+  .meta-tag {
+    padding: 2px 8px;
+    font-size: 0.65rem;
   }
 }
 </style>

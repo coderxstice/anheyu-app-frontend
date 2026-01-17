@@ -124,7 +124,8 @@ const commentInfoConfig = computed(() => {
     anonymous_email: config.anonymous_email || "",
     allow_image_upload: config.allow_image_upload !== false, // 默认允许上传
     qq_api_url: config.qq_api_url || "https://v1.nsuuu.com/api/qqname",
-    qq_api_key: config.qq_api_key || ""
+    qq_api_key: config.qq_api_key || "",
+    qq_api_referer: config.qq_api_referer || ""
   };
 });
 
@@ -176,6 +177,7 @@ const extractQQFromEmail = (email: string): string | null => {
 const fetchQQNickname = async (qq: string): Promise<string | null> => {
   const apiUrl = commentInfoConfig.value.qq_api_url;
   const apiKey = commentInfoConfig.value.qq_api_key;
+  const apiReferer = commentInfoConfig.value.qq_api_referer;
 
   // 如果没有配置API URL或Key，返回null
   if (!apiUrl || !apiKey) {
@@ -183,13 +185,27 @@ const fetchQQNickname = async (qq: string): Promise<string | null> => {
   }
 
   try {
-    const response = await fetch(`${apiUrl}?qq=${encodeURIComponent(qq)}`, {
+    // 构建请求选项
+    const fetchOptions: RequestInit = {
       method: "GET",
       headers: {
         // 使用 Bearer Token 方式传递 API Key（推荐方式）
         Authorization: `Bearer ${apiKey}`
-      }
-    });
+      },
+      // 使用 origin 策略，发送当前页面的 origin 作为 Referer（如 https://example.com）
+      // 这样 API 可以验证 Referer 白名单
+      referrerPolicy: "origin"
+    };
+
+    // 如果配置了自定义 Referer，设置为同源时使用该值
+    if (apiReferer) {
+      fetchOptions.referrer = apiReferer;
+    }
+
+    const response = await fetch(
+      `${apiUrl}?qq=${encodeURIComponent(qq)}`,
+      fetchOptions
+    );
 
     if (!response.ok) return null;
     const result = await response.json();
