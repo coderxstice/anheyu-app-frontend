@@ -122,6 +122,7 @@ const internalCopyrightType = computed({
             no-data-text="暂无分类，请在'管理分类'中添加"
             :multiple-limit="hasSeriesCategory ? 1 : 3"
             popper-class="hide-selected-check"
+            :teleported="false"
             @change="values => emit('change-category', values)"
           >
             <el-option
@@ -162,6 +163,7 @@ const internalCopyrightType = computed({
             placeholder="选择或创建标签"
             style="width: 100%"
             no-data-text="输入名称后按回车键创建"
+            :teleported="false"
             @change="values => emit('change-tag', values)"
           >
             <el-option

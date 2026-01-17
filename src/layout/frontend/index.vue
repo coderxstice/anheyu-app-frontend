@@ -113,7 +113,8 @@ import {
   onUnmounted,
   computed,
   ref,
-  watch
+  watch,
+  defineAsyncComponent
 } from "vue";
 import { useRoute } from "vue-router";
 import { useGlobal } from "@pureadmin/utils";
@@ -126,14 +127,28 @@ import ArrowDownBold from "@iconify-icons/ep/arrow-down-bold";
 import MuteIcon from "@iconify-icons/ep/mute";
 import MicrophoneIcon from "@iconify-icons/ep/microphone";
 
+// 首屏必须组件同步加载
 import Header from "./components/hearder/index.vue";
 import Footer from "./components/footer/index.vue";
-import SearchModal from "./components/SearchModal/index.vue";
-import RightMenu from "./components/RightMenu/index.vue";
-import KeyboardTips from "./components/KeyboardTips/index.vue";
-import MobileMenu from "./components/MobileMenu/index.vue";
-import MusicPlayer from "./components/MusicPlayer/index.vue";
 import FpsMonitor from "@/components/FpsMonitor/index.vue";
+
+// 非首屏组件异步加载，减少首屏 JS 体积
+const SearchModal = defineAsyncComponent(
+  () => import("./components/SearchModal/index.vue")
+);
+const RightMenu = defineAsyncComponent(
+  () => import("./components/RightMenu/index.vue")
+);
+const KeyboardTips = defineAsyncComponent(
+  () => import("./components/KeyboardTips/index.vue")
+);
+const MobileMenu = defineAsyncComponent(
+  () => import("./components/MobileMenu/index.vue")
+);
+const MusicPlayer = defineAsyncComponent(
+  () => import("./components/MusicPlayer/index.vue")
+);
+
 import { useCopyProtection } from "@/composables/useCopyProtection";
 
 const { $storage } = useGlobal<GlobalPropertiesApi>();

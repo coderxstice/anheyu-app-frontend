@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-06-15 11:31:00
- * @LastEditTime: 2026-01-17 16:43:46
+ * @LastEditTime: 2026-01-17 16:55:46
  * @LastEditors: 安知鱼
  */
 import { getPluginsList } from "./build/plugins";

@@ -119,8 +119,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
-import { gsap } from "gsap";
 import { useArticleStore } from "@/store/modules/articleStore";
+
+// GSAP 动态导入，减少首屏体积
+let gsap: typeof import("gsap").gsap;
 
 interface SearchHit {
   id: string;
@@ -266,13 +268,19 @@ function formatDate(dateString: string): string {
   }
 }
 
-function openModal() {
+async function openModal() {
   if (isOpen.value) return;
   isOpen.value = true;
 
   const mask = maskRef.value;
   const dialog = dialogRef.value;
   if (!mask || !dialog) return;
+
+  // 动态加载 GSAP
+  if (!gsap) {
+    const module = await import("gsap");
+    gsap = module.gsap;
+  }
 
   gsap.set(mask, { display: "block", opacity: 0, pointerEvents: "auto" });
   gsap.set(dialog, { display: "flex", opacity: 0, y: 24, scale: 0.98 });
@@ -302,11 +310,17 @@ function openModal() {
     });
 }
 
-function closeModal() {
+async function closeModal() {
   if (!isOpen.value) return;
   const mask = maskRef.value;
   const dialog = dialogRef.value;
   if (!mask || !dialog) return;
+
+  // 动态加载 GSAP
+  if (!gsap) {
+    const module = await import("gsap");
+    gsap = module.gsap;
+  }
 
   const tl = gsap.timeline({ onComplete: onClosed });
   tl.to(dialog, {
@@ -347,12 +361,15 @@ function onKeydown(e: KeyboardEvent) {
 
 // 移除全局点击监听，改为使用自定义事件或数据属性来精确控制
 
-onMounted(() => {
+onMounted(async () => {
+  // 初始化时用 CSS 隐藏，不需要 GSAP
   if (maskRef.value) {
-    gsap.set(maskRef.value, { display: "none", opacity: 0 });
+    maskRef.value.style.display = "none";
+    maskRef.value.style.opacity = "0";
   }
   if (dialogRef.value) {
-    gsap.set(dialogRef.value, { display: "none", opacity: 0 });
+    dialogRef.value.style.display = "none";
+    dialogRef.value.style.opacity = "0";
   }
 
   window.addEventListener("keydown", onKeydown);

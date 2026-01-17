@@ -66,6 +66,7 @@
     "jszip": "^3.10.1",
     "katex": "^0.16.22",
     "localforage": "^1.10.0",
+    "lodash-es": "^4.17.21",
     "lottie-web": "^5.13.0",
     "md-editor-v3": "^5.8.4",
     "mermaid": "^11.12.2",
@@ -92,7 +93,6 @@
     "@commitlint/config-conventional": "^19.6.0",
     "@commitlint/types": "^19.5.0",
     "@eslint/js": "^9.16.0",
-    "@faker-js/faker": "^9.3.0",
     "@iconify-icons/ep": "^1.2.12",
     "@iconify-icons/ri": "^1.2.10",
     "@iconify/vue": "^4.2.0",
@@ -141,13 +141,11 @@
     "vite": "^7.2.6",
     "vite-plugin-cdn-import": "^1.0.1",
     "vite-plugin-compression": "^0.5.1",
-    "vite-plugin-fake-server": "^2.1.4",
     "vite-plugin-remove-console": "^2.2.0",
     "vite-plugin-router-warn": "^1.0.0",
     "vite-svg-loader": "^5.1.0",
     "vue-eslint-parser": "^9.4.3",
-    "vue-tsc": "^2.1.10",
-    "vuedraggable": "^4.1.0"
+    "vue-tsc": "^2.1.10"
   },
   "engines": {
     "node": "^18.18.0 || ^20.9.0 || >=22.0.0",
