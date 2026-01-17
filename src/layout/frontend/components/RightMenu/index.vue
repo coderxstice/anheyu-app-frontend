@@ -135,8 +135,10 @@ import { useSnackbar } from "@/composables/useSnackbar";
 import { useUiStore } from "@/store/modules/uiStore";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
 import { storeToRefs } from "pinia";
-import gsap from "gsap";
 import IconifyIconOffline from "@/components/ReIcon/src/iconifyIconOffline";
+
+// GSAP 动态导入，减少首屏体积
+let gsap: typeof import("gsap").gsap;
 
 const rightMenuRef = ref<HTMLElement | null>(null);
 const isVisible = ref(false);
@@ -228,9 +230,15 @@ const handleContextMenu = (event: MouseEvent) => {
   position.y = event.clientY;
   isVisible.value = true;
 
-  nextTick(() => {
+  nextTick(async () => {
     // 调整菜单位置以避免超出窗口边界
     adjustMenuPosition();
+
+    // 动态加载 GSAP
+    if (!gsap) {
+      const module = await import("gsap");
+      gsap = module.gsap;
+    }
 
     // GSAP 动画
     gsap.fromTo(
@@ -311,8 +319,14 @@ const adjustMenuPosition = () => {
   );
 };
 
-const hideMenu = () => {
+const hideMenu = async () => {
   if (isVisible.value) {
+    // 动态加载 GSAP
+    if (!gsap) {
+      const module = await import("gsap");
+      gsap = module.gsap;
+    }
+
     gsap.to(rightMenuRef.value, {
       scale: 0.9,
       opacity: 0,

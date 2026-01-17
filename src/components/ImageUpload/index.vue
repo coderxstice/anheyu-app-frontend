@@ -227,7 +227,7 @@ const _uid = Math.random().toString(36).substring(2);
     </div>
 
     <div class="button-area">
-      <el-dropdown @command="handleCommand">
+      <el-dropdown :teleported="false" @command="handleCommand">
         <el-button type="primary" :loading="isUploading" plain>
           {{ imageUrl ? "更换图片" : "选择图片"
           }}<el-icon class="el-icon--right"><arrow-down /></el-icon>

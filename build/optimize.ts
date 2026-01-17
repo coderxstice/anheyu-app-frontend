@@ -22,7 +22,9 @@ const include = [
   "pinyin-pro",
   "@vueuse/core",
   "@pureadmin/utils",
-  "responsive-storage"
+  "responsive-storage",
+  // mermaid 及其动态导入的依赖，确保它们被正确预构建
+  "mermaid"
 ];
 
 /**

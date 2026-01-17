@@ -70,6 +70,7 @@
               placeholder="请选择申请类型（可选）"
               clearable
               style="width: 100%"
+              :teleported="false"
             >
               <el-option label="新增友链" value="NEW" />
               <el-option label="修改友链" value="UPDATE" />
@@ -108,6 +109,7 @@
                 placeholder="请选择分类"
                 class="selector-main"
                 :loading="categoryLoading"
+                :teleported="false"
               >
                 <el-option
                   v-for="item in allCategories"
@@ -145,6 +147,7 @@
                 placeholder="请选择标签（可选）"
                 class="selector-main"
                 :loading="tagLoading"
+                :teleported="false"
               >
                 <el-option
                   v-for="item in allTags"
@@ -181,6 +184,7 @@
               v-model="formData.status"
               placeholder="请选择状态"
               style="width: 100%"
+              :teleported="false"
             >
               <el-option label="审核通过" value="APPROVED" />
               <el-option label="待审核" value="PENDING" />

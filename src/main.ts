@@ -35,7 +35,13 @@ import { useElementPlus } from "@/plugins/elementPlus";
 import { injectResponsiveStorage } from "@/utils/responsive";
 import { initExternalLinkInterceptor } from "@/utils/externalLink";
 
-import Table from "@pureadmin/table";
+// Table 延迟加载（只在后台使用）
+let Table: any = null;
+const loadTable = async () => {
+  const module = await import("@pureadmin/table");
+  Table = module.default;
+  app.use(Table);
+};
 // 引入重置样式
 import "./style/reset.scss";
 // 导入公共样式
@@ -71,11 +77,14 @@ import { Perms } from "@/components/RePerms";
 app.component("Auth", Auth);
 app.component("Perms", Perms);
 
-// 全局注册vue-tippy
-import "tippy.js/dist/tippy.css";
-import "tippy.js/themes/light.css";
-import VueTippy from "vue-tippy";
-app.use(VueTippy);
+// vue-tippy 延迟加载（主要用于后台管理）
+const loadTippy = async () => {
+  await import("tippy.js/dist/tippy.css");
+  await import("tippy.js/themes/light.css");
+  const { default: VueTippy } = await import("vue-tippy");
+  app.use(VueTippy);
+};
+loadTippy();
 
 // 确保 Pinia 在任何 Store 被使用之前就被安装到 Vue 应用中
 setupStore(app);
@@ -93,8 +102,11 @@ initializeConfigs(app)
     }
     injectResponsiveStorage(app, platformConfig);
 
-    app.use(MotionPlugin).use(useElementPlus).use(Table);
+    app.use(MotionPlugin).use(useElementPlus);
     app.mount("#app");
+
+    // 延迟加载 Table 组件（后台使用）
+    loadTable();
 
     // 初始化外链拦截器
     initExternalLinkInterceptor();

@@ -244,7 +244,11 @@
       </div>
       <template #footer>
         <div class="dialog-footer">
-          <el-dropdown trigger="click" placement="top-start">
+          <el-dropdown
+            trigger="click"
+            placement="top-start"
+            :teleported="false"
+          >
             <el-button type="primary" plain :icon="Plus">添加列</el-button>
             <template #dropdown>
               <el-dropdown-menu>

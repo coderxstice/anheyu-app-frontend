@@ -310,6 +310,7 @@ const handleClose = () => {
                 <el-select
                   v-model="importOptions.default_status"
                   placeholder="选择状态"
+                  :teleported="false"
                 >
                   <el-option label="草稿" value="DRAFT" />
                   <el-option label="已发布" value="PUBLISHED" />

@@ -109,6 +109,7 @@
                   placeholder="选择默认分类"
                   style="width: 100%"
                   size="default"
+                  :teleported="false"
                 >
                   <el-option
                     v-for="category in categories"

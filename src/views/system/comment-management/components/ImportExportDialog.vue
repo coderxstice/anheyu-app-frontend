@@ -4,7 +4,10 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { Upload, Download, UploadFilled } from "@element-plus/icons-vue";
 import type { UploadProps, UploadFile } from "element-plus";
 import { exportComments, importComments } from "@/api/comment";
-import type { ImportCommentOptions, ImportCommentResult } from "@/api/comment/type";
+import type {
+  ImportCommentOptions,
+  ImportCommentResult
+} from "@/api/comment/type";
 import AnDialog from "@/components/AnDialog/index.vue";
 
 defineOptions({
@@ -214,7 +217,10 @@ const handleClose = () => {
             class="mb-4"
           >
             <template #default>
-              <p>• 将导出{{ selectedIds.length > 0 ? '选中的' : '所有' }}评论为 ZIP 压缩包</p>
+              <p>
+                • 将导出{{ selectedIds.length > 0 ? "选中的" : "所有" }}评论为
+                ZIP 压缩包
+              </p>
               <p>• 包含评论的 JSON 数据文件</p>
               <p>• 支持跨系统导入，保留评论所有信息</p>
             </template>
@@ -223,10 +229,13 @@ const handleClose = () => {
           <div class="export-info">
             <el-statistic
               :title="selectedIds.length > 0 ? '已选择评论数' : '导出范围'"
-              :value="selectedIds.length > 0 ? selectedIds.length : '全部'"
+              :value="selectedIds.length > 0 ? selectedIds.length : undefined"
             >
               <template #prefix>
                 <IconifyIconOnline icon="ep:chat-dot-round" />
+              </template>
+              <template v-if="selectedIds.length === 0" #default>
+                全部
               </template>
             </el-statistic>
           </div>
@@ -240,7 +249,13 @@ const handleClose = () => {
               class="export-btn"
               @click="handleExport"
             >
-              {{ exporting ? "导出中..." : (selectedIds.length > 0 ? "导出选中" : "导出全部") }}
+              {{
+                exporting
+                  ? "导出中..."
+                  : selectedIds.length > 0
+                    ? "导出选中"
+                    : "导出全部"
+              }}
             </el-button>
           </div>
         </div>
@@ -293,7 +308,9 @@ const handleClose = () => {
             <el-form label-width="140px" label-position="left">
               <el-form-item label="跳过已存在评论">
                 <el-switch v-model="importOptions.skip_existing" />
-                <span class="option-tip">相同邮箱、路径、内容的评论将被跳过</span>
+                <span class="option-tip"
+                  >相同邮箱、路径、内容的评论将被跳过</span
+                >
               </el-form-item>
 
               <el-form-item label="保留创建时间">
@@ -305,6 +322,7 @@ const handleClose = () => {
                 <el-select
                   v-model="importOptions.default_status"
                   placeholder="选择状态"
+                  :teleported="false"
                 >
                   <el-option label="已发布" :value="1" />
                   <el-option label="待审核" :value="2" />
@@ -464,4 +482,3 @@ const handleClose = () => {
   }
 }
 </style>
-

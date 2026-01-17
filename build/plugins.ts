@@ -59,7 +59,8 @@ export function getPluginsList(
       async writeBundle(outputOptions) {
         const version = {
           name: process.env.npm_package_name,
-          version: process.env.npm_package_version
+          version: process.env.npm_package_version,
+          buildTime: Date.now() // 添加构建时间戳，用于检测版本更新
         };
         // Rollup 的 `outputOptions.dir` 钩子会提供输出目录的绝对路径
         const path = resolve(outputOptions.dir, "version.json");
