@@ -29,7 +29,7 @@
         >
           <div class="comment-info">
             <img
-              :src="`https://weavatar.com/avatar/${comment.email_md5}?d=https%3A%2F%2Fbu.dusays.com%2F2024%2F04%2F18%2F66209793d5145.png`"
+              :src="getAvatarSrc(comment)"
               :alt="`${comment.nickname}的头像`"
             />
             <div>
@@ -61,6 +61,7 @@ import { computed, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { getLatestPublicComments } from "@/api/comment";
 import type { Comment } from "@/api/comment/type";
+import md5 from "blueimp-md5";
 
 defineOptions({
   name: "RecentComments"
@@ -73,6 +74,54 @@ const siteConfigStore = useSiteConfigStore();
 const recentCommentsConfig = computed(
   () => siteConfigStore.getSiteConfig?.recent_comments
 );
+
+// 评论配置
+const commentConfig = computed(() => {
+  const config = siteConfigStore.getSiteConfig;
+  return {
+    gravatar_url: config?.GRAVATAR_URL || "https://cravatar.cn/",
+    default_gravatar_type: config?.DEFAULT_GRAVATAR_TYPE || "identicon"
+  };
+});
+
+// 获取评论头像地址
+const getAvatarSrc = (comment: Comment): string => {
+  // 优先使用用户自定义头像
+  if (comment.avatar_url) {
+    return comment.avatar_url;
+  }
+
+  // 如果是匿名评论，使用匿名头像
+  if (comment.is_anonymous) {
+    const url = new URL(commentConfig.value.gravatar_url);
+    url.pathname += `avatar/anonymous`;
+    url.searchParams.set("d", "mp");
+    url.searchParams.set("s", "140");
+    url.searchParams.set("f", "y");
+    return url.toString();
+  }
+
+  // 如果后端返回了QQ号，使用QQ头像
+  if (comment.qq_number) {
+    return `https://thirdqq.qlogo.cn/g?b=sdk&nk=${comment.qq_number}&s=140`;
+  }
+
+  // 向后兼容：检查昵称是否为QQ号且邮箱MD5匹配
+  const isQQ = /^[1-9]\d{4,10}$/.test(comment.nickname?.trim() || "");
+  if (isQQ) {
+    const qqEmailMd5 = md5(`${comment.nickname?.trim()}@qq.com`).toLowerCase();
+    if (comment.email_md5?.toLowerCase() === qqEmailMd5) {
+      return `https://thirdqq.qlogo.cn/g?b=sdk&nk=${comment.nickname.trim()}&s=140`;
+    }
+  }
+
+  // 默认使用 Gravatar
+  const url = new URL(commentConfig.value.gravatar_url);
+  url.pathname += `avatar/${comment.email_md5 || ""}`;
+  url.searchParams.set("d", commentConfig.value.default_gravatar_type);
+  url.searchParams.set("s", "140");
+  return url.toString();
+};
 
 // 评论数据相关状态
 const comments = ref<Comment[]>([]);
