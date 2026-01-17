@@ -27,6 +27,21 @@
     />
   </el-form-item>
 
+  <el-form-item label="启用分类主色调标签">
+    <div>
+      <el-switch
+        v-model="formData.default.enablePrimaryColorTag"
+        placeholder="例如：false"
+      />
+      <div class="form-item-help">
+        启用后，文章卡片的分类标签会使用文章封面的主色调作为背景色，呈现彩色标签效果。<br />
+        <strong
+          >默认关闭，开启后需要文章有封面图片且已提取主色调才能生效。</strong
+        >
+      </div>
+    </div>
+  </el-form-item>
+
   <el-form-item label="文章过期时间">
     <div>
       <el-input-number
