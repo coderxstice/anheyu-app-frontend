@@ -1103,7 +1103,7 @@
     --gallery-ratio: auto;
     display: grid;
     gap: var(--gallery-gap);
-    margin: 0;
+    margin: 10px 0;
 
     // 列数配置
     &.gallery-cols-1 {

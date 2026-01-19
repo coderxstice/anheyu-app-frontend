@@ -157,7 +157,7 @@ const toggleCategoryType = async (category: PostCategory) => {
     await ElMessageBox.confirm(
       `确定要将分类 "${category.name}" ${action}吗？`,
       "确认操作",
-      { type: "warning" }
+      { type: "warning", customClass: "high-z-index-message-box" }
     );
     loadingStates.value[category.id] = true;
     await updateCategory(category.id, { is_series: newIsSeries });
@@ -180,7 +180,8 @@ const handleDeleteCategory = async (category: PostCategory) => {
   try {
     await ElMessageBox.confirm(message, "警告", {
       type: "warning",
-      confirmButtonText: "确认删除"
+      confirmButtonText: "确认删除",
+      customClass: "high-z-index-message-box"
     });
     loadingStates.value[category.id] = true;
     await deleteCategory(category.id);

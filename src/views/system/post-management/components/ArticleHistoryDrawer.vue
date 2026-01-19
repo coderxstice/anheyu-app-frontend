@@ -102,7 +102,8 @@ const handleRestore = async (item: ArticleHistoryListItem) => {
       {
         confirmButtonText: "确定恢复",
         cancelButtonText: "取消",
-        type: "warning"
+        type: "warning",
+        customClass: "high-z-index-message-box"
       }
     );
 

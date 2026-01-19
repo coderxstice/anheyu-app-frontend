@@ -482,7 +482,7 @@ export interface CommentSettingsInfo {
   aiDetectRiskLevel: string;
   qqAPIURL: string;
   qqAPIKey: string;
-  qqAPIReferer: string;
+  nsuuuAPIReferer: string;
   notifyAdmin: boolean;
   notifyReply: boolean;
   pushooChannel: string;

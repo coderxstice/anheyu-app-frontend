@@ -178,11 +178,16 @@ const onSaveHandler = async (markdown: string, sanitizedHtml: string) => {
       isSubmitting.value = false;
       return;
     }
+    // 处理 ip_location：当为 "未知" 或空值时，传递空字符串触发后端自动获取
+    const ipLocationToSubmit =
+      !form.ip_location || form.ip_location === "未知" ? "" : form.ip_location;
+
     const dataToSubmit = {
       ...form,
       content_md: markdown,
       content_html: sanitizedHtml,
-      summaries: form.summaries?.filter(s => s && s.trim() !== "") || []
+      summaries: form.summaries?.filter(s => s && s.trim() !== "") || [],
+      ip_location: ipLocationToSubmit // 确保 ip_location 字段总是被传递
     };
     if (isEditMode.value) {
       await updateArticle(articleId.value, dataToSubmit);

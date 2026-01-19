@@ -299,7 +299,7 @@ const formatJson = () => {
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="QQ API 密钥">
+        <el-form-item label="QQ API Key">
           <el-input
             v-model="model.qqAPIKey"
             placeholder="在鸭梨API控制台获取"
@@ -309,20 +309,22 @@ const formatJson = () => {
     </el-row>
     <el-row :gutter="20">
       <el-col :span="24">
-        <el-form-item label="QQ API Referer 白名单">
+        <el-form-item label="NSUUU API Referer 白名单">
           <el-input
-            v-model="model.qqAPIReferer"
-            placeholder="例如：https://example.com（需与鸭梨API控制面板白名单配置一致）"
+            v-model="model.nsuuuAPIReferer"
+            type="textarea"
+            :rows="3"
+            placeholder="留空表示不限制Referer&#10;每行一个域名，如：&#10;https://example.com&#10;.example.com（泛域名）"
           />
           <template #extra>
             <span style="color: var(--anzhiyu-secondtext); font-size: 12px">
-              填写您在鸭梨API控制面板中配置的Referer白名单地址，用于客户端请求时验证
+              适用于IP定位、QQ查询、AI检测等所有NSUUU
+              API。设置<code>.example.com</code>表示泛域名匹配。需与鸭梨API控制面板配置一致。
             </span>
           </template>
         </el-form-item>
       </el-col>
     </el-row>
-
     <el-divider content-position="left">通知设置</el-divider>
 
     <el-alert type="info" :closable="false" style="margin-bottom: 20px">
