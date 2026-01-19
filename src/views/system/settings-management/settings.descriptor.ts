@@ -1719,12 +1719,6 @@ const commentDescriptors: SettingDescriptor[] = [
     type: "string"
   },
   {
-    frontendPath: "frontDesk.comment.qqAPIReferer",
-    backendKey: constant.KeyCommentQQAPIReferer,
-    defaultValue: "",
-    type: "string"
-  },
-  {
     frontendPath: "frontDesk.comment.notifyAdmin",
     backendKey: constant.KeyCommentNotifyAdmin,
     defaultValue: false,

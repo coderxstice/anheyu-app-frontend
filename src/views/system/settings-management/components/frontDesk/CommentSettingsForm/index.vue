@@ -307,22 +307,6 @@ const formatJson = () => {
         </el-form-item>
       </el-col>
     </el-row>
-    <el-row :gutter="20">
-      <el-col :span="24">
-        <el-form-item label="QQ API Referer 白名单">
-          <el-input
-            v-model="model.qqAPIReferer"
-            placeholder="例如：https://example.com（需与鸭梨API控制面板白名单配置一致）"
-          />
-          <template #extra>
-            <span style="color: var(--anzhiyu-secondtext); font-size: 12px">
-              填写您在鸭梨API控制面板中配置的Referer白名单地址，用于客户端请求时验证
-            </span>
-          </template>
-        </el-form-item>
-      </el-col>
-    </el-row>
-
     <el-divider content-position="left">通知设置</el-divider>
 
     <el-alert type="info" :closable="false" style="margin-bottom: 20px">
