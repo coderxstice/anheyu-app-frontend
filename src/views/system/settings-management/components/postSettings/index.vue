@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2025-08-02 18:04:48
- * @LastEditTime: 2025-12-27 16:57:21
+ * @LastEditTime: 2026-01-19 10:11:02
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -104,7 +104,6 @@
     <el-input
       v-model="formData.ipApiToken"
       placeholder="请输入IP属地查询 API Token"
-      show-password
     />
     <div class="form-item-help">
       配合 IP 属地查询 API 使用的 Token (如有)。
