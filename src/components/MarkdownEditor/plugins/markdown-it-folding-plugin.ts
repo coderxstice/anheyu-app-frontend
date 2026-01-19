@@ -100,12 +100,25 @@ export default function customFoldingPlugin(md: MarkdownIt): void {
       }
     });
 
-    // --- 提取区块内容（处理缩进）---
+    // --- 提取区块内容（保留相对缩进）---
+    // 修复：只移除与块标记同级的基础缩进，保留代码块内的额外缩进
     let content = "";
     for (let i = startLine + 1; i < nextLine; i++) {
-      const lineStart = state.bMarks[i] + state.tShift[i];
+      // 获取整行的原始内容（包含所有缩进）
+      const lineStart = state.bMarks[i];
       const lineEnd = state.eMarks[i];
-      const lineContent = state.src.slice(lineStart, lineEnd);
+      const fullLine = state.src.slice(lineStart, lineEnd);
+
+      // 计算当前行的实际缩进量（空格数）
+      let lineIndent = 0;
+      while (lineIndent < fullLine.length && fullLine[lineIndent] === " ") {
+        lineIndent++;
+      }
+
+      // 移除基础缩进（与块标记同级），保留相对缩进
+      const indentToRemove = Math.min(lineIndent, startIndent);
+      const lineContent = fullLine.slice(indentToRemove);
+
       content += lineContent + "\n";
     }
 
