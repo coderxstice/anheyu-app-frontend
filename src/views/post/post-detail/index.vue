@@ -124,9 +124,10 @@ const isCommentEnabled = computed(() => {
 usePostCustomHTML();
 
 // Mermaid 虚拟渲染：避免首屏/TOC 解析时一次性解析大量 SVG DOM
-const mermaidVirtualized = computed(() =>
-  virtualizeMermaidBlocks(article.value?.content_html || "")
-);
+const mermaidVirtualized = computed(() => {
+  const html = article.value?.content_html || "";
+  return virtualizeMermaidBlocks(html);
+});
 
 const headingTocItems = ref<{ id: string }[]>([]);
 const commentIds = ref<string[]>([]);
