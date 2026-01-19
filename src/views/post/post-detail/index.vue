@@ -126,23 +126,6 @@ usePostCustomHTML();
 // Mermaid 虚拟渲染：避免首屏/TOC 解析时一次性解析大量 SVG DOM
 const mermaidVirtualized = computed(() => {
   const html = article.value?.content_html || "";
-  // #region agent log
-  const hasSvg = html.includes("<svg");
-  const hasMermaidClass = html.includes("md-editor-mermaid");
-  const hasPlaceholder = html.includes("Mermaid 图表加载中");
-  const hasPlaceholderClass = html.includes("md-editor-mermaid-placeholder");
-  const mermaidMatch =
-    html.match(/<[^>]*md-editor-mermaid[^>]*>[\s\S]{0,300}/)?.[0] ||
-    "not found";
-  console.log("[DEBUG-anheyu-app] content_html检查:", {
-    htmlLength: html.length,
-    hasSvg,
-    hasMermaidClass,
-    hasPlaceholder,
-    hasPlaceholderClass,
-    mermaidPreview: mermaidMatch
-  });
-  // #endregion
   return virtualizeMermaidBlocks(html);
 });
 

@@ -180,23 +180,6 @@ export function virtualizeMermaidBlocks(html: string): MermaidVirtualizeResult {
 
   virtualHtml += rawHtml.slice(lastPos);
 
-  // #region agent log
-  // 调试日志
-  if (count > 0) {
-    const inputHasPlaceholder = rawHtml.includes("Mermaid 图表加载中");
-    const outputHasPlaceholder = virtualHtml.includes("Mermaid 图表加载中");
-    console.log("[DEBUG-virtualizeMermaid] 处理结果:", {
-      count,
-      blockIds: Object.keys(blocks),
-      inputHasPlaceholder,
-      outputHasPlaceholder,
-      inputHasSvg: rawHtml.includes("<svg"),
-      outputHasSvg: virtualHtml.includes("<svg"),
-      blocks
-    });
-  }
-  // #endregion
-
   return {
     rawHtml,
     virtualHtml,

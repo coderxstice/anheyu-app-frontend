@@ -247,17 +247,6 @@ const setupVirtualMermaid = (container: HTMLElement) => {
     mermaidVirtualObserver = null;
   }
 
-  // #region agent log
-  console.log("[DEBUG-PostContent] setupVirtualMermaid:", {
-    rawContentLength: props.rawContent?.length || 0,
-    rawContentHasSvg: props.rawContent?.includes("<svg") || false,
-    rawContentHasPlaceholder:
-      props.rawContent?.includes("Mermaid 图表加载中") || false,
-    mermaidBlocksCount: Object.keys(props.mermaidBlocks || {}).length,
-    mermaidBlocks: props.mermaidBlocks
-  });
-  // #endregion
-
   if (!props.rawContent || !props.mermaidBlocks) return;
   const blockIds = Object.keys(props.mermaidBlocks);
   if (blockIds.length === 0) return;
@@ -282,17 +271,6 @@ const setupVirtualMermaid = (container: HTMLElement) => {
 
         // 注入原始 mermaid 块 HTML（包含 SVG）
         const blockHtml = props.rawContent.slice(meta.start, meta.end);
-        // #region agent log
-        console.log("[DEBUG-PostContent] 注入mermaid块:", {
-          id,
-          start: meta.start,
-          end: meta.end,
-          blockHtmlLength: blockHtml.length,
-          blockHtmlHasSvg: blockHtml.includes("<svg"),
-          blockHtmlHasPlaceholder: blockHtml.includes("Mermaid 图表加载中"),
-          blockHtmlPreview: blockHtml.substring(0, 200)
-        });
-        // #endregion
         try {
           const range = document.createRange();
           range.selectNode(el);
