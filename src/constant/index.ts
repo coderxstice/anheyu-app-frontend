@@ -309,6 +309,7 @@ const KeyCommentAIDetectAction: SettingKey = "comment.ai_detect_action";
 const KeyCommentAIDetectRiskLevel: SettingKey = "comment.ai_detect_risk_level";
 const KeyCommentQQAPIURL: SettingKey = "comment.qq_api_url";
 const KeyCommentQQAPIKey: SettingKey = "comment.qq_api_key";
+const KeyNSUUUAPIReferer: SettingKey = "nsuuu.api_referer";
 const KeyCommentNotifyAdmin: SettingKey = "comment.notify_admin";
 const KeyCommentNotifyReply: SettingKey = "comment.notify_reply";
 const KeyPushooChannel: SettingKey = "pushoo.channel";
@@ -669,6 +670,7 @@ export const constant = {
   KeyCommentAIDetectRiskLevel,
   KeyCommentQQAPIURL,
   KeyCommentQQAPIKey,
+  KeyNSUUUAPIReferer,
   KeyCommentNotifyAdmin,
   KeyCommentNotifyReply,
   KeyPushooChannel,
