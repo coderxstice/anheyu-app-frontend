@@ -157,8 +157,17 @@ const initMermaidZoom = (container: HTMLElement) => {
   };
 
   mermaidContainers.forEach(mm => {
-    // 检查是否已有 action div
+    // 检查是否已有 action div（可能是子元素或兄弟元素）
     let actionDiv = mm.querySelector(".md-editor-mermaid-action");
+    // 如果子元素中没有，检查下一个兄弟元素是否是 action div（后端保存的 HTML 结构）
+    if (
+      !actionDiv &&
+      mm.nextElementSibling?.classList.contains("md-editor-mermaid-action")
+    ) {
+      // 将兄弟元素移动到 mermaid 块内部，以便 CSS 正确定位
+      actionDiv = mm.nextElementSibling;
+      mm.appendChild(actionDiv);
+    }
     if (!actionDiv) {
       // 创建 action div
       const div = document.createElement("div");
@@ -238,6 +247,17 @@ const setupVirtualMermaid = (container: HTMLElement) => {
     mermaidVirtualObserver = null;
   }
 
+  // #region agent log
+  console.log("[DEBUG-PostContent] setupVirtualMermaid:", {
+    rawContentLength: props.rawContent?.length || 0,
+    rawContentHasSvg: props.rawContent?.includes("<svg") || false,
+    rawContentHasPlaceholder:
+      props.rawContent?.includes("Mermaid 图表加载中") || false,
+    mermaidBlocksCount: Object.keys(props.mermaidBlocks || {}).length,
+    mermaidBlocks: props.mermaidBlocks
+  });
+  // #endregion
+
   if (!props.rawContent || !props.mermaidBlocks) return;
   const blockIds = Object.keys(props.mermaidBlocks);
   if (blockIds.length === 0) return;
@@ -262,6 +282,17 @@ const setupVirtualMermaid = (container: HTMLElement) => {
 
         // 注入原始 mermaid 块 HTML（包含 SVG）
         const blockHtml = props.rawContent.slice(meta.start, meta.end);
+        // #region agent log
+        console.log("[DEBUG-PostContent] 注入mermaid块:", {
+          id,
+          start: meta.start,
+          end: meta.end,
+          blockHtmlLength: blockHtml.length,
+          blockHtmlHasSvg: blockHtml.includes("<svg"),
+          blockHtmlHasPlaceholder: blockHtml.includes("Mermaid 图表加载中"),
+          blockHtmlPreview: blockHtml.substring(0, 200)
+        });
+        // #endregion
         try {
           const range = document.createRange();
           range.selectNode(el);

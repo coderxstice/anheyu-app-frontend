@@ -33,8 +33,12 @@ const {
   disconnectMusicPlayerObserver
 } = useMusicPlayer();
 
-const { sanitize, registerGlobalCopyHandler, unregisterGlobalCopyHandler } =
-  useContentProcessor();
+const {
+  sanitize,
+  registerGlobalCopyHandler,
+  unregisterGlobalCopyHandler,
+  collapsedHeight
+} = useContentProcessor();
 
 // === 编辑器状态 ===
 const MdEditorComponent = ref<any>(null);
@@ -380,10 +384,89 @@ const waitForMermaidRender = async (
   };
 };
 
+// === 从预览区域获取渲染后的 HTML ===
+const getRenderedHtmlFromPreview = (): string | null => {
+  const previewContainer = containerRef.value?.querySelector(
+    ".md-editor-preview-wrapper"
+  );
+  if (!previewContainer) {
+    console.warn("[保存文章] 无法找到预览区域");
+    return null;
+  }
+
+  // 获取预览内容区域（通常是 .md-editor-preview 内部的内容）
+  const previewContent = previewContainer.querySelector(".md-editor-preview");
+  const targetElement = previewContent || previewContainer;
+
+  // 克隆 DOM 以避免修改原始预览区域
+  const clonedElement = targetElement.cloneNode(true) as HTMLElement;
+
+  // 清理临时状态，避免保存不必要的运行时属性
+  // 1. 清理 tip 组件的临时状态
+  clonedElement
+    .querySelectorAll("[data-tip-initialized]")
+    .forEach(el => el.removeAttribute("data-tip-initialized"));
+  clonedElement.querySelectorAll("[data-visible]").forEach(el => {
+    el.removeAttribute("data-visible");
+    // 重置 tooltip 的显示状态
+    if (el.classList.contains("anzhiyu-tip")) {
+      (el as HTMLElement).style.visibility = "hidden";
+      (el as HTMLElement).style.opacity = "0";
+    }
+  });
+
+  // 2. 清理代码块的临时展开状态（保持折叠状态）
+  clonedElement.querySelectorAll(".code-expand-btn.is-expanded").forEach(el => {
+    el.classList.remove("is-expanded");
+    const icon = el.querySelector("i");
+    if (icon) {
+      (icon as HTMLElement).style.transform = "rotate(0deg)";
+    }
+  });
+
+  // 3. 清理 details 元素的展开状态（保持折叠）
+  clonedElement
+    .querySelectorAll("details.md-editor-code.is-collapsible")
+    .forEach(details => {
+      if (!details.classList.contains("is-collapsed")) {
+        details.classList.add("is-collapsed");
+        const pre = details.querySelector("pre") as HTMLElement;
+        if (pre) {
+          pre.style.height = collapsedHeight.value;
+          pre.style.overflow = "hidden";
+        }
+      }
+    });
+
+  return clonedElement.innerHTML;
+};
+
 // 保存处理
 const handleSave = async (markdown: string, htmlPromise: Promise<string>) => {
   console.log("[保存文章] 开始处理...");
   console.log("[保存文章] Markdown长度:", markdown.length);
+
+  // 清除防抖定时器，避免干扰
+  if (mermaidRenderTimer) {
+    clearTimeout(mermaidRenderTimer);
+    mermaidRenderTimer = null;
+  }
+
+  // 先调用编辑器的 rerender 方法强制重新渲染（官方 API）
+  // 这会触发 markdown-it 重新解析，并让 mermaid 插件重新处理图表
+  if (editorRef.value?.rerender) {
+    console.log("[保存文章] 调用 editorRef.rerender() 强制重新渲染...");
+    editorRef.value.rerender();
+    // 等待重新渲染开始
+    await new Promise(resolve => setTimeout(resolve, 200));
+  }
+
+  // 再主动触发 mermaid 渲染（确保未渲染的图表被处理）
+  console.log("[保存文章] 主动触发 Mermaid 渲染...");
+  await checkAndRerenderMermaid();
+
+  // 等待一小段时间让渲染完成
+  await new Promise(resolve => setTimeout(resolve, 100));
 
   // 等待 Mermaid 渲染完成（动态等待时间）
   const renderResult = await waitForMermaidRender(100);
@@ -403,8 +486,15 @@ const handleSave = async (markdown: string, htmlPromise: Promise<string>) => {
     }
   }
 
-  // 获取原始HTML
-  const rawHtml = await htmlPromise;
+  // 优先从预览区域 DOM 获取渲染后的 HTML（包含 mermaid SVG、katex 等渲染结果）
+  // 如果获取失败，则回退到编辑器提供的 HTML
+  let rawHtml = getRenderedHtmlFromPreview();
+  if (!rawHtml) {
+    console.warn("[保存文章] 从预览区域获取 HTML 失败，使用编辑器提供的 HTML");
+    rawHtml = await htmlPromise;
+  } else {
+    console.log("[保存文章] 成功从预览区域获取渲染后的 HTML");
+  }
   console.log("[保存文章] 原始HTML长度:", rawHtml.length);
 
   // 为HTML中的音乐播放器注入完整数据

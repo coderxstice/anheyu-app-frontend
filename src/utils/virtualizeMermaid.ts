@@ -140,7 +140,9 @@ export function virtualizeMermaidBlocks(html: string): MermaidVirtualizeResult {
     const tagName = match[1].toLowerCase(); // "p" 或 "div"
     const classValue = match[3] || "";
 
-    if (!classValue.includes("md-editor-mermaid")) {
+    // 使用精确匹配，确保是完整的类名 "md-editor-mermaid"，而不是子串（如 "md-editor-mermaid-action"）
+    const classNames = classValue.split(/\s+/);
+    if (!classNames.includes("md-editor-mermaid")) {
       continue;
     }
 
@@ -178,13 +180,22 @@ export function virtualizeMermaidBlocks(html: string): MermaidVirtualizeResult {
 
   virtualHtml += rawHtml.slice(lastPos);
 
+  // #region agent log
   // 调试日志
   if (count > 0) {
-    console.log(
-      `[virtualizeMermaid] 处理了 ${count} 个 Mermaid 块:`,
-      Object.keys(blocks)
-    );
+    const inputHasPlaceholder = rawHtml.includes("Mermaid 图表加载中");
+    const outputHasPlaceholder = virtualHtml.includes("Mermaid 图表加载中");
+    console.log("[DEBUG-virtualizeMermaid] 处理结果:", {
+      count,
+      blockIds: Object.keys(blocks),
+      inputHasPlaceholder,
+      outputHasPlaceholder,
+      inputHasSvg: rawHtml.includes("<svg"),
+      outputHasSvg: virtualHtml.includes("<svg"),
+      blocks
+    });
   }
+  // #endregion
 
   return {
     rawHtml,
