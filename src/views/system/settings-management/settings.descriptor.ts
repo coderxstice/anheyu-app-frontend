@@ -1719,12 +1719,6 @@ const commentDescriptors: SettingDescriptor[] = [
     type: "string"
   },
   {
-    frontendPath: "frontDesk.comment.nsuuuAPIReferer",
-    backendKey: constant.KeyNSUUUAPIReferer,
-    defaultValue: "",
-    type: "string"
-  },
-  {
     frontendPath: "frontDesk.comment.notifyAdmin",
     backendKey: constant.KeyCommentNotifyAdmin,
     defaultValue: false,

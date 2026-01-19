@@ -122,10 +122,8 @@ const commentInfoConfig = computed(() => {
     limit_length: config.limit_length,
     login_required: config.login_required,
     anonymous_email: config.anonymous_email || "",
-    allow_image_upload: config.allow_image_upload !== false, // 默认允许上传
-    qq_api_url: config.qq_api_url || "https://v1.nsuuu.com/api/qqname",
-    qq_api_key: config.qq_api_key || "",
-    nsuuu_api_referer: config.nsuuu_api_referer || ""
+    allow_image_upload: config.allow_image_upload !== false // 默认允许上传
+    // QQ 查询已改为后端 API 代理，无需在前端配置 API URL 和 Key
   };
 });
 
@@ -173,47 +171,25 @@ const extractQQFromEmail = (email: string): string | null => {
   return match ? match[1] : null;
 };
 
-// 获取 QQ 昵称的函数（直接调用第三方API）
+// 获取 QQ 昵称的函数（通过后端 API 代理，避免暴露 API key）
 const fetchQQNickname = async (qq: string): Promise<string | null> => {
-  const apiUrl = commentInfoConfig.value.qq_api_url;
-  const apiKey = commentInfoConfig.value.qq_api_key;
-  const refererConfig = commentInfoConfig.value.nsuuu_api_referer;
-
-  // 如果没有配置API URL或Key，返回null
-  if (!apiUrl || !apiKey) {
-    return null;
-  }
-
   try {
-    // 构建请求选项
-    const fetchOptions: RequestInit = {
-      method: "GET",
-      headers: {
-        // 使用 Bearer Token 方式传递 API Key（推荐方式）
-        Authorization: `Bearer ${apiKey}`
-      },
-      // 使用 origin 策略，发送当前页面的 origin 作为 Referer
-      referrerPolicy: "origin"
-    };
-
-    // 如果配置了自定义 Referer 白名单，使用第一行作为 Referer
-    if (refererConfig && refererConfig.trim()) {
-      const firstReferer = refererConfig.split("\n")[0].trim();
-      if (firstReferer) {
-        fetchOptions.referrer = firstReferer;
-      }
-    }
-
+    // 调用后端 API，由后端代理请求 NSUUU API
     const response = await fetch(
-      `${apiUrl}?qq=${encodeURIComponent(qq)}`,
-      fetchOptions
+      `/api/public/comments/qq-info?qq=${encodeURIComponent(qq)}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
     );
 
     if (!response.ok) return null;
     const result = await response.json();
-    // API返回格式: { code: 200, msg: "查询成功！", data: { qq: "xxx", nick: "昵称", ... } }
-    if (result && result.code === 200 && result.data && result.data.nick) {
-      return result.data.nick;
+    // 后端 API 返回格式: { code: 200, data: { nickname: "昵称", avatar: "..." }, msg: "获取成功" }
+    if (result && result.code === 200 && result.data && result.data.nickname) {
+      return result.data.nickname;
     }
     return null;
   } catch (error) {
