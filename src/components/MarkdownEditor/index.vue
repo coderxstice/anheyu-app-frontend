@@ -55,21 +55,6 @@ const mermaidRenderStatus = ref<{
   rendered: 0
 });
 
-// === 保存进度状态 ===
-const saveProgress = ref<{
-  isSaving: boolean;
-  stage: "waiting" | "rendering" | "processing" | "done" | "timeout";
-  message: string;
-  mermaidTotal: number;
-  mermaidRendered: number;
-}>({
-  isSaving: false,
-  stage: "waiting",
-  message: "",
-  mermaidTotal: 0,
-  mermaidRendered: 0
-});
-
 // 重新加载方法
 const reloadPage = () => {
   window.location.reload();
@@ -320,7 +305,7 @@ const handleHtmlChanged = () => {
   }, debounceTime);
 };
 
-// === 等待 Mermaid 渲染完成（带进度更新） ===
+// === 等待 Mermaid 渲染完成 ===
 const waitForMermaidRender = async (
   checkIntervalMs: number = 100
 ): Promise<{ success: boolean; total: number; rendered: number }> => {
@@ -348,11 +333,6 @@ const waitForMermaidRender = async (
     `[保存文章] 检测到 ${mermaidBlocks.length} 个 Mermaid 图表，最大等待时间: ${maxWaitMs}ms`
   );
 
-  // 更新保存进度状态
-  saveProgress.value.stage = "rendering";
-  saveProgress.value.mermaidTotal = mermaidBlocks.length;
-  saveProgress.value.mermaidRendered = 0;
-
   while (Date.now() - startTime < maxWaitMs) {
     // 统计已渲染和未渲染的数量
     let renderedCount = 0;
@@ -363,10 +343,6 @@ const waitForMermaidRender = async (
         renderedCount++;
       }
     }
-
-    // 更新进度
-    saveProgress.value.mermaidRendered = renderedCount;
-    saveProgress.value.message = `等待图表渲染 ${renderedCount}/${mermaidBlocks.length}`;
 
     // 检查是否全部完成
     if (renderedCount === mermaidBlocks.length) {
@@ -409,89 +385,38 @@ const handleSave = async (markdown: string, htmlPromise: Promise<string>) => {
   console.log("[保存文章] 开始处理...");
   console.log("[保存文章] Markdown长度:", markdown.length);
 
-  // 显示保存进度
-  saveProgress.value = {
-    isSaving: true,
-    stage: "waiting",
-    message: "准备保存...",
-    mermaidTotal: 0,
-    mermaidRendered: 0
-  };
+  // 等待 Mermaid 渲染完成（动态等待时间）
+  const renderResult = await waitForMermaidRender(100);
 
-  try {
-    // 等待 Mermaid 渲染完成（动态等待时间）
-    const renderResult = await waitForMermaidRender(100);
+  if (!renderResult.success && renderResult.total > 0) {
+    // 渲染超时，询问用户是否继续
+    const unrenderedCount = renderResult.total - renderResult.rendered;
+    const confirmMsg =
+      `有 ${unrenderedCount} 个 Mermaid 图表尚未渲染完成。\n\n` +
+      `继续保存可能导致这些图表在前台显示为源代码。\n\n` +
+      `建议：点击"取消"后，等待所有图表渲染完成再保存。\n\n` +
+      `是否仍要继续保存？`;
 
-    if (!renderResult.success && renderResult.total > 0) {
-      // 渲染超时，询问用户是否继续
-      saveProgress.value.stage = "timeout";
-      saveProgress.value.message = `图表渲染超时 (${renderResult.rendered}/${renderResult.total})`;
-
-      const shouldContinue = await new Promise<boolean>(resolve => {
-        const unrenderedCount = renderResult.total - renderResult.rendered;
-        const confirmMsg =
-          `有 ${unrenderedCount} 个 Mermaid 图表尚未渲染完成。\n\n` +
-          `继续保存可能导致这些图表在前台显示为源代码。\n\n` +
-          `建议：点击"取消"后，等待所有图表渲染完成再保存。\n\n` +
-          `是否仍要继续保存？`;
-
-        if (confirm(confirmMsg)) {
-          resolve(true);
-        } else {
-          resolve(false);
-        }
-      });
-
-      if (!shouldContinue) {
-        saveProgress.value = {
-          isSaving: false,
-          stage: "waiting",
-          message: "",
-          mermaidTotal: 0,
-          mermaidRendered: 0
-        };
-        console.log("[保存文章] 用户取消保存");
-        return;
-      }
+    if (!confirm(confirmMsg)) {
+      console.log("[保存文章] 用户取消保存");
+      return;
     }
-
-    // 更新状态：处理中
-    saveProgress.value.stage = "processing";
-    saveProgress.value.message = "正在处理内容...";
-
-    // 获取原始HTML
-    const rawHtml = await htmlPromise;
-    console.log("[保存文章] 原始HTML长度:", rawHtml.length);
-
-    // 为HTML中的音乐播放器注入完整数据
-    const enrichedHtml = await enrichHtmlMusicPlayers(rawHtml);
-    console.log("[保存文章] 音乐数据注入后HTML长度:", enrichedHtml.length);
-
-    // 清理HTML
-    const sanitizedHtml = sanitize(enrichedHtml);
-
-    // 更新状态：完成
-    saveProgress.value.stage = "done";
-    saveProgress.value.message = "保存成功";
-
-    // 保存：Markdown保持原样，HTML包含完整的音乐数据
-    emit("onSave", markdown, sanitizedHtml);
-    console.log("[保存文章] 保存完成");
-
-    // 延迟隐藏进度提示
-    setTimeout(() => {
-      saveProgress.value.isSaving = false;
-    }, 1000);
-  } catch (error) {
-    console.error("[保存文章] 保存失败:", error);
-    saveProgress.value = {
-      isSaving: false,
-      stage: "waiting",
-      message: "",
-      mermaidTotal: 0,
-      mermaidRendered: 0
-    };
   }
+
+  // 获取原始HTML
+  const rawHtml = await htmlPromise;
+  console.log("[保存文章] 原始HTML长度:", rawHtml.length);
+
+  // 为HTML中的音乐播放器注入完整数据
+  const enrichedHtml = await enrichHtmlMusicPlayers(rawHtml);
+  console.log("[保存文章] 音乐数据注入后HTML长度:", enrichedHtml.length);
+
+  // 清理HTML
+  const sanitizedHtml = sanitize(enrichedHtml);
+
+  // 保存：Markdown保持原样，HTML包含完整的音乐数据
+  emit("onSave", markdown, sanitizedHtml);
+  console.log("[保存文章] 保存完成");
 };
 
 // 音乐播放器观察器
@@ -625,66 +550,6 @@ defineExpose({
           </div>
         </div>
       </Transition>
-
-      <!-- 保存进度提示 -->
-      <Transition name="fade">
-        <div v-if="saveProgress.isSaving" class="save-progress-overlay">
-          <div class="save-progress-card">
-            <div class="save-progress-icon">
-              <div v-if="saveProgress.stage === 'done'" class="success-icon">
-                ✓
-              </div>
-              <div
-                v-else-if="saveProgress.stage === 'timeout'"
-                class="warning-icon"
-              >
-                ⚠
-              </div>
-              <div v-else class="loading-spinner" />
-            </div>
-            <div class="save-progress-content">
-              <div class="save-progress-title">
-                {{
-                  saveProgress.stage === "done"
-                    ? "保存成功"
-                    : saveProgress.stage === "timeout"
-                      ? "渲染超时"
-                      : "正在保存"
-                }}
-              </div>
-              <div class="save-progress-message">
-                {{ saveProgress.message }}
-              </div>
-              <!-- Mermaid 渲染进度条 -->
-              <div
-                v-if="
-                  saveProgress.stage === 'rendering' &&
-                  saveProgress.mermaidTotal > 0
-                "
-                class="save-progress-bar-wrapper"
-              >
-                <div class="save-progress-bar">
-                  <div
-                    class="save-progress-bar-fill"
-                    :style="{
-                      width: `${(saveProgress.mermaidRendered / saveProgress.mermaidTotal) * 100}%`
-                    }"
-                  />
-                </div>
-                <span class="save-progress-percent">
-                  {{
-                    Math.round(
-                      (saveProgress.mermaidRendered /
-                        saveProgress.mermaidTotal) *
-                        100
-                    )
-                  }}%
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Transition>
     </template>
   </div>
 </template>
@@ -758,115 +623,6 @@ defineExpose({
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   font-size: 13px;
   color: var(--anzhiyu-fontcolor);
-}
-
-// 保存进度提示
-.save-progress-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(2px);
-}
-
-.save-progress-card {
-  background: var(--anzhiyu-card-bg);
-  border-radius: 16px;
-  padding: 24px 32px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  min-width: 300px;
-  max-width: 400px;
-}
-
-.save-progress-icon {
-  flex-shrink: 0;
-
-  .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border-width: 3px;
-  }
-
-  .success-icon {
-    width: 40px;
-    height: 40px;
-    background: var(--anzhiyu-green);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 20px;
-    font-weight: bold;
-  }
-
-  .warning-icon {
-    width: 40px;
-    height: 40px;
-    background: var(--anzhiyu-orange);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 20px;
-  }
-}
-
-.save-progress-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.save-progress-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--anzhiyu-fontcolor);
-  margin-bottom: 4px;
-}
-
-.save-progress-message {
-  font-size: 13px;
-  color: var(--anzhiyu-secondtext);
-  margin-bottom: 8px;
-}
-
-.save-progress-bar-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.save-progress-bar {
-  flex: 1;
-  height: 6px;
-  background: var(--anzhiyu-secondbg);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.save-progress-bar-fill {
-  height: 100%;
-  background: var(--anzhiyu-main);
-  border-radius: 3px;
-  transition: width 0.2s ease;
-}
-
-.save-progress-percent {
-  font-size: 12px;
-  color: var(--anzhiyu-main);
-  font-weight: 600;
-  min-width: 36px;
-  text-align: right;
 }
 
 // 过渡动画
