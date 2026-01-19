@@ -102,11 +102,11 @@ initializeConfigs(app)
     }
     injectResponsiveStorage(app, platformConfig);
 
+    // 加载 Table 组件（后台使用，需要在 mount 之前完成注册）
+    await loadTable();
+
     app.use(MotionPlugin).use(useElementPlus);
     app.mount("#app");
-
-    // 延迟加载 Table 组件（后台使用）
-    loadTable();
 
     // 初始化外链拦截器
     initExternalLinkInterceptor();
