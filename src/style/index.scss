@@ -229,3 +229,15 @@ html.with-fancybox[data-theme] body.hide-scrollbar {
 :global(.high-z-index-message) {
   z-index: 2200 !important;
 }
+
+/*
+ * 全局高 z-index 消息框样式
+ * 用于确保 ElMessageBox 能显示在 AnDialog (z-index: 2100) 之上
+ */
+.el-overlay:has(.high-z-index-message-box) {
+  z-index: 2199 !important;
+}
+
+.high-z-index-message-box {
+  z-index: 2200 !important;
+}
