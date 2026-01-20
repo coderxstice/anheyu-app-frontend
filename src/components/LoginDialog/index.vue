@@ -19,7 +19,8 @@ import RegisterForm from "@/views/login/components/RegisterForm.vue";
 import ForgotPasswordForm from "@/views/login/components/ForgotPasswordForm.vue";
 import ResetPasswordForm from "@/views/login/components/ResetPasswordForm.vue";
 import ActivatePrompt from "@/views/login/components/ActivatePrompt.vue";
-import Turnstile from "@/components/Turnstile/index.vue";
+import CaptchaVerify from "@/components/CaptchaVerify/index.vue";
+import type { CaptchaParams } from "@/components/CaptchaVerify/index.vue";
 
 defineOptions({ name: "LoginDialog" });
 
@@ -35,45 +36,33 @@ const siteConfigStore = useSiteConfigStore();
 const { dataTheme, dataThemeChange } = useDataThemeChange();
 const { enableRegistration } = storeToRefs(siteConfigStore);
 
-// Turnstile 相关
-const turnstileRef = ref();
-const turnstileToken = ref("");
-const turnstileReset = ref(false);
+// 人机验证相关
+const captchaRef = ref<InstanceType<typeof CaptchaVerify>>();
+const captchaParams = ref<CaptchaParams>({});
+const captchaReset = ref(false);
 
-// 判断是否启用了 Turnstile
-const isTurnstileEnabled = computed(() => {
-  const config = siteConfigStore.getSiteConfig;
-  // 支持两种配置格式：嵌套对象 (turnstile.enable) 和点号键名 ("turnstile.enable")
-  return (
-    config?.turnstile?.enable === true ||
-    config?.turnstile?.enable === "true" ||
-    config?.["turnstile.enable"] === "true"
-  );
+// 判断是否启用了人机验证
+const isCaptchaEnabled = computed(() => {
+  return captchaRef.value?.isEnabled ?? false;
 });
 
-// Turnstile 验证成功回调
-const onTurnstileVerified = (token: string) => {
-  turnstileToken.value = token;
+// 人机验证成功回调
+const onCaptchaVerified = (params: CaptchaParams) => {
+  captchaParams.value = params;
 };
 
-// Turnstile 错误回调
-const onTurnstileError = () => {
-  turnstileToken.value = "";
+// 人机验证错误回调
+const onCaptchaError = () => {
+  captchaParams.value = {};
   message("人机验证加载失败，请刷新页面重试", { type: "error" });
 };
 
-// Turnstile 过期回调
-const onTurnstileExpired = () => {
-  turnstileToken.value = "";
-  message("人机验证已过期，请重新验证", { type: "warning" });
-};
-
-// 重置 Turnstile
-const resetTurnstile = () => {
-  turnstileToken.value = "";
-  turnstileReset.value = true;
+// 重置人机验证
+const resetCaptcha = () => {
+  captchaParams.value = {};
+  captchaReset.value = true;
   nextTick(() => {
-    turnstileReset.value = false;
+    captchaReset.value = false;
   });
 };
 
@@ -197,8 +186,8 @@ const apiHandlers = {
     return res.code === 200 && res.data.exists;
   },
   login: async () => {
-    // 检查 Turnstile 验证
-    if (isTurnstileEnabled.value && !turnstileToken.value) {
+    // 检查人机验证
+    if (isCaptchaEnabled.value && !captchaRef.value?.isVerified) {
       message("请完成人机验证", { type: "warning" });
       return;
     }
@@ -206,11 +195,11 @@ const apiHandlers = {
     await useUserStoreHook().loginByEmail({
       email: form.email,
       password: form.password,
-      turnstile_token: turnstileToken.value
+      ...captchaParams.value
     });
 
-    // 登录成功后重置 Turnstile
-    resetTurnstile();
+    // 登录成功后重置验证码
+    resetCaptcha();
 
     // 初始化路由（仅供管理员使用，普通用户不需要）
     await initRouter();
@@ -221,8 +210,8 @@ const apiHandlers = {
     closeDialog();
   },
   register: async () => {
-    // 检查 Turnstile 验证
-    if (isTurnstileEnabled.value && !turnstileToken.value) {
+    // 检查人机验证
+    if (isCaptchaEnabled.value && !captchaRef.value?.isVerified) {
       message("请完成人机验证", { type: "warning" });
       return;
     }
@@ -233,11 +222,11 @@ const apiHandlers = {
         nickname: form.nickname,
         password: form.password,
         repeat_password: form.confirmPassword,
-        turnstile_token: turnstileToken.value
+        ...captchaParams.value
       });
 
-      // 注册成功后重置 Turnstile
-      resetTurnstile();
+      // 注册成功后重置验证码
+      resetCaptcha();
 
       if (res.code === 200) {
         if (res.data?.activation_required) {
@@ -269,15 +258,25 @@ const apiHandlers = {
       throw error;
     }
   },
-  sendResetEmail: async (payload: { captcha: string; captchaCode: string }) => {
-    if (payload.captcha.toLowerCase() !== payload.captchaCode.toLowerCase()) {
-      message("验证码不正确", { type: "error" });
-      forgotPasswordFormRef.value?.refreshCaptcha();
+  sendResetEmail: async (payload: {
+    captchaParams: Record<string, string>;
+    isCaptchaEnabled: boolean;
+    isVerified: boolean;
+  }) => {
+    // 检查人机验证
+    if (payload.isCaptchaEnabled && !payload.isVerified) {
+      message("请完成人机验证", { type: "warning" });
       return;
     }
+
     const res = await useUserStoreHook().sendPasswordResetEmail({
-      email: form.email
+      email: form.email,
+      ...payload.captchaParams
     });
+
+    // 发送后重置验证码
+    forgotPasswordFormRef.value?.refreshCaptcha();
+
     if (res.code === 200) {
       message(res.message, { type: "success" });
       switchStep("check-email", "prev");
@@ -328,7 +327,11 @@ const eventHandlers = {
     handleSubmit(() => formRef.value!.validate(), apiHandlers.login),
   onRegister: () =>
     handleSubmit(() => formRef.value!.validate(), apiHandlers.register),
-  onForgotPassword: (payload: { captcha: string; captchaCode: string }) =>
+  onForgotPassword: (payload: {
+    captchaParams: Record<string, string>;
+    isCaptchaEnabled: boolean;
+    isVerified: boolean;
+  }) =>
     handleSubmit(
       () => formRef.value!.validateField("email"),
       () => apiHandlers.sendResetEmail(payload)
@@ -507,14 +510,13 @@ watch(
             </div>
 
             <el-form ref="formRef" :model="form" :rules="rules" size="large">
-              <!-- Turnstile 人机验证 - 在登录和注册步骤显示 -->
-              <Turnstile
+              <!-- 人机验证 - 在登录和注册步骤显示 -->
+              <CaptchaVerify
                 v-if="step === 'login-password' || step === 'register-form'"
-                ref="turnstileRef"
-                :reset="turnstileReset"
-                @verified="onTurnstileVerified"
-                @error="onTurnstileError"
-                @expired="onTurnstileExpired"
+                ref="captchaRef"
+                :reset="captchaReset"
+                @verified="onCaptchaVerified"
+                @error="onCaptchaError"
               />
 
               <div class="form-wrapper">

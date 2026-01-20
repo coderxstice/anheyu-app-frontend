@@ -386,10 +386,21 @@ const KeyCDNDomain: SettingKey = "cdn.domain";
 const KeyCDNZoneID: SettingKey = "cdn.zone_id";
 const KeyCDNBaseUrl: SettingKey = "cdn.base_url";
 
+// --- 人机验证配置 ---
+const KeyCaptchaProvider: SettingKey = "captcha.provider";
+
 // --- Cloudflare Turnstile 人机验证配置 ---
 const KeyTurnstileEnable: SettingKey = "turnstile.enable";
 const KeyTurnstileSiteKey: SettingKey = "turnstile.site_key";
 const KeyTurnstileSecretKey: SettingKey = "turnstile.secret_key";
+
+// --- 极验 GeeTest 4.0 人机验证配置 ---
+const KeyGeetestCaptchaId: SettingKey = "geetest.captcha_id";
+const KeyGeetestCaptchaKey: SettingKey = "geetest.captcha_key";
+
+// --- 系统图形验证码配置 ---
+const KeyImageCaptchaLength: SettingKey = "image_captcha.length";
+const KeyImageCaptchaExpire: SettingKey = "image_captcha.expire";
 
 // --- 相册页面配置 ---
 const KeyAlbumPageBannerBackground: SettingKey = "album.banner.background";
@@ -758,10 +769,21 @@ export const constant = {
   KeyAlbumDefaultThumbParam,
   KeyAlbumDefaultBigParam,
 
+  // --- 人机验证配置 ---
+  KeyCaptchaProvider,
+
   // --- Cloudflare Turnstile 人机验证配置 ---
   KeyTurnstileEnable,
   KeyTurnstileSiteKey,
   KeyTurnstileSecretKey,
+
+  // --- 极验 GeeTest 4.0 人机验证配置 ---
+  KeyGeetestCaptchaId,
+  KeyGeetestCaptchaKey,
+
+  // --- 系统图形验证码配置 ---
+  KeyImageCaptchaLength,
+  KeyImageCaptchaExpire,
 
   // --- 其他 ---
   DEFAULT_CHUNK_SIZE

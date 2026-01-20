@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, computed } from "vue";
 import type { ElInput } from "element-plus";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import MailFill from "@iconify-icons/ri/mail-fill";
-import ShieldKeyholeLine from "@iconify-icons/ri/shield-keyhole-line";
 import ArrowLeftSLine from "@iconify-icons/ri/arrow-left-s-line";
+import CaptchaVerify from "@/components/CaptchaVerify/index.vue";
+import type { CaptchaParams } from "@/components/CaptchaVerify/index.vue";
 
 defineProps({
   loading: Boolean, // 加载状态，用于控制按钮的 loading 效果
@@ -20,93 +21,58 @@ const emit = defineEmits([
 
 // 模板引用，用于获取邮箱输入框的实例，以便聚焦
 const emailInputRef = ref<InstanceType<typeof ElInput>>();
-// 验证码输入框的值
-const captchaInput = ref("");
-// 生成的验证码值
-const captchaCode = ref("");
-// 验证码 canvas 元素的引用
-const captchaCanvasRef = ref<HTMLCanvasElement | null>(null);
+
+// 人机验证相关
+const captchaRef = ref<InstanceType<typeof CaptchaVerify>>();
+const captchaParams = ref<CaptchaParams>({});
 
 // 使用 ReIcon 钩子渲染图标
 const iconMap = {
   mail: useRenderIcon(MailFill),
-  captcha: useRenderIcon(ShieldKeyholeLine),
   back: useRenderIcon(ArrowLeftSLine)
 };
 
-/**
- * 生成随机的四位验证码
- */
-const generateCaptcha = () => {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 验证码字符集
-  let result = "";
-  for (let i = 0; i < 4; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  captchaCode.value = result; // 更新验证码值
+// 判断是否启用了人机验证
+const isCaptchaEnabled = computed(() => {
+  return captchaRef.value?.isEnabled ?? false;
+});
+
+// 人机验证成功回调
+const onCaptchaVerified = (params: CaptchaParams) => {
+  captchaParams.value = params;
 };
 
-/**
- * 在 canvas 上绘制验证码
- */
-const drawCaptcha = () => {
-  const canvas = captchaCanvasRef.value;
-  if (!canvas) return; // 如果 canvas 元素不存在，则返回
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return; // 如果无法获取 2D 上下文，则返回
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height); // 清除画布
-  ctx.fillStyle = "#f3f4f6"; // 设置背景色
-  ctx.fillRect(0, 0, canvas.width, canvas.height); // 填充背景
-  ctx.font = "bold 28px Arial"; // 设置字体
-  ctx.fillStyle = "#333"; // 设置字体颜色
-  ctx.textBaseline = "middle"; // 设置文本基线
-  ctx.textAlign = "center"; // 设置文本对齐方式
-
-  // 逐个绘制验证码字符
-  for (let i = 0; i < captchaCode.value.length; i++) {
-    const char = captchaCode.value[i];
-    // 计算字符位置
-    const x = (canvas.width / (captchaCode.value.length + 1)) * (i + 1);
-    const y = canvas.height / 2;
-    // 随机旋转角度
-    const angle = Math.random() * 0.5 - 0.25;
-    ctx.translate(x, y); // 移动画布原点
-    ctx.rotate(angle); // 旋转画布
-    ctx.fillText(char, 0, 0); // 绘制字符
-    ctx.rotate(-angle); // 恢复画布旋转
-    ctx.translate(-x, -y); // 恢复画布原点
-  }
-};
-
-/**
- * 刷新验证码，重新生成并绘制
- */
-const refreshCaptcha = () => {
-  generateCaptcha(); // 生成新验证码
-  drawCaptcha(); // 绘制新验证码
+// 人机验证错误回调
+const onCaptchaError = () => {
+  captchaParams.value = {};
 };
 
 /**
  * 触发提交事件，并传递验证码数据给父组件
  */
 const triggerSubmit = () => {
-  // 确保在触发 submit 事件时传递正确的载荷
   emit("submit", {
-    captcha: captchaInput.value, // 用户输入的验证码
-    captchaCode: captchaCode.value // 生成的正确验证码
+    captchaParams: captchaParams.value,
+    isCaptchaEnabled: isCaptchaEnabled.value,
+    isVerified: captchaRef.value?.isVerified ?? true
   });
+};
+
+/**
+ * 重置验证码
+ */
+const resetCaptcha = () => {
+  captchaParams.value = {};
+  captchaRef.value?.reset();
 };
 
 // 定义暴露给父组件的方法，以便父组件可以调用
 defineExpose({
   focus: () => emailInputRef.value?.focus(), // 聚焦邮箱输入框
-  refreshCaptcha, // 刷新验证码
-  triggerSubmit // 触发提交
+  refreshCaptcha: resetCaptcha, // 刷新验证码（兼容旧接口）
+  triggerSubmit, // 触发提交
+  getCaptchaParams: () => captchaParams.value
 });
-
-// 组件挂载后立即刷新验证码
-onMounted(refreshCaptcha);
 </script>
 
 <template>
@@ -129,24 +95,12 @@ onMounted(refreshCaptcha);
         />
       </el-form-item>
 
-      <el-form-item class="mt-4">
-        <div class="flex w-full space-x-2">
-          <el-input
-            v-model="captchaInput"
-            placeholder="验证码"
-            :prefix-icon="iconMap.captcha"
-            class="flex-1"
-            maxlength="4"
-          />
-          <canvas
-            ref="captchaCanvasRef"
-            width="100"
-            height="40"
-            class="rounded cursor-pointer"
-            @click="refreshCaptcha"
-          />
-        </div>
-      </el-form-item>
+      <!-- 人机验证 -->
+      <CaptchaVerify
+        ref="captchaRef"
+        @verified="onCaptchaVerified"
+        @error="onCaptchaError"
+      />
 
       <el-form-item class="mt-4">
         <el-button
