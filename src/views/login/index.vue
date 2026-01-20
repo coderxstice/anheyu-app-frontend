@@ -44,7 +44,12 @@ const turnstileReset = ref(false);
 // 判断是否启用了 Turnstile
 const isTurnstileEnabled = computed(() => {
   const config = siteConfigStore.getSiteConfig;
-  return config?.["turnstile.enable"] === "true";
+  // 支持两种配置格式：嵌套对象 (turnstile.enable) 和点号键名 ("turnstile.enable")
+  return (
+    config?.turnstile?.enable === true ||
+    config?.turnstile?.enable === "true" ||
+    config?.["turnstile.enable"] === "true"
+  );
 });
 
 // Turnstile 验证成功回调

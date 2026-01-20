@@ -19,6 +19,7 @@ import RegisterForm from "@/views/login/components/RegisterForm.vue";
 import ForgotPasswordForm from "@/views/login/components/ForgotPasswordForm.vue";
 import ResetPasswordForm from "@/views/login/components/ResetPasswordForm.vue";
 import ActivatePrompt from "@/views/login/components/ActivatePrompt.vue";
+import Turnstile from "@/components/Turnstile/index.vue";
 
 defineOptions({ name: "LoginDialog" });
 
@@ -33,6 +34,48 @@ const emit = defineEmits(["update:modelValue", "login-success"]);
 const siteConfigStore = useSiteConfigStore();
 const { dataTheme, dataThemeChange } = useDataThemeChange();
 const { enableRegistration } = storeToRefs(siteConfigStore);
+
+// Turnstile 相关
+const turnstileRef = ref();
+const turnstileToken = ref("");
+const turnstileReset = ref(false);
+
+// 判断是否启用了 Turnstile
+const isTurnstileEnabled = computed(() => {
+  const config = siteConfigStore.getSiteConfig;
+  // 支持两种配置格式：嵌套对象 (turnstile.enable) 和点号键名 ("turnstile.enable")
+  return (
+    config?.turnstile?.enable === true ||
+    config?.turnstile?.enable === "true" ||
+    config?.["turnstile.enable"] === "true"
+  );
+});
+
+// Turnstile 验证成功回调
+const onTurnstileVerified = (token: string) => {
+  turnstileToken.value = token;
+};
+
+// Turnstile 错误回调
+const onTurnstileError = () => {
+  turnstileToken.value = "";
+  message("人机验证加载失败，请刷新页面重试", { type: "error" });
+};
+
+// Turnstile 过期回调
+const onTurnstileExpired = () => {
+  turnstileToken.value = "";
+  message("人机验证已过期，请重新验证", { type: "warning" });
+};
+
+// 重置 Turnstile
+const resetTurnstile = () => {
+  turnstileToken.value = "";
+  turnstileReset.value = true;
+  nextTick(() => {
+    turnstileReset.value = false;
+  });
+};
 
 // Logo
 const siteIcon = computed(() => {
@@ -154,10 +197,21 @@ const apiHandlers = {
     return res.code === 200 && res.data.exists;
   },
   login: async () => {
+    // 检查 Turnstile 验证
+    if (isTurnstileEnabled.value && !turnstileToken.value) {
+      message("请完成人机验证", { type: "warning" });
+      return;
+    }
+
     await useUserStoreHook().loginByEmail({
       email: form.email,
-      password: form.password
+      password: form.password,
+      turnstile_token: turnstileToken.value
     });
+
+    // 登录成功后重置 Turnstile
+    resetTurnstile();
+
     // 初始化路由（仅供管理员使用，普通用户不需要）
     await initRouter();
     // 获取最新的用户信息
@@ -167,13 +221,24 @@ const apiHandlers = {
     closeDialog();
   },
   register: async () => {
+    // 检查 Turnstile 验证
+    if (isTurnstileEnabled.value && !turnstileToken.value) {
+      message("请完成人机验证", { type: "warning" });
+      return;
+    }
+
     try {
       const res = await useUserStoreHook().registeredUser({
         email: form.email,
         nickname: form.nickname,
         password: form.password,
-        repeat_password: form.confirmPassword
+        repeat_password: form.confirmPassword,
+        turnstile_token: turnstileToken.value
       });
+
+      // 注册成功后重置 Turnstile
+      resetTurnstile();
+
       if (res.code === 200) {
         if (res.data?.activation_required) {
           // 保存当前页面URL到localStorage，供激活后返回
@@ -442,6 +507,16 @@ watch(
             </div>
 
             <el-form ref="formRef" :model="form" :rules="rules" size="large">
+              <!-- Turnstile 人机验证 - 在登录和注册步骤显示 -->
+              <Turnstile
+                v-if="step === 'login-password' || step === 'register-form'"
+                ref="turnstileRef"
+                :reset="turnstileReset"
+                @verified="onTurnstileVerified"
+                @error="onTurnstileError"
+                @expired="onTurnstileExpired"
+              />
+
               <div class="form-wrapper">
                 <transition
                   :name="transitionName"

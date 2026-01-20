@@ -25,10 +25,14 @@ const { dataTheme } = useDataThemeChange();
 // 从站点配置获取 Turnstile 配置
 const turnstileConfig = computed(() => {
   const config = siteConfigStore.getSiteConfig;
-  return {
-    enabled: config?.["turnstile.enable"] === "true",
-    siteKey: config?.["turnstile.site_key"] || ""
-  };
+  // 支持两种配置格式：嵌套对象 (turnstile.enable) 和点号键名 ("turnstile.enable")
+  const enabled =
+    config?.turnstile?.enable === true ||
+    config?.turnstile?.enable === "true" ||
+    config?.["turnstile.enable"] === "true";
+  const siteKey =
+    config?.turnstile?.site_key || config?.["turnstile.site_key"] || "";
+  return { enabled, siteKey };
 });
 
 // 组件内部状态
