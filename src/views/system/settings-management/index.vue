@@ -173,14 +173,14 @@
           </template>
 
           <!-- 高级功能 - 人机验证 -->
-          <template v-else-if="activeComponent === 'TurnstileSettingsForm'">
+          <template v-else-if="activeComponent === 'CaptchaSettingsForm'">
             <div class="section-header">
               <h2>人机验证</h2>
               <p class="section-desc">
-                配置 Cloudflare Turnstile 人机验证，保护登录和注册接口
+                配置人机验证，支持 Turnstile / 极验 / 系统验证码，保护登录和注册接口
               </p>
             </div>
-            <TurnstileSettingsForm v-model="form.frontDesk.turnstile" />
+            <CaptchaSettingsForm v-model="form.frontDesk.captcha" />
           </template>
 
           <!-- 高级功能 - 备份&导入 -->
@@ -237,7 +237,7 @@ import AboutPageForm from "./components/frontDesk/AboutPageForm/index.vue";
 import RecentCommentsPageForm from "./components/frontDesk/RecentCommentsPageForm/index.vue";
 import AlbumPageForm from "./components/frontDesk/AlbumPageForm/index.vue";
 import MusicPageForm from "./components/frontDesk/MusicPageForm/index.vue";
-import TurnstileSettingsForm from "./components/frontDesk/TurnstileSettingsForm/index.vue";
+import CaptchaSettingsForm from "./components/frontDesk/CaptchaSettingsForm/index.vue";
 import BackupImportForm from "./components/BackupImportForm.vue";
 
 const siteConfigStore = useSiteConfigStore();
@@ -382,7 +382,7 @@ const componentToPathPrefix: Record<string, string[]> = {
   RecentCommentsPageForm: ["frontDesk.recentComments."],
   AlbumPageForm: ["frontDesk.album."],
   MusicPageForm: ["frontDesk.music."],
-  TurnstileSettingsForm: ["frontDesk.turnstile."]
+  CaptchaSettingsForm: ["frontDesk.captcha."]
 };
 
 // 重置选区 - 重置当前 tab 的配置

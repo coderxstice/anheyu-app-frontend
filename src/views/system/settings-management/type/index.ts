@@ -716,9 +716,35 @@ export interface AlbumPageSettingsInfo {
  * @description: Cloudflare Turnstile 人机验证配置表单接口
  */
 export interface TurnstileSettingsInfo {
-  enable: boolean; // 是否启用 Turnstile 人机验证
+  enable: boolean; // 是否启用 Turnstile 人机验证（已废弃，使用 captcha.provider）
   siteKey: string; // Site Key（公钥，前端使用）
   secretKey: string; // Secret Key（私钥，后端验证使用）
+}
+
+/**
+ * @description: 极验 GeeTest 4.0 配置接口
+ */
+export interface GeetestSettingsInfo {
+  captchaId: string; // 验证 ID（公钥，前端使用）
+  captchaKey: string; // 验证 Key（私钥，后端验证使用）
+}
+
+/**
+ * @description: 系统图形验证码配置接口
+ */
+export interface ImageCaptchaSettingsInfo {
+  length: number; // 验证码长度
+  expire: number; // 过期时间（秒）
+}
+
+/**
+ * @description: 统一人机验证配置表单接口
+ */
+export interface CaptchaSettingsInfo {
+  provider: "none" | "turnstile" | "geetest" | "image"; // 验证方式
+  turnstile: TurnstileSettingsInfo;
+  geetest: GeetestSettingsInfo;
+  imageCaptcha: ImageCaptchaSettingsInfo;
 }
 
 export interface FrontDeskSettings {
@@ -732,6 +758,7 @@ export interface FrontDeskSettings {
   recentComments: RecentCommentsSettingsInfo;
   album: AlbumPageSettingsInfo;
   turnstile: TurnstileSettingsInfo;
+  captcha: CaptchaSettingsInfo;
 }
 
 /**

@@ -19,6 +19,8 @@ import RegisterForm from "@/views/login/components/RegisterForm.vue";
 import ForgotPasswordForm from "@/views/login/components/ForgotPasswordForm.vue";
 import ResetPasswordForm from "@/views/login/components/ResetPasswordForm.vue";
 import ActivatePrompt from "@/views/login/components/ActivatePrompt.vue";
+import CaptchaVerify from "@/components/CaptchaVerify/index.vue";
+import type { CaptchaParams } from "@/components/CaptchaVerify/index.vue";
 
 defineOptions({ name: "LoginDialog" });
 
@@ -33,6 +35,36 @@ const emit = defineEmits(["update:modelValue", "login-success"]);
 const siteConfigStore = useSiteConfigStore();
 const { dataTheme, dataThemeChange } = useDataThemeChange();
 const { enableRegistration } = storeToRefs(siteConfigStore);
+
+// 人机验证相关
+const captchaRef = ref<InstanceType<typeof CaptchaVerify>>();
+const captchaParams = ref<CaptchaParams>({});
+const captchaReset = ref(false);
+
+// 判断是否启用了人机验证
+const isCaptchaEnabled = computed(() => {
+  return captchaRef.value?.isEnabled ?? false;
+});
+
+// 人机验证成功回调
+const onCaptchaVerified = (params: CaptchaParams) => {
+  captchaParams.value = params;
+};
+
+// 人机验证错误回调
+const onCaptchaError = () => {
+  captchaParams.value = {};
+  message("人机验证加载失败，请刷新页面重试", { type: "error" });
+};
+
+// 重置人机验证
+const resetCaptcha = () => {
+  captchaParams.value = {};
+  captchaReset.value = true;
+  nextTick(() => {
+    captchaReset.value = false;
+  });
+};
 
 // Logo
 const siteIcon = computed(() => {
@@ -154,10 +186,21 @@ const apiHandlers = {
     return res.code === 200 && res.data.exists;
   },
   login: async () => {
+    // 检查人机验证
+    if (isCaptchaEnabled.value && !captchaRef.value?.isVerified) {
+      message("请完成人机验证", { type: "warning" });
+      return;
+    }
+
     await useUserStoreHook().loginByEmail({
       email: form.email,
-      password: form.password
+      password: form.password,
+      ...captchaParams.value
     });
+
+    // 登录成功后重置验证码
+    resetCaptcha();
+
     // 初始化路由（仅供管理员使用，普通用户不需要）
     await initRouter();
     // 获取最新的用户信息
@@ -167,13 +210,24 @@ const apiHandlers = {
     closeDialog();
   },
   register: async () => {
+    // 检查人机验证
+    if (isCaptchaEnabled.value && !captchaRef.value?.isVerified) {
+      message("请完成人机验证", { type: "warning" });
+      return;
+    }
+
     try {
       const res = await useUserStoreHook().registeredUser({
         email: form.email,
         nickname: form.nickname,
         password: form.password,
-        repeat_password: form.confirmPassword
+        repeat_password: form.confirmPassword,
+        ...captchaParams.value
       });
+
+      // 注册成功后重置验证码
+      resetCaptcha();
+
       if (res.code === 200) {
         if (res.data?.activation_required) {
           // 保存当前页面URL到localStorage，供激活后返回
@@ -204,15 +258,25 @@ const apiHandlers = {
       throw error;
     }
   },
-  sendResetEmail: async (payload: { captcha: string; captchaCode: string }) => {
-    if (payload.captcha.toLowerCase() !== payload.captchaCode.toLowerCase()) {
-      message("验证码不正确", { type: "error" });
-      forgotPasswordFormRef.value?.refreshCaptcha();
+  sendResetEmail: async (payload: {
+    captchaParams: Record<string, string>;
+    isCaptchaEnabled: boolean;
+    isVerified: boolean;
+  }) => {
+    // 检查人机验证
+    if (payload.isCaptchaEnabled && !payload.isVerified) {
+      message("请完成人机验证", { type: "warning" });
       return;
     }
+
     const res = await useUserStoreHook().sendPasswordResetEmail({
-      email: form.email
+      email: form.email,
+      ...payload.captchaParams
     });
+
+    // 发送后重置验证码
+    forgotPasswordFormRef.value?.refreshCaptcha();
+
     if (res.code === 200) {
       message(res.message, { type: "success" });
       switchStep("check-email", "prev");
@@ -263,7 +327,11 @@ const eventHandlers = {
     handleSubmit(() => formRef.value!.validate(), apiHandlers.login),
   onRegister: () =>
     handleSubmit(() => formRef.value!.validate(), apiHandlers.register),
-  onForgotPassword: (payload: { captcha: string; captchaCode: string }) =>
+  onForgotPassword: (payload: {
+    captchaParams: Record<string, string>;
+    isCaptchaEnabled: boolean;
+    isVerified: boolean;
+  }) =>
     handleSubmit(
       () => formRef.value!.validateField("email"),
       () => apiHandlers.sendResetEmail(payload)
@@ -442,6 +510,15 @@ watch(
             </div>
 
             <el-form ref="formRef" :model="form" :rules="rules" size="large">
+              <!-- 人机验证 - 在登录和注册步骤显示 -->
+              <CaptchaVerify
+                v-if="step === 'login-password' || step === 'register-form'"
+                ref="captchaRef"
+                :reset="captchaReset"
+                @verified="onCaptchaVerified"
+                @error="onCaptchaError"
+              />
+
               <div class="form-wrapper">
                 <transition
                   :name="transitionName"

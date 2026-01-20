@@ -188,10 +188,10 @@ export const settingsMenuConfig: SettingsMenuItem[] = [
     icon: "ri:settings-4-line",
     children: [
       {
-        key: "advanced-turnstile",
+        key: "advanced-captcha",
         label: "人机验证",
-        component: "TurnstileSettingsForm",
-        keywords: ["Turnstile", "Cloudflare", "人机验证", "登录", "安全"]
+        component: "CaptchaSettingsForm",
+        keywords: ["Turnstile", "Cloudflare", "极验", "GeeTest", "人机验证", "登录", "安全", "验证码"]
       },
       {
         key: "advanced-backup",
@@ -2091,14 +2091,14 @@ const albumDescriptors: SettingDescriptor[] = [
   }
 ];
 
-// --- Cloudflare Turnstile 人机验证配置描述符 ---
+// --- Cloudflare Turnstile 人机验证配置描述符（保留兼容性） ---
 const turnstileDescriptors: SettingDescriptor[] = [
   {
     frontendPath: "frontDesk.turnstile.enable",
     backendKey: constant.KeyTurnstileEnable,
     defaultValue: false,
     type: "boolean",
-    label: "启用 Turnstile 人机验证",
+    label: "启用 Turnstile 人机验证（已废弃）",
     searchKeywords: ["Turnstile", "Cloudflare", "人机验证", "登录", "安全"]
   },
   {
@@ -2119,6 +2119,70 @@ const turnstileDescriptors: SettingDescriptor[] = [
   }
 ];
 
+// --- 统一人机验证配置描述符 ---
+const captchaDescriptors: SettingDescriptor[] = [
+  // 验证方式选择
+  {
+    frontendPath: "frontDesk.captcha.provider",
+    backendKey: constant.KeyCaptchaProvider,
+    defaultValue: "none",
+    type: "string",
+    label: "人机验证方式",
+    searchKeywords: ["人机验证", "验证码", "Turnstile", "极验", "GeeTest"]
+  },
+  // Turnstile 配置（通过 captcha 路径）
+  {
+    frontendPath: "frontDesk.captcha.turnstile.siteKey",
+    backendKey: constant.KeyTurnstileSiteKey,
+    defaultValue: "",
+    type: "string",
+    label: "Turnstile Site Key",
+    searchKeywords: ["Turnstile", "Cloudflare", "公钥"]
+  },
+  {
+    frontendPath: "frontDesk.captcha.turnstile.secretKey",
+    backendKey: constant.KeyTurnstileSecretKey,
+    defaultValue: "",
+    type: "string",
+    label: "Turnstile Secret Key",
+    searchKeywords: ["Turnstile", "Cloudflare", "私钥"]
+  },
+  // 极验 GeeTest 配置
+  {
+    frontendPath: "frontDesk.captcha.geetest.captchaId",
+    backendKey: constant.KeyGeetestCaptchaId,
+    defaultValue: "",
+    type: "string",
+    label: "极验 Captcha ID",
+    searchKeywords: ["极验", "GeeTest", "验证 ID", "公钥"]
+  },
+  {
+    frontendPath: "frontDesk.captcha.geetest.captchaKey",
+    backendKey: constant.KeyGeetestCaptchaKey,
+    defaultValue: "",
+    type: "string",
+    label: "极验 Captcha Key",
+    searchKeywords: ["极验", "GeeTest", "验证 Key", "私钥"]
+  },
+  // 系统图形验证码配置
+  {
+    frontendPath: "frontDesk.captcha.imageCaptcha.length",
+    backendKey: constant.KeyImageCaptchaLength,
+    defaultValue: 4,
+    type: "number",
+    label: "验证码长度",
+    searchKeywords: ["验证码", "图形验证码", "长度"]
+  },
+  {
+    frontendPath: "frontDesk.captcha.imageCaptcha.expire",
+    backendKey: constant.KeyImageCaptchaExpire,
+    defaultValue: 300,
+    type: "number",
+    label: "验证码过期时间",
+    searchKeywords: ["验证码", "图形验证码", "过期"]
+  }
+];
+
 export const allSettingDescriptors = [
   ...siteDescriptors,
   ...pageDescriptors,
@@ -2134,5 +2198,6 @@ export const allSettingDescriptors = [
   ...emailDescriptors,
   ...fLinkDescriptors,
   ...albumDescriptors,
-  ...turnstileDescriptors
+  ...turnstileDescriptors,
+  ...captchaDescriptors
 ];

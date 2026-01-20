@@ -192,6 +192,9 @@ export function useKeyboardShortcuts() {
   const handleKeyUp = (event: KeyboardEvent) => {
     const key = event.key;
 
+    // 防止 key 为 undefined 的情况（特殊输入法或浏览器事件）
+    if (!key) return;
+
     if (key === "Shift") {
       isShiftPressed.value = false;
       pressedKeys.value.delete("Shift");
