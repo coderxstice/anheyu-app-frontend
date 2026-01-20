@@ -20,8 +20,9 @@ const appName = computed(
   () => siteConfigStore.getSiteConfig?.APP_NAME || "安和鱼"
 );
 
+// 使用网站配置的 192x192 Logo
 const appLogo = computed(
-  () => siteConfigStore.getSiteConfig?.LOGO_URL || "/logo.svg"
+  () => siteConfigStore.getSiteConfig?.LOGO_URL_192x192 || "/logo.svg"
 );
 </script>
 

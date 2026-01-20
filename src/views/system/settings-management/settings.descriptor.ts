@@ -191,7 +191,16 @@ export const settingsMenuConfig: SettingsMenuItem[] = [
         key: "advanced-captcha",
         label: "人机验证",
         component: "CaptchaSettingsForm",
-        keywords: ["Turnstile", "Cloudflare", "极验", "GeeTest", "人机验证", "登录", "安全", "验证码"]
+        keywords: [
+          "Turnstile",
+          "Cloudflare",
+          "极验",
+          "GeeTest",
+          "人机验证",
+          "登录",
+          "安全",
+          "验证码"
+        ]
       },
       {
         key: "advanced-backup",

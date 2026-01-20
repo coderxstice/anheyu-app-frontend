@@ -95,10 +95,21 @@ export function useCommentManagement() {
   // 获取 Gravatar URL
   const getGravatarUrl = (emailMD5: string) => {
     const config = siteConfigStore.getSiteConfig;
-    let baseUrl = (config.GRAVATAR_URL || "https://cravatar.cn") + "/avatar";
+    const gravatarUrl = config.GRAVATAR_URL || "https://cravatar.cn";
     const defaultType = config.DEFAULT_GRAVATAR_TYPE || "identicon";
-    baseUrl = baseUrl.replace(/\/+$/, "");
-    return `${baseUrl}/${emailMD5 || ""}?d=${defaultType}&s=80`;
+
+    try {
+      const url = new URL(gravatarUrl);
+      url.pathname =
+        url.pathname.replace(/\/+$/, "") + `/avatar/${emailMD5 || ""}`;
+      url.searchParams.set("d", defaultType);
+      url.searchParams.set("s", "80");
+      return url.toString();
+    } catch {
+      // URL 解析失败，使用简单拼接
+      const baseUrl = gravatarUrl.replace(/\/+$/, "");
+      return `${baseUrl}/avatar/${emailMD5 || ""}?d=${defaultType}&s=80`;
+    }
   };
 
   // 获取头像 URL
@@ -108,17 +119,29 @@ export function useCommentManagement() {
       return comment.avatar_url;
     }
 
-    if (!comment.nickname || !comment.email_md5) {
-      return getGravatarUrl(comment.email_md5);
-    }
-    const isQQ = /^[1-9]\d{4,10}$/.test(comment.nickname.trim());
-    if (isQQ) {
-      const qqEmailMd5 = md5(`${comment.nickname.trim()}@qq.com`).toLowerCase();
-      if (comment.email_md5.toLowerCase() === qqEmailMd5) {
-        return `https://thirdqq.qlogo.cn/g?b=sdk&nk=${comment.nickname.trim()}&s=80`;
+    // 检查是否有 QQ 号（后端返回的 qq_number 字段）
+    if (comment.qq_number) {
+      const qqEmailMd5 = md5(`${comment.qq_number}@qq.com`).toLowerCase();
+      if (comment.email_md5?.toLowerCase() === qqEmailMd5) {
+        return `https://thirdqq.qlogo.cn/g?b=sdk&nk=${comment.qq_number}&s=80`;
       }
     }
-    return getGravatarUrl(comment.email_md5);
+
+    // 如果昵称是 QQ 号格式，也尝试获取 QQ 头像
+    if (comment.nickname) {
+      const isQQ = /^[1-9]\d{4,10}$/.test(comment.nickname.trim());
+      if (isQQ) {
+        const qqEmailMd5 = md5(
+          `${comment.nickname.trim()}@qq.com`
+        ).toLowerCase();
+        if (comment.email_md5?.toLowerCase() === qqEmailMd5) {
+          return `https://thirdqq.qlogo.cn/g?b=sdk&nk=${comment.nickname.trim()}&s=80`;
+        }
+      }
+    }
+
+    // 使用 Gravatar
+    return getGravatarUrl(comment.email_md5 || "");
   };
 
   // 格式化日期
