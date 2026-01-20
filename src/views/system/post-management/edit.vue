@@ -8,7 +8,7 @@ import {
   watch,
   defineAsyncComponent
 } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute, useRouter, onBeforeRouteLeave } from "vue-router";
 import { ElMessage, ElNotification, ElMessageBox } from "element-plus";
 import { ArrowLeft } from "@element-plus/icons-vue";
 import { debounce } from "lodash-es";
@@ -94,6 +94,76 @@ const isDirty = computed(() => {
     form.content_md !== initialFormState.content_md
   );
 });
+
+// ===== 离开页面保护 =====
+// 当有未保存的更改时，离开页面需要提示用户
+
+// 自定义确认弹窗状态
+const showLeaveConfirm = ref(false);
+let leaveConfirmResolve: ((value: boolean) => void) | null = null;
+
+// 显示离开确认弹窗（返回 Promise）
+const showLeaveConfirmDialog = (): Promise<boolean> => {
+  return new Promise(resolve => {
+    leaveConfirmResolve = resolve;
+    showLeaveConfirm.value = true;
+  });
+};
+
+// 确认离开
+const confirmLeave = () => {
+  showLeaveConfirm.value = false;
+  leaveConfirmResolve?.(true);
+  leaveConfirmResolve = null;
+};
+
+// 取消离开
+const cancelLeave = () => {
+  showLeaveConfirm.value = false;
+  leaveConfirmResolve?.(false);
+  leaveConfirmResolve = null;
+};
+
+// beforeunload 事件处理函数
+const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+  if (isDirty.value) {
+    event.preventDefault();
+    // 现代浏览器会显示标准的确认对话框
+    event.returnValue = "您有未保存的更改，确定要离开吗？";
+    return event.returnValue;
+  }
+};
+
+// 监听 isDirty 变化，动态添加/移除 beforeunload 事件
+watch(
+  isDirty,
+  newIsDirty => {
+    if (newIsDirty) {
+      window.addEventListener("beforeunload", handleBeforeUnload);
+    } else {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    }
+  },
+  { immediate: true }
+);
+
+// Vue Router 路由守卫：阻止路由导航离开
+onBeforeRouteLeave(async (to, from, next) => {
+  if (isDirty.value) {
+    const confirmed = await showLeaveConfirmDialog();
+    if (confirmed) {
+      // 用户确认离开，移除 beforeunload 事件监听
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      next();
+    } else {
+      // 用户取消，阻止导航
+      next(false);
+    }
+  } else {
+    next();
+  }
+});
+
 const categorySelectKey = ref(0);
 const tagSelectKey = ref(0);
 const updateInitialState = () => {
@@ -312,21 +382,12 @@ const handleImageUploadForMdV3 = async (
     loadingInstance.close();
   }
 };
-const handleGoBack = () => {
+const handleGoBack = async () => {
   if (isDirty.value) {
-    ElMessageBox.confirm(
-      "您有未保存的更改，确定要离开吗？所有未保存的更改都将丢失。",
-      "警告",
-      {
-        confirmButtonText: "确定离开",
-        cancelButtonText: "取消",
-        type: "warning"
-      }
-    )
-      .then(() => {
-        router.push({ name: "PostManagement" });
-      })
-      .catch(() => {});
+    const confirmed = await showLeaveConfirmDialog();
+    if (confirmed) {
+      router.push({ name: "PostManagement" });
+    }
   } else {
     router.push({ name: "PostManagement" });
   }
@@ -409,6 +470,9 @@ onMounted(async () => {
   }
 });
 onUnmounted(() => {
+  // 移除离开页面提示事件监听
+  window.removeEventListener("beforeunload", handleBeforeUnload);
+
   if (
     device.value !== "mobile" &&
     !pureApp.getSidebarStatus &&
@@ -477,6 +541,44 @@ onUnmounted(() => {
       :article-id="articleId || ''"
       @restore="handleRestoreFromHistory"
     />
+
+    <!-- 离开确认弹窗 -->
+    <Teleport to="body">
+      <Transition name="leave-confirm-fade">
+        <div
+          v-if="showLeaveConfirm"
+          class="leave-confirm-overlay"
+          @click.self="cancelLeave"
+        >
+          <div class="leave-confirm-dialog">
+            <div class="leave-confirm-icon">
+              <svg
+                viewBox="0 0 24 24"
+                width="32"
+                height="32"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <div class="leave-confirm-title">离开编辑？</div>
+            <div class="leave-confirm-message">未保存的更改将丢失</div>
+            <div class="leave-confirm-actions">
+              <button class="leave-confirm-btn cancel" @click="cancelLeave">
+                继续编辑
+              </button>
+              <button class="leave-confirm-btn confirm" @click="confirmLeave">
+                确定离开
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -584,6 +686,112 @@ onUnmounted(() => {
     width: 100%;
     flex-shrink: 0;
     justify-content: flex-end;
+  }
+}
+</style>
+
+<style lang="scss">
+// 离开确认弹窗样式
+.leave-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.leave-confirm-dialog {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90%;
+  max-width: 320px;
+  padding: 28px 24px 20px;
+  text-align: center;
+  background: var(--el-bg-color-overlay);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.leave-confirm-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 16px;
+  color: #faad14;
+  background: rgba(250, 173, 20, 0.1);
+  border-radius: 50%;
+}
+
+.leave-confirm-title {
+  margin-bottom: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.leave-confirm-message {
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: var(--el-text-color-secondary);
+}
+
+.leave-confirm-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.leave-confirm-btn {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  &.cancel {
+    color: var(--el-text-color-primary);
+    background: var(--el-fill-color-light);
+
+    &:hover {
+      background: var(--el-fill-color);
+    }
+  }
+
+  &.confirm {
+    color: #fff;
+    background: #ff4d4f;
+
+    &:hover {
+      background: #ff7875;
+    }
+  }
+}
+
+// 弹窗过渡动画
+.leave-confirm-fade-enter-active,
+.leave-confirm-fade-leave-active {
+  transition: opacity 0.2s ease;
+
+  .leave-confirm-dialog {
+    transition: transform 0.2s ease;
+  }
+}
+
+.leave-confirm-fade-enter-from,
+.leave-confirm-fade-leave-to {
+  opacity: 0;
+
+  .leave-confirm-dialog {
+    transform: scale(0.9);
   }
 }
 </style>
