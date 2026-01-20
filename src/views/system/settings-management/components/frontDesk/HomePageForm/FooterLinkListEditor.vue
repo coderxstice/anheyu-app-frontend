@@ -69,9 +69,17 @@
                   :icon="Delete"
                   circle
                   size="small"
+                  :disabled="column.links.length <= 1"
+                  :title="
+                    column.links.length <= 1 ? '至少保留一个链接' : '删除链接'
+                  "
                   @click="removeLink(colIndex, linkIndex)"
                 />
               </div>
+            </div>
+            <!-- 空状态提示 -->
+            <div v-if="column.links.length === 0" class="links-empty">
+              <span>暂无链接，请添加</span>
             </div>
           </div>
           <el-button
@@ -314,13 +322,11 @@ const removeColumn = (index: number) => {
     ElMessage.warning("至少需要保留 1 个栏目。");
     return;
   }
-  // 销毁对应的链接拖拽排序实例
-  const sortable = linksSortables.get(index);
-  if (sortable) {
-    sortable.destroy();
-    linksSortables.delete(index);
-  }
   listData.value.splice(index, 1);
+  // 删除后重新初始化所有链接拖拽排序（因为索引会变化）
+  nextTick(() => {
+    initAllLinksSortable();
+  });
 };
 
 const addLink = (columnIndex: number) => {
@@ -491,6 +497,18 @@ const removeLink = (columnIndex: number, linkIndex: number) => {
   width: 100%;
   margin-top: 12px;
   border-style: dashed;
+}
+
+.links-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  color: var(--anzhiyu-secondtext);
+  font-size: 13px;
+  background: var(--anzhiyu-secondbg);
+  border: 1px dashed var(--el-border-color-light);
+  border-radius: 6px;
 }
 
 /* 栏目拖拽排序样式 */
