@@ -226,7 +226,7 @@ html.with-fancybox[data-theme] body.hide-scrollbar {
  * 全局高 z-index 消息提示样式
  * 用于确保 ElMessage 能显示在 AnDialog (z-index: 2100) 之上
  */
-:global(.high-z-index-message) {
+.high-z-index-message {
   z-index: 2200 !important;
 }
 
