@@ -401,10 +401,16 @@ const handleSubmit = async () => {
       try {
         if (props.isEditMode && props.data) {
           await updateLink(props.data.id, formData.value);
-          ElMessage.success("更新成功");
+          ElMessage.success({
+            message: "更新成功",
+            customClass: "high-z-index-message"
+          });
         } else {
           await createLink(formData.value);
-          ElMessage.success("创建成功");
+          ElMessage.success({
+            message: "创建成功",
+            customClass: "high-z-index-message"
+          });
         }
         emit("success");
         dialogVisible.value = false;

@@ -72,7 +72,10 @@ const disabledFutureSeconds = (hour: number, minute: number) => {
 const handleFetchPrimaryColor = async () => {
   const imageUrl = props.form.top_img_url || props.form.cover_url;
   if (!imageUrl) {
-    ElMessage.warning("请先设置封面图或顶部大图");
+    ElMessage.warning({
+      message: "请先设置封面图或顶部大图",
+      customClass: "high-z-index-message"
+    });
     return;
   }
 
@@ -81,13 +84,22 @@ const handleFetchPrimaryColor = async () => {
     const res = await getPrimaryColor(imageUrl);
     if (res?.data?.primary_color) {
       props.form.primary_color = res.data.primary_color;
-      ElMessage.success("主色调获取成功");
+      ElMessage.success({
+        message: "主色调获取成功",
+        customClass: "high-z-index-message"
+      });
     } else {
-      ElMessage.error("获取主色调失败");
+      ElMessage.error({
+        message: "获取主色调失败",
+        customClass: "high-z-index-message"
+      });
     }
   } catch (error) {
     console.error("获取主色调失败:", error);
-    ElMessage.error("获取主色调失败");
+    ElMessage.error({
+      message: "获取主色调失败",
+      customClass: "high-z-index-message"
+    });
   } finally {
     isFetchingColor.value = false;
   }

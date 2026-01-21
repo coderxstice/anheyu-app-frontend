@@ -105,17 +105,26 @@ const handleSubmit = async () => {
 
     // 检查是否有变化
     if (Object.keys(updateData).length === 0) {
-      ElMessage.info("没有需要更新的内容");
+      ElMessage.info({
+        message: "没有需要更新的内容",
+        customClass: "high-z-index-message"
+      });
       handleClose();
       return;
     }
 
     const { data } = await updateAdminCommentInfo(props.comment.id, updateData);
-    ElMessage.success("评论信息更新成功");
+    ElMessage.success({
+      message: "评论信息更新成功",
+      customClass: "high-z-index-message"
+    });
     emit("success", data);
     handleClose();
   } catch {
-    ElMessage.error("更新失败，请稍后重试");
+    ElMessage.error({
+      message: "更新失败，请稍后重试",
+      customClass: "high-z-index-message"
+    });
   } finally {
     loading.value = false;
   }

@@ -216,7 +216,8 @@ const handleImageUpload = async (
 ) => {
   const loadingInstance = ElMessage.info({
     message: "正在上传图片...",
-    duration: 0
+    duration: 0,
+    customClass: "high-z-index-message"
   });
   try {
     const urls = await Promise.all(
@@ -230,10 +231,16 @@ const handleImageUpload = async (
       })
     );
     callback(urls);
-    ElMessage.success("图片上传成功！");
+    ElMessage.success({
+      message: "图片上传成功！",
+      customClass: "high-z-index-message"
+    });
   } catch (error: any) {
     console.error("图片上传失败:", error);
-    ElMessage.error(error.message || "图片上传失败，请稍后再试。");
+    ElMessage.error({
+      message: error.message || "图片上传失败，请稍后再试。",
+      customClass: "high-z-index-message"
+    });
   } finally {
     loadingInstance.close();
   }
@@ -288,16 +295,23 @@ const handleSave = async () => {
     }
 
     if (response.code === 200) {
-      ElMessage.success(isEdit.value ? "更新成功" : "创建成功");
+      ElMessage.success({
+        message: isEdit.value ? "更新成功" : "创建成功",
+        customClass: "high-z-index-message"
+      });
       emit("success");
     } else {
-      ElMessage.error(
-        response.message || (isEdit.value ? "更新失败" : "创建失败")
-      );
+      ElMessage.error({
+        message: response.message || (isEdit.value ? "更新失败" : "创建失败"),
+        customClass: "high-z-index-message"
+      });
     }
   } catch (error: any) {
     console.error("保存页面失败:", error);
-    ElMessage.error("保存失败");
+    ElMessage.error({
+      message: "保存失败",
+      customClass: "high-z-index-message"
+    });
   } finally {
     saving.value = false;
   }

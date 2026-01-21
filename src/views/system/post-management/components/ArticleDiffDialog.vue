@@ -128,10 +128,16 @@ const loadCompare = async () => {
       oldVersion.value = res.data.old_version;
       newVersion.value = res.data.new_version;
     } else {
-      ElMessage.error(res.message || "获取对比数据失败");
+      ElMessage.error({
+        message: res.message || "获取对比数据失败",
+        customClass: "high-z-index-message"
+      });
     }
   } catch (error) {
-    ElMessage.error("获取对比数据失败");
+    ElMessage.error({
+      message: "获取对比数据失败",
+      customClass: "high-z-index-message"
+    });
   } finally {
     loading.value = false;
   }
