@@ -58,10 +58,16 @@ const loadHistory = async () => {
       historyList.value = res.data.list || [];
       total.value = res.data.total || 0;
     } else {
-      ElMessage.error(res.message || "获取历史版本失败");
+      ElMessage.error({
+        message: res.message || "获取历史版本失败",
+        customClass: "high-z-index-message"
+      });
     }
   } catch (error) {
-    ElMessage.error("获取历史版本失败");
+    ElMessage.error({
+      message: "获取历史版本失败",
+      customClass: "high-z-index-message"
+    });
   } finally {
     loading.value = false;
   }
@@ -87,7 +93,10 @@ const isVersionSelected = (version: number) => {
 // 打开对比弹窗
 const handleCompare = () => {
   if (selectedVersions.value.length !== 2) {
-    ElMessage.warning("请选择两个版本进行对比");
+    ElMessage.warning({
+      message: "请选择两个版本进行对比",
+      customClass: "high-z-index-message"
+    });
     return;
   }
   diffDialogVisible.value = true;
@@ -111,13 +120,22 @@ const handleRestore = async (item: ArticleHistoryListItem) => {
     if (res.code === 200) {
       emit("restore", res.data);
       drawerVisible.value = false;
-      ElMessage.success("已恢复到版本 v" + item.version);
+      ElMessage.success({
+        message: "已恢复到版本 v" + item.version,
+        customClass: "high-z-index-message"
+      });
     } else {
-      ElMessage.error(res.message || "恢复失败");
+      ElMessage.error({
+        message: res.message || "恢复失败",
+        customClass: "high-z-index-message"
+      });
     }
   } catch (error) {
     if (error !== "cancel") {
-      ElMessage.error("恢复失败");
+      ElMessage.error({
+        message: "恢复失败",
+        customClass: "high-z-index-message"
+      });
     }
   }
 };

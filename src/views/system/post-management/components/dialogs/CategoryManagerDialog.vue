@@ -118,11 +118,17 @@ const handleUpdateCategoryName = async (category: PostCategory) => {
   loadingStates.value[category.id] = true;
   try {
     await updateCategory(category.id, { name: editingCategoryName.value });
-    ElMessage.success("分类名称更新成功");
+    ElMessage.success({
+      message: "分类名称更新成功",
+      customClass: "high-z-index-message"
+    });
     emit("refresh-categories");
     cancelEdit();
   } catch (error: any) {
-    ElMessage.error(error.message || "更新失败");
+    ElMessage.error({
+      message: error.message || "更新失败",
+      customClass: "high-z-index-message"
+    });
   } finally {
     loadingStates.value[category.id] = false;
   }
@@ -138,12 +144,18 @@ const handleSubmitSortOrder = async (category: PostCategory) => {
   loadingStates.value[category.id] = true;
   try {
     await updateCategory(category.id, { sort_order: newSortOrder });
-    ElMessage.success("排序更新成功");
+    ElMessage.success({
+      message: "排序更新成功",
+      customClass: "high-z-index-message"
+    });
     emit("refresh-categories");
   } catch (error: any) {
     // 更新失败，恢复原值
     localSortOrders.value[category.id] = category.sort_order;
-    ElMessage.error(error.message || "更新失败");
+    ElMessage.error({
+      message: error.message || "更新失败",
+      customClass: "high-z-index-message"
+    });
   } finally {
     loadingStates.value[category.id] = false;
   }
@@ -161,10 +173,17 @@ const toggleCategoryType = async (category: PostCategory) => {
     );
     loadingStates.value[category.id] = true;
     await updateCategory(category.id, { is_series: newIsSeries });
-    ElMessage.success(`${action}成功`);
+    ElMessage.success({
+      message: `${action}成功`,
+      customClass: "high-z-index-message"
+    });
     emit("refresh-categories");
   } catch (error: any) {
-    if (error !== "cancel") ElMessage.error(error.message || "操作失败");
+    if (error !== "cancel")
+      ElMessage.error({
+        message: error.message || "操作失败",
+        customClass: "high-z-index-message"
+      });
   } finally {
     loadingStates.value[category.id] = false;
   }
@@ -185,10 +204,17 @@ const handleDeleteCategory = async (category: PostCategory) => {
     });
     loadingStates.value[category.id] = true;
     await deleteCategory(category.id);
-    ElMessage.success("删除成功");
+    ElMessage.success({
+      message: "删除成功",
+      customClass: "high-z-index-message"
+    });
     emit("refresh-categories");
   } catch (error: any) {
-    if (error !== "cancel") ElMessage.error(error.message || "删除失败");
+    if (error !== "cancel")
+      ElMessage.error({
+        message: error.message || "删除失败",
+        customClass: "high-z-index-message"
+      });
   } finally {
     loadingStates.value[category.id] = false;
   }
@@ -198,11 +224,17 @@ const handleDeleteCategory = async (category: PostCategory) => {
 const handleCreateCategory = async () => {
   const name = newCategoryForm.value.name.trim();
   if (!name) {
-    ElMessage.warning("分类名称不能为空");
+    ElMessage.warning({
+      message: "分类名称不能为空",
+      customClass: "high-z-index-message"
+    });
     return;
   }
   if (isCategoryNameExists(name)) {
-    ElMessage.error(`分类 "${name}" 已存在`);
+    ElMessage.error({
+      message: `分类 "${name}" 已存在`,
+      customClass: "high-z-index-message"
+    });
     return;
   }
   isCreating.value = true;
@@ -212,13 +244,19 @@ const handleCreateCategory = async () => {
       is_series: newCategoryForm.value.is_series,
       sort_order: newCategoryForm.value.sort_order
     });
-    ElMessage.success("创建成功");
+    ElMessage.success({
+      message: "创建成功",
+      customClass: "high-z-index-message"
+    });
     newCategoryForm.value.name = "";
     newCategoryForm.value.is_series = false;
     newCategoryForm.value.sort_order = 0;
     emit("refresh-categories");
   } catch (error: any) {
-    ElMessage.error(error.message || "创建失败");
+    ElMessage.error({
+      message: error.message || "创建失败",
+      customClass: "high-z-index-message"
+    });
   } finally {
     isCreating.value = false;
   }

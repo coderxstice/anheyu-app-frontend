@@ -91,11 +91,17 @@ const handleExport = async () => {
       props.selectedIds.length > 0
         ? `成功导出 ${props.selectedIds.length} 条评论`
         : "成功导出所有评论";
-    ElMessage.success(msg);
+    ElMessage.success({
+      message: msg,
+      customClass: "high-z-index-message"
+    });
     dialogVisible.value = false;
   } catch (error: any) {
     console.error("导出失败:", error);
-    ElMessage.error(error.message || "导出评论失败");
+    ElMessage.error({
+      message: error.message || "导出评论失败",
+      customClass: "high-z-index-message"
+    });
   } finally {
     exporting.value = false;
   }
@@ -114,13 +120,19 @@ const beforeUpload: UploadProps["beforeUpload"] = file => {
     file.name.endsWith(".zip");
 
   if (!isAllowed) {
-    ElMessage.error("只支持 .json 和 .zip 格式的文件");
+    ElMessage.error({
+      message: "只支持 .json 和 .zip 格式的文件",
+      customClass: "high-z-index-message"
+    });
     return false;
   }
 
   const isLt50M = file.size / 1024 / 1024 < 50;
   if (!isLt50M) {
-    ElMessage.error("文件大小不能超过 50MB");
+    ElMessage.error({
+      message: "文件大小不能超过 50MB",
+      customClass: "high-z-index-message"
+    });
     return false;
   }
 
@@ -140,13 +152,19 @@ const handleRemove: UploadProps["onRemove"] = () => {
 // 导入评论
 const handleImport = async () => {
   if (uploadFileList.value.length === 0) {
-    ElMessage.warning("请选择要导入的文件");
+    ElMessage.warning({
+      message: "请选择要导入的文件",
+      customClass: "high-z-index-message"
+    });
     return;
   }
 
   const file = uploadFileList.value[0].raw;
   if (!file) {
-    ElMessage.error("无效的文件");
+    ElMessage.error({
+      message: "无效的文件",
+      customClass: "high-z-index-message"
+    });
     return;
   }
 
@@ -182,7 +200,10 @@ const handleImport = async () => {
     });
   } catch (error: any) {
     console.error("导入失败:", error);
-    ElMessage.error(error.message || "导入评论失败");
+    ElMessage.error({
+      message: error.message || "导入评论失败",
+      customClass: "high-z-index-message"
+    });
   } finally {
     importing.value = false;
   }

@@ -386,17 +386,26 @@ const validateJson = () => {
 const copyExample = async () => {
   try {
     await navigator.clipboard.writeText(exampleJson);
-    ElMessage.success("示例已复制到剪贴板");
+    ElMessage.success({
+      message: "示例已复制到剪贴板",
+      customClass: "high-z-index-message"
+    });
   } catch (error) {
     console.error("复制失败", error);
-    ElMessage.error("复制失败，请手动复制");
+    ElMessage.error({
+      message: "复制失败，请手动复制",
+      customClass: "high-z-index-message"
+    });
   }
 };
 
 // 执行导入
 const handleImport = async () => {
   if (parsedData.value.length === 0) {
-    ElMessage.error("请输入有效的 JSON 数据");
+    ElMessage.error({
+      message: "请输入有效的 JSON 数据",
+      customClass: "high-z-index-message"
+    });
     return;
   }
 
@@ -426,14 +435,23 @@ const handleImport = async () => {
         activeTab.value = "skipped";
       }
 
-      ElMessage.success("导入完成");
+      ElMessage.success({
+        message: "导入完成",
+        customClass: "high-z-index-message"
+      });
       emit("success");
     } else {
-      ElMessage.error(response.message || "导入失败");
+      ElMessage.error({
+        message: response.message || "导入失败",
+        customClass: "high-z-index-message"
+      });
     }
   } catch (error) {
     console.error("导入失败", error);
-    ElMessage.error("导入失败");
+    ElMessage.error({
+      message: "导入失败",
+      customClass: "high-z-index-message"
+    });
   } finally {
     importing.value = false;
   }

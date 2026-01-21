@@ -78,7 +78,10 @@ const handleConfirm = () => {
     const publishedTime = new Date(internalForm.custom_published_at);
     const now = new Date();
     if (publishedTime.getTime() > now.getTime()) {
-      ElMessage.error("发布时间不能设置为未来时间");
+      ElMessage.error({
+        message: "发布时间不能设置为未来时间",
+        customClass: "high-z-index-message"
+      });
       return;
     }
   }
