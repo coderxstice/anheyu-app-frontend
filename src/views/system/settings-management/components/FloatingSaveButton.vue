@@ -119,5 +119,63 @@ onUnmounted(() => {
   opacity: 0;
   transform: translateY(20px);
 }
-</style>
 
+// ==================== 平板端适配 ====================
+@media (max-width: 1024px) {
+  .floating-save-button {
+    bottom: 20px;
+    right: 20px;
+    gap: 12px;
+    padding: 10px 16px;
+  }
+}
+
+// ==================== 移动端适配 ====================
+@media (max-width: 768px) {
+  .floating-save-button {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    gap: 12px;
+    padding: 12px 16px;
+    justify-content: space-between;
+  }
+
+  .save-content {
+    gap: 10px;
+    flex: 1;
+  }
+
+  .save-text {
+    font-size: 13px;
+  }
+
+  // 移动端隐藏键盘快捷键提示
+  .keyboard-hint {
+    display: none;
+  }
+}
+
+// ==================== 小屏移动端适配 ====================
+@media (max-width: 480px) {
+  .floating-save-button {
+    bottom: 12px;
+    right: 12px;
+    left: 12px;
+    padding: 10px 12px;
+  }
+
+  .save-text {
+    font-size: 12px;
+  }
+
+  .save-content {
+    gap: 8px;
+
+    .el-button {
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+  }
+}
+</style>

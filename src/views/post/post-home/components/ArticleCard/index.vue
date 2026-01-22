@@ -53,9 +53,10 @@ const getContrastColor = (hexColor: string): string => {
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
-  // 计算亮度
+  // 计算亮度 (0-255)
   const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-  return brightness > 128 ? "#333333" : "#ffffff";
+  // 阈值设为 180，只有非常浅的颜色才使用黑色文字，大多数颜色使用白色文字
+  return brightness > 180 ? "#333333" : "#ffffff";
 };
 
 const categoryTextColor = computed(() => {

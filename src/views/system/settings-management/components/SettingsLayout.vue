@@ -3,6 +3,12 @@
     <!-- 顶部工具栏 -->
     <div class="settings-header">
       <div class="header-left">
+        <!-- 移动端菜单按钮 -->
+        <el-button
+          class="mobile-menu-btn"
+          :icon="Menu"
+          @click="showMobileSidebar = true"
+        />
         <h1 class="settings-title">系统设置</h1>
       </div>
       <div class="header-right">
@@ -17,7 +23,7 @@
               :disabled="!hasChanges"
               @click="$emit('resetCurrent', activeComponent)"
             >
-              重置选区
+              <span class="btn-text">重置选区</span>
             </el-button>
           </el-tooltip>
           <el-tooltip
@@ -29,7 +35,7 @@
               :disabled="!hasChanges"
               @click="$emit('resetAll')"
             >
-              重置全部
+              <span class="btn-text">重置全部</span>
             </el-button>
           </el-tooltip>
         </div>
@@ -38,8 +44,12 @@
 
     <!-- 主体内容区 -->
     <div class="settings-body">
-      <!-- 左侧导航 -->
-      <SettingsSidebar :active-key="activeKey" @select="handleSelect" />
+      <!-- 左侧导航 - 桌面端 -->
+      <SettingsSidebar
+        class="desktop-sidebar"
+        :active-key="activeKey"
+        @select="handleSelect"
+      />
 
       <!-- 右侧内容区 -->
       <div ref="contentRef" class="settings-content">
@@ -48,6 +58,23 @@
         </div>
       </div>
     </div>
+
+    <!-- 移动端侧边栏抽屉 -->
+    <el-drawer
+      v-model="showMobileSidebar"
+      direction="ltr"
+      :size="280"
+      :show-close="false"
+      class="mobile-sidebar-drawer"
+    >
+      <template #header>
+        <div class="drawer-header">
+          <span class="drawer-title">设置导航</span>
+          <el-button :icon="Close" text @click="showMobileSidebar = false" />
+        </div>
+      </template>
+      <SettingsSidebar :active-key="activeKey" @select="handleMobileSelect" />
+    </el-drawer>
 
     <!-- 悬浮保存按钮 -->
     <FloatingSaveButton
@@ -61,11 +88,14 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { RefreshLeft, Refresh } from "@element-plus/icons-vue";
+import { RefreshLeft, Refresh, Menu, Close } from "@element-plus/icons-vue";
 import SettingsSidebar from "./SettingsSidebar.vue";
 import SettingsSearch from "./SettingsSearch.vue";
 import FloatingSaveButton from "./FloatingSaveButton.vue";
 import { settingsMenuConfig } from "../settings.descriptor";
+
+// 移动端侧边栏状态
+const showMobileSidebar = ref(false);
 
 const props = defineProps<{
   hasChanges: boolean;
@@ -171,9 +201,18 @@ const handleSelect = (key: string) => {
   scrollToTop();
 };
 
+// 处理移动端菜单选择
+const handleMobileSelect = (key: string) => {
+  handleSelect(key);
+  // 关闭移动端侧边栏
+  showMobileSidebar.value = false;
+};
+
 // 处理搜索导航
 const handleNavigate = (key: string) => {
   handleSelect(key);
+  // 如果移动端侧边栏打开，也要关闭
+  showMobileSidebar.value = false;
 };
 
 // 监听路由变化
@@ -211,22 +250,32 @@ watch(
   gap: 16px;
 }
 
+// 移动端菜单按钮 - 默认隐藏
+.mobile-menu-btn {
+  display: none;
+}
+
 .settings-title {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
   color: var(--el-text-color-primary);
+  white-space: nowrap;
 }
 
 .header-right {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex: 1;
+  justify-content: flex-end;
+  min-width: 0;
 }
 
 .header-actions {
   display: flex;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .settings-body {
@@ -248,5 +297,130 @@ watch(
   border-radius: 12px;
   padding: 24px 32px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+// 移动端抽屉头部
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.drawer-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+// ==================== 平板端适配 (768px - 1024px) ====================
+@media (max-width: 1024px) {
+  .settings-header {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .header-actions {
+    .btn-text {
+      display: none;
+    }
+  }
+
+  .settings-content {
+    padding: 16px;
+  }
+
+  .content-wrapper {
+    padding: 20px 24px;
+  }
+}
+
+// ==================== 移动端适配 (< 768px) ====================
+@media (max-width: 768px) {
+  .settings-header {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .header-left {
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  // 显示移动端菜单按钮
+  .mobile-menu-btn {
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  .settings-title {
+    font-size: 16px;
+  }
+
+  .header-right {
+    gap: 8px;
+  }
+
+  // 隐藏桌面端侧边栏
+  .desktop-sidebar {
+    display: none;
+  }
+
+  .settings-content {
+    padding: 12px;
+  }
+
+  .content-wrapper {
+    padding: 16px;
+    border-radius: 8px;
+  }
+}
+
+// ==================== 小屏移动端适配 (< 480px) ====================
+@media (max-width: 480px) {
+  .settings-header {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  // 小屏幕隐藏标题文字
+  .settings-title {
+    display: none;
+  }
+
+  .header-right {
+    gap: 6px;
+  }
+
+  .settings-content {
+    padding: 8px;
+  }
+
+  .content-wrapper {
+    padding: 12px;
+  }
+}
+</style>
+
+<!-- 移动端侧边栏抽屉样式 -->
+<style lang="scss">
+.mobile-sidebar-drawer {
+  .el-drawer__header {
+    padding: 16px;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--el-border-color-lighter);
+  }
+
+  .el-drawer__body {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  // 重置侧边栏在抽屉中的样式
+  .settings-sidebar {
+    width: 100%;
+    min-width: 100%;
+    border-right: none;
+  }
 }
 </style>

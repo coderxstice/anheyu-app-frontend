@@ -262,3 +262,142 @@ html.with-fancybox[data-theme] body.hide-scrollbar {
 .el-select__popper {
   z-index: 2200 !important;
 }
+
+/*
+ * 系统设置页面移动端适配
+ */
+
+// 设置页面表单移动端优化
+.settings-page {
+  // 移动端表单项间距调整
+  @media (max-width: 768px) {
+    .el-form-item {
+      margin-bottom: 16px;
+    }
+
+    .el-form-item__label {
+      font-size: 13px;
+      padding-bottom: 4px;
+    }
+
+    .el-input__wrapper,
+    .el-textarea__inner {
+      font-size: 14px;
+    }
+
+    // 设置页面 section header 移动端适配
+    .section-header {
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+
+      h2 {
+        font-size: 17px;
+      }
+
+      .section-desc {
+        font-size: 13px;
+      }
+    }
+
+    // el-row 在移动端变为垂直布局
+    .el-row {
+      flex-direction: column;
+
+      // 所有 el-col 在移动端变为全宽
+      .el-col {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        padding-right: 0 !important;
+        padding-left: 0 !important;
+      }
+    }
+  }
+
+  // 小屏移动端进一步优化
+  @media (max-width: 480px) {
+    .el-form-item {
+      margin-bottom: 12px;
+    }
+
+    .section-header {
+      margin-bottom: 16px;
+
+      h2 {
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+// 后台管理页面通用移动端适配
+@media (max-width: 768px) {
+  // 页面容器移动端适配
+  .app-main-container {
+    padding: 12px !important;
+  }
+
+  // el-card 移动端适配
+  .el-card {
+    .el-card__header {
+      padding: 12px 16px;
+    }
+
+    .el-card__body {
+      padding: 12px 16px;
+    }
+  }
+
+  // 表格操作列移动端适配
+  .el-table {
+    .el-table__cell {
+      padding: 8px 0;
+    }
+  }
+
+  // 对话框移动端适配
+  .el-dialog {
+    width: calc(100vw - 32px) !important;
+    max-width: 100%;
+    margin: 16px auto !important;
+
+    .el-dialog__header {
+      padding: 16px;
+    }
+
+    .el-dialog__body {
+      padding: 16px;
+    }
+
+    .el-dialog__footer {
+      padding: 12px 16px;
+    }
+  }
+
+  // 抽屉移动端适配
+  .el-drawer {
+    &.rtl {
+      width: calc(100vw - 40px) !important;
+      max-width: 100%;
+    }
+  }
+}
+
+// 小屏移动端适配
+@media (max-width: 480px) {
+  .app-main-container {
+    padding: 8px !important;
+  }
+
+  .el-dialog {
+    width: calc(100vw - 24px) !important;
+    margin: 12px auto !important;
+
+    .el-dialog__header {
+      padding: 12px;
+    }
+
+    .el-dialog__body {
+      padding: 12px;
+    }
+  }
+}
