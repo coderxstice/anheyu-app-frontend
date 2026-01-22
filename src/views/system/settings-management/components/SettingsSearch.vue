@@ -94,11 +94,7 @@ const searchResults = computed<SearchResult[]>(() => {
     // 匹配分类
     if (item.categoryLabel.toLowerCase().includes(keyword)) return true;
     // 匹配关键词
-    if (
-      item.keywords?.some(k =>
-        k.toLowerCase().includes(keyword)
-      )
-    ) {
+    if (item.keywords?.some(k => k.toLowerCase().includes(keyword))) {
       return true;
     }
     return false;
@@ -134,6 +130,8 @@ const handleResultClick = (result: SearchResult) => {
 <style scoped lang="scss">
 .settings-search {
   width: 280px;
+  flex-shrink: 1;
+  min-width: 120px;
 }
 
 .search-input {
@@ -189,6 +187,50 @@ const handleResultClick = (result: SearchResult) => {
 .search-empty {
   padding: 20px;
 }
+
+// ==================== 平板端适配 ====================
+@media (max-width: 1024px) {
+  .settings-search {
+    width: 200px;
+  }
+}
+
+// ==================== 移动端适配 ====================
+@media (max-width: 768px) {
+  .settings-search {
+    width: 160px;
+    min-width: 100px;
+  }
+
+  .search-input {
+    :deep(.el-input__inner) {
+      font-size: 13px;
+
+      &::placeholder {
+        font-size: 13px;
+      }
+    }
+  }
+}
+
+// ==================== 小屏移动端适配 ====================
+@media (max-width: 480px) {
+  .settings-search {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+
+  .search-input {
+    :deep(.el-input__wrapper) {
+      padding: 0 8px;
+    }
+
+    :deep(.el-input__inner) {
+      font-size: 14px;
+    }
+  }
+}
 </style>
 
 <style lang="scss">
@@ -196,5 +238,11 @@ const handleResultClick = (result: SearchResult) => {
   padding: 8px !important;
   border-radius: 12px !important;
 }
-</style>
 
+// 移动端弹出层宽度适配
+@media (max-width: 768px) {
+  .settings-search-popover {
+    max-width: calc(100vw - 32px) !important;
+  }
+}
+</style>

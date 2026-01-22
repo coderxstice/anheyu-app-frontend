@@ -175,6 +175,31 @@
 
 // 响应式调整
 @media (max-width: 768px) {
+  .table-bar {
+    border-radius: 8px !important;
+
+    .pure-table {
+      width: calc(100% - 16px) !important;
+      margin: 0 8px 12px;
+      border-radius: 6px;
+
+      .el-table {
+        border-radius: 6px !important;
+
+        .el-table__inner-wrapper {
+          border-radius: 6px;
+        }
+      }
+    }
+
+    .el-pagination {
+      padding: 12px 8px !important;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+    }
+  }
+
   .table-title {
     .title-text {
       font-size: 14px;
@@ -192,6 +217,35 @@
       padding: 4px 8px;
       font-size: 11px;
       height: 26px;
+    }
+  }
+}
+
+// 小屏移动端进一步优化
+@media (max-width: 480px) {
+  .table-bar {
+    .pure-table {
+      width: calc(100% - 8px) !important;
+      margin: 0 4px 8px;
+    }
+
+    .el-pagination {
+      padding: 10px 4px !important;
+
+      // 隐藏每页条数选择器
+      .el-pagination__sizes {
+        display: none;
+      }
+    }
+  }
+
+  .operation-btns {
+    gap: 4px;
+
+    .el-button {
+      padding: 3px 6px;
+      font-size: 10px;
+      height: 24px;
     }
   }
 }
