@@ -387,6 +387,32 @@ const isAlipayEnabled = computed(() => {
   const reward = siteConfig.post?.reward;
   return reward?.alipay_enable !== false && reward?.alipay_qr;
 });
+
+// 版权区域按钮显示控制（系统级别 && 文章级别）
+const showRewardButton = computed(
+  () =>
+    siteConfig.post?.copyright?.showRewardButton !== false &&
+    props.article.show_reward_button !== false
+);
+const showShareButton = computed(
+  () =>
+    siteConfig.post?.copyright?.showShareButton !== false &&
+    props.article.show_share_button !== false
+);
+const showSubscribeButton = computed(
+  () =>
+    siteConfig.post?.copyright?.showSubscribeButton !== false &&
+    props.article.show_subscribe_button !== false
+);
+
+// 判断是否有任何按钮需要显示（用于控制 button-group 的渲染）
+const hasAnyButton = computed(() => {
+  const rewardVisible =
+    showRewardButton.value &&
+    siteConfig.post?.reward?.enable &&
+    hasAnyRewardMethod.value;
+  return rewardVisible || showShareButton.value || showSubscribeButton.value;
+});
 </script>
 
 <template>
@@ -411,9 +437,13 @@ const isAlipayEnabled = computed(() => {
       <template v-else>{{ siteConfig?.SUB_TITLE }}</template>
     </div>
 
-    <div class="button-group">
+    <div v-if="hasAnyButton" class="button-group">
       <div
-        v-if="siteConfig.post.reward?.enable && hasAnyRewardMethod"
+        v-if="
+          showRewardButton &&
+          siteConfig.post.reward?.enable &&
+          hasAnyRewardMethod
+        "
         class="reward"
       >
         <div class="reward-button" @click="showRewardPanel = !showRewardPanel">
@@ -464,11 +494,16 @@ const isAlipayEnabled = computed(() => {
           @click="showRewardPanel = !showRewardPanel"
         />
       </Transition>
-      <div class="subscribe-button" @click="handleSubscribeClick">
+      <div
+        v-if="showSubscribeButton"
+        class="subscribe-button"
+        @click="handleSubscribeClick"
+      >
         <IconifyIconOffline :icon="RssIcon" />
         <span>{{ subscribeConfig.buttonText }}</span>
       </div>
       <div
+        v-if="showShareButton"
         class="share-button"
         :class="{ loading: isGeneratingPoster }"
         @click="handleGeneratePoster"
@@ -580,9 +615,9 @@ const isAlipayEnabled = computed(() => {
           <el-button
             type="primary"
             size="large"
+            class="send-code-btn"
             :disabled="codeCountdown > 0 || isSendingCode"
             @click="handleSendCode"
-            class="send-code-btn"
           >
             {{ codeCountdown > 0 ? `${codeCountdown}s` : "发送验证码" }}
           </el-button>

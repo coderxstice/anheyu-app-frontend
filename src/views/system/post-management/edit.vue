@@ -77,7 +77,11 @@ const form = reactive<ArticleForm>({
   copyright_author: "",
   copyright_author_href: "",
   copyright_url: "",
-  keywords: ""
+  keywords: "",
+  // 版权区域按钮显示控制（默认全部显示）
+  show_reward_button: true,
+  show_share_button: true,
+  show_subscribe_button: true
 });
 
 const initialFormState = reactive({

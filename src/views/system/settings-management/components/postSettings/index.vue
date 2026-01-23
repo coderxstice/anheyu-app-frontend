@@ -528,6 +528,61 @@
   </el-form-item>
 
   <el-divider content-position="left">
+    <h3>版权区域按钮全局开关</h3>
+  </el-divider>
+
+  <el-form-item label="显示打赏按钮">
+    <div>
+      <el-switch
+        :model-value="formData.copyright?.showRewardButton ?? true"
+        @update:model-value="
+          (val: boolean) => {
+            initCopyright();
+            formData.copyright!.showRewardButton = val;
+          }
+        "
+      />
+      <div class="form-item-help">
+        全局控制所有文章底部是否显示打赏按钮。关闭后所有文章都不会显示打赏按钮。
+      </div>
+    </div>
+  </el-form-item>
+
+  <el-form-item label="显示分享按钮">
+    <div>
+      <el-switch
+        :model-value="formData.copyright?.showShareButton ?? true"
+        @update:model-value="
+          (val: boolean) => {
+            initCopyright();
+            formData.copyright!.showShareButton = val;
+          }
+        "
+      />
+      <div class="form-item-help">
+        全局控制所有文章底部是否显示分享按钮。关闭后所有文章都不会显示分享按钮。
+      </div>
+    </div>
+  </el-form-item>
+
+  <el-form-item label="显示订阅按钮">
+    <div>
+      <el-switch
+        :model-value="formData.copyright?.showSubscribeButton ?? true"
+        @update:model-value="
+          (val: boolean) => {
+            initCopyright();
+            formData.copyright!.showSubscribeButton = val;
+          }
+        "
+      />
+      <div class="form-item-help">
+        全局控制所有文章底部是否显示订阅按钮。关闭后所有文章都不会显示订阅按钮。
+      </div>
+    </div>
+  </el-form-item>
+
+  <el-divider content-position="left">
     <h3>文章底部版权声明配置</h3>
   </el-divider>
 
@@ -822,7 +877,10 @@ const initCopyright = () => {
     formData.value.copyright = {
       originalTemplate: "",
       reprintTemplateWithUrl: "",
-      reprintTemplateWithoutUrl: ""
+      reprintTemplateWithoutUrl: "",
+      showRewardButton: true,
+      showShareButton: true,
+      showSubscribeButton: true
     };
   }
 };

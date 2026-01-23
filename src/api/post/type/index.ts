@@ -127,6 +127,10 @@ export interface Article {
   is_doc?: boolean;
   doc_series_id?: string;
   doc_sort?: number;
+  // 版权区域按钮显示控制
+  show_reward_button?: boolean;
+  show_share_button?: boolean;
+  show_subscribe_button?: boolean;
 }
 
 /**
@@ -173,6 +177,10 @@ export interface ArticleForm {
   keywords?: string;
   // 定时发布相关字段
   scheduled_at?: string; // ISO 8601 格式的定时发布时间，设置后状态自动变为 SCHEDULED
+  // 版权区域按钮显示控制
+  show_reward_button?: boolean;
+  show_share_button?: boolean;
+  show_subscribe_button?: boolean;
 }
 
 export type ArticleResponse = Article;
