@@ -266,6 +266,44 @@ const handleFetchPrimaryColor = async () => {
           </div>
         </el-form-item>
       </el-col>
+
+      <!-- 版权区域按钮显示控制 -->
+      <el-col :span="24">
+        <el-divider content-position="left">版权区域按钮显示</el-divider>
+        <div class="form-item-help" style="margin-bottom: 16px">
+          控制本篇文章底部版权区域的按钮显示。注意：系统设置中的全局开关优先级更高，如果全局关闭了某个按钮，这里开启也不会显示。
+        </div>
+      </el-col>
+
+      <el-col :span="8">
+        <el-form-item label="显示打赏按钮">
+          <el-switch
+            v-model="form.show_reward_button"
+            active-text="显示"
+            inactive-text="隐藏"
+          />
+        </el-form-item>
+      </el-col>
+
+      <el-col :span="8">
+        <el-form-item label="显示分享按钮">
+          <el-switch
+            v-model="form.show_share_button"
+            active-text="显示"
+            inactive-text="隐藏"
+          />
+        </el-form-item>
+      </el-col>
+
+      <el-col :span="8">
+        <el-form-item label="显示订阅按钮">
+          <el-switch
+            v-model="form.show_subscribe_button"
+            active-text="显示"
+            inactive-text="隐藏"
+          />
+        </el-form-item>
+      </el-col>
     </el-row>
   </el-form>
 </template>

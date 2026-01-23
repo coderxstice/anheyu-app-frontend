@@ -1282,14 +1282,37 @@ a {
   .footer-back-to-top {
     display: none;
   }
+
   .footer-container {
     z-index: 99;
-    background: var(--anzhiyu-card-bg);
     margin-top: -1px;
+    background: var(--anzhiyu-card-bg);
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
     touch-action: pan-y;
+  }
+
+  .footer-bottom-bar {
+    .bar-content {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    .bar-left {
+      align-items: center;
+      text-align: center;
+    }
+
+    .bar-right {
+      justify-content: center;
+    }
+
+    .record-info {
+      justify-content: center;
+    }
   }
 }
 </style>

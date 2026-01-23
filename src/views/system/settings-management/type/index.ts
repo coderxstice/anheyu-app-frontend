@@ -202,6 +202,9 @@ export interface PostSettingsInfo {
     originalTemplate: string; // 原创文章版权声明模板
     reprintTemplateWithUrl: string; // 转载文章版权声明模板（有原文链接）
     reprintTemplateWithoutUrl: string; // 转载文章版权声明模板（无原文链接）
+    showRewardButton?: boolean; // 是否显示打赏按钮（全局）
+    showShareButton?: boolean; // 是否显示分享按钮（全局）
+    showSubscribeButton?: boolean; // 是否显示订阅按钮（全局）
   };
   cdn: {
     enable: boolean;

@@ -208,6 +208,12 @@ const KeyPostSubscribeDialogDesc: SettingKey = "post.subscribe.dialog_desc";
 const KeyPostSubscribeMailSubject: SettingKey = "post.subscribe.mail_subject";
 const KeyPostSubscribeMailTemplate: SettingKey = "post.subscribe.mail_template";
 
+// 版权区域按钮全局开关
+const KeyPostShowRewardButton: SettingKey = "post.copyright.show_reward_button";
+const KeyPostShowShareButton: SettingKey = "post.copyright.show_share_button";
+const KeyPostShowSubscribeButton: SettingKey =
+  "post.copyright.show_subscribe_button";
+
 // --- 装备页面配置 ---
 const KeyPostEquipmentBannerBackground: SettingKey =
   "equipment.banner.background";
@@ -590,6 +596,11 @@ export const constant = {
   KeyPostSubscribeDialogDesc,
   KeyPostSubscribeMailSubject,
   KeyPostSubscribeMailTemplate,
+
+  // 版权区域按钮全局开关
+  KeyPostShowRewardButton,
+  KeyPostShowShareButton,
+  KeyPostShowSubscribeButton,
 
   // --- 装备页面配置 ---
   KeyPostEquipmentBannerBackground,

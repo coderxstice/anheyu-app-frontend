@@ -752,6 +752,25 @@ const postDescriptors: SettingDescriptor[] = [
     defaultValue: "",
     type: "string"
   },
+  // 版权区域按钮全局开关
+  {
+    frontendPath: "post.copyright.showRewardButton",
+    backendKey: constant.KeyPostShowRewardButton,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "post.copyright.showShareButton",
+    backendKey: constant.KeyPostShowShareButton,
+    defaultValue: true,
+    type: "boolean"
+  },
+  {
+    frontendPath: "post.copyright.showSubscribeButton",
+    backendKey: constant.KeyPostShowSubscribeButton,
+    defaultValue: true,
+    type: "boolean"
+  },
   {
     frontendPath: "post.cdn.enable",
     backendKey: constant.KeyCDNEnable,
