@@ -48,9 +48,7 @@ watch(
   isVisible => {
     if (isVisible) {
       activeTab.value = "common";
-      copyrightType.value = props.form.copyright_author
-        ? "reprint"
-        : "original";
+      copyrightType.value = props.form.is_reprint ? "reprint" : "original";
       // 初始化关键词标签
       if (internalForm.keywords) {
         keywordTags.value = internalForm.keywords
@@ -87,6 +85,8 @@ const handleConfirm = () => {
   }
 
   internalForm.copyright = true;
+  // 设置文章类型（原创/转载）
+  internalForm.is_reprint = copyrightType.value === "reprint";
   // 将关键词标签数组转换为逗号分隔的字符串
   internalForm.keywords = keywordTags.value.join(", ");
   emit("confirm-publish");

@@ -52,18 +52,34 @@ const formatDate = (dateString: string) => {
   return `${year}-${month}-${day}`;
 };
 
-// 获取文章的实际作者信息（优先使用文章发布者的信息，否则使用站点所有者）
-const articleAuthor = computed(() => {
-  // 优先使用发布者的 nickname
+// 判断是否为转载文章
+const isReprintArticle = computed(() => props.article.is_reprint === true);
+
+// 获取文章发布者的信息（用于原创文章显示）
+const articlePublisher = computed(() => {
   if (props.article.owner_nickname) {
     return props.article.owner_nickname;
   }
-  // 其次使用发布者名称（已废弃，兼容旧数据）
   if (props.article.owner_name) {
     return props.article.owner_name;
   }
-  // 否则使用站点所有者名称
   return siteConfig.frontDesk?.siteOwner?.name || "本站博主";
+});
+
+// 获取显示的作者名称（转载文章显示原作者，原创文章显示发布者）
+const articleAuthor = computed(() => {
+  if (isReprintArticle.value && props.article.copyright_author) {
+    return props.article.copyright_author;
+  }
+  return articlePublisher.value;
+});
+
+// 获取作者链接（转载文章使用原作者链接）
+const articleAuthorHref = computed(() => {
+  if (isReprintArticle.value && props.article.copyright_author_href) {
+    return props.article.copyright_author_href;
+  }
+  return null;
 });
 
 // 获取文章发布者的头像（优先使用发布者头像，否则使用站点所有者头像）
@@ -92,19 +108,14 @@ const copyrightInfo = computed(() => {
     siteConfig.copyright?.license_url ??
     "https://creativecommons.org/licenses/by-nc-sa/4.0/";
   const siteUrl = siteConfig.site?.url ?? "/";
-  const actualAuthor = articleAuthor.value; // 使用文章的实际作者
 
   // 获取自定义版权声明模板配置
   const copyrightConfig = siteConfig.post?.copyright;
 
-  // 判断是否为转载文章
-  const isReprint =
-    props.article.copyright_author &&
-    props.article.copyright_author !== actualAuthor;
-
-  if (isReprint) {
+  if (isReprintArticle.value) {
     // 转载文章的版权声明
-    const originalAuthor = props.article.copyright_author;
+    const originalAuthor =
+      props.article.copyright_author || articlePublisher.value;
     const originalUrl = props.article.copyright_url;
 
     if (originalUrl) {
@@ -125,7 +136,7 @@ const copyrightInfo = computed(() => {
       return templateWithoutUrl.replace(/{originalAuthor}/g, originalAuthor);
     }
   } else {
-    // 原创文章的版权声明（使用文章的实际作者）
+    // 原创文章的版权声明（使用文章发布者）
     const originalTemplate =
       copyrightConfig?.originalTemplate ||
       copyrightConfig?.original_template ||
@@ -133,7 +144,7 @@ const copyrightInfo = computed(() => {
     return originalTemplate
       .replace(/{license}/g, license)
       .replace(/{licenseUrl}/g, licenseUrl)
-      .replace(/{author}/g, actualAuthor)
+      .replace(/{author}/g, articlePublisher.value)
       .replace(/{siteUrl}/g, siteUrl);
   }
 });
@@ -384,9 +395,21 @@ const isAlipayEnabled = computed(() => {
       <img :src="articleAuthorAvatar" alt="作者头像" />
     </div>
     <div class="author-name">
-      {{ articleAuthor }}
+      <a
+        v-if="articleAuthorHref"
+        :href="articleAuthorHref"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="author-link"
+      >
+        {{ articleAuthor }}
+      </a>
+      <span v-else>{{ articleAuthor }}</span>
     </div>
-    <div class="author-desc">{{ siteConfig?.SUB_TITLE }}</div>
+    <div class="author-desc">
+      <template v-if="isReprintArticle"> 转载文章 · 原作者 </template>
+      <template v-else>{{ siteConfig?.SUB_TITLE }}</template>
+    </div>
 
     <div class="button-group">
       <div
@@ -633,6 +656,18 @@ const isAlipayEnabled = computed(() => {
   line-height: 1;
   color: var(--anzhiyu-fontcolor);
   text-align: center;
+
+  .author-link {
+    color: var(--anzhiyu-fontcolor);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+
+    &:hover {
+      color: var(--anzhiyu-main);
+      border-bottom-color: var(--anzhiyu-main);
+    }
+  }
 }
 
 .author-desc {

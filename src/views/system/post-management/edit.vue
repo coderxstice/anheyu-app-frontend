@@ -73,6 +73,7 @@ const form = reactive<ArticleForm>({
   is_primary_color_manual: false,
   abbrlink: "",
   copyright: true,
+  is_reprint: false,
   copyright_author: "",
   copyright_author_href: "",
   copyright_url: "",

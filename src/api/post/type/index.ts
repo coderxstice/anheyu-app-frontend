@@ -107,6 +107,7 @@ export interface Article {
   is_primary_color_manual: boolean;
   abbrlink?: string;
   copyright?: boolean;
+  is_reprint?: boolean;
   copyright_author?: string;
   copyright_author_href?: string;
   copyright_url?: string;
@@ -163,6 +164,7 @@ export interface ArticleForm {
   is_primary_color_manual?: boolean;
   abbrlink?: string;
   copyright?: boolean;
+  is_reprint?: boolean;
   copyright_author?: string;
   copyright_author_href?: string;
   copyright_url?: string;
