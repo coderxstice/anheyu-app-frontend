@@ -204,31 +204,33 @@ const apiHandlers = {
       return;
     }
 
-    await useUserStoreHook().loginByEmail({
-      email: form.email,
-      password: form.password,
-      ...captchaParams.value
-    });
+    try {
+      await useUserStoreHook().loginByEmail({
+        email: form.email,
+        password: form.password,
+        ...captchaParams.value
+      });
 
-    // 登录成功后重置验证码
-    resetCaptcha();
+      // 等待路由初始化
+      await initRouter();
 
-    // 等待路由初始化
-    await initRouter();
+      // 根据用户角色决定跳转位置
+      const userStore = useUserStoreHook();
+      const isAdmin = userStore.roles.includes("1"); // 1 是管理员组ID
 
-    // 根据用户角色决定跳转位置
-    const userStore = useUserStoreHook();
-    const isAdmin = userStore.roles.includes("1"); // 1 是管理员组ID
+      if (isAdmin) {
+        // 管理员跳转到后台首页
+        await router.replace("/admin/dashboard");
+      } else {
+        // 普通用户跳转到前台首页
+        await router.replace("/");
+      }
 
-    if (isAdmin) {
-      // 管理员跳转到后台首页
-      await router.replace("/admin/dashboard");
-    } else {
-      // 普通用户跳转到前台首页
-      await router.replace("/");
+      message("登录成功", { type: "success" });
+    } finally {
+      // 无论登录成功还是失败，都重置验证码（极验 pass_token 只能使用一次）
+      resetCaptcha();
     }
-
-    message("登录成功", { type: "success" });
   },
   register: async () => {
     // 检查人机验证

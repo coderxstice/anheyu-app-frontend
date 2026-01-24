@@ -7,8 +7,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { useSiteConfigStore } from "@/store/modules/siteConfig";
-import { http } from "@/utils/http";
-import { baseUrlApi } from "@/utils/http/config";
 import Turnstile from "@/components/Turnstile/index.vue";
 import Geetest from "@/components/Geetest/index.vue";
 import ImageCaptcha from "@/components/ImageCaptcha/index.vue";
@@ -22,12 +20,6 @@ interface CaptchaConfig {
   turnstile_site_key?: string;
   geetest_captcha_id?: string;
   image_captcha_length?: number;
-}
-
-// API 响应类型
-interface CaptchaConfigResponse {
-  code: number;
-  data: CaptchaConfig;
 }
 
 // 统一验证参数
@@ -71,49 +63,19 @@ const provider = computed(() => captchaConfig.value?.provider || "none");
 // 是否启用验证
 const isEnabled = computed(() => provider.value !== "none");
 
-// 获取验证码配置
-const fetchCaptchaConfig = async () => {
+// 从站点配置获取验证码配置
+const fetchCaptchaConfig = () => {
   try {
-    // 首先尝试从 siteConfig 获取
     const siteConfig = siteConfigStore.getSiteConfig;
-    if (siteConfig?.captcha?.provider) {
-      captchaConfig.value = {
-        provider: siteConfig.captcha.provider as CaptchaProvider,
-        turnstile_site_key:
-          siteConfig.turnstile?.site_key || siteConfig["turnstile.site_key"],
-        geetest_captcha_id:
-          siteConfig.geetest?.captcha_id || siteConfig["geetest.captcha_id"]
-      };
-      emit("configLoaded", captchaConfig.value);
-      return;
-    }
+    const captchaProvider = (siteConfig?.captcha?.provider ||
+      "none") as CaptchaProvider;
 
-    // 兼容旧配置：检查 turnstile.enable
-    const turnstileEnabled =
-      siteConfig?.turnstile?.enable === true ||
-      siteConfig?.turnstile?.enable === "true" ||
-      siteConfig?.["turnstile.enable"] === "true";
-
-    if (turnstileEnabled) {
-      captchaConfig.value = {
-        provider: "turnstile",
-        turnstile_site_key:
-          siteConfig?.turnstile?.site_key || siteConfig?.["turnstile.site_key"]
-      };
-      emit("configLoaded", captchaConfig.value);
-      return;
-    }
-
-    // 从 API 获取配置
-    const res = await http.get<CaptchaConfigResponse, undefined>(
-      baseUrlApi("public/captcha/config")
-    );
-    if (res.code === 200 && res.data) {
-      captchaConfig.value = res.data;
-      emit("configLoaded", res.data);
-    } else {
-      captchaConfig.value = { provider: "none" };
-    }
+    captchaConfig.value = {
+      provider: captchaProvider,
+      turnstile_site_key: siteConfig?.turnstile?.site_key,
+      geetest_captcha_id: siteConfig?.geetest?.captcha_id
+    };
+    emit("configLoaded", captchaConfig.value);
   } catch (error) {
     console.error("获取验证码配置失败:", error);
     captchaConfig.value = { provider: "none" };

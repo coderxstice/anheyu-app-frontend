@@ -22,6 +22,14 @@ const emit = defineEmits(["verified", "error", "expired"]);
 const siteConfigStore = useSiteConfigStore();
 const { dataTheme } = useDataThemeChange();
 
+// 验证 Turnstile siteKey 格式（Cloudflare siteKey 通常以 0x 开头）
+const isValidSiteKey = (key: string): boolean => {
+  if (!key || key.length < 10) return false;
+  // 排除明显错误的格式（邮箱、URL等）
+  if (key.includes("@") || key.includes("://")) return false;
+  return true;
+};
+
 // 从站点配置获取 Turnstile 配置
 const turnstileConfig = computed(() => {
   const config = siteConfigStore.getSiteConfig;
@@ -32,7 +40,8 @@ const turnstileConfig = computed(() => {
     config?.["turnstile.enable"] === "true";
   const siteKey =
     config?.turnstile?.site_key || config?.["turnstile.site_key"] || "";
-  return { enabled, siteKey };
+  const isValid = isValidSiteKey(siteKey);
+  return { enabled, siteKey, isValid };
 });
 
 // 组件内部状态
@@ -82,6 +91,17 @@ const loadTurnstileScript = (): Promise<void> => {
 const renderWidget = async () => {
   if (!turnstileConfig.value.enabled || !turnstileConfig.value.siteKey) {
     isLoading.value = false;
+    return;
+  }
+
+  // 验证 siteKey 格式
+  if (!turnstileConfig.value.isValid) {
+    console.error(
+      "Turnstile 配置错误：Site Key 格式无效，请检查后台配置。当前值:",
+      turnstileConfig.value.siteKey
+    );
+    isLoading.value = false;
+    emit("error");
     return;
   }
 
@@ -206,10 +226,15 @@ defineExpose({
 
 <template>
   <div v-if="turnstileConfig.enabled" class="turnstile-wrapper">
-    <div v-if="isLoading" class="turnstile-loading">
-      <span>正在加载人机验证...</span>
+    <div v-if="!turnstileConfig.isValid" class="turnstile-error">
+      <span>Turnstile 配置错误：Site Key 格式无效</span>
     </div>
-    <div ref="containerRef" class="turnstile-container" />
+    <template v-else>
+      <div v-if="isLoading" class="turnstile-loading">
+        <span>正在加载人机验证...</span>
+      </div>
+      <div ref="containerRef" class="turnstile-container" />
+    </template>
   </div>
 </template>
 
@@ -228,6 +253,17 @@ defineExpose({
   color: var(--anzhiyu-fontcolor);
   font-size: 14px;
   opacity: 0.7;
+}
+
+.turnstile-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f56c6c;
+  font-size: 14px;
+  padding: 10px;
+  background-color: #fef0f0;
+  border-radius: 4px;
 }
 
 .turnstile-container {

@@ -235,11 +235,16 @@ defineExpose({
 </script>
 
 <template>
-  <div v-if="geetestCaptchaId" class="geetest-wrapper">
-    <div v-if="isLoading" class="geetest-loading">
-      <span>正在加载人机验证...</span>
+  <div class="geetest-wrapper">
+    <div v-if="!geetestCaptchaId" class="geetest-error">
+      <span>极验验证码配置错误：缺少 Captcha ID</span>
     </div>
-    <div ref="containerRef" class="geetest-container" />
+    <template v-else>
+      <div v-if="isLoading" class="geetest-loading">
+        <span>正在加载人机验证...</span>
+      </div>
+      <div ref="containerRef" class="geetest-container" />
+    </template>
   </div>
 </template>
 
@@ -258,6 +263,17 @@ defineExpose({
   color: var(--anzhiyu-fontcolor);
   font-size: 14px;
   opacity: 0.7;
+}
+
+.geetest-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f56c6c;
+  font-size: 14px;
+  padding: 10px;
+  background-color: #fef0f0;
+  border-radius: 4px;
 }
 
 .geetest-container {
