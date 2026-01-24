@@ -441,6 +441,11 @@ const getRenderedHtmlFromPreview = (): string | null => {
   return clonedElement.innerHTML;
 };
 
+// 保存完成的 Promise resolver（用于 triggerSaveAsync）
+let saveCompleteResolver:
+  | ((value: { markdown: string; html: string }) => void)
+  | null = null;
+
 // 保存处理
 const handleSave = async (markdown: string, htmlPromise: Promise<string>) => {
   console.log("[保存文章] 开始处理...");
@@ -507,6 +512,12 @@ const handleSave = async (markdown: string, htmlPromise: Promise<string>) => {
   // 保存：Markdown保持原样，HTML包含完整的音乐数据
   emit("onSave", markdown, sanitizedHtml);
   console.log("[保存文章] 保存完成");
+
+  // 如果有等待的 Promise，resolve 它
+  if (saveCompleteResolver) {
+    saveCompleteResolver({ markdown, html: sanitizedHtml });
+    saveCompleteResolver = null;
+  }
 };
 
 // 音乐播放器观察器
@@ -585,7 +596,32 @@ onUnmounted(() => {
 });
 
 defineExpose({
-  triggerSave: () => editorRef.value?.triggerSave()
+  triggerSave: () => editorRef.value?.triggerSave(),
+  // 异步版本的 triggerSave，返回 Promise，等待保存完成后 resolve
+  triggerSaveAsync: () => {
+    return new Promise<{ markdown: string; html: string }>(
+      (resolve, reject) => {
+        // 设置 resolver，handleSave 完成后会调用它
+        saveCompleteResolver = resolve;
+
+        // 触发保存
+        if (editorRef.value?.triggerSave) {
+          editorRef.value.triggerSave();
+        } else {
+          saveCompleteResolver = null;
+          reject(new Error("编辑器未就绪"));
+        }
+
+        // 设置超时（30秒），防止永远等待
+        setTimeout(() => {
+          if (saveCompleteResolver) {
+            saveCompleteResolver = null;
+            reject(new Error("保存超时"));
+          }
+        }, 30000);
+      }
+    );
+  }
 });
 </script>
 
