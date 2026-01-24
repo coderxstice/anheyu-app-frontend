@@ -192,22 +192,24 @@ const apiHandlers = {
       return;
     }
 
-    await useUserStoreHook().loginByEmail({
-      email: form.email,
-      password: form.password,
-      ...captchaParams.value
-    });
+    try {
+      await useUserStoreHook().loginByEmail({
+        email: form.email,
+        password: form.password,
+        ...captchaParams.value
+      });
 
-    // 登录成功后重置验证码
-    resetCaptcha();
-
-    // 初始化路由（仅供管理员使用，普通用户不需要）
-    await initRouter();
-    // 获取最新的用户信息
-    await useUserStoreHook().fetchUserInfo();
-    message("登录成功", { type: "success" });
-    emit("login-success");
-    closeDialog();
+      // 初始化路由（仅供管理员使用，普通用户不需要）
+      await initRouter();
+      // 获取最新的用户信息
+      await useUserStoreHook().fetchUserInfo();
+      message("登录成功", { type: "success" });
+      emit("login-success");
+      closeDialog();
+    } finally {
+      // 无论登录成功还是失败，都重置验证码（极验 pass_token 只能使用一次）
+      resetCaptcha();
+    }
   },
   register: async () => {
     // 检查人机验证
