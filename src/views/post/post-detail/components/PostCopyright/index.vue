@@ -389,21 +389,28 @@ const isAlipayEnabled = computed(() => {
 });
 
 // 版权区域按钮显示控制（系统级别 && 文章级别）
-const showRewardButton = computed(
-  () =>
-    siteConfig.post?.copyright?.showRewardButton !== false &&
-    props.article.show_reward_button !== false
-);
-const showShareButton = computed(
-  () =>
-    siteConfig.post?.copyright?.showShareButton !== false &&
-    props.article.show_share_button !== false
-);
-const showSubscribeButton = computed(
-  () =>
-    siteConfig.post?.copyright?.showSubscribeButton !== false &&
-    props.article.show_subscribe_button !== false
-);
+// 兼容后端返回的下划线格式（show_reward_button）和前端期望的驼峰格式（showRewardButton）
+const showRewardButton = computed(() => {
+  const copyright = siteConfig.post?.copyright;
+  // 优先使用驼峰格式，兼容下划线格式
+  const globalSetting =
+    copyright?.showRewardButton ?? copyright?.show_reward_button ?? true;
+  return globalSetting !== false && props.article.show_reward_button !== false;
+});
+const showShareButton = computed(() => {
+  const copyright = siteConfig.post?.copyright;
+  const globalSetting =
+    copyright?.showShareButton ?? copyright?.show_share_button ?? true;
+  return globalSetting !== false && props.article.show_share_button !== false;
+});
+const showSubscribeButton = computed(() => {
+  const copyright = siteConfig.post?.copyright;
+  const globalSetting =
+    copyright?.showSubscribeButton ?? copyright?.show_subscribe_button ?? true;
+  return (
+    globalSetting !== false && props.article.show_subscribe_button !== false
+  );
+});
 
 // 判断是否有任何按钮需要显示（用于控制 button-group 的渲染）
 const hasAnyButton = computed(() => {

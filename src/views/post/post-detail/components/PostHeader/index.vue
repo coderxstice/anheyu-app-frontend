@@ -32,11 +32,8 @@ let ctx: gsap.Context;
 let observer: IntersectionObserver | null = null;
 
 const articleType = computed(() => {
-  const siteOwnerName = siteConfigStore.siteConfig?.frontDesk?.siteOwner?.name;
-  if (
-    props.article.copyright_author &&
-    props.article.copyright_author !== siteOwnerName
-  ) {
+  // 直接使用 is_reprint 字段判断文章类型
+  if (props.article.is_reprint === true) {
     return "转载";
   }
   return "原创";
