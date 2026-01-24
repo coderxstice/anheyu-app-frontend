@@ -175,6 +175,7 @@
       :title="editingCategoryIndex === -1 ? '添加分类' : '编辑分类'"
       width="500px"
       :append-to-body="true"
+      :z-index="2200"
     >
       <el-form :model="editingCategory" label-width="110px">
         <el-form-item label="分类标题" required>

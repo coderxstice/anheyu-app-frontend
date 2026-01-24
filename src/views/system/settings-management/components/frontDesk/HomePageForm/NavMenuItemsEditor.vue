@@ -6,6 +6,7 @@
     append-to-body
     :close-on-click-modal="false"
     destroy-on-close
+    :z-index="2200"
   >
     <el-table :data="localItems" border height="400px">
       <el-table-column label="名称" prop="name" width="180">

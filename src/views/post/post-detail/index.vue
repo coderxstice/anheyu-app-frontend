@@ -23,6 +23,7 @@ import {
   resetThemeToDefault
 } from "@/utils/themeManager";
 import { setArticleMetaTags, clearArticleMetaTags } from "@/utils/metaManager";
+import { useWechatShare, setArticleShare } from "@/composables/useWechatShare";
 
 import PostHeader from "./components/PostHeader/index.vue";
 import PostOutdateNotice from "./components/PostOutdateNotice/index.vue";
@@ -77,6 +78,9 @@ const articleWithCommentCount = computed(() => {
 });
 
 const siteConfigStore = useSiteConfigStore();
+
+// --- 微信分享 ---
+const { setShareConfig, isWechatBrowser } = useWechatShare();
 
 // 检查波浪区域是否启用（默认为 true）
 const isWavesEnabled = computed(() => {
@@ -248,6 +252,17 @@ const updateArticleMetaTags = () => {
   };
 
   setArticleMetaTags(metaData);
+
+  // 设置微信分享配置
+  if (isWechatBrowser.value) {
+    const shareConfig = setArticleShare({
+      title: article.value.title,
+      description: article.value.summaries?.[0] || article.value.title,
+      cover: article.value.cover_url || undefined,
+      slug: article.value.abbrlink
+    });
+    setShareConfig(shareConfig);
+  }
 };
 
 /**

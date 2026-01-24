@@ -12,7 +12,10 @@ import type {
   ThemeListParams,
   ThemeUploadResponse,
   ThemeValidationResult,
-  Theme
+  Theme,
+  ThemeSettingGroup,
+  ThemeConfigResponse,
+  ThemeConfigSaveRequest
 } from "./type";
 
 /**
@@ -153,5 +156,71 @@ export const themeMallApi = {
         "Content-Type": "multipart/form-data"
       } as any
     });
+  },
+
+  // ===== 主题配置相关 API =====
+
+  /**
+   * 获取主题配置定义（需要登录）
+   * @param themeName 主题名称
+   */
+  getThemeSettings: (
+    themeName: string
+  ): Promise<{
+    code: number;
+    message: string;
+    data: ThemeSettingGroup[];
+  }> => {
+    return http.get(baseUrlApi("theme/settings"), { theme_name: themeName });
+  },
+
+  /**
+   * 获取用户主题配置（需要登录）
+   * @param themeName 主题名称
+   */
+  getUserThemeConfig: (
+    themeName: string
+  ): Promise<{
+    code: number;
+    message: string;
+    data: Record<string, any>;
+  }> => {
+    return http.get(baseUrlApi("theme/config"), { theme_name: themeName });
+  },
+
+  /**
+   * 保存用户主题配置（需要登录）
+   * @param data 主题配置
+   */
+  saveUserThemeConfig: (
+    data: ThemeConfigSaveRequest
+  ): Promise<{
+    code: number;
+    message: string;
+    data: any;
+  }> => {
+    return http.post(baseUrlApi("theme/config"), data);
+  },
+
+  /**
+   * 获取当前主题的完整配置（定义+值，需要登录）
+   */
+  getCurrentThemeConfig: (): Promise<{
+    code: number;
+    message: string;
+    data: ThemeConfigResponse;
+  }> => {
+    return http.get(baseUrlApi("theme/current-config"));
+  },
+
+  /**
+   * 获取当前主题配置（公开接口，供前端主题使用）
+   */
+  getPublicThemeConfig: (): Promise<{
+    code: number;
+    message: string;
+    data: Record<string, any>;
+  }> => {
+    return http.get(baseUrlApi("public/theme/config"));
   }
 };

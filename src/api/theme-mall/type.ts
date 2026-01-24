@@ -158,3 +158,113 @@ export interface ThemeListResponse {
   /** 响应数据 */
   data: ThemeListData | null;
 }
+
+// ===== 主题配置相关类型定义 =====
+
+/**
+ * 主题配置选项
+ */
+export interface ThemeSettingOption {
+  /** 选项显示名称 */
+  label: string;
+  /** 选项值 */
+  value: string | number | boolean;
+}
+
+/**
+ * 字段验证规则
+ */
+export interface ThemeFieldValidation {
+  /** 最小长度 */
+  minLength?: number;
+  /** 最大长度 */
+  maxLength?: number;
+  /** 最小值（数字类型） */
+  min?: number;
+  /** 最大值（数字类型） */
+  max?: number;
+  /** 正则表达式 */
+  pattern?: string;
+  /** 验证失败提示 */
+  message?: string;
+}
+
+/**
+ * 字段显示条件
+ */
+export interface ThemeFieldCondition {
+  /** 依赖的字段名 */
+  field: string;
+  /** 操作符: eq, neq, contains, gt, lt */
+  operator: "eq" | "neq" | "contains" | "gt" | "lt";
+  /** 比较值 */
+  value: any;
+}
+
+/**
+ * 主题配置字段定义
+ */
+export interface ThemeSettingField {
+  /** 字段名称（唯一标识） */
+  name: string;
+  /** 显示标签 */
+  label: string;
+  /** 字段类型: text, textarea, number, select, color, switch, image, code */
+  type:
+    | "text"
+    | "textarea"
+    | "number"
+    | "select"
+    | "color"
+    | "switch"
+    | "image"
+    | "code";
+  /** 默认值 */
+  default?: any;
+  /** 占位提示 */
+  placeholder?: string;
+  /** 字段描述 */
+  description?: string;
+  /** 是否必填 */
+  required?: boolean;
+  /** 选项（用于 select 类型） */
+  options?: ThemeSettingOption[];
+  /** 验证规则 */
+  validation?: ThemeFieldValidation;
+  /** 显示条件（依赖其他字段） */
+  condition?: ThemeFieldCondition;
+}
+
+/**
+ * 主题配置分组
+ */
+export interface ThemeSettingGroup {
+  /** 分组标识 */
+  group: string;
+  /** 分组显示名称 */
+  label: string;
+  /** 配置字段列表 */
+  fields: ThemeSettingField[];
+}
+
+/**
+ * 主题配置响应
+ */
+export interface ThemeConfigResponse {
+  /** 主题名称 */
+  theme_name: string;
+  /** 配置定义 */
+  settings: ThemeSettingGroup[];
+  /** 当前配置值（用户配置 + 默认值） */
+  values: Record<string, any>;
+}
+
+/**
+ * 保存主题配置请求
+ */
+export interface ThemeConfigSaveRequest {
+  /** 主题名称 */
+  theme_name: string;
+  /** 配置值 */
+  config: Record<string, any>;
+}

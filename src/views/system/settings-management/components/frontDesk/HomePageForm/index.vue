@@ -332,6 +332,7 @@
       direction="rtl"
       size="420px"
       class="settings-drawer"
+      :z-index="2200"
     >
       <div v-if="currentEditingMenu" class="settings-content">
         <!-- 基本信息 -->

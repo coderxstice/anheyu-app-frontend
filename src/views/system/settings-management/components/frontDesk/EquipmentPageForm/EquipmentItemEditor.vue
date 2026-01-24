@@ -153,6 +153,7 @@
       direction="rtl"
       size="500px"
       :append-to-body="true"
+      :z-index="2200"
     >
       <div class="new-item-form">
         <el-form :model="newItem" label-width="110px">
@@ -237,6 +238,7 @@
       title="批量导入装备项"
       width="600px"
       :append-to-body="true"
+      :z-index="2200"
     >
       <div class="import-dialog">
         <el-alert title="导入说明" type="info" :closable="false" show-icon>
