@@ -16,25 +16,6 @@
         <i class="anzhiyufont anzhiyu-icon-train" />
       </a>
     </el-tooltip>
-    <!-- 通知图标 -->
-    <el-tooltip
-      v-if="isLoggedIn && !isMobile"
-      content="通知"
-      placement="top"
-      :show-arrow="false"
-      :offset="8"
-    >
-      <a
-        class="nav-button notification-button"
-        @click="handleGoToNotifications"
-      >
-        <IconifyIconOffline
-          icon="ri:notification-2-fill"
-          class="w-[1.25rem] h-[1.25rem]"
-        />
-        <span v-if="hasUnreadNotifications" class="notification-dot" />
-      </a>
-    </el-tooltip>
     <!-- 用户中心/登录注册 -->
     <div
       v-if="!isLoggedIn"
@@ -271,9 +252,6 @@ const showUserDropdown = ref(false);
 // 用户弹窗控制
 const userPopoverVisible = ref(false);
 
-// 是否有未读通知（暂时模拟）
-const hasUnreadNotifications = ref(false);
-
 // 用户头像
 const userAvatar = computed(() => {
   return (
@@ -394,11 +372,6 @@ const goToUserCenter = () => {
 const handleGoToUserCenter = () => {
   userPopoverVisible.value = false;
   window.open("/user-center", "_blank");
-};
-
-// 跳转到通知页面
-const handleGoToNotifications = () => {
-  window.open("/notifications", "_blank");
 };
 
 // 进入后台
@@ -635,20 +608,6 @@ onUnmounted(() => {
     &:not(.nav-totop):hover {
       color: var(--anzhiyu-white);
       background: var(--anzhiyu-lighttext);
-    }
-
-    &.notification-button {
-      position: relative;
-
-      .notification-dot {
-        position: absolute;
-        top: 6px;
-        right: 6px;
-        width: 8px;
-        height: 8px;
-        background: #f56c6c;
-        border-radius: 50%;
-      }
     }
   }
 
