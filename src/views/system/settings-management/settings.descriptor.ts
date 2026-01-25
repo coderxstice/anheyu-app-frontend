@@ -203,6 +203,12 @@ export const settingsMenuConfig: SettingsMenuItem[] = [
         ]
       },
       {
+        key: "advanced-wechat-share",
+        label: "微信分享",
+        component: "WechatShareSettingsForm",
+        keywords: ["微信", "分享", "JS-SDK", "WeChat", "公众号", "卡片"]
+      },
+      {
         key: "advanced-backup",
         label: "备份导入",
         component: "BackupImportForm",
@@ -2211,6 +2217,34 @@ const captchaDescriptors: SettingDescriptor[] = [
   }
 ];
 
+// --- 微信分享配置描述符 ---
+const wechatShareDescriptors: SettingDescriptor[] = [
+  {
+    frontendPath: "frontDesk.wechatShare.enable",
+    backendKey: constant.KeyWechatShareEnable,
+    defaultValue: false,
+    type: "boolean",
+    label: "启用微信分享",
+    searchKeywords: ["微信", "分享", "JS-SDK", "WeChat"]
+  },
+  {
+    frontendPath: "frontDesk.wechatShare.appId",
+    backendKey: constant.KeyWechatShareAppID,
+    defaultValue: "",
+    type: "string",
+    label: "微信公众号 AppID",
+    searchKeywords: ["微信", "AppID", "公众号"]
+  },
+  {
+    frontendPath: "frontDesk.wechatShare.appSecret",
+    backendKey: constant.KeyWechatShareAppSecret,
+    defaultValue: "",
+    type: "string",
+    label: "微信公众号 AppSecret",
+    searchKeywords: ["微信", "AppSecret", "密钥", "公众号"]
+  }
+];
+
 export const allSettingDescriptors = [
   ...siteDescriptors,
   ...pageDescriptors,
@@ -2227,5 +2261,6 @@ export const allSettingDescriptors = [
   ...fLinkDescriptors,
   ...albumDescriptors,
   ...turnstileDescriptors,
-  ...captchaDescriptors
+  ...captchaDescriptors,
+  ...wechatShareDescriptors
 ];

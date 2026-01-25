@@ -177,10 +177,22 @@
             <div class="section-header">
               <h2>人机验证</h2>
               <p class="section-desc">
-                配置人机验证，支持 Turnstile / 极验 / 系统验证码，保护登录和注册接口
+                配置人机验证，支持 Turnstile / 极验 /
+                系统验证码，保护登录和注册接口
               </p>
             </div>
             <CaptchaSettingsForm v-model="form.frontDesk.captcha" />
+          </template>
+
+          <!-- 高级功能 - 微信分享 -->
+          <template v-else-if="activeComponent === 'WechatShareSettingsForm'">
+            <div class="section-header">
+              <h2>微信分享</h2>
+              <p class="section-desc">
+                配置微信 JS-SDK 分享功能，在微信内分享时显示自定义卡片
+              </p>
+            </div>
+            <WechatShareSettingsForm v-model="form.frontDesk.wechatShare" />
           </template>
 
           <!-- 高级功能 - 备份&导入 -->
@@ -238,6 +250,7 @@ import RecentCommentsPageForm from "./components/frontDesk/RecentCommentsPageFor
 import AlbumPageForm from "./components/frontDesk/AlbumPageForm/index.vue";
 import MusicPageForm from "./components/frontDesk/MusicPageForm/index.vue";
 import CaptchaSettingsForm from "./components/frontDesk/CaptchaSettingsForm/index.vue";
+import WechatShareSettingsForm from "./components/frontDesk/WechatShareSettingsForm/index.vue";
 import BackupImportForm from "./components/BackupImportForm.vue";
 
 const siteConfigStore = useSiteConfigStore();
@@ -382,7 +395,8 @@ const componentToPathPrefix: Record<string, string[]> = {
   RecentCommentsPageForm: ["frontDesk.recentComments."],
   AlbumPageForm: ["frontDesk.album."],
   MusicPageForm: ["frontDesk.music."],
-  CaptchaSettingsForm: ["frontDesk.captcha."]
+  CaptchaSettingsForm: ["frontDesk.captcha."],
+  WechatShareSettingsForm: ["frontDesk.wechatShare."]
 };
 
 // 重置选区 - 重置当前 tab 的配置

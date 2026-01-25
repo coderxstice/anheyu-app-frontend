@@ -750,6 +750,15 @@ export interface CaptchaSettingsInfo {
   imageCaptcha: ImageCaptchaSettingsInfo;
 }
 
+/**
+ * @description: 微信分享配置表单接口
+ */
+export interface WechatShareSettingsInfo {
+  enable: boolean; // 是否启用微信分享功能
+  appId: string; // 微信公众号 AppID
+  appSecret: string; // 微信公众号 AppSecret
+}
+
 export interface FrontDeskSettings {
   home: HomePageSettingsInfo;
   sidebar: SidebarPageSettingsInfo;
@@ -762,6 +771,7 @@ export interface FrontDeskSettings {
   album: AlbumPageSettingsInfo;
   turnstile: TurnstileSettingsInfo;
   captcha: CaptchaSettingsInfo;
+  wechatShare: WechatShareSettingsInfo;
 }
 
 /**

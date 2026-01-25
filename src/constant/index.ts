@@ -408,6 +408,11 @@ const KeyGeetestCaptchaKey: SettingKey = "geetest.captcha_key";
 const KeyImageCaptchaLength: SettingKey = "image_captcha.length";
 const KeyImageCaptchaExpire: SettingKey = "image_captcha.expire";
 
+// --- 微信分享配置 ---
+const KeyWechatShareEnable: SettingKey = "wechat.share.enable";
+const KeyWechatShareAppID: SettingKey = "wechat.share.app_id";
+const KeyWechatShareAppSecret: SettingKey = "wechat.share.app_secret";
+
 // --- 相册页面配置 ---
 const KeyAlbumPageBannerBackground: SettingKey = "album.banner.background";
 const KeyAlbumPageBannerTitle: SettingKey = "album.banner.title";
@@ -795,6 +800,11 @@ export const constant = {
   // --- 系统图形验证码配置 ---
   KeyImageCaptchaLength,
   KeyImageCaptchaExpire,
+
+  // --- 微信分享配置 ---
+  KeyWechatShareEnable,
+  KeyWechatShareAppID,
+  KeyWechatShareAppSecret,
 
   // --- 其他 ---
   DEFAULT_CHUNK_SIZE

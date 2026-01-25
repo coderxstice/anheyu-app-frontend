@@ -47,6 +47,11 @@
         <RecentCommentsPageForm v-model="model.recentComments" />
       </el-form>
     </el-tab-pane>
+    <el-tab-pane label="微信分享配置" name="wechatSharePage">
+      <el-form :model="model" label-position="top" class="setting-form">
+        <WechatShareSettingsForm v-model="model.wechatShare" />
+      </el-form>
+    </el-tab-pane>
   </el-tabs>
 </template>
 
@@ -61,6 +66,7 @@ import FLinkPageSettingsForm from "./frontDesk/FLinkPageSettingsForm/index.vue";
 import EquipmentPageForm from "./frontDesk/EquipmentPageForm/index.vue";
 import AboutPageForm from "./frontDesk/AboutPageForm/index.vue";
 import RecentCommentsPageForm from "./frontDesk/RecentCommentsPageForm/index.vue";
+import WechatShareSettingsForm from "./frontDesk/WechatShareSettingsForm/index.vue";
 
 const activeSubTab = ref("homePage");
 const fLinkFormRef = ref<InstanceType<typeof FLinkPageSettingsForm>>();
