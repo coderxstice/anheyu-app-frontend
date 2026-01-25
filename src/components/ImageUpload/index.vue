@@ -270,6 +270,7 @@ const _uid = Math.random().toString(36).substring(2);
       title="添加网络图片链接"
       width="500px"
       append-to-body
+      :z-index="2200"
     >
       <el-input v-model="linkUrlInput" placeholder="请输入图片URL" />
       <template #footer>
@@ -284,6 +285,7 @@ const _uid = Math.random().toString(36).substring(2);
       width="600px"
       append-to-body
       destroy-on-close
+      :z-index="2200"
     >
       <div class="cropper-wrapper">
         <div ref="cropperContainerRef" class="cropper-container" />

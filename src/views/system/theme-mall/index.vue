@@ -203,6 +203,15 @@
                     </el-button>
                   </template>
 
+                  <!-- 配置按钮（非官方主题才显示） -->
+                  <el-button
+                    v-if="!theme.isOfficial"
+                    class="action-secondary"
+                    @click="openThemeConfig(theme)"
+                  >
+                    <el-icon><Setting /></el-icon>
+                  </el-button>
+
                   <!-- 通用演示按钮 -->
                   <el-button
                     v-if="theme.demoUrl"
@@ -288,6 +297,13 @@
         @current-change="handleCurrentChange"
       />
     </div>
+
+    <!-- 主题配置对话框 -->
+    <ThemeConfigDialog
+      v-model="showConfigDialog"
+      :theme-name="currentConfigTheme"
+      @saved="handleConfigSaved"
+    />
 
     <!-- 主题上传对话框 -->
     <el-dialog
@@ -409,8 +425,10 @@ import {
   Delete,
   Check,
   Close,
-  Warning
+  Warning,
+  Setting
 } from "@element-plus/icons-vue";
+import ThemeConfigDialog from "./components/ThemeConfigDialog.vue";
 import { themeMallApi } from "@/api/theme-mall";
 import type {
   ThemeListParams,
@@ -441,6 +459,10 @@ const uploadRef = ref();
 
 // 主题切换状态
 const switchingTheme = ref<string | null>(null);
+
+// 主题配置相关状态
+const showConfigDialog = ref(false);
+const currentConfigTheme = ref("");
 
 // 搜索参数
 const searchParams = ref<ThemeListParams & { themeType: string }>({
@@ -715,6 +737,17 @@ const buyTheme = (theme: Theme) => {
     .catch(() => {
       // 用户取消购买
     });
+};
+
+// 打开主题配置对话框
+const openThemeConfig = (theme: Theme) => {
+  currentConfigTheme.value = theme.name;
+  showConfigDialog.value = true;
+};
+
+// 配置保存成功处理
+const handleConfigSaved = () => {
+  ElMessage.success("主题配置已保存，刷新页面后生效");
 };
 
 // 查看说明

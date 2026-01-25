@@ -169,6 +169,7 @@
       :title="categoryEditMode ? '编辑分类' : '新建分类'"
       :width="dialogWidth"
       append-to-body
+      :z-index="2200"
     >
       <el-form
         ref="categoryFormRef"
@@ -221,6 +222,7 @@
       :title="tagEditMode ? '编辑标签' : '新建标签'"
       :width="dialogWidth"
       append-to-body
+      :z-index="2200"
     >
       <el-form
         ref="tagFormRef"
