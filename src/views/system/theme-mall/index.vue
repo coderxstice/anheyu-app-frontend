@@ -2,7 +2,7 @@
  * @Description: 主题商城
  * @Author: 安知鱼
  * @Date: 2025-09-18 14:31:11
- * @LastEditTime: 2025-09-19 11:34:25
+ * @LastEditTime: 2026-01-25 16:08:58
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -251,10 +251,10 @@
                     <el-button
                       type="primary"
                       class="action-main pro-action"
-                      @click="buyTheme(theme)"
+                      @click="handleInstallProTheme(theme)"
                     >
-                      <el-icon><Money /></el-icon>
-                      购买主题
+                      <el-icon><Download /></el-icon>
+                      安装
                     </el-button>
                     <el-button
                       v-if="theme.instructionUrl"
@@ -440,6 +440,7 @@ import type {
 import { useDebounceFn } from "@vueuse/core";
 import { getToken } from "@/utils/auth";
 import dayjs from "@/utils/dayjs";
+import { getVersionInfo } from "@/utils/versionManager";
 
 defineOptions({
   name: "ThemeMall"
@@ -459,6 +460,9 @@ const uploadRef = ref();
 
 // 主题切换状态
 const switchingTheme = ref<string | null>(null);
+
+// PRO 版本检测
+const isProEdition = ref(false);
 
 // 主题配置相关状态
 const showConfigDialog = ref(false);
@@ -605,6 +609,17 @@ const downloadTheme = (url: string) => {
   window.open(url, "_blank");
 };
 
+// 从 downloadUrl 中提取主题名称（格式：theme-xxx-v1.0.0.zip）
+const extractThemeNameFromUrl = (downloadUrl: string): string => {
+  // 获取文件名
+  const fileName = downloadUrl.split("/").pop() || "";
+  // 移除 .zip 扩展名
+  const nameWithoutExt = fileName.replace(/\.zip$/i, "");
+  // 移除版本号后缀（-v1.0.0 或 -1.0.0 格式）
+  const themeName = nameWithoutExt.replace(/-v?\d+(\.\d+)*$/, "");
+  return themeName;
+};
+
 // 安装主题
 const installTheme = async (theme: Theme) => {
   if (!theme.downloadUrl) {
@@ -623,9 +638,12 @@ const installTheme = async (theme: Theme) => {
       }
     );
 
+    // 从 downloadUrl 中提取真正的主题名称，如果提取失败则使用显示名
+    const themeName = extractThemeNameFromUrl(theme.downloadUrl) || theme.name;
+
     // 调用后端安装API
     const response = await themeMallApi.installTheme({
-      theme_name: theme.name,
+      theme_name: themeName,
       download_url: theme.downloadUrl,
       theme_market_id: theme.id
     });
@@ -643,6 +661,32 @@ const installTheme = async (theme: Theme) => {
       ElMessage.error(error.message || "安装主题失败，请稍后重试");
     }
   }
+};
+
+// 处理安装 PRO 主题（根据版本判断行为）
+const handleInstallProTheme = async (theme: Theme) => {
+  // 检查是否为 PRO 版本
+  if (!isProEdition.value) {
+    // 社区版用户点击安装 PRO 主题，显示提示弹窗
+    ElMessageBox.alert(
+      "PRO 主题仅限 PRO 版本用户使用。请升级到 PRO 版本后再安装此主题。",
+      "无法安装 PRO 主题",
+      {
+        confirmButtonText: "我知道了",
+        type: "warning"
+      }
+    );
+    return;
+  }
+
+  // PRO 版本用户，检查是否有下载链接
+  if (!theme.downloadUrl) {
+    ElMessage.error("该主题暂无可用的下载链接，请稍后再试");
+    return;
+  }
+
+  // PRO 版本用户，直接安装
+  await installTheme(theme);
 };
 
 // 启用主题
@@ -1024,11 +1068,25 @@ const checkLoginStatus = () => {
   return true;
 };
 
+// 检测是否为 PRO 版本
+const checkProEdition = async () => {
+  try {
+    const versionInfo = await getVersionInfo();
+    isProEdition.value =
+      versionInfo.name === "anheyu-pro" && !!versionInfo.version;
+    console.log("PRO 版本检测:", isProEdition.value, versionInfo);
+  } catch (error) {
+    console.warn("版本检测失败，默认为社区版:", error);
+    isProEdition.value = false;
+  }
+};
+
 // 页面加载时获取数据
 onMounted(() => {
   checkLoginStatus();
   loadThemes();
   checkStaticMode();
+  checkProEdition();
 });
 </script>
 
