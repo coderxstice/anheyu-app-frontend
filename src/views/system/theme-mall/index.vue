@@ -2,7 +2,7 @@
  * @Description: 主题商城
  * @Author: 安知鱼
  * @Date: 2025-09-18 14:31:11
- * @LastEditTime: 2026-01-25 16:08:58
+ * @LastEditTime: 2026-01-26 14:00:55
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -97,10 +97,10 @@
                 </div>
                 <!-- 主题类型标识 -->
                 <div
-                  class="theme-type-badge"
-                  :class="`type-${theme.themeType}`"
+                  v-if="theme.themeType === 'pro'"
+                  class="theme-type-badge type-pro"
                 >
-                  <span v-if="theme.themeType === 'pro'">专业版</span>
+                  <span>PRO</span>
                 </div>
                 <!-- SSR 主题标识 -->
                 <div v-if="theme.deployType === 'ssr'" class="ssr-badge">
@@ -826,7 +826,7 @@ const viewInstructions = (url: string) => {
 const openSSRGuide = (theme: Theme) => {
   // 如果主题有指定的说明地址，使用它；否则使用默认的文档地址
   const guideUrl =
-    theme.instructionUrl || "https://docs.anheyu.com/docs/ssr-theme-deploy";
+    theme.instructionUrl || "https://dev.anheyu.com/docs/ssr-theme-deploy";
   window.open(guideUrl, "_blank");
 };
 
