@@ -4,6 +4,11 @@
 export type ThemeType = "community" | "pro";
 
 /**
+ * 部署类型枚举
+ */
+export type DeployType = "standard" | "ssr";
+
+/**
  * 主题对象类型定义（与后端ThemeInfo结构匹配）
  */
 export interface Theme {
@@ -17,6 +22,8 @@ export interface Theme {
   description: string;
   /** 主题类型 */
   themeType: ThemeType;
+  /** 部署类型：standard-传统安装，ssr-Docker SSR 部署 */
+  deployType: DeployType;
   /** GitHub仓库地址（社区版） */
   repoUrl: string;
   /** 说明地址（PRO版） */
