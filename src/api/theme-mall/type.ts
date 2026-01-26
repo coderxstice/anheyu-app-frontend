@@ -64,6 +64,12 @@ export interface Theme {
   user_config?: Record<string, any>;
   /** 已安装版本 */
   installed_version?: string;
+
+  // SSR 主题特有字段（已安装的 SSR 主题）
+  /** SSR 主题运行状态 */
+  ssrStatus?: SSRThemeStatus;
+  /** SSR 主题运行端口 */
+  ssrPort?: number;
 }
 
 /**
@@ -274,4 +280,51 @@ export interface ThemeConfigSaveRequest {
   theme_name: string;
   /** 配置值 */
   config: Record<string, any>;
+}
+
+// ===== SSR 主题相关类型定义 =====
+
+/**
+ * SSR 主题状态
+ */
+export type SSRThemeStatus =
+  | "not_installed"
+  | "installed"
+  | "running"
+  | "error";
+
+/**
+ * SSR 主题信息
+ */
+export interface SSRThemeInfo {
+  /** 主题名称 */
+  name: string;
+  /** 版本号 */
+  version: string;
+  /** 状态 */
+  status: SSRThemeStatus;
+  /** 运行端口 */
+  port?: number;
+  /** 安装时间 */
+  installedAt?: string;
+  /** 启动时间 */
+  startedAt?: string;
+}
+
+/**
+ * SSR 主题安装请求
+ */
+export interface SSRThemeInstallRequest {
+  /** 主题名称 */
+  themeName: string;
+  /** 下载链接 */
+  downloadUrl: string;
+}
+
+/**
+ * SSR 主题启动请求
+ */
+export interface SSRThemeStartRequest {
+  /** 运行端口 */
+  port?: number;
 }

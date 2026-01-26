@@ -743,6 +743,25 @@ hr {
           border-radius: 6px;
           margin-bottom: 6px;
           object-fit: cover;
+
+          // 字体图标样式
+          &.back-menu-item-icon-font {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            border-radius: 0;
+            color: var(--anzhiyu-fontcolor);
+          }
+
+          // Iconify 图标样式
+          &.back-menu-item-icon-iconify {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0;
+            color: var(--anzhiyu-fontcolor);
+          }
         }
 
         .back-menu-item-text {
@@ -826,6 +845,9 @@ hr {
   transform: scale(1.03);
 }
 .menus_items .menu-group .menu-group-list .menu-group-item i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1rem;
   width: 22px;
   text-align: center;
