@@ -102,6 +102,10 @@
                 >
                   <span v-if="theme.themeType === 'pro'">专业版</span>
                 </div>
+                <!-- SSR 主题标识 -->
+                <div v-if="theme.deployType === 'ssr'" class="ssr-badge">
+                  <span>SSR</span>
+                </div>
               </div>
             </div>
 
@@ -224,8 +228,27 @@
 
                 <!-- 主题商城的操作按钮 -->
                 <template v-else>
+                  <!-- SSR 主题按钮 -->
+                  <template v-if="theme.deployType === 'ssr'">
+                    <el-button
+                      type="warning"
+                      class="action-main ssr-action"
+                      @click="openSSRGuide(theme)"
+                    >
+                      <el-icon><Setting /></el-icon>
+                      Docker 部署
+                    </el-button>
+                    <el-button
+                      v-if="theme.repoUrl"
+                      class="action-secondary"
+                      @click="openRepo(theme.repoUrl)"
+                    >
+                      <el-icon><Link /></el-icon>
+                    </el-button>
+                  </template>
+
                   <!-- 社区版按钮 -->
-                  <template v-if="theme.themeType === 'community'">
+                  <template v-else-if="theme.themeType === 'community'">
                     <el-button
                       v-if="theme.downloadUrl"
                       type="primary"
@@ -799,6 +822,14 @@ const viewInstructions = (url: string) => {
   window.open(url, "_blank");
 };
 
+// 打开 SSR 主题部署指南
+const openSSRGuide = (theme: Theme) => {
+  // 如果主题有指定的说明地址，使用它；否则使用默认的文档地址
+  const guideUrl =
+    theme.instructionUrl || "https://docs.anheyu.com/docs/ssr-theme-deploy";
+  window.open(guideUrl, "_blank");
+};
+
 // 图片错误处理
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement;
@@ -1323,6 +1354,15 @@ onMounted(() => {
               color: white;
             }
           }
+
+          .ssr-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            background: linear-gradient(45deg, #06b6d4, #0891b2);
+            color: white;
+          }
         }
       }
 
@@ -1472,6 +1512,21 @@ onMounted(() => {
 
               &:active {
                 background: linear-gradient(45deg, #b45309, #dc2626);
+              }
+            }
+
+            &.ssr-action {
+              background: linear-gradient(45deg, #06b6d4, #0891b2);
+              border-color: #06b6d4;
+              color: white;
+
+              &:hover {
+                background: linear-gradient(45deg, #0891b2, #0e7490);
+                border-color: #0891b2;
+              }
+
+              &:active {
+                background: linear-gradient(45deg, #0e7490, #155e75);
               }
             }
 
