@@ -309,6 +309,8 @@ export interface SSRThemeInfo {
   installedAt?: string;
   /** 启动时间 */
   startedAt?: string;
+  /** 是否是当前使用的主题（从数据库获取） */
+  is_current?: boolean;
 }
 
 /**
