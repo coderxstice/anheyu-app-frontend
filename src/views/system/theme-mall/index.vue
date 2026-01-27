@@ -2,7 +2,7 @@
  * @Description: 主题商城
  * @Author: 安知鱼
  * @Date: 2025-09-18 14:31:11
- * @LastEditTime: 2026-01-26 19:50:00
+ * @LastEditTime: 2026-01-27 10:34:24
  * @LastEditors: 安知鱼
 -->
 <template>
@@ -146,13 +146,16 @@
               <template v-if="activeTab === 'installed'">
                 <!-- SSR 主题操作 -->
                 <template v-if="theme.deployType === 'ssr'">
-                  <!-- SSR 运行中（当前主题） -->
-                  <template v-if="theme.ssrStatus === 'running'">
+                  <!-- SSR 当前主题（统一使用 is_current 判断） -->
+                  <template v-if="theme.is_current">
                     <button class="btn current-btn" disabled>
                       <el-icon><Check /></el-icon>
                       当前主题
                     </button>
-                    <span class="ssr-port-badge">
+                    <span
+                      v-if="theme.ssrStatus === 'running'"
+                      class="ssr-port-badge"
+                    >
                       端口: {{ theme.ssrPort || 3000 }}
                     </span>
                   </template>
@@ -503,15 +506,12 @@ const isSSRThemeInstalled = (themeName: string): boolean => {
 
 // 统一的主题排序函数
 // 排序规则：1. 当前使用中的主题 2. 官方主题 3. 其他主题
+// 统一使用 is_current 字段判断当前主题状态（后端保证一致性）
 const sortThemeList = (themes: Theme[]): Theme[] => {
   return [...themes].sort((a, b) => {
-    // 1. 当前使用中的主题排最前面
-    const aIsCurrent =
-      a.is_current || (a.deployType === "ssr" && a.ssrStatus === "running");
-    const bIsCurrent =
-      b.is_current || (b.deployType === "ssr" && b.ssrStatus === "running");
-    if (aIsCurrent && !bIsCurrent) return -1;
-    if (!aIsCurrent && bIsCurrent) return 1;
+    // 1. 当前使用中的主题排最前面（统一使用 is_current）
+    if (a.is_current && !b.is_current) return -1;
+    if (!a.is_current && b.is_current) return 1;
 
     // 2. 官方主题排在前面
     if (a.isOfficial && !b.isOfficial) return -1;
@@ -543,11 +543,17 @@ const loadThemes = async () => {
       })
     ]);
 
-    // 更新已安装的 SSR 主题名称集合
+    // 更新已安装的 SSR 主题名称集合和状态（避免重复请求）
     if (ssrResponse.code === 200 && ssrResponse.data) {
       installedSSRThemeNames.value = new Set(
         ssrResponse.data.map((ssr: SSRThemeInfo) => ssr.name)
       );
+      // 同时更新 SSR 主题状态，避免 onMounted 中重复请求
+      const statusMap: Record<string, SSRThemeInfo> = {};
+      ssrResponse.data.forEach((info: SSRThemeInfo) => {
+        statusMap[info.name] = info;
+      });
+      ssrThemeStatus.value = statusMap;
       console.log(
         "已安装的 SSR 主题:",
         Array.from(installedSSRThemeNames.value)
@@ -558,12 +564,27 @@ const loadThemes = async () => {
 
     if (response.code === 200 && response.data) {
       const list = response.data.list || [];
+
+      // 按主题名称去重（优先保留 SSR 版本，如果有的话）
+      const themeMap = new Map<string, Theme>();
+      list.forEach((theme: Theme) => {
+        const existing = themeMap.get(theme.name);
+        // 如果不存在，或者新的是 SSR 版本而旧的不是，则更新
+        const isNewSSR = theme.deployType === "ssr";
+        const isExistingNotSSR = existing?.deployType !== "ssr";
+        if (!existing || (isNewSSR && isExistingNotSSR)) {
+          themeMap.set(theme.name, theme);
+        }
+      });
+      const dedupedList = Array.from(themeMap.values());
+
       // 排序规则：1. 当前使用的主题 2. 官方主题 3. 其他主题
-      const sortedList = sortThemeList(list);
+      const sortedList = sortThemeList(dedupedList);
 
       themeData.value = {
         ...response.data,
-        list: sortedList
+        list: sortedList,
+        total: dedupedList.length
       };
     } else {
       throw new Error(response.message || "获取主题列表失败");
@@ -602,9 +623,20 @@ const loadInstalledThemes = async () => {
       });
     }
 
-    // 添加普通已安装主题
+    // 先收集 SSR 主题名称，用于去重
+    const ssrThemeNames = new Set<string>();
+    if (ssrResponse.code === 200 && ssrResponse.data) {
+      ssrResponse.data.forEach((ssr: SSRThemeInfo) => {
+        ssrThemeNames.add(ssr.name);
+      });
+    }
+
+    // 添加普通已安装主题（排除 SSR 主题，避免重复）
     if (normalResponse.code === 200 && normalResponse.data) {
-      themes.push(...normalResponse.data);
+      const normalThemes = normalResponse.data.filter(
+        (theme: Theme) => !ssrThemeNames.has(theme.name)
+      );
+      themes.push(...normalThemes);
     }
 
     // 添加 SSR 已安装主题（转换为 Theme 格式，并从商城数据获取封面图）
@@ -612,6 +644,9 @@ const loadInstalledThemes = async () => {
       const ssrThemes: Theme[] = ssrResponse.data.map((ssr: SSRThemeInfo) => {
         // 尝试从商城数据中获取该主题的详细信息
         const marketTheme = marketThemeMap[ssr.name];
+
+        // 使用后端返回的 is_current（从数据库获取），而不是根据运行状态判断
+        const isCurrent = ssr.is_current === true;
 
         return {
           id: marketTheme?.id || 0,
@@ -636,7 +671,7 @@ const loadInstalledThemes = async () => {
           isActive: true,
           createdAt: ssr.installedAt || "",
           updatedAt: ssr.startedAt || "",
-          is_current: ssr.status === "running",
+          is_current: isCurrent,
           is_installed: true,
           // SSR 主题特有字段
           ssrStatus: ssr.status,
@@ -1314,9 +1349,8 @@ const checkProEdition = async () => {
 onMounted(async () => {
   checkLoginStatus();
   await checkProEdition();
+  // loadThemes 内部已包含 SSR 主题状态加载，无需单独调用 loadSSRThemeStatus
   loadThemes();
-  // 加载 SSR 主题状态
-  loadSSRThemeStatus();
 });
 </script>
 

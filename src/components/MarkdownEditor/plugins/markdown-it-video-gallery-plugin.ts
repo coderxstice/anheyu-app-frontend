@@ -64,18 +64,52 @@ export default function videoGalleryPlugin(md: MarkdownIt): void {
       ratio = ratioMatch[1];
     }
 
-    // 寻找结束标记 :::
+    // 寻找结束标记 :::，支持嵌套，并跳过代码块
     let nextLine = startLine + 1;
     let endLineFound = false;
+    let nestedLevel = 0; // 嵌套层级计数
+    let inCodeBlock = false; // 是否在代码块内
+    let codeBlockMarker = ""; // 代码块标记（``` 或 ~~~）
 
     while (nextLine < endLine) {
       pos = state.bMarks[nextLine] + state.tShift[nextLine];
       max = state.eMarks[nextLine];
       const lineText = state.src.slice(pos, max).trim();
 
-      if (lineText === startMarker) {
-        endLineFound = true;
-        break;
+      // 检查是否是代码块标记（``` 或 ~~~，可能带语言标识符）
+      const codeBlockMatch = lineText.match(/^(`{3,}|~{3,})/);
+      if (codeBlockMatch) {
+        const marker = codeBlockMatch[1];
+        if (!inCodeBlock) {
+          // 进入代码块
+          inCodeBlock = true;
+          codeBlockMarker = marker;
+        } else if (
+          lineText.startsWith(codeBlockMarker) &&
+          lineText.trim() === codeBlockMarker
+        ) {
+          // 退出代码块（必须是纯标记，不带语言标识符）
+          inCodeBlock = false;
+          codeBlockMarker = "";
+        }
+      }
+
+      // 只在非代码块内检查 ::: 标记
+      if (!inCodeBlock && lineText.startsWith(startMarker)) {
+        if (lineText.length > startMarker.length) {
+          // 是 :::xxx 这样的开始标记，增加嵌套层级
+          nestedLevel++;
+        } else if (lineText === startMarker) {
+          // 是纯 ::: 结束标记
+          if (nestedLevel === 0) {
+            // 当前层级，找到结束标记
+            endLineFound = true;
+            break;
+          } else {
+            // 嵌套块的结束标记，减少层级
+            nestedLevel--;
+          }
+        }
       }
       nextLine++;
     }

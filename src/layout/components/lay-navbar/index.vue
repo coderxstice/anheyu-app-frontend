@@ -45,7 +45,11 @@ const {
     <div v-if="layout === 'vertical'" class="vertical-header-right">
       <!-- 跳转首页 -->
       <el-tooltip content="访问首页" placement="bottom">
-        <span v-ripple class="home-icon navbar-bg-hover" @click="goToHomePage">
+        <span
+          v-ripple
+          class="navbar-bg-hover rounded-lg w-[40px] h-[40px] flex-c cursor-pointer"
+          @click="goToHomePage"
+        >
           <IconifyIconOffline :icon="HomeLine" />
         </span>
       </el-tooltip>
