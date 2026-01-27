@@ -8,6 +8,12 @@ import ThemeSwitcher from "./ThemeSwitcher.vue";
 
 import LogoutCircleRLine from "@iconify-icons/ri/logout-circle-r-line";
 import Setting from "@iconify-icons/ri/settings-3-line";
+import HomeLine from "@iconify-icons/ri/home-4-line";
+
+/** 跳转到网站首页 */
+const goToHomePage = () => {
+  window.open("/", "_blank");
+};
 
 const {
   layout,
@@ -37,6 +43,13 @@ const {
     />
 
     <div v-if="layout === 'vertical'" class="vertical-header-right">
+      <!-- 跳转首页 -->
+      <el-tooltip content="访问首页" placement="bottom">
+        <span v-ripple class="home-icon navbar-bg-hover" @click="goToHomePage">
+          <IconifyIconOffline :icon="HomeLine" />
+        </span>
+      </el-tooltip>
+
       <ThemeSwitcher />
 
       <!-- 菜单搜索 -->
