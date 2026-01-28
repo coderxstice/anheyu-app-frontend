@@ -405,9 +405,12 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         }
         emit("submitted");
         form.content = "";
-      } catch (error) {
-        // HTTP 拦截器已经显示了具体的错误消息，这里只记录日志
+      } catch (error: any) {
         console.error("评论发布失败:", error);
+        // 显示后端返回的错误消息给用户
+        const errorMessage =
+          error?.message || error?.data?.message || "评论发布失败，请稍后再试";
+        ElMessage.error(errorMessage);
       } finally {
         isSubmitting.value = false;
       }

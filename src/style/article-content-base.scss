@@ -275,6 +275,16 @@
       cursor: pointer;
       background: var(--hltools-bg);
 
+      // 隐藏移动端浏览器的默认三角形标记
+      &::marker {
+        display: none;
+        content: "";
+      }
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+
       .expand {
         position: absolute;
         top: 50%;
