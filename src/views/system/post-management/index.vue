@@ -2,8 +2,17 @@
 import { reactive, onMounted, toRefs, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox, ElDivider, ElTooltip } from "element-plus";
-import { getArticleList, deleteArticle, batchDeleteArticles } from "@/api/post";
-import type { Article, GetArticleListParams } from "@/api/post/type";
+import {
+  getArticleList,
+  deleteArticle,
+  batchDeleteArticles,
+  getCategoryList
+} from "@/api/post";
+import type {
+  Article,
+  GetArticleListParams,
+  PostCategory
+} from "@/api/post/type";
 import {
   Search,
   Refresh,
@@ -34,11 +43,25 @@ const state = reactive({
   },
   searchParams: {
     query: "",
-    status: ""
+    status: "",
+    category: ""
   } as GetArticleListParams
 });
 
 const { loading, tableData, pagination, searchParams } = toRefs(state);
+
+// 分类列表
+const categoryList = ref<PostCategory[]>([]);
+
+// 获取分类列表
+const fetchCategories = async () => {
+  try {
+    const { data } = await getCategoryList();
+    categoryList.value = data;
+  } catch (error) {
+    console.error("获取分类列表失败:", error);
+  }
+};
 
 // 导入导出相关
 const showImportExportDialog = ref(false);
@@ -89,10 +112,13 @@ const fetchData = async () => {
   try {
     const params: GetArticleListParams = {
       page: state.pagination.currentPage,
-      pageSize: state.pagination.pageSize,
-      query: state.searchParams.query,
-      status: state.searchParams.status
+      pageSize: state.pagination.pageSize
     };
+    // 只在有值时添加查询参数
+    if (state.searchParams.query) params.query = state.searchParams.query;
+    if (state.searchParams.status) params.status = state.searchParams.status;
+    if (state.searchParams.category)
+      params.category = state.searchParams.category;
     const { data } = await getArticleList(params);
     state.tableData = data.list;
     state.pagination.total = data.total;
@@ -111,6 +137,7 @@ const handleSearch = () => {
 const handleReset = () => {
   state.searchParams.query = "";
   state.searchParams.status = "";
+  state.searchParams.category = "";
   handleSearch();
 };
 
@@ -237,6 +264,7 @@ const handleBatchDelete = async () => {
 };
 
 onMounted(() => {
+  fetchCategories();
   fetchData();
 });
 </script>
@@ -279,6 +307,26 @@ onMounted(() => {
                 :style="{ backgroundColor: item.color }"
               />
               <span>{{ item.label }}</span>
+            </span>
+          </el-option>
+        </el-select>
+        <el-select
+          v-model="searchParams.category"
+          placeholder="文章分类"
+          class="category-select"
+          clearable
+          filterable
+        >
+          <el-option
+            v-for="item in categoryList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.name"
+          >
+            <span class="category-option">
+              <IconifyIconOnline icon="ep:folder" width="14" height="14" />
+              <span>{{ item.name }}</span>
+              <span class="category-count">({{ item.count }})</span>
             </span>
           </el-option>
         </el-select>
@@ -654,7 +702,8 @@ onMounted(() => {
     }
   }
 
-  .status-select {
+  .status-select,
+  .category-select {
     width: 140px;
 
     :deep(.el-input__wrapper) {
@@ -671,6 +720,10 @@ onMounted(() => {
         box-shadow: 0 0 0 3px var(--anzhiyu-main-op-light);
       }
     }
+  }
+
+  .category-select {
+    width: 160px;
   }
 
   .search-btn,
@@ -717,6 +770,19 @@ onMounted(() => {
     width: 8px;
     height: 8px;
     border-radius: 50%;
+  }
+}
+
+// 分类选项样式
+.category-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  .category-count {
+    color: var(--anzhiyu-secondtext);
+    font-size: 12px;
+    margin-left: auto;
   }
 }
 
