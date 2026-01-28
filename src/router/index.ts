@@ -72,7 +72,7 @@ export const remainingPaths = Object.keys(remainingRouter).map(v => {
 export const router: Router = createRouter({
   history: getHistoryMode(import.meta.env.VITE_ROUTER_HISTORY),
   routes: constantRoutes.concat(...(remainingRouter as any)),
-  strict: true,
+  strict: false, // 不区分尾随斜杠，/about 和 /about/ 都能正常访问
   scrollBehavior(to, from, savedPosition) {
     // 1. 对于友链页面，总是从顶部开始，避免因内容异步加载导致的位置偏移
     if (to.path.startsWith("/link")) {

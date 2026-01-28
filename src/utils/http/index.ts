@@ -343,6 +343,10 @@ class AnHttp {
         const status = response?.status;
         if (status && status >= 500 && status < 600) {
           handleBackendError(error);
+          // 标记错误已被拦截器处理，避免业务层重复显示
+          const rejectedData = response?.data || {};
+          rejectedData._handledByInterceptor = true;
+          return Promise.reject(rejectedData);
         }
 
         // 将后端返回的数据抛出到业务层，这样业务层可以获取到后端的错误信息
