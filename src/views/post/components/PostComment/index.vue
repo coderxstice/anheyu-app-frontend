@@ -438,7 +438,10 @@ defineExpose({
 }
 
 #post-comment {
+  box-sizing: border-box;
+  max-width: 100%;
   margin-bottom: 3rem;
+  overflow: hidden;
   border-radius: 8px;
   scroll-margin-top: 100px; // 滚动偏移，避免被固定导航栏遮挡
 

@@ -1213,6 +1213,8 @@ defineExpose({
 }
 
 .comment-form {
+  max-width: 100%;
+  overflow: hidden;
   border-radius: 8px;
 }
 
@@ -1403,8 +1405,11 @@ defineExpose({
 
 .textarea-wrapper {
   position: relative;
+  box-sizing: border-box;
   width: 100%;
+  max-width: 100%;
   padding: 16px;
+  overflow: hidden;
   background-color: var(--anzhiyu-secondbg);
   border: var(--style-border-always);
   border-radius: 12px;
@@ -1886,6 +1891,19 @@ defineExpose({
 }
 
 @media (width <= 768px) {
+  // 防止 iOS Safari 在输入时自动缩放页面（字体小于 16px 会触发缩放）
+  .textarea-wrapper {
+    :deep(.el-textarea__inner) {
+      font-size: 16px; // iOS Safari 要求最小 16px 防止自动缩放
+    }
+  }
+
+  .form-meta-actions {
+    :deep(.el-input__inner) {
+      font-size: 16px; // iOS Safari 要求最小 16px 防止自动缩放
+    }
+  }
+
   .form-meta-actions:not(.is-reply) {
     flex-direction: column;
 
@@ -1921,8 +1939,11 @@ defineExpose({
   }
 
   .OwO-body {
-    width: calc(100vw - 2rem - 32px);
+    width: calc(100% + 32px);
+    max-width: calc(100vw - 2rem);
     min-width: auto !important;
+    right: 0;
+    left: auto;
 
     .OwO-items .OwO-item {
       width: 25% !important;
