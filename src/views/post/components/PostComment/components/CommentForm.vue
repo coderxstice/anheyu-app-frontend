@@ -1214,7 +1214,6 @@ defineExpose({
 
 .comment-form {
   max-width: 100%;
-  overflow: hidden;
   border-radius: 8px;
 }
 
@@ -1409,7 +1408,6 @@ defineExpose({
   width: 100%;
   max-width: 100%;
   padding: 16px;
-  overflow: hidden;
   background-color: var(--anzhiyu-secondbg);
   border: var(--style-border-always);
   border-radius: 12px;
@@ -1420,7 +1418,8 @@ defineExpose({
   }
 
   .textarea-actions {
-    z-index: 2;
+    position: relative;
+    z-index: 10;
     display: flex;
     gap: 8px;
     margin-top: 0.875rem;
@@ -1444,7 +1443,7 @@ defineExpose({
         position: absolute;
         top: 2rem;
         left: 0;
-        z-index: 1000;
+        z-index: 2000;
         min-width: 31.25rem;
         max-width: 500px;
         overflow: hidden;
