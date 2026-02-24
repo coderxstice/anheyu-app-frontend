@@ -10,7 +10,7 @@
 /**
  * @Description: 播放列表组件
  * @Author: 安知鱼
- * 1:1 移植自 anheyu-pro components/MusicPlayer/Playlist.vue
+ * 1:1 移植自 anheyu-app components/MusicPlayer/Playlist.vue
  */
 import type { Song } from "@/types/music";
 import styles from "./styles/Playlist.module.css";

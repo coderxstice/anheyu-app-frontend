@@ -3,7 +3,7 @@
 /**
  * @Description: 音频播放器逻辑 hook
  * @Author: 安知鱼
- * 1:1 移植自 anheyu-pro composables/useAudioPlayer.ts
+ * 1:1 移植自 anheyu-app composables/useAudioPlayer.ts
  */
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import type { Song, AudioState, AudioLoadingState } from "@/types/music";

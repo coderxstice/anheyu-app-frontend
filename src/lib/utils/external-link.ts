@@ -1,6 +1,6 @@
 /**
  * 外链检测和处理工具
- * 参考 anheyu-pro utils/externalLink.ts 实现
+ * 参考 anheyu-app utils/externalLink.ts 实现
  */
 
 /**
@@ -49,7 +49,7 @@ export function initExternalLinkInterceptor(): () => void {
     const link = target as HTMLAnchorElement;
     if (!link?.href) return;
 
-    // 不拦截：新窗口打开、下载链接、修饰键（与 anheyu-pro 对齐）
+    // 不拦截：新窗口打开、下载链接、修饰键（与 anheyu-app 对齐）
     if (link.target === "_blank" || link.download) return;
     if (event.ctrlKey || event.metaKey || event.shiftKey) return;
 

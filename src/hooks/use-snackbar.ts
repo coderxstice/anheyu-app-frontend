@@ -6,7 +6,7 @@ import { createElement } from "react";
 import { Snackbar, type SnackbarProps } from "@/components/ui/snackbar/Snackbar";
 
 /**
- * Snackbar hook（对齐 anheyu-pro useSnackbar composable）
+ * Snackbar hook（对齐 anheyu-app useSnackbar composable）
  *
  * 用法：
  *   const { showSnackbar } = useSnackbar();

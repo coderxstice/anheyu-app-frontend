@@ -1,5 +1,5 @@
 /**
- * 前台相册 API（对齐 anheyu-pro /api/public/albums）
+ * 前台相册 API（对齐 anheyu-app /api/public/albums）
  */
 
 import { apiClient } from "./client";

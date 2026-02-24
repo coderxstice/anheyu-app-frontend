@@ -3,7 +3,7 @@
 /**
  * @Description: 音乐胶囊组件
  * @Author: 安知鱼
- * 1:1 移植自 anheyu-pro components/MusicPlayer/MusicCapsule.vue
+ * 1:1 移植自 anheyu-app components/MusicPlayer/MusicCapsule.vue
  */
 import type { Song, LyricLine, LyricsState } from "@/types/music";
 import { AlbumCover } from "./AlbumCover";

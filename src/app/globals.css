@@ -1,7 +1,7 @@
 /* ===================== Tailwind CSS v4 导入 ===================== */
 @import "tailwindcss";
 
-/* ===================== CSS Reset - 与 anheyu-pro 保持一致 ===================== */
+/* ===================== CSS Reset - 与 anheyu-app 保持一致 ===================== */
 /* 注意：必须放在 @layer base 中，否则会覆盖 Tailwind utilities */
 @layer base {
   *,
@@ -480,7 +480,7 @@
   /* 阴影 */
   --shadow-primary: var(--shadow-primary);
 
-  /* 字体 - 与 anheyu-pro 保持一致 */
+  /* 字体 - 与 anheyu-app 保持一致 */
   --font-sans: "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica, "Microsoft YaHei", "微软雅黑", Arial,
     sans-serif;
   --font-mono: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
@@ -569,7 +569,7 @@ html {
 body {
   background-color: var(--background);
   color: var(--foreground);
-  /* 字体设置 - 与 anheyu-pro 保持一致 */
+  /* 字体设置 - 与 anheyu-app 保持一致 */
   font-family: "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica, "Microsoft YaHei", "微软雅黑", Arial,
     sans-serif;
   line-height: inherit;
@@ -593,7 +593,7 @@ pre {
   background: radial-gradient(circle at center, var(--tw-gradient-from), var(--tw-gradient-to));
 }
 
-/* MUI 组件主题切换过渡 - 参考 anheyu-pro 使用较短的过渡时间 */
+/* MUI 组件主题切换过渡 - 参考 anheyu-app 使用较短的过渡时间 */
 .MuiOutlinedInput-root,
 .MuiInputLabel-root,
 .MuiFormHelperText-root {
@@ -604,7 +604,7 @@ pre {
   transition: border-color 0.2s ease !important;
 }
 
-/* Selection color - 匹配 anheyu-pro */
+/* Selection color - 匹配 anheyu-app */
 ::selection {
   background: var(--primary-op-deep);
   color: #fff;
@@ -638,7 +638,7 @@ pre {
   border: 1px solid var(--border);
 }
 
-/* Card styles - 匹配 anheyu-pro */
+/* Card styles - 匹配 anheyu-app */
 .card-widget {
   position: relative;
   display: flex;
@@ -1516,7 +1516,7 @@ html.with-fancybox body.hide-scrollbar {
 }
 
 /* ===================== 自定义内容块 — 全局样式 ===================== */
-/* 后端 custom_code_html 使用 anheyu-pro 原生标签/类，需全局定义 */
+/* 后端 custom_code_html 使用 anheyu-app 原生标签/类，需全局定义 */
 
 /* psw 标签 — 隐藏文字，hover 显示 */
 [data-custom-block] psw {

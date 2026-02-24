@@ -1,5 +1,5 @@
 /**
- * 文件管理相关工具函数（对齐 anheyu-pro）
+ * 文件管理相关工具函数（对齐 anheyu-app）
  */
 
 export const joinPath = (basePath: string, name: string): string => {

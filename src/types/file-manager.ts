@@ -1,5 +1,5 @@
 /**
- * 文件管理相关类型定义（对齐 anheyu-pro）
+ * 文件管理相关类型定义（对齐 anheyu-app）
  */
 
 export interface ColumnConfig {
@@ -22,7 +22,7 @@ export interface BaseResponse<T> {
 }
 
 /**
- * 0/1 在后端存在歧义，这里沿用 anheyu-pro 的枚举约定
+ * 0/1 在后端存在歧义，这里沿用 anheyu-app 的枚举约定
  * File = 1, Dir = 2
  */
 export enum FileType {

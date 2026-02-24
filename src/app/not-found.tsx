@@ -1,5 +1,5 @@
 /*
- * @Description: 404 页面 - 复刻 anheyu-pro 设计
+ * @Description: 404 页面 - 复刻 anheyu-app 设计
  * @Author: 安知鱼
  * @Date: 2026-02-03
  */

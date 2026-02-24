@@ -14,7 +14,7 @@ import type {
 } from "@/types/theme-mall";
 
 /**
- * 主题商城 API（对齐 anheyu-pro assets/src/api/theme-mall/index.ts）
+ * 主题商城 API（对齐 anheyu-app assets/src/api/theme-mall/index.ts）
  *
  * 路由前缀说明：
  * - /api/public/theme/* — 公开接口

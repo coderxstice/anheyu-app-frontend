@@ -95,8 +95,8 @@
 }
 
 /* 
- * 注意：anheyu-pro 的 ::after 是在 img 元素上的，但 img 元素不能有伪元素，
- * 所以这个效果在 anheyu-pro 实际上是无效的。
+ * 注意：anheyu-app 的 ::after 是在 img 元素上的，但 img 元素不能有伪元素，
+ * 所以这个效果在 anheyu-app 实际上是无效的。
  * 桌面端不需要这个遮罩，让图片自然显示模糊效果。
  */
 

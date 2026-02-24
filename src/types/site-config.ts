@@ -1,5 +1,5 @@
 /**
- * 站点配置类型（与 anheyu-pro 后端 API 保持一致）
+ * 站点配置类型（与 anheyu-app 后端 API 保持一致）
  */
 import type { AboutPageConfig } from "./about";
 

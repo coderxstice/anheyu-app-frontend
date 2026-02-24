@@ -2,17 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { addToast, useDisclosure } from "@heroui/react";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import {
-  useAdminArticles,
-  useDeleteArticle,
-  useBatchDeleteArticles,
-  useApproveArticle,
-  useRejectArticle,
-  useTakedownArticle,
-  useRestoreArticle,
-  useExportArticles,
-  useImportArticles,
-} from "@/hooks/queries/use-post-management";
+import { useAdminArticles, useDeleteArticle } from "@/hooks/queries/use-post-management";
 import type { AdminArticle, AdminArticleListParams, ArticleStatus, ReviewStatus } from "@/types/post-management";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import { FALLBACK_COVER } from "@/lib/constants/admin";
@@ -42,18 +32,9 @@ export function usePostManagementPage() {
 
   // ---- 弹窗状态 ----
   const [deleteTarget, setDeleteTarget] = useState<AdminArticle | null>(null);
-  const [reviewTarget, setReviewTarget] = useState<{ article: AdminArticle; action: "approve" | "reject" } | null>(
-    null
-  );
-  const [reviewComment, setReviewComment] = useState("");
-  const [takedownTarget, setTakedownTarget] = useState<AdminArticle | null>(null);
-  const [takedownReason, setTakedownReason] = useState("");
-
+  const [batchDeleting, setBatchDeleting] = useState(false);
   const deleteModal = useDisclosure();
   const batchDeleteModal = useDisclosure();
-  const reviewModal = useDisclosure();
-  const takedownModal = useDisclosure();
-  const importModal = useDisclosure();
 
   // ---- 查询 ----
   const queryParams: AdminArticleListParams = useMemo(
@@ -75,13 +56,6 @@ export function usePostManagementPage() {
 
   // ---- Mutations ----
   const deleteArticle = useDeleteArticle();
-  const batchDeleteArticles = useBatchDeleteArticles();
-  const approveArticle = useApproveArticle();
-  const rejectArticle = useRejectArticle();
-  const takedownArticle = useTakedownArticle();
-  const restoreArticle = useRestoreArticle();
-  const exportArticles = useExportArticles();
-  const importArticlesHook = useImportArticles();
 
   // ---- 选择逻辑 ----
   const isSomeSelected = selectedIds.size > 0;
@@ -126,106 +100,24 @@ export function usePostManagementPage() {
   const handleBatchDeleteConfirm = useCallback(async () => {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
+    setBatchDeleting(true);
     try {
-      await batchDeleteArticles.mutateAsync(ids);
-      addToast({ title: `已删除 ${ids.length} 篇文章`, color: "success", timeout: 3000 });
+      const results = await Promise.allSettled(ids.map(id => deleteArticle.mutateAsync(id)));
+      const failed = results.filter(r => r.status === "rejected").length;
+      const succeeded = results.filter(r => r.status === "fulfilled").length;
+      if (failed === 0) {
+        addToast({ title: `已删除 ${succeeded} 篇文章`, color: "success", timeout: 3000 });
+      } else {
+        addToast({ title: `${succeeded} 篇删除成功，${failed} 篇删除失败`, color: "warning", timeout: 5000 });
+      }
       setSelectedIds(new Set());
     } catch (error) {
       addToast({ title: error instanceof Error ? error.message : "批量删除失败", color: "danger", timeout: 3000 });
+    } finally {
+      setBatchDeleting(false);
+      batchDeleteModal.onClose();
     }
-    batchDeleteModal.onClose();
-  }, [selectedIds, batchDeleteArticles, batchDeleteModal]);
-
-  // ---- 审核 ----
-  const handleReviewClick = useCallback(
-    (article: AdminArticle, action: "approve" | "reject") => {
-      setReviewTarget({ article, action });
-      setReviewComment("");
-      reviewModal.onOpen();
-    },
-    [reviewModal]
-  );
-
-  const handleReviewConfirm = useCallback(async () => {
-    if (!reviewTarget) return;
-    try {
-      if (reviewTarget.action === "approve") {
-        await approveArticle.mutateAsync({
-          id: reviewTarget.article.id,
-          data: reviewComment ? { review_comment: reviewComment } : undefined,
-        });
-        addToast({ title: "文章审核通过", color: "success", timeout: 3000 });
-      } else {
-        if (!reviewComment.trim()) {
-          addToast({ title: "请填写拒绝原因", color: "warning", timeout: 3000 });
-          return;
-        }
-        await rejectArticle.mutateAsync({
-          id: reviewTarget.article.id,
-          data: { review_comment: reviewComment },
-        });
-        addToast({ title: "文章已拒绝", color: "success", timeout: 3000 });
-      }
-    } catch (error) {
-      addToast({ title: error instanceof Error ? error.message : "审核操作失败", color: "danger", timeout: 3000 });
-    }
-    reviewModal.onClose();
-    setReviewTarget(null);
-    setReviewComment("");
-  }, [reviewTarget, reviewComment, approveArticle, rejectArticle, reviewModal]);
-
-  // ---- 下架 ----
-  const handleTakedownClick = useCallback(
-    (article: AdminArticle) => {
-      setTakedownTarget(article);
-      setTakedownReason("");
-      takedownModal.onOpen();
-    },
-    [takedownModal]
-  );
-
-  const handleTakedownConfirm = useCallback(async () => {
-    if (!takedownTarget || !takedownReason.trim()) {
-      if (!takedownReason.trim()) addToast({ title: "请填写下架原因", color: "warning", timeout: 3000 });
-      return;
-    }
-    try {
-      await takedownArticle.mutateAsync({ id: takedownTarget.id, data: { takedown_reason: takedownReason } });
-      addToast({ title: "文章已下架", color: "success", timeout: 3000 });
-    } catch (error) {
-      addToast({ title: error instanceof Error ? error.message : "下架失败", color: "danger", timeout: 3000 });
-    }
-    takedownModal.onClose();
-    setTakedownTarget(null);
-    setTakedownReason("");
-  }, [takedownTarget, takedownReason, takedownArticle, takedownModal]);
-
-  const handleRestore = useCallback(
-    async (article: AdminArticle) => {
-      try {
-        await restoreArticle.mutateAsync(article.id);
-        addToast({ title: "文章已恢复", color: "success", timeout: 3000 });
-      } catch (error) {
-        addToast({ title: error instanceof Error ? error.message : "恢复失败", color: "danger", timeout: 3000 });
-      }
-    },
-    [restoreArticle]
-  );
-
-  // ---- 导出 ----
-  const handleExport = useCallback(async () => {
-    const ids = Array.from(selectedIds);
-    if (ids.length === 0) {
-      addToast({ title: "请先选择要导出的文章", color: "warning", timeout: 3000 });
-      return;
-    }
-    try {
-      await exportArticles.mutateAsync(ids);
-      addToast({ title: `已导出 ${ids.length} 篇文章`, color: "success", timeout: 3000 });
-    } catch (error) {
-      addToast({ title: error instanceof Error ? error.message : "导出失败", color: "danger", timeout: 3000 });
-    }
-  }, [selectedIds, exportArticles]);
+  }, [selectedIds, deleteArticle, batchDeleteModal]);
 
   // ---- 行操作分发 ----
   const handleAction = useCallback(
@@ -237,24 +129,12 @@ export function usePostManagementPage() {
         case "edit":
           router.push(`/admin/post-management/${article.id}/edit`);
           break;
-        case "approve":
-          handleReviewClick(article, "approve");
-          break;
-        case "reject":
-          handleReviewClick(article, "reject");
-          break;
-        case "takedown":
-          handleTakedownClick(article);
-          break;
-        case "restore":
-          handleRestore(article);
-          break;
         case "delete":
           handleDeleteClick(article);
           break;
       }
     },
-    [router, handleReviewClick, handleTakedownClick, handleRestore, handleDeleteClick]
+    [router, handleDeleteClick]
   );
 
   // ---- 重置筛选 ----
@@ -302,34 +182,11 @@ export function usePostManagementPage() {
     deleteTarget,
     deleteModal,
     batchDeleteModal,
+    batchDeleting,
     deleteArticle,
-    batchDeleteArticles,
     handleDeleteClick,
     handleDeleteConfirm,
     handleBatchDeleteConfirm,
-
-    // 审核
-    reviewTarget,
-    reviewComment,
-    setReviewComment,
-    reviewModal,
-    approveArticle,
-    rejectArticle,
-    handleReviewConfirm,
-
-    // 下架
-    takedownTarget,
-    takedownReason,
-    setTakedownReason,
-    takedownModal,
-    takedownArticle,
-    handleTakedownConfirm,
-
-    // 导出 & 导入
-    exportArticles,
-    handleExport,
-    importModal,
-    importArticlesHook,
 
     // 行操作
     handleAction,

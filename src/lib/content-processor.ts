@@ -1,7 +1,7 @@
 /**
  * 内容处理器
- * 保存文章时对 HTML 进行后处理，确保输出与 anheyu-pro 后端兼容
- * 参考 anheyu-pro useContentProcessor.ts
+ * 保存文章时对 HTML 进行后处理，确保输出与 anheyu-app 后端兼容
+ * 参考 anheyu-app useContentProcessor.ts
  */
 
 /**

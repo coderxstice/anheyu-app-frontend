@@ -1,6 +1,6 @@
 /**
  * 管理端文章相关类型定义
- * 对接 anheyu-pro 后端 /api/articles 和 /api/pro/articles/* 接口
+ * 对接 anheyu-app 后端 /api/articles 接口
  */
 
 import type { PostTag, PostCategory, ArticleExtraConfig } from "./article";

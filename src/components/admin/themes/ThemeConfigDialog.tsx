@@ -87,7 +87,7 @@ export function ThemeConfigDialog({ themeName, onClose }: ThemeConfigDialogProps
     setConfigValues(prev => ({ ...prev, [name]: value }));
   }, []);
 
-  // 判断字段是否显示（对齐 anheyu-pro shouldShowField）
+  // 判断字段是否显示（对齐 anheyu-app shouldShowField）
   const shouldShowField = useCallback(
     (field: ThemeSettingField): boolean => {
       if (!field.condition) return true;

@@ -70,10 +70,10 @@ export const docSeriesApi = {
 
   /**
    * 获取文档系列及其文章列表（公共接口）
-   * GET /api/pro/public/doc-series/:id/articles
+   * GET /api/public/doc-series/:id/articles
    */
   async getPublicSeriesWithArticles(id: string): Promise<DocSeriesWithArticles> {
-    const response = await apiClient.get<DocSeriesWithArticles>(`/api/pro/public/doc-series/${id}/articles`);
+    const response = await apiClient.get<DocSeriesWithArticles>(`/api/public/doc-series/${id}/articles`);
 
     if (response.code === 200 && response.data) {
       return response.data;

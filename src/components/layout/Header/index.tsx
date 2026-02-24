@@ -45,7 +45,7 @@ export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
 
-  // 菜单中 /travelling 项：跳转随机友链（对齐 anheyu-pro articleStore.navigateToRandomLink）
+  // 菜单中 /travelling 项：跳转随机友链（对齐 anheyu-app articleStore.navigateToRandomLink）
   const navigateToRandomLink = useCallback(async (e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();

@@ -93,7 +93,7 @@ export function MusicPlayer() {
         playlistRef.current = songs;
         setPlaylist(songs);
 
-        // 2. 随机选择第一首歌曲（与 anheyu-pro 一致）
+        // 2. 随机选择第一首歌曲（与 anheyu-app 一致）
         const randomIndex = Math.floor(Math.random() * songs.length);
         const firstSong = songs[randomIndex];
 
@@ -153,7 +153,7 @@ export function MusicPlayer() {
       audioPlayerRef.current.previousSong();
     };
 
-    // 右键菜单专用事件（与 anheyu-pro handleMusicControlEvents 一致）
+    // 右键菜单专用事件（与 anheyu-app handleMusicControlEvents 一致）
     const handleGetPlayStatus = () => {
       window.dispatchEvent(
         new CustomEvent("music-player-play-status-response", {
@@ -226,7 +226,7 @@ export function MusicPlayer() {
     };
   }, []);
 
-  // 暂停时自动收起（与 anheyu-pro 一致）
+  // 暂停时自动收起（与 anheyu-app 一致）
   const isPlaying = audioPlayer.audioState.isPlaying;
   useEffect(() => {
     if (!isPlaying) {
@@ -234,7 +234,7 @@ export function MusicPlayer() {
     }
   }, [isPlaying]);
 
-  // 展开时重新计算歌词位置（与 anheyu-pro 一致）
+  // 展开时重新计算歌词位置（与 anheyu-app 一致）
   useEffect(() => {
     if (isExpanded) {
       const timer = setTimeout(() => {
@@ -262,7 +262,7 @@ export function MusicPlayer() {
     return () => document.removeEventListener("click", handleClickOutside);
   }, [showPlaylist]);
 
-  // 处理展开/收起（带收起动画，与 anheyu-pro 一致）
+  // 处理展开/收起（带收起动画，与 anheyu-app 一致）
   const handleToggleExpand = useCallback(() => {
     if (isExpanded) {
       setIsCollapsing(true);

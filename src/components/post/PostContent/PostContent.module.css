@@ -41,7 +41,7 @@
   font-size: 1rem;
 }
 
-/* 段落样式 - 与 anheyu-pro 保持一致 */
+/* 段落样式 - 与 anheyu-app 保持一致 */
 .postContent :global(p) {
   margin: 24px 0;
   font-size: 17px;
@@ -52,7 +52,7 @@
   letter-spacing: 0.6px;
 }
 
-/* 链接样式 - 与 anheyu-pro 保持一致 */
+/* 链接样式 - 与 anheyu-app 保持一致 */
 .postContent :global(a) {
   padding: 0 0.2rem !important;
   font-family: inherit;

@@ -1,6 +1,6 @@
 /**
  * 头像工具函数
- * 参考 anheyu-pro 实现
+ * 参考 anheyu-app 实现
  */
 
 import md5 from "blueimp-md5";

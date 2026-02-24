@@ -1,6 +1,6 @@
 /**
  * 存储策略 API
- * 对接 anheyu-pro 后端 /api/pro/policies 端点（PRO 版）
+ * 对接 anheyu-app 后端 /api/policies 端点
  */
 
 import { apiClient } from "./client";
@@ -13,7 +13,7 @@ import type {
   OneDriveAuthCompleteRequest,
 } from "@/types/storage-policy";
 
-const PRO_POLICIES_BASE = "/api/pro/policies";
+const PRO_POLICIES_BASE = "/api/policies";
 
 export const storagePolicyApi = {
   /** 获取所有存储策略（PRO版 ListAll，后端返回全量，前端分页） */

@@ -9,7 +9,7 @@
 
 /**
  * 通用横幅卡片组件
- * 参考 anheyu-pro 的 AnBannerCard，用于子页面顶部横幅展示
+ * 参考 anheyu-app 的 AnBannerCard，用于子页面顶部横幅展示
  */
 import Link from "next/link";
 import { Icon } from "@iconify/react";

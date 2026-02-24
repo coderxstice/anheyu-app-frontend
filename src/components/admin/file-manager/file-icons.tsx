@@ -5,7 +5,7 @@ import type { FileItem } from "@/types/file-manager";
 
 /**
  * 文件扩展名到图标文件的映射表
- * 与 anheyu-pro 的 useFileIcons.ts 保持一致
+ * 与 anheyu-app 的 useFileIcons.ts 保持一致
  */
 const iconMap: Record<string, string> = {
   // 音频
@@ -81,7 +81,7 @@ const iconMap: Record<string, string> = {
 
 /**
  * 文件图标组件 - 使用自定义 SVG 图标
- * 替代 react-icons 的线框图标，与 anheyu-pro 保持视觉一致
+ * 替代 react-icons 的线框图标，与 anheyu-app 保持视觉一致
  *
  * 通过 CSS className 控制实际显示尺寸，
  * width/height 属性仅为 Image 组件的内在尺寸提示

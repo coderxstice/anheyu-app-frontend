@@ -218,7 +218,7 @@ export function UploadProgress({
   );
 }
 
-// ── 上传条目行 - 匹配 anheyu-pro 设计 ──
+// ── 上传条目行 - 匹配 anheyu-app 设计 ──
 function UploadItemRow({
   item,
   speedMode,

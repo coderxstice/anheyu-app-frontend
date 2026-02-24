@@ -57,7 +57,7 @@ function parseCustomBlocks(rawValue: unknown): CustomSidebarBlock[] {
 /**
  * 自定义侧边栏块组件
  * 从 siteConfig.CUSTOM_SIDEBAR 读取配置，渲染自定义 HTML 块
- * 参考 anheyu-pro Sticky.vue 实现
+ * 参考 anheyu-app Sticky.vue 实现
  */
 export const CustomSidebarBlocks = memo(function CustomSidebarBlocks({
   isPostPage = false,

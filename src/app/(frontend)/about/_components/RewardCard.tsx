@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { X } from "lucide-react";
-import { apiClient } from "@/lib/api/client";
 import { useSiteConfigStore } from "@/store/site-config-store";
-import type { DonationItem, DonationListResponse } from "@/types/about";
+import type { DonationItem } from "@/types/about";
 import styles from "../about.module.css";
 
 // 充电动画 SVG 管道
@@ -42,12 +41,9 @@ export function RewardCard() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await apiClient.get<DonationListResponse>("/api/pro/donations", {
-          params: { page: 1, page_size: 100 },
-        });
-        if (!cancelled && res.code === 200 && res.data) {
-          setDonations(res.data.list || []);
-          setTotal(res.data.total || 0);
+        if (!cancelled) {
+          setDonations([]);
+          setTotal(0);
         }
       } catch {
         // silent
@@ -55,14 +51,14 @@ export function RewardCard() {
         if (!cancelled) setLoading(false);
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const latestUpdate = useMemo(() => {
     if (!donations.length) return null;
-    const sorted = [...donations].sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
+    const sorted = [...donations].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     return sorted[0];
   }, [donations]);
 
@@ -87,9 +83,7 @@ export function RewardCard() {
           <div className={styles.cardContent}>
             <div className={styles.itemTips}>致谢</div>
             <span className={styles.itemTitle}>赞赏名单</span>
-            <div className={styles.rewardDescription}>
-              感谢因为有你们，让我更加有创作的动力。
-            </div>
+            <div className={styles.rewardDescription}>感谢因为有你们，让我更加有创作的动力。</div>
 
             <div className={styles.rewardListAll}>
               {donations.map(item => (
@@ -99,7 +93,8 @@ export function RewardCard() {
                     <div
                       className={`${styles.rewardItemMoney} ${item.amount >= 50 ? styles.rewardItemMoneyLarge : ""}`}
                     >
-                      ¥{item.amount}{item.suffix}
+                      ¥{item.amount}
+                      {item.suffix}
                     </div>
                     <div className={styles.rewardItemTime}>{formatDate(item.created_at)}</div>
                   </div>
@@ -110,9 +105,7 @@ export function RewardCard() {
             {latestUpdate && (
               <div className={styles.rewardUpdateDate}>
                 最新更新时间：
-                <time className={styles.rewardUpdateDateTime}>
-                  {formatDate(latestUpdate.created_at)}
-                </time>
+                <time className={styles.rewardUpdateDateTime}>{formatDate(latestUpdate.created_at)}</time>
               </div>
             )}
           </div>
@@ -153,9 +146,7 @@ export function RewardCard() {
               </button>
             </div>
             <div className={styles.rewardDialogBody}>
-              <p className={styles.rewardTips}>
-                感谢您的支持，您的鼓励是我创作的最大动力！
-              </p>
+              <p className={styles.rewardTips}>感谢您的支持，您的鼓励是我创作的最大动力！</p>
               <div className={styles.qrCodes}>
                 {rewardConfig.wechat_qr && (
                   <div className={styles.qrCodeItem}>

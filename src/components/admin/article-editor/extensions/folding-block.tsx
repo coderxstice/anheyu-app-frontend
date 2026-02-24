@@ -3,7 +3,7 @@
 /**
  * FoldingBlock 扩展
  * 折叠/展开块（details/summary），使用 React NodeView
- * 样式与 anheyu-pro 前端一致：标题栏有主题色背景，展开后有边框
+ * 样式与 anheyu-app 前端一致：标题栏有主题色背景，展开后有边框
  */
 import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent, type NodeViewProps } from "@tiptap/react";

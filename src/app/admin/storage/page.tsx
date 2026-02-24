@@ -218,7 +218,7 @@ function AddCard({ onPress }: { onPress: () => void }) {
 }
 
 // ===================================
-//     CORS 成功弹窗（对齐 anheyu-pro）
+//     CORS 成功弹窗（对齐 anheyu-app）
 // ===================================
 
 function CorsSuccessDialog({
@@ -280,7 +280,7 @@ function CorsSuccessDialog({
 }
 
 // ===================================
-//     创建表单弹窗（对齐 anheyu-pro 统一创建弹窗）
+//     创建表单弹窗（对齐 anheyu-app 统一创建弹窗）
 // ===================================
 
 /** 创建表单默认值 */
@@ -337,7 +337,7 @@ function CreateFormBody({
 
   const handleConfirm = () => {
     const submitData = { ...formData };
-    // 本地存储：从 virtual_path 自动生成 base_path（对齐 anheyu-pro LocalCreateForm）
+    // 本地存储：从 virtual_path 自动生成 base_path（对齐 anheyu-app LocalCreateForm）
     if (storageType === "local" && submitData.virtual_path) {
       const safePath = submitData.virtual_path.replace(/^\/+/, "");
       submitData.base_path = `data/storage/${safePath}`;
@@ -350,7 +350,7 @@ function CreateFormBody({
   return (
     <>
       <ModalBody>
-        {/* 策略名称（所有类型通用，对齐 anheyu-pro CreateForm） */}
+        {/* 策略名称（所有类型通用，对齐 anheyu-app CreateForm） */}
         <Input
           label="名称"
           labelPlacement="outside"

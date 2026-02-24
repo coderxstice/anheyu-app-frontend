@@ -8,7 +8,7 @@ import type { StoragePolicy, StoragePolicyType } from "@/types/storage-policy";
 import { getErrorMessage } from "@/lib/api/client";
 
 // ===================================
-//     存储类型配置（对齐 anheyu-pro）
+//     存储类型配置（对齐 anheyu-app）
 // ===================================
 
 export interface StorageTypeConfig {
@@ -77,7 +77,7 @@ export function useStoragePage() {
     setCreateDialogOpen(true);
   }, []);
 
-  /** 处理创建表单提交（对齐 anheyu-pro handleCreateSubmit） */
+  /** 处理创建表单提交（对齐 anheyu-app handleCreateSubmit） */
   const handleCreateSubmit = useCallback(
     async (payload: Partial<StoragePolicy>) => {
       try {

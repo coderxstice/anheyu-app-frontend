@@ -32,9 +32,6 @@ export const settingsFormRegistry: Record<SettingCategoryId, LazyForm> = {
   "user-email": lazy(() =>
     import("@/components/admin/settings/EmailSettingsForm").then(m => ({ default: m.EmailSettingsForm }))
   ) as LazyForm,
-  "integration-seo": lazy(() =>
-    import("@/components/admin/settings/SeoSettingsForm").then(m => ({ default: m.SeoSettingsForm }))
-  ) as LazyForm,
   "pages-flink": lazy(() =>
     import("@/components/admin/settings/FriendLinkSettingsForm").then(m => ({ default: m.FriendLinkSettingsForm }))
   ) as LazyForm,

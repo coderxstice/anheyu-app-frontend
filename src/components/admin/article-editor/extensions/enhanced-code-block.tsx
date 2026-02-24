@@ -5,7 +5,7 @@
  * - 展开/折叠箭头
  * - 行号列（带背景，可开关）
  * - 超过 N 行时折叠/展开
- * - 兼容 anheyu-pro 后端 details.md-editor-code 格式
+ * - 兼容 anheyu-app 后端 details.md-editor-code 格式
  */
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent, type NodeViewProps } from "@tiptap/react";

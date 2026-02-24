@@ -1,6 +1,6 @@
 /**
  * 存储策略 Query Hooks
- * 对接 /api/pro/policies PRO 版端点，提供全量查询和 CRUD mutation
+ * 对接 /api/policies 端点，提供全量查询和 CRUD mutation
  */
 
 import { useQuery, useMutation, useQueryClient, queryOptions } from "@tanstack/react-query";

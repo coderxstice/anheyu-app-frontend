@@ -3,7 +3,7 @@
 /**
  * @Description: 音乐API调用逻辑 hook
  * @Author: 安知鱼
- * 1:1 移植自 anheyu-pro composables/useMusicAPI.ts
+ * 1:1 移植自 anheyu-app composables/useMusicAPI.ts
  */
 import { useState, useCallback, useRef } from "react";
 import type { Song, PlaylistCache } from "@/types/music";

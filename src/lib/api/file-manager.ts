@@ -1,5 +1,5 @@
 /**
- * 文件管理 API（对齐 anheyu-pro）
+ * 文件管理 API（对齐 anheyu-app）
  */
 
 import { apiClient, axiosInstance } from "./client";

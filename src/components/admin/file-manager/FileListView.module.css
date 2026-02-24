@@ -6,7 +6,7 @@
   overflow: hidden;
 }
 
-/* 表头 - 不设自身 padding，由列提供（匹配 anheyu-pro） */
+/* 表头 - 不设自身 padding，由列提供（匹配 anheyu-app） */
 .list-header {
   display: flex;
   align-items: center;
@@ -36,7 +36,7 @@
   text-overflow: ellipsis;
 }
 
-/* 表头列通用hover - 匹配 anheyu-pro */
+/* 表头列通用hover - 匹配 anheyu-app */
 .list-header .column {
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -74,7 +74,7 @@
   background-color: var(--anzhiyu-theme);
 }
 
-/* ── 设置按钮容器 - "+" 圆形按钮（匹配 anheyu-pro） ── */
+/* ── 设置按钮容器 - "+" 圆形按钮（匹配 anheyu-app） ── */
 .settings-container {
   position: relative;
   flex-grow: 1;
@@ -238,7 +238,7 @@
   }
 }
 
-/* ── 深色模式 - 匹配 anheyu-pro ── */
+/* ── 深色模式 - 匹配 anheyu-app ── */
 :global(html.dark) .list-header .column:hover {
   color: rgb(0 0 0 / 90%);
   background-color: var(--anzhiyu-theme);

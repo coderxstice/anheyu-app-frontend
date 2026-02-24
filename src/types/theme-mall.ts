@@ -1,5 +1,5 @@
 /**
- * 主题商城类型定义（对齐 anheyu-pro assets/src/api/theme-mall/type.ts）
+ * 主题商城类型定义（对齐 anheyu-app assets/src/api/theme-mall/type.ts）
  */
 
 /** 主题类型 */

@@ -1,4 +1,4 @@
-/* CardToc 目录组件样式 - 参考 anheyu-pro */
+/* CardToc 目录组件样式 - 参考 anheyu-app */
 
 .cardToc {
   padding: 1rem;
@@ -39,7 +39,7 @@
   overflow-x: hidden;
 }
 
-/* 自定义滚动条 - 与 anheyu-pro 保持一致 */
+/* 自定义滚动条 - 与 anheyu-app 保持一致 */
 .tocContainer::-webkit-scrollbar {
   width: 6px;
   height: 6px;

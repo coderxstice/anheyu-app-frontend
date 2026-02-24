@@ -1,6 +1,6 @@
 /**
  * 文章上下篇导航组件
- * 参考 anheyu-pro 实现
+ * 参考 anheyu-app 实现
  */
 "use client";
 

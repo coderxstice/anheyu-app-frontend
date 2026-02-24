@@ -2,7 +2,6 @@
 
 import { useRef } from "react";
 import { LinkTopBanner } from "./LinkTopBanner";
-import { RandomPost } from "./RandomPost";
 import { LinkListSection } from "./LinkListSection";
 import { ApplyLink } from "./ApplyLink";
 import { CommentSection } from "@/components/post/Comment";
@@ -23,8 +22,6 @@ export function FriendLinkPageClient() {
   return (
     <div className="post-link-page">
       <LinkTopBanner onScrollToApply={handleScrollToApply} />
-
-      <RandomPost />
 
       <LinkListSection />
 
