@@ -32,6 +32,7 @@ export function RecentCommentsPageClient() {
       gravatarUrl: siteConfig?.GRAVATAR_URL || "https://cravatar.cn/",
       defaultGravatarType: siteConfig?.DEFAULT_GRAVATAR_TYPE || "mp",
       masterTag: siteConfig?.comment?.master_tag || "博主",
+      adminAvatarUrl: (siteConfig?.USER_AVATAR as string) || undefined,
     }),
     [siteConfig]
   );

@@ -93,7 +93,7 @@ export function CategoryBar({ selectedCategory: controlledCategory, onCategoryCh
             {categories.map(category => (
               <Link
                 key={category.id}
-                href={`/categories/${encodeURIComponent(category.name)}/`}
+                href={`/categories/${category.slug || encodeURIComponent(category.name)}/`}
                 onClick={e => handleCategoryClick(e, category.name)}
                 className={cn(styles.catalogListItem, selectedId === category.id && styles.select)}
               >

@@ -16,12 +16,12 @@ export function TagDetailPageContent({ tagName: initialTagName, page = 1 }: TagD
   const [currentPage, setCurrentPage] = useState(page);
   const siteTitle = useSiteConfigStore(state => state.siteConfig.APP_NAME || "AnHeYu");
 
-  const buildTagPath = useCallback((tagName: string, pageNumber: number) => {
-    const encodedTag = encodeURIComponent(tagName);
+  const buildTagPath = useCallback((tagIdentifier: string, pageNumber: number) => {
+    const encoded = encodeURIComponent(tagIdentifier);
     if (pageNumber <= 1) {
-      return `/tags/${encodedTag}/`;
+      return `/tags/${encoded}/`;
     }
-    return `/tags/${encodedTag}/page/${pageNumber}`;
+    return `/tags/${encoded}/page/${pageNumber}`;
   }, []);
 
   const handleTagChange = useCallback(

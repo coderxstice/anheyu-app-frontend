@@ -37,7 +37,7 @@ export function TagBar({ selectedTag, onTagChange }: TagBarProps) {
       {tags.map(tag => (
         <a
           key={tag.id}
-          href={`/tags/${encodeURIComponent(tag.name)}/`}
+          href={`/tags/${tag.slug || encodeURIComponent(tag.name)}/`}
           onClick={e => handleTagClick(e, tag.name)}
           className={cn(styles.tagItem, selectedTag === tag.name && styles.selected)}
         >

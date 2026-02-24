@@ -482,9 +482,10 @@ export function FormIconSelector({
       placement="bottom-start"
       offset={6}
       triggerScaleOnOpen={false}
+      shouldBlockScroll={false}
       classNames={{
         content:
-          "p-0 w-[360px] max-w-[calc(100vw-2rem)] rounded-xl shadow-lg border border-default-200 bg-white dark:bg-card",
+          "p-0 w-[360px] max-w-[calc(100vw-2rem)] rounded-xl shadow-lg border border-default-200 bg-white dark:bg-card z-[9999]",
       }}
     >
       <PopoverTrigger>

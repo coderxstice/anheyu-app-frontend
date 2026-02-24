@@ -76,6 +76,7 @@ export function CommentSection({ targetTitle, targetPath, className }: CommentSe
       gravatarUrl: siteConfig?.GRAVATAR_URL || "https://cravatar.cn/",
       defaultGravatarType: siteConfig?.DEFAULT_GRAVATAR_TYPE || "mp",
       masterTag: siteConfig?.comment?.master_tag || "博主",
+      adminAvatarUrl: (siteConfig?.USER_AVATAR as string) || undefined,
       showRegion: commentConfig?.show_region === true || commentConfig?.show_region === "true",
       showUA: commentConfig?.show_ua === true || commentConfig?.show_ua === "true",
     }),

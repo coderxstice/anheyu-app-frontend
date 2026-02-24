@@ -172,7 +172,12 @@ export function PostHeader({ article }: PostHeaderProps) {
 
               {/* 分类 */}
               {article.post_categories.length > 0 && (
-                <Link href={`/categories/${article.post_categories[0].name}`} className={styles.postMetaCategory}>
+                <Link
+                  href={`/categories/${
+                    article.post_categories[0].slug || encodeURIComponent(article.post_categories[0].name)
+                  }`}
+                  className={styles.postMetaCategory}
+                >
                   {article.post_categories[0].name}
                 </Link>
               )}
@@ -182,7 +187,11 @@ export function PostHeader({ article }: PostHeaderProps) {
                 <div className={styles.tagShare}>
                   <div className={styles.postMetaTagList}>
                     {article.post_tags.map(tag => (
-                      <Link key={tag.id} href={`/tags/${tag.name}`} className={styles.postMetaTag}>
+                      <Link
+                        key={tag.id}
+                        href={`/tags/${tag.slug || encodeURIComponent(tag.name)}`}
+                        className={styles.postMetaTag}
+                      >
                         <FaHashtag size={14} className={styles.tagIcon} />
                         <span className={styles.tagName}>{tag.name}</span>
                       </Link>

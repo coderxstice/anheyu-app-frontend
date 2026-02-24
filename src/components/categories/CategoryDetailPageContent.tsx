@@ -20,12 +20,12 @@ export function CategoryDetailPageContent({
   const [currentPage, setCurrentPage] = useState(page);
   const siteTitle = useSiteConfigStore(state => state.siteConfig.APP_NAME || "AnHeYu");
 
-  const buildCategoryPath = useCallback((categoryName: string, pageNumber: number) => {
-    const encodedCategory = encodeURIComponent(categoryName);
+  const buildCategoryPath = useCallback((categoryIdentifier: string, pageNumber: number) => {
+    const encoded = encodeURIComponent(categoryIdentifier);
     if (pageNumber <= 1) {
-      return `/categories/${encodedCategory}/`;
+      return `/categories/${encoded}/`;
     }
-    return `/categories/${encodedCategory}/page/${pageNumber}`;
+    return `/categories/${encoded}/page/${pageNumber}`;
   }, []);
 
   const handleCategoryChange = useCallback(

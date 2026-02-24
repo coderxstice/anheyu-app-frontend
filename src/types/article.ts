@@ -11,6 +11,7 @@ export interface PostTag {
   created_at: string;
   updated_at: string;
   name: string;
+  slug?: string;
   count: number;
 }
 
@@ -23,6 +24,7 @@ export interface PostCategory {
   created_at: string;
   updated_at: string;
   name: string;
+  slug?: string;
   description: string;
   count: number;
   is_series: boolean;

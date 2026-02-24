@@ -98,6 +98,7 @@ export const articleApi = {
    */
   async createCategory(data: {
     name: string;
+    slug?: string;
     description?: string;
     is_series?: boolean;
     sort_order?: number;
@@ -114,14 +115,39 @@ export const articleApi = {
   /**
    * 创建标签
    */
-  async createTag(name: string): Promise<PostTag> {
-    const response = await apiClient.post<PostTag>(`/api/post-tags`, { name });
+  async createTag(data: { name: string; slug?: string }): Promise<PostTag> {
+    const response = await apiClient.post<PostTag>(`/api/post-tags`, data);
 
     if (response.code === 200 && response.data) {
       return response.data;
     }
 
     throw new Error(response.message || "创建标签失败");
+  },
+
+  async updateCategory(
+    id: string,
+    data: { name?: string; slug?: string; description?: string; is_series?: boolean; sort_order?: number }
+  ): Promise<PostCategory> {
+    const response = await apiClient.put<PostCategory>(`/api/post-categories/${id}`, data);
+    if (response.code === 200 && response.data) return response.data;
+    throw new Error(response.message || "更新分类失败");
+  },
+
+  async updateTag(id: string, data: { name?: string; slug?: string }): Promise<PostTag> {
+    const response = await apiClient.put<PostTag>(`/api/post-tags/${id}`, data);
+    if (response.code === 200 && response.data) return response.data;
+    throw new Error(response.message || "更新标签失败");
+  },
+
+  async deleteCategory(id: string): Promise<void> {
+    const response = await apiClient.delete(`/api/post-categories/${id}`);
+    if (response.code !== 200) throw new Error(response.message || "删除分类失败");
+  },
+
+  async deleteTag(id: string): Promise<void> {
+    const response = await apiClient.delete(`/api/post-tags/${id}`);
+    if (response.code !== 200) throw new Error(response.message || "删除标签失败");
   },
 
   /**

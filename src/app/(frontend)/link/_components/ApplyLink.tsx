@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { addToast, Button, Checkbox, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/react";
 import { Send, Loader2, AlertTriangle, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui";
 import { useApplyLink, useApplications } from "@/hooks/queries/use-friends";
 import { friendsApi } from "@/lib/api/friends";
 import { useSiteConfigStore } from "@/store/site-config-store";
+import { useCodeBlockEnhancer } from "@/hooks/use-code-block-enhancer";
 import type { LinkApplyType, LinkStatus } from "@/types/friends";
 
 const ALL_STATUS_KEY = "ALL";
@@ -35,7 +36,9 @@ export function ApplyLink() {
     }
   }, [rawConditions]);
 
+  const customCodeRef = useRef<HTMLDivElement>(null);
   const customCodeHtml = (siteConfig?.FRIEND_LINK_APPLY_CUSTOM_CODE_HTML as string) || "";
+  useCodeBlockEnhancer(customCodeRef, customCodeHtml);
   const placeholderName = (siteConfig?.FRIEND_LINK_PLACEHOLDER_NAME as string) || "例如：安知鱼";
   const placeholderURL = (siteConfig?.FRIEND_LINK_PLACEHOLDER_URL as string) || "https://blog.anheyu.com/";
   const placeholderLogo = (siteConfig?.FRIEND_LINK_PLACEHOLDER_LOGO as string) || "https://example.com/logo.png";
@@ -157,7 +160,9 @@ export function ApplyLink() {
   return (
     <div className="space-y-8">
       {/* 自定义代码区 */}
-      {customCodeHtml && <div className="post-content " dangerouslySetInnerHTML={{ __html: customCodeHtml }} />}
+      {customCodeHtml && (
+        <div ref={customCodeRef} className="post-content" dangerouslySetInnerHTML={{ __html: customCodeHtml }} />
+      )}
 
       {/* 申请条件 */}
       {conditions.length > 0 && (
@@ -308,7 +313,11 @@ export function ApplyLink() {
           </div>
           <div className="header-filters">
             <div className="status-filter-wrap">
-              <Dropdown placement="bottom-end" shouldBlockScroll={false} classNames={{ content: "status-filter-popover" }}>
+              <Dropdown
+                placement="bottom-end"
+                shouldBlockScroll={false}
+                classNames={{ content: "status-filter-popover" }}
+              >
                 <DropdownTrigger>
                   <Button
                     aria-label="状态筛选"
