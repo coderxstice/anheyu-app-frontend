@@ -1,6 +1,6 @@
 /**
  * HiddenBlock 扩展
- * 隐藏/折叠内容块，样式与 anheyu-pro 一致
+ * 隐藏/折叠内容块，样式与 anheyu-app 一致
  * 顶部有工具条：按钮文字编辑 + 预览切换
  */
 import { Node, mergeAttributes } from "@tiptap/core";

@@ -33,7 +33,7 @@ export const articleApi = {
     if (year) queryParams.append("year", String(year));
     if (month) queryParams.append("month", String(month));
 
-    const response = await apiClient.get<FeedListResponse>(`/api/pro/public/feed?${queryParams.toString()}`);
+    const response = await apiClient.get<FeedListResponse>(`/api/public/articles?${queryParams.toString()}`);
 
     if (response.code === 200 && response.data) {
       return response.data;

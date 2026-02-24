@@ -3,7 +3,7 @@
 /**
  * @Description: 右键菜单组件
  * @Author: 安知鱼
- * 1:1 移植自 anheyu-pro layout/frontend/components/RightMenu/index.vue
+ * 1:1 移植自 anheyu-app layout/frontend/components/RightMenu/index.vue
  */
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -78,7 +78,7 @@ export function RightMenu() {
     }, 100);
   }, []);
 
-  // 检查评论区域（与 anheyu-pro checkCommentSection 一致，同时检查配置 + DOM）
+  // 检查评论区域（与 anheyu-app checkCommentSection 一致，同时检查配置 + DOM）
   const checkCommentSection = useCallback(() => {
     const config = stateRef.current.siteConfig;
     const commentEnabled = config?.comment?.enable === true || config?.comment?.enable === "true";

@@ -231,7 +231,7 @@ export function ReplyItem({
     </div>
   );
 
-  // 展开的回复列表（平级显示，不缩进，与 anheyu-pro 保持一致）
+  // 展开的回复列表（平级显示，不缩进，与 anheyu-app 保持一致）
   const expandedReplies =
     hasReplies && isRepliesExpanded ? (
       <>

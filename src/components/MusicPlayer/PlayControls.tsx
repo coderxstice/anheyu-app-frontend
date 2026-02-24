@@ -3,7 +3,7 @@
 /**
  * @Description: 播放控制组件
  * @Author: 安知鱼
- * 1:1 移植自 anheyu-pro components/MusicPlayer/PlayControls.vue
+ * 1:1 移植自 anheyu-app components/MusicPlayer/PlayControls.vue
  */
 import styles from "./styles/PlayControls.module.css";
 

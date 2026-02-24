@@ -1,6 +1,6 @@
 /**
  * 文章详情页面
- * 对接 anheyu-pro 后端 API
+ * 对接 anheyu-app 后端 API
  */
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
@@ -23,13 +23,13 @@ const API_BASE_URL = process.env.BACKEND_URL || "http://localhost:8091";
 
 /**
  * 获取文章详情
- * API: GET /api/pro/articles/{id}/content
+ * API: GET /api/public/articles/{id}
  * @param id 文章 ID 或 abbrlink
  */
 async function getArticle(id: string) {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/pro/articles/${id}/content`, {
-      next: { revalidate: 60 }, // 60 秒缓存
+    const res = await fetch(`${API_BASE_URL}/api/public/articles/${id}`, {
+      next: { revalidate: 60 },
       headers: {
         "Content-Type": "application/json",
       },
@@ -44,7 +44,7 @@ async function getArticle(id: string) {
     }
 
     const data = await res.json();
-    // anheyu-pro API 返回格式: { code: 200, data: {...}, msg: "success" }
+    // anheyu-app API 返回格式: { code: 200, data: {...}, msg: "success" }
     if (data.code === 200 && data.data) {
       return data.data;
     }
@@ -57,11 +57,11 @@ async function getArticle(id: string) {
 
 /**
  * 获取最近文章列表
- * API: GET /api/pro/articles
+ * API: GET /api/public/articles
  */
 async function getRecentArticles() {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/pro/articles?page=1&pageSize=5`, {
+    const res = await fetch(`${API_BASE_URL}/api/public/articles?page=1&pageSize=5`, {
       next: { revalidate: 60 },
       headers: {
         "Content-Type": "application/json",

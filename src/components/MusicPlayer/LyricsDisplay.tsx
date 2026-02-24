@@ -3,7 +3,7 @@
 /**
  * @Description: 歌词显示组件
  * @Author: 安知鱼
- * 1:1 移植自 anheyu-pro components/MusicPlayer/LyricsDisplay.vue
+ * 1:1 移植自 anheyu-app components/MusicPlayer/LyricsDisplay.vue
  */
 import { useCallback } from "react";
 import type { LyricLine, LyricsState } from "@/types/music";

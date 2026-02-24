@@ -156,7 +156,7 @@ export function useAutoSave({
             content_html: html,
             content_md: markdown,
           });
-          navigator.sendBeacon?.(`/api/pro/articles/${articleId}`, new Blob([data], { type: "application/json" }));
+          navigator.sendBeacon?.(`/api/articles/${articleId}`, new Blob([data], { type: "application/json" }));
         }
       }
     };

@@ -1,18 +1,17 @@
 /**
- * 版本检测工具（对齐 anheyu-pro utils/versionManager.ts）
- * 从 /api/pro/version 获取版本信息，判断是否为 PRO 版本
+ * 版本检测工具
+ * 从 /api/version 获取版本信息
  */
 
 export interface VersionInfo {
   name?: string;
   version?: string;
-  community_version?: string;
   commit?: string;
   date?: string;
   go_version?: string;
 }
 
-const VERSION_CACHE_KEY = "anheyu_pro_version";
+const VERSION_CACHE_KEY = "anheyu_version";
 const CACHE_DURATION = 60 * 60 * 1000; // 1小时
 
 interface CachedVersion extends VersionInfo {
@@ -49,7 +48,7 @@ export async function getVersionInfo(forceRefresh = false): Promise<VersionInfo>
   }
 
   try {
-    const res = await fetch("/api/pro/version", {
+    const res = await fetch("/api/version", {
       method: "GET",
       headers: { Accept: "application/json" },
     });
@@ -57,9 +56,8 @@ export async function getVersionInfo(forceRefresh = false): Promise<VersionInfo>
       const result = await res.json();
       if (result.code === 200 && result.data) {
         const info: VersionInfo = {
-          name: "anheyu-pro",
+          name: "anheyu-app",
           version: result.data.version?.replace(/^v/, "") || "未知版本",
-          community_version: result.data.community_version?.replace(/^v/, ""),
           commit: result.data.commit,
           date: result.data.date,
           go_version: result.data.go_version,
@@ -70,10 +68,9 @@ export async function getVersionInfo(forceRefresh = false): Promise<VersionInfo>
     }
   } catch { /* ignore */ }
 
-  return { name: "anheyu-pro", version: "未知版本" };
+  return { name: "anheyu-app", version: "未知版本" };
 }
 
 export async function isProEdition(): Promise<boolean> {
-  const info = await getVersionInfo();
-  return info.name === "anheyu-pro" && !!info.version && info.version !== "未知版本";
+  return false;
 }

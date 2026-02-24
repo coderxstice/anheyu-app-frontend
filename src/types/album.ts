@@ -58,7 +58,7 @@ export type UpdateAlbumCategoryRequest = CreateAlbumCategoryRequest;
 /** 相册页面布局模式 */
 export type AlbumLayoutMode = "grid" | "waterfall";
 
-/** 相册排序方式（对齐 anheyu-pro） */
+/** 相册排序方式（对齐 anheyu-app） */
 export type AlbumSortOrder =
   | "display_order_asc"
   | "display_order_desc"

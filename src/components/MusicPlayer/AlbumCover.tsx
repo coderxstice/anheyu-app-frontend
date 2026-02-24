@@ -3,7 +3,7 @@
 /**
  * @Description: 专辑封面组件
  * @Author: 安知鱼
- * 1:1 移植自 anheyu-pro components/MusicPlayer/AlbumCover.vue
+ * 1:1 移植自 anheyu-app components/MusicPlayer/AlbumCover.vue
  */
 import { useState, useRef, useEffect } from "react";
 import styles from "./styles/AlbumCover.module.css";

@@ -81,7 +81,7 @@ export function PostHeader({ article }: PostHeaderProps) {
 
   // 桌面端缩放动画
   const infoScale = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
-  // 封面图的动画缩放值 (从 2 缩小到 0.5，与 anheyu-pro 一致)
+  // 封面图的动画缩放值 (从 2 缩小到 0.5，与 anheyu-app 一致)
   const coverAnimScale = useTransform(scrollYProgress, [0, 1], [2, 0.5]);
   // 使用 useMotionTemplate 创建完整的 transform 字符串
   const coverTransform = useMotionTemplate`rotate(10deg) translateY(30%) scale(${coverAnimScale}) translateZ(0)`;

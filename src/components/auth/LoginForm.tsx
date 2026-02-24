@@ -23,7 +23,6 @@ import { useAuthStore } from "@/store/auth-store";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import { ThemeToggle } from "@/components/common";
 import { cn } from "@/lib/utils";
-import { WechatLoginDialog } from "./WechatLoginDialog";
 
 // 邮箱图标
 function MailIcon({ className }: { className?: string }) {
@@ -140,7 +139,6 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showWechatDialog, setShowWechatDialog] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
 
   // OAuth 配置
@@ -291,64 +289,8 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
     }
   };
 
-  // OAuth 登录处理
-  const handleOAuthLogin = async (provider: string, loginType?: string) => {
-    // 微信使用二维码方式
-    if (provider === "wechat") {
-      setShowWechatDialog(true);
-      return;
-    }
-
-    try {
-      setOauthLoading(true);
-
-      // 根据 provider 确定回调 URL
-      let callbackPath: string;
-      if (provider === "qq") {
-        callbackPath = "/callback/qq";
-      } else if (provider === "logto") {
-        callbackPath = "/callback/openid/0";
-      } else if (provider === "rainbow") {
-        callbackPath = "/callback/rainbow";
-      } else {
-        callbackPath = "/callback/openid/2"; // oidc
-      }
-      const callbackUrl = `${window.location.origin}${callbackPath}`;
-
-      const res = await authService.getOAuthAuthorizeUrl({
-        provider,
-        redirect_url: callbackUrl,
-        login_type: loginType,
-      });
-
-      if (res.code === 200 && res.data) {
-        const authorizeUrl = res.data.url || res.data.authorize_url;
-        if (authorizeUrl) {
-          // 保存 state 和 provider 到 sessionStorage
-          if (provider !== "rainbow" && res.data.state) {
-            sessionStorage.setItem("oauth_state", res.data.state);
-          }
-          sessionStorage.setItem("oauth_provider", provider);
-          if (loginType) {
-            sessionStorage.setItem("oauth_login_type", loginType);
-          }
-          sessionStorage.setItem("oauth_source", "page");
-          sessionStorage.setItem("oauth_return_url", redirectUrl);
-
-          // 跳转到第三方授权页面
-          window.location.href = authorizeUrl;
-        } else {
-          addToast({ title: res.message || "获取授权URL失败", color: "danger", timeout: 3000 });
-        }
-      } else {
-        addToast({ title: res.message || "获取授权URL失败", color: "danger", timeout: 3000 });
-      }
-    } catch (err) {
-      addToast({ title: getErrorMessage(err), color: "danger", timeout: 3000 });
-    } finally {
-      setOauthLoading(false);
-    }
-  };
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleOAuthLogin = async (_provider: string, _loginType?: string) => {};
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -735,7 +677,6 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
       </div>
 
       {/* 微信扫码登录弹窗 */}
-      <WechatLoginDialog open={showWechatDialog} onClose={() => setShowWechatDialog(false)} redirectUrl={redirectUrl} />
     </motion.div>
   );
 }

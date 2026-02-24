@@ -318,7 +318,7 @@
   animation: owoItemIn 0.3s ease-out both;
 }
 
-/* 按行交错出现（每行约7个，与 anheyu-pro GSAP stagger: 0.02 对应） */
+/* 按行交错出现（每行约7个，与 anheyu-app GSAP stagger: 0.02 对应） */
 .owoItem:nth-child(-n + 7) {
   animation-delay: 0.05s;
 }

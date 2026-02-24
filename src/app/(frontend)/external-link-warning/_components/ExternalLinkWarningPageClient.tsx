@@ -1,6 +1,6 @@
 /**
  * 外部链接跳转提示页面
- * 参考 anheyu-pro external-link-warning/index.vue 实现
+ * 参考 anheyu-app external-link-warning/index.vue 实现
  * 用户点击外链时，先显示此中间页面提醒，倒计时后自动跳转
  */
 "use client";

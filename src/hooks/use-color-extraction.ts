@@ -3,7 +3,7 @@
 /**
  * @Description: 颜色提取逻辑 hook
  * @Author: 安知鱼
- * 1:1 移植自 anheyu-pro composables/useColorExtraction.ts
+ * 1:1 移植自 anheyu-app composables/useColorExtraction.ts
  */
 import { useState, useRef, useCallback } from "react";
 import type { ColorCache } from "@/types/music";

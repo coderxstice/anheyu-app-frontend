@@ -30,7 +30,6 @@ export type SettingCategoryId =
   | "content-file"
   | "user-comment"
   | "user-email"
-  | "integration-seo"
   | "pages-flink"
   | "pages-about"
   | "pages-equipment"
@@ -40,58 +39,6 @@ export type SettingCategoryId =
   | "advanced-captcha"
   | "advanced-wechat-share"
   | "advanced-backup";
-
-/** 与 anheyu-pro 后端 buildApprovedEmailBody 一致的审核通过邮件默认模板（留空时后端使用此模板） */
-const DEFAULT_ARTICLE_REVIEW_MAIL_TEMPLATE_APPROVED = `<div style="background-color:#f4f5f7;padding:30px 0;">
-\t<div style="max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-\t\t<div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:30px;text-align:center;">
-\t\t\t<h1 style="color:#fff;margin:0;font-size:24px;">🎉 文章审核通过</h1>
-\t\t</div>
-\t\t<div style="padding:30px;">
-\t\t\t<p style="font-size:16px;line-height:1.8;color:#333;">亲爱的 <strong>{{.Nickname}}</strong>，您好！</p>
-\t\t\t<p style="font-size:14px;line-height:1.8;color:#666;">恭喜！您在 <a href="{{.SiteURL}}" style="color:#667eea;text-decoration:none;">{{.SiteName}}</a> 提交的文章已通过审核并发布。</p>
-\t\t\t<div style="background:#f8f9fa;padding:20px;border-radius:6px;margin:20px 0;">
-\t\t\t\t<h3 style="margin:0 0 15px 0;color:#333;font-size:16px;">文章信息</h3>
-\t\t\t\t<p style="margin:8px 0;color:#666;"><strong>文章标题：</strong>{{.ArticleTitle}}</p>
-\t\t\t\t{{if .ReviewComment}}<p style="margin:8px 0;color:#666;"><strong>审核意见：</strong>{{.ReviewComment}}</p>{{end}}
-\t\t\t</div>
-\t\t\t<p style="font-size:14px;line-height:1.8;color:#666;">您的文章现已可以被所有访客阅读，感谢您的精彩创作！</p>
-\t\t\t<div style="text-align:center;margin:25px 0;">
-\t\t\t\t<a href="{{.SiteURL}}/posts/{{.ArticleID}}" style="display:inline-block;padding:12px 30px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;text-decoration:none;border-radius:25px;font-size:14px;">查看文章</a>
-\t\t\t</div>
-\t\t</div>
-\t\t<div style="background:#f8f9fa;padding:20px;text-align:center;color:#999;font-size:12px;">
-\t\t\t<p style="margin:5px 0;">本邮件由系统自动发送，请勿直接回复</p>
-\t\t\t<p style="margin:5px 0;">© {{.SiteName}}</p>
-\t\t</div>
-\t</div>
-</div>`;
-
-/** 与 anheyu-pro 后端 buildRejectedEmailBody 一致的审核拒绝邮件默认模板（留空时后端使用此模板） */
-const DEFAULT_ARTICLE_REVIEW_MAIL_TEMPLATE_REJECTED = `<div style="background-color:#f4f5f7;padding:30px 0;">
-\t<div style="max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-\t\t<div style="background:linear-gradient(135deg,#ff6b6b 0%,#ee5a24 100%);padding:30px;text-align:center;">
-\t\t\t<h1 style="color:#fff;margin:0;font-size:24px;">📝 文章审核未通过</h1>
-\t\t</div>
-\t\t<div style="padding:30px;">
-\t\t\t<p style="font-size:16px;line-height:1.8;color:#333;">亲爱的 <strong>{{.Nickname}}</strong>，您好！</p>
-\t\t\t<p style="font-size:14px;line-height:1.8;color:#666;">很遗憾，您在 <a href="{{.SiteURL}}" style="color:#667eea;text-decoration:none;">{{.SiteName}}</a> 提交的文章审核未通过。</p>
-\t\t\t<div style="background:#fff5f5;padding:20px;border-radius:6px;margin:20px 0;border-left:4px solid #ff6b6b;">
-\t\t\t\t<h3 style="margin:0 0 15px 0;color:#333;font-size:16px;">审核详情</h3>
-\t\t\t\t<p style="margin:8px 0;color:#666;"><strong>文章标题：</strong>{{.ArticleTitle}}</p>
-\t\t\t\t<p style="margin:8px 0;color:#666;"><strong>拒绝原因：</strong>{{.ReviewComment}}</p>
-\t\t\t</div>
-\t\t\t<p style="font-size:14px;line-height:1.8;color:#666;">请根据审核意见修改后重新提交，我们期待您的优质内容！</p>
-\t\t\t<div style="text-align:center;margin:25px 0;">
-\t\t\t\t<a href="{{.SiteURL}}/admin/post-management" style="display:inline-block;padding:12px 30px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;text-decoration:none;border-radius:25px;font-size:14px;">前往修改</a>
-\t\t\t</div>
-\t\t</div>
-\t\t<div style="background:#f8f9fa;padding:20px;text-align:center;color:#999;font-size:12px;">
-\t\t\t<p style="margin:5px 0;">本邮件由系统自动发送，请勿直接回复</p>
-\t\t\t<p style="margin:5px 0;">© {{.SiteName}}</p>
-\t\t</div>
-\t</div>
-</div>`;
 
 /** 文章版权声明默认模板（与前台渲染兜底保持一致） */
 const DEFAULT_POST_COPYRIGHT_TEMPLATE_ORIGINAL =
@@ -110,32 +57,6 @@ const DEFAULT_POST_SUBSCRIBE_MAIL_TEMPLATE = `<p>你好，</p>
 <p><a href="{{post_link}}" target="_blank">点击查看文章</a></p>
 <p>如果你不想再接收通知，可点击：<a href="{{unsubscribe_link}}" target="_blank">取消订阅</a></p>
 <p>— {{site_name}}</p>`;
-
-/** AI 默认 Prompt（与 anheyu-pro 默认配置对齐） */
-const DEFAULT_AI_SUMMARY_SYSTEM_PROMPT =
-  "你是一个专业的内容总结助手。请将用户提供的文章内容总结为 100-200 字的单段中文摘要，语言简洁、客观、准确。";
-
-const DEFAULT_AI_WRITING_SYSTEM_PROMPT =
-  "你是一个专业的中文技术博客写作助手。请根据用户主题输出结构清晰、内容准确、可读性高的 Markdown 文章，必要时给出可运行示例。";
-
-const DEFAULT_AI_ASSISTANT_SYSTEM_PROMPT =
-  "你是站点 AI 助手。优先基于检索到的站点内容回答，无法确认时明确说明不确定，不要编造事实。";
-
-const DEFAULT_AI_ASSISTANT_USER_PROMPT = `以下是相关的博客文章内容：
-
-{{context}}
-
-用户问：{{question}}
-
-请用简洁友好的方式直接回答用户的问题。`;
-
-const DEFAULT_AI_ASSISTANT_NO_CONTEXT_PROMPT = `你是「{{site_name}}」的博客助手。用户说：{{question}}
-
-请友好简洁地回复用户（1-3 句话），可以用 emoji。`;
-
-const DEFAULT_AI_ASSISTANT_CHAT_SUGGESTIONS = JSON.stringify(["你是谁？", "博客有哪些功能？", "如何配置主题?"]);
-const DEFAULT_AI_ASSISTANT_SEARCH_SUGGESTIONS = JSON.stringify(["前端开发", "后端开发", "Anheyu-App使用"]);
-
 /**
  * 后端返回空字符串时，前端需要回显默认值的配置键白名单。
  * 这些字段在后端常以空值表示“使用系统默认模板”。
@@ -565,39 +486,6 @@ const categoryDescriptors: Record<SettingCategoryId, SettingDescriptor[]> = {
     { backendKey: K.KEY_CDN_DOMAIN, type: "string" },
     { backendKey: K.KEY_CDN_ZONE_ID, type: "string" },
     { backendKey: K.KEY_CDN_BASE_URL, type: "string" },
-    { backendKey: K.KEY_MULTI_AUTHOR_ENABLE, type: "boolean", isPro: true },
-    { backendKey: K.KEY_MULTI_AUTHOR_NEED_REVIEW, type: "boolean", isPro: true },
-    { backendKey: K.KEY_ARTICLE_REVIEW_NOTIFY_ENABLE, type: "boolean", isPro: true },
-    { backendKey: K.KEY_ARTICLE_REVIEW_NOTIFY_EMAIL, type: "boolean", isPro: true },
-    { backendKey: K.KEY_ARTICLE_REVIEW_NOTIFY_PUSH, type: "boolean", isPro: true },
-    { backendKey: K.KEY_ARTICLE_REVIEW_PUSH_CHANNEL, type: "string", isPro: true },
-    { backendKey: K.KEY_ARTICLE_REVIEW_PUSH_URL, type: "string", isPro: true },
-    { backendKey: K.KEY_ARTICLE_REVIEW_WEBHOOK_BODY, type: "code", isPro: true },
-    { backendKey: K.KEY_ARTICLE_REVIEW_WEBHOOK_HEADERS, type: "code", isPro: true },
-    {
-      backendKey: K.KEY_ARTICLE_REVIEW_MAIL_SUBJECT_APPROVED,
-      type: "string",
-      defaultValue: "【{{.SiteName}}】您的文章已通过审核",
-      isPro: true,
-    },
-    {
-      backendKey: K.KEY_ARTICLE_REVIEW_MAIL_TEMPLATE_APPROVED,
-      type: "code",
-      defaultValue: DEFAULT_ARTICLE_REVIEW_MAIL_TEMPLATE_APPROVED,
-      isPro: true,
-    },
-    {
-      backendKey: K.KEY_ARTICLE_REVIEW_MAIL_SUBJECT_REJECTED,
-      type: "string",
-      defaultValue: "【{{.SiteName}}】您的文章审核未通过",
-      isPro: true,
-    },
-    {
-      backendKey: K.KEY_ARTICLE_REVIEW_MAIL_TEMPLATE_REJECTED,
-      type: "code",
-      defaultValue: DEFAULT_ARTICLE_REVIEW_MAIL_TEMPLATE_REJECTED,
-      isPro: true,
-    },
   ],
   "content-file": [
     { backendKey: K.KEY_UPLOAD_ALLOWED_EXTENSIONS, type: "string" },
@@ -689,19 +577,6 @@ const categoryDescriptors: Record<SettingCategoryId, SettingDescriptor[]> = {
     { backendKey: K.KEY_ACTIVATE_ACCOUNT_SUBJECT, type: "string" },
     { backendKey: K.KEY_ACTIVATE_ACCOUNT_TEMPLATE, type: "code" },
     { backendKey: K.KEY_ENABLE_USER_ACTIVATION, type: "boolean" },
-  ],
-  "integration-seo": [
-    { backendKey: K.KEY_SEO_AUTO_SUBMIT, type: "boolean", isPro: true },
-    { backendKey: K.KEY_SEO_BAIDU_ENABLE, type: "boolean", isPro: true },
-    { backendKey: K.KEY_SEO_BAIDU_SITE, type: "string", isPro: true },
-    { backendKey: K.KEY_SEO_BAIDU_TOKEN, type: "password", isPro: true },
-    { backendKey: K.KEY_SEO_BING_ENABLE, type: "boolean", isPro: true },
-    { backendKey: K.KEY_SEO_BING_API_KEY, type: "password", isPro: true },
-    { backendKey: K.KEY_SEO_BING_SITE_URL, type: "string", isPro: true },
-    { backendKey: K.KEY_SEO_GOOGLE_ENABLE, type: "boolean", isPro: true },
-    { backendKey: K.KEY_SEO_GOOGLE_CREDENTIAL, type: "code", isPro: true },
-    { backendKey: K.KEY_SEO_RETRY_TIMES, type: "number", defaultValue: "3", isPro: true },
-    { backendKey: K.KEY_SEO_RETRY_INTERVAL, type: "number", defaultValue: "5", isPro: true },
   ],
   "pages-flink": [
     { backendKey: K.KEY_FRIEND_LINK_DEFAULT_CATEGORY, type: "string" },

@@ -15,79 +15,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "picsum.photos",
-      },
-      {
-        protocol: "https",
-        hostname: "*.picsum.photos",
-      },
-      {
-        protocol: "https",
-        hostname: "api.dicebear.com",
-      },
-      // 允许 anheyu 相关域名
-      {
-        protocol: "https",
-        hostname: "*.anheyu.com",
-      },
-      {
-        protocol: "https",
-        hostname: "anheyu.com",
+        hostname: "**",
       },
       {
         protocol: "http",
-        hostname: "localhost",
-      },
-      // 允许常用的图床和 CDN
-      {
-        protocol: "https",
-        hostname: "*.aliyuncs.com",
-      },
-      {
-        protocol: "https",
-        hostname: "*.qiniudn.com",
-      },
-      {
-        protocol: "https",
-        hostname: "*.cloudflare.com",
-      },
-      {
-        protocol: "https",
-        hostname: "*.r2.cloudflarestorage.com",
-      },
-      // Gravatar 头像服务
-      {
-        protocol: "https",
-        hostname: "cravatar.cn",
-      },
-      {
-        protocol: "https",
-        hostname: "gravatar.com",
-      },
-      {
-        protocol: "https",
-        hostname: "www.gravatar.com",
-      },
-      {
-        protocol: "https",
-        hostname: "secure.gravatar.com",
-      },
-      {
-        protocol: "https",
-        hostname: "*.gravatar.com",
-      },
-      // QQ 头像服务
-      {
-        protocol: "https",
-        hostname: "thirdqq.qlogo.cn",
-      },
-      {
-        protocol: "https",
-        hostname: "q.qlogo.cn",
-      },
-      {
-        protocol: "https",
-        hostname: "*.qlogo.cn",
+        hostname: "**",
       },
     ],
   },

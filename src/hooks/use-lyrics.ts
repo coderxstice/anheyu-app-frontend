@@ -3,7 +3,7 @@
 /**
  * @Description: 歌词处理逻辑 hook
  * @Author: 安知鱼
- * 1:1 移植自 anheyu-pro composables/useLyrics.ts
+ * 1:1 移植自 anheyu-app composables/useLyrics.ts
  */
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { LyricLine, LyricsState, LyricInput } from "@/types/music";

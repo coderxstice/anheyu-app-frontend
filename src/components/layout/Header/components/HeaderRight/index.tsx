@@ -113,7 +113,7 @@ export function HeaderRight({
       )}
 
       {/* 用户中心/登录注册 */}
-      {!isAuthenticated ? (
+      {!isAuthenticated || !user ? (
         <Popover
           placement="bottom-end"
           offset={8}
@@ -123,7 +123,7 @@ export function HeaderRight({
           }}
         >
           <PopoverTrigger>
-            <button className={cn(styles.navButton, "ml-0!")}>
+            <button className={styles.navButton}>
               <Icon icon="ri:user-fill" width="1.3rem" height="1.3rem" />
             </button>
           </PopoverTrigger>
@@ -157,7 +157,7 @@ export function HeaderRight({
           }}
         >
           <PopoverTrigger>
-            <button className={cn(styles.navButton, styles.userCenterButton, "ml-0!")}>
+            <button className={cn(styles.navButton, styles.userCenterButton)}>
               <Icon icon="ri:user-fill" width="1.3rem" height="1.3rem" />
             </button>
           </PopoverTrigger>

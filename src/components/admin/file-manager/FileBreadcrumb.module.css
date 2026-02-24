@@ -30,7 +30,7 @@
   overflow: hidden;
 }
 
-/* 首页图标 - 匹配 anheyu-pro（font-size: 16px） */
+/* 首页图标 - 匹配 anheyu-app（font-size: 16px） */
 .home-icon {
   flex-shrink: 0;
   margin-right: 12px;

@@ -1,7 +1,7 @@
 /**
  * PreserveHTML 扩展
  * 保留复杂 HTML 结构（画廊、视频画廊等），在编辑器中以不可编辑块显示
- * 参考 anheyu-pro FrontendEditor/extensions/PreserveHTML.ts
+ * 参考 anheyu-app FrontendEditor/extensions/PreserveHTML.ts
  */
 import { Node } from "@tiptap/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";

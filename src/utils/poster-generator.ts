@@ -1,6 +1,6 @@
 /**
  * 海报生成工具函数
- * 与 anheyu-pro 实现一致
+ * 与 anheyu-app 实现一致
  */
 
 import QRCode from "qrcode";

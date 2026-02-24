@@ -64,7 +64,7 @@ const mockTags = [
 export function MobileMenu({ isOpen, onClose, navConfig, menuConfig }: MobileMenuProps) {
   const { theme, setTheme } = useTheme();
   const siteConfig = useSiteConfigStore(state => state.siteConfig);
-  // 菜单中 /travelling 项：跳转随机友链（对齐 anheyu-pro articleStore.navigateToRandomLink）
+  // 菜单中 /travelling 项：跳转随机友链（对齐 anheyu-app articleStore.navigateToRandomLink）
   const navigateToRandomLink = useCallback(async () => {
     try {
       const links = await friendsApi.getRandomLinks(1);

@@ -1,6 +1,6 @@
 /**
  * 友链管理 API 服务
- * 对接 anheyu-pro 后端 /api/links 和相关接口
+ * 对接 anheyu-app 后端 /api/links 和相关接口
  */
 
 import { apiClient } from "./client";
@@ -369,61 +369,6 @@ export const friendsApi = {
     }
 
     throw new Error(response.message || "检查友链失败");
-  },
-
-  /**
-   * 获取朋友圈列表
-   * GET /api/pro/moments
-   */
-  async getMomentsList(
-    page: number = 1,
-    pageSize: number = 50,
-    sortType: MomentsSortType = "published_at"
-  ): Promise<MomentsListData> {
-    const queryParams = new URLSearchParams();
-    queryParams.append("page", String(page));
-    queryParams.append("page_size", String(pageSize));
-    queryParams.append("sort_type", sortType);
-
-    const response = await apiClient.get<MomentsListData>(`/api/pro/moments?${queryParams.toString()}`);
-
-    if (response.code === 200 && response.data) {
-      return response.data;
-    }
-
-    throw new Error(response.message || "获取朋友圈列表失败");
-  },
-
-  /**
-   * 获取指定友链的朋友圈文章列表
-   * GET /api/pro/moments/link/:id
-   */
-  async getLinkMoments(linkId: number, page: number = 1, pageSize: number = 20): Promise<LinkMomentsData> {
-    const queryParams = new URLSearchParams();
-    queryParams.append("page", String(page));
-    queryParams.append("page_size", String(pageSize));
-
-    const response = await apiClient.get<LinkMomentsData>(`/api/pro/moments/link/${linkId}?${queryParams.toString()}`);
-
-    if (response.code === 200 && response.data) {
-      return response.data;
-    }
-
-    throw new Error(response.message || "获取友链文章列表失败");
-  },
-
-  /**
-   * 获取友链随机文章（钓鱼）
-   * GET /api/pro/moments/randompost
-   */
-  async getRandomPost(): Promise<RandomPostData> {
-    const response = await apiClient.get<RandomPostData>("/api/pro/moments/randompost");
-
-    if (response.code === 200 && response.data) {
-      return response.data;
-    }
-
-    throw new Error(response.message || "获取友链随机文章失败");
   },
 
   /**

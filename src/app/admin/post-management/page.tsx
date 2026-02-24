@@ -16,7 +16,7 @@ import {
   Pagination,
 } from "@heroui/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Upload, Download, Trash2, ShieldAlert, ChevronDown, FileText } from "lucide-react";
+import { Plus, Trash2, ShieldAlert, ChevronDown, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { adminContainerVariants, adminItemVariants } from "@/lib/motion";
 import { PAGE_SIZES, ADMIN_EMPTY_TEXTS } from "@/lib/constants/admin";
@@ -24,9 +24,6 @@ import { usePostManagementPage } from "./_hooks/use-post-page";
 import { TABLE_COLUMNS, usePostRenderCell } from "@/components/admin/post-management/PostTableColumns";
 import { PostManagementSkeleton } from "@/components/admin/post-management/PostManagementSkeleton";
 import { PostFilterBar } from "@/components/admin/post-management/PostFilterBar";
-import { ReviewModal } from "@/components/admin/post-management/ReviewModal";
-import { TakedownModal } from "@/components/admin/post-management/TakedownModal";
-import { ImportModal } from "@/components/admin/post-management/ImportModal";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { FloatingSelectionBar } from "@/components/admin/FloatingSelectionBar";
 import { TableEmptyState } from "@/components/admin/TableEmptyState";
@@ -142,15 +139,6 @@ export default function PostManagementPage() {
               >
                 新增文章
               </Button>
-              <Button
-                size="sm"
-                variant="flat"
-                onPress={pm.importModal.onOpen}
-                startContent={<Upload className="w-3.5 h-3.5" />}
-                className="text-default-600"
-              >
-                导入
-              </Button>
             </div>
           </div>
         </div>
@@ -231,17 +219,16 @@ export default function PostManagementPage() {
             count={pm.selectedIds.size}
             actions={[
               {
-                key: "export",
-                label: "导出",
-                icon: <Download className="w-3.5 h-3.5" />,
-                onClick: pm.handleExport,
-                disabled: pm.exportArticles.isPending,
-              },
-              {
                 key: "delete",
                 label: "删除",
                 icon: <Trash2 className="w-3.5 h-3.5" />,
-                onClick: pm.batchDeleteModal.onOpen,
+                onClick: () => {
+                  const ids = Array.from(pm.selectedIds);
+                  if (ids.length > 0) {
+                    ids.forEach(id => pm.deleteArticle.mutateAsync(id).catch(() => {}));
+                    pm.setSelectedIds(new Set());
+                  }
+                },
                 variant: "danger",
               },
             ]}
@@ -264,45 +251,6 @@ export default function PostManagementPage() {
         onConfirm={pm.handleDeleteConfirm}
       />
 
-      <ConfirmDialog
-        isOpen={pm.batchDeleteModal.isOpen}
-        onOpenChange={pm.batchDeleteModal.onOpenChange}
-        title="批量删除"
-        description={`确定要删除选中的 ${pm.selectedIds.size} 篇文章吗？此操作不可撤销。`}
-        confirmText={`删除 ${pm.selectedIds.size} 篇`}
-        confirmColor="danger"
-        icon={<ShieldAlert className="w-5 h-5 text-danger" />}
-        iconBg="bg-danger-50"
-        loading={pm.batchDeleteArticles.isPending}
-        onConfirm={pm.handleBatchDeleteConfirm}
-      />
-
-      <ReviewModal
-        isOpen={pm.reviewModal.isOpen}
-        onOpenChange={pm.reviewModal.onOpenChange}
-        reviewTarget={pm.reviewTarget}
-        reviewComment={pm.reviewComment}
-        onReviewCommentChange={pm.setReviewComment}
-        onConfirm={pm.handleReviewConfirm}
-        isApproving={pm.approveArticle.isPending}
-        isRejecting={pm.rejectArticle.isPending}
-      />
-
-      <TakedownModal
-        isOpen={pm.takedownModal.isOpen}
-        onOpenChange={pm.takedownModal.onOpenChange}
-        target={pm.takedownTarget}
-        reason={pm.takedownReason}
-        onReasonChange={pm.setTakedownReason}
-        onConfirm={pm.handleTakedownConfirm}
-        isLoading={pm.takedownArticle.isPending}
-      />
-
-      <ImportModal
-        isOpen={pm.importModal.isOpen}
-        onOpenChange={pm.importModal.onOpenChange}
-        onImport={pm.importArticlesHook}
-      />
     </motion.div>
   );
 }

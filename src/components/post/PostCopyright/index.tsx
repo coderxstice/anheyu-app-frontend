@@ -1,6 +1,6 @@
 /**
  * 文章版权信息组件
- * 与 anheyu-pro 实现一致
+ * 与 anheyu-app 实现一致
  */
 "use client";
 

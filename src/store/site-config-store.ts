@@ -1,6 +1,6 @@
 /**
  * 站点配置状态管理
- * 参考 anheyu-pro 实现，使用 localStorage 缓存配置
+ * 参考 anheyu-app 实现，使用 localStorage 缓存配置
  */
 
 import { create } from "zustand";

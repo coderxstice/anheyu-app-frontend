@@ -20,7 +20,7 @@ import type { Theme, SSRThemeInfo } from "@/types/theme-mall";
 export type TabKey = "market" | "installed";
 
 /**
- * 从 downloadUrl 中提取主题名称（对齐 anheyu-pro extractThemeNameFromUrl）
+ * 从 downloadUrl 中提取主题名称（对齐 anheyu-app extractThemeNameFromUrl）
  * 格式：theme-xxx-v1.0.0.zip / theme-xxx-v1.0.0.tar.gz / theme-xxx-1.0.0.tgz
  */
 function extractThemeNameFromUrl(downloadUrl: string): string {
@@ -33,7 +33,7 @@ function extractThemeNameFromUrl(downloadUrl: string): string {
 }
 
 /**
- * 清理主题相关缓存（对齐 anheyu-pro clearThemeCache）
+ * 清理主题相关缓存（对齐 anheyu-app clearThemeCache）
  */
 async function clearThemeCache(): Promise<void> {
   // 1. 清理 localStorage
@@ -78,7 +78,7 @@ async function clearThemeCache(): Promise<void> {
 }
 
 /**
- * 版本号比较（对齐 anheyu-pro compareVersions）
+ * 版本号比较（对齐 anheyu-app compareVersions）
  * 返回: 1 (v1 > v2), -1 (v1 < v2), 0 (相等)
  */
 function compareVersions(v1: string, v2: string): number {
@@ -94,7 +94,7 @@ function compareVersions(v1: string, v2: string): number {
 }
 
 /**
- * 排序规则（对齐 anheyu-pro sortThemeList）：
+ * 排序规则（对齐 anheyu-app sortThemeList）：
  * 1. 当前使用中的主题排最前
  * 2. 官方主题排在前面
  * 3. 其他保持原始顺序
@@ -351,7 +351,7 @@ export function useThemePage() {
     [startSSR]
   );
 
-  // ---- 上传主题（对齐 anheyu-pro 验证 + 版本比对流程） ----
+  // ---- 上传主题（对齐 anheyu-app 验证 + 版本比对流程） ----
   const handleUpload = useCallback(
     async (file: File, forceUpdate = false) => {
       try {

@@ -1,4 +1,4 @@
-/* ── 上传队列面板 - 匹配 anheyu-pro ── */
+/* ── 上传队列面板 - 匹配 anheyu-app ── */
 .upload-progress-panel {
   position: fixed;
   bottom: 20px;
@@ -130,7 +130,7 @@
   background-color: var(--anzhiyu-card-border);
 }
 
-/* ── 上传条目 - 匹配 anheyu-pro 横向布局 ── */
+/* ── 上传条目 - 匹配 anheyu-app 横向布局 ── */
 .upload-item {
   position: relative;
   display: flex;

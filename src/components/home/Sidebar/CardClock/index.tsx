@@ -1,6 +1,6 @@
 /**
  * 天气时钟组件
- * 参考 anheyu-pro CardClock.vue 实现
+ * 参考 anheyu-app CardClock.vue 实现
  * 显示实时时钟、日期、天气信息
  */
 "use client";
@@ -167,7 +167,7 @@ export const CardClock = memo(function CardClock({ config }: CardClockProps) {
     } else {
       // 通过后端 API 获取 IP 定位
       try {
-        const res = await fetch("/api/pro/public/weather/ip-location");
+        const res = await fetch("/api/public/weather/ip-location");
         const result = await res.json();
 
         let location = config.rectangle;

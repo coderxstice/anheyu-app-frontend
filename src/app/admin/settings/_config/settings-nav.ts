@@ -8,8 +8,6 @@ import {
   FolderOpen,
   MessageSquare,
   Mail,
-  KeyRound,
-  Search,
   Link2,
   UserCircle,
   Monitor,
@@ -77,14 +75,6 @@ export const settingsCategories: CategorySection[] = [
     children: [
       { id: "user-comment", label: "评论系统", icon: MessageSquare, keywords: ["评论", "敏感词", "通知", "审核"] },
       { id: "user-email", label: "邮件服务", icon: Mail, keywords: ["SMTP", "邮件", "模板", "激活"] },
-    ],
-  },
-  {
-    id: "integration",
-    label: "三方服务",
-    icon: KeyRound,
-    children: [
-      { id: "integration-seo", label: "SEO 推送", icon: Search, keywords: ["百度", "Bing", "Google", "收录"] },
     ],
   },
   {
