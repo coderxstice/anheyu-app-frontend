@@ -1005,12 +1005,12 @@ html.dark [data-slot="content"][role="tooltip"] {
 
 /* ===================== AnHeYu Pro 变量映射 ===================== */
 :root {
-  /* 主题色 */
+  /* 主题色（从 --primary 派生，确保颜色一致性） */
   --anzhiyu-theme: var(--primary);
-  --anzhiyu-theme-op: #4259ef23;
-  --anzhiyu-theme-op-deep: #4259efdd;
-  --anzhiyu-theme-op-light: #4259ef0d;
-  --anzhiyu-theme-none: #4259ef01;
+  --anzhiyu-theme-op: var(--primary-op);
+  --anzhiyu-theme-op-deep: var(--primary-op-deep);
+  --anzhiyu-theme-op-light: var(--primary-op-light);
+  --anzhiyu-theme-none: transparent;
 
   /* 主色调别名 */
   --anzhiyu-main: var(--anzhiyu-theme);
@@ -1133,10 +1133,10 @@ html.dark [data-slot="content"][role="tooltip"] {
 }
 
 .dark {
-  /* 主题色 */
-  --anzhiyu-theme-op: #dfa62123;
-  --anzhiyu-theme-op-deep: #dfa621dd;
-  --anzhiyu-theme-none: #dfa62100;
+  /* 主题色（从 --primary 派生） */
+  --anzhiyu-theme-op: var(--primary-op);
+  --anzhiyu-theme-op-deep: var(--primary-op-deep);
+  --anzhiyu-theme-none: transparent;
 
   /* 语义色 */
   --anzhiyu-blue: #0084ff;

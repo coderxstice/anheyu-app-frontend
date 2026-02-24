@@ -175,15 +175,16 @@
   background: var(--primary);
 }
 
-/* 覆盖 HeroUI PopoverTrigger 注入的 [data-slot="trigger"] 样式 */
+/* 覆盖 HeroUI 全局 [data-slot="trigger"] 的 !important 规则 */
 .navButton[data-slot="trigger"] {
-  border-radius: 50px;
+  border-radius: 50px !important;
+  box-shadow: none !important;
 }
 
 .navButton[data-slot="trigger"]:hover {
   color: var(--primary-foreground);
   background: var(--primary);
-  border-radius: 50px;
+  border-radius: 50px !important;
 }
 
 /* 白色文字状态（页面顶部透明时） */

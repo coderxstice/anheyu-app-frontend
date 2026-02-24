@@ -123,7 +123,7 @@ export function HeaderRight({
           }}
         >
           <PopoverTrigger>
-            <button className={styles.navButton}>
+            <button className={styles.navButton} title="登录 / 注册">
               <Icon icon="ri:user-fill" width="1.3rem" height="1.3rem" />
             </button>
           </PopoverTrigger>
@@ -157,7 +157,7 @@ export function HeaderRight({
           }}
         >
           <PopoverTrigger>
-            <button className={cn(styles.navButton, styles.userCenterButton)}>
+            <button className={cn(styles.navButton, styles.userCenterButton)} title="个人中心">
               <Icon icon="ri:user-fill" width="1.3rem" height="1.3rem" />
             </button>
           </PopoverTrigger>
