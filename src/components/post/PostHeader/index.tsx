@@ -8,7 +8,8 @@ import { useRef, useEffect, useState, useMemo, useSyncExternalStore, useCallback
 import Link from "next/link";
 import { motion, useScroll, useTransform, useMotionTemplate } from "framer-motion";
 import { Tooltip } from "@heroui/react";
-import { FaHashtag, FaFileLines, FaClock, FaCalendarDays, FaFire, FaLocationDot, FaComments } from "react-icons/fa6";
+import { FaHashtag, FaFileLines, FaClock, FaCalendarDays, FaFire, FaLocationDot } from "react-icons/fa6";
+import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/utils/date";
 import type { Article } from "@/types/article";
@@ -255,7 +256,7 @@ export function PostHeader({ article }: PostHeaderProps) {
                   <span className={styles.metaSeparator} />
                   <MetaTooltip content="评论数" mounted={mounted}>
                     <span className={cn(styles.metaItem, styles.metaClickable)} onClick={scrollToComment}>
-                      <FaComments size={14} className={styles.metaIcon} />
+                      <Icon icon="ri:chat-1-fill" width={14} height={14} className={styles.metaIcon} />
                       <span>{article.comment_count}</span>
                     </span>
                   </MetaTooltip>

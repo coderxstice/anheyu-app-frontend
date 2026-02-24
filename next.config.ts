@@ -30,11 +30,6 @@ const nextConfig: NextConfig = {
           source: "/api/:path*",
           destination: `${backendUrl}/api/:path*`,
         },
-        // 静态文件代理（后端上传的图片等）
-        {
-          source: "/static/:path*",
-          destination: `${backendUrl}/static/:path*`,
-        },
         // 文件代理
         {
           source: "/f/:path*",
@@ -46,8 +41,13 @@ const nextConfig: NextConfig = {
           destination: `${backendUrl}/needcache/:path*`,
         },
       ],
-      // afterFiles: SEO 和动态生成的文件
+      // afterFiles: 先检查 public 目录，找不到才代理到 Go 后端
       afterFiles: [
+        // 静态文件代理（后端上传的图片等，优先使用 public 目录中的默认文件）
+        {
+          source: "/static/:path*",
+          destination: `${backendUrl}/static/:path*`,
+        },
         // SEO 相关文件代理（动态生成）
         {
           source: "/sitemap.xml",

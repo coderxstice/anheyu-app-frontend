@@ -215,7 +215,7 @@ export const FeedArticleCard = memo(function FeedArticleCard({
                 ))}
 
               {/* 置顶标签 */}
-              {!isProduct && article.pin_sort && article.pin_sort > 0 && (
+              {!isProduct && article.pin_sort != null && article.pin_sort > 0 && (
                 <span className={cn(styles.metaTag, styles.stickyTag)}>
                   <FaThumbtack className={styles.metaTagIcon} aria-hidden="true" />
                   <span>置顶</span>
@@ -223,7 +223,7 @@ export const FeedArticleCard = memo(function FeedArticleCard({
               )}
 
               {/* 多人互动标签 */}
-              {!isProduct && article.comment_count && article.comment_count > 10 && (
+              {!isProduct && article.comment_count != null && article.comment_count > 10 && (
                 <span className={cn(styles.metaTag, styles.hotTag)}>
                   <FaFire className={styles.metaTagIcon} aria-hidden="true" />
                   <span>多人互动</span>
@@ -254,14 +254,14 @@ export const FeedArticleCard = memo(function FeedArticleCard({
                 </span>
               )}
 
-              {!isProduct && article.pin_sort && article.pin_sort > 0 && (
+              {!isProduct && article.pin_sort != null && article.pin_sort > 0 && (
                 <span className={cn(styles.articleMeta, styles.stickyWarp)}>
                   <FaThumbtack className={styles.metaTagIcon} aria-hidden="true" />
                   <span>置顶</span>
                 </span>
               )}
 
-              {!isProduct && article.comment_count && article.comment_count > 10 && (
+              {!isProduct && article.comment_count != null && article.comment_count > 10 && (
                 <span className={cn(styles.articleMeta, styles.hotInteractionWarp)}>
                   <FaFire className={styles.metaTagIcon} aria-hidden="true" />
                   <span>多人互动</span>
