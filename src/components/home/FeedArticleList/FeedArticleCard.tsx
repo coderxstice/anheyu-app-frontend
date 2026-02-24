@@ -151,17 +151,15 @@ export const FeedArticleCard = memo(function FeedArticleCard({
     }
   };
 
-  // 跳转到分类页面
-  const goToCategoryPage = (e: React.MouseEvent, categoryName: string) => {
+  const goToCategoryPage = (e: React.MouseEvent, category: { name: string; slug?: string }) => {
     e.stopPropagation();
-    router.push(`/categories/${encodeURIComponent(categoryName)}/`);
+    router.push(`/categories/${category.slug || encodeURIComponent(category.name)}/`);
     window.scrollTo({ top: 0, behavior: "instant" });
   };
 
-  // 跳转到标签页面
-  const goToTagPage = (e: React.MouseEvent, tagName: string) => {
+  const goToTagPage = (e: React.MouseEvent, tag: { name: string; slug?: string }) => {
     e.stopPropagation();
-    router.push(`/tags/${encodeURIComponent(tagName)}/`);
+    router.push(`/tags/${tag.slug || encodeURIComponent(tag.name)}/`);
     window.scrollTo({ top: 0, behavior: "instant" });
   };
 
@@ -208,7 +206,7 @@ export const FeedArticleCard = memo(function FeedArticleCard({
                       backgroundColor: primaryColor,
                       color: categoryTextColor,
                     }}
-                    onClick={e => goToCategoryPage(e, category.name)}
+                    onClick={e => goToCategoryPage(e, category)}
                   >
                     {category.name}
                   </span>
@@ -270,11 +268,7 @@ export const FeedArticleCard = memo(function FeedArticleCard({
 
               {!isProduct &&
                 article.post_categories?.map(category => (
-                  <span
-                    key={category.id}
-                    className={styles.categoryTip}
-                    onClick={e => goToCategoryPage(e, category.name)}
-                  >
+                  <span key={category.id} className={styles.categoryTip} onClick={e => goToCategoryPage(e, category)}>
                     {category.name}
                   </span>
                 ))}
@@ -301,7 +295,7 @@ export const FeedArticleCard = memo(function FeedArticleCard({
             <>
               <span className={styles.tags}>
                 {article.post_tags?.map(tag => (
-                  <span key={tag.id} className={styles.articleMetaTags} onClick={e => goToTagPage(e, tag.name)}>
+                  <span key={tag.id} className={styles.articleMetaTags} onClick={e => goToTagPage(e, tag)}>
                     <FaHashtag className={styles.tagIcon} />
                     {tag.name}
                   </span>

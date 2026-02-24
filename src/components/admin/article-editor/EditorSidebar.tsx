@@ -594,7 +594,7 @@ function SettingsContent({
   // 创建标签
   const handleCreateTag = useCallback(
     async (name: string) => {
-      const created = await articleApi.createTag(name);
+      const created = await articleApi.createTag({ name });
       queryClient.invalidateQueries({ queryKey: ["post-tags"] });
       return created;
     },

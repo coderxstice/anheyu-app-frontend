@@ -16,6 +16,7 @@ import { tokenManager } from "@/lib/api/client";
 import { HeroUIProviderWrapper } from "./heroui-provider";
 import { QueryProvider } from "./query-provider";
 import { GlobalLoading } from "@/components/common/GlobalLoading";
+import { CustomCodeInjector } from "./custom-code-injector";
 
 interface ProvidersProps {
   children: ReactNode;
@@ -85,6 +86,7 @@ export function Providers({ children }: ProvidersProps) {
           <AuthTokenInitializer>
             <SiteConfigLoader>
               <GlobalLoading />
+              <CustomCodeInjector />
               {children}
             </SiteConfigLoader>
           </AuthTokenInitializer>

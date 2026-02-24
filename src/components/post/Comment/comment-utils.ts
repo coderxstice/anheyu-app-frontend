@@ -6,6 +6,7 @@ export interface CommentDisplayConfig {
   gravatarUrl: string;
   defaultGravatarType: string;
   masterTag: string;
+  adminAvatarUrl?: string;
   showRegion?: boolean;
   showUA?: boolean;
 }
@@ -24,6 +25,10 @@ export function buildGravatarUrl(emailMd5: string, config: CommentDisplayConfig,
 export function getAvatarUrl(comment: Comment, config: CommentDisplayConfig): string {
   if (comment.avatar_url) {
     return comment.avatar_url;
+  }
+
+  if (comment.is_admin_comment && config.adminAvatarUrl) {
+    return config.adminAvatarUrl;
   }
 
   if (comment.is_anonymous) {

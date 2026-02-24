@@ -16,8 +16,11 @@ import {
   Pagination,
 } from "@heroui/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash2, ShieldAlert, ChevronDown, FileText } from "lucide-react";
+import { useState, lazy, Suspense } from "react";
+import { Plus, Trash2, ShieldAlert, ChevronDown, FileText, Tags } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+const PostCategoryTagManager = lazy(() => import("@/components/admin/post-management/PostCategoryTagManager"));
 import { adminContainerVariants, adminItemVariants } from "@/lib/motion";
 import { PAGE_SIZES, ADMIN_EMPTY_TEXTS } from "@/lib/constants/admin";
 import { usePostManagementPage } from "./_hooks/use-post-page";
@@ -31,6 +34,7 @@ import { TableEmptyState } from "@/components/admin/TableEmptyState";
 export default function PostManagementPage() {
   const router = useRouter();
   const pm = usePostManagementPage();
+  const [showCategoryTagManager, setShowCategoryTagManager] = useState(false);
 
   const renderCell = usePostRenderCell({
     defaultCover: pm.defaultCover,
@@ -130,6 +134,14 @@ export default function PostManagementPage() {
               <p className="text-xs text-muted-foreground mt-1">管理博客文章，支持多作者审核发布</p>
             </div>
             <div className="flex items-center gap-1.5">
+              <Button
+                size="sm"
+                variant="flat"
+                startContent={<Tags className="w-3.5 h-3.5" />}
+                onPress={() => setShowCategoryTagManager(true)}
+              >
+                分类标签
+              </Button>
               <Button
                 size="sm"
                 color="primary"
@@ -257,6 +269,12 @@ export default function PostManagementPage() {
         loading={pm.batchDeleting}
         onConfirm={pm.handleBatchDeleteConfirm}
       />
+
+      <Suspense fallback={null}>
+        {showCategoryTagManager && (
+          <PostCategoryTagManager isOpen={showCategoryTagManager} onClose={() => setShowCategoryTagManager(false)} />
+        )}
+      </Suspense>
     </motion.div>
   );
 }
