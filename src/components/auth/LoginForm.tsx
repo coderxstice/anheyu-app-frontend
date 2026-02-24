@@ -408,13 +408,7 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
                   还没有账号？{" "}
                   <button
                     type="button"
-                    onClick={() => {
-                      if (email && validateEmail(email)) {
-                        switchStep("register");
-                      } else {
-                        setError("请先输入有效的邮箱地址");
-                      }
-                    }}
+                    onClick={() => switchStep("register")}
                     className="text-primary hover:underline cursor-pointer font-medium"
                   >
                     立即注册

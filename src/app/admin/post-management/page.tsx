@@ -222,13 +222,7 @@ export default function PostManagementPage() {
                 key: "delete",
                 label: "删除",
                 icon: <Trash2 className="w-3.5 h-3.5" />,
-                onClick: () => {
-                  const ids = Array.from(pm.selectedIds);
-                  if (ids.length > 0) {
-                    ids.forEach(id => pm.deleteArticle.mutateAsync(id).catch(() => {}));
-                    pm.setSelectedIds(new Set());
-                  }
-                },
+                onClick: pm.batchDeleteModal.onOpen,
                 variant: "danger",
               },
             ]}
@@ -251,6 +245,18 @@ export default function PostManagementPage() {
         onConfirm={pm.handleDeleteConfirm}
       />
 
+      <ConfirmDialog
+        isOpen={pm.batchDeleteModal.isOpen}
+        onOpenChange={pm.batchDeleteModal.onOpenChange}
+        title="批量删除"
+        description={`确定要删除选中的 ${pm.selectedIds.size} 篇文章吗？此操作不可撤销。`}
+        confirmText={`删除 ${pm.selectedIds.size} 篇`}
+        confirmColor="danger"
+        icon={<ShieldAlert className="w-5 h-5 text-danger" />}
+        iconBg="bg-danger-50"
+        loading={pm.batchDeleting}
+        onConfirm={pm.handleBatchDeleteConfirm}
+      />
     </motion.div>
   );
 }

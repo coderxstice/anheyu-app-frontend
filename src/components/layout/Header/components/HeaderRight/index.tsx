@@ -139,7 +139,7 @@ export function HeaderRight({
                   <Icon icon="ri:login-box-line" width={16} height={16} />
                   <span>登录</span>
                 </Link>
-                <Link href="/register" className={styles.registerBtn}>
+                <Link href="/login?register=1" className={styles.registerBtn}>
                   <Icon icon="ri:user-add-line" width={16} height={16} />
                   <span>注册</span>
                 </Link>
