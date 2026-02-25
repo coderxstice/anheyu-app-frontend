@@ -94,7 +94,9 @@ export function SearchModal({ isOpen, onClose, initialKeyword = "" }: SearchModa
       setCurrentPage(page);
 
       try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(searchKeyword)}&page=${page}&size=${pageSize}`);
+        const response = await fetch(
+          `/api/search?q=${encodeURIComponent(searchKeyword)}&page=${page}&size=${pageSize}`
+        );
         if (!response.ok) {
           throw new Error(`搜索请求失败: ${response.status}`);
         }
@@ -454,13 +456,21 @@ export function SearchModal({ isOpen, onClose, initialKeyword = "" }: SearchModa
 
               {totalPages > 1 && (
                 <div className={styles.pagination}>
-                  <button className={styles.pageBtn} disabled={currentPage <= 1} onClick={() => changePage(currentPage - 1)}>
+                  <button
+                    className={styles.pageBtn}
+                    disabled={currentPage <= 1}
+                    onClick={() => changePage(currentPage - 1)}
+                  >
                     上一页
                   </button>
                   <span className={styles.pageInfo}>
                     {currentPage} / {totalPages}
                   </span>
-                  <button className={styles.pageBtn} disabled={currentPage >= totalPages} onClick={() => changePage(currentPage + 1)}>
+                  <button
+                    className={styles.pageBtn}
+                    disabled={currentPage >= totalPages}
+                    onClick={() => changePage(currentPage + 1)}
+                  >
                     下一页
                   </button>
                 </div>
