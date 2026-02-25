@@ -24,7 +24,8 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
 import { useCreateComment } from "@/hooks/queries";
 import { commentApi, type CreateCommentPayload } from "@/lib/api/comment";
-import { extractQQFromEmail, generateAnonymousNickname, isValidEmail } from "./comment-utils";
+import { getErrorMessage } from "@/lib/api/client";
+import { extractQQFromEmail, generateAnonymousNickname, isValidEmail, isValidUrl } from "./comment-utils";
 import styles from "./CommentForm.module.css";
 
 interface CommentFormConfig {
@@ -104,6 +105,8 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
   const [isPreview, setIsPreview] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [nicknameTouched, setNicknameTouched] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [websiteError, setWebsiteError] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isAnonymousDialogOpen, setIsAnonymousDialogOpen] = useState(false);
   const [emojiPackages, setEmojiPackages] = useState<EmojiPackage[]>([]);
@@ -417,6 +420,10 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
         return false;
       }
     }
+    if (website.trim() && !isValidUrl(website)) {
+      setErrorMessage("请输入有效的网址");
+      return false;
+    }
     setErrorMessage(null);
     return true;
   };
@@ -452,8 +459,7 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
       addToast({ title: "评论已提交", color: "success", timeout: 2000 });
       onSubmitted?.();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "评论提交失败";
-      setErrorMessage(message);
+      const message = getErrorMessage(error);
       addToast({ title: message, color: "danger", timeout: 2000 });
     }
   };
@@ -648,9 +654,9 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
             >
               <Icon icon="fa6-brands:markdown" width="18" height="18" />
             </button>
-          </div>
-          <div className={styles.inputCount}>
-            {content.length}/{config.limitLength}
+            <div className={styles.inputCount}>
+              {content.length}/{config.limitLength}
+            </div>
           </div>
           {isLoggedIn && (
             <div className={styles.loggedInSubmitWrapper}>
@@ -706,35 +712,64 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
                 disabled={isAnonymous}
               />
             </div>
-            <div className={styles.metaInput} data-hint="收到回复将会发送到你的邮箱">
-              <label className={styles.metaLabel} htmlFor={emailId}>
-                邮箱
-              </label>
-              <input
-                className={styles.metaField}
-                id={emailId}
-                name="email"
-                autoComplete="email"
-                type="email"
-                placeholder="必填"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                disabled={isAnonymous}
-              />
+            <div className={styles.metaInputGroup}>
+              <div
+                className={cn(styles.metaInput, emailError && styles.metaInputInvalid)}
+                data-hint="收到回复将会发送到你的邮箱"
+              >
+                <label className={styles.metaLabel} htmlFor={emailId}>
+                  邮箱
+                </label>
+                <input
+                  className={styles.metaField}
+                  id={emailId}
+                  name="email"
+                  autoComplete="email"
+                  type="email"
+                  placeholder="必填"
+                  value={email}
+                  onChange={e => {
+                    setEmail(e.target.value);
+                    if (emailError) setEmailError(null);
+                  }}
+                  onBlur={() => {
+                    if (email.trim() && !isValidEmail(email)) {
+                      setEmailError("邮箱格式不正确");
+                    } else {
+                      setEmailError(null);
+                    }
+                  }}
+                  disabled={isAnonymous}
+                />
+              </div>
+              {emailError && <span className={styles.metaError}>{emailError}</span>}
             </div>
-            <div className={styles.metaInput}>
-              <label className={styles.metaLabel} htmlFor={websiteId}>
-                网址
-              </label>
-              <input
-                className={styles.metaField}
-                id={websiteId}
-                name="website"
-                autoComplete="url"
-                placeholder="选填"
-                value={website}
-                onChange={e => setWebsite(e.target.value)}
-              />
+            <div className={styles.metaInputGroup}>
+              <div className={cn(styles.metaInput, websiteError && styles.metaInputInvalid)}>
+                <label className={styles.metaLabel} htmlFor={websiteId}>
+                  网址
+                </label>
+                <input
+                  className={styles.metaField}
+                  id={websiteId}
+                  name="website"
+                  autoComplete="url"
+                  placeholder="选填"
+                  value={website}
+                  onChange={e => {
+                    setWebsite(e.target.value);
+                    if (websiteError) setWebsiteError(null);
+                  }}
+                  onBlur={() => {
+                    if (website.trim() && !isValidUrl(website)) {
+                      setWebsiteError("网址格式不正确");
+                    } else {
+                      setWebsiteError(null);
+                    }
+                  }}
+                />
+              </div>
+              {websiteError && <span className={styles.metaError}>{websiteError}</span>}
             </div>
           </div>
           <div className={styles.buttonsWrapper}>
@@ -747,7 +782,11 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
               size="sm"
               color="primary"
               className={styles.submitButton}
-              isDisabled={!content.trim()}
+              isDisabled={
+                !content.trim() ||
+                (!isAnonymous && (!nickname.trim() || !isValidEmail(email))) ||
+                (!!website.trim() && !isValidUrl(website))
+              }
               isLoading={createComment.isPending}
               onPress={handleSubmit}
             >

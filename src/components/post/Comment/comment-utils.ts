@@ -61,6 +61,18 @@ export function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
+export function isValidUrl(url: string): boolean {
+  const trimmed = url.trim();
+  if (!trimmed) return true;
+  try {
+    const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    new URL(withProtocol);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function generateAnonymousNickname(): string {
   const adjectives = ["安静", "温柔", "清澈", "随机", "自由", "简单", "微风", "星光"];
   const nouns = ["访客", "旅人", "小鱼", "云朵", "星尘", "岛屿", "候鸟", "回声"];

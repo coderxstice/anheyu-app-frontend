@@ -78,7 +78,7 @@ export function useKeyboardShortcuts() {
         keys: ["Shift", "R"],
         description: "随机访问",
         action: () => {
-          router.push("/posts");
+          router.push("/random-post");
           setShowShortcutsPanel(false);
           setIsShiftPressed(false);
           pressedKeysRef.current.clear();

@@ -52,19 +52,6 @@
   padding: 0 3.75rem;
   color: white;
   text-align: center;
-  /* 入场动画 */
-  animation: slideIn 0.5s ease-out forwards;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 /* 封面图片区域 */
