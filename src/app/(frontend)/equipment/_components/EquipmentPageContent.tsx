@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import { Spinner } from "@/components/ui";
 import { BannerCard } from "@/components/common/BannerCard";
+import { CommentSection } from "@/components/post/Comment";
 import { EquipmentCard } from "./EquipmentCard";
 import type { EquipmentCategory } from "./types";
 
@@ -52,7 +53,7 @@ export function EquipmentPageContent() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-[1400px] px-4 py-8 sm:px-6">
       <BannerCard
         tips={bannerConfig?.title || "我的装备"}
         title={bannerConfig?.description || "Equipment"}
@@ -70,12 +71,12 @@ export function EquipmentPageContent() {
           {categories.map((category, idx) => (
             <section key={`${category.title}-${idx}`}>
               <div className="mb-5">
-                <h2 className="text-xl font-semibold text-(--anzhiyu-fontcolor)">{category.title}</h2>
+                <h2 className="text-2xl font-bold text-(--anzhiyu-fontcolor)">{category.title}</h2>
                 {category.description && (
-                  <p className="mt-1 text-sm text-(--anzhiyu-secondtext)">{category.description}</p>
+                  <p className="mt-1.5 text-sm text-(--anzhiyu-secondtext)">{category.description}</p>
                 )}
               </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {category.equipment_list.map((item, itemIdx) => (
                   <EquipmentCard key={`${item.name}-${itemIdx}`} item={item} />
                 ))}
@@ -84,6 +85,10 @@ export function EquipmentPageContent() {
           ))}
         </div>
       )}
+
+      <div className="mt-12">
+        <CommentSection targetTitle="我的装备" targetPath="/equipment" />
+      </div>
     </div>
   );
 }

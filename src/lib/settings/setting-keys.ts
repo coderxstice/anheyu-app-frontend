@@ -86,6 +86,7 @@ export const KEY_SIDEBAR_ARCHIVE_MONTHS = "sidebar.archive.displayMonths";
 export const KEY_SIDEBAR_CUSTOM_SHOW_IN_POST = "sidebar.custom.showInPost";
 export const KEY_SIDEBAR_TOC_COLLAPSE_MODE = "sidebar.toc.collapseMode";
 export const KEY_SIDEBAR_SERIES_POST_COUNT = "sidebar.series.postCount";
+export const KEY_SIDEBAR_RECENT_POST_ENABLE = "sidebar.recentPost.enable";
 export const KEY_SIDEBAR_RECENT_POST_COUNT = "sidebar.recentPost.count";
 export const KEY_SIDEBAR_DOC_LINKS = "sidebar.doc.links";
 export const KEY_CUSTOM_SIDEBAR = "CUSTOM_SIDEBAR";

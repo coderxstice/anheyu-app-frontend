@@ -403,6 +403,7 @@ const categoryDescriptors: Record<SettingCategoryId, SettingDescriptor[]> = {
     { backendKey: K.KEY_SIDEBAR_CUSTOM_SHOW_IN_POST, type: "boolean" },
     { backendKey: K.KEY_SIDEBAR_TOC_COLLAPSE_MODE, type: "boolean" },
     { backendKey: K.KEY_SIDEBAR_SERIES_POST_COUNT, type: "number", defaultValue: "5" },
+    { backendKey: K.KEY_SIDEBAR_RECENT_POST_ENABLE, type: "boolean", defaultValue: "true" },
     { backendKey: K.KEY_SIDEBAR_RECENT_POST_COUNT, type: "number", defaultValue: "5" },
     { backendKey: K.KEY_SIDEBAR_DOC_LINKS, type: "json" },
     { backendKey: K.KEY_CUSTOM_SIDEBAR, type: "json" },

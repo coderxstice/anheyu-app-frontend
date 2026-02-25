@@ -30,7 +30,7 @@ export function PostSidebar({ article, recentArticles = [] }: PostSidebarProps) 
     const found = article.post_categories.find(cat => cat.is_series);
     if (!found) return null;
     return {
-      id: parseInt(found.id) || 0,
+      id: found.id,
       name: found.name,
       is_series: found.is_series || false,
     };
@@ -40,7 +40,7 @@ export function PostSidebar({ article, recentArticles = [] }: PostSidebarProps) 
   const seriesArticles = useMemo(() => {
     if (!seriesCategory || !article.related_articles) return [];
     return article.related_articles.map(art => ({
-      id: parseInt(art.id) || 0,
+      id: art.id,
       title: art.title,
       abbrlink: art.abbrlink || "",
       cover_url: art.cover_url,
@@ -95,8 +95,7 @@ export function PostSidebar({ article, recentArticles = [] }: PostSidebarProps) 
   // 默认封面
   const defaultCover = siteConfig?.post?.default?.default_cover || "/images/default-cover.webp";
 
-  // 当前文章 ID (转换为 number)
-  const currentArticleId = parseInt(article.id) || 0;
+  const currentArticleId = article.id;
 
   const recentPostCount = useMemo(() => {
     const raw = siteConfig?.sidebar?.recentPost?.count;
@@ -135,14 +134,16 @@ export function PostSidebar({ article, recentArticles = [] }: PostSidebarProps) 
         {article.content_html && <CardToc contentHtml={article.content_html} />}
 
         {/* 最近发布 */}
-        {recentArticles.length > 0 && (
-          <CardRecentPost
-            articles={recentArticles}
-            currentArticleId={currentArticleId}
-            defaultCover={defaultCover}
-            maxCount={recentPostCount}
-          />
-        )}
+        {siteConfig?.sidebar?.recentPost?.enable !== false &&
+          siteConfig?.sidebar?.recentPost?.enable !== "false" &&
+          recentArticles.length > 0 && (
+            <CardRecentPost
+              articles={recentArticles}
+              currentArticleId={currentArticleId}
+              defaultCover={defaultCover}
+              maxCount={recentPostCount}
+            />
+          )}
       </div>
     </aside>
   );

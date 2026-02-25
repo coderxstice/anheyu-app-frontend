@@ -35,6 +35,11 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
   const setPageTitle = usePageStore(state => state.setPageTitle);
   const clearPageTitle = usePageStore(state => state.clearPageTitle);
 
+  // 进入文章页面时立即跳到顶部（不带缓动）
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [article.id]);
+
   // 设置文章标题到 Header
   useEffect(() => {
     setPageTitle(article.title);
