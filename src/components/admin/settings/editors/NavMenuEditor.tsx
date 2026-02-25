@@ -130,14 +130,22 @@ function SmallInput({
 function NavSubItemRow({
   item,
   index,
+  isFirst,
+  isLast,
   onUpdate,
   onRemove,
+  onMoveUp,
+  onMoveDown,
   reorderValue,
 }: {
   item: NavSubItem;
   index: number;
+  isFirst: boolean;
+  isLast: boolean;
   onUpdate: (field: keyof NavSubItem, val: string) => void;
   onRemove: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
   reorderValue?: NavSubItem;
 }) {
   const dragControls = useDragControls();
@@ -177,6 +185,28 @@ function NavSubItemRow({
         </div>
       </div>
       <div className="mt-5 flex shrink-0 items-center gap-1.5">
+        <button type="button" onClick={onMoveUp} disabled={isFirst} className={ICON_BUTTON_CLASS}>
+          <svg
+            className="w-3 h-3 text-default-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+          </svg>
+        </button>
+        <button type="button" onClick={onMoveDown} disabled={isLast} className={ICON_BUTTON_CLASS}>
+          <svg
+            className="w-3 h-3 text-default-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
         <button type="button" onClick={onRemove} className={DANGER_ICON_BUTTON_CLASS}>
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -224,7 +254,13 @@ function NavGroupCard({
   const subItems = group.items || [];
 
   const addSubItem = () => {
-    onUpdate({ ...group, items: [...subItems, { name: "", link: "", icon: "", _id: `ns-${Date.now()}-${Math.random().toString(36).slice(2)}` }] });
+    onUpdate({
+      ...group,
+      items: [
+        ...subItems,
+        { name: "", link: "", icon: "", _id: `ns-${Date.now()}-${Math.random().toString(36).slice(2)}` },
+      ],
+    });
   };
 
   const removeSubItem = (subIdx: number) => {
@@ -234,6 +270,13 @@ function NavGroupCard({
   const updateSubItem = (subIdx: number, field: keyof NavSubItem, val: string) => {
     const newSubs = [...subItems];
     newSubs[subIdx] = { ...newSubs[subIdx], [field]: val };
+    onUpdate({ ...group, items: newSubs });
+  };
+
+  const moveSubItem = (from: number, to: number) => {
+    if (to < 0 || to >= subItems.length) return;
+    const newSubs = [...subItems];
+    [newSubs[from], newSubs[to]] = [newSubs[to], newSubs[from]];
     onUpdate({ ...group, items: newSubs });
   };
 
@@ -342,8 +385,12 @@ function NavGroupCard({
                         key={sub._id ?? subIdx}
                         item={sub}
                         index={subIdx}
+                        isFirst={subIdx === 0}
+                        isLast={subIdx === subItems.length - 1}
                         onUpdate={(field, val) => updateSubItem(subIdx, field, val)}
                         onRemove={() => removeSubItem(subIdx)}
+                        onMoveUp={() => moveSubItem(subIdx, subIdx - 1)}
+                        onMoveDown={() => moveSubItem(subIdx, subIdx + 1)}
                         reorderValue={sub}
                       />
                     ))}
