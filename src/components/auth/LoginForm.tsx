@@ -7,7 +7,7 @@
  */
 "use client";
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -22,6 +22,7 @@ import { getErrorMessage } from "@/lib/api/client";
 import { useAuthStore } from "@/store/auth-store";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import { ThemeToggle } from "@/components/common";
+import { CaptchaWidget, type CaptchaWidgetRef } from "./CaptchaWidget";
 import { cn } from "@/lib/utils";
 
 // 邮箱图标
@@ -131,6 +132,8 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
   const logoSrc = configLogo || defaultLogo;
   const siteName = mounted ? getTitle() : "AnHeYu";
 
+  const captchaRef = useRef<CaptchaWidgetRef>(null);
+
   const [step, setStep] = useState<Step>(initialStep ?? "check-email");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -139,6 +142,7 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- will be used when OAuth handlers are implemented
   const [oauthLoading, setOauthLoading] = useState(false);
 
   // OAuth 配置
@@ -206,16 +210,21 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
     }
   };
 
-  const handleLogin = async () => {
+  const handleLogin = async (skipCaptcha = false) => {
     if (!password) {
       addToast({ title: "请输入密码", color: "warning", timeout: 3000 });
       return;
     }
+    if (!skipCaptcha && captchaRef.current && !captchaRef.current.isReady()) {
+      addToast({ title: "请完成验证码", color: "warning", timeout: 3000 });
+      return;
+    }
 
     setIsLoading(true);
+    const captchaParams = skipCaptcha ? {} : captchaRef.current?.getCaptchaParams() ?? {};
 
     try {
-      const response = await authService.login({ email, password });
+      const response = await authService.login({ email, password, ...captchaParams });
       if (response.code === 200 && response.data) {
         setAuth({
           accessToken: response.data.accessToken,
@@ -228,9 +237,11 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
         router.push(redirectUrl);
       } else {
         addToast({ title: response.message || "登录失败", color: "danger", timeout: 3000 });
+        captchaRef.current?.refresh();
       }
     } catch (err) {
       addToast({ title: getErrorMessage(err), color: "danger", timeout: 3000 });
+      captchaRef.current?.refresh();
     } finally {
       setIsLoading(false);
     }
@@ -261,9 +272,14 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
       setError("两次密码不一致");
       return;
     }
+    if (captchaRef.current && !captchaRef.current.isReady()) {
+      addToast({ title: "请完成验证码", color: "warning", timeout: 3000 });
+      return;
+    }
 
     setIsLoading(true);
     setError("");
+    const captchaParams = captchaRef.current?.getCaptchaParams() ?? {};
 
     try {
       const response = await authService.register({
@@ -271,19 +287,22 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
         nickname,
         password,
         repeat_password: repeatPassword,
+        ...captchaParams,
       });
       if (response.code === 200) {
         if (response.data?.activation_required) {
           addToast({ title: "注册成功！请查收激活邮件。", color: "success", timeout: 3000 });
           switchStep("check-email");
         } else {
-          await handleLogin();
+          await handleLogin(true);
         }
       } else {
         addToast({ title: response.message || "注册失败", color: "danger", timeout: 3000 });
+        captchaRef.current?.refresh();
       }
     } catch (err) {
       addToast({ title: getErrorMessage(err), color: "danger", timeout: 3000 });
+      captchaRef.current?.refresh();
     } finally {
       setIsLoading(false);
     }
@@ -569,7 +588,9 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
                   </Link>
                 </div>
 
-                <Button isLoading={isLoading} onClick={handleLogin}>
+                <CaptchaWidget ref={captchaRef} />
+
+                <Button isLoading={isLoading} onClick={() => handleLogin()}>
                   登录
                 </Button>
 
@@ -634,6 +655,8 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
                   helperText={repeatPassword.length > 0 && password !== repeatPassword ? "两次密码不一致" : undefined}
                   startAdornment={<Lock className="w-4 h-4" />}
                 />
+
+                <CaptchaWidget ref={captchaRef} />
 
                 <Button isLoading={isLoading} onClick={handleRegister}>
                   注册

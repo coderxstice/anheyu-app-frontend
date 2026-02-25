@@ -40,6 +40,20 @@ async function getArticle(id: string) {
   }
 }
 
+async function getDocSeriesName(seriesId: string): Promise<string | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/public/doc-series/${seriesId}/articles`, {
+      next: { revalidate: 300 },
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.code === 200 && data.data?.name ? data.data.name : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const article = await getArticle(id);
@@ -53,8 +67,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     });
   }
 
+  const seriesName = article.doc_series_id ? await getDocSeriesName(String(article.doc_series_id)) : null;
+  const pageTitle = seriesName ? `${article.title} - ${seriesName}` : article.title;
+
   return buildPageMetadata({
-    title: article.title,
+    title: pageTitle,
     absoluteTitle: true,
     description: article.summaries?.[0] || article.title,
     keywords: article.keywords || article.post_tags?.map((tag: { name: string }) => tag.name),

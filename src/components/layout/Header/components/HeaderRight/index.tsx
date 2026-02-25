@@ -96,7 +96,7 @@ export function HeaderRight({
   }, [router]);
 
   return (
-    <div className={cn(styles.headerRight, isTextWhite && styles.textIsWhite)}>
+    <div className={cn(styles.headerRight, isTextWhite && styles.textIsWhite, isConsoleOpen && styles.consoleOpen)}>
       {/* 开往（仅首页 + 桌面端 + 开启时显示） */}
       {navConfig?.travelling === true && isHomePage && !isMobile && (
         <Tooltip

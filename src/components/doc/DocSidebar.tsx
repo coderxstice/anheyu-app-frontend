@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, PanelLeftClose, Sun, Moon, ExternalLink } from "lucide-react";
 import { Icon } from "@iconify/react";
@@ -30,16 +31,10 @@ export function DocSidebar({ series, currentDocId, onNavigate, onCollapse }: Doc
   const router = useRouter();
   const { isDark, toggleTheme, mounted } = useTheme();
 
-  const { siteConfig, getLogo, getTitle } = useSiteConfigStore(
-    useShallow(state => ({
-      siteConfig: state.siteConfig,
-      getLogo: state.getLogo,
-      getTitle: state.getTitle,
-    }))
-  );
+  const siteConfig = useSiteConfigStore(useShallow(state => state.siteConfig));
 
-  const logoUrl = getLogo();
-  const siteTitle = getTitle();
+  const ownerAvatar = siteConfig?.USER_AVATAR || siteConfig?.LOGO_URL_192x192 || "/logo.svg";
+  const ownerName = siteConfig?.frontDesk?.siteOwner?.name || siteConfig?.APP_NAME || "AnHeYu";
 
   const docSidebarLinks = useMemo<DocSidebarLinkItem[]>(() => {
     const links = (siteConfig as Record<string, unknown>)?.sidebar as
@@ -65,12 +60,20 @@ export function DocSidebar({ series, currentDocId, onNavigate, onCollapse }: Doc
 
   return (
     <div className={styles.sidebar}>
-      {/* Logo 区域 */}
+      {/* 站长头像 + 昵称 */}
       <div className={styles.sidebarBrand}>
-        <a href="/" className={styles.brandLink}>
-          <Image src={logoUrl} alt={siteTitle} width={28} height={28} className={styles.brandLogo} priority />
-          <span>{siteTitle}</span>
-        </a>
+        <Link href="/" className={styles.brandLink}>
+          <Image
+            src={ownerAvatar}
+            alt={ownerName}
+            width={28}
+            height={28}
+            className={styles.brandAvatar}
+            priority
+            unoptimized
+          />
+          <span>{ownerName}</span>
+        </Link>
         <button className={styles.collapseBtn} title="收起侧边栏" onClick={onCollapse}>
           <PanelLeftClose className="w-5 h-5" />
         </button>

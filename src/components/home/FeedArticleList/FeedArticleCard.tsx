@@ -144,7 +144,7 @@ export const FeedArticleCard = memo(function FeedArticleCard({
     // 根据类型跳转
     if (isProduct) {
       router.push(`/products/${id}`);
-    } else if (article.is_doc || article.doc_series_id) {
+    } else if (article.is_doc) {
       router.push(`/doc/${id}`);
     } else {
       router.push(`/posts/${id}`);
@@ -229,7 +229,7 @@ export const FeedArticleCard = memo(function FeedArticleCard({
               )}
 
               {/* 文档标签 */}
-              {!isProduct && (article.is_doc || article.doc_series_id) && (
+              {!isProduct && article.is_doc && (
                 <span className={cn(styles.metaTag, styles.docTag)}>
                   <FaBook className={styles.metaTagIcon} aria-hidden="true" />
                   <span>文档</span>

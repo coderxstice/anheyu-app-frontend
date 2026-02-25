@@ -1,3 +1,17 @@
+// 验证码配置（公共 API 返回）
+export interface CaptchaConfig {
+  provider: "none" | "turnstile" | "geetest" | "image";
+  turnstile_site_key?: string;
+  geetest_captcha_id?: string;
+  image_captcha_length?: number;
+}
+
+// 图形验证码生成响应
+export interface ImageCaptchaResponse {
+  captcha_id: string;
+  image_base64: string;
+}
+
 // 用户组响应
 export interface UserGroupResponse {
   id: string;

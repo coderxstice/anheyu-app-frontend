@@ -416,11 +416,19 @@
 
 .headerRight.consoleOpen .navButton,
 .headerRight.consoleOpen .userDropdownWrapper,
-.headerRight.consoleOpen .toggleMenu,
-.headerRight.consoleOpen .navTotop {
+.headerRight.consoleOpen .toggleMenu {
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
+}
+
+.headerRight.consoleOpen .navTotop {
+  width: 0 !important;
+  margin-left: 0 !important;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  transform: scale(0) !important;
 }
 
 .headerRight.consoleOpen .consoleLabel {

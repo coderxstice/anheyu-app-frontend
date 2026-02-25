@@ -30,12 +30,16 @@ export function DocDetailContent({ article }: DocDetailContentProps) {
 
   const currentDocId = article.id;
 
+  const activeDocSeries =
+    docSeries && article.doc_series_id && String(docSeries.id) === String(article.doc_series_id) ? docSeries : null;
+
   useEffect(() => {
-    setPageTitle(article.title);
+    const title = activeDocSeries?.name ? `${article.title} - ${activeDocSeries.name}` : article.title;
+    setPageTitle(title);
     return () => {
       clearPageTitle();
     };
-  }, [article.title, setPageTitle, clearPageTitle]);
+  }, [article.title, activeDocSeries?.name, setPageTitle, clearPageTitle]);
 
   useEffect(() => {
     if (article.primary_color) {
@@ -65,10 +69,7 @@ export function DocDetailContent({ article }: DocDetailContentProps) {
 
   // 加载文档系列
   useEffect(() => {
-    if (!article.doc_series_id) {
-      setDocSeries(null);
-      return;
-    }
+    if (!article.doc_series_id) return;
 
     let cancelled = false;
     const fetchSeries = async () => {
@@ -87,16 +88,16 @@ export function DocDetailContent({ article }: DocDetailContentProps) {
 
   // 上一篇/下一篇
   const prevDoc = useMemo<DocArticleItem | null>(() => {
-    if (!docSeries?.articles?.length) return null;
-    const idx = docSeries.articles.findIndex(doc => doc.id === currentDocId);
-    return idx > 0 ? docSeries.articles[idx - 1] : null;
-  }, [docSeries, currentDocId]);
+    if (!activeDocSeries?.articles?.length) return null;
+    const idx = activeDocSeries.articles.findIndex(doc => doc.id === currentDocId);
+    return idx > 0 ? activeDocSeries.articles[idx - 1] : null;
+  }, [activeDocSeries, currentDocId]);
 
   const nextDoc = useMemo<DocArticleItem | null>(() => {
-    if (!docSeries?.articles?.length) return null;
-    const idx = docSeries.articles.findIndex(doc => doc.id === currentDocId);
-    return idx >= 0 && idx < docSeries.articles.length - 1 ? docSeries.articles[idx + 1] : null;
-  }, [docSeries, currentDocId]);
+    if (!activeDocSeries?.articles?.length) return null;
+    const idx = activeDocSeries.articles.findIndex(doc => doc.id === currentDocId);
+    return idx >= 0 && idx < activeDocSeries.articles.length - 1 ? activeDocSeries.articles[idx + 1] : null;
+  }, [activeDocSeries, currentDocId]);
 
   const handleNavigateDoc = useCallback(
     (docId: string) => {
@@ -122,7 +123,7 @@ export function DocDetailContent({ article }: DocDetailContentProps) {
       />
 
       {/* PC 端折叠悬浮块 */}
-      {isSidebarCollapsed && docSeries && (
+      {isSidebarCollapsed && activeDocSeries && (
         <div className={styles.collapsedFloat}>
           <button className={styles.floatBtn} title="展开侧边栏" onClick={() => setIsSidebarCollapsed(false)}>
             <PanelLeftClose className="w-[18px] h-[18px]" />
@@ -139,7 +140,7 @@ export function DocDetailContent({ article }: DocDetailContentProps) {
           className={cn(styles.sidebarLeft, isSidebarOpen && styles.isOpen, isSidebarCollapsed && styles.isCollapsed)}
         >
           <DocSidebar
-            series={docSeries}
+            series={activeDocSeries}
             currentDocId={currentDocId}
             onNavigate={id => {
               handleNavigateDoc(id);
@@ -161,7 +162,7 @@ export function DocDetailContent({ article }: DocDetailContentProps) {
       </div>
 
       {/* 移动端侧边栏按钮 */}
-      {docSeries && (
+      {activeDocSeries && (
         <button className={styles.mobileSidebarToggle} onClick={() => setIsSidebarOpen(prev => !prev)}>
           {isSidebarOpen ? <X className="w-5 h-5" /> : <List className="w-5 h-5" />}
         </button>

@@ -12,6 +12,8 @@ import type {
   ResetPasswordRequest,
   RefreshTokenResponseData,
   CheckEmailResponseData,
+  CaptchaConfig,
+  ImageCaptchaResponse,
 } from "@/types/auth";
 
 export const authApi = {
@@ -52,6 +54,16 @@ export const authApi = {
   /** 激活用户账号 */
   activateUser(id: string, sign: string): Promise<ApiResponse<LoginResponseData>> {
     return apiClient.post<LoginResponseData>("/api/auth/activate", { id, sign });
+  },
+
+  /** 获取验证码配置 */
+  getCaptchaConfig(): Promise<ApiResponse<CaptchaConfig>> {
+    return apiClient.get<CaptchaConfig>("/api/public/captcha/config");
+  },
+
+  /** 生成图形验证码 */
+  generateImageCaptcha(): Promise<ApiResponse<ImageCaptchaResponse>> {
+    return apiClient.get<ImageCaptchaResponse>("/api/public/captcha/image");
   },
 };
 

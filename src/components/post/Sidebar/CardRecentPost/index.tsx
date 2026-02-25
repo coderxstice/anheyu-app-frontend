@@ -29,7 +29,7 @@ export function CardRecentPost({
 
   // 获取文章链接
   const getArticleLink = (article: RecentArticle) => {
-    if (article.is_doc || article.doc_series_id) {
+    if (article.is_doc) {
       return `/doc/${article.id}`;
     }
     return `/posts/${article.abbrlink || article.id}`;
