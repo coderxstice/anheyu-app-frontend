@@ -66,10 +66,7 @@ export function DocDetailContent({ article }: DocDetailContentProps) {
 
   // 加载文档系列
   useEffect(() => {
-    if (!article.doc_series_id) {
-      setDocSeries(null);
-      return;
-    }
+    if (!article.doc_series_id) return;
 
     let cancelled = false;
     const fetchSeries = async () => {

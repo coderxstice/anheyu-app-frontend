@@ -33,7 +33,7 @@ export function DocSidebar({ series, currentDocId, onNavigate, onCollapse }: Doc
 
   const siteConfig = useSiteConfigStore(useShallow(state => state.siteConfig));
 
-  const ownerAvatar = siteConfig?.USER_AVATAR || "/avatar.png";
+  const ownerAvatar = siteConfig?.USER_AVATAR || siteConfig?.LOGO_URL_192x192 || "/logo.svg";
   const ownerName = siteConfig?.frontDesk?.siteOwner?.name || siteConfig?.APP_NAME || "AnHeYu";
 
   const docSidebarLinks = useMemo<DocSidebarLinkItem[]>(() => {
@@ -63,7 +63,15 @@ export function DocSidebar({ series, currentDocId, onNavigate, onCollapse }: Doc
       {/* 站长头像 + 昵称 */}
       <div className={styles.sidebarBrand}>
         <Link href="/" className={styles.brandLink}>
-          <Image src={ownerAvatar} alt={ownerName} width={28} height={28} className={styles.brandAvatar} priority unoptimized />
+          <Image
+            src={ownerAvatar}
+            alt={ownerName}
+            width={28}
+            height={28}
+            className={styles.brandAvatar}
+            priority
+            unoptimized
+          />
           <span>{ownerName}</span>
         </Link>
         <button className={styles.collapseBtn} title="收起侧边栏" onClick={onCollapse}>
