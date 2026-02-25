@@ -256,7 +256,7 @@ export function SearchModal({ isOpen, onClose, initialKeyword = "" }: SearchModa
 
   const handleResultClick = useCallback(
     (result: SearchResult) => {
-      if (result.is_doc || result.doc_series_id) {
+      if (result.is_doc) {
         router.push(`/doc/${result.id}`);
       } else {
         const targetId = result.abbrlink || result.id;
@@ -419,7 +419,7 @@ export function SearchModal({ isOpen, onClose, initialKeyword = "" }: SearchModa
                       <div className={styles.resultContent}>
                         <div className={styles.resultTitleWrapper}>
                           <div className={styles.resultTitle} dangerouslySetInnerHTML={{ __html: result.title }} />
-                          {(result.is_doc || result.doc_series_id) && (
+                          {result.is_doc && (
                             <span className={styles.resultDocBadge}>
                               <Icon icon="ri:book-line" width="0.7rem" height="0.7rem" />
                               文档

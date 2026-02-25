@@ -77,7 +77,7 @@ export function HomeTop() {
     try {
       // 当前使用文章列表页作为“随便逛逛”的兜底入口
       const article = await articleApi.getRandomArticle();
-      if (article.is_doc || article.doc_series_id) {
+      if (article.is_doc) {
         router.push(`/doc/${article.id}`);
       } else {
         router.push(`/posts/${article.id}`);
@@ -218,7 +218,7 @@ export function HomeTop() {
               <Link
                 key={article.id}
                 className={styles.recentPostItem}
-                href={article.is_doc || article.doc_series_id ? `/doc/${article.id}` : `/posts/${article.id}`}
+                href={article.is_doc ? `/doc/${article.id}` : `/posts/${article.id}`}
                 title={article.title}
               >
                 <div className={styles.postCover}>
