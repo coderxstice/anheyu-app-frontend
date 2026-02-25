@@ -68,7 +68,7 @@
   }
 
   100% {
-    top: -50px;
+    top: -43px;
     opacity: 1;
   }
 }
@@ -398,12 +398,10 @@
 }
 
 .inputCount {
-  position: absolute;
-  right: 0;
-  bottom: -25px;
+  margin-left: auto;
+  font-size: 0.8rem;
   color: var(--anzhiyu-secondtext);
   user-select: none;
-  background: transparent;
 }
 
 .loggedInSubmitWrapper {
@@ -433,11 +431,12 @@
 }
 
 .cancelButton {
+  height: 32px !important;
   color: var(--anzhiyu-fontcolor);
   background: var(--anzhiyu-secondbg);
   border: 1px solid var(--anzhiyu-card-border, var(--border));
-  border-radius: 12px;
-  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  padding: 0 1rem;
   cursor: pointer;
   transition: all 0.3s;
 }
@@ -536,7 +535,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  align-items: flex-start;
+  align-items: stretch;
 }
 
 .formMetaActionsReply {
@@ -561,47 +560,77 @@
   gap: 1rem;
 }
 
-.metaInput {
-  position: relative;
-  display: flex;
-  align-items: stretch;
-}
-
-.metaInput::before {
+.metaInput[data-hint]::before {
   position: absolute;
-  top: -50px;
+  top: -43px;
   left: 50%;
   z-index: 100;
   display: none;
-  padding: 4px 18px;
+  padding: 6px 14px;
+  font-size: 0.875rem;
+  line-height: 1.4;
   color: var(--anzhiyu-white);
   white-space: nowrap;
   content: attr(data-hint);
   background: var(--anzhiyu-main-op-deep);
   backdrop-filter: blur(10px);
-  border-radius: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
   transform: translate(-50%);
 }
 
-.metaInput::after {
+.metaInput[data-hint]::after {
   position: absolute;
+  top: -2px;
   left: 50%;
   display: none;
   content: "";
-  border: 8px solid transparent;
+  border: 6px solid transparent;
   border-top-color: var(--anzhiyu-main-op-deep);
-  transform: translate(-50%, -10px);
+  transform: translate(-50%, -100%);
 }
 
-.metaInput:focus-within::before {
-  z-index: 2;
+.metaInput[data-hint]:focus-within::before {
+  z-index: 100;
   display: block;
   animation: commonTipsIn 0.3s;
 }
 
-.metaInput:focus-within::after {
+.metaInput[data-hint]:focus-within::after {
+  z-index: 100;
   display: block;
   animation: commonTriangleIn 0.3s;
+}
+
+.metaInputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metaInput {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  height: 32px;
+  border: var(--style-border-always);
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+
+.metaInput:focus-within {
+  border-color: var(--primary);
+}
+
+.metaInputInvalid {
+  border-color: var(--anzhiyu-red) !important;
+}
+
+.metaError {
+  font-size: 0.7rem;
+  line-height: 1;
+  color: var(--anzhiyu-red);
+  padding-left: 2px;
 }
 
 .metaLabel {
@@ -611,28 +640,22 @@
   font-weight: 600;
   color: var(--anzhiyu-fontcolor);
   background-color: var(--anzhiyu-secondbg);
-  border: var(--style-border-always);
-  border-right: none;
-  border-radius: 8px 0 0 8px;
+  border: none;
+  border-right: 1px solid var(--anzhiyu-card-border, var(--border));
+  border-radius: 7px 0 0 7px;
 }
 
 .metaField {
   flex: 1;
-  padding: 0.6rem 0.75rem;
+  padding: 0 0.75rem;
   color: var(--anzhiyu-fontcolor);
   background: var(--anzhiyu-card-bg);
-  border: var(--style-border-always);
-  border-left: none;
-  border-radius: 0 8px 8px 0;
+  border: none;
+  border-radius: 0 7px 7px 0;
 }
 
 .metaField::placeholder {
   color: var(--anzhiyu-secondtext);
-}
-
-.metaInput:focus-within .metaLabel,
-.metaInput:focus-within .metaField {
-  border-color: var(--primary);
 }
 
 .metaField:focus {
@@ -642,17 +665,18 @@
 .buttonsWrapper {
   display: flex;
   gap: 0.5rem;
-  align-items: center;
+  align-items: stretch;
 }
 
 .submitButton {
   min-width: 112px;
-  padding: 0.5rem 2rem;
+  height: 32px !important;
+  padding: 0 2rem;
   font-weight: 600;
   color: var(--anzhiyu-background, var(--background));
   background-color: var(--anzhiyu-fontcolor);
   border: 0 solid var(--anzhiyu-main);
-  border-radius: 12px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s;
 }
@@ -737,7 +761,6 @@
 }
 
 .errorText {
-  margin-top: 0.75rem;
   font-size: 0.85rem;
   color: var(--anzhiyu-red);
 }
@@ -1042,5 +1065,45 @@
 
   .loginActions {
     flex-direction: column;
+  }
+
+  .formMetaActions:not(.formMetaActionsReply) {
+    flex-direction: column;
+  }
+
+  .formMetaActions:not(.formMetaActionsReply) .metaInputs {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .formMetaActions:not(.formMetaActionsReply) .buttonsWrapper {
+    width: 100%;
+  }
+
+  .formMetaActions:not(.formMetaActionsReply) .buttonsWrapper .submitButton {
+    width: 100%;
+  }
+
+  .formMetaActionsReply .metaInputs {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .formMetaActionsReply .buttonsWrapper {
+    width: 100%;
+  }
+
+  .formMetaActionsReply .buttonsWrapper .cancelButton,
+  .formMetaActionsReply .buttonsWrapper .submitButton {
+    flex: 1;
+    width: auto;
+  }
+
+  .formMetaActions {
+    margin-top: 1rem;
+  }
+
+  .formMetaActions .metaInputs {
+    gap: 0.75rem;
   }
 }

@@ -274,6 +274,9 @@ export interface SiteConfigData {
       runtimeEnable?: boolean;
       totalWordCount?: number;
     };
+    recentPost?: {
+      count?: number | string;
+    };
     weather?: {
       enable?: boolean;
       enable_page?: string;
@@ -386,6 +389,17 @@ export interface SiteConfigData {
       description?: string;
       tip?: string;
     };
+  };
+
+  // 装备页面配置
+  equipment?: {
+    banner?: {
+      background?: string;
+      title?: string;
+      description?: string;
+      tip?: string;
+    };
+    list?: string;
   };
 
   // 版权配置

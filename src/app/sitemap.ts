@@ -1,6 +1,12 @@
 import type { MetadataRoute } from "next";
 import type { SiteConfigData } from "@/types/site-config";
-import { fetchSiteConfigForSeo, getSeoBackendUrl, normalizePath, normalizeSiteUrl, resolveSeoSiteInfo } from "@/lib/seo";
+import {
+  fetchSiteConfigForSeo,
+  getSeoBackendUrl,
+  normalizePath,
+  normalizeSiteUrl,
+  resolveSeoSiteInfo,
+} from "@/lib/seo";
 
 interface PublicArticleItem {
   id: string | number;
@@ -55,6 +61,7 @@ const STATIC_ROUTES: Array<{
   { path: "/air-conditioner", changeFrequency: "monthly", priority: 0.5 },
   { path: "/article-statistics", changeFrequency: "daily", priority: 0.6 },
   { path: "/recentcomments", changeFrequency: "daily", priority: 0.7 },
+  { path: "/equipment", changeFrequency: "monthly", priority: 0.6 },
 ];
 
 function toPositiveInt(value: unknown, fallback = 0): number {
@@ -90,9 +97,7 @@ function toAbsoluteUrl(path: string, baseUrl: string): string {
 
 function getSitemapBaseUrl(configUrl?: string): string {
   return (
-    configUrl ||
-    normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL) ||
-    "http://localhost:3000"
+    configUrl || normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL) || "http://localhost:3000"
   );
 }
 
@@ -217,11 +222,7 @@ export function collectConfigInternalPaths(siteConfig?: SiteConfigData | null): 
   });
 
   return Array.from(
-    new Set(
-      candidates
-        .map(item => normalizeSitemapCandidatePath(item))
-        .filter((item): item is string => Boolean(item))
-    )
+    new Set(candidates.map(item => normalizeSitemapCandidatePath(item)).filter((item): item is string => Boolean(item)))
   );
 }
 

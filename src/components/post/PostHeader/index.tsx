@@ -9,7 +9,7 @@ import Link from "next/link";
 import { motion, useScroll, useTransform, useMotionTemplate } from "framer-motion";
 import { Tooltip } from "@heroui/react";
 import { FaHashtag, FaFileLines, FaClock, FaCalendarDays, FaFire, FaLocationDot } from "react-icons/fa6";
-import { Icon } from "@iconify/react";
+import { RiChat1Fill } from "react-icons/ri";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/utils/date";
 import type { Article } from "@/types/article";
@@ -163,7 +163,12 @@ export function PostHeader({ article }: PostHeaderProps) {
     <div ref={containerRef} className={styles.postHeaderContainer} style={dynamicStyles}>
       {/* 文章信息区域 - 外层处理滚动缩放，内层处理入场动画 */}
       <motion.div className={styles.postInfoWrapper} style={{ scale: isMobile ? 1 : infoScale }}>
-        <div className={styles.postInfo}>
+        <motion.div
+          className={styles.postInfo}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
           {/* 类型、分类、标签 */}
           <div className={styles.postFirstinfo}>
             <div className={styles.metaFirstlineTop}>
@@ -265,7 +270,7 @@ export function PostHeader({ article }: PostHeaderProps) {
                   <span className={styles.metaSeparator} />
                   <MetaTooltip content="评论数" mounted={mounted}>
                     <span className={cn(styles.metaItem, styles.metaClickable)} onClick={scrollToComment}>
-                      <Icon icon="ri:chat-1-fill" width={14} height={14} className={styles.metaIcon} />
+                      <RiChat1Fill size={18} className={styles.metaIcon} />
                       <span>{article.comment_count}</span>
                     </span>
                   </MetaTooltip>
@@ -273,7 +278,7 @@ export function PostHeader({ article }: PostHeaderProps) {
               )}
             </div>
           </div>
-        </div>
+        </motion.div>
       </motion.div>
 
       {/* 封面图片 */}

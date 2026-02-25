@@ -61,7 +61,7 @@ async function getArticle(id: string) {
  */
 async function getRecentArticles() {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/public/articles?page=1&pageSize=5`, {
+    const res = await fetch(`${API_BASE_URL}/api/public/articles?page=1&pageSize=20`, {
       next: { revalidate: 60 },
       headers: {
         "Content-Type": "application/json",

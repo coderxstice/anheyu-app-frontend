@@ -42,6 +42,8 @@ export interface FormInputProps {
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   /** 自动完成属性，用于控制浏览器自动填充行为 */
   autoComplete?: string;
+  /** 自动聚焦 */
+  autoFocus?: boolean;
 }
 
 /** 密码可见性切换按钮 */
@@ -86,6 +88,7 @@ const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
       inputClassName,
       onKeyDown,
       autoComplete,
+      autoFocus,
     },
     ref
   ) => {
@@ -132,6 +135,7 @@ const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
           isDisabled={disabled}
           isReadOnly={readOnly}
           onKeyDown={onKeyDown}
+          autoFocus={autoFocus}
           autoComplete={autoComplete ?? (isPassword ? "new-password" : undefined)}
           aria-describedby={description || error ? descId : undefined}
           classNames={{
