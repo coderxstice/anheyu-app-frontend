@@ -31,11 +31,12 @@ export function DocDetailContent({ article }: DocDetailContentProps) {
   const currentDocId = article.id;
 
   useEffect(() => {
-    setPageTitle(article.title);
+    const title = docSeries?.name ? `${article.title} - ${docSeries.name}` : article.title;
+    setPageTitle(title);
     return () => {
       clearPageTitle();
     };
-  }, [article.title, setPageTitle, clearPageTitle]);
+  }, [article.title, docSeries?.name, setPageTitle, clearPageTitle]);
 
   useEffect(() => {
     if (article.primary_color) {

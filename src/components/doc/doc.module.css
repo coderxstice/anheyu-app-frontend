@@ -258,6 +258,13 @@
   border-radius: 6px;
 }
 
+.brandAvatar {
+  width: 28px;
+  height: 28px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
 .collapseBtn {
   display: flex;
   align-items: center;
