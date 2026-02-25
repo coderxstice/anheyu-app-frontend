@@ -6,7 +6,6 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { FaClock } from "react-icons/fa6";
 import { formatDate } from "@/utils/date";
 import type { RecentArticle } from "@/types/article";
 import styles from "./CardRecentPost.module.css";
@@ -41,10 +40,7 @@ export function CardRecentPost({
 
   return (
     <div className={styles.cardRecentPost}>
-      <div className={styles.cardTitle}>
-        <FaClock aria-hidden="true" />
-        <span>最近发布</span>
-      </div>
+      <div className={styles.cardTitle}>最近发布</div>
 
       <div className={styles.articleList}>
         {filteredArticles.map(article => (

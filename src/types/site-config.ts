@@ -275,6 +275,7 @@ export interface SiteConfigData {
       totalWordCount?: number;
     };
     recentPost?: {
+      enable?: boolean | string;
       count?: number | string;
     };
     weather?: {

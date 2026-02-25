@@ -563,7 +563,7 @@ hr {
 
 /* 基础样式 */
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 body {

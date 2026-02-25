@@ -32,6 +32,7 @@ import {
   KEY_SIDEBAR_CUSTOM_SHOW_IN_POST,
   KEY_SIDEBAR_TOC_COLLAPSE_MODE,
   KEY_SIDEBAR_SERIES_POST_COUNT,
+  KEY_SIDEBAR_RECENT_POST_ENABLE,
   KEY_SIDEBAR_RECENT_POST_COUNT,
   KEY_SIDEBAR_DOC_LINKS,
   KEY_CUSTOM_SIDEBAR,
@@ -222,13 +223,23 @@ export function SidebarForm({ values, onChange, loading }: SidebarFormProps) {
           description="侧边栏系列文章模块显示的文章数量"
         />
 
+        <FormSwitch
+          label="启用最近文章"
+          description="在文章详情页侧边栏显示最近发布模块"
+          checked={values[KEY_SIDEBAR_RECENT_POST_ENABLE] !== "false"}
+          onCheckedChange={v => onChange(KEY_SIDEBAR_RECENT_POST_ENABLE, String(v))}
+        />
+
+        {values[KEY_SIDEBAR_RECENT_POST_ENABLE] !== "false" && (
         <FormInput
           label="最近文章数量"
           placeholder="最近文章显示数量（推荐 1-20）"
           value={values[KEY_SIDEBAR_RECENT_POST_COUNT]}
           onValueChange={v => onChange(KEY_SIDEBAR_RECENT_POST_COUNT, v)}
-          description="文章详情页侧边栏“最近发布”模块显示的文章数量"
+          description="文章详情页侧边栏最近发布模块显示的文章数量"
         />
+        )}
+
 
         <VisualArrayEditor
           label="文档链接"
