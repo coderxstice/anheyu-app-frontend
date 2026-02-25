@@ -265,7 +265,11 @@
 
 @media (max-width: 768px) {
   .archivePage {
-    padding: 1rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .articleSortTitle {
+    font-size: 1.5rem;
   }
 
   .articleSortItem {
@@ -280,6 +284,10 @@
 
   .articleSortItemInfo {
     padding: 0.75rem 0;
+  }
+
+  .articleSortItemTitle {
+    -webkit-line-clamp: 2;
   }
 
   .articleSortItemTags {

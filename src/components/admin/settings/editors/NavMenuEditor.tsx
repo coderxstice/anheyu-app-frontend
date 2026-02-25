@@ -13,6 +13,7 @@ interface NavSubItem {
   name: string;
   link: string;
   icon: string;
+  _id?: string;
 }
 
 interface NavGroup {
@@ -49,12 +50,24 @@ function ensureStableNavGroupIds(nextGroups: NavGroup[], prevGroups: NavGroup[] 
   return nextGroups.map((group, index) => ({
     ...group,
     _id: group._id || prevGroups[index]?._id || `ng-${index}-${Math.random().toString(36).slice(2)}`,
+    items: group.items ? ensureStableNavSubItemIds(group.items, prevGroups[index]?.items) : group.items,
+  }));
+}
+
+function ensureStableNavSubItemIds(nextSubs: NavSubItem[], prevSubs: NavSubItem[] = []): NavSubItem[] {
+  return nextSubs.map((sub, index) => ({
+    ...sub,
+    _id: sub._id || prevSubs[index]?._id || `ns-${index}-${Math.random().toString(36).slice(2)}`,
   }));
 }
 
 function serializeNavGroups(groups: NavGroup[]): string {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- omit _id for serialization
-  const strip = groups.map(({ _id: _, ...rest }) => rest);
+  /* eslint-disable @typescript-eslint/no-unused-vars -- omit _id from groups and sub-items */
+  const strip = groups.map(({ _id: _, ...rest }) => ({
+    ...rest,
+    items: rest.items?.map(({ _id: __, ...subRest }) => subRest),
+  }));
+  /* eslint-enable @typescript-eslint/no-unused-vars */
   return JSON.stringify(strip, null, 2);
 }
 
@@ -117,24 +130,31 @@ function SmallInput({
 function NavSubItemRow({
   item,
   index,
-  isFirst,
-  isLast,
   onUpdate,
   onRemove,
-  onMoveUp,
-  onMoveDown,
+  reorderValue,
 }: {
   item: NavSubItem;
   index: number;
-  isFirst: boolean;
-  isLast: boolean;
   onUpdate: (field: keyof NavSubItem, val: string) => void;
   onRemove: () => void;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
+  reorderValue?: NavSubItem;
 }) {
-  return (
-    <div className="flex items-start gap-3 rounded-xl border border-default-200/75 bg-default-50/35 p-3 transition-colors hover:border-default-300/80 hover:bg-default-50/60">
+  const dragControls = useDragControls();
+
+  const content = (
+    <div className="flex items-start gap-2 rounded-xl border border-default-200/75 bg-default-50/35 p-3 transition-colors hover:border-default-300/80 hover:bg-default-50/60">
+      {reorderValue != null && (
+        <div
+          onPointerDown={e => {
+            e.stopPropagation();
+            dragControls.start(e);
+          }}
+          className="mt-2 flex w-6 shrink-0 touch-none items-center justify-center rounded-md text-default-400 transition-colors hover:bg-background/80 hover:text-foreground active:cursor-grabbing"
+        >
+          <GripVertical className="w-3.5 h-3.5" />
+        </div>
+      )}
       <span className="mt-2 inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-background text-[11px] font-medium text-default-500 ring-1 ring-default-200/80">
         {index + 1}
       </span>
@@ -157,28 +177,6 @@ function NavSubItemRow({
         </div>
       </div>
       <div className="mt-5 flex shrink-0 items-center gap-1.5">
-        <button type="button" onClick={onMoveUp} disabled={isFirst} className={ICON_BUTTON_CLASS}>
-          <svg
-            className="w-3 h-3 text-default-500"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-          </svg>
-        </button>
-        <button type="button" onClick={onMoveDown} disabled={isLast} className={ICON_BUTTON_CLASS}>
-          <svg
-            className="w-3 h-3 text-default-500"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
         <button type="button" onClick={onRemove} className={DANGER_ICON_BUTTON_CLASS}>
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -187,6 +185,15 @@ function NavSubItemRow({
       </div>
     </div>
   );
+
+  if (reorderValue != null) {
+    return (
+      <Reorder.Item value={reorderValue} dragListener={false} dragControls={dragControls} className="relative">
+        {content}
+      </Reorder.Item>
+    );
+  }
+  return content;
 }
 
 // ─── 分组卡片 ────────────────────────────────────────────────────
@@ -217,7 +224,7 @@ function NavGroupCard({
   const subItems = group.items || [];
 
   const addSubItem = () => {
-    onUpdate({ ...group, items: [...subItems, { name: "", link: "", icon: "" }] });
+    onUpdate({ ...group, items: [...subItems, { name: "", link: "", icon: "", _id: `ns-${Date.now()}-${Math.random().toString(36).slice(2)}` }] });
   };
 
   const removeSubItem = (subIdx: number) => {
@@ -227,12 +234,6 @@ function NavGroupCard({
   const updateSubItem = (subIdx: number, field: keyof NavSubItem, val: string) => {
     const newSubs = [...subItems];
     newSubs[subIdx] = { ...newSubs[subIdx], [field]: val };
-    onUpdate({ ...group, items: newSubs });
-  };
-
-  const moveSubItem = (from: number, to: number) => {
-    const newSubs = [...subItems];
-    [newSubs[from], newSubs[to]] = [newSubs[to], newSubs[from]];
     onUpdate({ ...group, items: newSubs });
   };
 
@@ -328,21 +329,25 @@ function NavGroupCard({
 
               <div className="space-y-2.5">
                 {subItems.length > 0 ? (
-                  <div className="flex flex-col gap-2">
+                  <Reorder.Group
+                    axis="y"
+                    values={subItems}
+                    onReorder={(newOrder: NavSubItem[]) => {
+                      onUpdate({ ...group, items: newOrder });
+                    }}
+                    className="flex flex-col gap-2"
+                  >
                     {subItems.map((sub, subIdx) => (
                       <NavSubItemRow
-                        key={subIdx}
+                        key={sub._id ?? subIdx}
                         item={sub}
                         index={subIdx}
-                        isFirst={subIdx === 0}
-                        isLast={subIdx === subItems.length - 1}
                         onUpdate={(field, val) => updateSubItem(subIdx, field, val)}
                         onRemove={() => removeSubItem(subIdx)}
-                        onMoveUp={() => moveSubItem(subIdx, subIdx - 1)}
-                        onMoveDown={() => moveSubItem(subIdx, subIdx + 1)}
+                        reorderValue={sub}
                       />
                     ))}
-                  </div>
+                  </Reorder.Group>
                 ) : (
                   <div className="rounded-xl border border-dashed border-default-300/80 bg-background/70 py-4 text-center">
                     <p className="text-xs text-default-500">暂无链接，点击下方添加</p>
