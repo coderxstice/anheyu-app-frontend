@@ -98,6 +98,13 @@ export function PostSidebar({ article, recentArticles = [] }: PostSidebarProps) 
   // 当前文章 ID (转换为 number)
   const currentArticleId = parseInt(article.id) || 0;
 
+  const recentPostCount = useMemo(() => {
+    const raw = siteConfig?.sidebar?.recentPost?.count;
+    const parsed = typeof raw === "number" ? raw : Number(raw);
+    if (!Number.isFinite(parsed)) return 5;
+    return Math.min(20, Math.max(1, Math.trunc(parsed)));
+  }, [siteConfig]);
+
   return (
     <aside className={styles.postSidebar}>
       {/* 作者信息卡片 */}
@@ -129,7 +136,12 @@ export function PostSidebar({ article, recentArticles = [] }: PostSidebarProps) 
 
         {/* 最近发布 */}
         {recentArticles.length > 0 && (
-          <CardRecentPost articles={recentArticles} currentArticleId={currentArticleId} defaultCover={defaultCover} />
+          <CardRecentPost
+            articles={recentArticles}
+            currentArticleId={currentArticleId}
+            defaultCover={defaultCover}
+            maxCount={recentPostCount}
+          />
         )}
       </div>
     </aside>

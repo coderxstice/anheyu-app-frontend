@@ -16,7 +16,9 @@ export function setupAdminMocks() {
     __esModule: true,
     default: (props: Record<string, unknown>) => {
       const { fill, priority, unoptimized, ...rest } = props;
-      void fill; void priority; void unoptimized;
+      void fill;
+      void priority;
+      void unoptimized;
       // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
       return <img {...rest} />;
     },
