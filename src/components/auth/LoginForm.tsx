@@ -142,6 +142,7 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- will be used when OAuth handlers are implemented
   const [oauthLoading, setOauthLoading] = useState(false);
 
   // OAuth 配置
@@ -209,18 +210,18 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
     }
   };
 
-  const handleLogin = async () => {
+  const handleLogin = async (skipCaptcha = false) => {
     if (!password) {
       addToast({ title: "请输入密码", color: "warning", timeout: 3000 });
       return;
     }
-    if (captchaRef.current && !captchaRef.current.isReady()) {
+    if (!skipCaptcha && captchaRef.current && !captchaRef.current.isReady()) {
       addToast({ title: "请完成验证码", color: "warning", timeout: 3000 });
       return;
     }
 
     setIsLoading(true);
-    const captchaParams = captchaRef.current?.getCaptchaParams() ?? {};
+    const captchaParams = skipCaptcha ? {} : captchaRef.current?.getCaptchaParams() ?? {};
 
     try {
       const response = await authService.login({ email, password, ...captchaParams });
@@ -293,7 +294,7 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
           addToast({ title: "注册成功！请查收激活邮件。", color: "success", timeout: 3000 });
           switchStep("check-email");
         } else {
-          await handleLogin();
+          await handleLogin(true);
         }
       } else {
         addToast({ title: response.message || "注册失败", color: "danger", timeout: 3000 });
@@ -589,7 +590,7 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
 
                 <CaptchaWidget ref={captchaRef} />
 
-                <Button isLoading={isLoading} onClick={handleLogin}>
+                <Button isLoading={isLoading} onClick={() => handleLogin()}>
                   登录
                 </Button>
 
