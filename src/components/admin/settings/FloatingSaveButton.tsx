@@ -47,11 +47,11 @@ export function FloatingSaveButton({ hasChanges, loading, onSave }: FloatingSave
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-4 px-5 py-3 bg-background/90 backdrop-blur-lg rounded-full shadow-sm border border-default-200/60 max-md:bottom-4 max-md:right-4 max-md:left-4 max-md:gap-3 max-md:px-4 max-md:rounded-xl max-sm:bottom-3 max-sm:right-3 max-sm:left-3"
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-4 px-5 py-3 bg-background/90 backdrop-blur-lg rounded-full shadow-sm border border-border/60 max-md:bottom-4 max-md:right-4 max-md:left-4 max-md:gap-3 max-md:px-4 max-md:rounded-xl max-sm:bottom-3 max-sm:right-3 max-sm:left-3"
         >
           {/* 保存内容 */}
           <div className="flex items-center gap-3 flex-1">
-            <span className="text-sm text-default-500 whitespace-nowrap">有未保存的更改</span>
+            <span className="text-sm text-muted-foreground whitespace-nowrap">有未保存的更改</span>
             <Button size="sm" disabled={loading} onClick={onSave} className="gap-1.5 shadow-lg shadow-primary/20">
               {loading ? (
                 <span className="w-3.5 h-3.5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
@@ -63,12 +63,12 @@ export function FloatingSaveButton({ hasChanges, loading, onSave }: FloatingSave
           </div>
 
           {/* 快捷键提示 - 移动端隐藏 */}
-          <div className="hidden sm:flex items-center gap-1 text-xs text-default-400">
-            <kbd className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 font-sans text-[11px] bg-default-100 border border-default-200 rounded">
+          <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground">
+            <kbd className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 font-sans text-[11px] bg-muted border border-border/60 rounded">
               {isMac ? "⌘" : "Ctrl"}
             </kbd>
             <span>+</span>
-            <kbd className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 font-sans text-[11px] bg-default-100 border border-default-200 rounded">
+            <kbd className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 font-sans text-[11px] bg-muted border border-border/60 rounded">
               S
             </kbd>
           </div>

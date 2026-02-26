@@ -44,23 +44,23 @@ function CollapsibleSection({
     <div
       className={cn(
         "rounded-xl border transition-colors",
-        expanded ? "border-default-200/80 bg-default-50/10" : "border-default-200/60 bg-transparent"
+        expanded ? "border-border/60 bg-muted/30" : "border-border/60 bg-transparent"
       )}
     >
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-default-100/30 rounded-xl transition-colors"
+        className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted rounded-xl transition-colors"
       >
         <div>
           <span className="text-sm font-medium text-foreground">{title}</span>
-          {description && <p className="text-xs text-default-400 mt-0.5">{description}</p>}
+          {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
         </div>
         <ChevronDown
-          className={cn("h-4 w-4 shrink-0 text-default-400 transition-transform", expanded && "rotate-180")}
+          className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", expanded && "rotate-180")}
         />
       </button>
-      {expanded && <div className="border-t border-default-200/50 px-4 pb-4 pt-4 space-y-4">{children}</div>}
+      {expanded && <div className="border-t border-border/60 px-4 pb-4 pt-4 space-y-4">{children}</div>}
     </div>
   );
 }
@@ -81,7 +81,7 @@ export function MusicPageForm({ values, onChange, loading }: MusicPageFormProps)
     <div className="space-y-8">
       {/* 基础配置 - 简约核心 */}
       <SettingsSection title="基础配置" description="播放器与歌单来源">
-        <div className="rounded-xl border border-default-200/80 bg-default-50/20 p-5 shadow-[0_0_0_0.5px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.04)]">
+        <div className="rounded-xl border border-border/60 bg-muted/30 p-5 shadow-[0_0_0_0.5px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.04)]">
           <FormSwitch
             label="启用音乐播放器"
             description="在站点中显示音乐播放器"
@@ -115,16 +115,16 @@ export function MusicPageForm({ values, onChange, loading }: MusicPageFormProps)
           expanded={showAdvanced}
           onToggle={() => setShowAdvanced(!showAdvanced)}
         >
-          <div className="rounded-lg bg-default-100/50 px-3 py-2.5 text-xs text-default-500 leading-relaxed space-y-2">
+          <div className="rounded-lg bg-muted px-3 py-2.5 text-xs text-muted-foreground leading-relaxed space-y-2">
             <p>JSON 文件格式示例：</p>
-            <pre className="rounded-md bg-default-200/60 dark:bg-default-100/80 px-3 py-2 text-xs font-mono text-default-600 overflow-x-auto whitespace-pre">{`[
-  {
-    "name": "歌曲名称",
-    "artist": "歌手名",
-    "url": "https://example.com/song.mp3",
-    "cover": "https://example.com/cover.jpg",
-    "lrc": "https://example.com/lyric.lrc"
-  }
+            <pre className="rounded-md bg-secondary dark:bg-muted px-3 py-2 text-xs font-mono text-foreground/70 overflow-x-auto whitespace-pre">{`[
+ {
+ "name": "歌曲名称",
+ "artist": "歌手名",
+ "url": "https://example.com/song.mp3",
+ "cover": "https://example.com/cover.jpg",
+ "lrc": "https://example.com/lyric.lrc"
+ }
 ]`}</pre>
             <p>其中 name、artist、url 为必填，cover、lrc 为可选</p>
           </div>

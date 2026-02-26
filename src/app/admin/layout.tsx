@@ -41,7 +41,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [_hasHydrated, isAuthenticated, hasAdminAccess, router]);
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-muted/30">
+    <div className="admin-layout h-screen flex flex-col overflow-hidden bg-muted/30">
       {/* 移动端顶部导航 */}
       <div className="lg:hidden flex items-center justify-between p-4 bg-card border-b border-border shrink-0">
         <Logo href="/admin" />

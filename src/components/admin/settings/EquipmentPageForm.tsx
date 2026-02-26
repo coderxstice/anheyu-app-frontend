@@ -32,7 +32,7 @@ export function EquipmentPageForm({ values, onChange, loading }: EquipmentPageFo
     <div className="space-y-10">
       {/* 横幅配置 */}
       <SettingsSection title="横幅" description="页面顶部展示区域">
-        <div className="rounded-xl border border-default-200/80 bg-default-50/20 p-5 shadow-[0_0_0_0.5px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.04)]">
+        <div className="rounded-xl border border-border/60 bg-muted/20 p-5 shadow-[0_0_0_0.5px_rgba(0,0,0,0.04)] dark:shadow-none">
           <SettingsFieldGroup cols={2}>
             <FormImageUpload
               label="背景图"

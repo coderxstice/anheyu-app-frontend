@@ -33,26 +33,26 @@ export function RecentCommentsPageForm({ values, onChange, loading }: RecentComm
         <FormImageUpload
           label="背景图"
           value={values[KEY_RECENT_COMMENTS_BANNER_BG]}
-          onValueChange={(v) => onChange(KEY_RECENT_COMMENTS_BANNER_BG, v)}
+          onValueChange={v => onChange(KEY_RECENT_COMMENTS_BANNER_BG, v)}
           placeholder="请输入横幅背景图 URL"
         />
         <FormInput
           label="标题"
           placeholder="请输入页面标题"
           value={values[KEY_RECENT_COMMENTS_BANNER_TITLE]}
-          onValueChange={(v) => onChange(KEY_RECENT_COMMENTS_BANNER_TITLE, v)}
+          onValueChange={v => onChange(KEY_RECENT_COMMENTS_BANNER_TITLE, v)}
         />
         <FormInput
           label="描述"
           placeholder="请输入页面描述"
           value={values[KEY_RECENT_COMMENTS_BANNER_DESC]}
-          onValueChange={(v) => onChange(KEY_RECENT_COMMENTS_BANNER_DESC, v)}
+          onValueChange={v => onChange(KEY_RECENT_COMMENTS_BANNER_DESC, v)}
         />
         <FormInput
           label="提示文字"
           placeholder="请输入提示文字"
           value={values[KEY_RECENT_COMMENTS_BANNER_TIP]}
-          onValueChange={(v) => onChange(KEY_RECENT_COMMENTS_BANNER_TIP, v)}
+          onValueChange={v => onChange(KEY_RECENT_COMMENTS_BANNER_TIP, v)}
         />
       </SettingsSection>
     </div>

@@ -2,11 +2,7 @@ import type { AlbumSortOrder } from "@/types/album";
 
 const DEFAULT_SORT: AlbumSortOrder = "display_order_asc";
 
-const ALLOWED_SORTS = new Set<AlbumSortOrder>([
-  "display_order_asc",
-  "created_at_desc",
-  "view_count_desc",
-]);
+const ALLOWED_SORTS = new Set<AlbumSortOrder>(["display_order_asc", "created_at_desc", "view_count_desc"]);
 
 export interface AlbumFilterQueryState {
   categoryId: number | null;
@@ -53,9 +49,7 @@ export function parseAlbumFilterQuery(search: string): AlbumFilterQueryState {
 
 export function buildAlbumFilterQuery(currentSearch: string, nextState: AlbumFilterQueryState): string {
   const params = new URLSearchParams(normalizeSearch(currentSearch));
-  const normalizedCategoryId = parseCategoryId(
-    nextState.categoryId === null ? null : String(nextState.categoryId)
-  );
+  const normalizedCategoryId = parseCategoryId(nextState.categoryId === null ? null : String(nextState.categoryId));
   const normalizedSort = parseSort(nextState.sort);
 
   if (normalizedCategoryId === null) {

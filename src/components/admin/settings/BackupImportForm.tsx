@@ -31,7 +31,7 @@ function formatFileSize(bytes: number): string {
   const k = 1024;
   const sizes = ["B", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + "" + sizes[i];
 }
 
 /** 格式化时间 */
@@ -293,20 +293,20 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10">
           <Info className="h-4 w-4 text-primary" />
         </div>
-        <p className="text-[13px] leading-relaxed text-default-600">
+        <p className="text-[13px] leading-relaxed text-foreground/70">
           配置备份功能会保存数据库中的设置项。恢复或导入配置后，建议刷新页面以查看最新配置。
         </p>
       </div>
 
       {/* ==================== 导入 & 导出 ==================== */}
-      <div className="rounded-2xl border border-default-200 bg-content1 shadow-sm p-6">
+      <div className="rounded-2xl border border-border/60 bg-content1 shadow-sm p-6">
         <div className="flex items-center gap-2.5 mb-2">
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-white">
             <FileJson className="h-3.5 w-3.5" />
           </div>
           <h3 className="text-[15px] font-bold text-foreground">导入 & 导出</h3>
         </div>
-        <p className="mb-5 text-[13px] text-default-400 leading-relaxed">
+        <p className="mb-5 text-[13px] text-muted-foreground leading-relaxed">
           导出当前系统配置为 JSON 文件，或导入配置文件恢复设置。
         </p>
         <div className="flex items-center gap-3 flex-wrap">
@@ -337,7 +337,7 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
       </div>
 
       {/* ==================== 备份管理 ==================== */}
-      <div className="rounded-2xl border border-default-200 bg-content1 shadow-sm p-6">
+      <div className="rounded-2xl border border-border/60 bg-content1 shadow-sm p-6">
         {/* 标题行 */}
         <div className="flex items-start justify-between mb-5">
           <div>
@@ -352,7 +352,7 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
                 </Chip>
               )}
             </div>
-            <p className="text-[13px] text-default-400 leading-relaxed">
+            <p className="text-[13px] text-muted-foreground leading-relaxed">
               管理系统配置备份，支持手动创建备份、恢复备份和清理旧备份。
             </p>
           </div>
@@ -381,7 +381,7 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
             radius="lg"
             variant="bordered"
             className="flex-1 min-w-[200px] max-w-sm"
-            classNames={{ inputWrapper: "border-default-200 data-[hover=true]:border-default-400" }}
+            classNames={{ inputWrapper: "border-border/60 data-[hover=true]:border-border-hover/40" }}
             onKeyDown={e => {
               if (e.key === "Enter") handleCreateBackup();
             }}
@@ -403,20 +403,20 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
         {listLoading && backupList.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-14 gap-2.5">
             <Spinner size="sm" />
-            <span className="text-xs text-default-400">加载备份列表...</span>
+            <span className="text-xs text-muted-foreground">加载备份列表...</span>
           </div>
         ) : backupList.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-14 gap-2">
-            <FolderOpen className="h-10 w-10 text-default-200" />
-            <span className="text-sm text-default-400">暂无备份记录</span>
-            <span className="text-xs text-default-300">点击上方「创建备份」开始</span>
+            <FolderOpen className="h-10 w-10 text-muted-foreground/30" />
+            <span className="text-sm text-muted-foreground">暂无备份记录</span>
+            <span className="text-xs text-muted-foreground/40">点击上方「创建备份」开始</span>
           </div>
         ) : (
           <div className="space-y-2.5">
             {backupList.map(backup => (
               <div
                 key={backup.filename}
-                className="group flex items-center gap-4 rounded-xl border border-default-100 bg-default-50/40 px-4 py-3 transition-all hover:border-default-200 hover:bg-default-50 hover:shadow-sm"
+                className="group flex items-center gap-4 rounded-xl border border-border/30 bg-muted/30 px-4 py-3 transition-all hover:border-border/60 hover:bg-muted/30 hover:shadow-sm"
               >
                 {/* 文件图标 */}
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/8">
@@ -433,15 +433,15 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
                       </Chip>
                     )}
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-default-400">
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     {backup.description && (
                       <>
                         <span className="truncate max-w-[200px]">{backup.description}</span>
-                        <span className="text-default-200">|</span>
+                        <span className="text-muted-foreground/30">|</span>
                       </>
                     )}
                     <span className="tabular-nums whitespace-nowrap">{formatFileSize(backup.size)}</span>
-                    <span className="text-default-200">|</span>
+                    <span className="text-muted-foreground/30">|</span>
                     <span className="tabular-nums whitespace-nowrap">{formatTime(backup.created_at)}</span>
                   </div>
                 </div>
@@ -480,8 +480,8 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
 
         {/* 清理旧备份 */}
         {backupList.length > 0 && (
-          <div className="flex items-center gap-2.5 flex-wrap mt-5 pt-4 border-t border-default-100">
-            <span className="text-[13px] text-default-500">清理旧备份，保留最近</span>
+          <div className="flex items-center gap-2.5 flex-wrap mt-5 pt-4 border-t border-border/30">
+            <span className="text-[13px] text-muted-foreground">清理旧备份，保留最近</span>
             <Input
               type="number"
               value={String(keepCount)}
@@ -495,12 +495,12 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
               className="w-[72px]"
               classNames={{
                 input: "text-center",
-                inputWrapper: "h-8 min-h-8 border-default-200",
+                inputWrapper: "h-8 min-h-8 border-border/60",
               }}
               min={1}
               max={100}
             />
-            <span className="text-[13px] text-default-500">份</span>
+            <span className="text-[13px] text-muted-foreground">份</span>
             <Tooltip
               content={
                 backupList.length <= keepCount
@@ -537,7 +537,7 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
         header={{ title: "确认导入配置", description: "导入后将覆盖当前系统配置", icon: ArrowUpFromLine }}
       >
         <ModalBody className="pb-1 pt-2">
-          <div className="space-y-3 text-[13px] text-default-600">
+          <div className="space-y-3 text-[13px] text-foreground/70">
             <p>导入配置将覆盖数据库中的系统设置。</p>
             <p>
               系统会在导入前<strong className="text-foreground">自动备份</strong>当前配置。
@@ -567,12 +567,13 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
         header={{ title: "确认恢复备份", description: "将使用该备份覆盖当前配置", icon: RotateCcw }}
       >
         <ModalBody className="pb-1 pt-2">
-          <div className="space-y-3 text-[13px] text-default-600">
+          <div className="space-y-3 text-[13px] text-foreground/70">
             <p>
-              确定要恢复备份{" "}
-              <code className="rounded bg-default-100 px-1.5 py-0.5 text-xs font-mono text-foreground">
+              确定要恢复备份{""}
+              <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono text-foreground">
                 {pendingBackup?.filename}
-              </code>{" "}
+              </code>
+              {""}
               吗？
             </p>
             <p>系统会在恢复前自动创建当前配置的备份。</p>
@@ -606,12 +607,13 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
         }}
       >
         <ModalBody className="pb-1 pt-2">
-          <div className="space-y-3 text-[13px] text-default-600">
+          <div className="space-y-3 text-[13px] text-foreground/70">
             <p>
-              确定要删除备份{" "}
-              <code className="rounded bg-default-100 px-1.5 py-0.5 text-xs font-mono text-foreground">
+              确定要删除备份{""}
+              <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono text-foreground">
                 {pendingBackup?.filename}
-              </code>{" "}
+              </code>
+              {""}
               吗？
             </p>
             <div className="flex items-start gap-2 rounded-lg bg-danger-50 px-3 py-2">
@@ -644,9 +646,9 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
         }}
       >
         <ModalBody className="pb-1 pt-2">
-          <div className="space-y-3 text-[13px] text-default-600">
+          <div className="space-y-3 text-[13px] text-foreground/70">
             <p>
-              将删除 <strong className="text-foreground">{deleteCount}</strong> 个旧备份，只保留最近{" "}
+              将删除 <strong className="text-foreground">{deleteCount}</strong> 个旧备份，只保留最近{""}
               <strong className="text-foreground">{keepCount}</strong> 份。
             </p>
           </div>

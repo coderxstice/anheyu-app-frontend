@@ -1031,9 +1031,8 @@ export function PostContent({ content, articleInfo }: PostContentProps) {
       const updateTransform = () => {
         const svg = el.querySelector("svg");
         if (svg) {
-          (
-            svg as unknown as HTMLElement
-          ).style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+          (svg as unknown as HTMLElement).style.transform =
+            `translate(${translateX}px, ${translateY}px) scale(${scale})`;
           (svg as unknown as HTMLElement).style.transformOrigin = "center center";
         }
       };

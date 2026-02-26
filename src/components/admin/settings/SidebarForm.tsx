@@ -231,15 +231,14 @@ export function SidebarForm({ values, onChange, loading }: SidebarFormProps) {
         />
 
         {values[KEY_SIDEBAR_RECENT_POST_ENABLE] !== "false" && (
-        <FormInput
-          label="最近文章数量"
-          placeholder="最近文章显示数量（推荐 1-20）"
-          value={values[KEY_SIDEBAR_RECENT_POST_COUNT]}
-          onValueChange={v => onChange(KEY_SIDEBAR_RECENT_POST_COUNT, v)}
-          description="文章详情页侧边栏最近发布模块显示的文章数量"
-        />
+          <FormInput
+            label="最近文章数量"
+            placeholder="最近文章显示数量（推荐 1-20）"
+            value={values[KEY_SIDEBAR_RECENT_POST_COUNT]}
+            onValueChange={v => onChange(KEY_SIDEBAR_RECENT_POST_COUNT, v)}
+            description="文章详情页侧边栏最近发布模块显示的文章数量"
+          />
         )}
-
 
         <VisualArrayEditor
           label="文档链接"
@@ -305,7 +304,7 @@ export function SidebarForm({ values, onChange, loading }: SidebarFormProps) {
               onValueChange={v => onChange(KEY_WEATHER_QWEATHER_KEY, v)}
               description={
                 <>
-                  从{" "}
+                  从{""}
                   <a
                     href="https://dev.qweather.com/"
                     target="_blank"
@@ -313,7 +312,8 @@ export function SidebarForm({ values, onChange, loading }: SidebarFormProps) {
                     className="text-primary hover:underline"
                   >
                     和风天气开发平台
-                  </a>{" "}
+                  </a>
+                  {""}
                   获取
                 </>
               }
@@ -335,7 +335,7 @@ export function SidebarForm({ values, onChange, loading }: SidebarFormProps) {
               onValueChange={v => onChange(KEY_WEATHER_IP_API_KEY, v)}
               description={
                 <>
-                  用于获取访问者地理位置，从{" "}
+                  用于获取访问者地理位置，从{""}
                   <a
                     href="https://api.nsuuu.com/"
                     target="_blank"
@@ -343,7 +343,8 @@ export function SidebarForm({ values, onChange, loading }: SidebarFormProps) {
                     className="text-primary hover:underline"
                   >
                     NSUUU API
-                  </a>{" "}
+                  </a>
+                  {""}
                   获取
                 </>
               }

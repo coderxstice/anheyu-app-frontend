@@ -8,7 +8,7 @@ import type { StoragePolicy, StoragePolicyType } from "@/types/storage-policy";
 import { getErrorMessage } from "@/lib/api/client";
 
 // ===================================
-//     存储类型配置（对齐 anheyu-app）
+// 存储类型配置（对齐 anheyu-app）
 // ===================================
 
 export interface StorageTypeConfig {

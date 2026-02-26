@@ -216,13 +216,13 @@ export function ImageCropDialog({ isOpen, onOpenChange, imageSrc, onCropComplete
         <>
           <ModalBody>
             {loadError ? (
-              <div className="flex items-center justify-center h-[300px] text-default-400 text-sm">
+              <div className="flex items-center justify-center h-[300px] text-muted-foreground text-sm">
                 无法加载图片，可能存在跨域限制
               </div>
             ) : (
               <div
                 ref={containerRef}
-                className="flex items-center justify-center bg-default-50 rounded-lg overflow-hidden"
+                className="flex items-center justify-center bg-muted/30 rounded-lg overflow-hidden"
               >
                 <canvas
                   ref={canvasRef}
@@ -235,8 +235,8 @@ export function ImageCropDialog({ isOpen, onOpenChange, imageSrc, onCropComplete
               </div>
             )}
             {hasCrop && (
-              <div className="text-xs text-default-400 text-center mt-2">
-                裁剪区域: {Math.round(cropArea.width / scaleRef.current)} x{" "}
+              <div className="text-xs text-muted-foreground text-center mt-2">
+                裁剪区域: {Math.round(cropArea.width / scaleRef.current)} x{""}
                 {Math.round(cropArea.height / scaleRef.current)} px
               </div>
             )}

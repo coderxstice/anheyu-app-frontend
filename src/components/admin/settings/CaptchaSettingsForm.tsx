@@ -59,7 +59,7 @@ export function CaptchaSettingsForm({ values, onChange, loading }: CaptchaSettin
           <FormSelectItem key="image">系统图形验证码</FormSelectItem>
         </FormSelect>
 
-        <div className="rounded-xl border border-default-200 bg-default-50/70 px-3 py-2 text-xs text-default-700 dark:bg-default-100/20 dark:text-default-300">
+        <div className="rounded-xl border border-border/60 bg-muted/30 px-3 py-2 text-xs text-foreground/80 dark:bg-muted dark:text-muted-foreground/40">
           当前启用：<span className="font-medium text-foreground">{providerLabel}</span>
           {isLegacyTurnstileMode ? "（兼容旧配置 turnstile.enable=true）" : ""}
         </div>
@@ -135,7 +135,7 @@ export function CaptchaSettingsForm({ values, onChange, loading }: CaptchaSettin
         </SettingsSection>
       )}
 
-      <div className="rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-default-600">
+      <div className="rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-foreground/70">
         建议先在测试环境验证验证码可用性，再发布到生产环境；若切换方案，请同步更新对应服务商后台白名单域名。
       </div>
     </div>

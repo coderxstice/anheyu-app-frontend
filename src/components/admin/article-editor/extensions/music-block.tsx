@@ -141,7 +141,7 @@ function MusicBlockView({ node, updateAttributes }: NodeViewProps) {
       <NodeViewWrapper className="music-block-wrapper my-3">
         <div ref={wrapperRef} className="editor-music-edit-panel">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs text-default-400 font-medium">编辑音乐播放器</span>
+            <span className="text-xs text-muted-foreground font-medium">编辑音乐播放器</span>
           </div>
           {/* 网易云 ID 输入 + 帮助按钮 */}
           <div className="relative">
@@ -170,10 +170,11 @@ function MusicBlockView({ node, updateAttributes }: NodeViewProps) {
                 <div className="font-medium mb-1">如何获取网易云音乐 ID？</div>
                 <ol className="list-decimal list-inside space-y-1 text-xs">
                   <li>
-                    打开{" "}
+                    打开{""}
                     <a href="https://music.163.com" target="_blank" rel="noreferrer" className="text-primary underline">
                       网易云音乐
-                    </a>{" "}
+                    </a>
+                    {""}
                     网页版
                   </li>
                   <li>找到想要的歌曲，点击进入歌曲详情页</li>
@@ -206,7 +207,7 @@ function MusicBlockView({ node, updateAttributes }: NodeViewProps) {
             <button onClick={handleFinishEdit} className="px-3 py-1 text-xs bg-primary text-white rounded">
               完成
             </button>
-            {loading && <span className="text-xs text-default-400 animate-pulse">正在加载歌曲信息...</span>}
+            {loading && <span className="text-xs text-muted-foreground animate-pulse">正在加载歌曲信息...</span>}
           </div>
         </div>
       </NodeViewWrapper>
@@ -216,88 +217,99 @@ function MusicBlockView({ node, updateAttributes }: NodeViewProps) {
   return (
     <NodeViewWrapper className="music-block-wrapper my-3">
       <div className="editor-node-hover-wrap" contentEditable={false}>
-        <div className="editor-node-edit-btn" onClick={(e) => { e.stopPropagation(); setEditing(true); }} contentEditable={false}>
+        <div
+          className="editor-node-edit-btn"
+          onClick={e => {
+            e.stopPropagation();
+            setEditing(true);
+          }}
+          contentEditable={false}
+        >
           <Pencil /> 编辑
         </div>
         <div className="markdown-music-player">
-        <div className="music-player-container">
-          {/* 加载中遮罩 */}
-          {loading && (
-            <div className="music-loading">
-              <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeDasharray="31.4"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <span>加载中...</span>
-            </div>
-          )}
-
-          {/* 唱片机 artwork 区域 */}
-          <div className="music-artwork-container">
-            <div className="music-artwork-wrapper">
-              {/* eslint-disable @next/next/no-img-element */}
-              <img src="/static/img/music-vinyl-background.png" alt="唱片背景" className="vinyl-background" />
-              <img src="/static/img/music-vinyl-outer.png" alt="唱片外圈" className="artwork-image-vinyl-background" />
-              <img
-                src="/static/img/music-vinyl-inner.png"
-                alt="唱片内圈"
-                className="artwork-image-vinyl-inner-background"
-              />
-              <img src="/static/img/music-vinyl-needle.png" alt="撞针" className="artwork-image-needle-background" />
-              <img
-                src="/static/img/music-vinyl-groove.png"
-                alt="凹槽背景"
-                className="artwork-image-groove-background"
-              />
-              <div className="artwork-transition-wrapper">
-                <img src={displayPic} alt="专辑封面" className="artwork-image" />
-                <img src={displayPic} alt="模糊背景" className="artwork-image-blur" />
-                <div className="artwork-border-ring" />
+          <div className="music-player-container">
+            {/* 加载中遮罩 */}
+            {loading && (
+              <div className="music-loading">
+                <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeDasharray="31.4"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <span>加载中...</span>
               </div>
-              {/* eslint-enable @next/next/no-img-element */}
-              {/* 播放/暂停覆盖层（编辑器中仅作装饰） */}
-              <div className="music-play-overlay">
-                <div className="music-play-button-overlay">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
+            )}
+
+            {/* 唱片机 artwork 区域 */}
+            <div className="music-artwork-container">
+              <div className="music-artwork-wrapper">
+                {/* eslint-disable @next/next/no-img-element */}
+                <img src="/static/img/music-vinyl-background.png" alt="唱片背景" className="vinyl-background" />
+                <img
+                  src="/static/img/music-vinyl-outer.png"
+                  alt="唱片外圈"
+                  className="artwork-image-vinyl-background"
+                />
+                <img
+                  src="/static/img/music-vinyl-inner.png"
+                  alt="唱片内圈"
+                  className="artwork-image-vinyl-inner-background"
+                />
+                <img src="/static/img/music-vinyl-needle.png" alt="撞针" className="artwork-image-needle-background" />
+                <img
+                  src="/static/img/music-vinyl-groove.png"
+                  alt="凹槽背景"
+                  className="artwork-image-groove-background"
+                />
+                <div className="artwork-transition-wrapper">
+                  <img src={displayPic} alt="专辑封面" className="artwork-image" />
+                  <img src={displayPic} alt="模糊背景" className="artwork-image-blur" />
+                  <div className="artwork-border-ring" />
+                </div>
+                {/* eslint-enable @next/next/no-img-element */}
+                {/* 播放/暂停覆盖层（编辑器中仅作装饰） */}
+                <div className="music-play-overlay">
+                  <div className="music-play-button-overlay">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* 歌曲信息 */}
-          <div className="music-info-container">
-            <div className="music-text-info">
-              <div className="music-name">{displayName}</div>
-              <div className="music-artist">{displayArtist}</div>
+            {/* 歌曲信息 */}
+            <div className="music-info-container">
+              <div className="music-text-info">
+                <div className="music-name">{displayName}</div>
+                <div className="music-artist">{displayArtist}</div>
+              </div>
+              <span className="nmsingle-playtime">
+                <span className="current-time">00:00</span> / <span className="duration">00:00</span>
+              </span>
             </div>
-            <span className="nmsingle-playtime">
-              <span className="current-time">00:00</span> / <span className="duration">00:00</span>
-            </span>
-          </div>
 
-          {/* 网易云音乐装饰图 */}
-          <div className="music-decoration-image">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={NETEASE_DECORATION_IMG} alt="音乐装饰" />
-          </div>
+            {/* 网易云音乐装饰图 */}
+            <div className="music-decoration-image">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={NETEASE_DECORATION_IMG} alt="音乐装饰" />
+            </div>
 
-          {/* 进度条（编辑器中仅作装饰） */}
-          <div className="music-progress-bar">
-            <div className="music-progress-track">
-              <div className="music-progress-fill" style={{ width: "0%" }} />
+            {/* 进度条（编辑器中仅作装饰） */}
+            <div className="music-progress-bar">
+              <div className="music-progress-track">
+                <div className="music-progress-fill" style={{ width: "0%" }} />
+              </div>
             </div>
           </div>
         </div>
-      </div>
       </div>
     </NodeViewWrapper>
   );

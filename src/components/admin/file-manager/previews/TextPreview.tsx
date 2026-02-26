@@ -404,8 +404,8 @@ export const TextPreview = forwardRef<TextPreviewRef>((_, ref) => {
                         dirty
                           ? "bg-blue-500 text-white hover:bg-blue-600"
                           : darkMode
-                          ? "bg-white/10 text-gray-400 cursor-not-allowed"
-                          : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                            ? "bg-white/10 text-gray-400 cursor-not-allowed"
+                            : "bg-gray-200 text-gray-400 cursor-not-allowed"
                       }`}
                       disabled={!dirty || saving}
                       onClick={triggerSave}
@@ -486,8 +486,8 @@ export const TextPreview = forwardRef<TextPreviewRef>((_, ref) => {
                                             ? "bg-blue-500/20 text-blue-400"
                                             : "bg-blue-50 text-blue-600"
                                           : darkMode
-                                          ? "hover:bg-white/5"
-                                          : "hover:bg-gray-50"
+                                            ? "hover:bg-white/5"
+                                            : "hover:bg-gray-50"
                                       }`}
                                       onClick={() => changeLanguage(lang.id)}
                                     >

@@ -14,7 +14,7 @@ import { AnimatePresence } from "framer-motion";
 import { FloatingSelectionBar } from "@/components/admin/FloatingSelectionBar";
 
 // ===================================
-//          编辑评论弹窗
+// 编辑评论弹窗
 // ===================================
 
 function EditCommentModal({ cm }: { cm: CommentPageState }) {
@@ -71,7 +71,7 @@ function EditCommentModal({ cm }: { cm: CommentPageState }) {
 }
 
 // ===================================
-//          导入评论弹窗
+// 导入评论弹窗
 // ===================================
 
 function ImportCommentModal({ cm }: { cm: CommentPageState }) {
@@ -120,9 +120,7 @@ function ImportCommentModal({ cm }: { cm: CommentPageState }) {
           onClick={() => fileInputRef.current?.click()}
           className={cn(
             "w-full border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 cursor-pointer",
-            file
-              ? "border-primary/50 bg-primary-50/30"
-              : "border-default-200 hover:border-primary/30 hover:bg-default-50"
+            file ? "border-primary/50 bg-primary-50/30" : "border-border/60 hover:border-primary/30 hover:bg-muted/30"
           )}
         >
           {file ? (
@@ -131,15 +129,15 @@ function ImportCommentModal({ cm }: { cm: CommentPageState }) {
                 <FileText className="w-6 h-6 text-primary" />
               </div>
               <span className="text-sm font-medium">{file.name}</span>
-              <span className="text-xs text-default-400">{(file.size / 1024).toFixed(1)} KB</span>
+              <span className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</span>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-2 text-default-400">
-              <div className="p-2.5 rounded-xl bg-default-100">
+            <div className="flex flex-col items-center gap-2 text-muted-foreground">
+              <div className="p-2.5 rounded-xl bg-muted">
                 <Upload className="w-6 h-6" />
               </div>
               <span className="text-sm font-medium">点击选择文件</span>
-              <span className="text-xs text-default-300">JSON / ZIP</span>
+              <span className="text-xs text-muted-foreground/40">JSON / ZIP</span>
             </div>
           )}
         </button>
@@ -157,7 +155,7 @@ function ImportCommentModal({ cm }: { cm: CommentPageState }) {
 }
 
 // ===================================
-//      浮动操作栏 + 确认弹窗
+// 浮动操作栏 + 确认弹窗
 // ===================================
 
 interface CommentModalsProps {

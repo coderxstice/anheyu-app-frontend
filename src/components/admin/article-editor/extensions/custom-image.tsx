@@ -33,7 +33,7 @@ declare module "@tiptap/core" {
 }
 
 // ============================================
-//         React NodeView 组件
+// React NodeView 组件
 // ============================================
 
 function ImageNodeView({ node, updateAttributes, selected, editor, deleteNode }: NodeViewProps) {
@@ -616,7 +616,7 @@ function ImageNodeView({ node, updateAttributes, selected, editor, deleteNode }:
 }
 
 // ============================================
-//         Tiptap 扩展定义
+// Tiptap 扩展定义
 // ============================================
 
 export const CustomImage = Image.extend({
@@ -878,7 +878,7 @@ export const CustomImage = Image.extend({
     const rotationStyle = rotation && rotation !== 0 ? `transform: rotate(${rotation}deg);` : "";
 
     const imgAttrs = mergeAttributes(HTMLAttributes, {
-      class: [`article-image`, alignClass, styleClass].filter(Boolean).join(" "),
+      class: [`article-image`, alignClass, styleClass].filter(Boolean).join(""),
       draggable: "true",
       ...(rotationStyle ? { style: rotationStyle } : {}),
     });
@@ -948,7 +948,7 @@ export const CustomImage = Image.extend({
         ({ commands }) => {
           return commands.updateAttributes(this.name, {
             link,
-            linkTarget: link ? target ?? "_blank" : null,
+            linkTarget: link ? (target ?? "_blank") : null,
           });
         },
       setImageRotation:

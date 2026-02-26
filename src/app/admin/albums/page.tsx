@@ -43,11 +43,11 @@ export default function AlbumsPage() {
   const bottomContent = (
     <div className="py-2 px-2 flex flex-wrap justify-between items-center gap-2">
       <div className="flex items-center gap-2 shrink-0">
-        <span className="text-small text-default-400 whitespace-nowrap">共 {al.totalItems} 张</span>
-        <span className="text-small text-default-300">|</span>
+        <span className="text-small text-muted-foreground whitespace-nowrap">共 {al.totalItems} 张</span>
+        <span className="text-small text-muted-foreground/40">|</span>
         <Dropdown>
           <DropdownTrigger>
-            <Button variant="light" size="sm" className="text-default-400 text-small h-7 min-w-0 gap-1 px-2">
+            <Button variant="light" size="sm" className="text-muted-foreground text-small h-7 min-w-0 gap-1 px-2">
               {al.pageSize}条/页
               <ChevronDown className="w-3 h-3" />
             </Button>
@@ -71,7 +71,7 @@ export default function AlbumsPage() {
         </Dropdown>
         {al.selectedIds.size > 0 && (
           <>
-            <span className="text-small text-default-300">|</span>
+            <span className="text-small text-muted-foreground/40">|</span>
             <span className="text-small text-primary font-medium whitespace-nowrap">已选 {al.selectedIds.size} 项</span>
           </>
         )}
@@ -145,7 +145,7 @@ export default function AlbumsPage() {
                 variant="flat"
                 onPress={al.handleOpenImport}
                 startContent={<Upload className="w-3.5 h-3.5" />}
-                className="text-default-600"
+                className="text-foreground/70"
               >
                 导入相册
               </Button>
@@ -154,7 +154,7 @@ export default function AlbumsPage() {
                 variant="flat"
                 onPress={al.handleOpenExport}
                 startContent={<Download className="w-3.5 h-3.5" />}
-                className="text-default-600"
+                className="text-foreground/70"
               >
                 导出相册
               </Button>
@@ -163,7 +163,7 @@ export default function AlbumsPage() {
                 variant="flat"
                 onPress={al.handleOpenCategoryManage}
                 startContent={<Tags className="w-3.5 h-3.5" />}
-                className="text-default-600"
+                className="text-foreground/70"
               >
                 分类管理
               </Button>
@@ -199,7 +199,7 @@ export default function AlbumsPage() {
               wrapper: "flex-1 min-h-0 px-3! py-0! shadow-none! rounded-none! border-none!",
               table: "border-separate border-spacing-y-1.5 -mt-1.5",
               thead: "[&>tr]:first:shadow-none! after:hidden!",
-              th: "bg-[#F6F7FA] dark:bg-default-100 first:rounded-tl-lg! last:rounded-tr-lg!",
+              th: "bg-[#F6F7FA] dark:bg-muted first:rounded-tl-lg! last:rounded-tr-lg!",
               tr: "rounded-xl!",
               td: "first:before:rounded-s-xl! last:before:rounded-e-xl!",
             }}

@@ -7,11 +7,7 @@ export const metadata: Metadata = {
   robots: createRobotsMetadata(false),
 };
 
-export default function AuthLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-background to-muted">
       {children}

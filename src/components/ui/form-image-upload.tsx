@@ -137,14 +137,14 @@ const FormImageUpload = React.forwardRef<HTMLDivElement, FormImageUploadProps>(
             onClear={() => onValueChange?.("")}
             classNames={{
               inputWrapper: cn(
-                "rounded-xl border border-default-200/80 bg-white dark:bg-default-100/50 shadow-none!",
-                "data-[hover=true]:bg-white! dark:data-[hover=true]:bg-default-100/60 data-[hover=true]:border-default-300/90",
-                "group-data-[focus=true]:bg-white! dark:group-data-[focus=true]:bg-default-100/60 group-data-[focus=true]:border-primary/65 group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-primary/15",
+                "rounded-xl border border-border/60 bg-card shadow-none!",
+                "data-[hover=true]:bg-card dark:data-[hover=true]:bg-muted data-[hover=true]:border-border/80",
+                "group-data-[focus=true]:bg-card dark:group-data-[focus=true]:bg-muted group-data-[focus=true]:border-primary/65 group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-primary/15",
                 "h-10 min-h-10",
                 "transition-all duration-200"
               ),
-              input: "text-sm text-foreground/90 placeholder:text-default-400/80",
-              clearButton: "text-default-400 hover:text-danger",
+              input: "text-sm text-foreground/90 placeholder:text-muted-foreground",
+              clearButton: "text-muted-foreground hover:text-danger",
             }}
           />
 
@@ -165,14 +165,14 @@ const FormImageUpload = React.forwardRef<HTMLDivElement, FormImageUploadProps>(
           <input ref={fileInputRef} type="file" accept={accept} onChange={handleFileChange} className="hidden" />
         </div>
 
-        {description && <p className="text-xs leading-relaxed text-default-400">{description}</p>}
+        {description && <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>}
 
         {/* 预览区域 - 在输入框下方 */}
         {showPreview &&
           (rounded ? (
             /* 圆形预览（头像等场景） */
             <div
-              className="overflow-hidden rounded-full border-2 border-default-200 bg-default-50 shrink-0"
+              className="overflow-hidden rounded-full border-2 border-border/60 bg-muted/30 shrink-0"
               style={{
                 width: previewMaxWidth ?? sizeConfig.maxW,
                 height: previewMaxWidth ?? sizeConfig.maxW,
@@ -189,7 +189,7 @@ const FormImageUpload = React.forwardRef<HTMLDivElement, FormImageUploadProps>(
           ) : (
             /* 矩形预览（Logo、封面等场景） */
             <div
-              className="overflow-hidden border border-default-200 bg-default-50 p-2 inline-flex items-center justify-center rounded-xl"
+              className="overflow-hidden border border-border/60 bg-muted/30 p-2 inline-flex items-center justify-center rounded-xl"
               style={{
                 maxWidth: previewMaxWidth ?? sizeConfig.maxW,
               }}

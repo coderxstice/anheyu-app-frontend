@@ -17,7 +17,7 @@ import { AwsS3Form } from "@/components/admin/storage/AwsS3Form";
 import { QiniuKodoForm } from "@/components/admin/storage/QiniuKodoForm";
 
 // ===================================
-//     大小单位换算
+// 大小单位换算
 // ===================================
 
 const SIZE_UNITS = [
@@ -38,7 +38,7 @@ function bytesToHuman(bytes: number, defaultUnit = 1024 * 1024): { value: number
 }
 
 // ===================================
-//     策略标志选项
+// 策略标志选项
 // ===================================
 
 const FLAG_OPTIONS = [
@@ -49,7 +49,7 @@ const FLAG_OPTIONS = [
 ];
 
 // ===================================
-//     存储类型选项
+// 存储类型选项
 // ===================================
 
 const STORAGE_TYPE_OPTIONS = [
@@ -62,7 +62,7 @@ const STORAGE_TYPE_OPTIONS = [
 ];
 
 // ===================================
-//     动态子表单映射
+// 动态子表单映射
 // ===================================
 
 const PROVIDER_FORMS: Record<StoragePolicyType, typeof LocalForm> = {
@@ -75,7 +75,7 @@ const PROVIDER_FORMS: Record<StoragePolicyType, typeof LocalForm> = {
 };
 
 // ===================================
-//     OneDrive 授权组件
+// OneDrive 授权组件
 // ===================================
 
 function OneDriveAuthorization({ policy }: { policy: Partial<StoragePolicy> }) {
@@ -117,7 +117,7 @@ function OneDriveAuthorization({ policy }: { policy: Partial<StoragePolicy> }) {
 }
 
 // ===================================
-//     编辑表单（接收 initialData props，避免 setState-in-render）
+// 编辑表单（接收 initialData props，避免 setState-in-render）
 // ===================================
 
 function PolicyEditForm({ initialData }: { initialData: StoragePolicy }) {
@@ -344,7 +344,7 @@ function PolicyEditForm({ initialData }: { initialData: StoragePolicy }) {
 }
 
 // ===================================
-//     页面入口（加载数据后渲染表单）
+// 页面入口（加载数据后渲染表单）
 // ===================================
 
 export default function StoragePolicyEditPage() {

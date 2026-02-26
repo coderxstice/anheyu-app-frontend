@@ -25,7 +25,7 @@ function formatHistoryTime(dateStr: string): string {
 
   if (isToday) return `今天 ${time}`;
   if (isYesterday) return `昨天 ${time}`;
-  return date.toLocaleDateString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" }) + " " + time;
+  return date.toLocaleDateString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" }) + "" + time;
 }
 
 export function ArticleHistoryPage({ articleId }: ArticleHistoryPageProps) {
@@ -109,7 +109,7 @@ export function ArticleHistoryPage({ articleId }: ArticleHistoryPageProps) {
           <button
             type="button"
             onClick={() => router.push(`/admin/post-management/${articleId}/edit`)}
-            className="flex items-center gap-1.5 text-sm text-default-600 hover:text-foreground transition-colors"
+            className="flex items-center gap-1.5 text-sm text-foreground/70 hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="font-medium">历史记录</span>
@@ -145,7 +145,7 @@ export function ArticleHistoryPage({ articleId }: ArticleHistoryPageProps) {
                 {/* 筛选 */}
                 <div className="px-4 py-2 border-b border-border">
                   <Checkbox size="sm" isSelected={publishedOnly} onValueChange={setPublishedOnly}>
-                    <span className="text-xs text-default-500">仅显示已发布的历史记录</span>
+                    <span className="text-xs text-muted-foreground">仅显示已发布的历史记录</span>
                   </Checkbox>
                 </div>
                 {/* 列表 */}
@@ -173,11 +173,11 @@ export function ArticleHistoryPage({ articleId }: ArticleHistoryPageProps) {
           {/* 对比控制栏 */}
           <div className="flex items-center gap-2 px-6 py-2 border-b border-border bg-background shrink-0">
             {selectedVersion && (
-              <span className="text-sm text-default-600">
+              <span className="text-sm text-foreground/70">
                 {versionDetail ? formatHistoryTime(versionDetail.created_at) : `版本 ${selectedVersion}`}
               </span>
             )}
-            <span className="text-sm text-default-400">与</span>
+            <span className="text-sm text-muted-foreground">与</span>
             <Select
               placeholder="请选择历史"
               size="sm"
@@ -196,7 +196,7 @@ export function ArticleHistoryPage({ articleId }: ArticleHistoryPageProps) {
                   </SelectItem>
                 ))}
             </Select>
-            <span className="text-sm text-default-400">对比</span>
+            <span className="text-sm text-muted-foreground">对比</span>
           </div>
 
           {/* 内容区 */}
@@ -208,7 +208,7 @@ export function ArticleHistoryPage({ articleId }: ArticleHistoryPageProps) {
             ) : versionDetail ? (
               <ContentPreview detail={versionDetail} compareDetail={compareDetail ?? null} />
             ) : (
-              <div className="flex items-center justify-center h-full text-default-400">选择一个历史版本查看</div>
+              <div className="flex items-center justify-center h-full text-muted-foreground">选择一个历史版本查看</div>
             )}
           </div>
         </div>
@@ -218,7 +218,7 @@ export function ArticleHistoryPage({ articleId }: ArticleHistoryPageProps) {
 }
 
 // ===================================
-//        历史版本列表组件
+// 历史版本列表组件
 // ===================================
 
 function HistoryList({
@@ -241,7 +241,7 @@ function HistoryList({
   }
 
   if (items.length === 0) {
-    return <div className="text-center text-default-400 text-sm py-12">暂无历史记录</div>;
+    return <div className="text-center text-muted-foreground text-sm py-12">暂无历史记录</div>;
   }
 
   return (
@@ -252,18 +252,18 @@ function HistoryList({
           type="button"
           onClick={() => onSelect(item.version)}
           className={`w-full text-left px-4 py-3 border-b border-border transition-colors ${
-            selectedVersion === item.version ? "bg-primary/5 border-l-2 border-l-primary" : "hover:bg-default-100"
+            selectedVersion === item.version ? "bg-primary/5 border-l-2 border-l-primary" : "hover:bg-muted"
           }`}
         >
           <div className="flex items-center justify-between mb-1">
-            <span className="text-sm font-medium text-default-700">{formatHistoryTime(item.created_at)}</span>
+            <span className="text-sm font-medium text-foreground/80">{formatHistoryTime(item.created_at)}</span>
             {item.change_note && (
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-success/10 text-success border border-success/20">
                 {item.change_note.includes("发布") ? "已发布" : item.change_note}
               </span>
             )}
           </div>
-          <div className="text-xs text-default-400">{item.editor_nickname || "未知用户"}</div>
+          <div className="text-xs text-muted-foreground">{item.editor_nickname || "未知用户"}</div>
         </button>
       ))}
     </div>
@@ -271,7 +271,7 @@ function HistoryList({
 }
 
 // ===================================
-//        内容预览组件
+// 内容预览组件
 // ===================================
 
 function ContentPreview({
@@ -287,7 +287,7 @@ function ContentPreview({
         // 对比模式
         <div className="grid grid-cols-2 gap-6">
           <div>
-            <div className="text-xs text-default-400 mb-2">
+            <div className="text-xs text-muted-foreground mb-2">
               版本 {compareDetail.version} - {formatHistoryTime(compareDetail.created_at)}
             </div>
             <div className="border border-border rounded-xl p-6 bg-card">
@@ -298,7 +298,7 @@ function ContentPreview({
             </div>
           </div>
           <div>
-            <div className="text-xs text-default-400 mb-2">
+            <div className="text-xs text-muted-foreground mb-2">
               版本 {detail.version} - {formatHistoryTime(detail.created_at)}
             </div>
             <div className="border border-border rounded-xl p-6 bg-card">

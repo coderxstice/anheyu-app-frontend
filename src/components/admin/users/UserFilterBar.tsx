@@ -48,19 +48,19 @@ export function UserFilterBar({
           isClearable
           className="w-full sm:max-w-[300px]"
           placeholder="搜索用户名/邮箱/昵称..."
-          startContent={<Search className="w-3.5 h-3.5 text-default-400" />}
+          startContent={<Search className="w-3.5 h-3.5 text-muted-foreground" />}
           value={searchInput}
           onValueChange={onSearchInputChange}
           onClear={() => onSearchInputChange("")}
           classNames={{
             inputWrapper:
-              "h-8 min-h-8 bg-white! dark:bg-default-50! shadow-none! [border:var(--style-border)] data-[hover=true]:bg-white! dark:data-[hover=true]:bg-default-50! group-data-[focus=true]:bg-white! dark:group-data-[focus=true]:bg-default-50! group-data-[focus=true]:[border:var(--style-border-hover)] transition-all duration-200",
+              "h-8 min-h-8 bg-card shadow-none! [border:var(--style-border)] data-[hover=true]:bg-card dark:data-[hover=true]:bg-muted/30! group-data-[focus=true]:bg-card dark:group-data-[focus=true]:bg-muted/30! group-data-[focus=true]:[border:var(--style-border-hover)] transition-all duration-200",
           }}
         />
         <Dropdown>
           <DropdownTrigger className="hidden sm:flex">
             <Button size="sm" variant="flat" endContent={<ChevronDown className="w-3.5 h-3.5" />} className="h-8">
-              {statusFilter ? STATUS_OPTIONS.find(o => o.key === statusFilter)?.label ?? "用户状态" : "用户状态"}
+              {statusFilter ? (STATUS_OPTIONS.find(o => o.key === statusFilter)?.label ?? "用户状态") : "用户状态"}
             </Button>
           </DropdownTrigger>
           <DropdownMenu
@@ -81,7 +81,7 @@ export function UserFilterBar({
         <Dropdown>
           <DropdownTrigger className="hidden sm:flex">
             <Button size="sm" variant="flat" endContent={<ChevronDown className="w-3.5 h-3.5" />} className="h-8">
-              {groupFilter ? userGroups.find(g => g.id === groupFilter)?.name ?? "用户组" : "用户组"}
+              {groupFilter ? (userGroups.find(g => g.id === groupFilter)?.name ?? "用户组") : "用户组"}
             </Button>
           </DropdownTrigger>
           <DropdownMenu
@@ -106,7 +106,7 @@ export function UserFilterBar({
             startContent={<RotateCcw className="w-3.5 h-3.5" />}
             onPress={onReset}
             isDisabled={!searchInput && !statusFilter && !groupFilter}
-            className="text-default-600"
+            className="text-foreground/70"
           >
             重置
           </Button>

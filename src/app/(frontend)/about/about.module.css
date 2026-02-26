@@ -623,7 +623,9 @@
   color: var(--foreground);
   background: var(--background-alpha, rgba(255, 255, 255, 0.6));
   backdrop-filter: saturate(180%) blur(20px);
-  transition: all 1s, color 0s ease-in-out;
+  transition:
+    all 1s,
+    color 0s ease-in-out;
   transform: translateZ(0);
 }
 .mapTitle b {

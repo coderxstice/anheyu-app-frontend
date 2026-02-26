@@ -78,7 +78,11 @@ export function AlbumHeader({
               className={`nav-item nav-dropdown ${activeDropdown === "category" ? "is-open" : ""}`}
               onClick={event => event.stopPropagation()}
             >
-              <button type="button" className="dropdown-trigger nav-action" onClick={event => toggleDropdown(event, "category")}>
+              <button
+                type="button"
+                className="dropdown-trigger nav-action"
+                onClick={event => toggleDropdown(event, "category")}
+              >
                 分类: {currentCategoryName}
               </button>
               <div className="nav-item-child" onClick={event => event.stopPropagation()}>
@@ -118,7 +122,11 @@ export function AlbumHeader({
             className={`nav-item nav-dropdown ${activeDropdown === "sort" ? "is-open" : ""}`}
             onClick={event => event.stopPropagation()}
           >
-            <button type="button" className="dropdown-trigger nav-action" onClick={event => toggleDropdown(event, "sort")}>
+            <button
+              type="button"
+              className="dropdown-trigger nav-action"
+              onClick={event => toggleDropdown(event, "sort")}
+            >
               排序: {currentSortLabel}
             </button>
             <div className="nav-item-child" onClick={event => event.stopPropagation()}>

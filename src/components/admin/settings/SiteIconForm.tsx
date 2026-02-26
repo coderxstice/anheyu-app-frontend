@@ -51,14 +51,14 @@ export function SiteIconForm({ values, onChange, loading }: SiteIconFormProps) {
             placeholder="夜间横向 Logo 地址"
             hidePreview
           />
-          <p className="text-xs text-default-400">
+          <p className="text-xs text-muted-foreground">
             LOGO 图像的地址，用于在左上角展示；请分别提供黑暗模式和日间模式下不同的 LOGO。
           </p>
           {/* 双 Logo 预览 */}
           {(values[KEY_LOGO_HORIZONTAL_DAY] || values[KEY_LOGO_HORIZONTAL_NIGHT]) && (
             <div className="flex items-center gap-4 flex-wrap">
               {values[KEY_LOGO_HORIZONTAL_DAY] && (
-                <div className="rounded-xl border border-default-200 bg-white p-3 flex items-center justify-center h-16 max-w-[200px]">
+                <div className="rounded-xl border border-border/60 bg-white p-3 flex items-center justify-center h-16 max-w-[200px]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={values[KEY_LOGO_HORIZONTAL_DAY]}
@@ -68,7 +68,7 @@ export function SiteIconForm({ values, onChange, loading }: SiteIconFormProps) {
                 </div>
               )}
               {values[KEY_LOGO_HORIZONTAL_NIGHT] && (
-                <div className="rounded-xl border border-default-200 bg-[#1a1a2e] p-3 flex items-center justify-center h-16 max-w-[200px]">
+                <div className="rounded-xl border border-border/60 bg-[#1a1a2e] p-3 flex items-center justify-center h-16 max-w-[200px]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={values[KEY_LOGO_HORIZONTAL_NIGHT]}

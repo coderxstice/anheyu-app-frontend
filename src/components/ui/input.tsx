@@ -66,7 +66,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const isFloating = isFocused || hasValue;
 
     // 当有浮动 label 时，只在 label 浮起后才显示 placeholder，避免重叠
-    const effectivePlaceholder = label && !isFloating ? " " : placeholder;
+    const effectivePlaceholder = label && !isFloating ? "" : placeholder;
 
     return (
       <div className="relative w-full">

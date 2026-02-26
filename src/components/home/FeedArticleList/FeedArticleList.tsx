@@ -61,10 +61,7 @@ export function FeedArticleList({ category, tag, pageSize: propPageSize }: FeedA
       <div className={styles.feedArticleList}>
         <div className={cn(styles.articleList, isDoubleColumn && styles.doubleColumnContainer)}>
           {Array.from({ length: 6 }).map((_, index) => (
-            <div
-              key={index}
-              className={cn(styles.skeletonCard, isDoubleColumn && styles.skeletonCardDouble)}
-            >
+            <div key={index} className={cn(styles.skeletonCard, isDoubleColumn && styles.skeletonCardDouble)}>
               <div className={styles.skeletonCover} />
               <div className={styles.skeletonContent}>
                 <div className={styles.skeletonTags} />

@@ -54,15 +54,7 @@ export interface UploadItem {
   id: string;
   name: string;
   size: number;
-  status:
-    | "pending"
-    | "uploading"
-    | "success"
-    | "error"
-    | "conflict"
-    | "canceled"
-    | "resumable"
-    | "processing";
+  status: "pending" | "uploading" | "success" | "error" | "conflict" | "canceled" | "resumable" | "processing";
   overwrite?: boolean;
   progress: number;
   file: File;

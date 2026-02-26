@@ -3,8 +3,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
   asChild?: boolean;
@@ -13,14 +12,10 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "default", size = "default", ...props }, ref) => {
     const variantStyles = {
-      default:
-        "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:shadow-primary",
-      destructive:
-        "bg-red text-white shadow-sm hover:bg-red/90",
-      outline:
-        "border border-border bg-transparent shadow-sm hover:bg-muted hover:text-foreground",
-      secondary:
-        "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+      default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:shadow-primary",
+      destructive: "bg-red text-white shadow-sm hover:bg-red/90",
+      outline: "border border-border bg-transparent shadow-sm hover:bg-muted hover:text-foreground",
+      secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
       ghost: "hover:bg-muted hover:text-foreground",
       link: "text-primary underline-offset-4 hover:underline",
     };

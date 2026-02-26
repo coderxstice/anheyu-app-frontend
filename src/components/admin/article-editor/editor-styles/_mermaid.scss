@@ -65,7 +65,10 @@
   border-radius: 8px;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.2s, background 0.2s, box-shadow 0.2s;
+  transition:
+    opacity 0.2s,
+    background 0.2s,
+    box-shadow 0.2s;
 
   &:hover {
     background: var(--anzhiyu-card-bg-grey, #f1f3f8);

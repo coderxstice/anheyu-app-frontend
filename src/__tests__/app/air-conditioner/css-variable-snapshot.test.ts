@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { restoreCssVariables, snapshotCssVariables } from "@/app/(frontend)/air-conditioner/_utils/css-variable-snapshot";
+import {
+  restoreCssVariables,
+  snapshotCssVariables,
+} from "@/app/(frontend)/air-conditioner/_utils/css-variable-snapshot";
 
 describe("css variable snapshot", () => {
   it("会记录变量值并在恢复时对空值变量执行 removeProperty", () => {

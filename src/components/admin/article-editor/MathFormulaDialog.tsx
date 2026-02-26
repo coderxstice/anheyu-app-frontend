@@ -109,9 +109,9 @@ export function MathFormulaDialog({ isOpen, onOpenChange, onInsertBlock, onInser
           <ModalBody className="gap-4">
             {/* 公式输入 */}
             <div>
-              <label className="text-xs text-default-500 mb-1.5 block">
+              <label className="text-xs text-muted-foreground mb-1.5 block">
                 LaTeX 公式
-                <span className="text-default-300 ml-2">Ctrl+Enter 快速插入</span>
+                <span className="text-muted-foreground/40 ml-2">Ctrl+Enter 快速插入</span>
               </label>
               <textarea
                 ref={textareaRef}
@@ -119,34 +119,34 @@ export function MathFormulaDialog({ isOpen, onOpenChange, onInsertBlock, onInser
                 onChange={e => setLatex(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="输入 LaTeX 公式，如 E = mc^2"
-                className="w-full min-h-[80px] p-3 font-mono text-sm bg-default-50 border border-default-200 rounded-lg resize-y outline-none focus:border-primary transition-colors"
+                className="w-full min-h-[80px] p-3 font-mono text-sm bg-muted/30 border border-border/60 rounded-lg resize-y outline-none focus:border-primary transition-colors"
               />
             </div>
 
             {/* 实时预览 */}
             <div>
-              <label className="text-xs text-default-500 mb-1.5 block">预览</label>
-              <div className="min-h-[60px] flex items-center justify-center p-4 bg-default-50 border border-default-200 rounded-lg">
+              <label className="text-xs text-muted-foreground mb-1.5 block">预览</label>
+              <div className="min-h-[60px] flex items-center justify-center p-4 bg-muted/30 border border-border/60 rounded-lg">
                 {previewError ? (
                   <span className="text-xs text-danger">{previewError}</span>
                 ) : previewHtml ? (
                   <div dangerouslySetInnerHTML={{ __html: previewHtml }} />
                 ) : (
-                  <span className="text-xs text-default-300">输入公式后实时预览</span>
+                  <span className="text-xs text-muted-foreground/40">输入公式后实时预览</span>
                 )}
               </div>
             </div>
 
             {/* 常用公式模板 */}
             <div>
-              <label className="text-xs text-default-500 mb-1.5 block">常用公式</label>
+              <label className="text-xs text-muted-foreground mb-1.5 block">常用公式</label>
               <div className="flex flex-wrap gap-1.5">
                 {FORMULA_TEMPLATES.map(tpl => (
                   <button
                     key={tpl.label}
                     type="button"
                     onClick={() => handleTemplateClick(tpl.latex)}
-                    className="px-2.5 py-1 text-xs bg-default-100 hover:bg-default-200 text-default-600 rounded-md transition-colors"
+                    className="px-2.5 py-1 text-xs bg-muted hover:bg-secondary text-foreground/70 rounded-md transition-colors"
                   >
                     {tpl.label}
                   </button>

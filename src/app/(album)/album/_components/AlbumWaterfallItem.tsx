@@ -22,7 +22,13 @@ function parseTags(tags?: string): string[] {
     .filter(Boolean);
 }
 
-export function AlbumWaterfallItem({ item, index, enableComment = false, onPreview, onComment }: AlbumWaterfallItemProps) {
+export function AlbumWaterfallItem({
+  item,
+  index,
+  enableComment = false,
+  onPreview,
+  onComment,
+}: AlbumWaterfallItemProps) {
   const tags = useMemo(() => parseTags(item.tags), [item.tags]);
 
   return (

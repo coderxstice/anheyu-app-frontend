@@ -90,11 +90,11 @@ const FormJsonEditor = React.forwardRef<HTMLTextAreaElement, FormJsonEditorProps
           className={cn(
             "w-full rounded-xl border px-3.5 py-2.5 text-sm text-foreground font-mono resize-y",
             "outline-none transition-all duration-200",
-            "placeholder:text-default-400",
+            "placeholder:text-muted-foreground/60",
             "disabled:cursor-not-allowed disabled:opacity-50",
             displayError
               ? "border-danger bg-danger-50/50 focus:border-danger focus:ring-1 focus:ring-danger/20"
-              : "border-default-200/80 bg-white dark:bg-default-100/50 hover:border-default-300/90 focus:bg-white dark:focus:bg-default-100/60 focus:border-primary/65 focus:ring-2 focus:ring-primary/15"
+              : "border-border/80 bg-card hover:border-border-hover/40 focus:border-primary/65 focus:ring-2 focus:ring-primary/15"
           )}
           placeholder={placeholder || '{"key": "value"}'}
         />
@@ -103,7 +103,7 @@ const FormJsonEditor = React.forwardRef<HTMLTextAreaElement, FormJsonEditorProps
           <p
             id={descId}
             role={displayError ? "alert" : undefined}
-            className={cn("text-xs leading-relaxed", displayError ? "text-danger" : "text-default-400")}
+            className={cn("text-xs leading-relaxed", displayError ? "text-danger" : "text-muted-foreground")}
           >
             {displayError || description}
           </p>

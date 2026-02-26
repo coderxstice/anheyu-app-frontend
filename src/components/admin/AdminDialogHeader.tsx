@@ -19,7 +19,7 @@ const TONE_CLASS_MAP: Record<AdminDialogTone, { bg: string; text: string }> = {
   success: { bg: "bg-success-50", text: "text-success" },
   warning: { bg: "bg-warning-50", text: "text-warning" },
   danger: { bg: "bg-danger-50", text: "text-danger" },
-  default: { bg: "bg-default-100", text: "text-default-600" },
+  default: { bg: "bg-muted", text: "text-foreground/70" },
 };
 
 export function AdminDialogHeader({
@@ -32,14 +32,14 @@ export function AdminDialogHeader({
   const toneClass = TONE_CLASS_MAP[tone];
 
   return (
-    <ModalHeader className={cn("border-b border-default-200/70 pb-3", className)}>
+    <ModalHeader className={cn("border-b border-border/60 pb-3", className)}>
       <div className="flex items-center gap-3">
         <div className={cn("p-2 rounded-xl", toneClass.bg)}>
           <Icon className={cn("w-5 h-5", toneClass.text)} />
         </div>
         <div>
           <span>{title}</span>
-          {description ? <p className="text-xs text-default-400 font-normal mt-0.5">{description}</p> : null}
+          {description ? <p className="text-xs text-muted-foreground font-normal mt-0.5">{description}</p> : null}
         </div>
       </div>
     </ModalHeader>

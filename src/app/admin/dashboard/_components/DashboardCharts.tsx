@@ -3,11 +3,7 @@
 import { motion, type Variants } from "framer-motion";
 import Link from "next/link";
 import { Icon } from "@iconify/react";
-import {
-  VisitTrendChart,
-  SourceChart,
-  DeviceChart,
-} from "@/components/admin/dashboard";
+import { VisitTrendChart, SourceChart, DeviceChart } from "@/components/admin/dashboard";
 
 interface DashboardChartsProps {
   trendChartData: Array<{ date: string; views: number; visitors: number }>;

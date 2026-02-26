@@ -64,7 +64,7 @@ const ICON_GRADIENTS = [
 ];
 
 /** 容器样式 — 扁平边框，不使用多层阴影 */
-const LIST_SHADOW = "border border-default-200/50";
+const LIST_SHADOW = "border border-border/50";
 
 // ─── 内部类型 ─────────────────────────────────────────────────────
 
@@ -108,15 +108,14 @@ const itemVariants = {
 
 /** 输入框包裹器 */
 const inputWrapperBase = cn(
-  "h-9 min-h-9 rounded-xl border border-default-200/80 bg-white dark:bg-default-100/50 shadow-none!",
-  "data-[hover=true]:bg-white! dark:data-[hover=true]:bg-default-100/60 data-[hover=true]:border-default-300/90",
-  "group-data-[focus=true]:bg-white! dark:group-data-[focus=true]:bg-default-100/60 group-data-[focus=true]:border-primary/65",
-  "group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-primary/15",
+  "h-9 min-h-9 rounded-xl border border-border/60 bg-card shadow-none!",
+  "data-[hover=true]:border-border-hover/40",
+  "group-data-[focus=true]:border-primary/65 group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-primary/15",
   "transition-all duration-200"
 );
 
 /** 输入框文字 */
-const inputTextBase = "text-sm text-foreground/90 placeholder:text-default-400/80";
+const inputTextBase = "text-sm text-foreground/90 placeholder:text-muted-foreground/60";
 
 // ─── 子组件：单个字段渲染 ──────────────────────────────────────────
 
@@ -218,7 +217,7 @@ function FieldRenderer({
             classNames={{
               trigger: cn(
                 inputWrapperBase,
-                "data-[open=true]:bg-white! dark:data-[open=true]:bg-default-100/60 data-[open=true]:border-primary/65 data-[open=true]:ring-2 data-[open=true]:ring-primary/15"
+                "data-[open=true]:border-primary/65 data-[open=true]:ring-2 data-[open=true]:ring-primary/15"
               ),
               value: "text-sm text-foreground/90",
               popoverContent: "rounded-xl shadow-lg",
@@ -262,8 +261,8 @@ function FieldRenderer({
               "w-full px-3 py-2 text-[13px] rounded-lg resize-y",
               "bg-[rgba(120,120,128,0.08)] dark:bg-[rgba(120,120,128,0.16)]",
               "border border-transparent",
-              "focus:outline-none focus:bg-white focus:dark:bg-default-50 focus:border-primary focus:ring-1 focus:ring-primary/20",
-              "placeholder:text-default-400 text-foreground",
+              "focus:outline-none focus:bg-card focus:border-primary focus:ring-1 focus:ring-primary/20",
+              "placeholder:text-muted-foreground/60 text-foreground",
               "transition-all duration-200",
               "font-mono"
             )}
@@ -539,7 +538,7 @@ function ArrayItem({
             className="overflow-hidden"
           >
             <div className="px-4 pb-4 pt-1 min-w-0">
-              <div className="rounded-xl border border-default-200/60 bg-white dark:bg-card p-4 min-w-0">
+              <div className="rounded-xl border border-border/40 bg-muted/50 p-4 min-w-0">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 min-w-0">
                   {fields.map(field => (
                     <div
@@ -722,7 +721,7 @@ export function VisualArrayEditor({
       )}
 
       {/* ── 描述 ── */}
-      {description && <p className="text-xs leading-relaxed text-default-400">{description}</p>}
+      {description && <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>}
     </div>
   );
 }

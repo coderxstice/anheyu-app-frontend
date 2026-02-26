@@ -395,9 +395,9 @@ export function ImageToolbar({ editor, attrs, updateAttributes, onCropClick, onC
                     size="sm"
                     min={1}
                     classNames={{ base: "flex-1" }}
-                    startContent={<span className="text-default-400 text-xs">W</span>}
+                    startContent={<span className="text-muted-foreground text-xs">W</span>}
                   />
-                  <span className="text-default-300">×</span>
+                  <span className="text-muted-foreground/40">×</span>
                   <Input
                     type="number"
                     placeholder="高度"
@@ -407,7 +407,7 @@ export function ImageToolbar({ editor, attrs, updateAttributes, onCropClick, onC
                     size="sm"
                     min={1}
                     classNames={{ base: "flex-1" }}
-                    startContent={<span className="text-default-400 text-xs">H</span>}
+                    startContent={<span className="text-muted-foreground text-xs">H</span>}
                   />
                 </div>
                 <Checkbox size="sm" isSelected={keepAspectRatio} onValueChange={setKeepAspectRatio}>
@@ -547,7 +547,7 @@ export function ImageToolbar({ editor, attrs, updateAttributes, onCropClick, onC
                   fontSize: 13,
                   cursor: "pointer",
                 }}
-                className="hover:bg-default-100 transition-colors"
+                className="hover:bg-muted transition-colors"
                 onClick={() => handleAlign(item.key)}
               >
                 {align === item.key ? (
@@ -609,7 +609,7 @@ export function ImageToolbar({ editor, attrs, updateAttributes, onCropClick, onC
                   fontSize: 13,
                   cursor: "pointer",
                 }}
-                className="hover:bg-default-100 transition-colors"
+                className="hover:bg-muted transition-colors"
                 onClick={() => handleStyle(item.key)}
               >
                 {imageStyle === item.key ? (
@@ -673,7 +673,7 @@ export function ImageToolbar({ editor, attrs, updateAttributes, onCropClick, onC
                 cursor: "pointer",
                 textAlign: "left",
               }}
-              className="hover:bg-default-100 transition-colors"
+              className="hover:bg-muted transition-colors"
               onClick={() => applyToAll("style")}
             >
               同步图片样式到全文
@@ -692,7 +692,7 @@ export function ImageToolbar({ editor, attrs, updateAttributes, onCropClick, onC
                 cursor: "pointer",
                 textAlign: "left",
               }}
-              className="hover:bg-default-100 transition-colors"
+              className="hover:bg-muted transition-colors"
               onClick={() => applyToAll("width")}
             >
               同步图片宽度到全文

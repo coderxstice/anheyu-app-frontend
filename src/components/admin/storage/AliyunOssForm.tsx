@@ -86,16 +86,10 @@ export function AliyunOssForm({ form, onChange }: AliyunOssFormProps) {
 
       <div className="text-sm font-medium text-primary border-b border-border/40 pb-2 mt-6">访问权限</div>
 
-      <Switch
-        size="sm"
-        isSelected={form.is_private ?? false}
-        onValueChange={v => onChange({ ...form, is_private: v })}
-      >
+      <Switch size="sm" isSelected={form.is_private ?? false} onValueChange={v => onChange({ ...form, is_private: v })}>
         <span className="text-sm">私有读写</span>
       </Switch>
-      <p className="text-xs text-muted-foreground -mt-2">
-        关闭时为公用读私有写，开启后读写都需要授权
-      </p>
+      <p className="text-xs text-muted-foreground -mt-2">关闭时为公用读私有写，开启后读写都需要授权</p>
 
       <div className="text-sm font-medium text-primary border-b border-border/40 pb-2 mt-6">下载设置</div>
 
@@ -116,9 +110,7 @@ export function AliyunOssForm({ form, onChange }: AliyunOssFormProps) {
       >
         <span className="text-sm">不为 CDN 签名文件 URL</span>
       </Switch>
-      <p className="text-xs text-muted-foreground -mt-2">
-        如果在 OSS 域名设置中开启了「回源鉴权」，请开启此项
-      </p>
+      <p className="text-xs text-muted-foreground -mt-2">如果在 OSS 域名设置中开启了「回源鉴权」，请开启此项</p>
 
       <Switch
         size="sm"
@@ -127,9 +119,7 @@ export function AliyunOssForm({ form, onChange }: AliyunOssFormProps) {
       >
         <span className="text-sm">开启下载中转</span>
       </Switch>
-      <p className="text-xs text-muted-foreground -mt-2">
-        开启后下载文件时会通过服务端代理
-      </p>
+      <p className="text-xs text-muted-foreground -mt-2">开启后下载文件时会通过服务端代理</p>
 
       <Input
         label="样式分隔符（可选）"

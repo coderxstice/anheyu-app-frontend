@@ -34,7 +34,7 @@ function WordCount({ editor }: { editor: Editor | null }) {
       const text = editor.state.doc.textContent;
       // 统计中文字符 + 英文单词
       const chineseChars = (text.match(/[\u4e00-\u9fff\u3400-\u4dbf]/g) || []).length;
-      const englishWords = (text.replace(/[\u4e00-\u9fff\u3400-\u4dbf]/g, " ").match(/[a-zA-Z0-9]+/g) || []).length;
+      const englishWords = (text.replace(/[\u4e00-\u9fff\u3400-\u4dbf]/g, "").match(/[a-zA-Z0-9]+/g) || []).length;
       setCount(chineseChars + englishWords);
     };
 
@@ -47,7 +47,7 @@ function WordCount({ editor }: { editor: Editor | null }) {
 
   return (
     <div className="absolute bottom-2 left-3 pointer-events-none z-10">
-      <span className="text-xs text-default-400 tabular-nums">{count}字</span>
+      <span className="text-xs text-muted-foreground tabular-nums">{count}字</span>
     </div>
   );
 }
@@ -202,7 +202,7 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
     return (
       <div className="flex flex-col h-screen items-center justify-center gap-3 bg-background">
         <Spinner size="lg" />
-        <p className="text-default-400">加载文章中...</p>
+        <p className="text-muted-foreground">加载文章中...</p>
       </div>
     );
   }
@@ -243,15 +243,15 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
 
         {/* 大纲面板 - 始终显示在右侧，固定宽度 */}
         <div className="w-64 shrink-0 h-full overflow-auto py-4 px-5">
-          <h3 className="text-base font-bold text-default-800 mb-3 pl-1">大纲</h3>
-          <div className="border-l-2 border-default-200/60 pl-2">
+          <h3 className="text-base font-bold text-foreground mb-3 pl-1">大纲</h3>
+          <div className="border-l-2 border-border/60 pl-2">
             <TOCContent editor={editor} />
           </div>
         </div>
 
         {/* 文章设置面板 - 覆盖层，不影响内容布局 */}
         {sidebarOpen && (
-          <div className="absolute top-0 right-0 h-full w-64 z-20 bg-background border-l-[0.5px] border-default-200/60 shadow-md overflow-auto">
+          <div className="absolute top-0 right-0 h-full w-64 z-20 bg-background border-l-[0.5px] border-border/60 shadow-md overflow-auto">
             <EditorSidebar
               meta={meta}
               onUpdateField={updateField}
@@ -263,7 +263,6 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
           </div>
         )}
       </div>
-
     </div>
   );
 }

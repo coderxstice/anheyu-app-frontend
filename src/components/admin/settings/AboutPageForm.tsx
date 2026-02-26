@@ -312,7 +312,9 @@ export function AboutPageForm({ values, onChange, loading }: AboutPageFormProps)
                 label="技能提示文案"
                 placeholder="例如：技能"
                 value={String(skillsTipsObject.tips ?? "")}
-                onValueChange={v => onChange(KEY_ABOUT_SKILLS_TIPS, patchObjectJsonValue(values[KEY_ABOUT_SKILLS_TIPS], "tips", v))}
+                onValueChange={v =>
+                  onChange(KEY_ABOUT_SKILLS_TIPS, patchObjectJsonValue(values[KEY_ABOUT_SKILLS_TIPS], "tips", v))
+                }
               />
               <FormInput
                 label="技能标题"
@@ -339,7 +341,9 @@ export function AboutPageForm({ values, onChange, loading }: AboutPageFormProps)
                 label="关于站点提示文案"
                 placeholder="例如：追求"
                 value={String(siteTipsObject.tips ?? "")}
-                onValueChange={v => onChange(KEY_ABOUT_SITE_TIPS, patchObjectJsonValue(values[KEY_ABOUT_SITE_TIPS], "tips", v))}
+                onValueChange={v =>
+                  onChange(KEY_ABOUT_SITE_TIPS, patchObjectJsonValue(values[KEY_ABOUT_SITE_TIPS], "tips", v))
+                }
               />
               <FormInput
                 label="关于站点标题1"
@@ -354,7 +358,9 @@ export function AboutPageForm({ values, onChange, loading }: AboutPageFormProps)
               label="关于站点标题2"
               placeholder="例如：热爱而去 感受"
               value={String(siteTipsObject.title2 ?? "")}
-              onValueChange={v => onChange(KEY_ABOUT_SITE_TIPS, patchObjectJsonValue(values[KEY_ABOUT_SITE_TIPS], "title2", v))}
+              onValueChange={v =>
+                onChange(KEY_ABOUT_SITE_TIPS, patchObjectJsonValue(values[KEY_ABOUT_SITE_TIPS], "title2", v))
+              }
             />
             <FormStringList
               label="关于站点关键词"
@@ -408,7 +414,9 @@ export function AboutPageForm({ values, onChange, loading }: AboutPageFormProps)
                 label="个人信息标签1"
                 placeholder="例如：生于"
                 value={String(selfInfoObject.tips1 ?? "")}
-                onValueChange={v => onChange(KEY_ABOUT_SELF_INFO, patchObjectJsonValue(values[KEY_ABOUT_SELF_INFO], "tips1", v))}
+                onValueChange={v =>
+                  onChange(KEY_ABOUT_SELF_INFO, patchObjectJsonValue(values[KEY_ABOUT_SELF_INFO], "tips1", v))
+                }
               />
               <FormInput
                 label="个人信息内容1"
@@ -424,13 +432,17 @@ export function AboutPageForm({ values, onChange, loading }: AboutPageFormProps)
                 label="个人信息标签2"
                 placeholder="例如：湖南信息学院"
                 value={String(selfInfoObject.tips2 ?? "")}
-                onValueChange={v => onChange(KEY_ABOUT_SELF_INFO, patchObjectJsonValue(values[KEY_ABOUT_SELF_INFO], "tips2", v))}
+                onValueChange={v =>
+                  onChange(KEY_ABOUT_SELF_INFO, patchObjectJsonValue(values[KEY_ABOUT_SELF_INFO], "tips2", v))
+                }
               />
               <FormInput
                 label="个人信息内容2"
                 placeholder="例如：软件工程"
                 value={String(selfInfoObject.content2 ?? "")}
-                onValueChange={v => onChange(KEY_ABOUT_SELF_INFO, patchObjectJsonValue(values[KEY_ABOUT_SELF_INFO], "content2", v))}
+                onValueChange={v =>
+                  onChange(KEY_ABOUT_SELF_INFO, patchObjectJsonValue(values[KEY_ABOUT_SELF_INFO], "content2", v))
+                }
               />
             </SettingsFieldGroup>
             <SettingsFieldGroup cols={2}>
@@ -438,13 +450,17 @@ export function AboutPageForm({ values, onChange, loading }: AboutPageFormProps)
                 label="个人信息标签3"
                 placeholder="例如：现在职业"
                 value={String(selfInfoObject.tips3 ?? "")}
-                onValueChange={v => onChange(KEY_ABOUT_SELF_INFO, patchObjectJsonValue(values[KEY_ABOUT_SELF_INFO], "tips3", v))}
+                onValueChange={v =>
+                  onChange(KEY_ABOUT_SELF_INFO, patchObjectJsonValue(values[KEY_ABOUT_SELF_INFO], "tips3", v))
+                }
               />
               <FormInput
                 label="个人信息内容3"
                 placeholder="例如：软件工程师👨"
                 value={String(selfInfoObject.content3 ?? "")}
-                onValueChange={v => onChange(KEY_ABOUT_SELF_INFO, patchObjectJsonValue(values[KEY_ABOUT_SELF_INFO], "content3", v))}
+                onValueChange={v =>
+                  onChange(KEY_ABOUT_SELF_INFO, patchObjectJsonValue(values[KEY_ABOUT_SELF_INFO], "content3", v))
+                }
               />
             </SettingsFieldGroup>
           </>
@@ -463,14 +479,19 @@ export function AboutPageForm({ values, onChange, loading }: AboutPageFormProps)
                 label="性格提示"
                 placeholder="例如：性格"
                 value={String(personalityObject.tips ?? "")}
-                onValueChange={v => onChange(KEY_ABOUT_PERSONALITIES, patchObjectJsonValue(values[KEY_ABOUT_PERSONALITIES], "tips", v))}
+                onValueChange={v =>
+                  onChange(KEY_ABOUT_PERSONALITIES, patchObjectJsonValue(values[KEY_ABOUT_PERSONALITIES], "tips", v))
+                }
               />
               <FormInput
                 label="作者称号"
                 placeholder="例如：执政官"
                 value={String(personalityObject.authorName ?? "")}
                 onValueChange={v =>
-                  onChange(KEY_ABOUT_PERSONALITIES, patchObjectJsonValue(values[KEY_ABOUT_PERSONALITIES], "authorName", v))
+                  onChange(
+                    KEY_ABOUT_PERSONALITIES,
+                    patchObjectJsonValue(values[KEY_ABOUT_PERSONALITIES], "authorName", v)
+                  )
                 }
               />
             </SettingsFieldGroup>
@@ -480,7 +501,10 @@ export function AboutPageForm({ values, onChange, loading }: AboutPageFormProps)
                 placeholder="例如：ESFJ-A"
                 value={String(personalityObject.personalityType ?? "")}
                 onValueChange={v =>
-                  onChange(KEY_ABOUT_PERSONALITIES, patchObjectJsonValue(values[KEY_ABOUT_PERSONALITIES], "personalityType", v))
+                  onChange(
+                    KEY_ABOUT_PERSONALITIES,
+                    patchObjectJsonValue(values[KEY_ABOUT_PERSONALITIES], "personalityType", v)
+                  )
                 }
               />
               <FormInput
@@ -499,14 +523,19 @@ export function AboutPageForm({ values, onChange, loading }: AboutPageFormProps)
               label="人格类型链接"
               placeholder="https://www.16personalities.com/..."
               value={String(personalityObject.nameUrl ?? "")}
-              onValueChange={v => onChange(KEY_ABOUT_PERSONALITIES, patchObjectJsonValue(values[KEY_ABOUT_PERSONALITIES], "nameUrl", v))}
+              onValueChange={v =>
+                onChange(KEY_ABOUT_PERSONALITIES, patchObjectJsonValue(values[KEY_ABOUT_PERSONALITIES], "nameUrl", v))
+              }
             />
             <SettingsFieldGroup cols={2}>
               <FormImageUpload
                 label="人格图"
                 value={String(personalityObject.personalityImg ?? "")}
                 onValueChange={v =>
-                  onChange(KEY_ABOUT_PERSONALITIES, patchObjectJsonValue(values[KEY_ABOUT_PERSONALITIES], "personalityImg", v))
+                  onChange(
+                    KEY_ABOUT_PERSONALITIES,
+                    patchObjectJsonValue(values[KEY_ABOUT_PERSONALITIES], "personalityImg", v)
+                  )
                 }
                 placeholder="请输入人格图 URL"
               />
@@ -514,7 +543,10 @@ export function AboutPageForm({ values, onChange, loading }: AboutPageFormProps)
                 label="照片图"
                 value={String(personalityObject.photoUrl ?? "")}
                 onValueChange={v =>
-                  onChange(KEY_ABOUT_PERSONALITIES, patchObjectJsonValue(values[KEY_ABOUT_PERSONALITIES], "photoUrl", v))
+                  onChange(
+                    KEY_ABOUT_PERSONALITIES,
+                    patchObjectJsonValue(values[KEY_ABOUT_PERSONALITIES], "photoUrl", v)
+                  )
                 }
                 placeholder="请输入照片图 URL"
               />
@@ -615,7 +647,9 @@ export function AboutPageForm({ values, onChange, loading }: AboutPageFormProps)
             <FormImageUpload
               label="游戏背景图"
               value={String(gameObject.background ?? "")}
-              onValueChange={v => onChange(KEY_ABOUT_GAME, patchObjectJsonValue(values[KEY_ABOUT_GAME], "background", v))}
+              onValueChange={v =>
+                onChange(KEY_ABOUT_GAME, patchObjectJsonValue(values[KEY_ABOUT_GAME], "background", v))
+              }
               placeholder="请输入游戏背景图 URL"
             />
           </>
@@ -640,7 +674,9 @@ export function AboutPageForm({ values, onChange, loading }: AboutPageFormProps)
                 label="追番标题"
                 placeholder="例如：最近在看"
                 value={String(comicObject.title ?? "")}
-                onValueChange={v => onChange(KEY_ABOUT_COMIC, patchObjectJsonValue(values[KEY_ABOUT_COMIC], "title", v))}
+                onValueChange={v =>
+                  onChange(KEY_ABOUT_COMIC, patchObjectJsonValue(values[KEY_ABOUT_COMIC], "title", v))
+                }
               />
             </SettingsFieldGroup>
             <VisualArrayEditor
@@ -689,7 +725,9 @@ export function AboutPageForm({ values, onChange, loading }: AboutPageFormProps)
             <FormImageUpload
               label="技术背景图"
               value={String(likeObject.background ?? "")}
-              onValueChange={v => onChange(KEY_ABOUT_LIKE, patchObjectJsonValue(values[KEY_ABOUT_LIKE], "background", v))}
+              onValueChange={v =>
+                onChange(KEY_ABOUT_LIKE, patchObjectJsonValue(values[KEY_ABOUT_LIKE], "background", v))
+              }
               placeholder="请输入技术背景图 URL"
             />
           </>
@@ -714,7 +752,9 @@ export function AboutPageForm({ values, onChange, loading }: AboutPageFormProps)
                 label="音乐标题"
                 placeholder="例如：最近循环"
                 value={String(musicObject.title ?? "")}
-                onValueChange={v => onChange(KEY_ABOUT_MUSIC, patchObjectJsonValue(values[KEY_ABOUT_MUSIC], "title", v))}
+                onValueChange={v =>
+                  onChange(KEY_ABOUT_MUSIC, patchObjectJsonValue(values[KEY_ABOUT_MUSIC], "title", v))
+                }
               />
             </SettingsFieldGroup>
             <FormInput
@@ -726,7 +766,9 @@ export function AboutPageForm({ values, onChange, loading }: AboutPageFormProps)
             <FormImageUpload
               label="音乐背景图"
               value={String(musicObject.background ?? "")}
-              onValueChange={v => onChange(KEY_ABOUT_MUSIC, patchObjectJsonValue(values[KEY_ABOUT_MUSIC], "background", v))}
+              onValueChange={v =>
+                onChange(KEY_ABOUT_MUSIC, patchObjectJsonValue(values[KEY_ABOUT_MUSIC], "background", v))
+              }
               placeholder="请输入音乐背景图 URL"
             />
           </>
@@ -745,19 +787,25 @@ export function AboutPageForm({ values, onChange, loading }: AboutPageFormProps)
                 label="职业经历提示"
                 placeholder="例如：经历"
                 value={String(careersObject.tips ?? "")}
-                onValueChange={v => onChange(KEY_ABOUT_CAREERS, patchObjectJsonValue(values[KEY_ABOUT_CAREERS], "tips", v))}
+                onValueChange={v =>
+                  onChange(KEY_ABOUT_CAREERS, patchObjectJsonValue(values[KEY_ABOUT_CAREERS], "tips", v))
+                }
               />
               <FormInput
                 label="职业经历标题"
                 placeholder="例如：我的职业路径"
                 value={String(careersObject.title ?? "")}
-                onValueChange={v => onChange(KEY_ABOUT_CAREERS, patchObjectJsonValue(values[KEY_ABOUT_CAREERS], "title", v))}
+                onValueChange={v =>
+                  onChange(KEY_ABOUT_CAREERS, patchObjectJsonValue(values[KEY_ABOUT_CAREERS], "title", v))
+                }
               />
             </SettingsFieldGroup>
             <FormImageUpload
               label="职业经历配图"
               value={String(careersObject.img ?? "")}
-              onValueChange={v => onChange(KEY_ABOUT_CAREERS, patchObjectJsonValue(values[KEY_ABOUT_CAREERS], "img", v))}
+              onValueChange={v =>
+                onChange(KEY_ABOUT_CAREERS, patchObjectJsonValue(values[KEY_ABOUT_CAREERS], "img", v))
+              }
               placeholder="请输入职业经历配图 URL"
             />
             <VisualArrayEditor

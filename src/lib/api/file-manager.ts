@@ -52,11 +52,7 @@ export const createUploadSessionApi = (
   });
 };
 
-export const uploadChunkApi = async (
-  sessionId: string,
-  index: number,
-  chunk: Blob
-): Promise<BaseResponse<unknown>> => {
+export const uploadChunkApi = async (sessionId: string, index: number, chunk: Blob): Promise<BaseResponse<unknown>> => {
   const response = await axiosInstance.post<BaseResponse<unknown>>(
     apiPath(`file/upload/${sessionId}/${index}`),
     chunk,
@@ -65,10 +61,7 @@ export const uploadChunkApi = async (
   return response.data;
 };
 
-export const deleteUploadSessionApi = async (
-  sessionId: string,
-  fullPath: string
-): Promise<BaseResponse<unknown>> => {
+export const deleteUploadSessionApi = async (sessionId: string, fullPath: string): Promise<BaseResponse<unknown>> => {
   const response = await axiosInstance.delete<BaseResponse<unknown>>(apiPath("file/upload"), {
     data: { id: sessionId, uri: buildFullUri(fullPath) },
   });
@@ -80,10 +73,11 @@ export const finalizeClientUploadApi = (
   policyId: string,
   size: number
 ): Promise<BaseResponse<{ file_id: string; name: string; size: number }>> => {
-  return apiClient.post<{ file_id: string; name: string; size: number }>(
-    apiPath("file/upload/finalize"),
-    { uri: buildFullUri(fullPath), policy_id: policyId, size }
-  );
+  return apiClient.post<{ file_id: string; name: string; size: number }>(apiPath("file/upload/finalize"), {
+    uri: buildFullUri(fullPath),
+    policy_id: policyId,
+    size,
+  });
 };
 
 export const createItemApi = (
@@ -111,9 +105,7 @@ export const updateFolderViewApi = (
 export const validateUploadSessionApi = (
   sessionId: string
 ): Promise<BaseResponse<ValidateUploadSessionResponse["data"]>> => {
-  return apiClient.get<ValidateUploadSessionResponse["data"]>(
-    apiPath(`file/upload/session/${sessionId}`)
-  );
+  return apiClient.get<ValidateUploadSessionResponse["data"]>(apiPath(`file/upload/session/${sessionId}`));
 };
 
 export const deleteFilesApi = (ids: string[]): Promise<BaseResponse<unknown>> => {
@@ -186,9 +178,7 @@ export const copyFilesApi = (sourceIDs: string[], destinationID: string): Promis
   return apiClient.post<null>(apiPath("folder/copy"), { sourceIDs, destinationID });
 };
 
-export const createDirectLinksApi = (
-  fileIds: string[]
-): Promise<CreateDirectLinksResponse> => {
+export const createDirectLinksApi = (fileIds: string[]): Promise<CreateDirectLinksResponse> => {
   const requestData: CreateDirectLinksRequest = { file_ids: fileIds };
   return apiClient.post<CreateDirectLinksResponse["data"]>(apiPath("pro/direct-links"), requestData);
 };
@@ -199,15 +189,11 @@ export const getFilePreviewUrlsApi = (publicId: string): Promise<FilePreviewUrls
   });
 };
 
-export const getThumbnailCredentialApi = (
-  publicId: string
-): Promise<GetThumbnailCredentialResponse> => {
+export const getThumbnailCredentialApi = (publicId: string): Promise<GetThumbnailCredentialResponse> => {
   return apiClient.get<GetThumbnailCredentialResponse["data"]>(apiPath(`thumbnail/${publicId}`));
 };
 
-export const regenerateThumbnailApi = (
-  publicId: string
-): Promise<BaseResponse<{ status: string }>> => {
+export const regenerateThumbnailApi = (publicId: string): Promise<BaseResponse<{ status: string }>> => {
   return apiClient.post<{ status: string }>(apiPath("thumbnail/regenerate"), { id: publicId });
 };
 
@@ -230,9 +216,6 @@ export const regenerateDirectoryThumbnailsApi = (
   });
 };
 
-export const createShareLinkApi = (
-  params: CreateShareLinkRequest
-): Promise<CreateShareLinkResponse> => {
+export const createShareLinkApi = (params: CreateShareLinkRequest): Promise<CreateShareLinkResponse> => {
   return apiClient.post<CreateShareLinkResponse["data"]>(apiPath("files/share/create"), params);
 };
-

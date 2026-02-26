@@ -59,27 +59,21 @@ function getConfigString(config: unknown, paths: string[]): string {
 
 export function useMusicAPI() {
   const [isLoading, setIsLoading] = useState(false);
-  const siteConfig = useSiteConfigStore((state) => state.siteConfig);
+  const siteConfig = useSiteConfigStore(state => state.siteConfig);
   const siteConfigRef = useRef(siteConfig);
   siteConfigRef.current = siteConfig;
 
   // 从配置获取音乐API基础地址
   const getMusicAPIBaseURL = useCallback((): string => {
     const config = siteConfigRef.current;
-    const apiBaseURL = getConfigString(config, [
-      "frontDesk.home.music.api.base_url",
-      "music.api.base_url",
-    ]);
+    const apiBaseURL = getConfigString(config, ["frontDesk.home.music.api.base_url", "music.api.base_url"]);
     return apiBaseURL || "https://metings.qjqq.cn";
   }, []);
 
   // 从配置获取当前播放列表ID
   const getCurrentPlaylistId = useCallback((): string => {
     const config = siteConfigRef.current;
-    const configId = getConfigString(config, [
-      "frontDesk.home.music.player.playlist_id",
-      "music.player.playlist_id",
-    ]);
+    const configId = getConfigString(config, ["frontDesk.home.music.player.playlist_id", "music.player.playlist_id"]);
     if (configId) return configId;
 
     const localId = localStorage.getItem("music-playlist-id");
@@ -125,10 +119,7 @@ export function useMusicAPI() {
       const currentCustomUrl = getCustomPlaylistUrl();
       const cachedCustomUrl = cache.customPlaylistUrl || null;
 
-      if (
-        cache.playlistId !== currentId ||
-        cachedCustomUrl !== currentCustomUrl
-      ) {
+      if (cache.playlistId !== currentId || cachedCustomUrl !== currentCustomUrl) {
         localStorage.removeItem(CACHE_KEY);
         return null;
       }
@@ -164,28 +155,24 @@ export function useMusicAPI() {
   }, []);
 
   // 获取歌词内容（支持URL和直接内容）
-  const fetchLyricContent = useCallback(
-    async (lrcValue: string, songName: string = "未知歌曲"): Promise<string> => {
-      if (!lrcValue || lrcValue.trim() === "") return "";
+  const fetchLyricContent = useCallback(async (lrcValue: string, songName: string = "未知歌曲"): Promise<string> => {
+    if (!lrcValue || lrcValue.trim() === "") return "";
 
-      const isUrl =
-        lrcValue.startsWith("http://") || lrcValue.startsWith("https://");
+    const isUrl = lrcValue.startsWith("http://") || lrcValue.startsWith("https://");
 
-      if (isUrl) {
-        try {
-          const response = await fetch(lrcValue);
-          if (!response.ok) return "";
-          return await response.text();
-        } catch {
-          console.warn(`[MUSIC_API] 歌词文件获取失败 - 歌曲: ${songName}`);
-          return "";
-        }
-      } else {
-        return lrcValue;
+    if (isUrl) {
+      try {
+        const response = await fetch(lrcValue);
+        if (!response.ok) return "";
+        return await response.text();
+      } catch {
+        console.warn(`[MUSIC_API] 歌词文件获取失败 - 歌曲: ${songName}`);
+        return "";
       }
-    },
-    []
-  );
+    } else {
+      return lrcValue;
+    }
+  }, []);
 
   // 从自定义JSON链接获取歌单数据
   const fetchPlaylistFromJson = useCallback(
@@ -202,21 +189,19 @@ export function useMusicAPI() {
           throw new Error("JSON数据格式错误：期望数组格式");
         }
 
-        const songPromises = jsonData.map(
-          async (item: Record<string, string>, index: number) => {
-            const songName = item.name || item.title || `未知歌曲-${index}`;
-            const lrcContent = await fetchLyricContent(item.lrc || "", songName);
+        const songPromises = jsonData.map(async (item: Record<string, string>, index: number) => {
+          const songName = item.name || item.title || `未知歌曲-${index}`;
+          const lrcContent = await fetchLyricContent(item.lrc || "", songName);
 
-            return {
-              id: item.id || `custom-${index}`,
-              name: songName,
-              artist: item.artist || "未知艺术家",
-              url: ensureHttps(item.url || ""),
-              pic: ensureHttps(item.cover || item.pic || ""),
-              lrc: lrcContent,
-            };
-          }
-        );
+          return {
+            id: item.id || `custom-${index}`,
+            name: songName,
+            artist: item.artist || "未知艺术家",
+            url: ensureHttps(item.url || ""),
+            pic: ensureHttps(item.cover || item.pic || ""),
+            lrc: lrcContent,
+          };
+        });
 
         return await Promise.all(songPromises);
       } catch (error) {
@@ -386,12 +371,7 @@ export function useMusicAPI() {
         setIsLoading(false);
       }
     },
-    [
-      getCapsulePlaylistCache,
-      getCapsuleCustomPlaylistUrl,
-      fetchPlaylistFromJson,
-      setCapsulePlaylistCache,
-    ]
+    [getCapsulePlaylistCache, getCapsuleCustomPlaylistUrl, fetchPlaylistFromJson, setCapsulePlaylistCache]
   );
 
   // 直接调用 Song_V1 API 获取单曲资源
@@ -512,8 +492,7 @@ export function useMusicAPI() {
         }
 
         // 优先使用已有歌词，其次使用 Song_V1 返回歌词（可能为空）
-        const finalLyricsText =
-          lyricsText || (result.lyric ? await fetchLyricContent(result.lyric, songName) : "");
+        const finalLyricsText = lyricsText || (result.lyric ? await fetchLyricContent(result.lyric, songName) : "");
 
         return {
           audioUrl: result.url,
@@ -524,17 +503,10 @@ export function useMusicAPI() {
         let errorMessage = "获取资源失败";
 
         if (error instanceof Error) {
-          if (
-            error.message.includes("502") ||
-            error.message.includes("503") ||
-            error.message.includes("500")
-          ) {
+          if (error.message.includes("502") || error.message.includes("503") || error.message.includes("500")) {
             errorType = "server";
             errorMessage = "音乐服务暂时不可用";
-          } else if (
-            error.message.includes("Network") ||
-            error.message.includes("timeout")
-          ) {
+          } else if (error.message.includes("Network") || error.message.includes("timeout")) {
             errorType = "network";
             errorMessage = "网络连接异常";
           } else {

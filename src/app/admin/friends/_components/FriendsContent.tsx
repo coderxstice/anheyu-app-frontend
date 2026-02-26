@@ -26,7 +26,7 @@ import type { LinkItem, LinkStatus } from "@/types/friends";
 import type { FriendsPageState } from "../_hooks/use-friends-page";
 
 // ===================================
-//          常量 & 配置
+// 常量 & 配置
 // ===================================
 
 const STATUS_CHIP: Record<LinkStatus, { label: string; color: "success" | "warning" | "danger" | "default" }> = {
@@ -45,7 +45,7 @@ const TABLE_COLUMNS = [
 ];
 
 // ===================================
-//          友链列表
+// 友链列表
 // ===================================
 
 interface FriendsContentProps {
@@ -68,7 +68,7 @@ export function FriendsContent({ cm }: FriendsContentProps) {
                   alt={link.name}
                   width={40}
                   height={40}
-                  className="w-10 h-10 rounded-full object-cover border border-default-200 shrink-0"
+                  className="w-10 h-10 rounded-full object-cover border border-border/60 shrink-0"
                   unoptimized
                 />
               ) : (
@@ -92,7 +92,7 @@ export function FriendsContent({ cm }: FriendsContentProps) {
           );
         }
         case "description": {
-          return <p className="text-xs text-default-500 line-clamp-2 max-w-[160px]">{link.description || "-"}</p>;
+          return <p className="text-xs text-muted-foreground line-clamp-2 max-w-[160px]">{link.description || "-"}</p>;
         }
         case "category": {
           return (
@@ -196,11 +196,11 @@ export function FriendsContent({ cm }: FriendsContentProps) {
     return (
       <div className="py-2 px-2 flex flex-wrap justify-between items-center gap-2">
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-small text-default-400 whitespace-nowrap">共 {cm.totalItems} 条</span>
-          <span className="text-small text-default-300">|</span>
+          <span className="text-small text-muted-foreground whitespace-nowrap">共 {cm.totalItems} 条</span>
+          <span className="text-small text-muted-foreground/40">|</span>
           <Dropdown>
             <DropdownTrigger>
-              <Button variant="light" size="sm" className="text-default-400 text-small h-7 min-w-0 gap-1 px-2">
+              <Button variant="light" size="sm" className="text-muted-foreground text-small h-7 min-w-0 gap-1 px-2">
                 {cm.pageSize}条/页
                 <ChevronDown className="w-3 h-3" />
               </Button>
@@ -224,7 +224,7 @@ export function FriendsContent({ cm }: FriendsContentProps) {
           </Dropdown>
           {cm.selectedIds.size > 0 && (
             <>
-              <span className="text-small text-default-300">|</span>
+              <span className="text-small text-muted-foreground/40">|</span>
               <span className="text-small text-primary font-medium whitespace-nowrap">
                 已选 {cm.selectedIds.size} 项
               </span>
@@ -281,7 +281,7 @@ export function FriendsContent({ cm }: FriendsContentProps) {
           wrapper: "flex-1 min-h-0 px-3! py-0! shadow-none! rounded-none! border-none!",
           table: "border-separate border-spacing-y-1.5 -mt-1.5",
           thead: "[&>tr]:first:shadow-none! after:hidden!",
-          th: "bg-[#F6F7FA] dark:bg-default-100 first:rounded-tl-lg! last:rounded-tr-lg!",
+          th: "bg-[#F6F7FA] dark:bg-muted first:rounded-tl-lg! last:rounded-tr-lg!",
           tr: "rounded-xl!",
           td: "first:before:rounded-s-xl! last:before:rounded-e-xl!",
         }}

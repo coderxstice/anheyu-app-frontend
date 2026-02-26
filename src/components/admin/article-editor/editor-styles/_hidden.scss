@@ -31,7 +31,9 @@
   .hidden-block-wrapper .hidden-content {
     margin-top: 1rem;
     min-height: 1.5em;
-    transition: filter 0.3s, opacity 0.3s;
+    transition:
+      filter 0.3s,
+      opacity 0.3s;
   }
 
   .hide-block .hide-content > :first-child {
@@ -193,5 +195,7 @@
   opacity: 0.3;
   user-select: none;
   pointer-events: none;
-  transition: filter 0.3s, opacity 0.3s;
+  transition:
+    filter 0.3s,
+    opacity 0.3s;
 }

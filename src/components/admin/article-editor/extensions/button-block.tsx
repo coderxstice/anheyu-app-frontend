@@ -185,7 +185,7 @@ function IconPicker({ value, onChange }: { value: string; onChange: (v: string) 
 
   const isSearching = search.trim().length > 0;
   const presetCategory = PRESET_ICONS[tab];
-  const displayIcons = isSearching ? apiResults : presetCategory?.icons ?? [];
+  const displayIcons = isSearching ? apiResults : (presetCategory?.icons ?? []);
 
   const selectIcon = (icon: string) => {
     onChange(icon);
@@ -381,7 +381,7 @@ function ButtonBlockView({ node, updateAttributes, editor }: NodeViewProps) {
     if (c) p.push(`btn-${c}`);
     if (s === "outline") p.push("btn-outline");
     if (sz === "larger") p.push("btn-larger");
-    return p.join(" ");
+    return p.join("");
   };
 
   // ---- 编辑：单按钮 ----
@@ -735,7 +735,7 @@ function ButtonBlockView({ node, updateAttributes, editor }: NodeViewProps) {
                 </a>
               ))
             ) : (
-              <div className="text-sm text-default-300 col-span-full text-center py-4">空按钮组 - 点击编辑</div>
+              <div className="text-sm text-muted-foreground/40 col-span-full text-center py-4">空按钮组 - 点击编辑</div>
             )}
           </div>
         </div>
@@ -864,7 +864,7 @@ export const ButtonBlock = Node.create({
       }
       const containerClass = ["btns-container", `btns-cols-${cols}`, gStyle !== "default" ? `btns-style-${gStyle}` : ""]
         .filter(Boolean)
-        .join(" ");
+        .join("");
       const children = items.map(item => {
         const la: Record<string, string> = { class: "btn-anzhiyu", href: item.url || "#" };
         if (item.color) la["data-color"] = item.color;
@@ -891,7 +891,7 @@ export const ButtonBlock = Node.create({
       sizeVal === "larger" ? "btn-larger" : "",
     ]
       .filter(Boolean)
-      .join(" ");
+      .join("");
     const la: Record<string, string> = { class: linkClass, href: urlVal };
     if (colorVal) la["data-color"] = colorVal;
 

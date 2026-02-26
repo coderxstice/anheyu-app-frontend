@@ -34,11 +34,10 @@ function getCached(): CachedVersion | null {
 
 function setCache(info: VersionInfo): void {
   try {
-    localStorage.setItem(
-      VERSION_CACHE_KEY,
-      JSON.stringify({ ...info, timestamp: Date.now() })
-    );
-  } catch { /* ignore */ }
+    localStorage.setItem(VERSION_CACHE_KEY, JSON.stringify({ ...info, timestamp: Date.now() }));
+  } catch {
+    /* ignore */
+  }
 }
 
 export async function getVersionInfo(forceRefresh = false): Promise<VersionInfo> {
@@ -66,7 +65,9 @@ export async function getVersionInfo(forceRefresh = false): Promise<VersionInfo>
         return info;
       }
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 
   return { name: "anheyu-app", version: "未知版本" };
 }

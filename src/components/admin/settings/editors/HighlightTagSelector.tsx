@@ -122,7 +122,7 @@ export function HighlightTagSelector({ value, onValueChange }: HighlightTagSelec
     return (
       <div className="flex items-center justify-center py-10">
         <Spinner size="sm" />
-        <span className="ml-2 text-sm text-default-400">加载标签...</span>
+        <span className="ml-2 text-sm text-muted-foreground">加载标签...</span>
       </div>
     );
   }
@@ -227,31 +227,31 @@ function TransferPanel({
   onToggleItem,
 }: TransferPanelProps) {
   return (
-    <div className="flex-1 border border-default-200 rounded-xl overflow-hidden bg-background min-w-[200px]">
+    <div className="flex-1 border border-border/60 rounded-xl overflow-hidden bg-background min-w-[200px]">
       {/* 头部 */}
-      <div className="flex items-center justify-between px-3 py-2.5 border-b border-default-100 bg-default-50/50">
+      <div className="flex items-center justify-between px-3 py-2.5 border-b border-border/30 bg-muted/30">
         <div className="flex items-center gap-2">
           <Checkbox size="sm" isSelected={allChecked} onValueChange={onToggleAll} aria-label={`全选${title}`} />
           <span className="text-sm font-medium text-foreground">{title}</span>
         </div>
-        <span className="text-xs text-default-400 tabular-nums">{count}</span>
+        <span className="text-xs text-muted-foreground tabular-nums">{count}</span>
       </div>
 
       {/* 搜索框 */}
-      <div className="px-3 py-2 border-b border-default-100">
+      <div className="px-3 py-2 border-b border-border/30">
         <Input
           size="sm"
           placeholder="搜索标签"
           value={search}
           onValueChange={onSearchChange}
-          startContent={<Search className="w-3 h-3 text-default-400" />}
+          startContent={<Search className="w-3 h-3 text-muted-foreground" />}
           classNames={{
             inputWrapper: cn(
-              "bg-default-100/5 border border-default-200/70 rounded-lg shadow-none! h-8 min-h-8",
-              "data-[hover=true]:bg-default-100/5! data-[hover=true]:border-default-300",
+              "bg-muted border border-border/60 rounded-lg shadow-none! h-8 min-h-8",
+              "data-[hover=true]:bg-muted! data-[hover=true]:border-border/80",
               "group-data-[focus=true]:border-primary/50 group-data-[focus=true]:ring-1 group-data-[focus=true]:ring-primary/20"
             ),
-            input: "text-xs placeholder:text-default-400",
+            input: "text-xs placeholder:text-muted-foreground",
           }}
         />
       </div>
@@ -259,13 +259,13 @@ function TransferPanel({
       {/* 列表 */}
       <div className="h-[220px] overflow-y-auto">
         {items.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-xs text-default-300">暂无标签</div>
+          <div className="flex items-center justify-center h-full text-xs text-muted-foreground/40">暂无标签</div>
         ) : (
           <div className="py-1">
             {items.map(tag => (
               <label
                 key={tag.id}
-                className="flex items-center gap-2 px-3 py-1.5 cursor-pointer hover:bg-default-50 transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 cursor-pointer hover:bg-muted/30 transition-colors"
               >
                 <Checkbox
                   size="sm"

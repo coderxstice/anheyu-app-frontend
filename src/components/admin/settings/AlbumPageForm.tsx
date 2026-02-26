@@ -72,7 +72,7 @@ export function AlbumPageForm({ values, onChange, loading }: AlbumPageFormProps)
     <div className="space-y-8">
       {/* 横幅配置 */}
       <SettingsSection title="横幅" description="页面顶部展示区域">
-        <div className="rounded-xl border border-default-200/80 bg-default-50/20 p-5 shadow-[0_0_0_0.5px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.04)]">
+        <div className="rounded-xl border border-border/60 bg-muted/30 p-5 shadow-[0_0_0_0.5px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.04)]">
           <FormImageUpload
             label="背景图"
             value={values[KEY_ALBUM_BANNER_BG]}
@@ -104,7 +104,7 @@ export function AlbumPageForm({ values, onChange, loading }: AlbumPageFormProps)
 
       {/* 布局配置 */}
       <SettingsSection title="布局" description="网格等高排列；瀑布流按原始比例参差错落">
-        <div className="rounded-xl border border-default-200/80 bg-default-50/20 p-5 shadow-[0_0_0_0.5px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.04)]">
+        <div className="rounded-xl border border-border/60 bg-muted/30 p-5 shadow-[0_0_0_0.5px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.04)]">
           <FormSelect
             label="布局模式"
             placeholder="请选择"
@@ -134,8 +134,8 @@ export function AlbumPageForm({ values, onChange, loading }: AlbumPageFormProps)
 
           {/* 瀑布流专属配置 - 仅选择瀑布流时显示 */}
           {isWaterfall && (
-            <div className="mt-4 pt-4 border-t border-default-200/60 space-y-4">
-              <p className="text-xs font-medium text-default-500">瀑布流列数</p>
+            <div className="mt-4 pt-4 border-t border-border/60 space-y-4">
+              <p className="text-xs font-medium text-muted-foreground">瀑布流列数</p>
               <SettingsFieldGroup cols={3}>
                 <FormSelect
                   label="大屏 (≥1200px)"
@@ -183,7 +183,7 @@ export function AlbumPageForm({ values, onChange, loading }: AlbumPageFormProps)
 
       {/* API 配置 */}
       <SettingsSection title="数据源" description="相册 API 与图片处理参数">
-        <div className="rounded-xl border border-default-200/80 bg-default-50/20 p-5 shadow-[0_0_0_0.5px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.04)]">
+        <div className="rounded-xl border border-border/60 bg-muted/30 p-5 shadow-[0_0_0_0.5px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.04)]">
           <FormInput
             label="API 地址"
             placeholder="https://album.anheyu.com/"

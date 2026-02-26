@@ -19,8 +19,5 @@ declare module "katex/contrib/auto-render" {
     macros?: Record<string, string>;
   }
 
-  export default function renderMathInElement(
-    element: HTMLElement,
-    options?: RenderMathInElementOptions
-  ): void;
+  export default function renderMathInElement(element: HTMLElement, options?: RenderMathInElementOptions): void;
 }

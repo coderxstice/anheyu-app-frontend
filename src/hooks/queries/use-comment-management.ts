@@ -3,13 +3,7 @@
  * 对接管理端评论 API，提供服务端分页查询和各类 mutation
  */
 
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  queryOptions,
-  keepPreviousData,
-} from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, queryOptions, keepPreviousData } from "@tanstack/react-query";
 import { commentManagementApi } from "@/lib/api/comment-management";
 import type {
   AdminCommentListParams,
@@ -46,10 +40,7 @@ export const adminCommentsQueryOptions = (params: AdminCommentListParams = {}) =
 /**
  * 管理端评论列表（服务端分页）
  */
-export function useAdminComments(
-  params: AdminCommentListParams = {},
-  options?: { enabled?: boolean }
-) {
+export function useAdminComments(params: AdminCommentListParams = {}, options?: { enabled?: boolean }) {
   return useQuery({
     ...adminCommentsQueryOptions(params),
     enabled: options?.enabled ?? true,
@@ -111,8 +102,7 @@ export function useToggleCommentPin() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, pinned }: { id: string; pinned: boolean }) =>
-      commentManagementApi.togglePin(id, pinned),
+    mutationFn: ({ id, pinned }: { id: string; pinned: boolean }) => commentManagementApi.togglePin(id, pinned),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: commentManagementKeys.lists() });
     },
@@ -125,7 +115,7 @@ export function useToggleCommentPin() {
 export function useExportComments() {
   return useMutation({
     mutationFn: (ids?: string[]) => commentManagementApi.exportComments(ids),
-    onSuccess: (blob) => {
+    onSuccess: blob => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;

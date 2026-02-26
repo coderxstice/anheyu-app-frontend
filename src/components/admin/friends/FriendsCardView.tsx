@@ -40,7 +40,7 @@ export function FriendsCardView({ links, onEdit, onDelete, onReview }: FriendsCa
                   alt={link.name}
                   width={48}
                   height={48}
-                  className="w-12 h-12 rounded-full object-cover border border-default-200 shrink-0"
+                  className="w-12 h-12 rounded-full object-cover border border-border/60 shrink-0"
                   unoptimized
                 />
               ) : (
@@ -55,7 +55,7 @@ export function FriendsCardView({ links, onEdit, onDelete, onReview }: FriendsCa
                     {statusCfg.label}
                   </Chip>
                 </div>
-                <p className="text-xs text-default-400 mt-0.5 line-clamp-1">{link.description || "暂无描述"}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{link.description || "暂无描述"}</p>
                 <a
                   href={link.url}
                   target="_blank"
@@ -91,7 +91,7 @@ export function FriendsCardView({ links, onEdit, onDelete, onReview }: FriendsCa
             )}
 
             <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
-              <span className="text-xs text-default-400">排序: {link.sort_order}</span>
+              <span className="text-xs text-muted-foreground">排序: {link.sort_order}</span>
               <div className="flex items-center gap-1">
                 {link.status === "PENDING" && (
                   <>

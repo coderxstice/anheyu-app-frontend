@@ -33,31 +33,31 @@ export function StorageTypeSelector({ isOpen, onOpenChange, onSelect }: StorageT
     >
       {onClose => (
         <>
-            <ModalBody className="pb-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {STORAGE_TYPES.map(type => {
-                  const Icon = TYPE_ICONS[type];
-                  return (
-                    <button
-                      key={type}
-                      onClick={() => {
-                        onSelect(type);
-                        onClose();
-                      }}
-                      className={cn(
-                        "flex items-center gap-3 p-4 rounded-lg border border-border/60",
-                        "hover:bg-primary hover:text-primary-foreground hover:border-primary",
-                        "transition-all duration-200 ease-in-out cursor-pointer",
-                        "group"
-                      )}
-                    >
-                      <Icon className="w-6 h-6 shrink-0" />
-                      <span className="text-sm font-medium">{STORAGE_TYPE_LABELS[type]}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </ModalBody>
+          <ModalBody className="pb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {STORAGE_TYPES.map(type => {
+                const Icon = TYPE_ICONS[type];
+                return (
+                  <button
+                    key={type}
+                    onClick={() => {
+                      onSelect(type);
+                      onClose();
+                    }}
+                    className={cn(
+                      "flex items-center gap-3 p-4 rounded-lg border border-border/60",
+                      "hover:bg-primary hover:text-primary-foreground hover:border-primary",
+                      "transition-all duration-200 ease-in-out cursor-pointer",
+                      "group"
+                    )}
+                  >
+                    <Icon className="w-6 h-6 shrink-0" />
+                    <span className="text-sm font-medium">{STORAGE_TYPE_LABELS[type]}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </ModalBody>
         </>
       )}
     </AdminDialog>

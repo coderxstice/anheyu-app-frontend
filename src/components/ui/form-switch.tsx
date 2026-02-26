@@ -36,7 +36,7 @@ const FormSwitch = React.forwardRef<HTMLInputElement, FormSwitchProps>(
               )}
             </span>
           )}
-          {description && <p className="text-xs leading-relaxed text-default-400 mt-0.5">{description}</p>}
+          {description && <p className="text-xs leading-relaxed text-muted-foreground mt-0.5">{description}</p>}
         </div>
 
         <Switch

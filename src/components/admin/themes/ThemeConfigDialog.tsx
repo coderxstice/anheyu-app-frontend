@@ -157,161 +157,161 @@ export function ThemeConfigDialog({ themeName, onClose }: ThemeConfigDialogProps
         icon: Settings2,
       }}
     >
-        <ModalBody className="gap-0 p-0">
-          {loading ? (
-            <div className="flex items-center justify-center py-16">
-              <Spinner size="sm" label="加载配置中..." />
-            </div>
-          ) : settingGroups.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-              <p className="text-sm">该主题暂无可配置项</p>
-            </div>
-          ) : (
-            <div className="flex flex-col">
-              {/* 分组 Tabs */}
-              {settingGroups.length > 1 && (
-                <div className="px-6 border-b border-border/50">
-                  <Tabs
-                    aria-label="配置分组"
-                    variant="underlined"
-                    size="sm"
-                    selectedKey={activeGroup}
-                    onSelectionChange={key => setActiveGroup(key as string)}
-                    classNames={{ tabList: "gap-4", tab: "px-0 h-8", cursor: "w-full" }}
-                  >
-                    {settingGroups.map(g => (
-                      <Tab key={g.group} title={g.label} />
-                    ))}
-                  </Tabs>
-                </div>
-              )}
-
-              {/* 配置字段 */}
-              <div className="px-6 py-4 flex flex-col gap-4 max-h-[50vh] overflow-y-auto">
-                {currentGroup?.fields.map(field => {
-                  if (!shouldShowField(field)) return null;
-                  const value = configValues[field.name];
-
-                  return (
-                    <div key={field.name}>
-                      {field.type === "text" && (
-                        <Input
-                          label={field.label}
-                          description={field.description}
-                          placeholder={field.placeholder || `请输入${field.label}`}
-                          value={String(value ?? "")}
-                          onValueChange={v => updateField(field.name, v)}
-                          isRequired={field.required}
-                          size="sm"
-                        />
-                      )}
-                      {field.type === "textarea" && (
-                        <Input
-                          label={field.label}
-                          description={field.description}
-                          placeholder={field.placeholder || `请输入${field.label}`}
-                          value={String(value ?? "")}
-                          onValueChange={v => updateField(field.name, v)}
-                          isRequired={field.required}
-                          size="sm"
-                        />
-                      )}
-                      {field.type === "number" && (
-                        <Input
-                          label={field.label}
-                          description={field.description}
-                          placeholder={field.placeholder}
-                          type="number"
-                          value={String(value ?? "")}
-                          onValueChange={v => updateField(field.name, v === "" ? "" : Number(v))}
-                          isRequired={field.required}
-                          size="sm"
-                        />
-                      )}
-                      {field.type === "select" && field.options && (
-                        <Select
-                          label={field.label}
-                          description={field.description}
-                          placeholder={field.placeholder || `请选择${field.label}`}
-                          selectedKeys={value != null ? [String(value)] : []}
-                          onSelectionChange={keys => {
-                            const selected = Array.from(keys)[0];
-                            updateField(field.name, selected);
-                          }}
-                          isRequired={field.required}
-                          size="sm"
-                        >
-                          {field.options.map(opt => (
-                            <SelectItem key={String(opt.value)}>{opt.label}</SelectItem>
-                          ))}
-                        </Select>
-                      )}
-                      {field.type === "switch" && (
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-medium">{field.label}</p>
-                            {field.description && (
-                              <p className="text-xs text-muted-foreground mt-0.5">{field.description}</p>
-                            )}
-                          </div>
-                          <Switch isSelected={!!value} onValueChange={v => updateField(field.name, v)} size="sm" />
-                        </div>
-                      )}
-                      {field.type === "color" && (
-                        <Input
-                          label={field.label}
-                          description={field.description}
-                          placeholder={field.placeholder || "#000000"}
-                          value={String(value ?? "")}
-                          onValueChange={v => updateField(field.name, v)}
-                          size="sm"
-                          startContent={
-                            <div
-                              className="w-4 h-4 rounded-full border border-border/50"
-                              style={{ backgroundColor: String(value || "#000") }}
-                            />
-                          }
-                        />
-                      )}
-                      {field.type === "image" && (
-                        <Input
-                          label={field.label}
-                          description={field.description}
-                          placeholder={field.placeholder || "输入图片URL"}
-                          value={String(value ?? "")}
-                          onValueChange={v => updateField(field.name, v)}
-                          size="sm"
-                        />
-                      )}
-                      {field.type === "code" && (
-                        <Input
-                          label={field.label}
-                          description={field.description}
-                          placeholder={field.placeholder || "请输入代码"}
-                          value={String(value ?? "")}
-                          onValueChange={v => updateField(field.name, v)}
-                          size="sm"
-                          classNames={{ input: "font-mono text-xs" }}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
+      <ModalBody className="gap-0 p-0">
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <Spinner size="sm" label="加载配置中..." />
+          </div>
+        ) : settingGroups.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+            <p className="text-sm">该主题暂无可配置项</p>
+          </div>
+        ) : (
+          <div className="flex flex-col">
+            {/* 分组 Tabs */}
+            {settingGroups.length > 1 && (
+              <div className="px-6 border-b border-border/50">
+                <Tabs
+                  aria-label="配置分组"
+                  variant="underlined"
+                  size="sm"
+                  selectedKey={activeGroup}
+                  onSelectionChange={key => setActiveGroup(key as string)}
+                  classNames={{ tabList: "gap-4", tab: "px-0 h-8", cursor: "w-full" }}
+                >
+                  {settingGroups.map(g => (
+                    <Tab key={g.group} title={g.label} />
+                  ))}
+                </Tabs>
               </div>
+            )}
+
+            {/* 配置字段 */}
+            <div className="px-6 py-4 flex flex-col gap-4 max-h-[50vh] overflow-y-auto">
+              {currentGroup?.fields.map(field => {
+                if (!shouldShowField(field)) return null;
+                const value = configValues[field.name];
+
+                return (
+                  <div key={field.name}>
+                    {field.type === "text" && (
+                      <Input
+                        label={field.label}
+                        description={field.description}
+                        placeholder={field.placeholder || `请输入${field.label}`}
+                        value={String(value ?? "")}
+                        onValueChange={v => updateField(field.name, v)}
+                        isRequired={field.required}
+                        size="sm"
+                      />
+                    )}
+                    {field.type === "textarea" && (
+                      <Input
+                        label={field.label}
+                        description={field.description}
+                        placeholder={field.placeholder || `请输入${field.label}`}
+                        value={String(value ?? "")}
+                        onValueChange={v => updateField(field.name, v)}
+                        isRequired={field.required}
+                        size="sm"
+                      />
+                    )}
+                    {field.type === "number" && (
+                      <Input
+                        label={field.label}
+                        description={field.description}
+                        placeholder={field.placeholder}
+                        type="number"
+                        value={String(value ?? "")}
+                        onValueChange={v => updateField(field.name, v === "" ? "" : Number(v))}
+                        isRequired={field.required}
+                        size="sm"
+                      />
+                    )}
+                    {field.type === "select" && field.options && (
+                      <Select
+                        label={field.label}
+                        description={field.description}
+                        placeholder={field.placeholder || `请选择${field.label}`}
+                        selectedKeys={value != null ? [String(value)] : []}
+                        onSelectionChange={keys => {
+                          const selected = Array.from(keys)[0];
+                          updateField(field.name, selected);
+                        }}
+                        isRequired={field.required}
+                        size="sm"
+                      >
+                        {field.options.map(opt => (
+                          <SelectItem key={String(opt.value)}>{opt.label}</SelectItem>
+                        ))}
+                      </Select>
+                    )}
+                    {field.type === "switch" && (
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium">{field.label}</p>
+                          {field.description && (
+                            <p className="text-xs text-muted-foreground mt-0.5">{field.description}</p>
+                          )}
+                        </div>
+                        <Switch isSelected={!!value} onValueChange={v => updateField(field.name, v)} size="sm" />
+                      </div>
+                    )}
+                    {field.type === "color" && (
+                      <Input
+                        label={field.label}
+                        description={field.description}
+                        placeholder={field.placeholder || "#000000"}
+                        value={String(value ?? "")}
+                        onValueChange={v => updateField(field.name, v)}
+                        size="sm"
+                        startContent={
+                          <div
+                            className="w-4 h-4 rounded-full border border-border/50"
+                            style={{ backgroundColor: String(value || "#000") }}
+                          />
+                        }
+                      />
+                    )}
+                    {field.type === "image" && (
+                      <Input
+                        label={field.label}
+                        description={field.description}
+                        placeholder={field.placeholder || "输入图片URL"}
+                        value={String(value ?? "")}
+                        onValueChange={v => updateField(field.name, v)}
+                        size="sm"
+                      />
+                    )}
+                    {field.type === "code" && (
+                      <Input
+                        label={field.label}
+                        description={field.description}
+                        placeholder={field.placeholder || "请输入代码"}
+                        value={String(value ?? "")}
+                        onValueChange={v => updateField(field.name, v)}
+                        size="sm"
+                        classNames={{ input: "font-mono text-xs" }}
+                      />
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          )}
-        </ModalBody>
-        <ModalFooter>
-          <Button variant="flat" onPress={handleClose}>
-            取消
-          </Button>
-          <Button variant="flat" onPress={handleReset} isDisabled={settingGroups.length === 0}>
-            恢复默认
-          </Button>
-          <Button color="primary" onPress={handleSave} isLoading={saving} isDisabled={settingGroups.length === 0}>
-            保存配置
-          </Button>
-        </ModalFooter>
+          </div>
+        )}
+      </ModalBody>
+      <ModalFooter>
+        <Button variant="flat" onPress={handleClose}>
+          取消
+        </Button>
+        <Button variant="flat" onPress={handleReset} isDisabled={settingGroups.length === 0}>
+          恢复默认
+        </Button>
+        <Button color="primary" onPress={handleSave} isLoading={saving} isDisabled={settingGroups.length === 0}>
+          保存配置
+        </Button>
+      </ModalFooter>
     </AdminDialog>
   );
 }

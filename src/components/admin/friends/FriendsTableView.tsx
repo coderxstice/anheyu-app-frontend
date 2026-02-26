@@ -42,16 +42,16 @@ export function FriendsTableView({
     <div className="overflow-x-auto rounded-xl border border-border/50">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-default-50/80 border-b border-border/50">
+          <tr className="bg-muted/30 border-b border-border/50">
             <th className="w-10 px-3 py-3 text-left">
               <Checkbox isSelected={allSelected} isIndeterminate={someSelected} onValueChange={onSelectAll} size="sm" />
             </th>
-            <th className="px-3 py-3 text-left font-medium text-default-500 min-w-[240px]">网站信息</th>
-            <th className="px-3 py-3 text-left font-medium text-default-500 min-w-[120px]">描述</th>
-            <th className="px-3 py-3 text-left font-medium text-default-500">分类/标签</th>
-            <th className="px-3 py-3 text-left font-medium text-default-500 w-24">状态</th>
-            <th className="px-3 py-3 text-center font-medium text-default-500 w-16">排序</th>
-            <th className="px-3 py-3 text-right font-medium text-default-500 w-48">操作</th>
+            <th className="px-3 py-3 text-left font-medium text-muted-foreground min-w-[240px]">网站信息</th>
+            <th className="px-3 py-3 text-left font-medium text-muted-foreground min-w-[120px]">描述</th>
+            <th className="px-3 py-3 text-left font-medium text-muted-foreground">分类/标签</th>
+            <th className="px-3 py-3 text-left font-medium text-muted-foreground w-24">状态</th>
+            <th className="px-3 py-3 text-center font-medium text-muted-foreground w-16">排序</th>
+            <th className="px-3 py-3 text-right font-medium text-muted-foreground w-48">操作</th>
           </tr>
         </thead>
         <tbody>
@@ -61,7 +61,7 @@ export function FriendsTableView({
               <tr
                 key={link.id}
                 className={cn(
-                  "border-b border-border/30 hover:bg-default-50/50 transition-colors",
+                  "border-b border-border/30 hover:bg-muted/30 transition-colors",
                   selectedIds.has(link.id) && "bg-primary-50/30"
                 )}
               >
@@ -80,7 +80,7 @@ export function FriendsTableView({
                         alt={link.name}
                         width={40}
                         height={40}
-                        className="w-10 h-10 rounded-full object-cover border border-default-200 shrink-0"
+                        className="w-10 h-10 rounded-full object-cover border border-border/60 shrink-0"
                         unoptimized
                       />
                     ) : (
@@ -103,7 +103,7 @@ export function FriendsTableView({
                   </div>
                 </td>
                 <td className="px-3 py-3">
-                  <p className="text-default-500 line-clamp-2 text-xs">{link.description || "-"}</p>
+                  <p className="text-muted-foreground line-clamp-2 text-xs">{link.description || "-"}</p>
                 </td>
                 <td className="px-3 py-3">
                   <div className="flex flex-col gap-1">
@@ -127,7 +127,7 @@ export function FriendsTableView({
                         {link.tag.name}
                       </Chip>
                     )}
-                    {!link.category && !link.tag && <span className="text-default-300 text-xs">-</span>}
+                    {!link.category && !link.tag && <span className="text-muted-foreground/40 text-xs">-</span>}
                   </div>
                 </td>
                 <td className="px-3 py-3">
@@ -141,7 +141,7 @@ export function FriendsTableView({
                   </Chip>
                 </td>
                 <td className="px-3 py-3 text-center">
-                  <span className="text-xs text-default-400">{link.sort_order}</span>
+                  <span className="text-xs text-muted-foreground">{link.sort_order}</span>
                 </td>
                 <td className="px-3 py-3">
                   <div className="flex items-center justify-end gap-1">

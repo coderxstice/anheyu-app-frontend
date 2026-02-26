@@ -38,13 +38,7 @@ export function isIconifyIcon(icon?: string): boolean {
  * 菜单图标组件
  * 自动识别 Iconify 图标或图片 URL 并渲染对应组件
  */
-export function MenuIcon({
-  icon,
-  size = 20,
-  className,
-  imageClassName,
-  iconifyClassName,
-}: MenuIconProps) {
+export function MenuIcon({ icon, size = 20, className, imageClassName, iconifyClassName }: MenuIconProps) {
   if (!icon) return null;
 
   // 图片 URL
@@ -63,14 +57,7 @@ export function MenuIcon({
 
   // Iconify 图标（如 "ri:home-fill"）
   if (isIconifyIcon(icon)) {
-    return (
-      <Icon
-        icon={icon}
-        width="1em"
-        height="1em"
-        className={cn("inline-block", className, iconifyClassName)}
-      />
-    );
+    return <Icon icon={icon} width="1em" height="1em" className={cn("inline-block", className, iconifyClassName)} />;
   }
 
   return null;

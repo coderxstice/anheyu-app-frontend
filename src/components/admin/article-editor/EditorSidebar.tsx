@@ -24,7 +24,7 @@ import type { PostCategory, PostTag } from "@/types/article";
 import type { ArticleMeta } from "./use-article-meta";
 
 // ═══════════════════════════════════════════
-//  Props & 常量
+// Props & 常量
 // ═══════════════════════════════════════════
 
 interface EditorSidebarProps {
@@ -79,7 +79,7 @@ const QUICK_TIMES = [
 ];
 
 // ═══════════════════════════════════════════
-//  原子 UI 组件（纯手写，不依赖任何 UI 库）
+// 原子 UI 组件（纯手写，不依赖任何 UI 库）
 // ═══════════════════════════════════════════
 
 /** 自定义输入框 */
@@ -370,7 +370,7 @@ function SbSection({
 }
 
 // ═══════════════════════════════════════════
-//  封面图预览
+// 封面图预览
 // ═══════════════════════════════════════════
 
 function CoverPreview({ url }: { url: string }) {
@@ -413,7 +413,7 @@ function CoverPreview({ url }: { url: string }) {
 }
 
 // ═══════════════════════════════════════════
-//  已选标签 pill
+// 已选标签 pill
 // ═══════════════════════════════════════════
 
 function TagPill({ name, onRemove }: { name: string; onRemove: () => void }) {
@@ -428,7 +428,7 @@ function TagPill({ name, onRemove }: { name: string; onRemove: () => void }) {
 }
 
 // ═══════════════════════════════════════════
-//  大纲 (TOC) 组件
+// 大纲 (TOC) 组件
 // ═══════════════════════════════════════════
 
 interface Heading {
@@ -487,7 +487,7 @@ function TOCTreeNode({
               e.stopPropagation();
               setCollapsed(!collapsed);
             }}
-            className="w-4 h-4 flex items-center justify-center shrink-0 text-default-400 hover:text-default-500 transition-colors"
+            className="w-4 h-4 flex items-center justify-center shrink-0 text-muted-foreground hover:text-muted-foreground transition-colors"
           >
             <span
               className={`text-[9px] leading-none transition-transform duration-150 ${collapsed ? "" : "rotate-90"}`}
@@ -502,11 +502,11 @@ function TOCTreeNode({
           type="button"
           onClick={() => onClickPos(node.heading.pos)}
           className={`flex-1 text-left text-[13px] truncate hover:text-primary transition-colors min-w-0 ${
-            depth === 0 ? "font-semibold text-default-700" : "text-default-500"
+            depth === 0 ? "font-semibold text-foreground/80" : "text-muted-foreground"
           }`}
           title={node.heading.text || "（空标题）"}
         >
-          {node.heading.text || <span className="text-default-300 italic">（空标题）</span>}
+          {node.heading.text || <span className="text-muted-foreground/40 italic">（空标题）</span>}
         </button>
       </div>
       {hasChildren && !collapsed && (
@@ -541,8 +541,8 @@ export function TOCContent({ editor }: { editor: Editor | null }) {
     [editor]
   );
 
-  if (!editor) return <p className="text-xs text-default-300 py-2">编辑器未就绪</p>;
-  if (headings.length === 0) return <p className="text-xs text-default-300 py-2">暂无标题</p>;
+  if (!editor) return <p className="text-xs text-muted-foreground/40 py-2">编辑器未就绪</p>;
+  if (headings.length === 0) return <p className="text-xs text-muted-foreground/40 py-2">暂无标题</p>;
 
   const tree = buildTree(headings);
   return (
@@ -555,7 +555,7 @@ export function TOCContent({ editor }: { editor: Editor | null }) {
 }
 
 // ═══════════════════════════════════════════
-//  文章设置主内容
+// 文章设置主内容
 // ═══════════════════════════════════════════
 
 interface SettingsContentProps {
@@ -961,7 +961,7 @@ function SettingsContent({
 }
 
 // ═══════════════════════════════════════════
-//  EditorSidebar 主入口
+// EditorSidebar 主入口
 // ═══════════════════════════════════════════
 
 export function EditorSidebar({

@@ -22,7 +22,9 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 32px 64px -16px rgb(0 0 0 / 25%), 0 0 0 1px rgb(255 255 255 / 5%) inset;
+  box-shadow:
+    0 32px 64px -16px rgb(0 0 0 / 25%),
+    0 0 0 1px rgb(255 255 255 / 5%) inset;
 }
 
 .modal-body {
@@ -194,7 +196,9 @@
 
 /* 深色模式微调 */
 :global(html.dark) .modal {
-  box-shadow: 0 32px 64px -16px rgb(0 0 0 / 60%), 0 0 0 1px rgb(255 255 255 / 8%) inset;
+  box-shadow:
+    0 32px 64px -16px rgb(0 0 0 / 60%),
+    0 0 0 1px rgb(255 255 255 / 8%) inset;
 }
 
 /* 响应式布局 */

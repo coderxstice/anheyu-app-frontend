@@ -25,10 +25,13 @@ export function AlbumFilterBar({
   onPageReset,
 }: AlbumFilterBarProps) {
   const hasFilter = categoryFilter !== "" || sortFilter !== "display_order_asc";
-  const categoryOptions = [{ key: "__all__", label: "全部分类" }, ...categories.map(cat => ({
-    key: String(cat.id),
-    label: cat.name,
-  }))];
+  const categoryOptions = [
+    { key: "__all__", label: "全部分类" },
+    ...categories.map(cat => ({
+      key: String(cat.id),
+      label: cat.name,
+    })),
+  ];
 
   return (
     <div className="shrink-0 px-5 pb-3">
@@ -37,9 +40,7 @@ export function AlbumFilterBar({
           <Dropdown>
             <DropdownTrigger>
               <Button size="sm" variant="flat" endContent={<ChevronDown className="w-3.5 h-3.5" />} className="h-8">
-                {categoryFilter
-                  ? categories.find(c => String(c.id) === categoryFilter)?.name ?? "分类"
-                  : "分类"}
+                {categoryFilter ? (categories.find(c => String(c.id) === categoryFilter)?.name ?? "分类") : "分类"}
               </Button>
             </DropdownTrigger>
             <DropdownMenu
@@ -63,7 +64,7 @@ export function AlbumFilterBar({
         <Dropdown>
           <DropdownTrigger>
             <Button size="sm" variant="flat" endContent={<ChevronDown className="w-3.5 h-3.5" />} className="h-8">
-              {sortFilter ? ALBUM_SORT_OPTIONS.find(o => o.key === sortFilter)?.label ?? "排序方式" : "排序方式"}
+              {sortFilter ? (ALBUM_SORT_OPTIONS.find(o => o.key === sortFilter)?.label ?? "排序方式") : "排序方式"}
             </Button>
           </DropdownTrigger>
           <DropdownMenu
@@ -88,7 +89,7 @@ export function AlbumFilterBar({
             startContent={<RotateCcw className="w-3.5 h-3.5" />}
             onPress={onReset}
             isDisabled={!hasFilter}
-            className="text-default-600"
+            className="text-foreground/70"
           >
             重置
           </Button>

@@ -32,17 +32,13 @@ export default function Error({ error, reset }: ErrorProps) {
 
         {/* 错误信息 */}
         <h1 className="text-2xl font-bold text-foreground mb-2">出错了</h1>
-        <p className="text-muted-foreground mb-6">
-          抱歉，页面加载时发生了错误。请尝试刷新页面或返回首页。
-        </p>
+        <p className="text-muted-foreground mb-6">抱歉，页面加载时发生了错误。请尝试刷新页面或返回首页。</p>
 
         {/* 错误详情（仅开发环境） */}
         {process.env.NODE_ENV === "development" && (
           <div className="mb-6 p-4 bg-muted rounded-lg text-left">
             <p className="text-sm font-mono text-red break-all">{error.message}</p>
-            {error.digest && (
-              <p className="text-xs text-muted-foreground mt-2">Digest: {error.digest}</p>
-            )}
+            {error.digest && <p className="text-xs text-muted-foreground mt-2">Digest: {error.digest}</p>}
           </div>
         )}
 

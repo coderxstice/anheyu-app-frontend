@@ -94,7 +94,7 @@ function ExpandChevron({ expanded }: { expanded: boolean }) {
     <motion.div
       animate={{ rotate: expanded ? 180 : 0 }}
       transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
-      className="shrink-0 text-default-300"
+      className="shrink-0 text-muted-foreground/40"
     >
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path
@@ -120,18 +120,18 @@ const expandTransition = {
 
 const fieldInputClasses = {
   inputWrapper: cn(
-    "h-9 min-h-9 rounded-xl border border-default-200/80 bg-white dark:bg-default-100/50 shadow-none!",
-    "data-[hover=true]:bg-white! dark:data-[hover=true]:bg-default-100/60 data-[hover=true]:border-default-300/90",
-    "group-data-[focus=true]:bg-white! dark:group-data-[focus=true]:bg-default-100/60 group-data-[focus=true]:border-primary/65",
+    "h-9 min-h-9 rounded-xl border border-border/60 bg-card shadow-none!",
+    "data-[hover=true]:bg-card dark:data-[hover=true]:bg-muted data-[hover=true]:border-border/80",
+    "group-data-[focus=true]:bg-card dark:group-data-[focus=true]:bg-muted group-data-[focus=true]:border-primary/65",
     "group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-primary/15",
     "transition-all duration-200"
   ),
-  input: "text-sm text-foreground/90 placeholder:text-default-400/80",
+  input: "text-sm text-foreground/90 placeholder:text-muted-foreground",
 };
 
 const fieldInputMonoClasses = {
   ...fieldInputClasses,
-  input: "text-sm font-mono text-foreground/90 placeholder:text-default-400/80 tracking-wide",
+  input: "text-sm font-mono text-foreground/90 placeholder:text-muted-foreground tracking-wide",
 };
 
 // ─── 子组件：列表项行（支持拖拽排序） ─────────────────────────────
@@ -226,7 +226,7 @@ function CreativityRow({
           <div className="text-[14px] font-medium text-foreground leading-tight truncate tracking-[-0.08px]">
             {item.name || "未命名"}
           </div>
-          <div className="text-[12px] text-default-400 leading-tight truncate mt-px font-mono tracking-[-0.2px]">
+          <div className="text-[12px] text-muted-foreground leading-tight truncate mt-px font-mono tracking-[-0.2px]">
             {color}
           </div>
         </div>
@@ -241,7 +241,7 @@ function CreativityRow({
             onClick={onRemove}
             className={cn(
               "w-7 h-7 rounded-lg flex items-center justify-center",
-              "text-default-300 hover:text-danger hover:bg-danger/8",
+              "text-muted-foreground/40 hover:text-danger hover:bg-danger/8",
               "transition-all duration-150 active:scale-[0.92]"
             )}
             aria-label="删除"
@@ -268,11 +268,11 @@ function CreativityRow({
             className="overflow-hidden"
           >
             <div className="px-4 pb-4 pt-1">
-              <div className="rounded-xl border border-default-200/60 bg-white dark:bg-card p-4">
+              <div className="rounded-xl border border-border/60 bg-white dark:bg-card p-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                   {/* 名称 */}
                   <div className="flex flex-col gap-[5px]">
-                    <label className="text-[11px] font-semibold text-default-500 uppercase tracking-[0.5px] leading-tight">
+                    <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.5px] leading-tight">
                       名称
                     </label>
                     <Input
@@ -286,7 +286,7 @@ function CreativityRow({
 
                   {/* 图标 */}
                   <div className="flex flex-col gap-[5px]">
-                    <label className="text-[11px] font-semibold text-default-500 uppercase tracking-[0.5px] leading-tight">
+                    <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.5px] leading-tight">
                       图标
                     </label>
                     <FormIconSelector
@@ -299,7 +299,7 @@ function CreativityRow({
 
                   {/* 颜色 — 跨两列 */}
                   <div className="md:col-span-2 flex flex-col gap-[5px]">
-                    <label className="text-[11px] font-semibold text-default-500 uppercase tracking-[0.5px] leading-tight">
+                    <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.5px] leading-tight">
                       颜色
                     </label>
                     <div className="flex items-center gap-2">
@@ -453,7 +453,9 @@ export function CreativityEditor({ label, description, value, onValueChange, cla
         <div className="flex items-baseline justify-between px-0.5 mb-0.5">
           <label className="text-[13px] font-semibold text-foreground tracking-[-0.08px]">{label}</label>
           {internalItems.length > 0 && (
-            <span className="text-[12px] text-default-300 tabular-nums font-medium">{internalItems.length} 项</span>
+            <span className="text-[12px] text-muted-foreground/40 tabular-nums font-medium">
+              {internalItems.length} 项
+            </span>
           )}
         </div>
       )}
@@ -494,11 +496,11 @@ export function CreativityEditor({ label, description, value, onValueChange, cla
             "flex flex-col items-center justify-center py-12 gap-2.5"
           )}
         >
-          <div className="w-11 h-11 rounded-full bg-default-100/60 flex items-center justify-center mb-0.5">
-            <Palette className="w-5 h-5 text-default-300" />
+          <div className="w-11 h-11 rounded-full bg-muted flex items-center justify-center mb-0.5">
+            <Palette className="w-5 h-5 text-muted-foreground/40" />
           </div>
-          <span className="text-[14px] text-default-300 font-medium">暂无创意图标</span>
-          <span className="text-[12px] text-default-300/60">点击下方按钮添加</span>
+          <span className="text-[14px] text-muted-foreground/40 font-medium">暂无创意图标</span>
+          <span className="text-[12px] text-muted-foreground/40">点击下方按钮添加</span>
         </div>
       )}
 
@@ -521,7 +523,7 @@ export function CreativityEditor({ label, description, value, onValueChange, cla
       </button>
 
       {/* ── 描述 ──────────────────────────────── */}
-      {description && <p className="text-xs leading-relaxed text-default-400">{description}</p>}
+      {description && <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>}
     </div>
   );
 }

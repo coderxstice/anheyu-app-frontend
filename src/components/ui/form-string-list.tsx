@@ -123,12 +123,12 @@ const FormStringList = React.forwardRef<HTMLDivElement, FormStringListProps>(
 
         <div
           className={cn(
-            "rounded-xl border border-default-200/80 bg-white dark:bg-default-100/50 overflow-hidden",
+            "rounded-xl border border-border/60 bg-card overflow-hidden",
             "shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_1px_3px_rgba(0,0,0,0.04)]",
-            "dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.06),0_2px_8px_rgba(0,0,0,0.3)]"
+            "dark:shadow-none"
           )}
         >
-          <Reorder.Group axis="y" values={items} onReorder={handleReorder} className="divide-y divide-default-100">
+          <Reorder.Group axis="y" values={items} onReorder={handleReorder} className="divide-y divide-border/30">
             <AnimatePresence initial={false}>
               {items.map(item => (
                 <StringListItem
@@ -143,7 +143,7 @@ const FormStringList = React.forwardRef<HTMLDivElement, FormStringListProps>(
           </Reorder.Group>
 
           {items.length === 0 && (
-            <div className="flex items-center justify-center py-6 text-xs text-default-300">暂无项目</div>
+            <div className="flex items-center justify-center py-6 text-xs text-muted-foreground/50">暂无项目</div>
           )}
 
           {/* 添加按钮 */}
@@ -154,7 +154,7 @@ const FormStringList = React.forwardRef<HTMLDivElement, FormStringListProps>(
             className={cn(
               "flex items-center justify-center gap-1.5 w-full py-2.5",
               "text-xs font-medium text-primary",
-              "border-t border-default-100 bg-default-100/5!",
+              "border-t border-border/30 bg-muted/5!",
               "hover:bg-primary/5 transition-colors",
               "disabled:opacity-40 disabled:cursor-not-allowed"
             )}
@@ -164,7 +164,7 @@ const FormStringList = React.forwardRef<HTMLDivElement, FormStringListProps>(
           </button>
         </div>
 
-        {description && <p className="text-xs leading-relaxed text-default-400">{description}</p>}
+        {description && <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>}
       </div>
     );
   }
@@ -201,7 +201,7 @@ function StringListItem({
         {/* 拖拽手柄 */}
         <button
           type="button"
-          className="cursor-grab active:cursor-grabbing text-default-300 hover:text-default-500 transition-colors shrink-0"
+          className="cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground transition-colors shrink-0"
           onPointerDown={e => controls.start(e)}
           tabIndex={-1}
         >
@@ -216,13 +216,12 @@ function StringListItem({
           onValueChange={v => onChange(item._id, v)}
           classNames={{
             inputWrapper: cn(
-              "rounded-xl border border-default-200/80 bg-white dark:bg-default-100/50 shadow-none! h-9 min-h-9",
-              "data-[hover=true]:bg-white! dark:data-[hover=true]:bg-default-100/60 data-[hover=true]:border-default-300/90",
-              "group-data-[focus=true]:bg-white! dark:group-data-[focus=true]:bg-default-100/60 group-data-[focus=true]:border-primary/65",
-              "group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-primary/15",
+              "rounded-xl border border-border/60 bg-muted/50 shadow-none! h-9 min-h-9",
+              "data-[hover=true]:border-border-hover/40",
+              "group-data-[focus=true]:border-primary/65 group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-primary/15",
               "transition-all duration-200"
             ),
-            input: "text-sm text-foreground/90 placeholder:text-default-400/80",
+            input: "text-sm text-foreground/90 placeholder:text-muted-foreground/60",
           }}
         />
 
@@ -232,7 +231,7 @@ function StringListItem({
           size="sm"
           variant="light"
           onPress={() => onRemove(item._id)}
-          className="text-default-300 hover:text-danger min-w-6 w-6 h-6 shrink-0"
+          className="text-muted-foreground/40 hover:text-danger min-w-6 w-6 h-6 shrink-0"
         >
           <X className="w-3.5 h-3.5" />
         </Button>

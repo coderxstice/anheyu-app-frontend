@@ -374,7 +374,8 @@ export function MoveModal({ open, itemsForAction, mode, onSuccess, onClose }: Mo
               <div className={styles["target-info"]}>
                 {currentTargetFolder ? (
                   <>
-                    {mode === "move" ? "移动到:" : "复制到:"}{" "}
+                    {mode === "move" ? "移动到:" : "复制到:"}
+                    {""}
                     <span className={styles["target-path"]}>{currentTargetFolder.name}</span>
                   </>
                 ) : (

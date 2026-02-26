@@ -24,12 +24,7 @@ export function useSnackbar() {
   }, []);
 
   const showSnackbar = useCallback(
-    (
-      text: string,
-      onActionClick?: (() => void) | false,
-      duration = 2000,
-      actionText?: string | false
-    ) => {
+    (text: string, onActionClick?: (() => void) | false, duration = 2000, actionText?: string | false) => {
       // 清除上一个
       cleanup();
 

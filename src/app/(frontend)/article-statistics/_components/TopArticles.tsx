@@ -23,10 +23,7 @@ const getRankClass = (index: number): string => {
 };
 
 export function TopArticles({ articles }: TopArticlesProps) {
-  const safeArticles = useMemo(
-    () => (Array.isArray(articles) ? articles : []),
-    [articles]
-  );
+  const safeArticles = useMemo(() => (Array.isArray(articles) ? articles : []), [articles]);
 
   return (
     <div className={styles.listCard} style={{ animationDelay: "0.3s" }}>
@@ -40,14 +37,8 @@ export function TopArticles({ articles }: TopArticlesProps) {
         ) : (
           <div className={styles.articleList}>
             {safeArticles.map((article, index) => (
-              <Link
-                key={article.id}
-                href={`/posts/${article.id}`}
-                className={styles.articleItem}
-              >
-                <span className={`${styles.rank} ${getRankClass(index)}`}>
-                  {index + 1}
-                </span>
+              <Link key={article.id} href={`/posts/${article.id}`} className={styles.articleItem}>
+                <span className={`${styles.rank} ${getRankClass(index)}`}>{index + 1}</span>
                 <div className={styles.articleInfo}>
                   <span className={styles.articleTitle} title={article.title}>
                     {article.title}

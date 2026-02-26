@@ -39,7 +39,9 @@
 /* 表头列通用hover - 匹配 anheyu-app */
 .list-header .column {
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .list-header .column:hover {
@@ -65,7 +67,9 @@
   background: transparent;
   border-radius: 8px;
   transform: translateY(-50%);
-  transition: background-color 0.2s ease-in-out, width 0.2s ease-in-out;
+  transition:
+    background-color 0.2s ease-in-out,
+    width 0.2s ease-in-out;
   z-index: 10;
 }
 
@@ -99,7 +103,9 @@
   color: var(--anzhiyu-fontcolor);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+  transition:
+    opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
     background-color 0.2s ease;
   transform: translateY(-50%) translateX(20px);
 }

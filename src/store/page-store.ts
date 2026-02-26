@@ -13,8 +13,8 @@ interface PageState {
   clearPageTitle: () => void;
 }
 
-export const usePageStore = create<PageState>((set) => ({
+export const usePageStore = create<PageState>(set => ({
   pageTitle: null,
-  setPageTitle: (title) => set({ pageTitle: title }),
+  setPageTitle: title => set({ pageTitle: title }),
   clearPageTitle: () => set({ pageTitle: null }),
 }));

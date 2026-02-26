@@ -59,20 +59,20 @@ function serializeGroups(groups: ProjectGroup[]): string {
 
 const ICON_BUTTON_CLASS = cn(
   "inline-flex h-7 w-7 items-center justify-center rounded-lg border border-transparent",
-  "text-default-500 transition-all duration-200",
-  "hover:border-default-200 hover:bg-background hover:text-foreground",
+  "text-muted-foreground transition-all duration-200",
+  "hover:border-border/60 hover:bg-background hover:text-foreground",
   "disabled:cursor-not-allowed disabled:opacity-35"
 );
 
 const DANGER_ICON_BUTTON_CLASS = cn(
   "inline-flex h-7 w-7 items-center justify-center rounded-lg border border-transparent",
-  "text-default-400 transition-all duration-200",
+  "text-muted-foreground transition-all duration-200",
   "hover:border-danger/20 hover:bg-danger-50 hover:text-danger"
 );
 
 const DASHED_ADD_BUTTON_CLASS = cn(
-  "flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-default-300/80 bg-background/80",
-  "py-2 text-xs font-medium text-default-600 transition-all duration-200",
+  "flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-border/80 bg-background/80",
+  "py-2 text-xs font-medium text-foreground/70 transition-all duration-200",
   "hover:border-primary/45 hover:bg-primary/5 hover:text-primary"
 );
 
@@ -100,12 +100,12 @@ function SmallInput({
       classNames={{
         label: "text-[11px] font-medium tracking-wide text-foreground/60",
         inputWrapper: cn(
-          "h-9 min-h-9 rounded-xl border border-default-200/80 bg-white dark:bg-default-100/50 shadow-none!",
-          "data-[hover=true]:bg-white! dark:data-[hover=true]:bg-default-100/60 data-[hover=true]:border-default-300/90",
-          "group-data-[focus=true]:bg-white! dark:group-data-[focus=true]:bg-default-100/60 group-data-[focus=true]:border-primary/65 group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-primary/15",
+          "h-9 min-h-9 rounded-xl border border-border/60 bg-card shadow-none!",
+          "data-[hover=true]:bg-card dark:data-[hover=true]:bg-muted data-[hover=true]:border-border/80",
+          "group-data-[focus=true]:bg-card dark:group-data-[focus=true]:bg-muted group-data-[focus=true]:border-primary/65 group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-primary/15",
           "transition-all duration-200"
         ),
-        input: "text-sm text-foreground/90 placeholder:text-default-400/80",
+        input: "text-sm text-foreground/90 placeholder:text-muted-foreground",
       }}
     />
   );
@@ -133,8 +133,8 @@ function LinkRow({
   onMoveDown: () => void;
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-default-200/75 bg-default-50/35 p-3 transition-colors hover:border-default-300/80 hover:bg-default-50/60">
-      <span className="mt-2 inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-background text-[11px] font-medium text-default-500 ring-1 ring-default-200/80">
+    <div className="flex items-start gap-3 rounded-xl border border-border/60 bg-muted/30 p-3 transition-colors hover:border-border/80 hover:bg-muted/30">
+      <span className="mt-2 inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-background text-[11px] font-medium text-muted-foreground ring-1 ring-border/60/80">
         {index + 1}
       </span>
       <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-2">
@@ -159,7 +159,7 @@ function LinkRow({
         </div>
         <button type="button" onClick={onMoveUp} disabled={isFirst} className={ICON_BUTTON_CLASS}>
           <svg
-            className="w-3 h-3 text-default-500"
+            className="w-3 h-3 text-muted-foreground"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -170,7 +170,7 @@ function LinkRow({
         </button>
         <button type="button" onClick={onMoveDown} disabled={isLast} className={ICON_BUTTON_CLASS}>
           <svg
-            className="w-3 h-3 text-default-500"
+            className="w-3 h-3 text-muted-foreground"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -237,7 +237,7 @@ function GroupCard({
   };
 
   const content = (
-    <div className="overflow-hidden rounded-2xl border border-default-200/75 bg-background/95 shadow-[0_8px_24px_-20px_rgba(15,23,42,0.6)] transition-all duration-200 hover:border-default-300/85">
+    <div className="overflow-hidden rounded-2xl border border-border/60 bg-background/95 shadow-[0_8px_24px_-20px_rgba(15,23,42,0.6)] transition-all duration-200 hover:border-border/80">
       <div
         className="flex cursor-pointer select-none items-center gap-2.5 bg-linear-to-r from-default-50/60 via-default-50/20 to-transparent px-3.5 py-2.5 transition-colors hover:from-default-100/55"
         onClick={() => setExpanded(!expanded)}
@@ -248,14 +248,17 @@ function GroupCard({
               e.stopPropagation();
               dragControls.start(e);
             }}
-            className="flex w-8 shrink-0 touch-none items-center justify-center self-stretch rounded-lg text-default-400 transition-colors hover:bg-background/80 hover:text-foreground active:cursor-grabbing"
+            className="flex w-8 shrink-0 touch-none items-center justify-center self-stretch rounded-lg text-muted-foreground transition-colors hover:bg-background/80 hover:text-foreground active:cursor-grabbing"
             onClick={e => e.stopPropagation()}
           >
             <GripVertical className="w-4 h-4" />
           </div>
         )}
         <svg
-          className={cn("w-4 h-4 text-default-400 transition-transform duration-200 shrink-0", expanded && "rotate-90")}
+          className={cn(
+            "w-4 h-4 text-muted-foreground transition-transform duration-200 shrink-0",
+            expanded && "rotate-90"
+          )}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -263,19 +266,19 @@ function GroupCard({
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
         </svg>
-        <span className="inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full border border-default-200/80 bg-background text-[11px] font-semibold text-default-500">
+        <span className="inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full border border-border/60 bg-background text-[11px] font-semibold text-muted-foreground">
           {index + 1}
         </span>
         <span className="flex flex-1 items-center gap-2 truncate text-sm font-medium text-foreground/85">
           {group.title || "未命名分组"}
-          <span className="rounded-full bg-default-100/70 px-2 py-0.5 text-[11px] font-normal text-default-500">
+          <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-normal text-muted-foreground">
             {links.length} 条链接
           </span>
         </span>
         <div className="flex shrink-0 items-center gap-1" onClick={e => e.stopPropagation()}>
           <button type="button" onClick={onMoveUp} disabled={isFirst} className={ICON_BUTTON_CLASS}>
             <svg
-              className="w-3.5 h-3.5 text-default-500"
+              className="w-3.5 h-3.5 text-muted-foreground"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -286,7 +289,7 @@ function GroupCard({
           </button>
           <button type="button" onClick={onMoveDown} disabled={isLast} className={ICON_BUTTON_CLASS}>
             <svg
-              className="w-3.5 h-3.5 text-default-500"
+              className="w-3.5 h-3.5 text-muted-foreground"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -316,7 +319,7 @@ function GroupCard({
             transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
             className="overflow-hidden"
           >
-            <div className="space-y-3.5 border-t border-default-200/70 bg-default-50/18 px-3.5 py-3.5">
+            <div className="space-y-3.5 border-t border-border/60 bg-muted/30 px-3.5 py-3.5">
               <SmallInput
                 label="分组标题"
                 value={group.title || ""}
@@ -341,8 +344,8 @@ function GroupCard({
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-dashed border-default-300/80 bg-background/70 py-4 text-center">
-                    <p className="text-xs text-default-500">暂无链接，点击下方添加</p>
+                  <div className="rounded-xl border border-dashed border-border/80 bg-background/70 py-4 text-center">
+                    <p className="text-xs text-muted-foreground">暂无链接，点击下方添加</p>
                   </div>
                 )}
                 <button type="button" onClick={addLink} className={DASHED_ADD_BUTTON_CLASS}>
@@ -413,14 +416,14 @@ export function ProjectListEditor({ label, description, value, onValueChange, cl
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-2xl border border-default-200/70 bg-linear-to-b from-background to-default-50/25 p-4 shadow-[0_12px_36px_-30px_rgba(15,23,42,0.7)] md:p-5",
+        "flex flex-col gap-3 rounded-2xl border border-border/60 bg-linear-to-b from-background to-default-50/25 p-4 shadow-[0_12px_36px_-30px_rgba(15,23,42,0.7)] md:p-5",
         className
       )}
     >
       {label && (
         <div className="flex items-center justify-between">
           <label className="text-sm font-semibold tracking-tight text-foreground/80">{label}</label>
-          <span className="rounded-full bg-default-100/70 px-2 py-0.5 text-[11px] font-medium text-default-500">
+          <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
             {groups.length} 组
           </span>
         </div>
@@ -444,9 +447,9 @@ export function ProjectListEditor({ label, description, value, onValueChange, cl
           ))}
         </Reorder.Group>
       ) : (
-        <div className="rounded-2xl border border-dashed border-default-300/80 bg-background/70 py-8 text-center">
-          <p className="text-sm text-default-500">暂无项目分组</p>
-          <p className="mt-1 text-xs text-default-400">建议按功能建立 3-6 个分组</p>
+        <div className="rounded-2xl border border-dashed border-border/80 bg-background/70 py-8 text-center">
+          <p className="text-sm text-muted-foreground">暂无项目分组</p>
+          <p className="mt-1 text-xs text-muted-foreground">建议按功能建立 3-6 个分组</p>
         </div>
       )}
 
@@ -454,8 +457,8 @@ export function ProjectListEditor({ label, description, value, onValueChange, cl
         type="button"
         onClick={handleAdd}
         className={cn(
-          "flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-default-300/80 bg-background/80 py-2.5",
-          "text-sm font-medium text-default-600 transition-all duration-200",
+          "flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-border/80 bg-background/80 py-2.5",
+          "text-sm font-medium text-foreground/70 transition-all duration-200",
           "hover:border-primary/45 hover:bg-primary/5 hover:text-primary"
         )}
       >
@@ -465,7 +468,7 @@ export function ProjectListEditor({ label, description, value, onValueChange, cl
         添加项目分组
       </button>
 
-      {description && <p className="text-xs leading-relaxed text-default-400">{description}</p>}
+      {description && <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>}
     </div>
   );
 }

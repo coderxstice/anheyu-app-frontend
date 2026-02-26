@@ -1,26 +1,10 @@
 "use client";
 
-import {
-  useState,
-  useMemo,
-  useCallback,
-  useRef,
-  Suspense,
-  Component,
-  type ReactNode,
-  type ErrorInfo,
-} from "react";
+import { useState, useMemo, useCallback, useRef, Suspense, Component, type ReactNode, type ErrorInfo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, Input, Button } from "@heroui/react";
-import {
-  Search,
-  ChevronRight,
-  RotateCcw,
-  AlertCircle,
-  Menu,
-  X,
-} from "lucide-react";
+import { Search, ChevronRight, RotateCcw, AlertCircle, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMultiSettings } from "@/hooks/use-settings";
 import { FloatingSaveButton } from "@/components/admin/settings/FloatingSaveButton";
@@ -61,7 +45,7 @@ class SettingsErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryS
             <AlertCircle className="w-10 h-10 text-danger" />
             <div>
               <p className="text-sm font-medium text-foreground">加载失败</p>
-              <p className="text-xs text-default-400 mt-1">表单组件加载出错，请刷新页面重试</p>
+              <p className="text-xs text-muted-foreground mt-1">表单组件加载出错，请刷新页面重试</p>
             </div>
             <button
               onClick={() => this.setState({ hasError: false })}
@@ -228,7 +212,7 @@ export default function SettingsPage() {
         <div key={category.id}>
           {/* 分类标签 */}
           <div className="px-3 mb-1">
-            <span className="text-[11px] font-semibold text-default-400 uppercase tracking-wider">
+            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
               {category.label}
             </span>
           </div>
@@ -247,13 +231,13 @@ export default function SettingsPage() {
                     "group w-full flex items-center gap-2.5 px-3 py-[7px] rounded-full text-[13px] transition-all duration-150",
                     isActive
                       ? "bg-primary/10 text-primary font-medium"
-                      : "text-default-500 hover:text-foreground hover:bg-default-100/60"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
                   )}
                 >
                   <SubIcon
                     className={cn(
                       "w-4 h-4 shrink-0",
-                      isActive ? "text-primary" : "text-default-400 group-hover:text-default-500"
+                      isActive ? "text-primary" : "text-muted-foreground/70 group-hover:text-muted-foreground"
                     )}
                   />
                   <span className="truncate">{sub.label}</span>
@@ -278,15 +262,15 @@ export default function SettingsPage() {
         onFocus={() => setIsSearchFocused(true)}
         onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
         placeholder="搜索设置..."
-        startContent={<Search className="w-3.5 h-3.5 text-default-400" />}
+        startContent={<Search className="w-3.5 h-3.5 text-muted-foreground" />}
         classNames={{
           inputWrapper: cn(
-            "bg-default-100/40 border border-default-200/50 rounded-full shadow-none! h-9 min-h-9",
-            "data-[hover=true]:bg-default-100/60 data-[hover=true]:border-default-300/60",
-            "group-data-[focus=true]:border-primary/40 group-data-[focus=true]:bg-white! group-data-[focus=true]:dark:bg-default-50! group-data-[focus=true]:ring-1 group-data-[focus=true]:ring-primary/15",
+            "bg-muted/40 border border-border/50 rounded-full shadow-none! h-9 min-h-9",
+            "data-[hover=true]:bg-muted/60 data-[hover=true]:border-border/80",
+            "group-data-[focus=true]:border-primary/40 group-data-[focus=true]:bg-card! group-data-[focus=true]:ring-1 group-data-[focus=true]:ring-primary/15",
             "transition-all duration-200"
           ),
-          input: "text-[13px] placeholder:text-default-400",
+          input: "text-[13px] placeholder:text-muted-foreground/60",
         }}
       />
 
@@ -298,27 +282,27 @@ export default function SettingsPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.12 }}
-            className="absolute top-full mt-1.5 left-0 right-0 bg-background border border-default-200/60 rounded-xl shadow-sm z-50 overflow-hidden"
+            className="absolute top-full mt-1.5 left-0 right-0 bg-card border border-border/60 rounded-xl shadow-sm dark:shadow-lg z-50 overflow-hidden"
           >
             {searchResults.length > 0 ? (
               <div className="max-h-[320px] overflow-y-auto p-1">
                 {searchResults.map(result => (
                   <button
                     key={result.sectionId}
-                    className="w-full text-left px-3 py-2 rounded-md hover:bg-default-100 transition-colors"
+                    className="w-full text-left px-3 py-2 rounded-md hover:bg-muted transition-colors"
                     onMouseDown={e => {
                       e.preventDefault();
                       handleSearchNavigate(result);
                     }}
                   >
-                    <div className="text-[11px] text-default-400">{result.categoryLabel}</div>
+                    <div className="text-[11px] text-muted-foreground">{result.categoryLabel}</div>
                     <div className="text-[13px] font-medium text-foreground">{result.sectionLabel}</div>
                   </button>
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-6 text-[13px] text-default-400">
-                <Search className="w-5 h-5 mb-1.5 text-default-300" />
+              <div className="flex flex-col items-center justify-center py-6 text-[13px] text-muted-foreground">
+                <Search className="w-5 h-5 mb-1.5 text-muted-foreground/60" />
                 未找到相关设置
               </div>
             )}
@@ -329,9 +313,9 @@ export default function SettingsPage() {
   );
 
   return (
-    <div className="flex h-full bg-card rounded-xl border border-default-200/60 overflow-hidden">
+    <div className="flex h-full bg-card rounded-xl border border-border/60 overflow-hidden">
       {/* ==================== 左侧导航面板 - 桌面端 ==================== */}
-      <aside className="w-[260px] shrink-0 border-r border-default-200/60 bg-default-50/30 flex flex-col max-lg:hidden">
+      <aside className="w-[260px] shrink-0 border-r border-border/60 bg-muted/30 flex flex-col max-lg:hidden">
         {/* 搜索框 */}
         <div className="p-3 pb-2">{renderSearch()}</div>
 
@@ -340,10 +324,7 @@ export default function SettingsPage() {
       </aside>
 
       {/* ==================== 右侧内容区 ==================== */}
-      <div
-        ref={contentRef}
-        className="flex-1 overflow-y-auto [scrollbar-gutter:stable] bg-default-50/40 dark:bg-transparent"
-      >
+      <div ref={contentRef} className="flex-1 overflow-y-auto [scrollbar-gutter:stable] bg-muted/40">
         <div className="max-w-3xl mx-auto px-8 py-6 max-md:px-4 max-md:py-4">
           {/* 内容区头部 */}
           <motion.div
@@ -358,15 +339,15 @@ export default function SettingsPage() {
               <div className="flex items-center gap-1.5 mb-1.5">
                 {/* 移动端菜单触发 */}
                 <button
-                  className="hidden max-lg:flex items-center justify-center w-6 h-6 -ml-1 mr-0.5 rounded-md hover:bg-default-100 transition-colors"
+                  className="hidden max-lg:flex items-center justify-center w-6 h-6 -ml-1 mr-0.5 rounded-md hover:bg-muted transition-colors"
                   onClick={() => setShowMobileSidebar(true)}
                   aria-label="打开导航菜单"
                 >
-                  <Menu className="w-4 h-4 text-default-400" />
+                  <Menu className="w-4 h-4 text-muted-foreground" />
                 </button>
-                <span className="text-xs text-default-400">{parentCategory?.label}</span>
-                <ChevronRight className="w-3 h-3 text-default-300" />
-                <span className="text-xs text-default-600 font-medium">{currentSection?.label}</span>
+                <span className="text-xs text-muted-foreground">{parentCategory?.label}</span>
+                <ChevronRight className="w-3 h-3 text-muted-foreground/50" />
+                <span className="text-xs text-foreground/70 font-medium">{currentSection?.label}</span>
               </div>
 
               {/* 页面标题 */}
@@ -379,7 +360,7 @@ export default function SettingsPage() {
                 content={
                   <div className="px-1 py-0.5">
                     <p className="text-xs font-medium">重置当前分类</p>
-                    <p className="text-[11px] text-default-400">撤销当前页面的未保存更改</p>
+                    <p className="text-[11px] text-muted-foreground">撤销当前页面的未保存更改</p>
                   </div>
                 }
                 placement="bottom"
@@ -391,7 +372,7 @@ export default function SettingsPage() {
                   isDisabled={!isCurrentDirty}
                   onPress={handleResetCurrent}
                   startContent={<RotateCcw className="w-3.5 h-3.5" />}
-                  className="h-8 px-3 min-w-0 bg-default-100 text-default-600 hover:bg-default-200 hover:text-default-700 text-xs font-medium"
+                  className="h-8 px-3 min-w-0 bg-muted text-foreground/70 hover:bg-secondary hover:text-foreground/80 text-xs font-medium"
                 >
                   重置当前
                 </Button>
@@ -401,7 +382,7 @@ export default function SettingsPage() {
                 content={
                   <div className="px-1 py-0.5">
                     <p className="text-xs font-medium">重置全部更改</p>
-                    <p className="text-[11px] text-default-400">撤销所有分类的未保存更改</p>
+                    <p className="text-[11px] text-muted-foreground">撤销所有分类的未保存更改</p>
                   </div>
                 }
                 placement="bottom"
@@ -445,17 +426,17 @@ export default function SettingsPage() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 320 }}
-              className="fixed inset-y-0 left-0 z-50 w-[280px] bg-background border-r border-default-200/60 shadow-lg flex flex-col"
+              className="fixed inset-y-0 left-0 z-50 w-[280px] bg-card border-r border-border/60 shadow-lg flex flex-col"
             >
               {/* 抽屉头部 */}
-              <div className="flex items-center justify-between px-4 h-14 border-b border-default-100">
+              <div className="flex items-center justify-between px-4 h-14 border-b border-border/40">
                 <span className="text-sm font-semibold text-foreground">设置导航</span>
                 <button
-                  className="flex items-center justify-center w-7 h-7 rounded-md hover:bg-default-100 transition-colors"
+                  className="flex items-center justify-center w-7 h-7 rounded-md hover:bg-muted transition-colors"
                   onClick={() => setShowMobileSidebar(false)}
                   aria-label="关闭导航菜单"
                 >
-                  <X className="w-4 h-4 text-default-500" />
+                  <X className="w-4 h-4 text-muted-foreground" />
                 </button>
               </div>
 

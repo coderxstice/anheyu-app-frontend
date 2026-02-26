@@ -18,20 +18,9 @@ export function FlinkList({ links }: FlinkListProps) {
             </span>
           )}
 
-          <a
-            className="cf-friends-link"
-            href={link.url}
-            rel="external nofollow"
-            title={link.name}
-            target="_blank"
-          >
+          <a className="cf-friends-link" href={link.url} rel="external nofollow" title={link.name} target="_blank">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              className="flink-avatar"
-              src={link.logo}
-              alt={link.name}
-              loading="lazy"
-            />
+            <img className="flink-avatar" src={link.logo} alt={link.name} loading="lazy" />
             <div className="flink-item-info">
               <span className="flink-item-name">{link.name}</span>
               <span className="flink-item-desc" title={link.description}>

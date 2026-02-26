@@ -25,11 +25,7 @@ export function OverviewCards({ statistics }: OverviewCardsProps) {
   return (
     <div className={styles.overviewCards}>
       {items.map((item, index) => (
-        <div
-          key={index}
-          className={styles.overviewCard}
-          style={{ animationDelay: `${index * 0.1}s` }}
-        >
+        <div key={index} className={styles.overviewCard} style={{ animationDelay: `${index * 0.1}s` }}>
           <div className={styles.cardIcon} style={{ background: item.color + "20" }}>
             <item.icon style={{ color: item.color }} />
           </div>

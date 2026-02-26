@@ -52,7 +52,7 @@ import { AwsS3Form } from "@/components/admin/storage/AwsS3Form";
 import { QiniuKodoForm } from "@/components/admin/storage/QiniuKodoForm";
 
 // ===================================
-//     存储类型图标 & 配色
+// 存储类型图标 & 配色
 // ===================================
 
 const TYPE_ICONS: Record<StoragePolicyType, typeof Server> = {
@@ -74,7 +74,7 @@ const TYPE_ICON_COLORS: Record<StoragePolicyType, string> = {
 };
 
 // ===================================
-//     策略卡片 (Apple-style)
+// 策略卡片 (Apple-style)
 // ===================================
 
 function PolicyCard({
@@ -143,8 +143,8 @@ function PolicyCard({
                       ? "已授权"
                       : "未授权"
                     : isConfigured
-                    ? "已配置"
-                    : "未配置"}
+                      ? "已配置"
+                      : "未配置"}
                 </span>
               </span>
             </>
@@ -163,7 +163,7 @@ function PolicyCard({
             size="sm"
             variant="light"
             radius="full"
-            className="text-default-400 hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground"
             onPress={() => onEdit(policy)}
           >
             <Pencil className="w-3.5 h-3.5" />
@@ -176,7 +176,7 @@ function PolicyCard({
               size="sm"
               variant="light"
               radius="full"
-              className="text-default-400 hover:text-danger"
+              className="text-muted-foreground hover:text-danger"
               onPress={() => onDelete(policy)}
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -189,7 +189,7 @@ function PolicyCard({
 }
 
 // ===================================
-//     添加卡片 (Apple-style)
+// 添加卡片 (Apple-style)
 // ===================================
 
 function AddCard({ onPress }: { onPress: () => void }) {
@@ -204,7 +204,7 @@ function AddCard({ onPress }: { onPress: () => void }) {
         "group"
       )}
     >
-      <div className="w-10 h-10 rounded-xl bg-default-100/60 dark:bg-white/4 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors duration-300">
+      <div className="w-10 h-10 rounded-xl bg-muted dark:bg-white/4 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors duration-300">
         <Plus className="w-4.5 h-4.5 text-muted-foreground/50 group-hover:text-primary transition-colors duration-300" />
       </div>
       <div>
@@ -218,7 +218,7 @@ function AddCard({ onPress }: { onPress: () => void }) {
 }
 
 // ===================================
-//     CORS 成功弹窗（对齐 anheyu-app）
+// CORS 成功弹窗（对齐 anheyu-app）
 // ===================================
 
 function CorsSuccessDialog({
@@ -246,7 +246,7 @@ function CorsSuccessDialog({
           <p className="text-sm text-foreground/80 leading-relaxed">
             系统已为您的{policyType}存储桶自动配置了以下跨域（CORS）策略：
           </p>
-          <div className="p-4 rounded-lg bg-default-100 space-y-3">
+          <div className="p-4 rounded-lg bg-muted space-y-3">
             {[
               { label: "来源 (Origin):", value: "*", desc: "允许所有来源访问" },
               { label: "允许方法 (Methods):", value: "GET, POST, PUT, DELETE, HEAD", desc: "支持所有常用HTTP方法" },
@@ -280,7 +280,7 @@ function CorsSuccessDialog({
 }
 
 // ===================================
-//     创建表单弹窗（对齐 anheyu-app 统一创建弹窗）
+// 创建表单弹窗（对齐 anheyu-app 统一创建弹窗）
 // ===================================
 
 /** 创建表单默认值 */
@@ -399,25 +399,27 @@ function CreateFormModal({
       isDismissable={!isLoading}
       header={{
         title,
-        description: storageType ? `配置 ${STORAGE_TYPE_LABELS[storageType]} 参数后即可创建` : "填写配置后即可创建存储策略",
+        description: storageType
+          ? `配置 ${STORAGE_TYPE_LABELS[storageType]} 参数后即可创建`
+          : "填写配置后即可创建存储策略",
         icon: Plus,
       }}
     >
-        {storageType && (
-          <CreateFormBody
-            key={`${storageType}-${isOpen}`}
-            storageType={storageType}
-            isLoading={isLoading}
-            onSubmit={onSubmit}
-            onCancel={() => onOpenChange(false)}
-          />
-        )}
+      {storageType && (
+        <CreateFormBody
+          key={`${storageType}-${isOpen}`}
+          storageType={storageType}
+          isLoading={isLoading}
+          onSubmit={onSubmit}
+          onCancel={() => onOpenChange(false)}
+        />
+      )}
     </AdminDialog>
   );
 }
 
 // ===================================
-//     骨架屏
+// 骨架屏
 // ===================================
 
 function StorageSkeleton() {
@@ -471,7 +473,7 @@ function StorageSkeleton() {
 }
 
 // ===================================
-//     主页面
+// 主页面
 // ===================================
 
 export default function StoragePage() {
@@ -523,7 +525,7 @@ export default function StoragePage() {
                 variant="flat"
                 startContent={<RotateCw className="w-3.5 h-3.5" />}
                 onPress={sp.onRefresh}
-                className="text-default-600"
+                className="text-foreground/70"
               >
                 刷新
               </Button>

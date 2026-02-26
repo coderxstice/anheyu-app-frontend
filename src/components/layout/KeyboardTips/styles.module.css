@@ -18,7 +18,10 @@
   border-radius: 16px;
   box-shadow: var(--anzhiyu-shadow-border);
   opacity: 0;
-  transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    opacity 0.15s ease,
+    visibility 0.15s ease,
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateZ(0);
   transform: translateY(-10px) scale(0.95);
 }

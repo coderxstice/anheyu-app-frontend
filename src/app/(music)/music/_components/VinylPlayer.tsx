@@ -19,13 +19,7 @@ interface VinylPlayerProps {
   onPlayPause: () => void;
 }
 
-export function VinylPlayer({
-  currentSong,
-  isPlaying,
-  borderColor,
-  vinylImages,
-  onPlayPause,
-}: VinylPlayerProps) {
+export function VinylPlayer({ currentSong, isPlaying, borderColor, vinylImages, onPlayPause }: VinylPlayerProps) {
   const playLabel = currentSong
     ? isPlaying
       ? `暂停 ${currentSong.name}`
@@ -43,23 +37,11 @@ export function VinylPlayer({
         onClick={onPlayPause}
       >
         {/* 唱片背景 */}
-        <img
-          src={vinylImages.background}
-          alt="唱片背景"
-          className={styles.vinylBackground}
-        />
+        <img src={vinylImages.background} alt="唱片背景" className={styles.vinylBackground} />
         {/* 唱片外圈 */}
-        <img
-          src={vinylImages.outer}
-          alt="唱片外圈"
-          className={styles.artworkImageVinylBackground}
-        />
+        <img src={vinylImages.outer} alt="唱片外圈" className={styles.artworkImageVinylBackground} />
         {/* 唱片内圈 */}
-        <img
-          src={vinylImages.inner}
-          alt="唱片内圈"
-          className={styles.artworkImageVinylInnerBackground}
-        />
+        <img src={vinylImages.inner} alt="唱片内圈" className={styles.artworkImageVinylInnerBackground} />
         {/* 撞针 */}
         <img
           src={vinylImages.needle}
@@ -67,11 +49,7 @@ export function VinylPlayer({
           className={`${styles.artworkImageNeedleBackground} ${isPlaying ? styles.needlePlaying : ""}`}
         />
         {/* 凹槽 */}
-        <img
-          src={vinylImages.groove}
-          alt="凹槽背景"
-          className={styles.artworkImageGrooveBackground}
-        />
+        <img src={vinylImages.groove} alt="凹槽背景" className={styles.artworkImageGrooveBackground} />
 
         {/* 专辑封面 */}
         {currentSong?.pic ? (
@@ -83,11 +61,7 @@ export function VinylPlayer({
                 className={styles.artworkImage}
                 style={{ borderColor }}
               />
-              <img
-                src={currentSong.pic}
-                alt={`${currentSong.name} 模糊背景`}
-                className={styles.artworkImageBlur}
-              />
+              <img src={currentSong.pic} alt={`${currentSong.name} 模糊背景`} className={styles.artworkImageBlur} />
               <div className={styles.artworkBorderRing} />
             </div>
           </div>
@@ -113,8 +87,7 @@ export function VinylPlayer({
       {/* 歌曲信息 */}
       <div className={styles.trackInfo}>
         <h2 className={styles.trackTitle}>
-          {(currentSong?.name || "") +
-            (currentSong?.artist ? " - " + currentSong.artist : "")}
+          {(currentSong?.name || "") + (currentSong?.artist ? " - " + currentSong.artist : "")}
         </h2>
       </div>
     </div>

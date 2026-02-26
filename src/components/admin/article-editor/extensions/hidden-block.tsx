@@ -54,7 +54,6 @@ function HiddenBlockView({ node, updateAttributes }: NodeViewProps) {
           <span className="editor-hide-footer-label">发布后显示为：</span>
           <span className="editor-hide-footer-btn">{display}</span>
         </div>
-
       </div>
     </NodeViewWrapper>
   );

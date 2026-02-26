@@ -46,7 +46,7 @@ interface EditorToolbarProps {
 }
 
 // ===================================
-//        工具栏基础组件
+// 工具栏基础组件
 // ===================================
 
 /** 工具栏按钮（带 Tooltip） */
@@ -71,8 +71,8 @@ function ToolbarButton({
         disabled={disabled}
         className={cn(
           "inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors",
-          "hover:bg-default-100 disabled:opacity-40 disabled:cursor-not-allowed",
-          isActive && "bg-default-200 text-default-800"
+          "hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed",
+          isActive && "bg-secondary text-foreground"
         )}
       >
         {children}
@@ -83,11 +83,11 @@ function ToolbarButton({
 
 /** 分割线 */
 function Divider() {
-  return <div className="w-px h-5 bg-default-200 mx-1 shrink-0" />;
+  return <div className="w-px h-5 bg-secondary mx-1 shrink-0" />;
 }
 
 // ===================================
-//     段落/标题下拉选择器
+// 段落/标题下拉选择器
 // ===================================
 
 const HEADING_OPTIONS = [
@@ -141,11 +141,11 @@ function HeadingDropdown({ editor }: { editor: Editor }) {
       <PopoverTrigger>
         <button
           type="button"
-          className="inline-flex items-center gap-1 h-8 px-2.5 rounded-md border border-default-200 text-sm hover:bg-default-100 transition-colors min-w-[72px]"
+          className="inline-flex items-center gap-1 h-8 px-2.5 rounded-md border border-border/60 text-sm hover:bg-muted transition-colors min-w-[72px]"
           onClick={() => setOpen(!open)}
         >
           <span className="font-medium">{currentLabel}</span>
-          <ChevronDown className="w-3 h-3 text-default-400" />
+          <ChevronDown className="w-3 h-3 text-muted-foreground" />
         </button>
       </PopoverTrigger>
       <PopoverContent className="p-1 min-w-[200px]">
@@ -158,7 +158,7 @@ function HeadingDropdown({ editor }: { editor: Editor }) {
               type="button"
               className={cn(
                 "w-full flex items-center justify-between px-3 py-2 rounded-md transition-colors",
-                isActive ? "bg-default-100" : "hover:bg-default-50"
+                isActive ? "bg-muted" : "hover:bg-muted/30"
               )}
               onClick={() => handleSelect(opt.level)}
             >
@@ -167,7 +167,7 @@ function HeadingDropdown({ editor }: { editor: Editor }) {
                 {!isActive && <span className="w-4 shrink-0" />}
                 {opt.label}
               </span>
-              <span className="text-xs text-default-300 ml-4 shrink-0">{opt.shortcut}</span>
+              <span className="text-xs text-muted-foreground/40 ml-4 shrink-0">{opt.shortcut}</span>
             </button>
           );
         })}
@@ -177,7 +177,7 @@ function HeadingDropdown({ editor }: { editor: Editor }) {
 }
 
 // ===================================
-//       字号下拉选择器
+// 字号下拉选择器
 // ===================================
 
 const FONT_SIZES = ["12px", "13px", "14px", "15px", "16px", "18px", "20px", "24px", "28px", "32px"];
@@ -208,11 +208,11 @@ function FontSizeDropdown({ editor }: { editor: Editor }) {
       <PopoverTrigger>
         <button
           type="button"
-          className="inline-flex items-center gap-1 h-8 px-2.5 rounded-md border border-default-200 text-sm hover:bg-default-100 transition-colors min-w-[64px]"
+          className="inline-flex items-center gap-1 h-8 px-2.5 rounded-md border border-border/60 text-sm hover:bg-muted transition-colors min-w-[64px]"
           onClick={() => setOpen(!open)}
         >
           <span className="tabular-nums">{currentSize}</span>
-          <ChevronDown className="w-3 h-3 text-default-400" />
+          <ChevronDown className="w-3 h-3 text-muted-foreground" />
         </button>
       </PopoverTrigger>
       <PopoverContent className="p-1 min-w-[100px]">
@@ -224,12 +224,12 @@ function FontSizeDropdown({ editor }: { editor: Editor }) {
               type="button"
               className={cn(
                 "w-full flex items-center justify-between px-3 py-1.5 rounded-md text-sm transition-colors",
-                isActive ? "bg-default-100 font-medium" : "hover:bg-default-50"
+                isActive ? "bg-muted font-medium" : "hover:bg-muted/30"
               )}
               onClick={() => handleSelect(size)}
             >
               <span className="tabular-nums">{size}</span>
-              {isActive && <Check className="w-3.5 h-3.5 text-default-500" />}
+              {isActive && <Check className="w-3.5 h-3.5 text-muted-foreground" />}
             </button>
           );
         })}
@@ -239,7 +239,7 @@ function FontSizeDropdown({ editor }: { editor: Editor }) {
 }
 
 // ===================================
-//       预设颜色
+// 预设颜色
 // ===================================
 
 const PRESET_COLORS = [
@@ -265,7 +265,7 @@ const PRESET_COLORS = [
 const HIGHLIGHT_COLORS = ["#fef08a", "#bbf7d0", "#bfdbfe", "#e9d5ff", "#fecaca", "#fed7aa"];
 
 // ===================================
-//       主工具栏组件
+// 主工具栏组件
 // ===================================
 
 export function EditorToolbar({ editor, onAIWriting }: EditorToolbarProps) {
@@ -470,7 +470,7 @@ export function EditorToolbar({ editor, onAIWriting }: EditorToolbarProps) {
           </div>
           <button
             type="button"
-            className="w-full mt-2 pt-2 border-t border-border text-xs text-default-500 hover:text-primary text-center transition-colors"
+            className="w-full mt-2 pt-2 border-t border-border text-xs text-muted-foreground hover:text-primary text-center transition-colors"
             onClick={() => {
               editor.chain().focus().unsetColor().run();
               setShowColorPicker(false);
@@ -514,7 +514,7 @@ export function EditorToolbar({ editor, onAIWriting }: EditorToolbarProps) {
           </div>
           <button
             type="button"
-            className="w-full mt-2 pt-2 border-t border-border text-xs text-default-500 hover:text-primary text-center transition-colors"
+            className="w-full mt-2 pt-2 border-t border-border text-xs text-muted-foreground hover:text-primary text-center transition-colors"
             onClick={() => {
               editor.chain().focus().unsetHighlight().run();
               setShowHighlightPicker(false);
@@ -653,7 +653,7 @@ export function EditorToolbar({ editor, onAIWriting }: EditorToolbarProps) {
 }
 
 // ===================================
-//     插入内容块下拉菜单
+// 插入内容块下拉菜单
 // ===================================
 
 function InsertBlockMenu({ editor }: { editor: Editor }) {
@@ -690,20 +690,20 @@ function InsertBlockMenu({ editor }: { editor: Editor }) {
       <PopoverContent className="p-1 min-w-[140px]">
         {ITEMS.map(item =>
           item.separator ? (
-            <div key={item.label} className="px-3 py-1 text-[10px] text-default-300 font-medium">
+            <div key={item.label} className="px-3 py-1 text-[10px] text-muted-foreground/40 font-medium">
               {item.label}
             </div>
           ) : (
             <button
               key={item.label}
               type="button"
-              className="w-full text-left px-3 py-1.5 text-sm hover:bg-default-100 rounded transition-colors flex items-center gap-2"
+              className="w-full text-left px-3 py-1.5 text-sm hover:bg-muted rounded transition-colors flex items-center gap-2"
               onClick={() => {
                 item.action();
                 setOpen(false);
               }}
             >
-              {item.icon && <span className="flex-shrink-0 text-default-400">{item.icon}</span>}
+              {item.icon && <span className="flex-shrink-0 text-muted-foreground">{item.icon}</span>}
               {item.label}
             </button>
           )
@@ -714,7 +714,7 @@ function InsertBlockMenu({ editor }: { editor: Editor }) {
 }
 
 // ===================================
-//     表格网格选择器
+// 表格网格选择器
 // ===================================
 
 const MAX_GRID = 8;
@@ -764,7 +764,7 @@ function TableGridPicker({ onInsert }: { onInsert: (rows: number, cols: number) 
         </div>
       </PopoverTrigger>
       <PopoverContent className="p-3">
-        <div className="text-xs text-default-500 mb-2 font-medium">表格</div>
+        <div className="text-xs text-muted-foreground mb-2 font-medium">表格</div>
         <div
           className="grid gap-[3px]"
           style={{ gridTemplateColumns: `repeat(${MAX_GRID}, 1fr)` }}
@@ -779,9 +779,7 @@ function TableGridPicker({ onInsert }: { onInsert: (rows: number, cols: number) 
                 key={i}
                 type="button"
                 className={`w-5 h-5 rounded-[3px] border transition-colors ${
-                  isActive
-                    ? "bg-primary/20 border-primary/40"
-                    : "bg-default-100 border-default-200 hover:border-default-300"
+                  isActive ? "bg-primary/20 border-primary/40" : "bg-muted border-border/60 hover:border-border/80"
                 }`}
                 onMouseEnter={() => setHover({ row, col })}
                 onClick={() => handleGridClick(row, col)}
@@ -789,19 +787,19 @@ function TableGridPicker({ onInsert }: { onInsert: (rows: number, cols: number) 
             );
           })}
         </div>
-        <div className="text-xs text-center text-default-400 mt-2">
+        <div className="text-xs text-center text-muted-foreground mt-2">
           {hover.row > 0 ? `${hover.row} x ${hover.col}` : "选择行列数"}
         </div>
         {!showCustom ? (
           <button
             type="button"
-            className="w-full text-xs text-default-400 hover:text-primary text-center mt-2 pt-2 border-t border-default-200 transition-colors"
+            className="w-full text-xs text-muted-foreground hover:text-primary text-center mt-2 pt-2 border-t border-border/60 transition-colors"
             onClick={() => setShowCustom(true)}
           >
             自定义行列数...
           </button>
         ) : (
-          <div className="mt-2 pt-2 border-t border-default-200 flex items-center gap-2">
+          <div className="mt-2 pt-2 border-t border-border/60 flex items-center gap-2">
             <input
               type="number"
               min={1}
@@ -809,9 +807,9 @@ function TableGridPicker({ onInsert }: { onInsert: (rows: number, cols: number) 
               placeholder="行"
               value={customRows}
               onChange={e => setCustomRows(e.target.value)}
-              className="w-14 h-7 px-2 text-xs border border-default-200 rounded-md outline-none focus:border-primary text-center"
+              className="w-14 h-7 px-2 text-xs border border-border/60 rounded-md outline-none focus:border-primary text-center"
             />
-            <span className="text-xs text-default-400">x</span>
+            <span className="text-xs text-muted-foreground">x</span>
             <input
               type="number"
               min={1}
@@ -819,7 +817,7 @@ function TableGridPicker({ onInsert }: { onInsert: (rows: number, cols: number) 
               placeholder="列"
               value={customCols}
               onChange={e => setCustomCols(e.target.value)}
-              className="w-14 h-7 px-2 text-xs border border-default-200 rounded-md outline-none focus:border-primary text-center"
+              className="w-14 h-7 px-2 text-xs border border-border/60 rounded-md outline-none focus:border-primary text-center"
             />
             <button
               type="button"
