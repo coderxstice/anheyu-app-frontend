@@ -18,7 +18,7 @@ function isValidUrl(value: string): boolean {
 }
 
 // ===================================
-//         链接插入对话框
+// 链接插入对话框
 // ===================================
 
 interface LinkDialogProps {
@@ -112,7 +112,7 @@ export function LinkDialog({ isOpen, onOpenChange, currentUrl, currentTarget, on
                 autoComplete="url"
                 isInvalid={!!urlError}
                 errorMessage={urlError}
-                startContent={<Link2 className="w-4 h-4 text-default-400 shrink-0" />}
+                startContent={<Link2 className="w-4 h-4 text-muted-foreground shrink-0" />}
               />
 
               <Switch
@@ -121,7 +121,7 @@ export function LinkDialog({ isOpen, onOpenChange, currentUrl, currentTarget, on
                 onValueChange={setOpenInNewTab}
                 classNames={{
                   base: "flex-row-reverse justify-between w-full max-w-full py-1.5 px-1",
-                  label: "text-sm text-default-600",
+                  label: "text-sm text-foreground/70",
                 }}
                 thumbIcon={<ExternalLink className="w-2.5 h-2.5" />}
               >
@@ -157,7 +157,7 @@ export function LinkDialog({ isOpen, onOpenChange, currentUrl, currentTarget, on
 }
 
 // ===================================
-//         图片插入对话框
+// 图片插入对话框
 // ===================================
 
 interface ImageDialogProps {
@@ -312,13 +312,13 @@ export function ImageDialog({ isOpen, onOpenChange, onConfirm }: ImageDialogProp
             </ModalHeader>
 
             <ModalBody className="gap-3">
-              <div className="flex p-1 rounded-xl bg-default-100 gap-1">
+              <div className="flex p-1 rounded-xl bg-muted gap-1">
                 <button
                   type="button"
                   className={`flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     mode === "url"
-                      ? "bg-white text-foreground shadow-sm dark:bg-default-200"
-                      : "text-default-500 hover:text-default-700"
+                      ? "bg-white text-foreground shadow-sm dark:bg-secondary"
+                      : "text-muted-foreground hover:text-foreground/80"
                   }`}
                   onClick={() => setMode("url")}
                 >
@@ -329,8 +329,8 @@ export function ImageDialog({ isOpen, onOpenChange, onConfirm }: ImageDialogProp
                   type="button"
                   className={`flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     mode === "upload"
-                      ? "bg-white text-foreground shadow-sm dark:bg-default-200"
-                      : "text-default-500 hover:text-default-700"
+                      ? "bg-white text-foreground shadow-sm dark:bg-secondary"
+                      : "text-muted-foreground hover:text-foreground/80"
                   }`}
                   onClick={() => setMode("upload")}
                 >
@@ -355,7 +355,7 @@ export function ImageDialog({ isOpen, onOpenChange, onConfirm }: ImageDialogProp
                     autoComplete="url"
                     isInvalid={!!imgUrlError}
                     errorMessage={imgUrlError}
-                    startContent={<ImageIcon className="w-4 h-4 text-default-400 shrink-0" />}
+                    startContent={<ImageIcon className="w-4 h-4 text-muted-foreground shrink-0" />}
                   />
 
                   <Input
@@ -370,11 +370,11 @@ export function ImageDialog({ isOpen, onOpenChange, onConfirm }: ImageDialogProp
 
                   {/* 图片预览 */}
                   {canInsertByUrl && (
-                    <div className="border border-default-200 rounded-lg overflow-hidden bg-default-50">
-                      <div className="px-3 py-1.5 text-xs text-default-400 border-b border-default-200">预览</div>
+                    <div className="border border-border/60 rounded-lg overflow-hidden bg-muted/30">
+                      <div className="px-3 py-1.5 text-xs text-muted-foreground border-b border-border/60">预览</div>
                       <div className="p-3 flex items-center justify-center min-h-[120px]">
                         {previewError ? (
-                          <span className="text-xs text-default-300">无法加载预览</span>
+                          <span className="text-xs text-muted-foreground/40">无法加载预览</span>
                         ) : (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
@@ -395,7 +395,7 @@ export function ImageDialog({ isOpen, onOpenChange, onConfirm }: ImageDialogProp
                     className={`flex flex-col items-center justify-center gap-3 p-8 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${
                       isDragOver
                         ? "border-primary bg-primary/5"
-                        : "border-default-300 hover:border-primary/50 hover:bg-default-50"
+                        : "border-border/80 hover:border-primary/50 hover:bg-muted/30"
                     }`}
                     onClick={() => fileInputRef.current?.click()}
                     onDragOver={handleDragOver}
@@ -411,9 +411,11 @@ export function ImageDialog({ isOpen, onOpenChange, onConfirm }: ImageDialogProp
                           alt="预览"
                           className="max-h-[180px] max-w-full object-contain rounded"
                         />
-                        <div className="text-sm text-default-500 text-center">
+                        <div className="text-sm text-muted-foreground text-center">
                           <span className="font-medium">{selectedFile.name}</span>
-                          <span className="text-default-400 ml-2">({(selectedFile.size / 1024).toFixed(1)} KB)</span>
+                          <span className="text-muted-foreground ml-2">
+                            ({(selectedFile.size / 1024).toFixed(1)} KB)
+                          </span>
                         </div>
                         <Button size="sm" variant="flat" onPress={() => fileInputRef.current?.click()}>
                           重新选择
@@ -421,9 +423,9 @@ export function ImageDialog({ isOpen, onOpenChange, onConfirm }: ImageDialogProp
                       </>
                     ) : (
                       <>
-                        <Upload className="w-10 h-10 text-default-300" />
-                        <div className="text-sm text-default-500">点击或拖拽图片到此处上传</div>
-                        <div className="text-xs text-default-400">支持 JPG、PNG、GIF、WebP 格式</div>
+                        <Upload className="w-10 h-10 text-muted-foreground/40" />
+                        <div className="text-sm text-muted-foreground">点击或拖拽图片到此处上传</div>
+                        <div className="text-xs text-muted-foreground">支持 JPG、PNG、GIF、WebP 格式</div>
                       </>
                     )}
                   </div>

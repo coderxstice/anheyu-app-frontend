@@ -98,13 +98,13 @@ function InlineInput({
       classNames={{
         label: "text-[11px] font-medium tracking-wide text-foreground/60",
         inputWrapper: cn(
-          "h-9 min-h-9 rounded-xl border border-default-200/80 bg-white dark:bg-default-100/50 shadow-none!",
-          "data-[hover=true]:bg-white! dark:data-[hover=true]:bg-default-100/60 data-[hover=true]:border-default-300/90",
-          "group-data-[focus=true]:bg-white! dark:group-data-[focus=true]:bg-default-100/60 group-data-[focus=true]:border-primary/65 group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-primary/15",
+          "h-9 min-h-9 rounded-xl border border-border/60 bg-card shadow-none!",
+          "data-[hover=true]:bg-card dark:data-[hover=true]:bg-muted data-[hover=true]:border-border/80",
+          "group-data-[focus=true]:bg-card dark:group-data-[focus=true]:bg-muted group-data-[focus=true]:border-primary/65 group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-primary/15",
           "transition-all duration-200"
         ),
-        input: "text-sm text-foreground/90 placeholder:text-default-400/80",
-        description: "text-xs leading-relaxed text-default-400",
+        input: "text-sm text-foreground/90 placeholder:text-muted-foreground",
+        description: "text-xs leading-relaxed text-muted-foreground",
       }}
     />
   );
@@ -157,7 +157,7 @@ export function HomeTopEditor({ label, description, value, onValueChange, classN
       {label && <label className="text-sm font-semibold tracking-tight text-foreground/80">{label}</label>}
 
       {/* 基本信息 */}
-      <div className="rounded-xl border border-default-200/70 p-4 space-y-3">
+      <div className="rounded-xl border border-border/60 p-4 space-y-3">
         <h5 className="text-xs font-semibold text-foreground/50 uppercase tracking-wider">基本信息</h5>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <InlineInput
@@ -182,7 +182,7 @@ export function HomeTopEditor({ label, description, value, onValueChange, classN
       </div>
 
       {/* 分类列表 */}
-      <div className="rounded-xl border border-default-200/70 p-4 space-y-3">
+      <div className="rounded-xl border border-border/60 p-4 space-y-3">
         <h5 className="text-xs font-semibold text-foreground/50 uppercase tracking-wider">分类列表</h5>
         <VisualArrayEditor
           value={categoryJsonValue}
@@ -195,7 +195,7 @@ export function HomeTopEditor({ label, description, value, onValueChange, classN
       </div>
 
       {/* Banner 配置 */}
-      <div className="rounded-xl border border-default-200/70 p-4 space-y-3">
+      <div className="rounded-xl border border-border/60 p-4 space-y-3">
         <h5 className="text-xs font-semibold text-foreground/50 uppercase tracking-wider">Banner 配置</h5>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <InlineInput
@@ -225,7 +225,7 @@ export function HomeTopEditor({ label, description, value, onValueChange, classN
         </div>
       </div>
 
-      {description && <p className="text-xs leading-relaxed text-default-400">{description}</p>}
+      {description && <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>}
     </div>
   );
 }

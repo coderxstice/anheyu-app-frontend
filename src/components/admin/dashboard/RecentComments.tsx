@@ -13,7 +13,7 @@ function stripHtml(html: string): string {
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#039;/g, "'")
-    .replace(/&nbsp;/g, " ")
+    .replace(/&nbsp;/g, "")
     .trim();
 }
 

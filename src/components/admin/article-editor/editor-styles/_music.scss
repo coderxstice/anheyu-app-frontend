@@ -234,7 +234,9 @@
       filter: blur(12px) saturate(0.8);
       clip-path: circle(90% at center);
       pointer-events: none;
-      transition: opacity 0.4s ease, filter 0.4s ease;
+      transition:
+        opacity 0.4s ease,
+        filter 0.4s ease;
     }
 
     .artwork-border-ring {
@@ -250,7 +252,9 @@
       background: transparent;
       pointer-events: none;
       box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-      transition: border-color 0.4s ease, box-shadow 0.4s ease;
+      transition:
+        border-color 0.4s ease,
+        box-shadow 0.4s ease;
     }
 
     .music-cover-placeholder {

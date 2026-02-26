@@ -82,7 +82,8 @@ export function AdminDataTable<T extends Record<string, unknown>>({
   const sortDir = controlledSortDir ?? internalSortDir;
 
   const getRowKey = (item: T, index: number): string | number => {
-    if (!rowKey) return (item as Record<string, unknown>).id != null ? String((item as Record<string, unknown>).id) : index;
+    if (!rowKey)
+      return (item as Record<string, unknown>).id != null ? String((item as Record<string, unknown>).id) : index;
     if (typeof rowKey === "function") return rowKey(item, index);
     return String(item[rowKey] ?? index);
   };

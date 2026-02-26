@@ -38,7 +38,7 @@ export function TakedownModal({
               </div>
             </ModalHeader>
             <ModalBody>
-              <p className="text-default-500 mb-3">
+              <p className="text-muted-foreground mb-3">
                 下架「<strong>{target?.title}</strong>」
               </p>
               <FormTextarea

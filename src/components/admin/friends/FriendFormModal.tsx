@@ -61,8 +61,8 @@ export default function FriendFormModal({ isOpen, onClose, editItem }: FriendFor
 function SectionTitle({ icon: Icon, children }: { icon: React.ElementType; children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-2 mb-3">
-      <Icon className="w-4 h-4 text-default-400" />
-      <span className="text-sm font-medium text-default-600">{children}</span>
+      <Icon className="w-4 h-4 text-muted-foreground" />
+      <span className="text-sm font-medium text-foreground/70">{children}</span>
     </div>
   );
 }
@@ -327,7 +327,7 @@ function FriendFormContent({ editItem, onClose }: { editItem?: LinkItem | null; 
           </div>
         </div>
 
-        <div className="border-t border-default-100" />
+        <div className="border-t border-border/30" />
 
         {/* Section 2: 归类 */}
         <div className="py-4">
@@ -437,7 +437,7 @@ function FriendFormContent({ editItem, onClose }: { editItem?: LinkItem | null; 
           </div>
         </div>
 
-        <div className="border-t border-default-100" />
+        <div className="border-t border-border/30" />
 
         {/* Section 3: 配置 */}
         <div className="pt-4">
@@ -464,10 +464,10 @@ function FriendFormContent({ editItem, onClose }: { editItem?: LinkItem | null; 
               />
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-lg bg-default-50 border border-default-200">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/60">
               <div>
                 <p className="text-sm font-medium">跳过健康检查</p>
-                <p className="text-xs text-default-400">开启后该友链不参与自动健康检查</p>
+                <p className="text-xs text-muted-foreground">开启后该友链不参与自动健康检查</p>
               </div>
               <Switch isSelected={skipHealthCheck} onValueChange={setSkipHealthCheck} size="sm" />
             </div>
@@ -475,7 +475,7 @@ function FriendFormContent({ editItem, onClose }: { editItem?: LinkItem | null; 
         </div>
       </ModalBody>
 
-      <ModalFooter className="border-t border-default-100">
+      <ModalFooter className="border-t border-border/30">
         <Button variant="flat" onPress={onClose}>
           取消
         </Button>

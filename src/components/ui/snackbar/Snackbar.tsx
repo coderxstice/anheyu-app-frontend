@@ -13,13 +13,7 @@ export interface SnackbarProps {
   onClose?: () => void;
 }
 
-export function Snackbar({
-  text,
-  duration = 2000,
-  actionText,
-  onActionClick,
-  onClose,
-}: SnackbarProps) {
+export function Snackbar({ text, duration = 2000, actionText, onActionClick, onClose }: SnackbarProps) {
   const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
 
@@ -48,13 +42,7 @@ export function Snackbar({
   if (typeof window === "undefined") return null;
 
   return createPortal(
-    <div
-      className={cn(
-        styles.snackbar,
-        visible && !exiting && styles.show,
-        exiting && styles.exit
-      )}
-    >
+    <div className={cn(styles.snackbar, visible && !exiting && styles.show, exiting && styles.exit)}>
       <div className={styles.inner}>
         <span className={styles.text}>{text}</span>
         {actionText && onActionClick && (
@@ -63,10 +51,7 @@ export function Snackbar({
           </button>
         )}
       </div>
-      <div
-        className={styles.progress}
-        style={{ animationDuration: `${duration}ms` }}
-      />
+      <div className={styles.progress} style={{ animationDuration: `${duration}ms` }} />
     </div>,
     document.body
   );

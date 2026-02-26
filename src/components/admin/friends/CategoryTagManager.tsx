@@ -273,7 +273,7 @@ export default function CategoryTagManager({ isOpen, onClose }: CategoryTagManag
               {categories.map(cat => (
                 <div
                   key={cat.id}
-                  className="p-3 rounded-lg border border-default-200 bg-default-50 hover:border-default-300 transition-colors"
+                  className="p-3 rounded-lg border border-border/60 bg-muted/30 hover:border-border/80 transition-colors"
                 >
                   {editingCategory?.id === cat.id ? (
                     renderCategoryForm(true)
@@ -289,7 +289,7 @@ export default function CategoryTagManager({ isOpen, onClose }: CategoryTagManag
                             系统
                           </Chip>
                         )}
-                        {cat.description && <span className="text-xs text-default-400">{cat.description}</span>}
+                        {cat.description && <span className="text-xs text-muted-foreground">{cat.description}</span>}
                       </div>
                       <div className="flex items-center gap-1">
                         <Button isIconOnly size="sm" variant="light" onPress={() => handleEditCategory(cat)}>
@@ -312,7 +312,9 @@ export default function CategoryTagManager({ isOpen, onClose }: CategoryTagManag
                 </div>
               ))}
 
-              {categories.length === 0 && <div className="text-center py-8 text-default-400 text-sm">暂无分类</div>}
+              {categories.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground text-sm">暂无分类</div>
+              )}
             </div>
           </Tab>
 
@@ -342,7 +344,7 @@ export default function CategoryTagManager({ isOpen, onClose }: CategoryTagManag
                       className="flex-1"
                     />
                     <div className="flex flex-col items-center gap-1">
-                      <span className="text-xs text-default-400">颜色</span>
+                      <span className="text-xs text-muted-foreground">颜色</span>
                       <FormColorPicker value={newTagColor} onChange={setNewTagColor} />
                     </div>
                   </div>
@@ -367,7 +369,7 @@ export default function CategoryTagManager({ isOpen, onClose }: CategoryTagManag
               {tags.map(tag => (
                 <div
                   key={tag.id}
-                  className="p-3 rounded-lg border border-default-200 bg-default-50 hover:border-default-300 transition-colors"
+                  className="p-3 rounded-lg border border-border/60 bg-muted/30 hover:border-border/80 transition-colors"
                 >
                   {editingTag?.id === tag.id ? (
                     <div className="space-y-3">
@@ -380,7 +382,7 @@ export default function CategoryTagManager({ isOpen, onClose }: CategoryTagManag
                           className="flex-1"
                         />
                         <div className="flex flex-col items-center gap-1">
-                          <span className="text-xs text-default-400">颜色</span>
+                          <span className="text-xs text-muted-foreground">颜色</span>
                           <FormColorPicker value={newTagColor} onChange={setNewTagColor} />
                         </div>
                       </div>
@@ -397,11 +399,11 @@ export default function CategoryTagManager({ isOpen, onClose }: CategoryTagManag
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span
-                          className="w-4 h-4 rounded-full border border-default-200"
+                          className="w-4 h-4 rounded-full border border-border/60"
                           style={{ backgroundColor: tag.color || "#999" }}
                         />
                         <span className="font-medium text-sm">{tag.name}</span>
-                        <span className="text-xs text-default-400">{tag.color}</span>
+                        <span className="text-xs text-muted-foreground">{tag.color}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Button isIconOnly size="sm" variant="light" onPress={() => handleEditTag(tag)}>
@@ -422,7 +424,7 @@ export default function CategoryTagManager({ isOpen, onClose }: CategoryTagManag
                 </div>
               ))}
 
-              {tags.length === 0 && <div className="text-center py-8 text-default-400 text-sm">暂无标签</div>}
+              {tags.length === 0 && <div className="text-center py-8 text-muted-foreground text-sm">暂无标签</div>}
             </div>
           </Tab>
         </Tabs>

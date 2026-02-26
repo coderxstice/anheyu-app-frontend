@@ -16,12 +16,7 @@ interface LyricsDisplayProps {
   setLyricRef: (el: HTMLElement | null, index: number) => void;
 }
 
-export function LyricsDisplay({
-  lyrics,
-  lyricsState,
-  dominantColor,
-  setLyricRef,
-}: LyricsDisplayProps) {
+export function LyricsDisplay({ lyrics, lyricsState, dominantColor, setLyricRef }: LyricsDisplayProps) {
   const getLineClassName = useCallback(
     (index: number) => {
       const classes = [styles.lyricLine];
@@ -34,14 +29,8 @@ export function LyricsDisplay({
   );
 
   return (
-    <div
-      className={styles.lyricsContainer}
-      style={{ "--dominant-color": dominantColor } as React.CSSProperties}
-    >
-      <div
-        className={styles.lyricsContent}
-        style={{ transform: `translateY(${lyricsState.translateY}px)` }}
-      >
+    <div className={styles.lyricsContainer} style={{ "--dominant-color": dominantColor } as React.CSSProperties}>
+      <div className={styles.lyricsContent} style={{ transform: `translateY(${lyricsState.translateY}px)` }}>
         {lyrics.length === 0 ? (
           <div className={`${styles.lyricLine} ${styles.noLyrics}`}>
             <div className={styles.lyricText}>♪ 暂无歌词 ♪</div>
@@ -50,7 +39,7 @@ export function LyricsDisplay({
           lyrics.map((lyric, index) => (
             <div key={index} className={getLineClassName(index)}>
               <div
-                ref={(el) => setLyricRef(el, index)}
+                ref={el => setLyricRef(el, index)}
                 className={`${styles.lyricText}${lyricsState.shouldScroll[index] ? ` ${styles.textScrolling}` : ""}`}
               >
                 {lyric.text}

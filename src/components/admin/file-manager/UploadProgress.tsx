@@ -184,8 +184,8 @@ export function UploadProgress({
                     {queue.length > 0 && queue.every(item => ["success", "canceled"].includes(item.status))
                       ? "所有任务已处理完毕"
                       : queue.length > 0
-                      ? "所有活动任务已完成"
-                      : "没有上传任务"}
+                        ? "所有活动任务已完成"
+                        : "没有上传任务"}
                   </div>
                 ) : null}
                 <AnimatePresence>
@@ -258,12 +258,12 @@ function UploadItemRow({
     item.status === "success"
       ? styles["status-success"]
       : item.status === "error"
-      ? styles["status-error"]
-      : item.status === "uploading"
-      ? styles["status-uploading"]
-      : item.status === "conflict"
-      ? styles["status-conflict"]
-      : "";
+        ? styles["status-error"]
+        : item.status === "uploading"
+          ? styles["status-uploading"]
+          : item.status === "conflict"
+            ? styles["status-conflict"]
+            : "";
 
   return (
     <div
@@ -326,10 +326,10 @@ function UploadItemRow({
                       item.status === "success"
                         ? styles["is-success"]
                         : item.status === "error"
-                        ? styles["is-error"]
-                        : item.status === "conflict"
-                        ? styles["is-conflict"]
-                        : ""
+                          ? styles["is-error"]
+                          : item.status === "conflict"
+                            ? styles["is-conflict"]
+                            : ""
                     }`}
                   >
                     {getStatusText()}

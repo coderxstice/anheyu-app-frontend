@@ -45,8 +45,8 @@ function parseValue(raw: string | undefined): ParseResult {
       const rawItems = Array.isArray(categoryObj.equipment_list)
         ? categoryObj.equipment_list
         : Array.isArray(categoryObj.items)
-        ? categoryObj.items
-        : [];
+          ? categoryObj.items
+          : [];
       return {
         _id: nextId(),
         data: { ...categoryObj, name: categoryName },
@@ -88,7 +88,7 @@ function serializeValue(categories: InternalCategory[]): string {
 }
 
 const inputWrapperClass =
-  "bg-default-100/5! border border-default-200/80 rounded-lg shadow-none! min-h-9 h-9 data-[hover=true]:bg-default-100/5! group-data-[focus=true]:bg-default-50! group-data-[focus=true]:border-primary/40";
+  "bg-transparent! border border-border/60 rounded-lg shadow-none! min-h-9 h-9 data-[hover=true]:border-border-hover/40 group-data-[focus=true]:bg-card! group-data-[focus=true]:border-primary/40";
 
 export function EquipmentListEditor({ value, onValueChange }: EquipmentListEditorProps) {
   const [categories, setCategories] = React.useState<InternalCategory[]>(() => parseValue(value).categories);
@@ -236,11 +236,11 @@ export function EquipmentListEditor({ value, onValueChange }: EquipmentListEdito
 
       {categories.length === 0 && (
         <div
-          className="flex flex-col items-center justify-center rounded-xl border border-dashed border-default-300/80 py-12 text-center"
+          className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/60 py-12 text-center"
           style={{ minHeight: 140 }}
         >
-          <p className="text-sm text-default-400">暂无分类</p>
-          <p className="mt-1 text-xs text-default-300">点击下方按钮添加</p>
+          <p className="text-sm text-muted-foreground">暂无分类</p>
+          <p className="mt-1 text-xs text-muted-foreground/50">点击下方按钮添加</p>
         </div>
       )}
 
@@ -248,8 +248,8 @@ export function EquipmentListEditor({ value, onValueChange }: EquipmentListEdito
         type="button"
         onClick={addCategory}
         className={cn(
-          "flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-default-300/80 py-3 text-sm",
-          "text-default-500 transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+          "flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border/60 py-3 text-sm",
+          "text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
         )}
       >
         <Plus className="h-4 w-4" />
@@ -290,21 +290,21 @@ function CategoryCard({
       value={category}
       dragListener={false}
       dragControls={dragControls}
-      className="rounded-xl border border-default-200/80 bg-default-50/20 shadow-[0_0_0_0.5px_rgba(0,0,0,0.03)] dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.04)]"
+      className="rounded-xl border border-border/60 bg-muted/20 shadow-[0_0_0_0.5px_rgba(0,0,0,0.03)] dark:shadow-none"
     >
       {/* 分类标题栏 */}
       <div className="flex items-center gap-2 px-3 py-2.5">
         <button
           type="button"
           onPointerDown={e => dragControls.start(e)}
-          className="shrink-0 rounded p-0.5 text-default-400 hover:bg-default-100 hover:text-default-600"
+          className="shrink-0 rounded p-0.5 text-muted-foreground/50 hover:bg-muted hover:text-muted-foreground"
         >
           <GripVertical className="h-4 w-4" />
         </button>
         <button
           type="button"
           onClick={onToggle}
-          className="flex shrink-0 items-center justify-center rounded p-0.5 text-default-400 hover:bg-default-100 hover:text-default-600"
+          className="flex shrink-0 items-center justify-center rounded p-0.5 text-muted-foreground/50 hover:bg-muted hover:text-muted-foreground"
         >
           {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </button>
@@ -320,11 +320,11 @@ function CategoryCard({
             }}
           />
         </div>
-        <span className="shrink-0 text-xs text-default-400">{category.items.length} 项</span>
+        <span className="shrink-0 text-xs text-muted-foreground">{category.items.length} 项</span>
         <button
           type="button"
           onClick={onRemove}
-          className="shrink-0 rounded p-1.5 text-default-400 hover:bg-danger/10 hover:text-danger"
+          className="shrink-0 rounded p-1.5 text-muted-foreground/50 hover:bg-danger/10 hover:text-danger"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
@@ -337,7 +337,7 @@ function CategoryCard({
           isExpanded ? "max-h-[5000px]" : "max-h-0"
         )}
       >
-        <div className="border-t border-default-200/60 px-3 py-3">
+        <div className="border-t border-border/40 px-3 py-3">
           <Reorder.Group axis="y" values={category.items} onReorder={onReorderItems} className="space-y-2">
             {category.items.map(item => (
               <ItemCard
@@ -351,7 +351,7 @@ function CategoryCard({
           <button
             type="button"
             onClick={onAddItem}
-            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-default-300/80 py-2 text-xs text-default-500 hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-border/60 py-2 text-xs text-muted-foreground hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
           >
             <Plus className="h-3.5 w-3.5" />
             添加装备
@@ -379,18 +379,18 @@ function ItemCard({
       value={item}
       dragListener={false}
       dragControls={dragControls}
-      className="flex gap-3 rounded-lg border border-default-200/60 bg-white/50 p-2.5 dark:bg-default-50/30"
+      className="flex gap-3 rounded-lg border border-border/40 bg-card p-2.5"
     >
       {/* 拖拽手柄 + 图片预览 */}
       <div className="flex shrink-0 flex-col items-center gap-1">
         <button
           type="button"
           onPointerDown={e => dragControls.start(e)}
-          className="rounded p-0.5 text-default-400 hover:text-default-600"
+          className="rounded p-0.5 text-muted-foreground/50 hover:text-muted-foreground"
         >
           <GripVertical className="h-3.5 w-3.5" />
         </button>
-        <div className="h-12 w-12 overflow-hidden rounded-lg border border-default-200/80 bg-default-100">
+        <div className="h-12 w-12 overflow-hidden rounded-lg border border-border/60 bg-muted">
           {imgUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- 用户 URL 预览，需支持任意域名
             <img
@@ -402,7 +402,9 @@ function ItemCard({
               }}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-[10px] text-default-300">图</div>
+            <div className="flex h-full w-full items-center justify-center text-[10px] text-muted-foreground/40">
+              图
+            </div>
           )}
         </div>
       </div>
@@ -427,7 +429,7 @@ function ItemCard({
           <button
             type="button"
             onClick={onRemove}
-            className="shrink-0 rounded p-1.5 text-default-400 hover:bg-danger/10 hover:text-danger"
+            className="shrink-0 rounded p-1.5 text-muted-foreground/50 hover:bg-danger/10 hover:text-danger"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
@@ -456,8 +458,8 @@ function ItemCard({
           minRows={1}
           classNames={{
             inputWrapper: cn(
-              "bg-default-100/5! border border-default-200/80 rounded-lg shadow-none! min-h-[60px]",
-              "data-[hover=true]:bg-default-100/5! group-data-[focus=true]:bg-default-50! group-data-[focus=true]:border-primary/40"
+              "bg-transparent! border border-border/60 rounded-lg shadow-none! min-h-[60px]",
+              "data-[hover=true]:border-border-hover/40 group-data-[focus=true]:bg-card! group-data-[focus=true]:border-primary/40"
             ),
             input: "text-xs",
           }}

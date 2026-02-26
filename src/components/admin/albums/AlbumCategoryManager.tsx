@@ -180,7 +180,7 @@ export default function AlbumCategoryManager({ isOpen, onClose }: AlbumCategoryM
             {sortedCategories.map(category => (
               <div
                 key={category.id}
-                className="rounded-xl border border-default-200 bg-default-50 p-3 flex items-center justify-between gap-3"
+                className="rounded-xl border border-border/60 bg-muted/30 p-3 flex items-center justify-between gap-3"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -189,7 +189,7 @@ export default function AlbumCategoryManager({ isOpen, onClose }: AlbumCategoryM
                       排序 {category.displayOrder ?? 0}
                     </Chip>
                   </div>
-                  {category.description && <p className="text-xs text-default-500 mt-1">{category.description}</p>}
+                  {category.description && <p className="text-xs text-muted-foreground mt-1">{category.description}</p>}
                 </div>
                 <div className="flex items-center gap-1">
                   <Button isIconOnly size="sm" variant="light" onPress={() => handleStartEdit(category)}>
@@ -203,7 +203,7 @@ export default function AlbumCategoryManager({ isOpen, onClose }: AlbumCategoryM
             ))}
 
             {sortedCategories.length === 0 && (
-              <div className="py-10 text-center text-sm text-default-400">暂无分类，点击上方按钮创建</div>
+              <div className="py-10 text-center text-sm text-muted-foreground">暂无分类，点击上方按钮创建</div>
             )}
           </div>
         </ModalBody>

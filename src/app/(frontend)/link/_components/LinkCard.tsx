@@ -34,20 +34,13 @@ export function LinkCard({ link }: LinkCardProps) {
           <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
             {link.name}
           </p>
-          <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
-            {link.description || link.url}
-          </p>
+          <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{link.description || link.url}</p>
         </div>
       </div>
       {link.siteshot && (
         <div className="mt-3 rounded-lg overflow-hidden border border-border/50">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={link.siteshot}
-            alt={`${link.name} 截图`}
-            className="w-full h-28 object-cover"
-            loading="lazy"
-          />
+          <img src={link.siteshot} alt={`${link.name} 截图`} className="w-full h-28 object-cover" loading="lazy" />
         </div>
       )}
     </a>
@@ -84,9 +77,7 @@ export function LinkListItem({ link }: LinkListItemProps) {
         <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">
           {link.name}
         </p>
-        <p className="text-xs text-muted-foreground truncate">
-          {link.description || link.url}
-        </p>
+        <p className="text-xs text-muted-foreground truncate">{link.description || link.url}</p>
       </div>
     </a>
   );

@@ -98,18 +98,19 @@ function initFromArticle(article: ArticleDetailForEdit): ArticleMeta {
 }
 
 export function useArticleMeta(article?: ArticleDetailForEdit | null) {
-  const [meta, setMeta] = useState<ArticleMeta>(
-    article ? initFromArticle(article) : { ...DEFAULT_META }
-  );
+  const [meta, setMeta] = useState<ArticleMeta>(article ? initFromArticle(article) : { ...DEFAULT_META });
   const [initialized, setInitialized] = useState(false);
 
   // 从文章数据初始化（仅首次）
-  const initFromData = useCallback((data: ArticleDetailForEdit) => {
-    if (!initialized) {
-      setMeta(initFromArticle(data));
-      setInitialized(true);
-    }
-  }, [initialized]);
+  const initFromData = useCallback(
+    (data: ArticleDetailForEdit) => {
+      if (!initialized) {
+        setMeta(initFromArticle(data));
+        setInitialized(true);
+      }
+    },
+    [initialized]
+  );
 
   // 更新单个字段
   const updateField = useCallback(<K extends keyof ArticleMeta>(key: K, value: ArticleMeta[K]) => {

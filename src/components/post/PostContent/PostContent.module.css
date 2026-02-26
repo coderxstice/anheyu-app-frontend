@@ -1718,7 +1718,9 @@
   background: var(--muted);
   border: 1px solid var(--border);
   border-radius: 4px;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), inset 0 0 0 2px var(--card);
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.2),
+    inset 0 0 0 2px var(--card);
 }
 
 .postContent :global(.inline-password) {
@@ -1954,7 +1956,9 @@
   filter: blur(12px) saturate(0.8);
   clip-path: circle(90% at center);
   pointer-events: none;
-  transition: opacity 0.4s ease, filter 0.4s ease;
+  transition:
+    opacity 0.4s ease,
+    filter 0.4s ease;
 }
 
 /* 播放时模糊背景更明显 */
@@ -1977,7 +1981,9 @@
   background: transparent;
   pointer-events: none;
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  transition:
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
 }
 
 /* 播放时边框更明显 */
@@ -2679,7 +2685,9 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   opacity: 0;
-  transition: opacity 0.3s, background 0.3s;
+  transition:
+    opacity 0.3s,
+    background 0.3s;
 }
 
 .postContent :global(.md-editor-mermaid .md-editor-mermaid-action svg) {

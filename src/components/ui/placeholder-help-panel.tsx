@@ -41,12 +41,12 @@ export function PlaceholderHelpPanel({ title = "可用占位符", subtitle, item
 
   return (
     <div
-      className={cn("rounded-xl border border-default-200 bg-default-50/50 dark:bg-default-100/20 p-3", className)}
+      className={cn("rounded-xl border border-border/50 bg-muted/40 p-3", className)}
       role="region"
       aria-label={title}
     >
       <p className="text-xs font-medium text-foreground/80 mb-2">{title}</p>
-      {subtitle && <p className="text-[11px] text-default-500 mb-2">{subtitle}</p>}
+      {subtitle && <p className="text-[11px] text-muted-foreground mb-2">{subtitle}</p>}
       <ul className="space-y-1.5 text-xs">
         {items.map(({ variable, description }) => (
           <li key={variable} className="flex items-baseline gap-2 flex-wrap">
@@ -61,8 +61,8 @@ export function PlaceholderHelpPanel({ title = "可用占位符", subtitle, item
             >
               {variable}
             </button>
-            <span className="text-default-500 shrink-0">：</span>
-            <span className="text-default-600">{description}</span>
+            <span className="text-muted-foreground shrink-0">：</span>
+            <span className="text-foreground/70">{description}</span>
           </li>
         ))}
       </ul>

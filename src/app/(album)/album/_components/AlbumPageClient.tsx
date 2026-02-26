@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTheme } from "next-themes";
 import { addToast } from "@heroui/react";
 import { Header, Footer } from "@/components/layout";
 import { BannerCard } from "@/components/common/BannerCard";
@@ -15,6 +16,7 @@ import { AlbumList } from "./AlbumList";
 import "../_styles/album.scss";
 
 export function AlbumPageClient() {
+  const { theme, setTheme } = useTheme();
   const siteConfig = useSiteConfigStore(state => state.siteConfig);
 
   const [sortOrder, setSortOrder] = useState<AlbumSortOrder>("display_order_asc");
@@ -32,11 +34,24 @@ export function AlbumPageClient() {
 
   const previousBodyBgRef = useRef("");
   const previousHtmlBgRef = useRef("");
+  const previousThemeRef = useRef<string | undefined>(undefined);
+
+  // 网格模式下强制暗色模式，离开时恢复
+  useEffect(() => {
+    if (!isGridLayout) return;
+    previousThemeRef.current = theme;
+    if (theme !== "dark") {
+      setTheme("dark");
+    }
+    return () => {
+      if (previousThemeRef.current && previousThemeRef.current !== "dark") {
+        setTheme(previousThemeRef.current);
+      }
+    };
+  }, [isGridLayout]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const siteName = siteConfig?.APP_NAME || "安和鱼";
-  const siteLogo =
-    siteConfig?.USER_AVATAR ||
-    "https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg";
+  const siteLogo = siteConfig?.USER_AVATAR || "https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg";
   const aboutLink = siteConfig?.ABOUT_LINK || "#";
 
   useEffect(() => {

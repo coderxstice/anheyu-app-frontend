@@ -46,7 +46,7 @@ export function EmailSettingsForm({ values, onChange, loading }: EmailSettingsFo
       >
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
           <p className="text-xs font-medium text-foreground/80 mb-3">快速配置</p>
-          <ol className="space-y-2 text-xs text-default-600">
+          <ol className="space-y-2 text-xs text-foreground/70">
             <li className="flex gap-2">
               <span className="shrink-0 w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center text-[10px] font-semibold text-primary">
                 1
@@ -68,7 +68,7 @@ export function EmailSettingsForm({ values, onChange, loading }: EmailSettingsFo
           </ol>
         </div>
 
-        <div className="space-y-5 rounded-xl border border-default-200 bg-default-50/30 p-4 shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.06),0_2px_8px_rgba(0,0,0,0.3)]">
+        <div className="space-y-5 rounded-xl border border-border/60 bg-muted/30 p-4 shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.06),0_2px_8px_rgba(0,0,0,0.3)]">
           <SettingsFieldGroup cols={2}>
             <FormInput
               label="SMTP 主机"
@@ -150,7 +150,7 @@ export function EmailSettingsForm({ values, onChange, loading }: EmailSettingsFo
           items={[{ variable: "{{site_name}}", description: "站点名称" }]}
           className="mt-2"
         />
-        <div className="rounded-xl border border-default-200 bg-default-50/60 px-3 py-2 text-xs text-default-600">
+        <div className="rounded-xl border border-border/60 bg-muted/30 px-3 py-2 text-xs text-foreground/70">
           配置建议：重置链接最好标注有效分钟数，并提醒“若非本人操作请忽略此邮件”。
         </div>
         <FormMonacoEditor
@@ -197,7 +197,7 @@ export function EmailSettingsForm({ values, onChange, loading }: EmailSettingsFo
           items={[{ variable: "{{site_name}}", description: "站点名称" }]}
           className="mt-2"
         />
-        <div className="rounded-xl border border-default-200 bg-default-50/60 px-3 py-2 text-xs text-default-600">
+        <div className="rounded-xl border border-border/60 bg-muted/30 px-3 py-2 text-xs text-foreground/70">
           配置建议：激活模板中建议明确说明“点击后将自动登录/跳转到哪里”，减少用户流失。
         </div>
         <FormMonacoEditor

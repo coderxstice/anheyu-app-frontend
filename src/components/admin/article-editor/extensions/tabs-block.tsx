@@ -69,70 +69,69 @@ function TabsBlockView({ node, updateAttributes }: NodeViewProps) {
     <NodeViewWrapper className="tabs-block-wrapper my-3">
       <div className="editor-node-hover-wrap" contentEditable={false}>
         <div className="editor-tabs">
-        {/* 标签导航 */}
-        <div className="editor-tabs-nav">
-          {tabs.map((tab, i) => (
-            <div key={i} className="editor-tabs-tab-wrap">
-              <button
-                type="button"
-                className={`editor-tabs-tab ${i === safeIdx ? "is-active" : ""}`}
-                onClick={() => {
-                  setActiveIdx(i);
-                  updateAttributes({ activeIndex: String(i) });
-                }}
-                onDoubleClick={e => {
-                  e.stopPropagation();
-                  setEditingTab(i);
-                }}
-              >
-                {editingTab === i ? (
-                  <input
-                    value={tab.title}
-                    onChange={e => handleTitleChange(i, e.target.value)}
-                    onBlur={() => setEditingTab(null)}
-                    onKeyDown={e => {
-                      if (e.key === "Enter" || e.key === "Escape") setEditingTab(null);
-                    }}
-                    onClick={e => e.stopPropagation()}
-                    className="editor-tabs-tab-input"
-                    autoFocus
-                  />
-                ) : (
-                  tab.title
-                )}
-              </button>
-              {tabs.length > 1 && (
+          {/* 标签导航 */}
+          <div className="editor-tabs-nav">
+            {tabs.map((tab, i) => (
+              <div key={i} className="editor-tabs-tab-wrap">
                 <button
                   type="button"
-                  className="editor-tabs-tab-remove"
-                  onClick={e => {
-                    e.stopPropagation();
-                    handleRemoveTab(i);
+                  className={`editor-tabs-tab ${i === safeIdx ? "is-active" : ""}`}
+                  onClick={() => {
+                    setActiveIdx(i);
+                    updateAttributes({ activeIndex: String(i) });
                   }}
-                  title="删除标签"
+                  onDoubleClick={e => {
+                    e.stopPropagation();
+                    setEditingTab(i);
+                  }}
                 >
-                  <X className="w-3 h-3" />
+                  {editingTab === i ? (
+                    <input
+                      value={tab.title}
+                      onChange={e => handleTitleChange(i, e.target.value)}
+                      onBlur={() => setEditingTab(null)}
+                      onKeyDown={e => {
+                        if (e.key === "Enter" || e.key === "Escape") setEditingTab(null);
+                      }}
+                      onClick={e => e.stopPropagation()}
+                      className="editor-tabs-tab-input"
+                      autoFocus
+                    />
+                  ) : (
+                    tab.title
+                  )}
                 </button>
-              )}
-            </div>
-          ))}
+                {tabs.length > 1 && (
+                  <button
+                    type="button"
+                    className="editor-tabs-tab-remove"
+                    onClick={e => {
+                      e.stopPropagation();
+                      handleRemoveTab(i);
+                    }}
+                    title="删除标签"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            ))}
 
-          {/* 添加按钮 */}
-          <button type="button" className="editor-tabs-add" onClick={handleAddTab} title="添加标签">
-            <Plus className="w-3.5 h-3.5" />
-          </button>
-        </div>
+            {/* 添加按钮 */}
+            <button type="button" className="editor-tabs-add" onClick={handleAddTab} title="添加标签">
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
-        {/* 内容区 */}
-        <div className="editor-tabs-content">
-          <textarea
-            value={tabs[safeIdx]?.content || ""}
-            onChange={e => handleContentChange(e.target.value)}
-            className="editor-tabs-textarea"
-            placeholder="输入标签内容..."
-          />
-        </div>
-
+          {/* 内容区 */}
+          <div className="editor-tabs-content">
+            <textarea
+              value={tabs[safeIdx]?.content || ""}
+              onChange={e => handleContentChange(e.target.value)}
+              className="editor-tabs-textarea"
+              placeholder="输入标签内容..."
+            />
+          </div>
         </div>
       </div>
     </NodeViewWrapper>

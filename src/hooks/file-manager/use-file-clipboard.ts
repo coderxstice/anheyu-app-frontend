@@ -10,11 +10,7 @@ interface UseFileClipboardOptions {
   clearSelection: () => void;
 }
 
-export function useFileClipboard({
-  getSelectedFileItems,
-  handleRefresh,
-  clearSelection,
-}: UseFileClipboardOptions) {
+export function useFileClipboard({ getSelectedFileItems, handleRefresh, clearSelection }: UseFileClipboardOptions) {
   const [isDestinationModalVisible, setDestinationModalVisible] = useState(false);
   const [itemsForAction, setItemsForAction] = useState<FileItem[]>([]);
   const [destinationModalMode, setDestinationModalMode] = useState<"move" | "copy">("move");

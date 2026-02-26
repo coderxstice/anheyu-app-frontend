@@ -155,10 +155,10 @@ function LaunchTimePicker({
         labelPlacement="outside"
         classNames={{
           inputWrapper:
-            "h-9 min-h-9 rounded-xl border border-default-200/80 bg-white dark:bg-default-100/50 shadow-none transition-all duration-200",
+            "h-9 min-h-9 rounded-xl border border-border/60 bg-card shadow-none transition-all duration-200",
         }}
       />
-      {description && <p className="text-xs leading-relaxed text-default-400">{description}</p>}
+      {description && <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>}
     </div>
   );
 }

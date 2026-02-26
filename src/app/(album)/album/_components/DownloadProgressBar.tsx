@@ -30,27 +30,35 @@ export const DownloadProgressBar = forwardRef<DownloadProgressBarHandle>(functio
     timersRef.current = [];
   }, []);
 
-  useImperativeHandle(ref, () => ({
-    downloadImageWithProgress(imageUrl: string, fileName?: string) {
-      if (!imageUrl) {
-        return;
-      }
+  useImperativeHandle(
+    ref,
+    () => ({
+      downloadImageWithProgress(imageUrl: string, fileName?: string) {
+        if (!imageUrl) {
+          return;
+        }
 
-      clearTimers();
-      setVisible(true);
-      setText("正在准备下载...");
+        clearTimers();
+        setVisible(true);
+        setText("正在准备下载...");
 
-      triggerDownload(imageUrl, fileName);
+        triggerDownload(imageUrl, fileName);
 
-      timersRef.current.push(window.setTimeout(() => {
-        setText("下载已开始，请查看浏览器下载栏");
-      }, 100));
+        timersRef.current.push(
+          window.setTimeout(() => {
+            setText("下载已开始，请查看浏览器下载栏");
+          }, 100)
+        );
 
-      timersRef.current.push(window.setTimeout(() => {
-        setVisible(false);
-      }, 2000));
-    },
-  }), [clearTimers]);
+        timersRef.current.push(
+          window.setTimeout(() => {
+            setVisible(false);
+          }, 2000)
+        );
+      },
+    }),
+    [clearTimers]
+  );
 
   useEffect(() => {
     return () => {

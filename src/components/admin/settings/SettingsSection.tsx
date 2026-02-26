@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2026-02-24 14:11:25
+ * @LastEditTime: 2026-02-26 10:34:55
+ * @LastEditors: 安知鱼
+ */
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -21,13 +28,13 @@ export function SettingsSection({ title, description, children, className }: Set
   return (
     <section
       className={cn(
-        "rounded-xl border border-default-200/50 bg-white dark:bg-content1 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)]",
+        "rounded-xl border border-border/60 bg-card p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-none",
         className
       )}
     >
-      <div className="pb-3 mb-4 border-b border-default-200/40">
+      <div className="pb-3 mb-4 border-b border-border/40">
         <h3 className="text-[14px] font-semibold text-foreground/85 tracking-tight">{title}</h3>
-        {description && <p className="text-xs text-default-400 mt-1 leading-relaxed">{description}</p>}
+        {description && <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{description}</p>}
       </div>
       <div className="space-y-5">{children}</div>
     </section>

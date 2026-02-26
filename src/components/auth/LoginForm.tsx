@@ -221,7 +221,7 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
     }
 
     setIsLoading(true);
-    const captchaParams = skipCaptcha ? {} : captchaRef.current?.getCaptchaParams() ?? {};
+    const captchaParams = skipCaptcha ? {} : (captchaRef.current?.getCaptchaParams() ?? {});
 
     try {
       const response = await authService.login({ email, password, ...captchaParams });

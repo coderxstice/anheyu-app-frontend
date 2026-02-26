@@ -83,11 +83,7 @@ export function AwsS3Form({ form, onChange }: AwsS3FormProps) {
 
       <div className="text-sm font-medium text-primary border-b border-border/40 pb-2 mt-6">访问权限</div>
 
-      <Switch
-        size="sm"
-        isSelected={form.is_private ?? false}
-        onValueChange={v => onChange({ ...form, is_private: v })}
-      >
+      <Switch size="sm" isSelected={form.is_private ?? false} onValueChange={v => onChange({ ...form, is_private: v })}>
         <span className="text-sm">私有读写</span>
       </Switch>
 
@@ -98,9 +94,7 @@ export function AwsS3Form({ form, onChange }: AwsS3FormProps) {
       >
         <span className="text-sm">强制路径格式 (Path Style)</span>
       </Switch>
-      <p className="text-xs text-muted-foreground -mt-2">
-        部分 S3 兼容服务（如 MinIO）需要开启此选项
-      </p>
+      <p className="text-xs text-muted-foreground -mt-2">部分 S3 兼容服务（如 MinIO）需要开启此选项</p>
 
       <div className="text-sm font-medium text-primary border-b border-border/40 pb-2 mt-6">下载设置</div>
 

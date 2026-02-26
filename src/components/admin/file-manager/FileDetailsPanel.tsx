@@ -149,8 +149,8 @@ export function FileDetailsPanel({ fileInfo, onClose }: FileDetailsPanelProps) {
                         {isCalculating
                           ? "计算中..."
                           : calculatedSize
-                          ? formatBytes(calculatedSize.storageConsumption)
-                          : "--"}
+                            ? formatBytes(calculatedSize.storageConsumption)
+                            : "--"}
                       </span>
                     </div>
                   </>

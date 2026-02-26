@@ -32,7 +32,7 @@ import { useThemePage, type TabKey } from "./_hooks/use-theme-page";
 import type { Theme } from "@/types/theme-mall";
 
 // ===================================
-//     价格格式化
+// 价格格式化
 // ===================================
 
 function formatPrice(priceCents: number): string {
@@ -40,7 +40,7 @@ function formatPrice(priceCents: number): string {
 }
 
 // ===================================
-//     主题卡片
+// 主题卡片
 // ===================================
 
 function ThemeCard({
@@ -197,7 +197,7 @@ function ThemeCard({
                       当前主题
                     </Button>
                     {theme.ssrStatus === "running" && theme.ssrPort && (
-                      <span className="text-[10px] text-muted-foreground/60 bg-default-100 dark:bg-white/[0.06] px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] text-muted-foreground/60 bg-muted dark:bg-white/[0.06] px-1.5 py-0.5 rounded">
                         端口: {theme.ssrPort}
                       </span>
                     )}
@@ -219,7 +219,7 @@ function ThemeCard({
                       size="sm"
                       variant="light"
                       radius="full"
-                      className="text-default-400 hover:text-danger h-7 w-7"
+                      className="text-muted-foreground hover:text-danger h-7 w-7"
                       onPress={() => onUninstall(theme)}
                     >
                       <Trash2 className="w-3 h-3" />
@@ -250,7 +250,7 @@ function ThemeCard({
                       size="sm"
                       variant="light"
                       radius="full"
-                      className="text-default-400 hover:text-danger h-7 w-7"
+                      className="text-muted-foreground hover:text-danger h-7 w-7"
                       onPress={() => onUninstall(theme)}
                     >
                       <Trash2 className="w-3 h-3" />
@@ -278,7 +278,7 @@ function ThemeCard({
                   size="sm"
                   variant="light"
                   radius="full"
-                  className="text-default-400 hover:text-foreground h-7 w-7"
+                  className="text-muted-foreground hover:text-foreground h-7 w-7"
                   onPress={() =>
                     window.open(theme.instructionUrl || "https://dev.anheyu.com/docs/ssr-theme-deploy", "_blank")
                   }
@@ -291,7 +291,7 @@ function ThemeCard({
                     size="sm"
                     variant="light"
                     radius="full"
-                    className="text-default-400 hover:text-foreground h-7 w-7"
+                    className="text-muted-foreground hover:text-foreground h-7 w-7"
                     onPress={() => window.open(theme.repoUrl, "_blank")}
                   >
                     <Github className="w-3 h-3" />
@@ -321,7 +321,7 @@ function ThemeCard({
                 size="sm"
                 variant="light"
                 radius="full"
-                className="text-default-400 hover:text-foreground h-7 w-7"
+                className="text-muted-foreground hover:text-foreground h-7 w-7"
                 onPress={() => onConfig(theme)}
               >
                 <Settings className="w-3 h-3" />
@@ -334,7 +334,7 @@ function ThemeCard({
                 size="sm"
                 variant="light"
                 radius="full"
-                className="text-default-400 hover:text-foreground h-7 w-7"
+                className="text-muted-foreground hover:text-foreground h-7 w-7"
                 onPress={() => window.open(theme.demoUrl, "_blank")}
               >
                 <ExternalLink className="w-3 h-3" />
@@ -348,7 +348,7 @@ function ThemeCard({
 }
 
 // ===================================
-//     骨架屏
+// 骨架屏
 // ===================================
 
 function ThemeSkeleton() {
@@ -390,7 +390,7 @@ function ThemeSkeleton() {
 }
 
 // ===================================
-//     主页面
+// 主页面
 // ===================================
 
 export default function ThemesPage() {
@@ -424,7 +424,7 @@ export default function ThemesPage() {
                 variant="flat"
                 startContent={<Upload className="w-3.5 h-3.5" />}
                 onPress={() => tp.setUploadOpen(true)}
-                className="text-default-600"
+                className="text-foreground/70"
               >
                 上传主题
               </Button>
@@ -434,7 +434,7 @@ export default function ThemesPage() {
                 startContent={<RotateCw className="w-3.5 h-3.5" />}
                 onPress={tp.handleRefresh}
                 isLoading={tp.isFetching}
-                className="text-default-600"
+                className="text-foreground/70"
               >
                 刷新
               </Button>

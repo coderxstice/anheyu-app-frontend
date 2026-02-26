@@ -52,7 +52,7 @@ export function ReviewModal({
               </div>
             </ModalHeader>
             <ModalBody>
-              <p className="text-default-500 mb-3">
+              <p className="text-muted-foreground mb-3">
                 {reviewTarget?.action === "approve"
                   ? `通过「${reviewTarget?.article.title}」的审核`
                   : `拒绝「${reviewTarget?.article.title}」的审核`}

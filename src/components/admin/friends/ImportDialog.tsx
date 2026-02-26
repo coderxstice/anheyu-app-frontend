@@ -137,191 +137,191 @@ export default function ImportDialog({ isOpen, onClose }: ImportDialogProps) {
         icon: Upload,
       }}
     >
-        <ModalBody className="gap-4">
-          {!importResult ? (
-            <>
-              {/* JSON 输入 */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">JSON 数据</span>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="flat"
-                      startContent={<FileDown className="w-3.5 h-3.5" />}
-                      onPress={handleFillExample}
-                    >
-                      填入示例
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="flat"
-                      startContent={<Copy className="w-3.5 h-3.5" />}
-                      onPress={handleCopyExample}
-                    >
-                      复制示例
-                    </Button>
-                  </div>
-                </div>
-                <FormTextarea
-                  placeholder='[{"name": "博客名称", "url": "https://...", "logo": "https://..."}]'
-                  value={jsonInput}
-                  onValueChange={v => {
-                    setJsonInput(v);
-                    setParseError("");
-                  }}
-                  minRows={8}
-                  maxRows={15}
-                  error={parseError}
-                  textareaClassName="font-mono text-xs"
-                />
-              </div>
-
-              {/* 导入选项 */}
-              <div className="space-y-3 p-4 rounded-lg border border-default-200 bg-default-50">
-                <span className="text-sm font-medium">导入选项</span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">跳过重复（URL 相同）</span>
-                    <Switch size="sm" isSelected={skipDuplicates} onValueChange={setSkipDuplicates} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">自动创建分类</span>
-                    <Switch size="sm" isSelected={createCategories} onValueChange={setCreateCategories} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">自动创建标签</span>
-                    <Switch size="sm" isSelected={createTags} onValueChange={setCreateTags} />
-                  </div>
-                </div>
-                <FormSelect
-                  size="sm"
-                  label="默认分类"
-                  placeholder="分类不存在时使用的默认分类"
-                  value={defaultCategoryId}
-                  onValueChange={setDefaultCategoryId}
-                >
-                  {categories.map(cat => (
-                    <FormSelectItem key={String(cat.id)}>{cat.name}</FormSelectItem>
-                  ))}
-                </FormSelect>
-              </div>
-            </>
-          ) : (
-            /* 导入结果 */
-            <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-3">
-                <div className="p-3 rounded-lg bg-success-50 border border-success-200 text-center">
-                  <p className="text-2xl font-bold text-success">{importResult.success}</p>
-                  <p className="text-xs text-success-600">成功</p>
-                </div>
-                <div className="p-3 rounded-lg bg-danger-50 border border-danger-200 text-center">
-                  <p className="text-2xl font-bold text-danger">{importResult.failed}</p>
-                  <p className="text-xs text-danger-600">失败</p>
-                </div>
-                <div className="p-3 rounded-lg bg-warning-50 border border-warning-200 text-center">
-                  <p className="text-2xl font-bold text-warning">{importResult.skipped}</p>
-                  <p className="text-xs text-warning-600">跳过</p>
+      <ModalBody className="gap-4">
+        {!importResult ? (
+          <>
+            {/* JSON 输入 */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">JSON 数据</span>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="flat"
+                    startContent={<FileDown className="w-3.5 h-3.5" />}
+                    onPress={handleFillExample}
+                  >
+                    填入示例
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="flat"
+                    startContent={<Copy className="w-3.5 h-3.5" />}
+                    onPress={handleCopyExample}
+                  >
+                    复制示例
+                  </Button>
                 </div>
               </div>
-
-              <Tabs variant="underlined" color="primary">
-                <Tab
-                  key="success"
-                  title={
-                    <div className="flex items-center gap-1">
-                      <CheckCircle className="w-3.5 h-3.5 text-success" />
-                      <span>成功 ({importResult.success_list?.length || 0})</span>
-                    </div>
-                  }
-                >
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {importResult.success_list?.map((item, i) => (
-                      <div key={i} className="flex items-center gap-2 text-sm p-2 rounded bg-success-50/50">
-                        <CheckCircle className="w-3.5 h-3.5 text-success shrink-0" />
-                        <span className="font-medium">{item.name}</span>
-                        <span className="text-default-400 truncate">{item.url}</span>
-                      </div>
-                    ))}
-                    {(!importResult.success_list || importResult.success_list.length === 0) && (
-                      <p className="text-sm text-default-400 text-center py-4">无成功项</p>
-                    )}
-                  </div>
-                </Tab>
-                <Tab
-                  key="failed"
-                  title={
-                    <div className="flex items-center gap-1">
-                      <XCircle className="w-3.5 h-3.5 text-danger" />
-                      <span>失败 ({importResult.failed_list?.length || 0})</span>
-                    </div>
-                  }
-                >
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {importResult.failed_list?.map((item, i) => (
-                      <div key={i} className="flex items-center gap-2 text-sm p-2 rounded bg-danger-50/50">
-                        <XCircle className="w-3.5 h-3.5 text-danger shrink-0" />
-                        <span className="font-medium">{item.link.name}</span>
-                        <Chip size="sm" color="danger" variant="flat">
-                          {item.reason}
-                        </Chip>
-                      </div>
-                    ))}
-                    {(!importResult.failed_list || importResult.failed_list.length === 0) && (
-                      <p className="text-sm text-default-400 text-center py-4">无失败项</p>
-                    )}
-                  </div>
-                </Tab>
-                <Tab
-                  key="skipped"
-                  title={
-                    <div className="flex items-center gap-1">
-                      <SkipForward className="w-3.5 h-3.5 text-warning" />
-                      <span>跳过 ({importResult.skipped_list?.length || 0})</span>
-                    </div>
-                  }
-                >
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {importResult.skipped_list?.map((item, i) => (
-                      <div key={i} className="flex items-center gap-2 text-sm p-2 rounded bg-warning-50/50">
-                        <SkipForward className="w-3.5 h-3.5 text-warning shrink-0" />
-                        <span className="font-medium">{item.link.name}</span>
-                        <Chip size="sm" color="warning" variant="flat">
-                          {item.reason}
-                        </Chip>
-                      </div>
-                    ))}
-                    {(!importResult.skipped_list || importResult.skipped_list.length === 0) && (
-                      <p className="text-sm text-default-400 text-center py-4">无跳过项</p>
-                    )}
-                  </div>
-                </Tab>
-              </Tabs>
+              <FormTextarea
+                placeholder='[{"name": "博客名称", "url": "https://...", "logo": "https://..."}]'
+                value={jsonInput}
+                onValueChange={v => {
+                  setJsonInput(v);
+                  setParseError("");
+                }}
+                minRows={8}
+                maxRows={15}
+                error={parseError}
+                textareaClassName="font-mono text-xs"
+              />
             </div>
-          )}
-        </ModalBody>
 
-        <ModalFooter>
-          {importResult ? (
-            <>
-              <Button variant="flat" onPress={handleReset}>
-                继续导入
-              </Button>
-              <Button color="primary" onPress={handleClose}>
-                完成
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="flat" onPress={handleClose}>
-                取消
-              </Button>
-              <Button color="primary" onPress={handleImport} isLoading={importLinks.isPending}>
-                开始导入
-              </Button>
-            </>
-          )}
-        </ModalFooter>
+            {/* 导入选项 */}
+            <div className="space-y-3 p-4 rounded-lg border border-border/60 bg-muted/30">
+              <span className="text-sm font-medium">导入选项</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">跳过重复（URL 相同）</span>
+                  <Switch size="sm" isSelected={skipDuplicates} onValueChange={setSkipDuplicates} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">自动创建分类</span>
+                  <Switch size="sm" isSelected={createCategories} onValueChange={setCreateCategories} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">自动创建标签</span>
+                  <Switch size="sm" isSelected={createTags} onValueChange={setCreateTags} />
+                </div>
+              </div>
+              <FormSelect
+                size="sm"
+                label="默认分类"
+                placeholder="分类不存在时使用的默认分类"
+                value={defaultCategoryId}
+                onValueChange={setDefaultCategoryId}
+              >
+                {categories.map(cat => (
+                  <FormSelectItem key={String(cat.id)}>{cat.name}</FormSelectItem>
+                ))}
+              </FormSelect>
+            </div>
+          </>
+        ) : (
+          /* 导入结果 */
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-3">
+              <div className="p-3 rounded-lg bg-success-50 border border-success-200 text-center">
+                <p className="text-2xl font-bold text-success">{importResult.success}</p>
+                <p className="text-xs text-success-600">成功</p>
+              </div>
+              <div className="p-3 rounded-lg bg-danger-50 border border-danger-200 text-center">
+                <p className="text-2xl font-bold text-danger">{importResult.failed}</p>
+                <p className="text-xs text-danger-600">失败</p>
+              </div>
+              <div className="p-3 rounded-lg bg-warning-50 border border-warning-200 text-center">
+                <p className="text-2xl font-bold text-warning">{importResult.skipped}</p>
+                <p className="text-xs text-warning-600">跳过</p>
+              </div>
+            </div>
+
+            <Tabs variant="underlined" color="primary">
+              <Tab
+                key="success"
+                title={
+                  <div className="flex items-center gap-1">
+                    <CheckCircle className="w-3.5 h-3.5 text-success" />
+                    <span>成功 ({importResult.success_list?.length || 0})</span>
+                  </div>
+                }
+              >
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {importResult.success_list?.map((item, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm p-2 rounded bg-success-50/50">
+                      <CheckCircle className="w-3.5 h-3.5 text-success shrink-0" />
+                      <span className="font-medium">{item.name}</span>
+                      <span className="text-muted-foreground truncate">{item.url}</span>
+                    </div>
+                  ))}
+                  {(!importResult.success_list || importResult.success_list.length === 0) && (
+                    <p className="text-sm text-muted-foreground text-center py-4">无成功项</p>
+                  )}
+                </div>
+              </Tab>
+              <Tab
+                key="failed"
+                title={
+                  <div className="flex items-center gap-1">
+                    <XCircle className="w-3.5 h-3.5 text-danger" />
+                    <span>失败 ({importResult.failed_list?.length || 0})</span>
+                  </div>
+                }
+              >
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {importResult.failed_list?.map((item, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm p-2 rounded bg-danger-50/50">
+                      <XCircle className="w-3.5 h-3.5 text-danger shrink-0" />
+                      <span className="font-medium">{item.link.name}</span>
+                      <Chip size="sm" color="danger" variant="flat">
+                        {item.reason}
+                      </Chip>
+                    </div>
+                  ))}
+                  {(!importResult.failed_list || importResult.failed_list.length === 0) && (
+                    <p className="text-sm text-muted-foreground text-center py-4">无失败项</p>
+                  )}
+                </div>
+              </Tab>
+              <Tab
+                key="skipped"
+                title={
+                  <div className="flex items-center gap-1">
+                    <SkipForward className="w-3.5 h-3.5 text-warning" />
+                    <span>跳过 ({importResult.skipped_list?.length || 0})</span>
+                  </div>
+                }
+              >
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {importResult.skipped_list?.map((item, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm p-2 rounded bg-warning-50/50">
+                      <SkipForward className="w-3.5 h-3.5 text-warning shrink-0" />
+                      <span className="font-medium">{item.link.name}</span>
+                      <Chip size="sm" color="warning" variant="flat">
+                        {item.reason}
+                      </Chip>
+                    </div>
+                  ))}
+                  {(!importResult.skipped_list || importResult.skipped_list.length === 0) && (
+                    <p className="text-sm text-muted-foreground text-center py-4">无跳过项</p>
+                  )}
+                </div>
+              </Tab>
+            </Tabs>
+          </div>
+        )}
+      </ModalBody>
+
+      <ModalFooter>
+        {importResult ? (
+          <>
+            <Button variant="flat" onPress={handleReset}>
+              继续导入
+            </Button>
+            <Button color="primary" onPress={handleClose}>
+              完成
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button variant="flat" onPress={handleClose}>
+              取消
+            </Button>
+            <Button color="primary" onPress={handleImport} isLoading={importLinks.isPending}>
+              开始导入
+            </Button>
+          </>
+        )}
+      </ModalFooter>
     </AdminDialog>
   );
 }

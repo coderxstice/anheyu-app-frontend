@@ -44,7 +44,7 @@ const FormCodeEditor = React.forwardRef<HTMLTextAreaElement, FormCodeEditorProps
             <label htmlFor={id} className="text-sm font-medium text-foreground/80">
               {label}
             </label>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-default-100 text-default-500 font-mono">
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono">
               {langLabel[language] || language}
             </span>
           </div>
@@ -63,11 +63,11 @@ const FormCodeEditor = React.forwardRef<HTMLTextAreaElement, FormCodeEditorProps
           className={cn(
             "w-full rounded-xl border px-3.5 py-2.5 text-sm text-foreground font-mono resize-y leading-relaxed",
             "outline-none transition-all duration-200",
-            "placeholder:text-default-400",
+            "placeholder:text-muted-foreground/60",
             "disabled:cursor-not-allowed disabled:opacity-50",
             error
               ? "border-danger bg-danger-50/50 focus:border-danger focus:ring-1 focus:ring-danger/20"
-              : "border-default-200/80 bg-white dark:bg-default-100/50 hover:border-default-300/90 focus:bg-white dark:focus:bg-default-100/60 focus:border-primary/65 focus:ring-2 focus:ring-primary/15"
+              : "border-border/80 bg-card hover:border-border-hover/40 focus:border-primary/65 focus:ring-2 focus:ring-primary/15"
           )}
         />
 
@@ -75,7 +75,7 @@ const FormCodeEditor = React.forwardRef<HTMLTextAreaElement, FormCodeEditorProps
           <p
             id={descId}
             role={error ? "alert" : undefined}
-            className={cn("text-xs leading-relaxed", error ? "text-danger" : "text-default-400")}
+            className={cn("text-xs leading-relaxed", error ? "text-danger" : "text-muted-foreground")}
           >
             {error || description}
           </p>

@@ -36,7 +36,13 @@ function loadImage(url: string): Promise<HTMLImageElement> {
 /**
  * 绘制圆形头像
  */
-function drawCircleAvatar(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, image: HTMLImageElement) {
+function drawCircleAvatar(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  radius: number,
+  image: HTMLImageElement
+) {
   ctx.save();
   ctx.beginPath();
   ctx.arc(x, y, radius, 0, Math.PI * 2);
@@ -235,12 +241,24 @@ export async function generatePoster(config: PosterConfig): Promise<string> {
   if (config.authorAvatar) {
     try {
       const avatarImg = await loadImage(config.authorAvatar);
-      drawCircleAvatar(ctx, bottomAvatarX + bottomAvatarSize / 2, bottomAvatarY + bottomAvatarSize / 2, bottomAvatarSize / 2, avatarImg);
+      drawCircleAvatar(
+        ctx,
+        bottomAvatarX + bottomAvatarSize / 2,
+        bottomAvatarY + bottomAvatarSize / 2,
+        bottomAvatarSize / 2,
+        avatarImg
+      );
     } catch (error) {
       console.warn("头像加载失败，使用默认样式:", error);
       ctx.fillStyle = primaryColor;
       ctx.beginPath();
-      ctx.arc(bottomAvatarX + bottomAvatarSize / 2, bottomAvatarY + bottomAvatarSize / 2, bottomAvatarSize / 2, 0, Math.PI * 2);
+      ctx.arc(
+        bottomAvatarX + bottomAvatarSize / 2,
+        bottomAvatarY + bottomAvatarSize / 2,
+        bottomAvatarSize / 2,
+        0,
+        Math.PI * 2
+      );
       ctx.fill();
     }
   }

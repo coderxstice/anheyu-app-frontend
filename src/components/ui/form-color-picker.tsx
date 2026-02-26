@@ -56,8 +56,8 @@ export function FormColorPicker({ value, onChange, className }: FormColorPickerP
         <button
           type="button"
           className={cn(
-            "shrink-0 w-8 h-8 rounded-lg border-2 border-default-200 cursor-pointer",
-            "transition-all hover:scale-110 hover:border-default-300",
+            "shrink-0 w-8 h-8 rounded-lg border-2 border-border/60 cursor-pointer",
+            "transition-all hover:scale-110 hover:border-border/80",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
             className
           )}
@@ -116,17 +116,17 @@ export function FormColorPicker({ value, onChange, className }: FormColorPickerP
               onClick={() => onChange(randomHexColor())}
               className={cn(
                 "shrink-0 w-7 h-7 flex items-center justify-center rounded-full",
-                "bg-default-100 hover:bg-default-200 transition-colors cursor-pointer",
+                "bg-muted hover:bg-secondary transition-colors cursor-pointer",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               )}
               aria-label="随机颜色"
             >
-              <Shuffle className="w-3.5 h-3.5 text-default-500" />
+              <Shuffle className="w-3.5 h-3.5 text-muted-foreground" />
             </button>
           </div>
 
           {/* Hex Input */}
-          <div className="flex items-center gap-2 pt-2 border-t border-default-100">
+          <div className="flex items-center gap-2 pt-2 border-t border-border/30">
             <div className="w-6 h-6 rounded-md shrink-0" style={{ backgroundColor: value }} />
             <AriaColorField
               value={color}
@@ -137,8 +137,8 @@ export function FormColorPicker({ value, onChange, className }: FormColorPickerP
             >
               <Label className="sr-only">Hex</Label>
               <Input
-                className="w-full h-7 px-2 text-xs font-mono rounded-md border border-default-200 bg-default-50
-                           outline-none focus:border-primary transition-colors"
+                className="w-full h-7 px-2 text-xs font-mono rounded-md border border-border/60 bg-muted/30
+ outline-none focus:border-primary transition-colors"
               />
             </AriaColorField>
           </div>

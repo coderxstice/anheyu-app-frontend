@@ -292,7 +292,7 @@ export function FormIconSelector({
   // ─── 预览（嵌入输入框左侧） ────────────────────────────────────
 
   const renderInlinePreview = () => {
-    if (!value) return <Grid3X3 className="w-4 h-4 text-default-300" />;
+    if (!value) return <Grid3X3 className="w-4 h-4 text-muted-foreground/40" />;
     if (isImageUrl(value)) {
       // eslint-disable-next-line @next/next/no-img-element
       return <img src={value} alt="" className="w-[18px] h-[18px] object-contain rounded" />;
@@ -315,7 +315,7 @@ export function FormIconSelector({
             "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150",
             activeTab === "iconify"
               ? "bg-primary text-primary-foreground shadow-sm"
-              : "text-default-500 hover:text-foreground hover:bg-default-100"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted"
           )}
           onClick={() => setActiveTab("iconify")}
         >
@@ -328,7 +328,7 @@ export function FormIconSelector({
             "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150",
             activeTab === "url"
               ? "bg-primary text-primary-foreground shadow-sm"
-              : "text-default-500 hover:text-foreground hover:bg-default-100"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted"
           )}
           onClick={() => setActiveTab("url")}
         >
@@ -336,7 +336,7 @@ export function FormIconSelector({
           图片链接
         </button>
         {activeTab === "iconify" && !isLoading && (
-          <span className="ml-auto text-[10px] text-default-400 tabular-nums pr-1 w-16 text-right shrink-0">
+          <span className="ml-auto text-[10px] text-muted-foreground tabular-nums pr-1 w-16 text-right shrink-0">
             {isSearching ? "搜索中…" : searchText ? `${filteredIcons.length} 结果` : `${allIcons.length} 个`}
           </span>
         )}
@@ -352,14 +352,14 @@ export function FormIconSelector({
               onValueChange={setSearchText}
               placeholder="搜索图标（含 fa、ri 等）"
               autoFocus
-              startContent={<Search className="w-3.5 h-3.5 text-default-400" />}
+              startContent={<Search className="w-3.5 h-3.5 text-muted-foreground" />}
               isClearable
               onClear={() => setSearchText("")}
               classNames={{
                 inputWrapper:
-                  "bg-default-50 border border-default-200 rounded-lg shadow-none! h-8 min-h-8 group-data-[focus=true]:bg-white! group-data-[focus=true]:dark:bg-default-50! group-data-[focus=true]:border-primary/50 group-data-[focus=true]:ring-1 group-data-[focus=true]:ring-primary/10",
-                input: "text-xs placeholder:text-default-400",
-                clearButton: "text-default-400",
+                  "bg-muted/30 border border-border/60 rounded-lg shadow-none! h-8 min-h-8 group-data-[focus=true]:bg-card group-data-[focus=true]:dark:bg-muted/30! group-data-[focus=true]:border-primary/50 group-data-[focus=true]:ring-1 group-data-[focus=true]:ring-primary/10",
+                input: "text-xs placeholder:text-muted-foreground",
+                clearButton: "text-muted-foreground",
               }}
             />
           </div>
@@ -389,7 +389,7 @@ export function FormIconSelector({
                       "relative flex items-center justify-center w-full aspect-square rounded-lg transition-all duration-100",
                       isActive
                         ? "bg-primary/10 text-primary"
-                        : "text-default-600 hover:bg-default-100 hover:text-foreground active:scale-90"
+                        : "text-foreground/70 hover:bg-muted hover:text-foreground active:scale-90"
                     )}
                   >
                     <Icon icon={icon} width={22} height={22} />
@@ -404,22 +404,22 @@ export function FormIconSelector({
             })}
 
             {(isLoading || isSearching) && (
-              <div className="col-span-6 flex items-center justify-center py-8 text-xs text-default-400">
-                <span className="w-4 h-4 border-2 border-default-300 border-t-primary rounded-full animate-spin mr-2" />
+              <div className="col-span-6 flex items-center justify-center py-8 text-xs text-muted-foreground">
+                <span className="w-4 h-4 border-2 border-border/80 border-t-primary rounded-full animate-spin mr-2" />
                 正在加载图标...
               </div>
             )}
 
             {!isLoading && visibleIcons.length === 0 && (
-              <div className="col-span-6 flex flex-col items-center justify-center py-10 text-xs text-default-400">
-                <Search className="w-5 h-5 mb-2 text-default-300" />
+              <div className="col-span-6 flex flex-col items-center justify-center py-10 text-xs text-muted-foreground">
+                <Search className="w-5 h-5 mb-2 text-muted-foreground/40" />
                 未找到 &quot;{searchText}&quot;
               </div>
             )}
           </div>
 
           {hasMore && !isLoading && (
-            <div className="text-center py-1.5 text-[10px] text-default-400 border-t border-default-50">
+            <div className="text-center py-1.5 text-[10px] text-muted-foreground border-t border-border/30">
               向下滚动加载更多
             </div>
           )}
@@ -436,12 +436,12 @@ export function FormIconSelector({
               onValueChange={setImageUrl}
               placeholder="https://example.com/icon.png"
               autoFocus
-              startContent={<ImageIcon className="w-3.5 h-3.5 text-default-400 shrink-0" />}
+              startContent={<ImageIcon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />}
               onKeyDown={e => e.key === "Enter" && handleUrlConfirm()}
               classNames={{
                 inputWrapper:
-                  "bg-default-100/5! border border-default-200 rounded-lg shadow-none! h-9 min-h-9 flex-1 data-[hover=true]:bg-default-100/5! group-data-[focus=true]:bg-white! group-data-[focus=true]:dark:bg-default-50! group-data-[focus=true]:border-primary/50 group-data-[focus=true]:ring-1 group-data-[focus=true]:ring-primary/10",
-                input: "text-xs placeholder:text-default-400",
+                  "bg-muted! border border-border/60 rounded-lg shadow-none! h-9 min-h-9 flex-1 data-[hover=true]:bg-muted! group-data-[focus=true]:bg-card group-data-[focus=true]:dark:bg-muted/30! group-data-[focus=true]:border-primary/50 group-data-[focus=true]:ring-1 group-data-[focus=true]:ring-primary/10",
+                input: "text-xs placeholder:text-muted-foreground",
               }}
             />
             <Button
@@ -456,7 +456,7 @@ export function FormIconSelector({
           </div>
 
           {imageUrl && isImageUrl(imageUrl) && (
-            <div className="flex items-center justify-center p-3 border border-default-100 rounded-lg bg-default-50/50">
+            <div className="flex items-center justify-center p-3 border border-border/30 rounded-lg bg-muted/30">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={imageUrl}
@@ -469,7 +469,7 @@ export function FormIconSelector({
             </div>
           )}
 
-          <p className="text-[10px] text-default-400 leading-relaxed">输入 http:// 或 https:// 开头的图片地址</p>
+          <p className="text-[10px] text-muted-foreground leading-relaxed">输入 http:// 或 https:// 开头的图片地址</p>
         </div>
       )}
     </div>
@@ -485,16 +485,16 @@ export function FormIconSelector({
       shouldBlockScroll={false}
       classNames={{
         content:
-          "p-0 w-[360px] max-w-[calc(100vw-2rem)] rounded-xl shadow-lg border border-default-200 bg-white dark:bg-card z-[9999]",
+          "p-0 w-[360px] max-w-[calc(100vw-2rem)] rounded-xl shadow-lg border border-border/60 bg-white dark:bg-card z-[9999]",
       }}
     >
       <PopoverTrigger>
         {/* 整体是一个看起来像输入框的容器，支持直接输入 */}
         <div
           className={cn(
-            "w-full min-w-0 flex items-center gap-2 rounded-xl border bg-white dark:bg-default-100/50 transition-all duration-200 text-left cursor-text",
-            "border-default-200/80 hover:border-default-300/90",
-            "outline-none focus-within:bg-white! dark:focus-within:bg-default-100/60 focus-within:border-primary/65 focus-within:ring-2 focus-within:ring-primary/15",
+            "w-full min-w-0 flex items-center gap-2 rounded-xl border bg-card transition-all duration-200 text-left cursor-text",
+            "border-border/60 hover:border-border/80",
+            "outline-none focus-within:bg-white! dark:focus-within:bg-muted focus-within:border-primary/65 focus-within:ring-2 focus-within:ring-primary/15",
             size === "sm" ? "h-9 px-2.5" : "h-10 px-3",
             className
           )}
@@ -510,7 +510,7 @@ export function FormIconSelector({
         >
           {/* 图标预览 - 点击打开弹窗 */}
           <div
-            className="shrink-0 flex items-center justify-center w-6 h-6 rounded-md bg-default-100 border border-default-200/50 cursor-pointer"
+            className="shrink-0 flex items-center justify-center w-6 h-6 rounded-md bg-muted border border-border/60 cursor-pointer"
             onClick={e => {
               e.stopPropagation();
               setIsOpen(prev => !prev);
@@ -532,8 +532,8 @@ export function FormIconSelector({
             placeholder={placeholder}
             className={cn(
               "flex-1 min-w-0 bg-transparent border-none outline-none text-[13px]",
-              value ? "text-foreground" : "text-default-400",
-              "placeholder:text-default-400"
+              value ? "text-foreground" : "text-muted-foreground",
+              "placeholder:text-muted-foreground"
             )}
           />
           {/* 清除按钮 */}
@@ -542,7 +542,7 @@ export function FormIconSelector({
               role="button"
               tabIndex={-1}
               data-clear-btn
-              className="shrink-0 text-default-400 hover:text-danger transition-colors cursor-pointer"
+              className="shrink-0 text-muted-foreground hover:text-danger transition-colors cursor-pointer"
               onClick={e => {
                 e.stopPropagation();
                 onValueChange?.("");

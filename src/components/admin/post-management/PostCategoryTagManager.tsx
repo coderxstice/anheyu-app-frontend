@@ -162,7 +162,7 @@ export default function PostCategoryTagManager({ isOpen, onClose }: PostCategory
           <Tab key="categories" title={`分类 (${categories.length})`}>
             <div className="space-y-3 mt-3">
               {categories.map(cat => (
-                <div key={cat.id} className="flex items-center gap-2 rounded-lg border border-default-200 p-3">
+                <div key={cat.id} className="flex items-center gap-2 rounded-lg border border-border/60 p-3">
                   {editingCategory?.id === cat.id ? (
                     <div className="flex-1 space-y-2">
                       <FormInput
@@ -190,7 +190,7 @@ export default function PostCategoryTagManager({ isOpen, onClose }: PostCategory
                     <>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium truncate">{cat.name}</div>
-                        <div className="text-xs text-default-400 truncate">
+                        <div className="text-xs text-muted-foreground truncate">
                           {cat.slug ? `/${cat.slug}` : <span className="italic">无 slug</span>}
                           {` · ${cat.count} 篇文章`}
                         </div>
@@ -264,7 +264,7 @@ export default function PostCategoryTagManager({ isOpen, onClose }: PostCategory
           <Tab key="tags" title={`标签 (${tags.length})`}>
             <div className="space-y-3 mt-3">
               {tags.map(tag => (
-                <div key={tag.id} className="flex items-center gap-2 rounded-lg border border-default-200 p-3">
+                <div key={tag.id} className="flex items-center gap-2 rounded-lg border border-border/60 p-3">
                   {editingTag?.id === tag.id ? (
                     <div className="flex-1 space-y-2">
                       <FormInput
@@ -292,7 +292,7 @@ export default function PostCategoryTagManager({ isOpen, onClose }: PostCategory
                     <>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium truncate">{tag.name}</div>
-                        <div className="text-xs text-default-400 truncate">
+                        <div className="text-xs text-muted-foreground truncate">
                           {tag.slug ? `/${tag.slug}` : <span className="italic">无 slug</span>}
                           {` · ${tag.count} 篇文章`}
                         </div>

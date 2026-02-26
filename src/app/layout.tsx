@@ -1,12 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "@/providers";
-import {
-  createRobotsMetadata,
-  fetchSiteConfigForSeo,
-  resolveMetadataBase,
-  resolveSeoSiteInfo,
-} from "@/lib/seo";
+import { createRobotsMetadata, fetchSiteConfigForSeo, resolveMetadataBase, resolveSeoSiteInfo } from "@/lib/seo";
 
 /**
  * 动态生成 Metadata

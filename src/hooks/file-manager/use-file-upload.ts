@@ -8,12 +8,7 @@ import {
   finalizeClientUploadApi,
   validateUploadSessionApi,
 } from "@/lib/api/file-manager";
-import {
-  extractLogicalPathFromUri,
-  getFileFingerprint,
-  getParentPath,
-  joinPath,
-} from "@/utils/file-manager";
+import { extractLogicalPathFromUri, getFileFingerprint, getParentPath, joinPath } from "@/utils/file-manager";
 import { uploadFileChunksWorker } from "@/lib/file-manager/upload-worker";
 import type {
   ConfirmDialogState,

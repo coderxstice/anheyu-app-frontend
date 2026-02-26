@@ -146,7 +146,7 @@ export function PlaybackControls({
 
   // 音量控制
   const toggleVolumeSlider = useCallback(() => {
-    setShowVolumeSlider((prev) => !prev);
+    setShowVolumeSlider(prev => !prev);
   }, []);
 
   const handleVerticalVolumeChange = useCallback(
@@ -199,10 +199,7 @@ export function PlaybackControls({
             style={{ width: `${loadedPercentage}%` }}
           />
           {/* 播放进度 */}
-          <div
-            className={styles.progressFill}
-            style={{ width: `${isDragging ? dragProgress : playedPercentage}%` }}
-          />
+          <div className={styles.progressFill} style={{ width: `${isDragging ? dragProgress : playedPercentage}%` }} />
           {/* Thumb */}
           <div
             className={`${styles.progressThumb} ${showProgressThumb || isDragging ? styles.show : ""}`}
@@ -229,7 +226,11 @@ export function PlaybackControls({
         {/* 2. 音量 */}
         <div ref={volumeControlRef} className={`${styles.volumeControlWrapper} ${styles.mobileHidden}`}>
           <Tooltip content="音量控制" placement="top" showArrow={false} delay={120}>
-            <button className={`${styles.controlBtn} ${styles.secondary}`} aria-label="音量控制" onClick={toggleVolumeSlider}>
+            <button
+              className={`${styles.controlBtn} ${styles.secondary}`}
+              aria-label="音量控制"
+              onClick={toggleVolumeSlider}
+            >
               <VolumeIcon size={20} />
             </button>
           </Tooltip>

@@ -355,9 +355,31 @@ export function useFileOperations({
   const isTextFile = (fileName: string): boolean => {
     const ext = fileName.split(".").pop()?.toLowerCase() || "";
     return new Set([
-      "txt", "md", "markdown", "json", "xml", "yaml", "yml", "csv",
-      "html", "css", "js", "ts", "jsx", "tsx", "vue", "go", "py",
-      "java", "c", "cpp", "h", "cs", "sh", "rb", "rs",
+      "txt",
+      "md",
+      "markdown",
+      "json",
+      "xml",
+      "yaml",
+      "yml",
+      "csv",
+      "html",
+      "css",
+      "js",
+      "ts",
+      "jsx",
+      "tsx",
+      "vue",
+      "go",
+      "py",
+      "java",
+      "c",
+      "cpp",
+      "h",
+      "cs",
+      "sh",
+      "rb",
+      "rs",
     ]).has(ext);
   };
 

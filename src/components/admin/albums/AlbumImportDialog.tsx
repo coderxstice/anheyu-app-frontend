@@ -408,7 +408,7 @@ export default function AlbumImportDialog({ isOpen, onClose }: AlbumImportDialog
             <div className={`${PANEL_CLASS} space-y-4`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <SlidersHorizontal className="w-4 h-4 text-default-500" />
+                  <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
                   <p className="text-sm font-semibold text-foreground">导入策略</p>
                 </div>
                 <Chip size="sm" variant="flat" color="default">

@@ -170,14 +170,16 @@ export function FormMonacoEditor({
   }, [readOnly, disabled, wordWrap]);
 
   React.useEffect(() => {
+    if (loading) return;
     const monaco = monacoRef.current;
     if (!monaco) return;
+    monaco.editor.setTheme(getTheme());
     const observer = new MutationObserver(() => {
       monaco.editor.setTheme(getTheme());
     });
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
     return () => observer.disconnect();
-  }, []);
+  }, [loading]);
 
   const languageLabel = (language || "plaintext").toUpperCase();
 
@@ -188,7 +190,7 @@ export function FormMonacoEditor({
           <label htmlFor={id} className="text-sm font-medium text-foreground/80">
             {label}
           </label>
-          <span className="rounded bg-default-100 px-1.5 py-0.5 font-mono text-[10px] text-default-500">
+          <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
             {languageLabel}
           </span>
         </div>
@@ -200,21 +202,21 @@ export function FormMonacoEditor({
         aria-invalid={!!error}
         aria-describedby={description || error ? descId : undefined}
         className={cn(
-          "relative w-full overflow-hidden rounded-xl border bg-white dark:bg-default-100/50",
+          "relative w-full overflow-hidden rounded-xl border bg-card",
           error
             ? "border-danger ring-1 ring-danger/20"
-            : "border-default-200/80 hover:border-default-300/90 focus-within:border-primary/65 focus-within:ring-2 focus-within:ring-primary/15"
+            : "border-border/80 hover:border-border-hover/40 focus-within:border-primary/65 focus-within:ring-2 focus-within:ring-primary/15"
         )}
         style={{ height: `${height}px` }}
       >
-        {loading && <div className="absolute inset-0 animate-pulse bg-default-100/60" />}
+        {loading && <div className="absolute inset-0 animate-pulse bg-muted/60" />}
       </div>
 
       {(description || error) && (
         <p
           id={descId}
           role={error ? "alert" : undefined}
-          className={cn("text-xs leading-relaxed", error ? "text-danger" : "text-default-400")}
+          className={cn("text-xs leading-relaxed", error ? "text-danger" : "text-muted-foreground")}
         >
           {error || description}
         </p>

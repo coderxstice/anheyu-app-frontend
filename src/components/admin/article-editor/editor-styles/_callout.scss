@@ -86,7 +86,9 @@
   background: var(--anzhiyu-card-bg, #fff);
   border: 1px solid var(--anzhiyu-card-border, #e3e8f7);
   border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04);
   min-width: 300px;
   animation: editorCalloutPanelIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: bottom center;

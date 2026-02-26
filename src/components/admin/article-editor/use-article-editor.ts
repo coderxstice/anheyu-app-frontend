@@ -44,7 +44,7 @@ import type { EditorView } from "@tiptap/pm/view";
 const lowlight = createLowlight(common);
 
 // ============================================
-//       图片粘贴/拖拽上传处理
+// 图片粘贴/拖拽上传处理
 // ============================================
 
 /**

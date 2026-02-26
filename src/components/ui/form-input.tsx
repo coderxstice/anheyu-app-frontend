@@ -54,8 +54,8 @@ function PasswordToggle({ visible, onToggle }: { visible: boolean; onToggle: () 
       onClick={onToggle}
       className={cn(
         "flex items-center justify-center w-7 h-7 -mr-1 rounded-lg shrink-0",
-        "text-default-400 hover:text-default-600 dark:hover:text-default-300",
-        "hover:bg-default-100 dark:hover:bg-default-200/20",
+        "text-muted-foreground hover:text-foreground/70 dark:hover:text-muted-foreground/40",
+        "hover:bg-muted dark:hover:bg-secondary",
         "transition-all duration-150 cursor-pointer",
         "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50"
       )}
@@ -140,16 +140,16 @@ const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
           aria-describedby={description || error ? descId : undefined}
           classNames={{
             inputWrapper: cn(
-              "rounded-xl border border-default-200/80 bg-white dark:bg-default-100/50 shadow-none!",
-              "data-[hover=true]:bg-white! dark:data-[hover=true]:bg-default-100/60 data-[hover=true]:border-default-300/90",
-              "group-data-[focus=true]:bg-white! dark:group-data-[focus=true]:bg-default-100/60 group-data-[focus=true]:border-primary/65 group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-primary/15",
+              "rounded-xl border border-border/80 bg-card shadow-none!",
+              "data-[hover=true]:border-border-hover/40",
+              "group-data-[focus=true]:border-primary/65 group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-primary/15",
               size === "sm" ? "h-9 min-h-9" : "h-10 min-h-10",
               "transition-all duration-200",
               error &&
                 "border-danger bg-danger-50/50 group-data-[focus=true]:border-danger group-data-[focus=true]:ring-danger/20",
               inputClassName
             ),
-            input: "text-sm text-foreground/90 placeholder:text-default-400/80",
+            input: "text-sm text-foreground/90 placeholder:text-muted-foreground/60",
           }}
         />
 
@@ -158,7 +158,7 @@ const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
           <p
             id={descId}
             role={error ? "alert" : undefined}
-            className={cn("text-xs leading-relaxed", error ? "text-danger" : "text-default-400")}
+            className={cn("text-xs leading-relaxed", error ? "text-danger" : "text-muted-foreground")}
           >
             {error || description}
           </p>

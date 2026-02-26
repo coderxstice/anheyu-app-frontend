@@ -361,7 +361,7 @@ export function EditorHeader({
               type="button"
               onMouseDown={e => e.preventDefault()}
               onClick={() => setShowEmoji(!showEmoji)}
-              className="shrink-0 text-default-400 hover:text-primary transition-colors"
+              className="shrink-0 text-muted-foreground hover:text-primary transition-colors"
               title="插入表情"
             >
               <SmilePlus className="w-4.5 h-4.5" />
@@ -374,7 +374,7 @@ export function EditorHeader({
               onBlur={handleFinishEdit}
               onKeyDown={handleKeyDown}
               placeholder="无标题文章"
-              className="flex-1 text-base font-semibold bg-transparent border-none outline-none placeholder:text-default-300 min-w-0"
+              className="flex-1 text-base font-semibold bg-transparent border-none outline-none placeholder:text-muted-foreground/40 min-w-0"
             />
           </div>
         ) : (
@@ -382,22 +382,22 @@ export function EditorHeader({
           <button
             type="button"
             onClick={() => setIsEditing(true)}
-            className="w-full text-left text-base font-semibold truncate h-9 flex items-center px-3 rounded-lg hover:bg-default-100/5 transition-colors"
+            className="w-full text-left text-base font-semibold truncate h-9 flex items-center px-3 rounded-lg hover:bg-muted transition-colors"
             title="点击编辑标题"
           >
-            {title || <span className="text-default-300">无标题文章</span>}
+            {title || <span className="text-muted-foreground/40">无标题文章</span>}
           </button>
         )}
 
         {/* Emoji 选择器（带进出动画） */}
         <div
           className={`absolute top-full left-0 mt-2 w-[380px] bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden
-            transition-all duration-200 origin-top-left
-            ${
-              isEditing && showEmoji
-                ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
-                : "opacity-0 scale-95 translate-y-1 pointer-events-none"
-            }`}
+ transition-all duration-200 origin-top-left
+ ${
+   isEditing && showEmoji
+     ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
+     : "opacity-0 scale-95 translate-y-1 pointer-events-none"
+ }`}
           onMouseDown={e => {
             if ((e.target as HTMLElement).tagName !== "INPUT") {
               e.preventDefault();
@@ -417,7 +417,7 @@ export function EditorHeader({
               type="button"
               onMouseDown={e => e.preventDefault()}
               onClick={() => setShowEmoji(false)}
-              className="text-default-400 hover:text-default-600 text-sm shrink-0"
+              className="text-muted-foreground hover:text-foreground/70 text-sm shrink-0"
             >
               <X className="w-4 h-4" />
             </button>
@@ -426,7 +426,7 @@ export function EditorHeader({
           {/* Emoji 网格 */}
           <div className="p-2 h-[260px] overflow-auto">
             {!emojiSearch && (
-              <div className="text-xs text-default-400 mb-1.5 px-1">
+              <div className="text-xs text-muted-foreground mb-1.5 px-1">
                 {EMOJI_CATEGORIES.find(c => c.key === emojiCategory)?.label}
               </div>
             )}
@@ -436,9 +436,9 @@ export function EditorHeader({
                   key={`${item.e}-${i}`}
                   type="button"
                   className="w-8 h-8 flex items-center justify-center text-xl rounded
-                    hover:bg-default-100 hover:scale-125 active:scale-95
-                    transition-all duration-150 cursor-pointer
-                    opacity-0 animate-[emojiItemIn_0.25s_ease-out_forwards]"
+ hover:bg-muted hover:scale-125 active:scale-95
+ transition-all duration-150 cursor-pointer
+ opacity-0 animate-[emojiItemIn_0.25s_ease-out_forwards]"
                   style={{ animationDelay: `${Math.min(i * 12, 300)}ms` }}
                   onClick={() => insertEmoji(item.e)}
                   onMouseDown={e => e.preventDefault()}
@@ -450,7 +450,7 @@ export function EditorHeader({
               ))}
             </div>
             {filteredEmojis.length === 0 && (
-              <div className="text-sm text-default-300 text-center py-8">未找到匹配的表情</div>
+              <div className="text-sm text-muted-foreground/40 text-center py-8">未找到匹配的表情</div>
             )}
           </div>
 
@@ -459,10 +459,10 @@ export function EditorHeader({
             {hoveredEmoji ? (
               <>
                 <span className="text-lg">{hoveredEmoji.e}</span>
-                <span className="text-xs text-default-500">{hoveredEmoji.n}</span>
+                <span className="text-xs text-muted-foreground">{hoveredEmoji.n}</span>
               </>
             ) : (
-              <span className="text-xs text-default-300">移到表情上查看名称</span>
+              <span className="text-xs text-muted-foreground/40">移到表情上查看名称</span>
             )}
           </div>
 
@@ -476,7 +476,7 @@ export function EditorHeader({
                   className={`px-3 py-2 text-xs whitespace-nowrap transition-colors ${
                     emojiCategory === cat.key
                       ? "text-primary border-b-2 border-primary font-medium"
-                      : "text-default-500 hover:text-default-700"
+                      : "text-muted-foreground hover:text-foreground/80"
                   }`}
                   onClick={() => setEmojiCategory(cat.key)}
                   onMouseDown={e => e.preventDefault()}
@@ -495,7 +495,7 @@ export function EditorHeader({
           <button
             type="button"
             onClick={() => articleId && router.push(`/admin/post-management/${articleId}/history`)}
-            className="flex items-center gap-1.5 text-xs text-default-400 hover:text-default-600 transition-colors shrink-0 cursor-pointer px-2 py-1 rounded-md hover:bg-default-100"
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground/70 transition-colors shrink-0 cursor-pointer px-2 py-1 rounded-md hover:bg-muted"
           >
             <Lock className="w-3.5 h-3.5" />
             {autoSaveStatus === "saving" && (
@@ -515,7 +515,7 @@ export function EditorHeader({
           </button>
         </Tooltip>
       ) : (
-        <div className="flex items-center gap-1.5 text-xs text-default-400 shrink-0 px-2 py-1">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground shrink-0 px-2 py-1">
           <Lock className="w-3.5 h-3.5" />
           <span>新建文章</span>
           <Cloud className="w-3.5 h-3.5" />

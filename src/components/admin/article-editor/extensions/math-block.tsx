@@ -45,7 +45,7 @@ function MathBlockView({ node, updateAttributes, selected }: NodeViewProps) {
     return (
       <NodeViewWrapper className="math-block-wrapper">
         <div className="math-block-editor border border-primary/30 rounded-lg p-3 bg-muted/20">
-          <div className="text-xs text-default-400 mb-2 font-mono">LaTeX 公式（Ctrl+Enter 保存，Esc 取消）</div>
+          <div className="text-xs text-muted-foreground mb-2 font-mono">LaTeX 公式（Ctrl+Enter 保存，Esc 取消）</div>
           <textarea
             ref={inputRef}
             value={editValue}
@@ -75,7 +75,14 @@ function MathBlockView({ node, updateAttributes, selected }: NodeViewProps) {
   return (
     <NodeViewWrapper className="math-block-wrapper">
       <div className="editor-node-hover-wrap" contentEditable={false}>
-        <div className="editor-node-edit-btn" onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} contentEditable={false}>
+        <div
+          className="editor-node-edit-btn"
+          onClick={e => {
+            e.stopPropagation();
+            setIsEditing(true);
+          }}
+          contentEditable={false}
+        >
           <Pencil /> 编辑
         </div>
         <div

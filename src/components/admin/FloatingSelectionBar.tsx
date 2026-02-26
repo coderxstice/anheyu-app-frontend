@@ -32,12 +32,12 @@ interface FloatingSelectionBarProps {
  * 使用示例:
  * ```tsx
  * <FloatingSelectionBar
- *   count={selectedIds.size}
- *   actions={[
- *     { key: "export", label: "导出", icon: <Download />, onClick: handleExport },
- *     { key: "delete", label: "删除", icon: <Trash2 />, onClick: onDelete, variant: "danger" },
- *   ]}
- *   onClear={() => setSelectedIds(new Set())}
+ * count={selectedIds.size}
+ * actions={[
+ * { key: "export", label: "导出", icon: <Download />, onClick: handleExport },
+ * { key: "delete", label: "删除", icon: <Trash2 />, onClick: onDelete, variant: "danger" },
+ * ]}
+ * onClear={() => setSelectedIds(new Set())}
  * />
  * ```
  */

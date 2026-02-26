@@ -60,7 +60,9 @@
         box-shadow: none !important;
         justify-content: space-between !important;
         cursor: pointer;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
 
         &:hover {
           border-color: var(--anzhiyu-main) !important;
@@ -571,7 +573,10 @@
         font-weight: 700;
         color: var(--anzhiyu-fontcolor);
         cursor: pointer;
-        transition: transform 0.3s, color 0.3s, opacity 0.3s;
+        transition:
+          transform 0.3s,
+          color 0.3s,
+          opacity 0.3s;
         display: flex;
         align-items: center;
 

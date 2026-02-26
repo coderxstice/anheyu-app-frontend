@@ -3,19 +3,9 @@
  * 对接管理端文章 API，提供服务端分页查询和各类 mutation
  */
 
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  queryOptions,
-  keepPreviousData,
-} from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, queryOptions, keepPreviousData } from "@tanstack/react-query";
 import { postManagementApi } from "@/lib/api/post-management";
-import type {
-  AdminArticleListParams,
-  CreateArticleRequest,
-  UpdateArticleRequest,
-} from "@/types/post-management";
+import type { AdminArticleListParams, CreateArticleRequest, UpdateArticleRequest } from "@/types/post-management";
 
 export const postManagementKeys = {
   all: ["post-management"] as const,
@@ -49,10 +39,7 @@ export const adminArticleEditDetailQueryOptions = (id: string) =>
     staleTime: 1000 * 60 * 5,
   });
 
-export function useAdminArticles(
-  params: AdminArticleListParams = {},
-  options?: { enabled?: boolean }
-) {
+export function useAdminArticles(params: AdminArticleListParams = {}, options?: { enabled?: boolean }) {
   return useQuery({
     ...adminArticlesQueryOptions(params),
     enabled: options?.enabled ?? true,
@@ -88,8 +75,7 @@ export function useUpdateArticle() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateArticleRequest }) =>
-      postManagementApi.updateArticle(id, data),
+    mutationFn: ({ id, data }: { id: string; data: UpdateArticleRequest }) => postManagementApi.updateArticle(id, data),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: postManagementKeys.lists() });
       queryClient.invalidateQueries({ queryKey: postManagementKeys.detail(variables.id) });

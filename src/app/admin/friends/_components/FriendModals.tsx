@@ -43,19 +43,19 @@ export function FriendModals({ cm }: FriendModalsProps) {
           tone: "danger",
         }}
       >
-          <ModalBody>
-            <p className="text-sm">
-              确定要删除友链 <strong>{cm.deleteTarget?.name}</strong> 吗？此操作不可撤销。
-            </p>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="flat" onPress={cm.deleteModal.onClose}>
-              取消
-            </Button>
-            <Button color="danger" onPress={cm.handleDeleteConfirm} isLoading={cm.deleteLink.isPending}>
-              删除
-            </Button>
-          </ModalFooter>
+        <ModalBody>
+          <p className="text-sm">
+            确定要删除友链 <strong>{cm.deleteTarget?.name}</strong> 吗？此操作不可撤销。
+          </p>
+        </ModalBody>
+        <ModalFooter>
+          <Button variant="flat" onPress={cm.deleteModal.onClose}>
+            取消
+          </Button>
+          <Button color="danger" onPress={cm.handleDeleteConfirm} isLoading={cm.deleteLink.isPending}>
+            删除
+          </Button>
+        </ModalFooter>
       </AdminDialog>
 
       {/* 审核弹窗 */}
@@ -70,36 +70,36 @@ export function FriendModals({ cm }: FriendModalsProps) {
           tone: isApprove ? "success" : "danger",
         }}
       >
-          <ModalBody>
-            <p className="text-sm">
-              {isApprove
-                ? `确定通过 "${cm.reviewTarget?.item.name}" 的友链申请吗？`
-                : `确定拒绝 "${cm.reviewTarget?.item.name}" 的友链申请吗？`}
-            </p>
-            {!isApprove && (
-              <FormTextarea
-                label="拒绝原因"
-                placeholder="请输入拒绝原因"
-                value={cm.rejectReason}
-                onValueChange={cm.setRejectReason}
-                isRequired
-                minRows={2}
-                maxRows={4}
-              />
-            )}
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="flat" onPress={cm.reviewModal.onClose}>
-              取消
-            </Button>
-            <Button
-              color={isApprove ? "success" : "danger"}
-              onPress={cm.handleReviewConfirm}
-              isLoading={cm.reviewLink.isPending}
-            >
-              {isApprove ? "通过" : "拒绝"}
-            </Button>
-          </ModalFooter>
+        <ModalBody>
+          <p className="text-sm">
+            {isApprove
+              ? `确定通过 "${cm.reviewTarget?.item.name}" 的友链申请吗？`
+              : `确定拒绝 "${cm.reviewTarget?.item.name}" 的友链申请吗？`}
+          </p>
+          {!isApprove && (
+            <FormTextarea
+              label="拒绝原因"
+              placeholder="请输入拒绝原因"
+              value={cm.rejectReason}
+              onValueChange={cm.setRejectReason}
+              isRequired
+              minRows={2}
+              maxRows={4}
+            />
+          )}
+        </ModalBody>
+        <ModalFooter>
+          <Button variant="flat" onPress={cm.reviewModal.onClose}>
+            取消
+          </Button>
+          <Button
+            color={isApprove ? "success" : "danger"}
+            onPress={cm.handleReviewConfirm}
+            isLoading={cm.reviewLink.isPending}
+          >
+            {isApprove ? "通过" : "拒绝"}
+          </Button>
+        </ModalFooter>
       </AdminDialog>
     </>
   );

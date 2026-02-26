@@ -1,10 +1,6 @@
 import { addToast } from "@heroui/react";
 import type { ColumnConfig, FileItem, UploadItem } from "@/types/file-manager";
-import type {
-  FileSystemEntry,
-  FileSystemFileEntry,
-  FileSystemDirectoryEntry,
-} from "@/types/file-system";
+import type { FileSystemEntry, FileSystemFileEntry, FileSystemDirectoryEntry } from "@/types/file-system";
 import { joinPath } from "@/utils/file-manager";
 
 // ===== Exported Types =====

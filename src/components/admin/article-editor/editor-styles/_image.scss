@@ -269,7 +269,9 @@
     z-index: 20;
     background: #fff;
     border: 2px solid var(--anzhiyu-theme, #4259ef);
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    transition:
+      transform 0.1s ease,
+      box-shadow 0.1s ease;
     box-shadow: 0 1px 4px rgb(0 0 0 / 12%);
 
     &:hover {
@@ -401,7 +403,10 @@
     background: rgb(255 255 255 / 92%);
     border: 1px solid rgb(0 0 0 / 6%);
     border-radius: 10px;
-    box-shadow: 0 1px 2px rgb(0 0 0 / 5%), 0 4px 16px -2px rgb(0 0 0 / 8%), 0 12px 32px -4px rgb(0 0 0 / 4%);
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 5%),
+      0 4px 16px -2px rgb(0 0 0 / 8%),
+      0 12px 32px -4px rgb(0 0 0 / 4%);
     backdrop-filter: blur(16px) saturate(1.6);
     z-index: 50;
     white-space: nowrap;
@@ -411,7 +416,10 @@
   html.dark & .image-floating-toolbar {
     background: rgb(30 30 34 / 88%);
     border-color: rgb(255 255 255 / 8%);
-    box-shadow: 0 1px 2px rgb(0 0 0 / 20%), 0 4px 16px -2px rgb(0 0 0 / 25%), 0 12px 32px -4px rgb(0 0 0 / 15%);
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 20%),
+      0 4px 16px -2px rgb(0 0 0 / 25%),
+      0 12px 32px -4px rgb(0 0 0 / 15%);
   }
 
   @keyframes imageToolbarFadeIn {
@@ -512,7 +520,9 @@
     outline: none;
     background: var(--anzhiyu-card-bg-grey, #f5f6f8);
     color: var(--anzhiyu-fontcolor, #363636);
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
 
     &::placeholder {
       color: var(--anzhiyu-secondtext, #999);
@@ -566,7 +576,9 @@
       outline: none;
       background: var(--anzhiyu-card-bg-grey, #f5f6f8);
       color: var(--anzhiyu-fontcolor, #363636);
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
       appearance: textfield;
       -moz-appearance: textfield;
 
@@ -783,7 +795,9 @@
     background: rgb(255 255 255 / 92%);
     border: 1px solid rgb(0 0 0 / 6%);
     border-radius: 10px;
-    box-shadow: 0 1px 2px rgb(0 0 0 / 5%), 0 4px 16px -2px rgb(0 0 0 / 8%);
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 5%),
+      0 4px 16px -2px rgb(0 0 0 / 8%);
     backdrop-filter: blur(16px) saturate(1.6);
     z-index: 50;
     white-space: nowrap;

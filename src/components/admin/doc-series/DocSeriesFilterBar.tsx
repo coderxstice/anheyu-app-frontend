@@ -31,7 +31,7 @@ export function DocSeriesFilterBar({
           isClearable
           className="w-full sm:max-w-[300px]"
           placeholder="搜索系列名称..."
-          startContent={<Search className="w-3.5 h-3.5 text-default-400" />}
+          startContent={<Search className="w-3.5 h-3.5 text-muted-foreground" />}
           value={searchInput}
           onValueChange={v => {
             onSearchInputChange(v);
@@ -43,7 +43,7 @@ export function DocSeriesFilterBar({
           }}
           classNames={{
             inputWrapper:
-              "h-8 min-h-8 bg-white! dark:bg-default-50! shadow-none! [border:var(--style-border)] data-[hover=true]:bg-white! dark:data-[hover=true]:bg-default-50! group-data-[focus=true]:bg-white! dark:group-data-[focus=true]:bg-default-50! group-data-[focus=true]:[border:var(--style-border-hover)] transition-all duration-200",
+              "h-8 min-h-8 bg-card shadow-none! [border:var(--style-border)] data-[hover=true]:bg-card dark:data-[hover=true]:bg-muted/30! group-data-[focus=true]:bg-card dark:group-data-[focus=true]:bg-muted/30! group-data-[focus=true]:[border:var(--style-border-hover)] transition-all duration-200",
           }}
         />
         <div className="ml-auto">
@@ -53,7 +53,7 @@ export function DocSeriesFilterBar({
             startContent={<RotateCcw className="w-3.5 h-3.5" />}
             onPress={onReset}
             isDisabled={!searchInput}
-            className="text-default-600"
+            className="text-foreground/70"
           >
             重置
           </Button>

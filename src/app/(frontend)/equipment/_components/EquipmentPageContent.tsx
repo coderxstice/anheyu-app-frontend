@@ -20,8 +20,8 @@ function parseEquipmentList(raw: unknown): EquipmentCategory[] {
         equipment_list: (Array.isArray(category.equipment_list)
           ? category.equipment_list
           : Array.isArray(category.items)
-          ? category.items
-          : []
+            ? category.items
+            : []
         ).map((item: Record<string, unknown>) => ({
           name: String(item.name ?? ""),
           image: String(item.image ?? ""),

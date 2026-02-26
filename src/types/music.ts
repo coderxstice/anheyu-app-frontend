@@ -57,8 +57,4 @@ export interface AudioLoadingState {
 }
 
 // 支持的歌词输入格式类型
-export type LyricInput =
-  | string
-  | { lrc: string }
-  | { lyric: string }
-  | { data: { lrc: string } };
+export type LyricInput = string | { lrc: string } | { lyric: string } | { data: { lrc: string } };

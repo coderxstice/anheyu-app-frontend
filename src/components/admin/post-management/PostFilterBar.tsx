@@ -47,20 +47,20 @@ export function PostFilterBar({
           isClearable
           className="w-full sm:max-w-[300px]"
           placeholder="搜索文章标题、内容..."
-          startContent={<Search className="w-3.5 h-3.5 text-default-400" />}
+          startContent={<Search className="w-3.5 h-3.5 text-muted-foreground" />}
           value={searchInput}
           onValueChange={onSearchInputChange}
           onClear={() => onSearchInputChange("")}
           classNames={{
             inputWrapper:
-              "h-8 min-h-8 bg-white! dark:bg-default-50! shadow-none! [border:var(--style-border)] data-[hover=true]:bg-white! dark:data-[hover=true]:bg-default-50! group-data-[focus=true]:bg-white! dark:group-data-[focus=true]:bg-default-50! group-data-[focus=true]:[border:var(--style-border-hover)] transition-all duration-200",
+              "h-8 min-h-8 bg-card shadow-none! [border:var(--style-border)] data-[hover=true]:bg-card dark:data-[hover=true]:bg-muted/30! group-data-[focus=true]:bg-card dark:group-data-[focus=true]:bg-muted/30! group-data-[focus=true]:[border:var(--style-border-hover)] transition-all duration-200",
           }}
         />
         <Dropdown>
           <DropdownTrigger className="hidden sm:flex">
             <Button size="sm" variant="flat" endContent={<ChevronDown className="w-3.5 h-3.5" />} className="h-8">
               {statusFilter
-                ? ARTICLE_STATUS_OPTIONS.find(o => o.key === statusFilter)?.label ?? "文章状态"
+                ? (ARTICLE_STATUS_OPTIONS.find(o => o.key === statusFilter)?.label ?? "文章状态")
                 : "文章状态"}
             </Button>
           </DropdownTrigger>
@@ -83,7 +83,7 @@ export function PostFilterBar({
           <DropdownTrigger className="hidden sm:flex">
             <Button size="sm" variant="flat" endContent={<ChevronDown className="w-3.5 h-3.5" />} className="h-8">
               {reviewStatusFilter
-                ? REVIEW_STATUS_OPTIONS.find(o => o.key === reviewStatusFilter)?.label ?? "审核状态"
+                ? (REVIEW_STATUS_OPTIONS.find(o => o.key === reviewStatusFilter)?.label ?? "审核状态")
                 : "审核状态"}
             </Button>
           </DropdownTrigger>
@@ -109,7 +109,7 @@ export function PostFilterBar({
             startContent={<RotateCcw className="w-3.5 h-3.5" />}
             onPress={onReset}
             isDisabled={!searchInput && !statusFilter && !reviewStatusFilter}
-            className="text-default-600"
+            className="text-foreground/70"
           >
             重置
           </Button>

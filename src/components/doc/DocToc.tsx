@@ -194,7 +194,7 @@ export function DocToc({ contentHtml }: DocTocProps) {
         4: styles.tocLevel4,
         5: styles.tocLevel5,
         6: styles.tocLevel6,
-      } as Record<number, string>),
+      }) as Record<number, string>,
     []
   );
 

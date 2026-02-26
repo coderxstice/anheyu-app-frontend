@@ -112,7 +112,7 @@ function SocialItemIcon({ item }: { item: Record<string, unknown> }) {
 
   if (!icon) {
     return (
-      <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center bg-default-100 text-default-400">
+      <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center bg-muted text-muted-foreground">
         <svg
           width="16"
           height="16"
@@ -136,19 +136,13 @@ function SocialItemIcon({ item }: { item: Record<string, unknown> }) {
   if (isImageUrl) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={icon}
-        alt=""
-        className="w-8 h-8 rounded-lg shrink-0 object-cover bg-default-100"
-        width={32}
-        height={32}
-      />
+      <img src={icon} alt="" className="w-8 h-8 rounded-lg shrink-0 object-cover bg-muted" width={32} height={32} />
     );
   }
 
   if (isIconify) {
     return (
-      <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center bg-default-100 text-foreground">
+      <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center bg-muted text-foreground">
         <Icon icon={icon} className="w-5 h-5" />
       </div>
     );

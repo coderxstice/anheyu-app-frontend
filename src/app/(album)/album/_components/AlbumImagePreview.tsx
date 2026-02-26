@@ -435,7 +435,13 @@ export const AlbumImagePreview = forwardRef<AlbumImagePreviewHandle, AlbumImageP
             {loading ? <div className="loader" /> : null}
 
             <div key={imageKey} className="pic">
-              <img ref={imageRef} className="az-preview-image" src={currentImageUrl} alt={currentItem?.title || "预览图"} onLoad={handleImageLoad} />
+              <img
+                ref={imageRef}
+                className="az-preview-image"
+                src={currentImageUrl}
+                alt={currentItem?.title || "预览图"}
+                onLoad={handleImageLoad}
+              />
             </div>
 
             {!loading && currentItem ? (

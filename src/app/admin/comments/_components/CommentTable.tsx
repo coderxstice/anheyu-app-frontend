@@ -64,8 +64,8 @@ export function CommentTable({ cm }: CommentTableProps) {
               ? comment.avatar_url
               : `${cm.gravatarBaseUrl}/${comment.avatar_url}`
             : comment.email_md5
-            ? `${cm.gravatarBaseUrl}/avatar/${comment.email_md5}?d=mp&s=80`
-            : undefined;
+              ? `${cm.gravatarBaseUrl}/avatar/${comment.email_md5}?d=mp&s=80`
+              : undefined;
           return (
             <User
               name={
@@ -199,7 +199,7 @@ export function CommentTable({ cm }: CommentTableProps) {
                     "w-7 h-7 min-w-0",
                     comment.pinned_at
                       ? "text-warning bg-warning/10 hover:bg-warning/20"
-                      : "text-default-400 bg-default/10 hover:bg-default/20"
+                      : "text-muted-foreground bg-default/10 hover:bg-default/20"
                   )}
                   onPress={() => cm.handleAction(comment, "pin")}
                 >
@@ -242,11 +242,11 @@ export function CommentTable({ cm }: CommentTableProps) {
   const bottomContent = (
     <div className="py-2 px-2 flex flex-wrap justify-between items-center gap-2">
       <div className="flex items-center gap-2 shrink-0">
-        <span className="text-small text-default-400 whitespace-nowrap">共 {cm.totalItems} 条</span>
-        <span className="text-small text-default-300">|</span>
+        <span className="text-small text-muted-foreground whitespace-nowrap">共 {cm.totalItems} 条</span>
+        <span className="text-small text-muted-foreground/40">|</span>
         <Dropdown>
           <DropdownTrigger>
-            <Button variant="light" size="sm" className="text-default-400 text-small h-7 min-w-0 gap-1 px-2">
+            <Button variant="light" size="sm" className="text-muted-foreground text-small h-7 min-w-0 gap-1 px-2">
               {cm.pageSize}条/页
               <ChevronDown className="w-3 h-3" />
             </Button>
@@ -270,7 +270,7 @@ export function CommentTable({ cm }: CommentTableProps) {
         </Dropdown>
         {cm.selectedIds.size > 0 && (
           <>
-            <span className="text-small text-default-300">|</span>
+            <span className="text-small text-muted-foreground/40">|</span>
             <span className="text-small text-primary font-medium whitespace-nowrap">已选 {cm.selectedIds.size} 项</span>
           </>
         )}
@@ -324,7 +324,7 @@ export function CommentTable({ cm }: CommentTableProps) {
           wrapper: "flex-1 min-h-0 px-3! py-0! shadow-none! rounded-none! border-none!",
           table: "border-separate border-spacing-y-1.5 -mt-1.5",
           thead: "[&>tr]:first:shadow-none! after:hidden!",
-          th: "bg-[#F6F7FA] dark:bg-default-100 first:rounded-tl-lg! last:rounded-tr-lg!",
+          th: "bg-[#F6F7FA] dark:bg-muted first:rounded-tl-lg! last:rounded-tr-lg!",
           tr: "rounded-xl!",
           td: "first:before:rounded-s-xl! last:before:rounded-e-xl!",
         }}

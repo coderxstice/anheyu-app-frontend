@@ -31,7 +31,9 @@
   backdrop-filter: blur(20px);
   border: var(--style-border);
   border-radius: 20px;
-  transition: all 0s, color 0.3s;
+  transition:
+    all 0s,
+    color 0.3s;
 }
 
 .musicCapsuleContainer:hover {

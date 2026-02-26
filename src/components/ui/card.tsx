@@ -7,16 +7,7 @@ interface CardProps {
 }
 
 export function Card({ children, className }: CardProps) {
-  return (
-    <div
-      className={cn(
-        "bg-card border border-border rounded-xl overflow-hidden",
-        className
-      )}
-    >
-      {children}
-    </div>
-  );
+  return <div className={cn("bg-card border border-border rounded-xl overflow-hidden", className)}>{children}</div>;
 }
 
 interface CardHeaderProps {
@@ -25,9 +16,7 @@ interface CardHeaderProps {
 }
 
 export function CardHeader({ children, className }: CardHeaderProps) {
-  return (
-    <div className={cn("p-4 border-b border-border", className)}>{children}</div>
-  );
+  return <div className={cn("p-4 border-b border-border", className)}>{children}</div>;
 }
 
 interface CardContentProps {
@@ -45,9 +34,7 @@ interface CardFooterProps {
 }
 
 export function CardFooter({ children, className }: CardFooterProps) {
-  return (
-    <div className={cn("p-4 pt-0", className)}>{children}</div>
-  );
+  return <div className={cn("p-4 pt-0", className)}>{children}</div>;
 }
 
 interface CardTitleProps {
@@ -56,9 +43,7 @@ interface CardTitleProps {
 }
 
 export function CardTitle({ children, className }: CardTitleProps) {
-  return (
-    <h3 className={cn("text-lg font-semibold", className)}>{children}</h3>
-  );
+  return <h3 className={cn("text-lg font-semibold", className)}>{children}</h3>;
 }
 
 interface CardDescriptionProps {
@@ -67,7 +52,5 @@ interface CardDescriptionProps {
 }
 
 export function CardDescription({ children, className }: CardDescriptionProps) {
-  return (
-    <p className={cn("text-sm text-muted-foreground", className)}>{children}</p>
-  );
+  return <p className={cn("text-sm text-muted-foreground", className)}>{children}</p>;
 }

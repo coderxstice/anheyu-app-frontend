@@ -41,7 +41,9 @@ $pro-purple-dark: #d8b4fe;
   border-radius: 12px;
   box-shadow: var(--anzhiyu-shadow-border, 0 8px 16px -4px #2c2d300c);
   overflow: hidden;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
 
   // 三色 hover
   &--amber:hover {
@@ -234,7 +236,9 @@ $pro-purple-dark: #d8b4fe;
   border: 1px solid var(--anzhiyu-card-border, #e3e8f7);
   border-radius: 6px;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 
   &:focus {
     border-color: var(--anzhiyu-main, #4259ef);

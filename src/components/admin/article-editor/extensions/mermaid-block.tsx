@@ -8,7 +8,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Pencil } from "lucide-react";
 
 // ---- Mermaid 渲染辅助（懒加载） ----
-let mermaidInstance: typeof import("mermaid")["default"] | null = null;
+let mermaidInstance: (typeof import("mermaid"))["default"] | null = null;
 let mermaidInitialized = false;
 
 async function getMermaid() {
@@ -231,7 +231,7 @@ function MermaidBlockView({ node, updateAttributes, selected }: NodeViewProps) {
           <div className="editor-btn-header">
             <span className="editor-btn-title">Mermaid 图表</span>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] text-default-400">Ctrl+Enter 保存 · Esc 取消</span>
+              <span className="text-[10px] text-muted-foreground">Ctrl+Enter 保存 · Esc 取消</span>
               <button type="button" className="editor-btn-done" onClick={handleSave}>
                 保存
               </button>
@@ -245,7 +245,7 @@ function MermaidBlockView({ node, updateAttributes, selected }: NodeViewProps) {
               onKeyDown={handleKeyDown}
               rows={10}
               className="editor-mermaid-textarea"
-              placeholder={`graph TD\n  A[开始] --> B[结束]`}
+              placeholder={`graph TD\n A[开始] --> B[结束]`}
             />
           </div>
         </div>
@@ -277,7 +277,7 @@ function MermaidBlockView({ node, updateAttributes, selected }: NodeViewProps) {
           }}
           title={zoomEnabled ? "滚轮缩放 · 拖拽平移" : "点击编辑图表"}
         >
-          {renderState.loading && <div className="text-default-400 text-sm py-8">加载图表中...</div>}
+          {renderState.loading && <div className="text-muted-foreground text-sm py-8">加载图表中...</div>}
           {renderState.error && (
             <div className="text-danger text-sm py-4">
               <div className="font-medium mb-1">Mermaid 渲染错误</div>
@@ -307,7 +307,7 @@ function MermaidBlockView({ node, updateAttributes, selected }: NodeViewProps) {
             </>
           )}
           {!renderState.loading && !renderState.error && !renderState.svg && (
-            <div className="text-default-300 text-sm py-8">点击输入 Mermaid 代码</div>
+            <div className="text-muted-foreground/40 text-sm py-8">点击输入 Mermaid 代码</div>
           )}
         </div>
       </div>
@@ -385,7 +385,7 @@ export const MermaidBlock = Node.create({
   addCommands() {
     return {
       insertMermaidBlock:
-        (code = "graph TD\n  A[开始] --> B[结束]") =>
+        (code = "graph TD\n A[开始] --> B[结束]") =>
         ({ commands }) => {
           return commands.insertContent({
             type: this.name,

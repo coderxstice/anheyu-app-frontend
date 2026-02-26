@@ -4,12 +4,7 @@
 
 import { apiClient } from "./client";
 import { useSiteConfigStore } from "@/store/site-config-store";
-import type {
-  AlbumStatType,
-  PublicAlbumCategory,
-  PublicAlbumListData,
-  PublicAlbumListParams,
-} from "@/types/album";
+import type { AlbumStatType, PublicAlbumCategory, PublicAlbumListData, PublicAlbumListParams } from "@/types/album";
 
 function trimTrailingSlash(value: string): string {
   return value.replace(/\/+$/, "");
@@ -40,12 +35,7 @@ export const albumPublicApi = {
    * GET /api/public/albums
    */
   async getPublicAlbums(params: PublicAlbumListParams = {}): Promise<PublicAlbumListData> {
-    const {
-      page = 1,
-      pageSize = 24,
-      sort = "display_order_asc",
-      categoryId = null,
-    } = params;
+    const { page = 1, pageSize = 24, sort = "display_order_asc", categoryId = null } = params;
 
     const queryParams = new URLSearchParams();
     queryParams.append("page", String(page));

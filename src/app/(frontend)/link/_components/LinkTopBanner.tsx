@@ -70,12 +70,10 @@ export function LinkTopBanner({ onScrollToApply }: LinkTopBannerProps) {
         <div className="banners-title-big">与数百名博主无限进步</div>
       </div>
       <div className="banner-button-group">
-        <button
-          className="banner-button secondary"
-          disabled={isVisitingRandom}
-          onClick={handleRandomVisit}
-        >
-          <span className="banner-button-icon"><Navigation className="w-4 h-4" /></span>
+        <button className="banner-button secondary" disabled={isVisitingRandom} onClick={handleRandomVisit}>
+          <span className="banner-button-icon">
+            <Navigation className="w-4 h-4" />
+          </span>
           <span className="banner-button-text">随机访问</span>
         </button>
         <a
@@ -86,7 +84,9 @@ export function LinkTopBanner({ onScrollToApply }: LinkTopBannerProps) {
             onScrollToApply();
           }}
         >
-          <span className="banner-button-icon"><Send className="w-4 h-4" /></span>
+          <span className="banner-button-icon">
+            <Send className="w-4 h-4" />
+          </span>
           <span className="banner-button-text">申请友链</span>
         </a>
       </div>

@@ -4,7 +4,13 @@
  */
 
 import { apiClient } from "./client";
-import type { DocSeries, DocSeriesForm, DocSeriesListResponse, DocSeriesListParams, DocSeriesWithArticles } from "@/types/doc-series";
+import type {
+  DocSeries,
+  DocSeriesForm,
+  DocSeriesListResponse,
+  DocSeriesListParams,
+  DocSeriesWithArticles,
+} from "@/types/doc-series";
 
 export const docSeriesApi = {
   /**

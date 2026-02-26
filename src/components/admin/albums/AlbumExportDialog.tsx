@@ -54,7 +54,7 @@ export default function AlbumExportDialog({ isOpen, onClose, selectedIds, totalI
       header={{ title: "导出相册", description: "选择导出范围与格式并下载数据", icon: Download }}
     >
       <ModalBody className="gap-4">
-        <p className="text-sm text-default-600">
+        <p className="text-sm text-foreground/70">
           {hasSelection
             ? `即将导出选中的 ${selectedAlbumIds.length} 个相册。`
             : `未选择具体项，将导出全部相册（共 ${totalItems} 个）。`}

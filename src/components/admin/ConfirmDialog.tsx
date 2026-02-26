@@ -47,7 +47,7 @@ export function ConfirmDialog({
               </div>
             </ModalHeader>
             <ModalBody>
-              <p className="text-default-500">{description}</p>
+              <p className="text-muted-foreground">{description}</p>
             </ModalBody>
             <ModalFooter>
               <Button variant="light" onPress={onClose} isDisabled={loading}>

@@ -26,11 +26,19 @@ const itemVariants = {
 // ==================== 主组件 ====================
 export default function AdminDashboard() {
   const {
-    isLoading, basicStats, contentStats,
-    viewsTrend, visitorsTrend,
-    trendChartData, sourceChartData, deviceChartData,
-    topArticlesData, recentCommentsData,
-    handleApprove, handleReject, queries,
+    isLoading,
+    basicStats,
+    contentStats,
+    viewsTrend,
+    visitorsTrend,
+    trendChartData,
+    sourceChartData,
+    deviceChartData,
+    topArticlesData,
+    recentCommentsData,
+    handleApprove,
+    handleReject,
+    queries,
   } = useDashboardPage();
 
   if (isLoading) {

@@ -66,7 +66,9 @@
   animation: spin 1s linear infinite;
 }
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 .errorIcon {
   font-size: 3rem;
@@ -93,8 +95,14 @@
   animation: fadeIn 0.5s ease;
 }
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ---------- 概览卡片 ---------- */
@@ -104,10 +112,14 @@
   gap: 1rem;
 }
 @media (max-width: 1024px) {
-  .overviewCards { grid-template-columns: repeat(2, 1fr); }
+  .overviewCards {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 @media (max-width: 480px) {
-  .overviewCards { grid-template-columns: 1fr; }
+  .overviewCards {
+    grid-template-columns: 1fr;
+  }
 }
 .overviewCard {
   display: flex;
@@ -117,17 +129,23 @@
   background: var(--card, #fff);
   border: 1px solid var(--border, #e5e7eb);
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   transition: all 0.3s;
   animation: cardPopIn 0.5s ease backwards;
 }
 .overviewCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(59,130,246,0.15);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
 }
 @keyframes cardPopIn {
-  from { opacity: 0; transform: scale(0.9) translateY(10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 .cardIcon {
   display: flex;
@@ -166,14 +184,16 @@
   margin-top: 1.5rem;
 }
 @media (max-width: 768px) {
-  .chartsGrid { grid-template-columns: 1fr; }
+  .chartsGrid {
+    grid-template-columns: 1fr;
+  }
 }
 .chartCard {
   padding: 1.5rem;
   background: var(--card, #fff);
   border: 1px solid var(--border, #e5e7eb);
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   animation: cardFadeIn 0.5s ease backwards;
 }
 .chartTitle {
@@ -191,8 +211,14 @@
   color: hsl(var(--primary));
 }
 @keyframes cardFadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ---------- 底部网格 ---------- */
@@ -203,14 +229,16 @@
   margin-top: 1.5rem;
 }
 @media (max-width: 768px) {
-  .bottomGrid { grid-template-columns: 1fr; }
+  .bottomGrid {
+    grid-template-columns: 1fr;
+  }
 }
 .listCard {
   padding: 1.5rem;
   background: var(--card, #fff);
   border: 1px solid var(--border, #e5e7eb);
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   animation: cardFadeIn 0.5s ease backwards;
 }
 .listCardTitle {
@@ -334,7 +362,7 @@
 }
 .tagItem:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 .tagName {
   font-weight: 500;
@@ -353,7 +381,10 @@
   gap: 2rem;
 }
 @media (max-width: 480px) {
-  .categoryChart { flex-direction: column; gap: 1rem; }
+  .categoryChart {
+    flex-direction: column;
+    gap: 1rem;
+  }
 }
 .pieContainer {
   position: relative;
@@ -430,14 +461,14 @@
 .trendBar {
   width: 100%;
   max-width: 40px;
-  background: linear-gradient(to top, rgba(59,130,246,0.3), rgba(59,130,246,0.8));
+  background: linear-gradient(to top, rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0.8));
   border-radius: 4px 4px 0 0;
   transition: all 0.3s;
   min-height: 2px;
   position: relative;
 }
 .trendBar:hover {
-  background: linear-gradient(to top, rgba(59,130,246,0.5), rgba(59,130,246,1));
+  background: linear-gradient(to top, rgba(59, 130, 246, 0.5), rgba(59, 130, 246, 1));
 }
 .trendBarValue {
   position: absolute;

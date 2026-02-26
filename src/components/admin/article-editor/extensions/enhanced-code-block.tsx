@@ -165,7 +165,7 @@ function SettingsPanel({
         onMouseLeave={handleSubLeave}
       >
         <span>字号</span>
-        <ChevronRight className="w-3.5 h-3.5 text-default-400" />
+        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
         {openSub === "fontSize" && (
           <div className="ecsm-submenu" onMouseEnter={() => handleSubEnter("fontSize")} onMouseLeave={handleSubLeave}>
             {CODE_FONT_SIZES.map(opt => (
@@ -195,7 +195,7 @@ function SettingsPanel({
         onMouseLeave={handleSubLeave}
       >
         <span>缩进模式</span>
-        <ChevronRight className="w-3.5 h-3.5 text-default-400" />
+        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
         {openSub === "indentMode" && (
           <div className="ecsm-submenu" onMouseEnter={() => handleSubEnter("indentMode")} onMouseLeave={handleSubLeave}>
             {INDENT_MODES.map(opt => (
@@ -225,7 +225,7 @@ function SettingsPanel({
         onMouseLeave={handleSubLeave}
       >
         <span>缩进宽度</span>
-        <ChevronRight className="w-3.5 h-3.5 text-default-400" />
+        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
         {openSub === "indentWidth" && (
           <div
             className="ecsm-submenu"

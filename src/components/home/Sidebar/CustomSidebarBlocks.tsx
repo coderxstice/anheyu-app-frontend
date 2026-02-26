@@ -59,9 +59,7 @@ function parseCustomBlocks(rawValue: unknown): CustomSidebarBlock[] {
  * 从 siteConfig.CUSTOM_SIDEBAR 读取配置，渲染自定义 HTML 块
  * 参考 anheyu-app Sticky.vue 实现
  */
-export const CustomSidebarBlocks = memo(function CustomSidebarBlocks({
-  isPostPage = false,
-}: CustomSidebarBlocksProps) {
+export const CustomSidebarBlocks = memo(function CustomSidebarBlocks({ isPostPage = false }: CustomSidebarBlocksProps) {
   const siteConfig = useSiteConfigStore(state => state.siteConfig);
   const containerRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -101,7 +99,9 @@ export const CustomSidebarBlocks = memo(function CustomSidebarBlocks({
         <div key={index} className={styles.customBlock}>
           {block.title && <div className={styles.customBlockTitle}>{block.title}</div>}
           <div
-            ref={el => { containerRefs.current[index] = el; }}
+            ref={el => {
+              containerRefs.current[index] = el;
+            }}
             className={styles.customBlockContent}
             dangerouslySetInnerHTML={{ __html: block.content }}
           />

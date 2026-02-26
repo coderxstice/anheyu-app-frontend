@@ -86,10 +86,10 @@ export function useDashboardPage() {
         item.device === "desktop"
           ? "桌面端"
           : item.device === "mobile"
-          ? "移动端"
-          : item.device === "tablet"
-          ? "平板"
-          : "其他",
+            ? "移动端"
+            : item.device === "tablet"
+              ? "平板"
+              : "其他",
       value: item.count,
       percentage: total > 0 ? Math.round((item.count / total) * 100) : 0,
       icon: iconMap[item.device.toLowerCase()] || "ri:device-line",

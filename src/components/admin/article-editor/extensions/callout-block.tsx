@@ -188,8 +188,12 @@ function CalloutBlockView({ node, updateAttributes, selected }: NodeViewProps) {
       <span
         ref={wrapperRef}
         className="editor-callout-trigger"
-        onMouseEnter={() => { if (!isClickTrigger) setShowTip(true); }}
-        onMouseLeave={() => { if (!isClickTrigger) setShowTip(false); }}
+        onMouseEnter={() => {
+          if (!isClickTrigger) setShowTip(true);
+        }}
+        onMouseLeave={() => {
+          if (!isClickTrigger) setShowTip(false);
+        }}
         onClick={e => {
           if (isClickTrigger) {
             e.stopPropagation();

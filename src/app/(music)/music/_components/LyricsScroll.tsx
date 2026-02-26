@@ -268,8 +268,8 @@ export function LyricsScroll({ lyrics, lyricsState, dominantColor, onLyricClick 
                 index === lyricsState.currentIndex
                   ? styles.isCurrent
                   : index < lyricsState.currentIndex
-                  ? styles.isPassed
-                  : styles.isUpcoming
+                    ? styles.isPassed
+                    : styles.isUpcoming
               }`}
               data-index={index}
               onClick={() => handleLyricClick(index)}
