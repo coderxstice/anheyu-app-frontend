@@ -18,8 +18,10 @@ import { PostContent } from "./PostContent";
 import { PostCopyright } from "./PostCopyright";
 import { PostPagination } from "./PostPagination";
 import { CommentSection } from "./Comment";
+import { CommentBarrage } from "./CommentBarrage";
 import { PostSidebar } from "./Sidebar";
 import { useSiteConfigStore } from "@/store/site-config-store";
+import { useUiStore } from "@/store/ui-store";
 import { usePageStore } from "@/store/page-store";
 import { setArticleMetaThemeColor, restoreMetaThemeColor } from "@/utils/theme-manager";
 import type { Article, RecentArticle } from "@/types/article";
@@ -41,6 +43,14 @@ function buildArticleContentWithCustomJS(contentHTML: string, customJS?: string)
 export function PostDetailContent({ article, recentArticles = [] }: PostDetailContentProps) {
   const siteConfig = useSiteConfigStore(state => state.siteConfig);
   const setPageTitle = usePageStore(state => state.setPageTitle);
+  const isCommentBarrageVisible = useUiStore(state => state.isCommentBarrageVisible);
+  const commentConfig = siteConfig?.comment;
+  const isCommentEnabled =
+    commentConfig?.enable === undefined || commentConfig?.enable === true || commentConfig?.enable === "true";
+  const isCommentBarrageEnabledBySite =
+    commentConfig?.barrage_enable === undefined ||
+    commentConfig?.barrage_enable === true ||
+    commentConfig?.barrage_enable === "true";
   const clearPageTitle = usePageStore(state => state.clearPageTitle);
 
   // 进入文章页面时立即跳到顶部（不带缓动）
@@ -149,6 +159,15 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
           查看全部
         </Link>
       </div>
+
+      {/* 右下角热评弹幕（受系统设置与用户开关双重控制） */}
+      {isCommentEnabled && isCommentBarrageEnabledBySite && isCommentBarrageVisible && (
+        <CommentBarrage
+          gravatarUrl={siteConfig?.GRAVATAR_URL || "https://cravatar.cn/"}
+          defaultGravatarType={siteConfig?.DEFAULT_GRAVATAR_TYPE || "mp"}
+          masterTag={commentConfig?.master_tag || "博主"}
+        />
+      )}
     </div>
   );
 }

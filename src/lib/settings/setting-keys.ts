@@ -215,6 +215,7 @@ export const KEY_MUSIC_MAX_SIZE_REMOTE = "MUSIC_MAX_SIZE_REMOTE";
 
 // ==================== 评论配置 ====================
 export const KEY_COMMENT_ENABLE = "comment.enable";
+export const KEY_COMMENT_BARRAGE_ENABLE = "comment.barrage_enable";
 export const KEY_COMMENT_LOGIN_REQUIRED = "comment.login_required";
 export const KEY_COMMENT_PAGE_SIZE = "comment.page_size";
 export const KEY_COMMENT_MASTER_TAG = "comment.master_tag";
