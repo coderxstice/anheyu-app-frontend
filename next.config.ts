@@ -10,6 +10,10 @@ import type { NextConfig } from "next";
 const isDev = process.env.NODE_ENV === "development";
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    // 固定 Turbopack 根目录，避免多 lockfile 场景下根目录误判
+    root: __dirname,
+  },
   output: "standalone",
   images: {
     unoptimized: true,

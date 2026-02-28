@@ -31,6 +31,7 @@ interface EditorSidebarProps {
   editor: Editor | null;
   meta: ArticleMeta;
   onUpdateField: <K extends keyof ArticleMeta>(key: K, value: ArticleMeta[K]) => void;
+  isAdmin: boolean;
   categories: PostCategory[];
   tags: PostTag[];
   isLoadingCategories?: boolean;
@@ -561,6 +562,7 @@ export function TOCContent({ editor }: { editor: Editor | null }) {
 interface SettingsContentProps {
   meta: ArticleMeta;
   onUpdateField: EditorSidebarProps["onUpdateField"];
+  isAdmin: boolean;
   categories: PostCategory[];
   tags: PostTag[];
   isLoadingCategories?: boolean;
@@ -570,6 +572,7 @@ interface SettingsContentProps {
 function SettingsContent({
   meta,
   onUpdateField,
+  isAdmin,
   categories,
   tags,
   isLoadingCategories,
@@ -908,6 +911,17 @@ function SettingsContent({
           onChange={v => onUpdateField("ip_location", v)}
           placeholder="自动获取或手动填写"
         />
+        {isAdmin && (
+          <div className="sb-field">
+            <span className="sb-label">单文章自定义 JS</span>
+            <textarea
+              value={meta.custom_js}
+              onChange={e => onUpdateField("custom_js", e.target.value)}
+              placeholder="仅管理员可用。填写后会在该文章详情页执行。"
+              className="sb-input sb-textarea min-h-[120px] font-mono text-xs leading-relaxed"
+            />
+          </div>
+        )}
         <SbToggle
           label="文档模式"
           description="作为系列文档的一部分"
@@ -967,6 +981,7 @@ function SettingsContent({
 export function EditorSidebar({
   meta,
   onUpdateField,
+  isAdmin,
   categories,
   tags,
   isLoadingCategories,
@@ -981,6 +996,7 @@ export function EditorSidebar({
         <SettingsContent
           meta={meta}
           onUpdateField={onUpdateField}
+          isAdmin={isAdmin}
           categories={categories}
           tags={tags}
           isLoadingCategories={isLoadingCategories}

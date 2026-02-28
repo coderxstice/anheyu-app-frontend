@@ -4,7 +4,7 @@
  */
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import type { ArticleStatus, ArticleDetailForEdit, CreateArticleRequest } from "@/types/post-management";
 
 /** 文章元数据状态 */
@@ -33,6 +33,7 @@ export interface ArticleMeta {
   copyright_url: string;
   // 高级
   ip_location: string;
+  custom_js: string;
   is_doc: boolean;
   doc_series_id: string;
   doc_sort: number;
@@ -60,6 +61,7 @@ const DEFAULT_META: ArticleMeta = {
   copyright_author_href: "",
   copyright_url: "",
   ip_location: "",
+  custom_js: "",
   is_doc: false,
   doc_series_id: "",
   doc_sort: 0,
@@ -90,6 +92,7 @@ function initFromArticle(article: ArticleDetailForEdit): ArticleMeta {
     copyright_author_href: article.copyright_author_href || "",
     copyright_url: article.copyright_url || "",
     ip_location: article.ip_location || "",
+    custom_js: article.extra_config?.custom_js || "",
     is_doc: article.is_doc || false,
     doc_series_id: article.doc_series_id || "",
     doc_sort: article.doc_sort || 0,
@@ -97,15 +100,19 @@ function initFromArticle(article: ArticleDetailForEdit): ArticleMeta {
   };
 }
 
-export function useArticleMeta(article?: ArticleDetailForEdit | null) {
+export function useArticleMeta(article?: ArticleDetailForEdit | null, options?: { isAdmin?: boolean }) {
+  const isAdmin = options?.isAdmin ?? false;
   const [meta, setMeta] = useState<ArticleMeta>(article ? initFromArticle(article) : { ...DEFAULT_META });
   const [initialized, setInitialized] = useState(false);
+  const initialCustomJsRef = useRef(article?.extra_config?.custom_js || "");
 
   // 从文章数据初始化（仅首次）
   const initFromData = useCallback(
     (data: ArticleDetailForEdit) => {
       if (!initialized) {
-        setMeta(initFromArticle(data));
+        const nextMeta = initFromArticle(data);
+        setMeta(nextMeta);
+        initialCustomJsRef.current = nextMeta.custom_js;
         setInitialized(true);
       }
     },
@@ -147,8 +154,15 @@ export function useArticleMeta(article?: ArticleDetailForEdit | null) {
       doc_series_id: meta.doc_series_id || undefined,
       doc_sort: meta.doc_sort,
     };
+    const hasCustomJS = meta.custom_js.trim().length > 0;
+    const customJSChanged = meta.custom_js !== initialCustomJsRef.current;
+    if (isAdmin && (hasCustomJS || customJSChanged)) {
+      data.extra_config = {
+        custom_js: meta.custom_js,
+      };
+    }
     return data;
-  }, [meta]);
+  }, [isAdmin, meta]);
 
   return {
     meta,

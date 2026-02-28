@@ -5,7 +5,12 @@
 
 import { useQuery, useMutation, useQueryClient, queryOptions, keepPreviousData } from "@tanstack/react-query";
 import { postManagementApi } from "@/lib/api/post-management";
-import type { AdminArticleListParams, CreateArticleRequest, UpdateArticleRequest } from "@/types/post-management";
+import type {
+  AdminArticleListParams,
+  CreateArticleRequest,
+  UpdateArticleRequest,
+  ImportArticlesParams,
+} from "@/types/post-management";
 
 export const postManagementKeys = {
   all: ["post-management"] as const,
@@ -89,6 +94,17 @@ export function useDeleteArticle() {
 
   return useMutation({
     mutationFn: (id: string) => postManagementApi.deleteArticle(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: postManagementKeys.lists() });
+    },
+  });
+}
+
+export function useImportArticles() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (params: ImportArticlesParams) => postManagementApi.importArticles(params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: postManagementKeys.lists() });
     },

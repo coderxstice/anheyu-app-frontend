@@ -2,7 +2,7 @@
  * @Description:
  * @Author: 安知鱼
  * @Date: 2026-02-06 23:09:05
- * @LastEditTime: 2026-02-06 23:09:20
+ * @LastEditTime: 2026-02-27 18:28:03
  * @LastEditors: 安知鱼
  */
 /** 通用每页条数选项 */
@@ -81,5 +81,11 @@ export const ADMIN_EMPTY_TEXTS = {
     filterEmptyText: "没有匹配的商品",
     emptyText: "暂无商品",
     emptyHint: "点击「新增商品」创建第一件商品",
+  },
+  pages: {
+    filterEmptyText: "没有匹配的页面",
+    emptyText: "还没有自定义页面",
+    emptyHint: "点击「新建页面」创建隐私政策、关于等静态页面",
+    actionLabel: "新建页面",
   },
 } as const satisfies Record<string, TableEmptyTexts>;

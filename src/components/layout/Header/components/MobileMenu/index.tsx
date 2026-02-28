@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Moon, Sun, FileText, Clock, Type } from "lucide-react";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/hooks/use-theme";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import { friendsApi } from "@/lib/api/friends";
 
@@ -62,8 +62,9 @@ const mockTags = [
 ];
 
 export function MobileMenu({ isOpen, onClose, navConfig, menuConfig }: MobileMenuProps) {
-  const { theme, setTheme } = useTheme();
+  const { isDark, toggleTheme, mounted } = useTheme();
   const siteConfig = useSiteConfigStore(state => state.siteConfig);
+  const isDarkMode = mounted && isDark;
   // 菜单中 /travelling 项：跳转随机友链（对齐 anheyu-app articleStore.navigateToRandomLink）
   const navigateToRandomLink = useCallback(async () => {
     try {
@@ -75,8 +76,6 @@ export function MobileMenu({ isOpen, onClose, navConfig, menuConfig }: MobileMen
       console.error("获取随机友链失败:", error);
     }
   }, []);
-
-  const isDark = theme === "dark";
 
   // 站点数据
   const siteData = useMemo(() => {
@@ -190,8 +189,9 @@ export function MobileMenu({ isOpen, onClose, navConfig, menuConfig }: MobileMen
 
   // 切换主题
   const switchDarkMode = useCallback(() => {
-    setTheme(isDark ? "light" : "dark");
-  }, [isDark, setTheme]);
+    if (!mounted) return;
+    toggleTheme();
+  }, [mounted, toggleTheme]);
 
   // 处理内部链接点击
   const handleInternalLinkClick = useCallback(() => {
@@ -234,9 +234,9 @@ export function MobileMenu({ isOpen, onClose, navConfig, menuConfig }: MobileMen
         {/* 功能区域 */}
         <span className={styles.sidebarMenuItemTitle}>功能</span>
         <div className={styles.sidebarMenuItem}>
-          <div className={cn(styles.darkmodeSwitchButton, isDark && styles.isDark)} onClick={switchDarkMode}>
-            {isDark ? <Sun size={16} /> : <Moon size={16} />}
-            <span>{isDark ? "浅色模式" : "深色模式"}</span>
+          <div className={cn(styles.darkmodeSwitchButton, isDarkMode && styles.isDark)} onClick={switchDarkMode}>
+            {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+            <span>{isDarkMode ? "浅色模式" : "深色模式"}</span>
           </div>
         </div>
 
