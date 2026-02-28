@@ -146,9 +146,12 @@ export interface ImportArticlesParams {
 }
 
 export interface ImportArticlesResult {
-  imported: number;
-  skipped: number;
+  total_count: number;
+  success_count: number;
+  skipped_count: number;
+  failed_count: number;
   errors: string[];
+  created_ids?: string[];
 }
 
 // ===================================

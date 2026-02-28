@@ -619,14 +619,69 @@
 }
 
 /* 列表样式 */
-.postContent :global(ul),
-.postContent :global(ol) {
-  padding-left: 1.5em;
+.postContent :global(ul:not([data-type="taskList"]):not(:has(li.task-list-item))) {
+  list-style: none;
+  padding-left: 0;
   margin: 1em 0;
+}
+
+.postContent :global(ul:not([data-type="taskList"]):not(:has(li.task-list-item)) li) {
+  position: relative;
+  padding-left: 1.2em;
+}
+
+.postContent :global(ul:not([data-type="taskList"]):not(:has(li.task-list-item)) li::before) {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.85em;
+  width: 0.6em;
+  height: 0.6em;
+  margin-top: -0.3em;
+  border: 2px solid var(--primary);
+  border-radius: 50%;
+  background: transparent;
+}
+
+.postContent :global(ol) {
+  list-style: none;
+  padding-left: 0;
+  margin: 1em 0;
+  counter-reset: ol-counter;
+}
+
+.postContent :global(ol li) {
+  position: relative;
+  padding-left: 1.75em;
+  counter-increment: ol-counter;
+}
+
+.postContent :global(ol li::before) {
+  content: counter(ol-counter);
+  position: absolute;
+  left: 0.05em;
+  top: 1.05em;
+  margin-top: -0.675em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35em;
+  height: 1.35em;
+  font-size: 0.8em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  background: var(--primary);
+  border-radius: 50%;
+}
+
+.postContent :global(ol ol) {
+  counter-reset: ol-counter;
 }
 
 .postContent :global(li) {
   margin: 0.5em 0;
+  line-height: 1.7;
 }
 
 /* 表格样式 */
