@@ -70,9 +70,9 @@ export function HeaderRight({
     window.dispatchEvent(new CustomEvent("frontend-open-search"));
   }, []);
 
-  // 随机文章
+  // 随机文章：先进入 /random-post，由该页请求随机文章并重定向到 /posts/:id 或 /doc/:id
   const handleRandomArticle = useCallback(() => {
-    router.push("/posts");
+    router.push("/random-post");
   }, [router]);
 
   // 切换移动端菜单

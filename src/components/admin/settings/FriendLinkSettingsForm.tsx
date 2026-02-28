@@ -299,14 +299,14 @@ export function FriendLinkSettingsForm({ values, onChange, loading }: FriendLink
       {/* 审核邮件 */}
       <SettingsSection
         title="审核邮件"
-        description="审核通过或拒绝后，可向申请者发送邮件。模板中可使用站点名、友链页地址等变量。"
+        description="审核通过或拒绝后，可向申请者发送邮件。模板占位符统一使用 Go 模板变量（如 {{.SITE_NAME}}）。"
       >
         <SettingsHelpPanel
           title="审核邮件说明"
           steps={[
             { title: "启用审核邮件", description: "不启用时不会向申请者发送审核结果邮件。" },
             { title: "配置主题与模板", description: "分别配置通过、拒绝的邮件主题和 HTML 模板。" },
-            { title: "使用占位符", description: "模板中可使用 {{site_name}}、{{flink_url}} 等变量，由后端渲染替换。" },
+            { title: "使用占位符", description: "模板中可使用 {{.SITE_NAME}}、{{.LINK_URL}}、{{.REJECT_REASON}} 等变量，由后端渲染替换。" },
           ]}
           sections={[
             {
@@ -331,7 +331,7 @@ export function FriendLinkSettingsForm({ values, onChange, loading }: FriendLink
           <>
             <FormInput
               label="通过邮件主题"
-              placeholder="友链申请已通过"
+              placeholder="【{{.SITE_NAME}}】友链申请已通过"
               value={values[KEY_FRIEND_LINK_REVIEW_MAIL_SUBJECT_APPROVED]}
               onValueChange={v => onChange(KEY_FRIEND_LINK_REVIEW_MAIL_SUBJECT_APPROVED, v)}
             />
@@ -348,14 +348,18 @@ export function FriendLinkSettingsForm({ values, onChange, loading }: FriendLink
               title="可用占位符"
               subtitle="常见变量，点击可复制；以实际后端为准"
               items={[
-                { variable: "{{site_name}}", description: "站点名称" },
-                { variable: "{{flink_url}}", description: "友链页地址" },
+                { variable: "{{.SITE_NAME}}", description: "站点名称" },
+                { variable: "{{.SITE_URL}}", description: "站点地址" },
+                { variable: "{{.LINK_NAME}}", description: "申请站点名称" },
+                { variable: "{{.LINK_URL}}", description: "申请站点地址" },
+                { variable: "{{.LINK_DESCRIPTION}}", description: "申请站点描述" },
+                { variable: "{{.REJECT_REASON}}", description: "拒绝原因（仅拒绝邮件可用）" },
               ]}
               className="mt-2"
             />
             <FormInput
               label="拒绝邮件主题"
-              placeholder="友链申请未通过"
+              placeholder="【{{.SITE_NAME}}】友链申请未通过"
               value={values[KEY_FRIEND_LINK_REVIEW_MAIL_SUBJECT_REJECTED]}
               onValueChange={v => onChange(KEY_FRIEND_LINK_REVIEW_MAIL_SUBJECT_REJECTED, v)}
             />

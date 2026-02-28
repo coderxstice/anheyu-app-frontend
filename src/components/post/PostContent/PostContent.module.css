@@ -551,14 +551,9 @@
   padding: 0.5rem 0.8rem;
   margin: 1rem 0;
   color: var(--muted-foreground);
-  background-color: #f1f3f8;
-  border: 1px solid #e3e8f7;
+  background-color: var(--muted);
+  border: 1px solid var(--border);
   border-radius: 8px;
-}
-
-:root.dark .postContent :global(blockquote) {
-  background-color: #21232a;
-  border-color: #3d3d3f;
 }
 
 .postContent :global(blockquote p) {

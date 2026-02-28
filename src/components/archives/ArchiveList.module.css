@@ -145,21 +145,44 @@
 }
 
 .articleMetaTags {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 2px 8px;
   width: fit-content;
   overflow: hidden;
+  line-height: 1;
   color: var(--anzhiyu-secondtext);
   text-overflow: ellipsis;
-  border-radius: 8px;
-  transition: color 0.3s;
+  white-space: nowrap;
+  background: var(--anzhiyu-secondbg);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  transition:
+    color 0.3s,
+    background 0.3s,
+    border-color 0.3s;
 }
 
 .articleMetaTags:hover {
   color: var(--anzhiyu-main);
+  border-color: var(--anzhiyu-main);
 }
 
 .tagsPunctuation {
-  margin-right: 1px;
+  display: inline-flex;
+  gap: 0.2rem;
+  align-items: center;
+  margin-right: 0;
   font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.tagsPunctuation svg {
+  display: inline-block;
+  flex-shrink: 0;
+  font-size: 0.75rem;
 }
 
 /* 加载状态 */

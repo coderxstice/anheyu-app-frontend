@@ -57,6 +57,67 @@ const DEFAULT_POST_SUBSCRIBE_MAIL_TEMPLATE = `<p>你好，</p>
 <p><a href="{{post_link}}" target="_blank">点击查看文章</a></p>
 <p>如果你不想再接收通知，可点击：<a href="{{unsubscribe_link}}" target="_blank">取消订阅</a></p>
 <p>— {{site_name}}</p>`;
+
+/** 友链审核邮件默认主题（与后端 email_service 留空兜底一致） */
+const DEFAULT_FRIEND_LINK_REVIEW_MAIL_SUBJECT_APPROVED = "【{{.SITE_NAME}}】友链申请已通过";
+const DEFAULT_FRIEND_LINK_REVIEW_MAIL_SUBJECT_REJECTED = "【{{.SITE_NAME}}】友链申请未通过";
+
+/** 友链审核通过邮件默认模板（与后端 email_service 留空兜底一致） */
+const DEFAULT_FRIEND_LINK_REVIEW_MAIL_TEMPLATE_APPROVED = `<div style="background-color:#f4f5f7;padding:30px 0;">
+	<div style="max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+		<div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:30px;text-align:center;">
+			<h1 style="color:#fff;margin:0;font-size:24px;">友链申请通过通知</h1>
+		</div>
+		<div style="padding:30px;">
+			<p style="font-size:16px;line-height:1.8;color:#333;">亲爱的 <strong>{{.LINK_NAME}}</strong> 站长，您好！</p>
+			<p style="font-size:14px;line-height:1.8;color:#666;">恭喜您！您在 <a href="{{.SITE_URL}}" style="color:#667eea;text-decoration:none;">{{.SITE_NAME}}</a> 提交的友链申请已通过审核。</p>
+			<div style="background:#f8f9fa;padding:20px;border-radius:6px;margin:20px 0;">
+				<h3 style="margin:0 0 15px 0;color:#333;font-size:16px;">友链信息</h3>
+				<p style="margin:8px 0;color:#666;"><strong>网站名称：</strong>{{.LINK_NAME}}</p>
+				<p style="margin:8px 0;color:#666;"><strong>网站地址：</strong><a href="{{.LINK_URL}}" style="color:#667eea;">{{.LINK_URL}}</a></p>
+				<p style="margin:8px 0;color:#666;"><strong>网站描述：</strong>{{.LINK_DESCRIPTION}}</p>
+			</div>
+			<p style="font-size:14px;line-height:1.8;color:#666;">您的网站现已显示在我们的友链页面中，感谢您的支持与分享！</p>
+			<p style="font-size:14px;line-height:1.8;color:#666;">期待与您建立长期的友好关系。</p>
+		</div>
+		<div style="background:#f8f9fa;padding:20px;text-align:center;color:#999;font-size:12px;">
+			<p style="margin:5px 0;">本邮件由系统自动发送，请勿直接回复</p>
+			<p style="margin:5px 0;">© {{.SITE_NAME}}</p>
+		</div>
+	</div>
+</div>`;
+
+/** 友链审核拒绝邮件默认模板（与后端 email_service 留空兜底一致） */
+const DEFAULT_FRIEND_LINK_REVIEW_MAIL_TEMPLATE_REJECTED = `<div style="background-color:#f4f5f7;padding:30px 0;">
+	<div style="max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+		<div style="background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);padding:30px;text-align:center;">
+			<h1 style="color:#fff;margin:0;font-size:24px;">友链申请未通过通知</h1>
+		</div>
+		<div style="padding:30px;">
+			<p style="font-size:16px;line-height:1.8;color:#333;">亲爱的 <strong>{{.LINK_NAME}}</strong> 站长，您好！</p>
+			<p style="font-size:14px;line-height:1.8;color:#666;">很遗憾地通知您，您在 <a href="{{.SITE_URL}}" style="color:#f5576c;text-decoration:none;">{{.SITE_NAME}}</a> 提交的友链申请未能通过审核。</p>
+			<div style="background:#fff3f3;padding:20px;border-radius:6px;margin:20px 0;border-left:4px solid #f5576c;">
+				<h3 style="margin:0 0 15px 0;color:#333;font-size:16px;">申请信息</h3>
+				<p style="margin:8px 0;color:#666;"><strong>网站名称：</strong>{{.LINK_NAME}}</p>
+				<p style="margin:8px 0;color:#666;"><strong>网站地址：</strong><a href="{{.LINK_URL}}" style="color:#f5576c;">{{.LINK_URL}}</a></p>
+				<p style="margin:8px 0;color:#666;"><strong>网站描述：</strong>{{.LINK_DESCRIPTION}}</p>
+			</div>
+			{{if .REJECT_REASON}}
+			<div style="background:#fff3f3;padding:20px;border-radius:6px;margin:20px 0;border-left:4px solid #f5576c;">
+				<h3 style="margin:0 0 15px 0;color:#333;font-size:16px;">拒绝原因</h3>
+				<p style="margin:8px 0;color:#666;line-height:1.6;">{{.REJECT_REASON}}</p>
+			</div>
+			{{else}}
+			<p style="font-size:14px;line-height:1.8;color:#666;">可能的原因包括：网站内容不符合要求、网站无法正常访问、未添加本站友链等。</p>
+			{{end}}
+			<p style="font-size:14px;line-height:1.8;color:#666;">如有疑问，欢迎与我们联系。</p>
+		</div>
+		<div style="background:#f8f9fa;padding:20px;text-align:center;color:#999;font-size:12px;">
+			<p style="margin:5px 0;">本邮件由系统自动发送，请勿直接回复</p>
+			<p style="margin:5px 0;">© {{.SITE_NAME}}</p>
+		</div>
+	</div>
+</div>`;
 /**
  * 后端返回空字符串时，前端需要回显默认值的配置键白名单。
  * 这些字段在后端常以空值表示“使用系统默认模板”。
@@ -64,6 +125,10 @@ const DEFAULT_POST_SUBSCRIBE_MAIL_TEMPLATE = `<p>你好，</p>
 const EMPTY_STRING_DEFAULT_KEYS = new Set<string>([
   K.KEY_ARTICLE_REVIEW_MAIL_TEMPLATE_APPROVED,
   K.KEY_ARTICLE_REVIEW_MAIL_TEMPLATE_REJECTED,
+  K.KEY_FRIEND_LINK_REVIEW_MAIL_SUBJECT_APPROVED,
+  K.KEY_FRIEND_LINK_REVIEW_MAIL_SUBJECT_REJECTED,
+  K.KEY_FRIEND_LINK_REVIEW_MAIL_TEMPLATE_APPROVED,
+  K.KEY_FRIEND_LINK_REVIEW_MAIL_TEMPLATE_REJECTED,
   K.KEY_POST_COPYRIGHT_ORIGINAL,
   K.KEY_POST_COPYRIGHT_REPRINT_WITH_URL,
   K.KEY_POST_COPYRIGHT_REPRINT_NO_URL,
@@ -472,7 +537,7 @@ const categoryDescriptors: Record<SettingCategoryId, SettingDescriptor[]> = {
     { backendKey: K.KEY_POST_DEFAULT_COVER, type: "string" },
     { backendKey: K.KEY_POST_DOUBLE_COLUMN, type: "boolean" },
     { backendKey: K.KEY_POST_PAGE_SIZE, type: "number", defaultValue: "12" },
-    { backendKey: K.KEY_POST_ENABLE_PRIMARY_COLOR, type: "boolean" },
+    { backendKey: K.KEY_POST_ENABLE_PRIMARY_COLOR, type: "boolean", defaultValue: "false" },
     { backendKey: K.KEY_POST_404_IMAGE, type: "string" },
     { backendKey: K.KEY_POST_REWARD_ENABLE, type: "boolean" },
     { backendKey: K.KEY_POST_REWARD_WECHAT_QR, type: "string" },
@@ -637,10 +702,26 @@ const categoryDescriptors: Record<SettingCategoryId, SettingDescriptor[]> = {
     { backendKey: K.KEY_FRIEND_LINK_MAIL_SUBJECT_ADMIN, type: "string" },
     { backendKey: K.KEY_FRIEND_LINK_MAIL_TEMPLATE_ADMIN, type: "code" },
     { backendKey: K.KEY_FRIEND_LINK_REVIEW_MAIL_ENABLE, type: "boolean" },
-    { backendKey: K.KEY_FRIEND_LINK_REVIEW_MAIL_SUBJECT_APPROVED, type: "string" },
-    { backendKey: K.KEY_FRIEND_LINK_REVIEW_MAIL_TEMPLATE_APPROVED, type: "code" },
-    { backendKey: K.KEY_FRIEND_LINK_REVIEW_MAIL_SUBJECT_REJECTED, type: "string" },
-    { backendKey: K.KEY_FRIEND_LINK_REVIEW_MAIL_TEMPLATE_REJECTED, type: "code" },
+    {
+      backendKey: K.KEY_FRIEND_LINK_REVIEW_MAIL_SUBJECT_APPROVED,
+      type: "string",
+      defaultValue: DEFAULT_FRIEND_LINK_REVIEW_MAIL_SUBJECT_APPROVED,
+    },
+    {
+      backendKey: K.KEY_FRIEND_LINK_REVIEW_MAIL_TEMPLATE_APPROVED,
+      type: "code",
+      defaultValue: DEFAULT_FRIEND_LINK_REVIEW_MAIL_TEMPLATE_APPROVED,
+    },
+    {
+      backendKey: K.KEY_FRIEND_LINK_REVIEW_MAIL_SUBJECT_REJECTED,
+      type: "string",
+      defaultValue: DEFAULT_FRIEND_LINK_REVIEW_MAIL_SUBJECT_REJECTED,
+    },
+    {
+      backendKey: K.KEY_FRIEND_LINK_REVIEW_MAIL_TEMPLATE_REJECTED,
+      type: "code",
+      defaultValue: DEFAULT_FRIEND_LINK_REVIEW_MAIL_TEMPLATE_REJECTED,
+    },
   ],
   "pages-about": [
     { backendKey: K.KEY_ABOUT_NAME, type: "string" },

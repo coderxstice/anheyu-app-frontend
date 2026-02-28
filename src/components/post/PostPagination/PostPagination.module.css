@@ -44,7 +44,7 @@
 }
 
 .paginationItem:hover {
-  background: var(--primary);
+  background: var(--anzhiyu-main, var(--primary));
 }
 
 .paginationItem:hover .label,
