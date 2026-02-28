@@ -119,9 +119,7 @@
 
 .randomFriendsBtn svg {
   display: inline-block;
-  transition:
-    transform 0.3s ease-out,
-    opacity 0.3s ease-out;
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
 }
 
 .randomFriendsBtn .isAnimating {
@@ -284,10 +282,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  transition:
-    background-color 0.3s,
-    transform 0.2s ease,
-    box-shadow 0.3s;
+  transition: background-color 0.3s, transform 0.2s ease, box-shadow 0.3s;
 }
 
 .statusText {

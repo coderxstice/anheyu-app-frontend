@@ -4,7 +4,6 @@ import {
   forwardRef,
   useCallback,
   useEffect,
-  useId,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -91,11 +90,13 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
   const emojiPickerRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
 
-  const contentId = useId();
-  const nicknameId = useId();
-  const emailId = useId();
-  const websiteId = useId();
-  const emojiPanelId = useId();
+  // 使用基于 props 的确定性 ID，避免 useId() 在 SSR/客户端 hydration 时不一致
+  const formKey = [targetPath, parentId ?? "root", replyToId ?? "main"].join("_").replace(/[^a-zA-Z0-9-_]/g, "_");
+  const contentId = useMemo(() => `comment-content-${formKey}`, [formKey]);
+  const nicknameId = useMemo(() => `comment-nickname-${formKey}`, [formKey]);
+  const emailId = useMemo(() => `comment-email-${formKey}`, [formKey]);
+  const websiteId = useMemo(() => `comment-website-${formKey}`, [formKey]);
+  const emojiPanelId = useMemo(() => `comment-emoji-panel-${formKey}`, [formKey]);
 
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");

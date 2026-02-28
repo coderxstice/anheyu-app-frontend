@@ -564,6 +564,7 @@ const categoryDescriptors: Record<SettingCategoryId, SettingDescriptor[]> = {
   ],
   "user-comment": [
     { backendKey: K.KEY_COMMENT_ENABLE, type: "boolean", defaultValue: "true" },
+    { backendKey: K.KEY_COMMENT_BARRAGE_ENABLE, type: "boolean", defaultValue: "true" },
     { backendKey: K.KEY_COMMENT_LOGIN_REQUIRED, type: "boolean" },
     { backendKey: K.KEY_COMMENT_PAGE_SIZE, type: "number", defaultValue: "10" },
     { backendKey: K.KEY_COMMENT_MASTER_TAG, type: "string", defaultValue: "博主" },

@@ -360,6 +360,7 @@ export interface SiteConfigData {
   // 评论配置
   comment?: {
     enable?: boolean | string;
+    barrage_enable?: boolean | string;
     page_size?: number | string;
     placeholder?: string;
     emoji_cdn?: string;

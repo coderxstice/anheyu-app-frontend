@@ -28,6 +28,8 @@ export function Console({ isOpen, onClose }: ConsoleProps) {
   const siteConfig = useSiteConfigStore(state => state.siteConfig);
   const isShortcutsEnabled = useUiStore(state => state.isShortcutsEnabled);
   const toggleShortcuts = useUiStore(state => state.toggleShortcuts);
+  const isCommentBarrageVisible = useUiStore(state => state.isCommentBarrageVisible);
+  const toggleCommentBarrage = useUiStore(state => state.toggleCommentBarrage);
 
   const isDarkMode = mounted && isDark;
 
@@ -262,14 +264,27 @@ export function Console({ isOpen, onClose }: ConsoleProps) {
           </Tooltip>
 
           <Tooltip
-            content="热评开关"
+            content={isCommentBarrageVisible ? "关闭热评" : "显示热评"}
             placement="top"
             delay={300}
             closeDelay={0}
             classNames={{ content: "custom-tooltip-content" }}
           >
-            <div className={styles.consoleBtnItem}>
-              <button className={styles.commentBarrage} aria-label="热评开关">
+            <div className={cn(styles.consoleBtnItem, isCommentBarrageVisible && styles.on)}>
+              <button
+                type="button"
+                className={styles.commentBarrage}
+                aria-label="热评开关"
+                aria-pressed={isCommentBarrageVisible}
+                onClick={() => {
+                  toggleCommentBarrage();
+                  addToast({
+                    title: isCommentBarrageVisible ? "热评弹幕已关闭" : "热评弹幕已开启",
+                    color: isCommentBarrageVisible ? "default" : "success",
+                    timeout: 2000,
+                  });
+                }}
+              >
                 <Icon icon="ri:chat-1-fill" width={24} height={24} />
               </button>
             </div>

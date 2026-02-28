@@ -12,6 +12,7 @@ import { SettingsSection, SettingsFieldGroup } from "./SettingsSection";
 import { Spinner } from "@/components/ui/spinner";
 import {
   KEY_COMMENT_ENABLE,
+  KEY_COMMENT_BARRAGE_ENABLE,
   KEY_COMMENT_LOGIN_REQUIRED,
   KEY_COMMENT_PAGE_SIZE,
   KEY_COMMENT_MASTER_TAG,
@@ -100,6 +101,12 @@ export function CommentSettingsForm({ values, onChange, loading }: CommentSettin
           description="是否启用评论功能"
           checked={values[KEY_COMMENT_ENABLE] === "true"}
           onCheckedChange={v => onChange(KEY_COMMENT_ENABLE, String(v))}
+        />
+        <FormSwitch
+          label="评论弹幕（热评）"
+          description="文章详情页右下角是否显示热评弹幕轮播，访客仍可在页面内单独关闭"
+          checked={values[KEY_COMMENT_BARRAGE_ENABLE] === "true"}
+          onCheckedChange={v => onChange(KEY_COMMENT_BARRAGE_ENABLE, String(v))}
         />
         <FormSwitch
           label="登录后评论"
