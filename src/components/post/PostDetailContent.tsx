@@ -16,7 +16,7 @@ import Link from "next/link";
 import { PostHeader } from "./PostHeader";
 import { PostContent } from "./PostContent";
 import { PostCopyright } from "./PostCopyright";
-import { PostPagination } from "./PostPagination";
+import { PostPaginationFloat } from "./PostPaginationFloat";
 import { CommentSection } from "./Comment";
 import { CommentBarrage } from "./CommentBarrage";
 import { PostSidebar } from "./Sidebar";
@@ -139,9 +139,6 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
             {/* 版权信息 */}
             <PostCopyright article={article} />
 
-            {/* 上下篇导航 */}
-            <PostPagination prevArticle={article.prev_article} nextArticle={article.next_article} />
-
             {/* 评论区 */}
             <CommentSection targetTitle={article.title} className={styles.commentSection} />
           </div>
@@ -160,7 +157,14 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
         </Link>
       </div>
 
-      {/* 右下角热评弹幕（受系统设置与用户开关双重控制） */}
+      {/* 右下角：上一篇/下一篇浮动卡片 + 热评弹幕（受系统设置与用户开关双重控制） */}
+      <PostPaginationFloat
+        prevArticle={article.prev_article}
+        nextArticle={article.next_article}
+        commentBarrageEnabled={
+          isCommentEnabled && isCommentBarrageEnabledBySite && isCommentBarrageVisible
+        }
+      />
       {isCommentEnabled && isCommentBarrageEnabledBySite && isCommentBarrageVisible && (
         <CommentBarrage
           gravatarUrl={siteConfig?.GRAVATAR_URL || "https://cravatar.cn/"}
