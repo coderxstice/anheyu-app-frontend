@@ -557,84 +557,122 @@
 
 /* 未登录时的登录引导面板 */
 .loginPanel {
-  width: 240px;
-  padding: 20px;
+  width: 272px;
+  padding: 22px 20px 18px;
+  background:
+    radial-gradient(circle at 50% -20%, var(--primary-op-light, rgba(99, 102, 241, 0.12)) 0%, transparent 58%),
+    var(--card);
 }
 
 .loginHeader {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
   text-align: center;
 }
 
-.loginIcon {
+.loginIconWrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   margin-bottom: 12px;
-  color: var(--primary);
   background: var(--primary-op, rgba(99, 102, 241, 0.1));
+  border: 1px solid var(--border);
   border-radius: 50%;
+  box-shadow: 0 8px 20px -16px var(--primary-op-deep, rgba(66, 89, 239, 0.5));
+}
+
+.loginIcon {
+  color: var(--primary);
 }
 
 .loginTitle {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.2px;
   color: var(--foreground);
 }
 
 .loginDesc {
-  margin-top: 4px;
-  font-size: 13px;
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.5;
   color: var(--muted-foreground);
 }
 
 .loginActions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .loginBtn,
 .registerBtn {
   display: flex;
-  gap: 8px;
+  gap: 9px;
   align-items: center;
   justify-content: center;
-  padding: 10px 16px;
-  font-size: 14px;
-  font-weight: 500;
+  min-height: 46px;
+  padding: 0 16px;
+  font-size: 15px;
+  font-weight: 600;
   text-decoration: none;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+.loginBtn:focus-visible,
+.registerBtn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .loginBtn {
   color: var(--primary-foreground);
   background: var(--primary);
+  box-shadow: 0 12px 28px -18px var(--primary-op-deep, rgba(66, 89, 239, 0.55));
 }
 
 .loginBtn:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
+.loginBtn:active {
+  transform: translateY(0);
 }
 
 .registerBtn {
   color: var(--foreground);
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--muted);
+  border-color: var(--border);
 }
 
 :global(html.dark) .registerBtn {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--secondary);
 }
 
 .registerBtn:hover {
-  background: rgba(0, 0, 0, 0.1);
+  background: var(--card);
+  border-color: var(--primary-op-deep, rgba(66, 89, 239, 0.35));
+  transform: translateY(-1px);
 }
 
 :global(html.dark) .registerBtn:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--card);
+}
+
+.registerBtn:active {
+  transform: translateY(0);
 }

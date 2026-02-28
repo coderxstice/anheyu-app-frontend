@@ -58,6 +58,13 @@ export const adminMenuConfig: AdminMenuGroup[] = [
         roles: ["admin", "user"],
       },
       {
+        id: "page-management",
+        label: "页面管理",
+        href: "/admin/page-management",
+        icon: "ri:pages-line",
+        roles: ["admin"],
+      },
+      {
         id: "doc-series",
         label: "文档系列",
         href: "/admin/doc-series",

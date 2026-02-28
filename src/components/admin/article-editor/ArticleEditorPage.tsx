@@ -15,6 +15,7 @@ import { useAutoSave } from "./use-auto-save";
 import { useArticleForEdit, useCreateArticle, useUpdateArticle } from "@/hooks/queries/use-post-management";
 import { processHtmlForSave } from "@/lib/content-processor";
 import { articleApi } from "@/lib/api/article";
+import { useAuthStore } from "@/store/auth-store";
 
 import type { Editor } from "@tiptap/react";
 
@@ -62,6 +63,7 @@ const turndownService = new TurndownService({
 export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
   const router = useRouter();
   const isEditMode = !!articleId;
+  const isAdmin = useAuthStore(state => state.user?.userGroupID === 1 || state.roles.includes("1"));
 
   // 编辑模式：加载文章数据
   const { data: article, isLoading: isLoadingArticle } = useArticleForEdit(articleId ?? "", { enabled: isEditMode });
@@ -74,7 +76,7 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // 文章元数据
-  const { meta, updateField, initFromData, getSubmitData } = useArticleMeta();
+  const { meta, updateField, initFromData, getSubmitData } = useArticleMeta(undefined, { isAdmin });
 
   // Tiptap 编辑器实例
   const editor = useArticleEditor({
@@ -255,6 +257,7 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
             <EditorSidebar
               meta={meta}
               onUpdateField={updateField}
+              isAdmin={isAdmin}
               categories={categories}
               tags={tags}
               isLoadingCategories={isLoadingCategories}

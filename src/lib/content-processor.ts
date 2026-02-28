@@ -25,6 +25,32 @@ export function processHtmlForSave(html: string): string {
     }
   });
 
+  // 1.1 统一表头结构：当首行为 th 且缺少 thead 时，自动提升为 thead
+  doc.querySelectorAll("table").forEach(table => {
+    if (table.querySelector("thead")) return;
+
+    const tbody = table.querySelector("tbody");
+    const firstRow =
+      tbody?.querySelector("tr") ?? Array.from(table.children).find(el => el.tagName.toLowerCase() === "tr");
+
+    if (!firstRow) return;
+
+    const cells = Array.from(firstRow.children);
+    if (cells.length === 0) return;
+
+    const isHeaderRow = cells.every(cell => cell.tagName.toLowerCase() === "th");
+    if (!isHeaderRow) return;
+
+    const thead = document.createElement("thead");
+    thead.appendChild(firstRow);
+
+    if (tbody && tbody.parentNode === table) {
+      table.insertBefore(thead, tbody);
+    } else {
+      table.insertBefore(thead, table.firstChild);
+    }
+  });
+
   // 2. 图片懒加载：使用浏览器原生 loading="lazy"
   //    不再将 src 替换为占位图（旧方案依赖 IntersectionObserver 存在 SSR 水合时序问题）
   doc.querySelectorAll("img").forEach(img => {

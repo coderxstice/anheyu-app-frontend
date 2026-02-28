@@ -7,11 +7,11 @@
  */
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useTheme } from "next-themes";
 import { Icon } from "@iconify/react";
 import { addToast } from "@heroui/react";
 import { useUiStore } from "@/store/ui-store";
 import { useSiteConfigStore } from "@/store/site-config-store";
+import { useTheme } from "@/hooks/use-theme";
 import styles from "./styles.module.css";
 
 /**
@@ -27,7 +27,7 @@ const safeClipboardWrite = (text: string, successMsg: string) => {
 export function RightMenu() {
   const router = useRouter();
   const pathname = usePathname();
-  const { theme, setTheme } = useTheme();
+  const { isDark, toggleTheme, mounted } = useTheme();
 
   const useCustomContextMenu = useUiStore(s => s.useCustomContextMenu);
   const isCommentBarrageVisible = useUiStore(s => s.isCommentBarrageVisible);
@@ -48,7 +48,7 @@ export function RightMenu() {
   const menuRef = useRef<HTMLDivElement>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isVisibleRef = useRef(false);
-  const isDark = theme === "dark";
+  const isDarkMode = mounted && isDark;
 
   // 使用 ref 稳定引用，避免事件监听器频繁重注册
   const stateRef = useRef({
@@ -301,8 +301,9 @@ export function RightMenu() {
     hideMenu();
   };
 
-  const toggleTheme = () => {
-    setTheme(isDark ? "light" : "dark");
+  const handleThemeToggle = () => {
+    if (!mounted) return;
+    toggleTheme();
     hideMenu();
   };
 
@@ -432,9 +433,9 @@ export function RightMenu() {
           <Icon icon="ri:file-copy-line" />
           <span>复制地址</span>
         </div>
-        <div className={styles.menuItem} onClick={toggleTheme}>
+        <div className={styles.menuItem} onClick={handleThemeToggle}>
           <Icon icon="ri:contrast-2-line" />
-          <span>{isDark ? "浅色模式" : "深色模式"}</span>
+          <span>{isDarkMode ? "浅色模式" : "深色模式"}</span>
         </div>
         {hasCommentSection && (
           <div className={styles.menuItem} onClick={handleToggleCommentBarrage}>

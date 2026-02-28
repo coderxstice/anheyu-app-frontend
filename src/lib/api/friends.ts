@@ -28,10 +28,6 @@ import type {
   ApplyLinkRequest,
   CheckLinkExistsResponse,
   LinkApplicationsParams,
-  RandomPostData,
-  MomentsListData,
-  LinkMomentsData,
-  MomentsSortType,
 } from "@/types/friends";
 
 export const friendsApi = {
@@ -239,7 +235,7 @@ export const friendsApi = {
   async importLinks(data: ImportLinksRequest): Promise<ImportLinksResponse> {
     const response = await apiClient.post<ImportLinksResponse>("/api/links/import", data);
 
-    if (response.code === 200 && response.data) {
+    if (response.code >= 200 && response.code < 300 && response.data) {
       return response.data;
     }
 

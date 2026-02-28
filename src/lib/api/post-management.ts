@@ -10,6 +10,8 @@ import type {
   AdminArticleListResponse,
   CreateArticleRequest,
   UpdateArticleRequest,
+  ImportArticlesParams,
+  ImportArticlesResult,
   ArticleDetailForEdit,
   ArticleHistoryListResponse,
   ArticleHistoryDetail,
@@ -132,6 +134,46 @@ export const postManagementApi = {
     }
 
     throw new Error(response.message || "上传图片失败");
+  },
+
+  /**
+   * 导入文章
+   * POST /api/articles/import
+   */
+  async importArticles(params: ImportArticlesParams): Promise<ImportArticlesResult> {
+    const formData = new FormData();
+    formData.append("file", params.file);
+    if (params.create_categories !== undefined) {
+      formData.append("create_categories", String(params.create_categories));
+    }
+    if (params.create_tags !== undefined) {
+      formData.append("create_tags", String(params.create_tags));
+    }
+    if (params.skip_existing !== undefined) {
+      formData.append("skip_existing", String(params.skip_existing));
+    }
+    if (params.default_status) {
+      formData.append("default_status", params.default_status);
+    }
+    if (params.import_paid_content !== undefined) {
+      formData.append("import_paid_content", String(params.import_paid_content));
+    }
+    if (params.import_password_content !== undefined) {
+      formData.append("import_password_content", String(params.import_password_content));
+    }
+    if (params.import_full_text_hidden !== undefined) {
+      formData.append("import_full_text_hidden", String(params.import_full_text_hidden));
+    }
+
+    const response = await apiClient.post<ImportArticlesResult>("/api/articles/import", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    if (response.code === 200 && response.data) {
+      return response.data;
+    }
+
+    throw new Error(response.message || "导入文章失败");
   },
 
   /**

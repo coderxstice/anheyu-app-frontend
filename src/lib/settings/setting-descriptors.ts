@@ -231,6 +231,37 @@ function canonicalizeEquipmentListJson(raw: string | undefined): string | null {
 }
 
 /**
+ * JSON 规范化（通用）：递归排序对象键后序列化，忽略格式化差异（缩进/换行）与对象键顺序差异。
+ * 数组顺序保持不变（数组顺序有业务意义）。
+ */
+function canonicalizeJsonForCompare(raw: string | undefined): string | null {
+  if (!raw || raw.trim() === "") return "";
+
+  function sortObjectKeys(value: unknown): unknown {
+    if (Array.isArray(value)) {
+      return value.map(sortObjectKeys);
+    }
+    if (value && typeof value === "object") {
+      const obj = value as Record<string, unknown>;
+      const sortedKeys = Object.keys(obj).sort();
+      const normalized: Record<string, unknown> = {};
+      for (const key of sortedKeys) {
+        normalized[key] = sortObjectKeys(obj[key]);
+      }
+      return normalized;
+    }
+    return value;
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    return JSON.stringify(sortObjectKeys(parsed));
+  } catch {
+    return null;
+  }
+}
+
+/**
  * 规范化字符串再比较：统一换行符为 \n 并 trim，避免后端 \r\n/尾随空格与表单回传不一致导致误判 dirty
  */
 function normalizeStringForCompare(s: unknown): string {
@@ -314,6 +345,12 @@ export function getChangedValues(
     if (desc?.type === "json" && key === K.KEY_EQUIPMENT_LIST) {
       const canonCur = canonicalizeEquipmentListJson(cur);
       const canonOrig = canonicalizeEquipmentListJson(orig);
+      if (canonCur != null && canonOrig != null && canonCur === canonOrig) continue;
+    }
+    // json 类型（通用）：按语义比较，避免拖拽/编辑后格式化差异导致误判 dirty
+    if (desc?.type === "json") {
+      const canonCur = canonicalizeJsonForCompare(cur);
+      const canonOrig = canonicalizeJsonForCompare(orig);
       if (canonCur != null && canonOrig != null && canonCur === canonOrig) continue;
     }
     changed[key] = cur;

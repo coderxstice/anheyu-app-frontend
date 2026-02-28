@@ -23,6 +23,49 @@ interface CardTocProps {
   collapseMode?: boolean;
 }
 
+const HEADING_SELECTOR = "h1, h2, h3, h4, h5, h6";
+const POST_CONTENT_SELECTOR = '[data-post-content="true"]';
+
+function getPostContentHeadings(): HTMLElement[] {
+  if (typeof window === "undefined") return [];
+
+  const postContent = document.querySelector(POST_CONTENT_SELECTOR);
+  if (!postContent) return [];
+
+  return Array.from(postContent.querySelectorAll(HEADING_SELECTOR)).filter(
+    (heading): heading is HTMLElement => heading instanceof HTMLElement
+  );
+}
+
+function buildTocItems(headings: HTMLElement[]): TocItem[] {
+  const idCountMap: Record<string, number> = {};
+  const items: TocItem[] = [];
+
+  headings.forEach((heading, index) => {
+    const headingId = heading.id?.trim();
+    let baseId =
+      headingId || heading.textContent?.trim().replace(/\s+/g, "-").toLowerCase() || `heading-${index}`;
+
+    // 处理重复 ID，避免 React key 和激活态冲突
+    if (idCountMap[baseId] !== undefined) {
+      idCountMap[baseId]++;
+      baseId = `${baseId}-${idCountMap[baseId]}`;
+    } else {
+      idCountMap[baseId] = 0;
+    }
+
+    items.push({
+      id: headingId || baseId,
+      uniqueId: baseId,
+      text: heading.textContent?.trim() || "",
+      level: parseInt(heading.tagName.charAt(1), 10),
+      index,
+    });
+  });
+
+  return items;
+}
+
 /**
  * 解析 HTML 提取标题
  * 仅在客户端调用（DOMParser 是浏览器 API）
@@ -31,34 +74,30 @@ function parseTocItems(contentHtml: string): TocItem[] {
   // SSR 环境下返回空数组
   if (typeof window === "undefined" || !contentHtml) return [];
 
+  // 优先使用真实渲染 DOM，确保目录项与页面中的 heading 一一对应
+  const domHeadings = getPostContentHeadings();
+  if (domHeadings.length > 0) {
+    return buildTocItems(domHeadings);
+  }
+
   const parser = new DOMParser();
   const doc = parser.parseFromString(contentHtml, "text/html");
-  const headings = doc.querySelectorAll("h1, h2, h3, h4, h5, h6");
+  const headings = Array.from(doc.querySelectorAll(HEADING_SELECTOR)).filter(
+    (heading): heading is HTMLElement => heading instanceof HTMLElement
+  );
 
-  const idCountMap: Record<string, number> = {};
-  const items: TocItem[] = [];
+  return buildTocItems(headings);
+}
 
-  headings.forEach((heading, index) => {
-    let id = heading.id || heading.textContent?.trim().replace(/\s+/g, "-").toLowerCase() || `heading-${index}`;
+function getHeadingElement(item: TocItem, headings: HTMLElement[]): HTMLElement | null {
+  // 优先按顺序索引定位，避免特殊字符/重复 id 导致命中错误元素
+  if (item.index >= 0 && item.index < headings.length) {
+    return headings[item.index];
+  }
 
-    // 处理重复 ID
-    if (idCountMap[id] !== undefined) {
-      idCountMap[id]++;
-      id = `${id}-${idCountMap[id]}`;
-    } else {
-      idCountMap[id] = 0;
-    }
-
-    items.push({
-      id: heading.id || id,
-      uniqueId: id,
-      text: heading.textContent?.trim() || "",
-      level: parseInt(heading.tagName.charAt(1)),
-      index,
-    });
-  });
-
-  return items;
+  if (!item.id) return null;
+  const element = document.getElementById(item.id);
+  return element instanceof HTMLElement ? element : null;
 }
 
 /**
@@ -69,13 +108,15 @@ function computeActiveId(tocItems: TocItem[], scrollY: number): string {
   if (tocItems.length === 0) return "";
 
   const headerOffset = 80;
+  const currentScrollY = Math.max(scrollY, window.scrollY);
+  const headings = getPostContentHeadings();
   let currentId = "";
 
   for (const item of tocItems) {
-    const element = document.getElementById(item.id);
+    const element = getHeadingElement(item, headings);
     if (element) {
-      const top = element.getBoundingClientRect().top + scrollY - headerOffset;
-      if (scrollY >= top - 10) {
+      const top = element.getBoundingClientRect().top + window.scrollY - headerOffset;
+      if (currentScrollY >= top - 10) {
         currentId = item.uniqueId;
       }
     }
@@ -96,8 +137,16 @@ export function CardToc({ contentHtml, collapseMode = false }: CardTocProps) {
 
   // 解析 HTML 提取标题（仅在客户端执行，避免 SSR 时 DOMParser 不可用）
   useEffect(() => {
-    const items = parseTocItems(contentHtml);
-    setTocItems(items);
+    const updateTocItems = () => {
+      const items = parseTocItems(contentHtml);
+      setTocItems(items);
+    };
+
+    updateTocItems();
+    const rafId = window.requestAnimationFrame(updateTocItems);
+    return () => {
+      window.cancelAnimationFrame(rafId);
+    };
   }, [contentHtml]);
 
   // 滚动监听，高亮当前标题
@@ -149,7 +198,8 @@ export function CardToc({ contentHtml, collapseMode = false }: CardTocProps) {
 
   // 点击跳转
   const handleClick = useCallback((item: TocItem) => {
-    const element = document.getElementById(item.id);
+    const headings = getPostContentHeadings();
+    const element = getHeadingElement(item, headings);
     if (element) {
       // 标记正在滚动，暂停滚动监听
       setIsScrolling(true);
@@ -157,10 +207,11 @@ export function CardToc({ contentHtml, collapseMode = false }: CardTocProps) {
 
       const headerOffset = 80;
       const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      const offsetPosition = elementPosition - headerOffset;
+      const maxScrollTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const targetTop = Math.min(Math.max(0, elementPosition - headerOffset), maxScrollTop);
 
       window.scrollTo({
-        top: offsetPosition,
+        top: targetTop,
         behavior: "smooth",
       });
 

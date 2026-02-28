@@ -7,12 +7,12 @@ import { ChevronRight } from "lucide-react";
 import { Icon } from "@iconify/react";
 import { Tooltip } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import { useTheme } from "next-themes";
 import { addToast } from "@heroui/react";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import { useUiStore } from "@/store/ui-store";
 import { useTags, useArchives, useLatestComments } from "@/hooks/queries";
 import { sanitizeCommentHtml } from "@/components/post/Comment/comment-utils";
+import { useTheme } from "@/hooks/use-theme";
 import type { Comment } from "@/lib/api/comment";
 
 import styles from "./styles.module.css";
@@ -24,12 +24,12 @@ interface ConsoleProps {
 
 export function Console({ isOpen, onClose }: ConsoleProps) {
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
+  const { isDark, toggleTheme, mounted } = useTheme();
   const siteConfig = useSiteConfigStore(state => state.siteConfig);
   const isShortcutsEnabled = useUiStore(state => state.isShortcutsEnabled);
   const toggleShortcuts = useUiStore(state => state.toggleShortcuts);
 
-  const isDark = theme === "dark";
+  const isDarkMode = mounted && isDark;
 
   // 获取标签数据
   const { data: tags = [] } = useTags();
@@ -52,8 +52,9 @@ export function Console({ isOpen, onClose }: ConsoleProps) {
 
   // 切换主题
   const handleThemeToggle = useCallback(() => {
-    setTheme(isDark ? "light" : "dark");
-  }, [isDark, setTheme]);
+    if (!mounted) return;
+    toggleTheme();
+  }, [mounted, toggleTheme]);
 
   // 跳转到归档
   const goToArchive = useCallback(
@@ -248,12 +249,12 @@ export function Console({ isOpen, onClose }: ConsoleProps) {
             closeDelay={0}
             classNames={{ content: "custom-tooltip-content" }}
           >
-            <div className={cn(styles.consoleBtnItem, isDark && styles.on)}>
+            <div className={cn(styles.consoleBtnItem, isDarkMode && styles.on)}>
               <button className={styles.darkmodeSwitch} aria-label="显示模式切换" onClick={handleThemeToggle}>
-                <span className={cn(styles.themeIcon, styles.sunIcon, !isDark && styles.active)}>
+                <span className={cn(styles.themeIcon, styles.sunIcon, !isDarkMode && styles.active)}>
                   <Icon icon="solar:sun-bold" width={24} height={24} />
                 </span>
-                <span className={cn(styles.themeIcon, styles.moonIcon, isDark && styles.active)}>
+                <span className={cn(styles.themeIcon, styles.moonIcon, isDarkMode && styles.active)}>
                   <Icon icon="solar:moon-bold" width={24} height={24} />
                 </span>
               </button>

@@ -11,7 +11,7 @@
  */
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { PostHeader } from "./PostHeader";
 import { PostContent } from "./PostContent";
@@ -28,6 +28,14 @@ import styles from "./PostDetail.module.css";
 interface PostDetailContentProps {
   article: Article;
   recentArticles?: RecentArticle[];
+}
+
+function buildArticleContentWithCustomJS(contentHTML: string, customJS?: string): string {
+  if (!customJS || customJS.trim() === "") {
+    return contentHTML;
+  }
+  const escapedCustomJS = customJS.replace(/<\/script/gi, "<\\/script");
+  return `${contentHTML}\n<script data-article-custom-js="true">\n${escapedCustomJS}\n</script>`;
 }
 
 export function PostDetailContent({ article, recentArticles = [] }: PostDetailContentProps) {
@@ -91,6 +99,12 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
 
   const siteName = siteConfig?.APP_NAME || "安知鱼";
   const ownerName = siteConfig?.frontDesk?.siteOwner?.name || "安知鱼";
+  const customJS = article.extra_config?.custom_js;
+  const hasCustomJS = !!customJS && customJS.trim() !== "";
+  const contentWithCustomJS = useMemo(
+    () => buildArticleContentWithCustomJS(article.content_html, customJS),
+    [article.content_html, customJS]
+  );
 
   return (
     <div className={styles.postDetailContainer}>
@@ -103,7 +117,8 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
           <div className={styles.postDetailContent}>
             {/* 文章内容 */}
             <PostContent
-              content={article.content_html}
+              content={contentWithCustomJS}
+              enableScripts={hasCustomJS}
               articleInfo={{
                 isReprint: article.is_reprint,
                 copyrightAuthor: article.copyright_author,

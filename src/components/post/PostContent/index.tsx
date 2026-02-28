@@ -23,6 +23,8 @@ interface ArticleCopyInfo {
 interface PostContentProps {
   content: string;
   articleInfo?: ArticleCopyInfo;
+  /** 启用后会执行 HTML 内容中的 <script> 标签，仅在受信任内容中使用 */
+  enableScripts?: boolean;
 }
 
 // Mermaid 缩放功能的清理函数类型
@@ -36,7 +38,7 @@ declare global {
   }
 }
 
-export function PostContent({ content, articleInfo }: PostContentProps) {
+export function PostContent({ content, articleInfo, enableScripts = false }: PostContentProps) {
   const contentRef = useRef<HTMLDivElement>(null);
   const mermaidCleanupRef = useRef<MermaidCleanupFn>(null);
   const codeCopyCleanupRef = useRef<(() => void) | null>(null);
@@ -1300,7 +1302,36 @@ export function PostContent({ content, articleInfo }: PostContentProps) {
     initMermaidZoom,
   ]);
 
-  return <article ref={contentRef} className={styles.postContent} dangerouslySetInnerHTML={{ __html: content }} />;
+  // 浏览器不会执行通过 innerHTML 插入的 <script>，需手动重建节点
+  useEffect(() => {
+    if (!enableScripts || !contentRef.current) return;
+    const container = contentRef.current;
+    const scripts = container.querySelectorAll("script");
+    const createdScripts: HTMLScriptElement[] = [];
+
+    scripts.forEach(oldScript => {
+      const newScript = document.createElement("script");
+      Array.from(oldScript.attributes).forEach(attr => {
+        newScript.setAttribute(attr.name, attr.value);
+      });
+      newScript.textContent = oldScript.textContent;
+      oldScript.parentNode?.replaceChild(newScript, oldScript);
+      createdScripts.push(newScript);
+    });
+
+    return () => {
+      createdScripts.forEach(s => s.remove());
+    };
+  }, [content, enableScripts]);
+
+  return (
+    <article
+      ref={contentRef}
+      className={styles.postContent}
+      data-post-content="true"
+      dangerouslySetInnerHTML={{ __html: content }}
+    />
+  );
 }
 
 export default PostContent;

@@ -130,7 +130,9 @@ export function HeaderRight({
           <PopoverContent>
             <div className={styles.loginPanel}>
               <div className={styles.loginHeader}>
-                <Icon icon="ri:user-3-line" width={32} height={32} className={styles.loginIcon} />
+                <div className={styles.loginIconWrap}>
+                  <Icon icon="ri:user-3-line" width={28} height={28} className={styles.loginIcon} />
+                </div>
                 <div className={styles.loginTitle}>欢迎访问</div>
                 <div className={styles.loginDesc}>登录后解锁更多功能</div>
               </div>

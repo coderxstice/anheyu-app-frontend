@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { addToast, useDisclosure } from "@heroui/react";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { useAdminArticles, useDeleteArticle } from "@/hooks/queries/use-post-management";
+import { useAdminArticles, useDeleteArticle, useImportArticles } from "@/hooks/queries/use-post-management";
 import type { AdminArticle, AdminArticleListParams, ArticleStatus, ReviewStatus } from "@/types/post-management";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import { FALLBACK_COVER } from "@/lib/constants/admin";
@@ -35,6 +35,7 @@ export function usePostManagementPage() {
   const [batchDeleting, setBatchDeleting] = useState(false);
   const deleteModal = useDisclosure();
   const batchDeleteModal = useDisclosure();
+  const importModal = useDisclosure();
 
   // ---- 查询 ----
   const queryParams: AdminArticleListParams = useMemo(
@@ -56,6 +57,7 @@ export function usePostManagementPage() {
 
   // ---- Mutations ----
   const deleteArticle = useDeleteArticle();
+  const importArticlesHook = useImportArticles();
 
   // ---- 选择逻辑 ----
   const isSomeSelected = selectedIds.size > 0;
@@ -187,6 +189,10 @@ export function usePostManagementPage() {
     handleDeleteClick,
     handleDeleteConfirm,
     handleBatchDeleteConfirm,
+
+    // 导入
+    importModal,
+    importArticlesHook,
 
     // 行操作
     handleAction,

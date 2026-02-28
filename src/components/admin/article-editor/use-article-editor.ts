@@ -6,6 +6,7 @@ import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import { CustomImage } from "./extensions/custom-image";
 import { PreserveHTML } from "./extensions/preserve-html";
+import { PreserveId } from "./extensions/preserve-id";
 import { MathBlock } from "./extensions/math-block";
 import { MathInline } from "./extensions/math-inline";
 import { MermaidBlock } from "./extensions/mermaid-block";
@@ -190,6 +191,7 @@ export function useArticleEditor({
         nested: true,
       }),
       PreserveHTML,
+      PreserveId,
       MathBlock,
       MathInline,
       MermaidBlock,
