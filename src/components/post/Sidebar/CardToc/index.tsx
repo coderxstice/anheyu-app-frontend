@@ -104,11 +104,12 @@ function getHeadingElement(item: TocItem, headings: HTMLElement[]): HTMLElement 
  * 计算当前激活的标题 ID
  * 基于滚动位置和标题元素位置
  */
-function computeActiveId(tocItems: TocItem[], scrollY: number): string {
+function computeActiveId(tocItems: TocItem[]): string {
   if (tocItems.length === 0) return "";
 
   const headerOffset = 80;
-  const currentScrollY = Math.max(scrollY, window.scrollY);
+  // 使用 window.scrollY 与 top 计算保持一致，避免 store 节流导致 scrollY 滞后时误激活下方标题
+  const currentScrollY = window.scrollY;
   const headings = getPostContentHeadings();
   let currentId = "";
 
@@ -154,7 +155,7 @@ export function CardToc({ contentHtml, collapseMode = false }: CardTocProps) {
   useEffect(() => {
     if (tocItems.length === 0 || isScrolling) return;
 
-    const newActiveId = computeActiveId(tocItems, scrollY);
+    const newActiveId = computeActiveId(tocItems);
     if (newActiveId && newActiveId !== activeId) {
       setActiveId(newActiveId);
     }

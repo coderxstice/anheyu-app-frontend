@@ -71,9 +71,13 @@ export function ImportModal({ isOpen, onOpenChange, onImport }: ImportModalProps
     }
     try {
       const result = await onImport.mutateAsync({ file });
+      const msg =
+        result.failed_count > 0
+          ? `导入完成：成功 ${result.success_count} 篇，跳过 ${result.skipped_count} 篇，失败 ${result.failed_count} 篇`
+          : `导入完成：成功 ${result.success_count} 篇，跳过 ${result.skipped_count} 篇`;
       addToast({
-        title: `导入完成：成功 ${result.imported} 篇，跳过 ${result.skipped} 篇`,
-        color: "success",
+        title: msg,
+        color: result.failed_count > 0 ? "warning" : "success",
         timeout: 5000,
       });
       setFile(null);

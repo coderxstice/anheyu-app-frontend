@@ -64,7 +64,7 @@ export function CustomPageContent({ page }: CustomPageContentProps) {
   }, [customJS]);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="w-full max-w-[1400px] mx-auto px-6 py-8">
       {customCSS ? <style data-custom-page-style={page.path} dangerouslySetInnerHTML={{ __html: customCSS }} /> : null}
 
       <header className="mb-8">

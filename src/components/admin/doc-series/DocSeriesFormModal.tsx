@@ -1,11 +1,9 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { ModalBody, ModalFooter, Button, addToast } from "@heroui/react";
+import { ModalBody, ModalFooter, Button, Input, Textarea, addToast } from "@heroui/react";
 import { BookOpen, Pencil } from "lucide-react";
 import { AdminDialog } from "@/components/admin/AdminDialog";
-import { FormInput } from "@/components/ui/form-input";
-import { FormTextarea } from "@/components/ui/form-textarea";
 import { useCreateDocSeries, useUpdateDocSeries } from "@/hooks/queries/use-doc-series";
 import type { DocSeries } from "@/types/doc-series";
 
@@ -46,7 +44,6 @@ function DocSeriesFormContent({ editItem, onClose }: { editItem?: DocSeries | nu
   // 表单状态 - 初始值直接来自 editItem
   const [name, setName] = useState(editItem?.name ?? "");
   const [description, setDescription] = useState(editItem?.description ?? "");
-  const [coverUrl, setCoverUrl] = useState(editItem?.cover_url ?? "");
   const [sort, setSort] = useState(String(editItem?.sort ?? 0));
 
   // Mutations
@@ -63,7 +60,6 @@ function DocSeriesFormContent({ editItem, onClose }: { editItem?: DocSeries | nu
     const formData = {
       name: name.trim(),
       description: description.trim(),
-      cover_url: coverUrl.trim(),
       sort: Number(sort) || 0,
     };
 
@@ -83,14 +79,14 @@ function DocSeriesFormContent({ editItem, onClose }: { editItem?: DocSeries | nu
         timeout: 3000,
       });
     }
-  }, [name, description, coverUrl, sort, isEdit, editItem, createDocSeries, updateDocSeries, onClose]);
+  }, [name, description, sort, isEdit, editItem, createDocSeries, updateDocSeries, onClose]);
 
   const isSubmitting = createDocSeries.isPending || updateDocSeries.isPending;
 
   return (
     <>
       <ModalBody className="gap-4">
-        <FormInput
+        <Input
           label="系列名称"
           placeholder="请输入系列名称"
           value={name}
@@ -99,7 +95,7 @@ function DocSeriesFormContent({ editItem, onClose }: { editItem?: DocSeries | nu
           maxLength={50}
         />
 
-        <FormTextarea
+        <Textarea
           label="描述"
           placeholder="请输入系列描述（可选）"
           value={description}
@@ -109,14 +105,7 @@ function DocSeriesFormContent({ editItem, onClose }: { editItem?: DocSeries | nu
           maxLength={200}
         />
 
-        <FormInput
-          label="封面图 URL"
-          placeholder="请输入封面图片地址（可选）"
-          value={coverUrl}
-          onValueChange={setCoverUrl}
-        />
-
-        <FormInput
+        <Input
           label="排序"
           placeholder="数值越小越靠前"
           type="number"

@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { Chip, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@heroui/react";
-import { MoreHorizontal, Pencil, Eye, Trash2, ExternalLink, MessageSquare } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, ExternalLink, MessageSquare } from "lucide-react";
 import type { CustomPage } from "@/types/page-management";
 
 export const TABLE_COLUMNS = [
@@ -90,9 +90,6 @@ export function usePageRenderCell({ onAction }: UsePageRenderCellOptions) {
                   aria-label="页面操作"
                   onAction={key => onAction(pageItem, key as string)}
                 >
-                  <DropdownItem key="preview" startContent={<Eye className="w-3.5 h-3.5" />}>
-                    预览
-                  </DropdownItem>
                   <DropdownItem key="visit" startContent={<ExternalLink className="w-3.5 h-3.5" />} href={pageItem.path} target="_blank">
                     访问
                   </DropdownItem>

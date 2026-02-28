@@ -150,16 +150,64 @@
   }
 
   // ---- 列表 ----
-  ul {
-    list-style: disc;
-    padding-left: 1.5em;
+  ul:not([data-type="taskList"]) {
+    list-style: none;
+    padding-left: 0;
     margin: 1em 0;
+
+    li {
+      position: relative;
+      padding-left: 1.2em;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.85em;
+        width: 0.6em;
+        height: 0.6em;
+        margin-top: -0.3em;
+        border: 2px solid var(--anzhiyu-theme, var(--primary));
+        border-radius: 50%;
+        background: transparent;
+      }
+    }
   }
 
   ol {
-    list-style: decimal;
-    padding-left: 1.5em;
+    list-style: none;
+    padding-left: 0;
     margin: 1em 0;
+    counter-reset: ol-counter;
+
+    ol {
+      counter-reset: ol-counter;
+    }
+
+    li {
+      position: relative;
+      padding-left: 1.75em;
+      counter-increment: ol-counter;
+
+      &::before {
+        content: counter(ol-counter);
+        position: absolute;
+        left: 0.05em;
+        top: 1.05em;
+        margin-top: -0.675em;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.35em;
+        height: 1.35em;
+        font-size: 0.8em;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        color: #fff;
+        background: var(--anzhiyu-theme, var(--primary));
+        border-radius: 50%;
+      }
+    }
   }
 
   li {
