@@ -120,9 +120,6 @@ export function usePageManagementPage() {
   const handleAction = useCallback(
     (pageItem: CustomPage, key: string) => {
       switch (key) {
-        case "preview":
-          window.open(pageItem.path, "_blank");
-          break;
         case "edit":
           router.push(`/admin/page-management/${pageItem.id}/edit`);
           break;
