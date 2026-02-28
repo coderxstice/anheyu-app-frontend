@@ -13,9 +13,12 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
+import { FaHashtag } from "react-icons/fa6";
 import { PostHeader } from "./PostHeader";
 import { PostContent } from "./PostContent";
 import { PostCopyright } from "./PostCopyright";
+import { PostRelatedPosts } from "./PostRelatedPosts";
+import { PostPagination } from "./PostPagination";
 import { PostPaginationFloat } from "./PostPaginationFloat";
 import { CommentSection } from "./Comment";
 import { CommentBarrage } from "./CommentBarrage";
@@ -109,8 +112,11 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
 
   const siteName = siteConfig?.APP_NAME || "安知鱼";
   const ownerName = siteConfig?.frontDesk?.siteOwner?.name || "安知鱼";
+  const defaultCover = siteConfig?.post?.default?.default_cover || "/images/default-cover.webp";
   const customJS = article.extra_config?.custom_js;
   const hasCustomJS = !!customJS && customJS.trim() !== "";
+  const articleShowRelated = (siteConfig as Record<string, unknown>)["article.showRelated"];
+  const isRelatedEnabled = articleShowRelated !== false && articleShowRelated !== "false";
   const contentWithCustomJS = useMemo(
     () => buildArticleContentWithCustomJS(article.content_html, customJS),
     [article.content_html, customJS]
@@ -138,6 +144,37 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
 
             {/* 版权信息 */}
             <PostCopyright article={article} />
+
+            {/* 版权下方标签（仅左侧标签集合，无右侧入口） */}
+            {article.post_tags.length > 0 && (
+              <div className={styles.postTagBar} aria-label="文章标签">
+                {article.post_tags.map(tag => (
+                  <Link
+                    key={tag.id}
+                    href={`/tags/${tag.slug || encodeURIComponent(tag.name)}`}
+                    className={styles.postTagItem}
+                  >
+                    <FaHashtag className={styles.postTagIcon} aria-hidden="true" />
+                    <span className={styles.postTagName}>{tag.name}</span>
+                    <span className={styles.postTagCount}>{tag.count}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {/* 喜欢这篇文章的人也看了（版权后、评论前） */}
+            {isRelatedEnabled && (
+              <PostRelatedPosts
+                articles={article.related_articles}
+                currentArticleId={article.id}
+                defaultCover={defaultCover}
+              />
+            )}
+
+            {/* 上一篇/下一篇（屏宽 < 1400px 时在版权下方显示） */}
+            <div className={styles.paginationInlineWrap}>
+              <PostPagination prevArticle={article.prev_article} nextArticle={article.next_article} />
+            </div>
 
             {/* 评论区 */}
             <CommentSection targetTitle={article.title} className={styles.commentSection} />

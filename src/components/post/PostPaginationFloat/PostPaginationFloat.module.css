@@ -100,8 +100,15 @@
   background: rgb(30 30 30 / 80%);
 }
 
+/* 屏宽 < 1400px 时隐藏浮动，改用版权下方的内联上一篇/下一篇 */
+@media screen and (max-width: 1399px) {
+  .floatWrap {
+    display: none !important;
+  }
+}
+
 @media screen and (width <= 768px) {
   .floatWrap {
-    display: none;
+    display: none !important;
   }
 }

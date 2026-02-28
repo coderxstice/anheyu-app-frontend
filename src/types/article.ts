@@ -201,7 +201,7 @@ export interface Article {
   doc_series_id?: string | number;
   prev_article?: ArticleLink;
   next_article?: ArticleLink;
-  related_articles?: Article[];
+  related_articles?: ArticleLink[];
   full_text_hidden_config?: FullTextHiddenConfig;
   extra_config?: ArticleExtraConfig;
   // 版权相关字段
