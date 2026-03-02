@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Textarea } from "@heroui/react";
 import { cn } from "@/lib/utils";
 
 export interface FormTextareaProps {
@@ -53,50 +54,10 @@ const FormTextarea = React.forwardRef<HTMLTextAreaElement, FormTextareaProps>(
   ) => {
     const id = React.useId();
     const descId = `${id}-desc`;
-    const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
-
-    // 合并外部 ref 和内部 ref
-    const setRefs = React.useCallback(
-      (node: HTMLTextAreaElement | null) => {
-        textareaRef.current = node;
-        if (typeof ref === "function") {
-          ref(node);
-        } else if (ref) {
-          (ref as React.MutableRefObject<HTMLTextAreaElement | null>).current = node;
-        }
-      },
-      [ref]
-    );
-
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      onValueChange?.(e.target.value);
-      autoResize();
-    };
-
-    // 自动调整高度
-    const autoResize = React.useCallback(() => {
-      const el = textareaRef.current;
-      if (!el) return;
-
-      // 重置高度以获取正确的 scrollHeight
-      el.style.height = "auto";
-
-      const lineHeight = parseInt(getComputedStyle(el).lineHeight) || 20;
-      const minHeight = minRows * lineHeight + 16; // 16 = py padding
-      const maxHeight = maxRows ? maxRows * lineHeight + 16 : Infinity;
-
-      const newHeight = Math.min(Math.max(el.scrollHeight, minHeight), maxHeight);
-      el.style.height = `${newHeight}px`;
-    }, [minRows, maxRows]);
-
-    // 初始化时和 value 变化时调整高度
-    React.useEffect(() => {
-      autoResize();
-    }, [value, autoResize]);
 
     return (
       <div className={cn("flex flex-col gap-1.5", className)}>
-        {/* Label */}
+        {/* Label（与 FormInput 一致，不依赖 HeroUI 的 labelPlacement） */}
         {label && (
           <label htmlFor={id} className="text-sm font-medium text-foreground/80">
             {label}
@@ -104,31 +65,31 @@ const FormTextarea = React.forwardRef<HTMLTextAreaElement, FormTextareaProps>(
           </label>
         )}
 
-        {/* Textarea */}
-        <textarea
-          ref={setRefs}
+        <Textarea
+          ref={ref}
           id={id}
-          value={value}
           placeholder={placeholder}
+          value={value}
+          onValueChange={onValueChange}
+          isInvalid={!!error}
+          variant="bordered"
+          minRows={minRows}
+          maxRows={maxRows}
           maxLength={maxLength}
-          disabled={disabled}
-          rows={minRows}
-          aria-invalid={!!error}
+          isDisabled={disabled}
           aria-describedby={description || error ? descId : undefined}
-          onChange={handleChange}
-          className={cn(
-            "w-full rounded-xl border px-3.5 py-2.5 text-sm text-foreground/90 resize-none",
-            "outline-none transition-all duration-200",
-            "placeholder:text-muted-foreground/60",
-            "disabled:cursor-not-allowed disabled:opacity-50",
-            error
-              ? "border-danger bg-danger-50/50 focus:border-danger focus:ring-1 focus:ring-danger/20"
-              : "border-border/80 bg-card hover:border-border-hover/40 focus:border-primary/65 focus:ring-2 focus:ring-primary/15",
-            textareaClassName
-          )}
+          classNames={{
+            inputWrapper: cn(
+              "min-h-[5.5rem] py-2.5",
+              "group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-primary/15 group-data-[focus=true]:border-primary",
+              error && "group-data-[focus=true]:border-danger group-data-[focus=true]:ring-danger/20",
+              textareaClassName
+            ),
+            input: "text-sm",
+          }}
         />
 
-        {/* Description / Error */}
+        {/* Description / Error（与 FormInput 一致） */}
         {(description || error) && (
           <p
             id={descId}

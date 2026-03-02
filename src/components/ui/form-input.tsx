@@ -130,6 +130,7 @@ const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
           type={actualType}
           maxLength={maxLength}
           size={size === "sm" ? "sm" : "md"}
+          variant="bordered"
           startContent={startContent}
           endContent={resolvedEndContent}
           isDisabled={disabled}
@@ -140,16 +141,12 @@ const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
           aria-describedby={description || error ? descId : undefined}
           classNames={{
             inputWrapper: cn(
-              "rounded-xl border border-border/80 bg-card shadow-none!",
-              "data-[hover=true]:border-border-hover/40",
-              "group-data-[focus=true]:border-primary/65 group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-primary/15",
               size === "sm" ? "h-9 min-h-9" : "h-10 min-h-10",
-              "transition-all duration-200",
-              error &&
-                "border-danger bg-danger-50/50 group-data-[focus=true]:border-danger group-data-[focus=true]:ring-danger/20",
+              "group-data-[focus=true]:ring-2 group-data-[focus=true]:ring-primary/15 group-data-[focus=true]:border-primary",
+              error && "group-data-[focus=true]:border-danger group-data-[focus=true]:ring-danger/20",
               inputClassName
             ),
-            input: "text-sm text-foreground/90 placeholder:text-muted-foreground/60",
+            input: "text-sm",
           }}
         />
 

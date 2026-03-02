@@ -43,8 +43,8 @@ export default function PostManagementPage() {
     onAction: pm.handleAction,
   });
   const getColumnClassName = (columnKey: string) => {
-    if (columnKey === "article") return "w-[32%] max-w-[420px]";
-    if (columnKey === "time") return "w-[180px] min-w-[180px]";
+    if (columnKey === "article") return "w-[26%] max-w-[260px]";
+    if (columnKey === "time") return "w-[120px] min-w-[100px]";
     return undefined;
   };
 

@@ -17,6 +17,7 @@ import { HeroUIProviderWrapper } from "./heroui-provider";
 import { QueryProvider } from "./query-provider";
 import { GlobalLoading } from "@/components/common/GlobalLoading";
 import { CustomCodeInjector } from "./custom-code-injector";
+import { DefaultThemeSync } from "./DefaultThemeSync";
 
 interface ProvidersProps {
   children: ReactNode;
@@ -85,6 +86,7 @@ export function Providers({ children }: ProvidersProps) {
         <HeroUIProviderWrapper>
           <AuthTokenInitializer>
             <SiteConfigLoader>
+              <DefaultThemeSync />
               <GlobalLoading />
               <CustomCodeInjector />
               {children}

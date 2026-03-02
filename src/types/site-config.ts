@@ -66,6 +66,8 @@ export interface SiteConfigData {
   LOGO_URL_512x512?: string;
   DEFAULT_THUMB_PARAM?: string;
   DEFAULT_BIG_PARAM?: string;
+  /** 默认主题模式：light | dark | system | auto */
+  DEFAULT_THEME_MODE?: string;
   SITE_ANNOUNCEMENT?: string;
   GRAVATAR_URL?: string;
   DEFAULT_GRAVATAR_TYPE?: string;

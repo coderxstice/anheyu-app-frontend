@@ -60,9 +60,12 @@ export const configApi = {
   /**
    * 创建备份
    * @param description - 备份描述（可选）
+   * @param isAuto - 是否自动备份（可选，用于在列表中显示「自动」标签，如导入前/恢复前自动备份）
    */
-  async createBackup(description: string): Promise<ApiResponse<BackupInfo>> {
-    return apiClient.post<BackupInfo>("/api/config/backup/create", { description });
+  async createBackup(description: string, isAuto?: boolean): Promise<ApiResponse<BackupInfo>> {
+    const body: { description: string; is_auto?: boolean } = { description };
+    if (isAuto === true) body.is_auto = true;
+    return apiClient.post<BackupInfo>("/api/config/backup/create", body);
   },
 
   /**

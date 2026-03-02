@@ -63,48 +63,45 @@ export function usePostRenderCell({ defaultCover, gravatarBaseUrl, onAction }: U
         case "article": {
           const coverSrc = article.cover_url || defaultCover;
           const previewUrl = `/posts/${article.abbrlink || article.id}`;
+          const cat = article.post_categories?.[0];
+          const tag = article.post_tags?.[0];
           return (
             <a
               href={previewUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex gap-3 items-center min-w-0 group/article cursor-pointer rounded-lg -m-1 p-1 transition-colors hover:bg-muted/50"
+              className="flex gap-2 items-center min-w-0 max-w-full group/article cursor-pointer rounded-lg -m-1 p-1 transition-colors hover:bg-muted/50"
               onClick={e => {
-                // 阻止默认行为以使用自定义导航，保留中键点击和 Ctrl/Cmd+点击的默认行为
                 if (!e.ctrlKey && !e.metaKey && e.button === 0) {
                   e.preventDefault();
                   onAction(article, "preview");
                 }
               }}
             >
-              <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-muted ring-1 ring-border/20 transition-shadow group-hover/article:ring-primary/40">
+              <div className="relative w-10 h-10 rounded-md overflow-hidden shrink-0 bg-muted ring-1 ring-border/20 transition-shadow group-hover/article:ring-primary/40">
                 <Image
                   src={coverSrc}
                   alt=""
                   fill
                   className="object-cover"
-                  sizes="56px"
+                  sizes="40px"
                   unoptimized
                   onError={e => {
                     (e.target as HTMLImageElement).src = FALLBACK_COVER;
                   }}
                 />
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium truncate group-hover/article:text-primary transition-colors">
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <p className="text-sm font-medium truncate group-hover/article:text-primary transition-colors" title={article.title}>
                   {article.title}
                 </p>
-                <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                  {article.post_categories?.slice(0, 1).map(c => (
-                    <Chip key={c.id} size="sm" color="primary" variant="flat" className="text-[11px] h-5">
-                      {c.name}
-                    </Chip>
-                  ))}
-                  {article.post_tags?.slice(0, 2).map(t => (
-                    <span key={t.id} className="text-[11px] text-muted-foreground">
-                      #{t.name}
-                    </span>
-                  ))}
+                <div className="flex items-center gap-1 mt-0.5 min-w-0 overflow-hidden">
+                  {cat && (
+                    <span className="text-[11px] text-primary truncate shrink-0 max-w-16">{cat.name}</span>
+                  )}
+                  {tag && (
+                    <span className="text-[11px] text-muted-foreground truncate shrink min-w-0">#{tag.name}</span>
+                  )}
                 </div>
               </div>
             </a>
@@ -138,16 +135,11 @@ export function usePostRenderCell({ defaultCover, gravatarBaseUrl, onAction }: U
         case "time": {
           const created = formatDateTimeParts(article.created_at);
           const updated = formatDateTimeParts(article.updated_at);
+          const createdShort = created.date.length >= 10 ? `${created.date.slice(5)} ${created.time}` : "-";
+          const updatedShort = updated.date.length >= 10 ? `${updated.date.slice(5)} ${updated.time}` : "-";
           return (
-            <div className="flex flex-col gap-1 text-xs">
-              <div className="text-muted-foreground tabular-nums">
-                <div>{created.date}</div>
-                <div className="text-muted-foreground/60">{created.time}</div>
-              </div>
-              <div className="text-muted-foreground/50 tabular-nums">
-                <div>{updated.date}</div>
-                <div className="text-muted-foreground/40">{updated.time}</div>
-              </div>
+            <div className="text-xs text-muted-foreground tabular-nums whitespace-nowrap" title={`创建 ${created.date} ${created.time} · 更新 ${updated.date} ${updated.time}`}>
+              {createdShort} / {updatedShort}
             </div>
           );
         }
