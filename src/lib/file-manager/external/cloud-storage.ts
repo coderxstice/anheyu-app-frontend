@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export type CloudStorageType = "tencent_cos" | "aliyun_oss" | "aws_s3";
+export type CloudStorageType = "tencent_cos" | "aliyun_oss" | "aws_s3" | "qiniu_kodo";
 
 export async function uploadToCloudStorage(
   uploadUrl: string,

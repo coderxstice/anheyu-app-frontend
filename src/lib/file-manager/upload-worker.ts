@@ -16,6 +16,7 @@ export async function uploadFileChunksWorker(item: UploadItem): Promise<void> {
         case "tencent_cos":
         case "aliyun_oss":
         case "aws_s3":
+        case "qiniu_kodo":
           await uploadCloudStorageFile(item);
           break;
         default:
@@ -60,7 +61,7 @@ async function uploadCloudStorageFile(item: UploadItem): Promise<void> {
   await uploadToCloudStorage(
     item.uploadUrl!,
     item.file,
-    item.storageType as "tencent_cos" | "aliyun_oss" | "aws_s3",
+    item.storageType as "tencent_cos" | "aliyun_oss" | "aws_s3" | "qiniu_kodo",
     progress => {
       item.progress = progress;
       item.uploadedSize = Math.round((progress / 100) * item.size);
