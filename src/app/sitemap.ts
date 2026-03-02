@@ -61,6 +61,7 @@ const STATIC_ROUTES: Array<{
   { path: "/air-conditioner", changeFrequency: "monthly", priority: 0.5 },
   { path: "/article-statistics", changeFrequency: "daily", priority: 0.6 },
   { path: "/recentcomments", changeFrequency: "daily", priority: 0.7 },
+  { path: "/update", changeFrequency: "weekly", priority: 0.65 },
   { path: "/equipment", changeFrequency: "monthly", priority: 0.6 },
 ];
 
