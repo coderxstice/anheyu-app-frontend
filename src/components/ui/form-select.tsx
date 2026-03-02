@@ -78,21 +78,16 @@ function FormSelect({
         onSelectionChange={handleSelectionChange}
         isDisabled={disabled}
         size={size === "sm" ? "sm" : "md"}
+        variant="bordered"
         aria-describedby={description || error ? descId : undefined}
         classNames={{
           trigger: cn(
-            "rounded-xl border border-border/80 bg-card shadow-none!",
-            "data-[open=true]:border-primary/65 data-[open=true]:ring-2 data-[open=true]:ring-primary/15",
-            "data-[focus=true]:border-primary/65 data-[focus=true]:ring-2 data-[focus=true]:ring-primary/15",
-            "data-[hover=true]:border-border-hover/40",
             size === "sm" ? "h-9 min-h-9" : "h-10 min-h-10",
-            "transition-all duration-200",
-            error && "border-danger bg-danger-50/50 data-[open=true]:border-danger data-[open=true]:ring-danger/20"
+            "data-[focus=true]:ring-2 data-[focus=true]:ring-primary/15 data-[focus=true]:border-primary",
+            "data-[open=true]:ring-2 data-[open=true]:ring-primary/15 data-[open=true]:border-primary",
+            error && "data-[focus=true]:border-danger data-[focus=true]:ring-danger/20 data-[open=true]:border-danger data-[open=true]:ring-danger/20"
           ),
-          value: "text-sm text-foreground/90",
-          selectorIcon: "text-muted-foreground",
-          popoverContent: "rounded-xl",
-          innerWrapper: "pl-0.5",
+          value: "text-sm",
         }}
       >
         {children}

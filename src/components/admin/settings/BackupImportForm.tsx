@@ -15,6 +15,7 @@ import {
   ArrowDownToLine,
 } from "lucide-react";
 import { AdminDialog } from "@/components/admin/AdminDialog";
+import { getErrorMessage } from "@/lib/api/client";
 import { configApi, type BackupInfo } from "@/lib/api/config";
 
 interface BackupImportFormProps {
@@ -46,6 +47,26 @@ function formatTime(timeStr: string): string {
   });
 }
 
+/** 从导出接口错误中解析 message（导出使用 responseType: blob，错误体可能是 Blob） */
+async function getExportErrorMessage(error: unknown, fallback: string): Promise<string> {
+  if (!error || typeof error !== "object" || !("response" in error)) return fallback;
+  const axiosError = error as { response?: { data?: Blob | { message?: string } } };
+  const data = axiosError.response?.data;
+  if (data && typeof data === "object" && data !== null && "message" in data && typeof (data as { message?: string }).message === "string") {
+    return (data as { message: string }).message;
+  }
+  if (data instanceof Blob) {
+    try {
+      const text = await data.text();
+      const parsed = JSON.parse(text) as { message?: string };
+      if (typeof parsed?.message === "string") return parsed.message;
+    } catch {
+      /* ignore */
+    }
+  }
+  return fallback;
+}
+
 export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps) {
   // ==================== 导入导出状态 ====================
   const [exporting, setExporting] = useState(false);
@@ -56,6 +77,7 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
   const [backupList, setBackupList] = useState<BackupInfo[]>([]);
   const [listLoading, setListLoading] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [restoring, setRestoring] = useState(false);
   const [cleaning, setCleaning] = useState(false);
   const [backupDescription, setBackupDescription] = useState("");
   const [keepCount, setKeepCount] = useState(5);
@@ -102,9 +124,10 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       addToast({ title: "配置导出成功", color: "success", timeout: 3000 });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("导出配置失败:", error);
-      addToast({ title: "导出配置失败，请稍后重试", color: "danger", timeout: 4000 });
+      const message = await getExportErrorMessage(error, "导出配置失败，请稍后重试");
+      addToast({ title: message, color: "danger", timeout: 4000 });
     } finally {
       setExporting(false);
     }
@@ -141,9 +164,9 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
     importConfirm.onClose();
     setImporting(true);
 
-    // 导入前自动备份
+    // 导入前自动备份（is_auto: true 以便在备份列表中显示「自动」标签）
     try {
-      await configApi.createBackup("导入配置前自动备份");
+      await configApi.createBackup("导入配置前自动备份", true);
     } catch (backupError) {
       console.warn("导入前自动备份失败:", backupError);
       addToast({ title: "自动备份失败，将继续导入配置", color: "warning", timeout: 3000 });
@@ -164,12 +187,7 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
       }, 2000);
     } catch (error) {
       console.error("导入配置失败:", error);
-      let message = "导入配置失败，请检查文件格式";
-      if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { data?: { message?: string } } };
-        message = axiosError.response?.data?.message || message;
-      }
-      addToast({ title: message, color: "danger", timeout: 5000 });
+      addToast({ title: getErrorMessage(error), color: "danger", timeout: 5000 });
     } finally {
       setImporting(false);
       setPendingFile(null);
@@ -204,6 +222,7 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
   const executeRestore = useCallback(async () => {
     if (!pendingBackup) return;
     restoreConfirm.onClose();
+    setRestoring(true);
 
     try {
       await configApi.restoreBackup(pendingBackup.filename);
@@ -220,8 +239,9 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
     } catch (error) {
       console.error("恢复备份失败:", error);
       addToast({ title: "恢复备份失败，请稍后重试", color: "danger", timeout: 4000 });
-    } finally {
       setPendingBackup(null);
+    } finally {
+      setRestoring(false);
     }
   }, [pendingBackup, restoreConfirm]);
 
@@ -584,10 +604,10 @@ export function BackupImportForm({ loading: pageLoading }: BackupImportFormProps
           </div>
         </ModalBody>
         <ModalFooter className="pt-2">
-          <Button variant="flat" size="sm" onPress={restoreConfirm.onClose} radius="lg">
+          <Button variant="flat" size="sm" onPress={restoreConfirm.onClose} radius="lg" isDisabled={restoring}>
             取消
           </Button>
-          <Button color="primary" size="sm" onPress={executeRestore} radius="lg">
+          <Button color="primary" size="sm" onPress={executeRestore} radius="lg" isLoading={restoring} isDisabled={restoring}>
             确定恢复
           </Button>
         </ModalFooter>
