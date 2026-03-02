@@ -119,7 +119,7 @@ export function HeaderRight({
           offset={8}
           showArrow={false}
           classNames={{
-            content: "p-0 bg-card border border-border rounded-xl shadow-lg",
+            content: "p-0 bg-card border border-border rounded-xl shadow-md overflow-hidden",
           }}
         >
           <PopoverTrigger>
@@ -138,11 +138,11 @@ export function HeaderRight({
               </div>
               <div className={styles.loginActions}>
                 <Link href="/login" className={styles.loginBtn}>
-                  <Icon icon="ri:login-box-line" width={16} height={16} />
+                  <Icon icon="ri:login-box-line" width={14} height={14} />
                   <span>登录</span>
                 </Link>
                 <Link href="/login?register=1" className={styles.registerBtn}>
-                  <Icon icon="ri:user-add-line" width={16} height={16} />
+                  <Icon icon="ri:user-add-line" width={14} height={14} />
                   <span>注册</span>
                 </Link>
               </div>
