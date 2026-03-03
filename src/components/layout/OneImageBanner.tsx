@@ -8,11 +8,12 @@ import { useSiteConfigStore } from "@/store/site-config-store";
 import type { PageOneImageItem } from "@/types/site-config";
 import styles from "./OneImageBanner.module.css";
 
-type OneImageRouteKey = "home" | "categories" | "tags" | "archives";
+type OneImageRouteKey = "home" | "link" | "categories" | "tags" | "archives";
 
 function getRouteKey(pathname: string | null): OneImageRouteKey | null {
   if (!pathname) return null;
   if (pathname === "/") return "home";
+  if (pathname === "/link") return "link";
   if (pathname === "/categories") return "categories";
   if (pathname === "/tags") return "tags";
   if (pathname.startsWith("/archives")) return "archives";
@@ -254,8 +255,29 @@ export function OneImageBanner() {
   const scrollToMain = useCallback(() => {
     const mainEl = document.getElementById("frontend-main");
     if (!mainEl) return;
-    const top = mainEl.getBoundingClientRect().top + window.pageYOffset;
-    window.scrollTo({ top, behavior: "smooth" });
+    const mainTop = mainEl.getBoundingClientRect().top + window.pageYOffset;
+    const offsetPosition = mainTop - 70;
+    window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+  }, []);
+
+  const isWechatBrowser = useCallback(() => {
+    return typeof navigator !== "undefined" && /micromessenger/i.test(navigator.userAgent);
+  }, []);
+
+  const handleWechatVideoPlay = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = true;
+    setIsVideoMuted(true);
+    video.play().catch(() => {});
+  }, []);
+
+  const handleUserInteraction = useCallback(() => {
+    const video = videoRef.current;
+    if (!video || !video.paused) return;
+    video.muted = true;
+    setIsVideoMuted(true);
+    video.play().catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -266,6 +288,34 @@ export function OneImageBanner() {
     window.addEventListener("resize", checkIsMobile);
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
+
+  useEffect(() => {
+    if (!isWechatBrowser() || effectiveMediaType !== "video" || !effectiveBackground) return;
+
+    const win = typeof window !== "undefined" ? window : null;
+    if (win && "WeixinJSBridge" in win) {
+      handleWechatVideoPlay();
+    } else {
+      document.addEventListener("WeixinJSBridgeReady", handleWechatVideoPlay, false);
+    }
+
+    document.addEventListener("touchstart", handleUserInteraction, { once: true, passive: true });
+    document.addEventListener("click", handleUserInteraction, { once: true });
+
+    const retryIntervals = [100, 300, 500, 1000, 2000];
+    const timers = retryIntervals.map(delay =>
+      setTimeout(() => {
+        if (videoRef.current?.paused) handleWechatVideoPlay();
+      }, delay)
+    );
+
+    return () => {
+      document.removeEventListener("WeixinJSBridgeReady", handleWechatVideoPlay);
+      document.removeEventListener("touchstart", handleUserInteraction);
+      document.removeEventListener("click", handleUserInteraction);
+      timers.forEach(clearTimeout);
+    };
+  }, [isWechatBrowser, effectiveMediaType, effectiveBackground, handleWechatVideoPlay, handleUserInteraction]);
 
   useEffect(() => {
     const layout = document.getElementById("frontend-layout");
@@ -307,14 +357,7 @@ export function OneImageBanner() {
   if (!isEnabled) return null;
 
   return (
-    <section
-      className={styles.oneImageBanner}
-      style={
-        effectiveMediaType === "image" && effectiveBackground
-          ? { backgroundImage: `url(${effectiveBackground})` }
-          : undefined
-      }
-    >
+    <section className={styles.oneImageBanner}>
       {effectiveMediaType === "video" && effectiveBackground && (
         <video
           ref={videoRef}
@@ -326,6 +369,9 @@ export function OneImageBanner() {
           muted={isVideoMuted}
           playsInline
           preload="auto"
+          disablePictureInPicture
+          disableRemotePlayback
+          controlsList="nodownload nofullscreen noremoteplayback noplaybackrate"
           onLoadedMetadata={handleVideoLoaded}
           onCanPlay={handleVideoCanPlay}
           onLoadedData={handleVideoLoadedData}

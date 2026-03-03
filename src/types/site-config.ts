@@ -88,6 +88,7 @@ export interface SiteConfigData {
     one_image?: {
       config?: {
         home?: PageOneImageItem;
+        link?: PageOneImageItem;
         categories?: PageOneImageItem;
         tags?: PageOneImageItem;
         archives?: PageOneImageItem;
@@ -97,6 +98,7 @@ export interface SiteConfigData {
     };
     oneImageConfig?: {
       home?: PageOneImageItem;
+      link?: PageOneImageItem;
       categories?: PageOneImageItem;
       tags?: PageOneImageItem;
       archives?: PageOneImageItem;
