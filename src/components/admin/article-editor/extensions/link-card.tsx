@@ -10,6 +10,10 @@ import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps } from "@tip
 import { useState, useRef, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { Pencil } from "lucide-react";
+import { FormIconSelector } from "@/components/ui/form-icon-selector";
+
+const DEFAULT_LINK_ICON = "rivet-icons:link";
+const FA6_ARROW_ICON = "fa6-solid:angle-right";
 
 /** 判断是否为 Iconify 格式（包含 ":"） */
 function isIconifyIcon(icon: string): boolean {
@@ -21,11 +25,30 @@ function isImageUrl(icon: string): boolean {
   return !!icon && (icon.startsWith("http://") || icon.startsWith("https://") || icon.startsWith("/"));
 }
 
+/** 兼容旧 anzhiyufont 图标命名，统一映射到 fa6 图标 */
+function normalizeLegacyIconName(icon: string): string {
+  const value = icon.trim();
+  if (!value) return DEFAULT_LINK_ICON;
+  if (value === "anzhiyu-icon-angle-right") return FA6_ARROW_ICON;
+  if (value.startsWith("anzhiyu-icon-")) return DEFAULT_LINK_ICON;
+  return value;
+}
+
+/** 解析为可用的 Iconify 图标名（非 Iconify 时走 fallback） */
+function resolveIconifyName(icon: string, fallback: string): string {
+  const normalized = normalizeLegacyIconName(icon);
+  return isIconifyIcon(normalized) ? normalized : fallback;
+}
+
+/** 将 Iconify 名称转换为可直出的 SVG URL */
+function toIconifySvgUrl(iconifyName: string): string {
+  const [prefix, name] = iconifyName.split(":");
+  if (!prefix || !name) return "";
+  return `https://api.iconify.design/${prefix}/${name}.svg?color=currentColor`;
+}
+
 /** 渲染图标：支持 Iconify、图片 URL、默认链接图标 */
 function CardIcon({ icon }: { icon: string }) {
-  if (icon && isIconifyIcon(icon)) {
-    return <Icon icon={icon} width={28} height={28} style={{ color: "var(--anzhiyu-fontcolor, var(--foreground))" }} />;
-  }
   if (icon && isImageUrl(icon)) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
@@ -38,10 +61,10 @@ function CardIcon({ icon }: { icon: string }) {
       />
     );
   }
-  // 默认链接图标
+  const iconifyName = resolveIconifyName(icon, DEFAULT_LINK_ICON);
   return (
     <Icon
-      icon="fa6-solid:link"
+      icon={iconifyName}
       width={28}
       height={28}
       style={{ color: "var(--anzhiyu-fontcolor, var(--foreground))" }}
@@ -60,12 +83,17 @@ function LinkCardView({ node, updateAttributes }: NodeViewProps) {
   const tips = (node.attrs.tips as string) || "";
 
   const displayTips = tips || "引用站外地址";
+  const displaySitename = sitename || "网站名称";
 
   // 点击外部关闭编辑
   useEffect(() => {
     if (!editing) return;
     const handler = (e: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as globalThis.Node)) {
+      const target = e.target as HTMLElement | null;
+      if (target?.closest('[data-form-icon-selector-popover="true"]')) {
+        return;
+      }
+      if (panelRef.current && target && !panelRef.current.contains(target)) {
         setEditing(false);
       }
     };
@@ -93,13 +121,14 @@ function LinkCardView({ node, updateAttributes }: NodeViewProps) {
                   <div className="tag-link-left">
                     <CardIcon icon={icon} />
                   </div>
-                  <div className="tag-link-right">
-                    <div className="tag-link-title">{title || url || "链接标题"}</div>
-                    {sitename && <div className="tag-link-sitename">{sitename}</div>}
-                  </div>
+                <div className="tag-link-right">
+                  <div className="tag-link-title">{title || url || "链接标题"}</div>
+                  <div className="tag-link-sitename">{displaySitename}</div>
                 </div>
+                <Icon icon={FA6_ARROW_ICON} width={18} height={18} className="tag-link-arrow-icon" aria-hidden="true" />
               </div>
             </div>
+          </div>
           </div>
 
           {/* 表单 */}
@@ -145,15 +174,17 @@ function LinkCardView({ node, updateAttributes }: NodeViewProps) {
                 />
               </label>
             </div>
-            <label className="editor-btn-field">
+            <div className="editor-btn-field">
               <span className="editor-btn-label">图标（Iconify 格式或图片 URL）</span>
-              <input
+              <FormIconSelector
                 value={icon}
-                onChange={e => updateAttributes({ icon: e.target.value })}
-                className="editor-btn-input"
-                placeholder="simple-icons:github 或 https://example.com/icon.png"
+                onValueChange={value => updateAttributes({ icon: value.trim() })}
+                className="editor-btn-icon-selector"
+                placeholder="搜索图标，或输入 rivet-icons:link / https://... / /icons/..."
+                size="sm"
               />
-            </label>
+              <span className="editor-btn-helper">支持 Iconify 全量搜索、URL 图标，或直接输入 prefix:name</span>
+            </div>
           </div>
         </div>
       </NodeViewWrapper>
@@ -183,8 +214,9 @@ function LinkCardView({ node, updateAttributes }: NodeViewProps) {
               </div>
               <div className="tag-link-right">
                 <div className="tag-link-title">{title || url || "链接卡片"}</div>
-                {sitename && <div className="tag-link-sitename">{sitename}</div>}
+                <div className="tag-link-sitename">{displaySitename}</div>
               </div>
+              <Icon icon={FA6_ARROW_ICON} width={18} height={18} className="tag-link-arrow-icon" aria-hidden="true" />
             </div>
           </div>
         </div>
@@ -237,13 +269,23 @@ export const LinkCard = Node.create({
           const sitenameEl = el.querySelector(".tag-link-sitename");
           const iconImg = el.querySelector(".tag-link-left img") as HTMLImageElement | null;
           const iconSpan = el.querySelector(".tag-link-left .iconify") as HTMLElement | null;
+          const iconI = el.querySelector(".tag-link-left i") as HTMLElement | null;
 
           // 图标：图片 URL > Iconify data-icon
           let iconVal = "";
           if (iconImg) {
-            iconVal = iconImg.getAttribute("src") || iconImg.getAttribute("data-src") || "";
+            iconVal =
+              iconImg.getAttribute("data-iconify") ||
+              iconImg.getAttribute("data-icon") ||
+              iconImg.getAttribute("src") ||
+              iconImg.getAttribute("data-src") ||
+              "";
           } else if (iconSpan) {
             iconVal = iconSpan.getAttribute("data-icon") || "";
+          } else if (iconI) {
+            const classList = Array.from(iconI.classList);
+            const legacyIcon = classList.find(className => className.startsWith("anzhiyu-icon-")) || "";
+            iconVal = normalizeLegacyIconName(legacyIcon);
           }
 
           return {
@@ -273,26 +315,36 @@ export const LinkCard = Node.create({
 
     // icon
     const leftContent: unknown[] = [];
-    if (nodeIcon && isIconifyIcon(nodeIcon)) {
-      // Iconify 图标：输出为 <span class="iconify" data-icon="...">
-      leftContent.push(["span", { class: "iconify", "data-icon": nodeIcon, style: "font-size: 28px" }]);
-    } else if (nodeIcon && isImageUrl(nodeIcon)) {
+    if (nodeIcon && isImageUrl(nodeIcon)) {
       leftContent.push(["img", { src: nodeIcon, alt: "", loading: "lazy" }]);
     } else {
-      leftContent.push(["span", { class: "iconify", "data-icon": "fa6-solid:link", style: "font-size: 28px" }]);
+      const iconifyName = resolveIconifyName(nodeIcon, DEFAULT_LINK_ICON);
+      const iconifyUrl = toIconifySvgUrl(iconifyName);
+      leftContent.push(["img", { src: iconifyUrl, alt: iconifyName, loading: "lazy", "data-iconify": iconifyName }]);
     }
 
     // right
-    const rightContent: unknown[] = [["span", { class: "tag-link-title" }, nodeTitle || url]];
-    if (sitename) {
-      rightContent.push(["span", { class: "tag-link-sitename" }, sitename]);
-    }
+    const rightContent: unknown[] = [
+      ["span", { class: "tag-link-title" }, nodeTitle || url || "链接卡片"],
+      ["span", { class: "tag-link-sitename" }, sitename || "网站名称"],
+    ];
 
     linkChildren.push([
       "div",
       { class: "tag-link-bottom" },
       ["div", { class: "tag-link-left" }, ...leftContent],
       ["div", { class: "tag-link-right" }, ...rightContent],
+      [
+        "img",
+        {
+          class: "tag-link-arrow-icon",
+          src: toIconifySvgUrl(FA6_ARROW_ICON),
+          alt: "",
+          loading: "lazy",
+          "aria-hidden": "true",
+          "data-iconify": FA6_ARROW_ICON,
+        },
+      ],
     ]);
 
     return [

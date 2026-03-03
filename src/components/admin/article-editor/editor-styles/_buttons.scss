@@ -137,6 +137,10 @@
   position: relative;
 }
 
+.editor-btn-icon-selector {
+  width: 100%;
+}
+
 .editor-btn-label {
   font-size: 11px;
   font-weight: 600;
@@ -185,6 +189,13 @@
   resize: vertical;
   font-family: source-code-pro, Menlo, Monaco, Consolas, monospace;
   font-size: 12px;
+}
+
+.editor-btn-helper {
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--anzhiyu-secondtext, #9ca3af);
 }
 
 // ---- 按钮组逐项编辑 ----
