@@ -50,7 +50,8 @@ class SettingsErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryS
             </div>
             <button
               onClick={() => {
-                this.props.onRetry?.() ?? this.setState({ hasError: false });
+                if (this.props.onRetry) this.props.onRetry();
+                else this.setState({ hasError: false });
               }}
               className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm hover:opacity-90 transition-opacity"
             >
