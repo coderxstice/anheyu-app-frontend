@@ -1240,6 +1240,8 @@ html.dark [data-slot="content"][role="tooltip"] {
 /* ===================== One Image Background ===================== */
 .frontend-layout {
   position: relative;
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
 }
 
@@ -1262,6 +1264,21 @@ html.dark [data-slot="content"][role="tooltip"] {
 
 .frontend-layout.one-image-active::before {
   opacity: 1;
+}
+
+#frontend-main {
+  animation: slide-in 0.6s 0.1s backwards;
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ===================== HeroUI Toast - ElementUI Message 风格 ===================== */
