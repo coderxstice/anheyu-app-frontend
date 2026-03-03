@@ -585,16 +585,16 @@ export function VisualArrayEditor({
   const lastValueRef = React.useRef<string | undefined>(undefined);
   const idCounter = React.useRef(0);
 
-  // 从外部 value 同步内部状态（仅当外部变化时触发）
+  // 从外部 value 同步内部状态（仅当外部变化时触发）；保留已有项的 _id 避免展开项被 remount 收起
   React.useEffect(() => {
     if (value === lastValueRef.current) return;
     const parsed = parseJsonArray(value);
-    setInternalItems(
-      parsed.map(data => ({
-        _id: `_${++idCounter.current}`,
+    setInternalItems(prev => {
+      return parsed.map((data, i) => ({
+        _id: i < prev.length ? prev[i]._id : `_${++idCounter.current}`,
         data,
-      }))
-    );
+      }));
+    });
     lastValueRef.current = value;
   }, [value]);
 

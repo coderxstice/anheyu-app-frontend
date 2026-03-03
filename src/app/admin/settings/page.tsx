@@ -17,6 +17,7 @@ import { settingsFormRegistry } from "./_config/settings-forms";
 interface ErrorBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode;
+  onRetry?: () => void;
 }
 
 interface ErrorBoundaryState {
@@ -48,7 +49,9 @@ class SettingsErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryS
               <p className="text-xs text-muted-foreground mt-1">表单组件加载出错，请刷新页面重试</p>
             </div>
             <button
-              onClick={() => this.setState({ hasError: false })}
+              onClick={() => {
+                this.props.onRetry?.() ?? this.setState({ hasError: false });
+              }}
               className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm hover:opacity-90 transition-opacity"
             >
               重试
@@ -87,6 +90,7 @@ function FormFallback() {
 
 export default function SettingsPage() {
   const [activeSection, setActiveSection] = useState<string>("site-basic");
+  const [formRetryKey, setFormRetryKey] = useState(0);
 
   // 搜索相关状态
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -196,7 +200,10 @@ export default function SettingsPage() {
     const FormComponent = settingsFormRegistry[activeSection as SettingCategoryId];
     if (!FormComponent) return null;
     return (
-      <SettingsErrorBoundary>
+      <SettingsErrorBoundary
+        key={`${activeSection}-${formRetryKey}`}
+        onRetry={() => setFormRetryKey(k => k + 1)}
+      >
         <Suspense key={activeSection} fallback={<FormFallback />}>
           <FormComponent {...formProps} />
         </Suspense>

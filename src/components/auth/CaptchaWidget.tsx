@@ -1,10 +1,62 @@
 "use client";
 
-import { useState, useEffect, useCallback, useImperativeHandle, forwardRef } from "react";
-import { RefreshCw } from "lucide-react";
+import { useState, useEffect, useCallback, useImperativeHandle, forwardRef, useRef } from "react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { authApi } from "@/lib/api/auth";
 import { cn } from "@/lib/utils";
 import type { CaptchaConfig } from "@/types/auth";
+
+const TURNSTILE_SCRIPT_URL = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+const GEETEST_SCRIPT_URL = "https://static.geetest.com/v4/gt4.js";
+
+/** 极验 getValidate() 返回结构 */
+interface GeetestValidate {
+  lot_number: string;
+  captcha_output: string;
+  pass_token: string;
+  gen_time: string;
+}
+
+/** 极验 4.0 验证实例（gt4.js 回调参数） */
+interface GeetestCaptchaInstance {
+  appendTo: (el: string | HTMLElement) => void;
+  getValidate: () => GeetestValidate | false;
+  reset: () => void;
+  onReady: (cb: () => void) => GeetestCaptchaInstance;
+  onSuccess: (cb: () => void) => GeetestCaptchaInstance;
+  onError: (cb: (err: { code?: string; msg?: string }) => void) => GeetestCaptchaInstance;
+}
+
+declare global {
+  interface Window {
+    initGeetest4?: (
+      options: {
+        captchaId: string;
+        product?: string;
+        language?: string;
+        protocol?: string;
+        onError?: () => void;
+      },
+      callback: (captcha: GeetestCaptchaInstance) => void
+    ) => void;
+    turnstile?: {
+      render: (
+        container: string | HTMLElement,
+        options: {
+          sitekey: string;
+          theme?: "light" | "dark" | "auto";
+          size?: "normal" | "compact" | "flexible";
+          callback?: (token: string) => void;
+          "error-callback"?: (errorCode?: string) => void;
+          "expired-callback"?: () => void;
+        }
+      ) => string;
+      reset: (widgetId?: string) => void;
+      remove: (widgetId: string) => void;
+      ready: (fn: () => void) => void;
+    };
+  }
+}
 
 export interface CaptchaResult {
   turnstile_token?: string;
@@ -34,6 +86,17 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
   const [imageData, setImageData] = useState<{ id: string; base64: string } | null>(null);
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetIdRef = useRef<string | null>(null);
+
+  const [geetestResult, setGeetestResult] = useState<GeetestValidate | null>(null);
+  const [geetestInstanceReady, setGeetestInstanceReady] = useState(false);
+  const [geetestError, setGeetestError] = useState(false);
+  const [geetestRetryKey, setGeetestRetryKey] = useState(0);
+  const geetestContainerRef = useRef<HTMLDivElement>(null);
+  const geetestInstanceRef = useRef<GeetestCaptchaInstance | null>(null);
+  const geetestLoadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -66,6 +129,151 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
     }
   }, [config?.provider, fetchImage]);
 
+  // Turnstile：加载脚本并渲染 widget
+  useEffect(() => {
+    if (config?.provider !== "turnstile" || !config.turnstile_site_key) return;
+
+    const sitekey = config.turnstile_site_key;
+
+    const renderWidget = () => {
+      const container = turnstileContainerRef.current;
+      if (!window.turnstile || !container?.isConnected) return;
+      const widgetId = window.turnstile.render(container, {
+        sitekey,
+        theme: "auto",
+        size: "normal",
+        callback: (token: string) => setTurnstileToken(token),
+        "error-callback": () => setTurnstileToken(null),
+        "expired-callback": () => setTurnstileToken(null),
+      });
+      turnstileWidgetIdRef.current = widgetId;
+    };
+
+    if (window.turnstile) {
+      window.turnstile.ready(renderWidget);
+      return () => {
+        if (turnstileWidgetIdRef.current) {
+          window.turnstile?.remove(turnstileWidgetIdRef.current);
+          turnstileWidgetIdRef.current = null;
+        }
+        setTurnstileToken(null);
+      };
+    }
+
+    const script = document.createElement("script");
+    script.src = TURNSTILE_SCRIPT_URL;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      window.turnstile?.ready(renderWidget);
+    };
+    document.head.appendChild(script);
+
+    return () => {
+      if (turnstileWidgetIdRef.current) {
+        window.turnstile?.remove(turnstileWidgetIdRef.current);
+        turnstileWidgetIdRef.current = null;
+      }
+      setTurnstileToken(null);
+    };
+  }, [config?.provider, config?.turnstile_site_key]);
+
+  // 极验 4.0：加载 gt4.js 并初始化，appendTo 到容器，onSuccess 时用 getValidate() 取结果
+  useEffect(() => {
+    if (config?.provider !== "geetest" || !config.geetest_captcha_id) return;
+
+    setGeetestError(false);
+
+    const handleUncaughtGeetestError = (event: ErrorEvent) => {
+      if (event.message?.includes("网络错误") && (event.filename?.includes("gt4") || event.filename?.includes("geetest"))) {
+        if (geetestLoadTimeoutRef.current) {
+          clearTimeout(geetestLoadTimeoutRef.current);
+          geetestLoadTimeoutRef.current = null;
+        }
+        setGeetestInstanceReady(false);
+        setGeetestError(true);
+      }
+    };
+    window.addEventListener("error", handleUncaughtGeetestError);
+    const captchaId = config.geetest_captcha_id;
+    const GEETEST_LOAD_TIMEOUT_MS = 15000;
+
+    const init = () => {
+      const el = geetestContainerRef.current;
+      if (!window.initGeetest4 || !el?.isConnected) return;
+
+      geetestLoadTimeoutRef.current = setTimeout(() => {
+        geetestLoadTimeoutRef.current = null;
+        setGeetestInstanceReady(false);
+        setGeetestError(true);
+      }, GEETEST_LOAD_TIMEOUT_MS);
+
+      window.initGeetest4(
+        {
+          captchaId,
+          product: "float",
+          language: "zho",
+          protocol: typeof window !== "undefined" ? `${window.location.protocol}//` : "https://",
+          onError: () => {
+            if (geetestLoadTimeoutRef.current) {
+              clearTimeout(geetestLoadTimeoutRef.current);
+              geetestLoadTimeoutRef.current = null;
+            }
+            setGeetestInstanceReady(false);
+            setGeetestError(true);
+          },
+        },
+        (captchaObj: GeetestCaptchaInstance) => {
+          if (geetestLoadTimeoutRef.current) {
+            clearTimeout(geetestLoadTimeoutRef.current);
+            geetestLoadTimeoutRef.current = null;
+          }
+          geetestInstanceRef.current = captchaObj;
+          setGeetestInstanceReady(true);
+          captchaObj.onSuccess(() => {
+            const v = captchaObj.getValidate();
+            if (v) setGeetestResult(v);
+          });
+          captchaObj.onError(() => setGeetestResult(null));
+        }
+      );
+    };
+
+    const cleanup = () => {
+      window.removeEventListener("error", handleUncaughtGeetestError);
+      if (geetestLoadTimeoutRef.current) {
+        clearTimeout(geetestLoadTimeoutRef.current);
+        geetestLoadTimeoutRef.current = null;
+      }
+      setGeetestResult(null);
+      setGeetestInstanceReady(false);
+      setGeetestError(false);
+      geetestInstanceRef.current = null;
+    };
+
+    if (window.initGeetest4) {
+      init();
+      return cleanup;
+    }
+
+    const script = document.createElement("script");
+    script.src = GEETEST_SCRIPT_URL;
+    script.async = true;
+    script.onload = init;
+    document.head.appendChild(script);
+
+    return cleanup;
+  }, [config?.provider, config?.geetest_captcha_id, geetestRetryKey]);
+
+  useEffect(() => {
+    if (!geetestInstanceReady || config?.provider !== "geetest") return;
+    const container = geetestContainerRef.current;
+    const instance = geetestInstanceRef.current;
+    if (container?.isConnected && instance) {
+      instance.appendTo(container);
+    }
+  }, [geetestInstanceReady, config?.provider]);
+
   useImperativeHandle(
     ref,
     () => ({
@@ -74,18 +282,39 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
         if (config.provider === "image") {
           return { image_captcha_id: imageData?.id, image_captcha_answer: answer };
         }
+        if (config.provider === "turnstile" && turnstileToken) {
+          return { turnstile_token: turnstileToken };
+        }
+        if (config.provider === "geetest" && geetestResult) {
+          return {
+            geetest_lot_number: geetestResult.lot_number,
+            geetest_captcha_output: geetestResult.captcha_output,
+            geetest_pass_token: geetestResult.pass_token,
+            geetest_gen_time: geetestResult.gen_time,
+          };
+        }
         return {};
       },
       refresh() {
         if (config?.provider === "image") fetchImage();
+        if (config?.provider === "turnstile" && turnstileWidgetIdRef.current) {
+          setTurnstileToken(null);
+          window.turnstile?.reset(turnstileWidgetIdRef.current ?? undefined);
+        }
+        if (config?.provider === "geetest") {
+          setGeetestResult(null);
+          geetestInstanceRef.current?.reset();
+        }
       },
       isReady() {
         if (!config || config.provider === "none") return true;
         if (config.provider === "image") return !!(imageData?.id && answer.trim());
+        if (config.provider === "turnstile") return !!turnstileToken;
+        if (config.provider === "geetest") return !!geetestResult;
         return true;
       },
     }),
-    [config, imageData, answer, fetchImage]
+    [config, imageData, answer, fetchImage, turnstileToken, geetestResult]
   );
 
   if (!config || config.provider === "none") return null;
@@ -93,50 +322,97 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
   if (config.provider === "image") {
     return (
       <div className={cn("flex flex-col gap-2", className)}>
-        <div className="flex items-center gap-3">
-          <div className="relative shrink-0 overflow-hidden rounded-lg border border-border bg-muted/30">
-            {loading ? (
-              <div className="flex h-[40px] w-[120px] items-center justify-center">
-                <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
-              </div>
-            ) : imageData ? (
-              /* eslint-disable-next-line @next/next/no-img-element -- base64 captcha, not suitable for next/image */
-              <img
-                src={imageData.base64}
-                alt="验证码"
-                className="h-[40px] w-[120px] object-contain dark:invert dark:hue-rotate-180"
-                draggable={false}
-              />
-            ) : (
-              <div className="flex h-[40px] w-[120px] items-center justify-center text-xs text-muted-foreground">
-                加载失败
-              </div>
-            )}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <div className="relative shrink-0 overflow-hidden rounded-lg border border-border bg-muted/30">
+              {loading ? (
+                <div className="flex h-[40px] w-[120px] items-center justify-center">
+                  <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : imageData ? (
+                /* eslint-disable-next-line @next/next/no-img-element -- base64 captcha, not suitable for next/image */
+                <img
+                  src={imageData.base64}
+                  alt="验证码"
+                  className="h-[40px] w-[120px] object-contain dark:invert dark:hue-rotate-180"
+                  draggable={false}
+                />
+              ) : (
+                <div className="flex h-[40px] w-[120px] items-center justify-center text-xs text-muted-foreground">
+                  加载失败
+                </div>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={fetchImage}
+              disabled={loading}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50 cursor-pointer"
+              title="刷新验证码"
+            >
+              <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+            </button>
+            <input
+              type="text"
+              value={answer}
+              onChange={e => setAnswer(e.target.value)}
+              placeholder="请输入验证码"
+              maxLength={config.image_captcha_length || 6}
+              autoComplete="one-time-code"
+              className={cn(
+                "h-10 flex-1 rounded-lg border border-border bg-background px-3 text-sm text-foreground",
+                "placeholder:text-muted-foreground/60",
+                "outline-none transition-all duration-200",
+                "focus:border-primary/60 focus:ring-2 focus:ring-primary/15"
+              )}
+            />
           </div>
-          <button
-            type="button"
-            onClick={fetchImage}
-            disabled={loading}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50 cursor-pointer"
-            title="刷新验证码"
-          >
-            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
-          </button>
-          <input
-            type="text"
-            value={answer}
-            onChange={e => setAnswer(e.target.value)}
-            placeholder="请输入验证码"
-            maxLength={config.image_captcha_length || 6}
-            autoComplete="one-time-code"
-            className={cn(
-              "h-10 flex-1 rounded-lg border border-border bg-background px-3 text-sm text-foreground",
-              "placeholder:text-muted-foreground/60",
-              "outline-none transition-all duration-200",
-              "focus:border-primary/60 focus:ring-2 focus:ring-primary/15"
-            )}
-          />
         </div>
+      </div>
+    );
+  }
+
+  if (config.provider === "turnstile" && config.turnstile_site_key) {
+    return (
+      <div className={cn("flex flex-col gap-2", className)}>
+        <div ref={turnstileContainerRef} className="min-h-[65px]" />
+      </div>
+    );
+  }
+
+  if (config.provider === "geetest" && config.geetest_captcha_id) {
+    return (
+      <div className={cn("flex flex-col gap-2", className)}>
+        {geetestError ? (
+          <div className="flex flex-col gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-500" />
+              <div className="flex-1 space-y-1">
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                  验证码加载失败
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  可能是网络问题，请点击下方按钮重试。若为本地开发，可在后台「系统设置 → 人机验证」中切换为「图形验证码」。
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setGeetestError(false);
+                setGeetestRetryKey(k => k + 1);
+                document.querySelectorAll('script[src*="static.geetest.com"]').forEach(s => s.remove());
+                delete (window as { initGeetest4?: unknown }).initGeetest4;
+              }}
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-500/20 dark:text-amber-200 dark:hover:bg-amber-500/15"
+            >
+              <RefreshCw className="h-4 w-4" />
+              重新加载
+            </button>
+          </div>
+        ) : (
+          <div ref={geetestContainerRef} className="min-h-[50px]" />
+        )}
       </div>
     );
   }
