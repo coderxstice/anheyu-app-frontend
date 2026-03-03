@@ -84,6 +84,7 @@ function LinkCardView({ node, updateAttributes }: NodeViewProps) {
 
   const displayTips = tips || "引用站外地址";
   const displaySitename = sitename || "网站名称";
+  const hasLink = Boolean(url?.trim());
 
   // 点击外部关闭编辑
   useEffect(() => {
@@ -205,20 +206,54 @@ function LinkCardView({ node, updateAttributes }: NodeViewProps) {
         >
           <Pencil /> 编辑
         </div>
-        <div className="anzhiyu-tag-link">
-          <div className="tag-Link">
-            <div className="tag-link-tips">{displayTips}</div>
-            <div className="tag-link-bottom">
-              <div className="tag-link-left">
-                <CardIcon icon={icon} />
+        <div className="anzhiyu-tag-link" contentEditable={false}>
+          {hasLink ? (
+            <a
+              className="tag-Link"
+              href={url.trim()}
+              target="_blank"
+              rel="noopener noreferrer"
+              contentEditable={false}
+              onMouseDown={e => {
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="tag-link-tips">{displayTips}</div>
+              <div className="tag-link-bottom">
+                <div className="tag-link-left">
+                  <CardIcon icon={icon} />
+                </div>
+                <div className="tag-link-right">
+                  <div className="tag-link-title">{title || url || "链接卡片"}</div>
+                  <div className="tag-link-sitename">{displaySitename}</div>
+                </div>
+                <Icon icon={FA6_ARROW_ICON} width={18} height={18} className="tag-link-arrow-icon" aria-hidden="true" />
               </div>
-              <div className="tag-link-right">
-                <div className="tag-link-title">{title || url || "链接卡片"}</div>
-                <div className="tag-link-sitename">{displaySitename}</div>
+            </a>
+          ) : (
+            <div
+              className="tag-Link tag-Link--no-link"
+              contentEditable={false}
+              onMouseDown={e => {
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+            >
+              <div className="tag-link-tips">{displayTips}</div>
+              <div className="tag-link-bottom">
+                <div className="tag-link-left">
+                  <CardIcon icon={icon} />
+                </div>
+                <div className="tag-link-right">
+                  <div className="tag-link-title">{title || url || "链接卡片"}</div>
+                  <div className="tag-link-sitename">{displaySitename}</div>
+                </div>
+                <Icon icon={FA6_ARROW_ICON} width={18} height={18} className="tag-link-arrow-icon" aria-hidden="true" />
               </div>
-              <Icon icon={FA6_ARROW_ICON} width={18} height={18} className="tag-link-arrow-icon" aria-hidden="true" />
             </div>
-          </div>
+          )}
         </div>
       </div>
     </NodeViewWrapper>

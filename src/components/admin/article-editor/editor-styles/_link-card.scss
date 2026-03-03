@@ -2,6 +2,23 @@
 // 链接卡片（与文章详情一致）
 // ============================================
 
+// 链接卡片 hover 区域圆角与内部 .tag-Link 一致（8px）
+.link-card-wrapper .editor-node-hover-wrap {
+  border-radius: 8px;
+}
+
+// 节点选中时保持卡片内文字颜色，不继承 .tiptap 的可编辑区颜色（避免点击后文字变黑）
+.link-card-wrapper.ProseMirror-selectednode .anzhiyu-tag-link .tag-Link,
+.link-card-wrapper.ProseMirror-selectednode .anzhiyu-tag-link .tag-Link .tag-link-title,
+.link-card-wrapper.ProseMirror-selectednode .anzhiyu-tag-link .tag-Link .tag-link-sitename {
+  color: var(--anzhiyu-fontcolor, var(--foreground));
+}
+.link-card-wrapper.ProseMirror-selectednode .anzhiyu-tag-link .tag-Link:hover,
+.link-card-wrapper.ProseMirror-selectednode .anzhiyu-tag-link .tag-Link:hover .tag-link-title,
+.link-card-wrapper.ProseMirror-selectednode .anzhiyu-tag-link .tag-Link:hover .tag-link-sitename {
+  color: #fff;
+}
+
 // 链接卡片编辑面板
 .editor-linkcard-edit-panel {
   display: flex;
@@ -39,11 +56,20 @@
   display: block;
   margin: 1rem 0;
 
+  // 有链接时小手，无链接时默认
+  .tag-Link[href] {
+    cursor: pointer;
+  }
+  .tag-Link--no-link {
+    cursor: default;
+  }
+
   .tag-Link {
     display: flex;
     flex-direction: column;
     padding: 0.5rem 1rem !important;
     text-decoration: none;
+    color: var(--anzhiyu-fontcolor, var(--foreground));
     background: var(--muted);
     border: 1px solid var(--border);
     border-radius: 8px !important;
@@ -118,7 +144,8 @@
         margin: auto;
         font-size: 24px;
         color: var(--foreground);
-        transition: all 0.3s ease;
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s ease;
+        will-change: transform;
       }
 
     img {
@@ -136,6 +163,8 @@
       object-fit: contain;
       border-radius: 0;
       margin: auto;
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
     }
   }
 

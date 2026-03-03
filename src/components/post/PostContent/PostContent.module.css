@@ -1173,7 +1173,8 @@
   margin: auto;
   font-size: 24px;
   color: var(--foreground);
-  transition: all 0.3s ease;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s ease;
+  will-change: transform;
 }
 
 .postContent :global(.anzhiyu-tag-link .tag-link-left img) {
@@ -1191,6 +1192,8 @@
   object-fit: contain;
   border-radius: 0;
   margin: auto;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
 }
 
 .postContent :global(.anzhiyu-tag-link .tag-link-right) {
