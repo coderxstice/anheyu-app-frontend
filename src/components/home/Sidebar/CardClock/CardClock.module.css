@@ -34,10 +34,6 @@
   transition: all 0.3s ease;
 }
 
-.cardClock:hover {
-  box-shadow: var(--anzhiyu-shadow-main);
-}
-
 /* 加载状态 */
 .loadingContainer {
   display: flex;

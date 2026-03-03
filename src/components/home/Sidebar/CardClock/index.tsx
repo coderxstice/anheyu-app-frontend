@@ -282,9 +282,17 @@ export const CardClock = memo(function CardClock({ config }: CardClockProps) {
         let city = "未知";
 
         if (result.code === 200 && result.data) {
-          city = result.data.city || "未知";
+          // 优先 city，空时用 province/country（如局域网、境外）再兜底「未知」
+          city =
+            result.data.city ||
+            result.data.province ||
+            result.data.country ||
+            "未知";
           if (result.data.longitude && result.data.latitude) {
             location = `${result.data.longitude},${result.data.latitude}`;
+          } else if (result.default_rectangle) {
+            // 局域网或无经纬度时后端会带 default_rectangle，优先用其请求天气
+            location = result.default_rectangle;
           }
         } else {
           city = await fetchCityName(location);
