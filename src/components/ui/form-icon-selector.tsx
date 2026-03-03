@@ -112,7 +112,7 @@ const DEFAULT_REMIX_ICONS = [
 // ─── 工具函数 ───────────────────────────────────────────────────────
 
 function isImageUrl(value?: string): boolean {
-  return !!value && (value.startsWith("http://") || value.startsWith("https://"));
+  return !!value && (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("/"));
 }
 
 function isIconifyIcon(value?: string): boolean {
@@ -306,7 +306,7 @@ export function FormIconSelector({
   // ─── 弹窗内容 ─────────────────────────────────────────────────────
 
   const popoverContent = (
-    <div className="flex flex-col">
+    <div className="flex flex-col" data-form-icon-selector-popover="true">
       {/* Tab 切换 */}
       <div className="flex items-center gap-1 p-2 pb-0">
         <button
@@ -469,7 +469,9 @@ export function FormIconSelector({
             </div>
           )}
 
-          <p className="text-[10px] text-muted-foreground leading-relaxed">输入 http:// 或 https:// 开头的图片地址</p>
+          <p className="text-[10px] text-muted-foreground leading-relaxed">
+            输入 http://、https:// 或 / 开头的图标地址
+          </p>
         </div>
       )}
     </div>
@@ -560,7 +562,7 @@ export function FormIconSelector({
         </div>
       </PopoverTrigger>
 
-      <PopoverContent>{popoverContent}</PopoverContent>
+      <PopoverContent data-form-icon-selector-popover="true">{popoverContent}</PopoverContent>
     </Popover>
   );
 }

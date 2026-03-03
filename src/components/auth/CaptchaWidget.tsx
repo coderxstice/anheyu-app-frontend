@@ -185,7 +185,10 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
     setGeetestError(false);
 
     const handleUncaughtGeetestError = (event: ErrorEvent) => {
-      if (event.message?.includes("网络错误") && (event.filename?.includes("gt4") || event.filename?.includes("geetest"))) {
+      if (
+        event.message?.includes("网络错误") &&
+        (event.filename?.includes("gt4") || event.filename?.includes("geetest"))
+      ) {
         if (geetestLoadTimeoutRef.current) {
           clearTimeout(geetestLoadTimeoutRef.current);
           geetestLoadTimeoutRef.current = null;
@@ -374,7 +377,7 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
 
   if (config.provider === "turnstile" && config.turnstile_site_key) {
     return (
-      <div className={cn("flex flex-col gap-2", className)}>
+      <div className={cn("flex flex-col gap-2 items-center", className)}>
         <div ref={turnstileContainerRef} className="min-h-[65px]" />
       </div>
     );
@@ -382,17 +385,16 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
 
   if (config.provider === "geetest" && config.geetest_captcha_id) {
     return (
-      <div className={cn("flex flex-col gap-2", className)}>
+      <div className={cn("flex flex-col gap-2 items-center", className)}>
         {geetestError ? (
           <div className="flex flex-col gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
             <div className="flex items-start gap-3">
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-500" />
               <div className="flex-1 space-y-1">
-                <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                  验证码加载失败
-                </p>
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-200">验证码加载失败</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  可能是网络问题，请点击下方按钮重试。若为本地开发，可在后台「系统设置 → 人机验证」中切换为「图形验证码」。
+                  可能是网络问题，请点击下方按钮重试。若为本地开发，可在后台「系统设置 →
+                  人机验证」中切换为「图形验证码」。
                 </p>
               </div>
             </div>
@@ -411,7 +413,7 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
             </button>
           </div>
         ) : (
-          <div ref={geetestContainerRef} className="min-h-[50px]" />
+          <div ref={geetestContainerRef} className="flex min-h-[50px] items-center [&_.geetest_captcha]:my-0" />
         )}
       </div>
     );

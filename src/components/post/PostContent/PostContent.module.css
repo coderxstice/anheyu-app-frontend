@@ -1088,6 +1088,7 @@
 .postContent :global(.anzhiyu-tag-link) {
   display: block;
   margin: 1rem 0;
+  animation: fadeIn 0.3s ease;
 }
 
 .postContent :global(.anzhiyu-tag-link .tag-Link) {
@@ -1107,13 +1108,16 @@
 }
 
 .postContent :global(.anzhiyu-tag-link .tag-Link:hover .tag-link-left i),
-.postContent :global(.anzhiyu-tag-link .tag-Link:hover .tag-link-left .iconify) {
+.postContent :global(.anzhiyu-tag-link .tag-Link:hover .tag-link-left .iconify),
+.postContent :global(.anzhiyu-tag-link .tag-Link:hover .tag-link-left img[data-iconify]) {
   color: var(--primary);
   transform: scale(1.1);
 }
 
-.postContent :global(.anzhiyu-tag-link .tag-Link:hover .tag-link-bottom > i) {
+.postContent :global(.anzhiyu-tag-link .tag-Link:hover .tag-link-bottom > i),
+.postContent :global(.anzhiyu-tag-link .tag-Link:hover .tag-link-bottom > .tag-link-arrow-icon) {
   color: #fff;
+  filter: brightness(0) invert(1);
 }
 
 .postContent :global(.anzhiyu-tag-link .tag-Link:hover .tag-link-sitename) {
@@ -1136,12 +1140,19 @@
   margin-top: 0.5rem;
 }
 
-.postContent :global(.anzhiyu-tag-link .tag-link-bottom > i) {
+.postContent :global(.anzhiyu-tag-link .tag-link-bottom > i),
+.postContent :global(.anzhiyu-tag-link .tag-link-bottom > .tag-link-arrow-icon) {
   margin-left: auto;
   font-size: 1.2rem;
   color: var(--muted-foreground);
   opacity: 0.5;
   transition: all 0.3s ease;
+}
+
+.postContent :global(.anzhiyu-tag-link .tag-link-bottom > .tag-link-arrow-icon) {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
 }
 
 .postContent :global(.anzhiyu-tag-link .tag-link-left) {
@@ -1162,7 +1173,8 @@
   margin: auto;
   font-size: 24px;
   color: var(--foreground);
-  transition: all 0.3s ease;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s ease;
+  will-change: transform;
 }
 
 .postContent :global(.anzhiyu-tag-link .tag-link-left img) {
@@ -1172,6 +1184,16 @@
   border-radius: 8px;
   margin: 0;
   box-shadow: none;
+}
+
+.postContent :global(.anzhiyu-tag-link .tag-link-left img[data-iconify]) {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  border-radius: 0;
+  margin: auto;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
 }
 
 .postContent :global(.anzhiyu-tag-link .tag-link-right) {
@@ -1192,6 +1214,7 @@
 }
 
 .postContent :global(.anzhiyu-tag-link .tag-link-sitename) {
+  margin-top: 4px;
   font-size: 0.75rem;
   color: var(--muted-foreground);
   transition: all 0.3s ease;

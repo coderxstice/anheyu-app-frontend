@@ -312,6 +312,104 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     });
   }, []);
 
+  // 兼容历史 LinkCard 结构，补齐缺失节点，确保详情页渲染稳定
+  const normalizeLinkCardStructure = useCallback(() => {
+    if (!contentRef.current) return;
+
+    const toIconifySvgUrl = (iconifyName: string): string => {
+      const [prefix, name] = iconifyName.split(":");
+      if (!prefix || !name) return "";
+      return `https://api.iconify.design/${prefix}/${name}.svg?color=currentColor`;
+    };
+    const mapLegacyIconToFa6 = (legacyIconClass: string): string => {
+      if (legacyIconClass === "anzhiyu-icon-angle-right") return "fa6-solid:angle-right";
+      return "rivet-icons:link";
+    };
+    const createFa6IconImage = (iconifyName: string, className?: string): HTMLImageElement => {
+      const iconImg = document.createElement("img");
+      iconImg.src = toIconifySvgUrl(iconifyName);
+      iconImg.alt = "";
+      iconImg.loading = "lazy";
+      iconImg.setAttribute("data-iconify", iconifyName);
+      if (className) iconImg.className = className;
+      return iconImg;
+    };
+
+    const linkCards = contentRef.current.querySelectorAll(".anzhiyu-tag-link .tag-Link");
+    linkCards.forEach(cardNode => {
+      const card = cardNode as HTMLElement;
+      const bottom = card.querySelector(".tag-link-bottom") as HTMLElement | null;
+      if (!bottom) return;
+      const left = bottom.querySelector(".tag-link-left") as HTMLElement | null;
+
+      if (left) {
+        // 兼容历史 HTML：将 <span class="iconify" data-icon="prefix:name"> 转为可直接展示的 <img>
+        const iconifySpans = left.querySelectorAll(".iconify[data-icon]");
+        iconifySpans.forEach(span => {
+          const iconName = (span.getAttribute("data-icon") || "").trim();
+          const [prefix, name] = iconName.split(":");
+          if (!prefix || !name) return;
+          const iconImg = createFa6IconImage(`${prefix}:${name}`);
+          iconImg.alt = iconName;
+          span.replaceWith(iconImg);
+        });
+
+        const legacyIconNodes = left.querySelectorAll("i.anzhiyufont");
+        legacyIconNodes.forEach(node => {
+          const legacyIconClass = Array.from(node.classList).find(cls => cls.startsWith("anzhiyu-icon-")) || "";
+          const mappedIcon = mapLegacyIconToFa6(legacyIconClass);
+          node.replaceWith(createFa6IconImage(mappedIcon));
+        });
+
+        if (!left.querySelector("img, i")) {
+          left.appendChild(createFa6IconImage("rivet-icons:link"));
+        }
+      }
+
+      const right = bottom.querySelector(".tag-link-right") as HTMLElement | null;
+      if (right) {
+        const titleEl = right.querySelector(".tag-link-title") as HTMLElement | null;
+        const fallbackTitle = (card as HTMLAnchorElement).getAttribute("href") || "链接卡片";
+        if (titleEl && !(titleEl.textContent || "").trim()) {
+          titleEl.textContent = fallbackTitle;
+        }
+
+        let sitenameEl = right.querySelector(".tag-link-sitename") as HTMLElement | null;
+        if (!sitenameEl) {
+          sitenameEl = document.createElement("span");
+          sitenameEl.className = "tag-link-sitename";
+          right.appendChild(sitenameEl);
+        }
+        if (!(sitenameEl.textContent || "").trim()) {
+          sitenameEl.textContent = "网站名称";
+        }
+      }
+
+      const tipsEl = card.querySelector(".tag-link-tips") as HTMLElement | null;
+      if (tipsEl && !(tipsEl.textContent || "").trim()) {
+        tipsEl.textContent = "引用站外地址";
+      }
+
+      const hasArrow = Array.from(bottom.children).some(
+        child =>
+          (child.tagName === "I" &&
+            child.classList.contains("anzhiyufont") &&
+            child.classList.contains("anzhiyu-icon-angle-right")) ||
+          (child.tagName === "IMG" && (child as HTMLImageElement).dataset.iconify === "fa6-solid:angle-right") ||
+          child.classList.contains("tag-link-arrow-icon")
+      );
+
+      const legacyArrowNodes = bottom.querySelectorAll("i.anzhiyufont.anzhiyu-icon-angle-right");
+      legacyArrowNodes.forEach(node => {
+        node.replaceWith(createFa6IconImage("fa6-solid:angle-right", "tag-link-arrow-icon"));
+      });
+
+      if (!hasArrow) {
+        bottom.appendChild(createFa6IconImage("fa6-solid:angle-right", "tag-link-arrow-icon"));
+      }
+    });
+  }, []);
+
   // 初始化付费内容购买按钮事件
   const initPaidContentEvents = useCallback(() => {
     if (!contentRef.current) return;
@@ -1210,6 +1308,8 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
       }
     });
 
+    normalizeLinkCardStructure();
+
     // 处理图片懒加载
     const images = currentContent.querySelectorAll("img[data-src]");
     if (images.length > 0 && "IntersectionObserver" in window) {
@@ -1284,6 +1384,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     };
   }, [
     content,
+    normalizeLinkCardStructure,
     initTipEvents,
     initHiddenEvents,
     initTabsEvents,

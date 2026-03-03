@@ -481,8 +481,8 @@
   --shadow-primary: var(--shadow-primary);
 
   /* 字体 - 与 anheyu-app 保持一致 */
-  --font-sans:
-    "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica, "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+  --font-sans: "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica, "Microsoft YaHei", "微软雅黑", Arial,
+    sans-serif;
   --font-mono: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
@@ -570,8 +570,8 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   /* 字体设置 - 与 anheyu-app 保持一致 */
-  font-family:
-    "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica, "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+  font-family: "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", Helvetica, "Microsoft YaHei", "微软雅黑", Arial,
+    sans-serif;
   line-height: inherit;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -597,10 +597,7 @@ pre {
 .MuiOutlinedInput-root,
 .MuiInputLabel-root,
 .MuiFormHelperText-root {
-  transition:
-    color 0.2s ease,
-    border-color 0.2s ease,
-    background-color 0.2s ease !important;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease !important;
 }
 
 .MuiOutlinedInput-notchedOutline {
@@ -653,11 +650,8 @@ pre {
   border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: var(--shadow-md);
-  transition:
-    background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.2s ease;
+  transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease;
 }
 
 .card-widget:hover {
@@ -705,15 +699,13 @@ pre {
 
 /* Grid pattern background - subtle */
 .grid-pattern {
-  background-image:
-    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+  background-image: linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
   background-size: 80px 80px;
 }
 
 .dark .grid-pattern {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+  background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
 }
 
@@ -733,9 +725,7 @@ pre {
 
 /* Ambient glow effects */
 .glow-primary {
-  box-shadow:
-    0 0 80px var(--primary-op),
-    0 0 160px var(--primary-op-light);
+  box-shadow: 0 0 80px var(--primary-op), 0 0 160px var(--primary-op-light);
 }
 
 .glow-subtle {
@@ -972,9 +962,7 @@ html[data-loaded="true"] #initial-loader {
   font-weight: 500 !important;
   padding: 0.5rem 0.875rem !important;
   border-radius: 0.625rem !important;
-  box-shadow:
-    0 4px 14px 0 rgb(0 0 0 / 8%),
-    0 0 0 1px var(--border) !important;
+  box-shadow: 0 4px 14px 0 rgb(0 0 0 / 8%), 0 0 0 1px var(--border) !important;
   backdrop-filter: blur(10px) saturate(150%) !important;
   -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
 }
@@ -988,9 +976,7 @@ html[data-loaded="true"] #initial-loader {
 /* 暗色主题下的 Tooltip */
 html.dark .custom-tooltip-content,
 html.dark [data-slot="content"][role="tooltip"] {
-  box-shadow:
-    0 4px 14px 0 rgb(0 0 0 / 25%),
-    0 0 0 1px var(--border) !important;
+  box-shadow: 0 4px 14px 0 rgb(0 0 0 / 25%), 0 0 0 1px var(--border) !important;
 }
 
 /* 即刻条容器 */
@@ -1121,11 +1107,8 @@ html.dark [data-slot="content"][role="tooltip"] {
   --anzhiyu-snackbar-time: 5s;
 
   /* 主题色平滑过渡动画 */
-  transition:
-    --anzhiyu-main 0.3s ease-in-out,
-    --anzhiyu-main-op 0.3s ease-in-out,
-    --anzhiyu-main-op-deep 0.3s ease-in-out,
-    --anzhiyu-main-op-light 0.3s ease-in-out;
+  transition: --anzhiyu-main 0.3s ease-in-out, --anzhiyu-main-op 0.3s ease-in-out,
+    --anzhiyu-main-op-deep 0.3s ease-in-out, --anzhiyu-main-op-light 0.3s ease-in-out;
 
   /* 评论区样式（默认独立卡片模式，文章详情页重写为内嵌模式） */
   --comment-form-bg: var(--anzhiyu-card-bg);
@@ -1291,9 +1274,7 @@ html.dark [data-slot="content"][role="tooltip"] {
   min-width: auto !important;
   padding: 0.5rem 1.25rem 0.5rem 1rem !important;
   border-radius: 1rem !important;
-  box-shadow:
-    0 3px 6px -1px rgba(0, 0, 0, 0.06),
-    0 6px 18px 0 rgba(0, 0, 0, 0.04) !important;
+  box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.06), 0 6px 18px 0 rgba(0, 0, 0, 0.04) !important;
   gap: 0.5rem !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -1328,9 +1309,7 @@ html.dark [data-slot="content"][role="tooltip"] {
 
 /* 暗色主题阴影 */
 html.dark [data-toast] {
-  box-shadow:
-    0 3px 6px -1px rgba(0, 0, 0, 0.2),
-    0 6px 18px 0 rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 3px 6px -1px rgba(0, 0, 0, 0.2), 0 6px 18px 0 rgba(0, 0, 0, 0.1) !important;
 }
 
 /* HeroUI Dropdown / Listbox hover 颜色调浅 */
@@ -1362,10 +1341,7 @@ html.dark [data-toast] {
 [data-slot="input-wrapper"] {
   border-radius: 0.625rem !important;
   box-shadow: none !important;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    background-color 0.25s ease !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.25s ease !important;
 }
 
 /* 深色模式：输入框背景色修正 - 使用项目暗色主题变量 */
@@ -1450,10 +1426,7 @@ html.dark [data-slot="input-wrapper"]:focus-within,
 [data-slot="trigger"] {
   border-radius: 0.625rem !important;
   box-shadow: none !important;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    background-color 0.25s ease !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.25s ease !important;
 }
 
 /* 深色模式：Select 触发器背景色 */
@@ -1486,9 +1459,7 @@ html.dark [data-slot="trigger"][data-open="true"],
 /* ---- 清除按钮 ---- */
 [data-slot="clear-button"] {
   color: var(--muted-foreground) !important;
-  transition:
-    opacity 0.15s ease,
-    color 0.15s ease !important;
+  transition: opacity 0.15s ease, color 0.15s ease !important;
 }
 
 [data-slot="input"][data-filled="true"] ~ [data-slot="clear-button"] {
