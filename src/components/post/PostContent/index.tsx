@@ -329,7 +329,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
       const iconImg = document.createElement("img");
       iconImg.src = toIconifySvgUrl(iconifyName);
       iconImg.alt = "";
-      iconImg.loading = "lazy";
+      iconImg.loading = "eager";
       iconImg.setAttribute("data-iconify", iconifyName);
       if (className) iconImg.className = className;
       return iconImg;
@@ -406,6 +406,19 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
 
       if (!hasArrow) {
         bottom.appendChild(createFa6IconImage("fa6-solid:angle-right", "tag-link-arrow-icon"));
+      }
+    });
+
+    // 链接卡片图标不使用懒加载，避免无痕模式等环境下 data-src 未及时替换导致不显示
+    const linkCardIcons = contentRef.current.querySelectorAll(".anzhiyu-tag-link .tag-link-left img[data-src]");
+    linkCardIcons.forEach((img: Element) => {
+      const el = img as HTMLImageElement;
+      const dataSrc = el.getAttribute("data-src");
+      if (dataSrc) {
+        el.src = dataSrc;
+        el.removeAttribute("data-src");
+        el.classList.remove("lazy-image", "lazy-loaded", "lazy-loading");
+        el.removeAttribute("data-lazy-processed");
       }
     });
   }, []);
