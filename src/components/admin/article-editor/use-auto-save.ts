@@ -5,6 +5,9 @@ import type { Editor } from "@tiptap/react";
 import { postManagementApi } from "@/lib/api/post-management";
 import { processHtmlForSave } from "@/lib/content-processor";
 import TurndownService from "turndown";
+import { registerCustomRules } from "@/lib/turndown-rules";
+import { marked } from "marked";
+import type { EditorMode } from "./EditorToolbar";
 
 /** 自动保存状态 */
 export type AutoSaveStatus = "idle" | "saving" | "saved" | "error";
@@ -22,6 +25,10 @@ interface UseAutoSaveOptions {
   interval?: number;
   /** 是否启用自动保存 */
   enabled?: boolean;
+  /** 当前编辑模式 */
+  editorMode?: EditorMode;
+  /** 源码模式下的内容 */
+  sourceContent?: string;
 }
 
 interface UseAutoSaveReturn {
@@ -41,6 +48,7 @@ const turndownService = new TurndownService({
   codeBlockStyle: "fenced",
   bulletListMarker: "-",
 });
+registerCustomRules(turndownService);
 
 /**
  * 自动保存 Hook
@@ -55,6 +63,8 @@ export function useAutoSave({
   getSubmitData,
   interval = 30000,
   enabled = true,
+  editorMode = "visual",
+  sourceContent = "",
 }: UseAutoSaveOptions): UseAutoSaveReturn {
   const [status, setStatus] = useState<AutoSaveStatus>("idle");
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
@@ -72,21 +82,38 @@ export function useAutoSave({
 
   /** 执行保存 */
   const doSave = useCallback(async () => {
-    if (!articleId || !editor || editor.isDestroyed || savingRef.current) return;
+    if (!articleId || savingRef.current) return;
     if (!title.trim()) return;
 
-    const rawHtml = editor.getHTML();
-    const hash = computeHash(title, rawHtml);
+    let contentForHash: string;
+    if (editorMode === "visual") {
+      if (!editor || editor.isDestroyed) return;
+      contentForHash = editor.getHTML();
+    } else {
+      contentForHash = sourceContent;
+    }
 
-    // 内容没有变化，跳过
+    const hash = computeHash(title, contentForHash);
     if (hash === lastContentHashRef.current) return;
 
     savingRef.current = true;
     setStatus("saving");
 
     try {
-      const html = processHtmlForSave(rawHtml);
-      const markdown = turndownService.turndown(html);
+      let html: string;
+      let markdown: string;
+
+      if (editorMode === "visual") {
+        html = processHtmlForSave(contentForHash);
+        markdown = turndownService.turndown(html);
+      } else if (editorMode === "html") {
+        html = sourceContent;
+        markdown = turndownService.turndown(html);
+      } else {
+        markdown = sourceContent;
+        html = marked.parse(sourceContent, { async: false }) as string;
+      }
+
       const metaData = getSubmitData();
 
       await postManagementApi.updateArticle(articleId, {
@@ -104,7 +131,7 @@ export function useAutoSave({
     } finally {
       savingRef.current = false;
     }
-  }, [articleId, editor, title, getSubmitData, computeHash]);
+  }, [articleId, editor, title, getSubmitData, computeHash, editorMode, sourceContent]);
 
   /** 手动触发保存 */
   const triggerSave = useCallback(() => {
@@ -113,14 +140,16 @@ export function useAutoSave({
 
   /** 标记为已保存（供手动保存成功后调用） */
   const markAsSaved = useCallback(() => {
-    // 更新内容哈希，防止自动保存重复提交刚手动保存过的内容
-    if (editor && !editor.isDestroyed) {
-      const rawHtml = editor.getHTML();
-      lastContentHashRef.current = computeHash(title, rawHtml);
+    if (editorMode === "visual") {
+      if (editor && !editor.isDestroyed) {
+        lastContentHashRef.current = computeHash(title, editor.getHTML());
+      }
+    } else {
+      lastContentHashRef.current = computeHash(title, sourceContent);
     }
     setLastSavedAt(new Date());
     setStatus("saved");
-  }, [editor, title, computeHash]);
+  }, [editor, title, computeHash, editorMode, sourceContent]);
 
   // 定时器：定期检测并保存
   useEffect(() => {
@@ -143,27 +172,38 @@ export function useAutoSave({
     if (!enabled || !articleId) return;
 
     const handleBeforeUnload = () => {
-      // 同步检查是否需要保存（不等待结果）
-      if (editor && !editor.isDestroyed && title.trim()) {
-        const rawHtml = editor.getHTML();
-        const hash = computeHash(title, rawHtml);
-        if (hash !== lastContentHashRef.current) {
-          // 尝试用 sendBeacon 发送（更可靠）
-          const html = processHtmlForSave(rawHtml);
-          const markdown = turndownService.turndown(html);
-          const data = JSON.stringify({
-            title: title.trim(),
-            content_html: html,
-            content_md: markdown,
-          });
-          navigator.sendBeacon?.(`/api/articles/${articleId}`, new Blob([data], { type: "application/json" }));
+      if (!title.trim()) return;
+
+      let contentForHash: string;
+      if (editorMode === "visual") {
+        if (!editor || editor.isDestroyed) return;
+        contentForHash = editor.getHTML();
+      } else {
+        contentForHash = sourceContent;
+      }
+
+      const hash = computeHash(title, contentForHash);
+      if (hash !== lastContentHashRef.current) {
+        let html: string;
+        let markdown: string;
+        if (editorMode === "visual") {
+          html = processHtmlForSave(contentForHash);
+          markdown = turndownService.turndown(html);
+        } else if (editorMode === "html") {
+          html = sourceContent;
+          markdown = turndownService.turndown(html);
+        } else {
+          markdown = sourceContent;
+          html = marked.parse(sourceContent, { async: false }) as string;
         }
+        const data = JSON.stringify({ title: title.trim(), content_html: html, content_md: markdown });
+        navigator.sendBeacon?.(`/api/articles/${articleId}`, new Blob([data], { type: "application/json" }));
       }
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [enabled, articleId, editor, title, computeHash]);
+  }, [enabled, articleId, editor, title, computeHash, editorMode, sourceContent]);
 
   return { status, lastSavedAt, triggerSave, markAsSaved };
 }

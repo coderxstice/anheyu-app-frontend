@@ -123,8 +123,8 @@ export function useSettings(categoryId: SettingCategoryId): UseSettingsReturn {
     try {
       await settingsApi.update(changed);
       setOriginalValues({ ...values });
-      // 清除前台站点配置缓存，确保前台能拿到最新配置
-      useSiteConfigStore.getState().clearCache();
+      // 强制刷新前台站点配置，确保注入的自定义代码等立即生效
+      await useSiteConfigStore.getState().forceRefreshFromServer();
       addToast({ title: "保存成功", color: "success" });
       return true;
     } catch (err) {
@@ -243,8 +243,8 @@ export function useMultiSettings(categoryIds: SettingCategoryId[]) {
     try {
       await settingsApi.update(changed);
       setAllOriginal({ ...allValues });
-      // 清除前台站点配置缓存，确保前台能拿到最新配置
-      useSiteConfigStore.getState().clearCache();
+      // 强制刷新前台站点配置，确保注入的自定义代码等立即生效
+      await useSiteConfigStore.getState().forceRefreshFromServer();
       addToast({ title: "保存成功", color: "success" });
       return true;
     } catch (err) {

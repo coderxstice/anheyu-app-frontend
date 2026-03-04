@@ -35,14 +35,21 @@ import {
   Coins,
   Lock,
   UserCheck,
+  Eye,
+  FileCode2,
+  CodeXml,
 } from "lucide-react";
 import { useCallback, useState, useEffect } from "react";
 import { MathFormulaDialog } from "./MathFormulaDialog";
 import { LinkDialog, ImageDialog } from "./EditorDialogs";
 
+export type EditorMode = "visual" | "html" | "markdown";
+
 interface EditorToolbarProps {
   editor: Editor | null;
   onAIWriting?: () => void;
+  editorMode?: EditorMode;
+  onModeChange?: (mode: EditorMode) => void;
 }
 
 // ===================================
@@ -268,7 +275,7 @@ const HIGHLIGHT_COLORS = ["#fef08a", "#bbf7d0", "#bfdbfe", "#e9d5ff", "#fecaca",
 // 主工具栏组件
 // ===================================
 
-export function EditorToolbar({ editor, onAIWriting }: EditorToolbarProps) {
+export function EditorToolbar({ editor, onAIWriting, editorMode = "visual", onModeChange }: EditorToolbarProps) {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showHighlightPicker, setShowHighlightPicker] = useState(false);
 
@@ -372,8 +379,45 @@ export function EditorToolbar({ editor, onAIWriting }: EditorToolbarProps) {
 
   if (!editor) return null;
 
+  const modeSwitcher = onModeChange && (
+    <div className="flex items-center bg-muted/60 rounded-lg p-0.5 gap-0.5 shrink-0 ml-auto">
+      {([
+        { mode: "visual" as const, icon: <Eye className="w-3.5 h-3.5" />, label: "可视化" },
+        { mode: "html" as const, icon: <CodeXml className="w-3.5 h-3.5" />, label: "HTML" },
+        { mode: "markdown" as const, icon: <FileCode2 className="w-3.5 h-3.5" />, label: "Markdown" },
+      ]).map(item => (
+        <Tooltip key={item.mode} content={`${item.label}编辑`} size="sm" delay={400} closeDelay={0} placement="bottom">
+          <button
+            type="button"
+            className={cn(
+              "flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-all",
+              editorMode === item.mode
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+            onClick={() => onModeChange(item.mode)}
+          >
+            {item.icon}
+            <span className="hidden sm:inline">{item.label}</span>
+          </button>
+        </Tooltip>
+      ))}
+    </div>
+  );
+
+  if (editorMode !== "visual") {
+    return (
+      <div className="flex items-center gap-0.5 px-4 py-2 border-b border-border bg-card shrink-0">
+        <span className="text-xs text-muted-foreground mr-2">
+          {editorMode === "html" ? "HTML 源码编辑" : "Markdown 源码编辑"}
+        </span>
+        {modeSwitcher}
+      </div>
+    );
+  }
+
   return (
-    <div className="flex items-center justify-center gap-0.5 px-4 py-2 border-b border-border bg-card overflow-x-auto shrink-0 scrollbar-hide">
+    <div className="flex items-center gap-0.5 px-4 py-2 border-b border-border bg-card overflow-x-auto shrink-0 scrollbar-hide">
       {/* 撤销/重做 */}
       <ToolbarButton onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} title="撤销">
         <Undo2 className="w-4 h-4" />
@@ -631,6 +675,9 @@ export function EditorToolbar({ editor, onAIWriting }: EditorToolbarProps) {
           </ToolbarButton>
         </>
       )}
+
+      {/* 模式切换 */}
+      {modeSwitcher}
 
       {/* 对话框 */}
       <MathFormulaDialog
