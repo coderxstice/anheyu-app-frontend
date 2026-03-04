@@ -1,7 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "@/providers";
-import { createRobotsMetadata, fetchSiteConfigForSeo, resolveMetadataBase, resolveSeoSiteInfo } from "@/lib/seo";
+import {
+  buildWebSiteJsonLd,
+  createRobotsMetadata,
+  fetchSiteConfigForSeo,
+  resolveMetadataBase,
+  resolveSeoSiteInfo,
+} from "@/lib/seo";
 
 /**
  * 动态生成 Metadata
@@ -86,14 +92,28 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const siteConfig = await fetchSiteConfigForSeo();
+  const site = resolveSeoSiteInfo(siteConfig);
+  const webSiteJsonLd =
+    site.siteUrl && site.siteName
+      ? buildWebSiteJsonLd(site.siteName, site.siteUrl, site.description)
+      : null;
+
   return (
     <html lang="zh-CN" suppressHydrationWarning>
-      <head />
+      <head>
+        {webSiteJsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
+          />
+        )}
+      </head>
       <body className="antialiased min-h-screen flex flex-col">
         {/* 初始加载动画 - 纯 CSS + SVG，JS 加载前就显示，样式在 globals.css */}
         <div id="initial-loader" aria-label="加载中" role="status">

@@ -150,6 +150,91 @@ export function createRobotsMetadata(index = true): NonNullable<Metadata["robots
   };
 }
 
+/** 文章数据，用于生成 Article/BlogPosting JSON-LD */
+export interface ArticleJsonLdInput {
+  title: string;
+  summaries?: string[] | null;
+  cover_url?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  copyright_author?: string | null;
+}
+
+/**
+ * 生成文章页 JSON-LD（schema.org BlogPosting），用于搜索引擎富摘要
+ */
+export function buildArticleJsonLd(
+  article: ArticleJsonLdInput,
+  siteUrl: string,
+  articlePath: string
+): Record<string, unknown> {
+  const base = normalizeSiteUrl(siteUrl) || siteUrl;
+  const url = `${base.replace(/\/$/, "")}${articlePath.startsWith("/") ? articlePath : `/${articlePath}`}`;
+  const description =
+    (Array.isArray(article.summaries) && article.summaries[0]) || article.title || "";
+  const image = article.cover_url
+    ? article.cover_url.startsWith("http")
+      ? article.cover_url
+      : `${base.replace(/\/$/, "")}${article.cover_url.startsWith("/") ? article.cover_url : `/${article.cover_url}`}`
+    : undefined;
+  const authorName = article.copyright_author || "安知鱼";
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: article.title,
+    description,
+    ...(image ? { image: [image] } : {}),
+    datePublished: article.created_at || undefined,
+    dateModified: article.updated_at || article.created_at || undefined,
+    author: {
+      "@type": "Person",
+      name: authorName,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "AnHeYu",
+      logo: {
+        "@type": "ImageObject",
+        url: `${base.replace(/\/$/, "")}/static/img/logo-192x192.png`,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": url,
+    },
+    url,
+  };
+}
+
+/**
+ * 生成站点 JSON-LD（schema.org WebSite），可选放在根 layout
+ */
+export function buildWebSiteJsonLd(
+  siteName: string,
+  siteUrl: string,
+  description?: string
+): Record<string, unknown> {
+  const base = normalizeSiteUrl(siteUrl) || siteUrl;
+  const url = base.replace(/\/$/, "");
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: siteName,
+    description: description || "",
+    url,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${url}/search?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
+
 export async function buildPageMetadata(options: BuildPageMetadataOptions): Promise<Metadata> {
   const siteConfig = options.siteConfig ?? (await fetchSiteConfigForSeo());
   const site = resolveSeoSiteInfo(siteConfig);
