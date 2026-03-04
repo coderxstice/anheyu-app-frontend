@@ -242,6 +242,11 @@ export interface SiteConfigData {
         link?: string;
       };
     };
+    /** 底部徽章：启用后在页脚显示自定义徽章（如框架、CDN、协议等） */
+    badge?: {
+      enable?: boolean | string;
+      list?: Array<{ link: string; shields: string; message: string }>;
+    };
   };
 
   // OAuth 配置

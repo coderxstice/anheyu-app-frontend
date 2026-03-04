@@ -115,10 +115,11 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
   // 代码块配置
   const codeBlockConfig = useMemo(() => {
     const codeMaxLines = siteConfig?.post?.code_block?.code_max_lines ?? 10;
+    const macStyle = siteConfig?.post?.code_block?.mac_style !== false;
     // 每行高度约 26px (font-size 16px * line-height 1.6)，加上 padding 20px
     const collapsedHeight = codeMaxLines > 0 ? codeMaxLines * 26 + 20 : 0;
-    return { codeMaxLines, collapsedHeight };
-  }, [siteConfig?.post?.code_block?.code_max_lines]);
+    return { codeMaxLines, collapsedHeight, macStyle };
+  }, [siteConfig?.post?.code_block?.code_max_lines, siteConfig?.post?.code_block?.mac_style]);
 
   // 存储 Tip 清理函数
   const tipCleanupFnsRef = useRef<(() => void)[]>([]);
@@ -552,11 +553,57 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     });
   }, []);
 
+  // 将裸 <pre><code> 转换为 details.md-editor-code 结构（兼容 TipTap 编辑器输出）
+  const normalizeCodeBlocks = useCallback(() => {
+    if (!contentRef.current) return;
+
+    const pres = contentRef.current.querySelectorAll("pre");
+    pres.forEach(pre => {
+      if (pre.closest(".md-editor-code")) return;
+
+      const code = pre.querySelector("code");
+      if (!code) return;
+
+      const langMatch = code.className.match(/language-(\w+)/);
+      const language = langMatch ? langMatch[1] : "";
+      const title = pre.getAttribute("data-title") || "";
+      const displayLabel = title || language || "plaintext";
+      const codeText = code.textContent || "";
+      const lines = codeText.split("\n");
+      if (lines[lines.length - 1] === "") lines.pop();
+
+      const lineNumberSpans = lines.map(() => "<span></span>").join("");
+
+      const details = document.createElement("details");
+      details.className = "md-editor-code";
+      details.setAttribute("open", "");
+
+      const summary = document.createElement("summary");
+      summary.className = "md-editor-code-head";
+      summary.innerHTML = `<div class="code-lang">${displayLabel.toUpperCase()}</div>`;
+      details.appendChild(summary);
+
+      const newPre = document.createElement("pre");
+      const newCode = document.createElement("code");
+      if (language) {
+        newCode.className = `language-${language}`;
+        newCode.setAttribute("language", language);
+      }
+      newCode.innerHTML =
+        `<span class="md-editor-code-block">${codeText.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</span>` +
+        `<span rn-wrapper="" aria-hidden="true">${lineNumberSpans}</span>`;
+      newPre.appendChild(newCode);
+      details.appendChild(newPre);
+
+      pre.replaceWith(details);
+    });
+  }, []);
+
   // 初始化代码块图标（展开箭头和复制按钮）
   const initCodeBlockIcons = useCallback(() => {
     if (!contentRef.current) return;
 
-    const { codeMaxLines, collapsedHeight } = codeBlockConfig;
+    const { codeMaxLines, collapsedHeight, macStyle } = codeBlockConfig;
 
     // SVG 图标
     // 展开箭头 (fa6-solid:chevron-down) - 向下箭头，收起时旋转向右
@@ -626,6 +673,21 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
         codeHead.insertBefore(expandBtn, codeHead.firstChild);
       } else if (!expandBtn.querySelector("svg")) {
         expandBtn.innerHTML = expandIcon;
+      }
+
+      // Mac 风格三色圆点
+      const existingDots = codeHead.querySelector(".mac-dots");
+      if (macStyle) {
+        if (!existingDots) {
+          const dotsWrapper = document.createElement("span");
+          dotsWrapper.className = "mac-dots";
+          dotsWrapper.innerHTML = `<span class="mac-dot red"></span><span class="mac-dot yellow"></span><span class="mac-dot green"></span>`;
+          codeHead.insertBefore(dotsWrapper, expandBtn?.nextSibling || codeHead.firstChild);
+          codeHead.classList.add("has-mac-dots");
+        }
+      } else {
+        if (existingDots) existingDots.remove();
+        codeHead.classList.remove("has-mac-dots");
       }
 
       // 只有需要折叠的代码块才添加高度限制和展开更多按钮
@@ -1354,7 +1416,8 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     initPaidContentEvents();
     initPasswordContentEvents();
     initLoginRequiredContentEvents();
-    initCodeBlockIcons(); // 先添加图标
+    normalizeCodeBlocks(); // 将裸 <pre><code> 转换为 md-editor-code 结构
+    initCodeBlockIcons(); // 添加图标（展开/复制/Mac dots）
     initCodeExpandEvents(); // 绑定展开/收起事件
     if (codeCopyCleanupRef.current) {
       codeCopyCleanupRef.current();
@@ -1398,6 +1461,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
   }, [
     content,
     normalizeLinkCardStructure,
+    normalizeCodeBlocks,
     initTipEvents,
     initHiddenEvents,
     initTabsEvents,

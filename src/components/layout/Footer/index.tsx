@@ -133,6 +133,7 @@ export function Footer() {
       randomFriendsCount: siteConfig?.footer?.list?.randomFriends || 0,
       owner: siteConfig?.footer?.owner,
       bar: siteConfig?.footer?.bar,
+      badge: siteConfig?.footer?.badge,
     };
   }, [siteConfig]);
 
@@ -269,8 +270,21 @@ export function Footer() {
     }
   }, [uptimeStatus]);
 
+  // 底部徽章列表（启用且有为有效数组时使用）
+  const badgeList = useMemo(() => {
+    const enable = footerConfig.badge?.enable;
+    if (enable !== true && enable !== "true") return [];
+    const list = footerConfig.badge?.list;
+    if (!Array.isArray(list) || list.length === 0) return [];
+    return list;
+  }, [footerConfig.badge]);
+
   // 如果没有配置则不显示
-  const hasContent = footerConfig.socialBar || footerConfig.projectList.length > 0 || footerConfig.bar;
+  const hasContent =
+    footerConfig.socialBar ||
+    footerConfig.projectList.length > 0 ||
+    footerConfig.bar ||
+    badgeList.length > 0;
   if (!hasContent) return null;
 
   return (
@@ -382,6 +396,32 @@ export function Footer() {
               </div>
             )}
           </div>
+        )}
+
+        {/* 底部徽章：自定义徽章（如框架、CDN、协议等） */}
+        {badgeList.length > 0 && (
+          <p className={styles.footerBadges}>
+            {badgeList.map((badge, index) => (
+              <Tooltip
+                key={badge.shields + String(index)}
+                content={badge.message}
+                placement="top"
+                showArrow={false}
+                offset={8}
+                classNames={{ content: "custom-tooltip-content" }}
+              >
+                <a
+                  className={styles.badgeLink}
+                  href={badge.link}
+                  target="_blank"
+                  rel="external nofollow noreferrer"
+                  title={badge.message}
+                >
+                  <img src={badge.shields} alt={badge.message} />
+                </a>
+              </Tooltip>
+            ))}
+          </p>
         )}
       </div>
 
