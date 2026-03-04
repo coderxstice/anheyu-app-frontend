@@ -5,7 +5,7 @@
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import { PostDetailContent } from "@/components/post";
-import { buildPageMetadata } from "@/lib/seo";
+import { buildArticleJsonLd, buildPageMetadata, fetchSiteConfigForSeo, resolveSeoSiteInfo } from "@/lib/seo";
 
 /**
  * 文章详情页面的 viewport 配置
@@ -124,12 +124,40 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  // 并行获取文章和最近文章
-  const [article, recentArticles] = await Promise.all([getArticle(id), getRecentArticles()]);
+  // 并行获取文章、最近文章与站点配置（用于 JSON-LD）
+  const [article, recentArticles, siteConfig] = await Promise.all([
+    getArticle(id),
+    getRecentArticles(),
+    fetchSiteConfigForSeo(),
+  ]);
 
   if (!article) {
     notFound();
   }
 
-  return <PostDetailContent article={article} recentArticles={recentArticles} />;
+  const site = resolveSeoSiteInfo(siteConfig);
+  const articlePath = `/posts/${encodeURIComponent(String(article.abbrlink || id))}`;
+  const siteUrl = site.siteUrl || process.env.NEXT_PUBLIC_SITE_URL || "";
+  const jsonLd = buildArticleJsonLd(
+    {
+      title: article.title,
+      summaries: article.summaries,
+      cover_url: article.cover_url,
+      created_at: article.created_at,
+      updated_at: article.updated_at,
+      copyright_author: article.copyright_author,
+    },
+    siteUrl,
+    articlePath
+  );
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <PostDetailContent article={article} recentArticles={recentArticles} />
+    </>
+  );
 }
