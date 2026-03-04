@@ -12,6 +12,7 @@ import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent, type NodeViewP
 import { useState, useCallback, useMemo, useRef, useEffect, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import { Copy, Check, ChevronDown, ChevronRight, MoreHorizontal } from "lucide-react";
+import { useSiteConfigStore } from "@/store/site-config-store";
 
 /** 超过此行数时默认折叠 */
 const COLLAPSE_THRESHOLD = 15;
@@ -395,6 +396,9 @@ function EnhancedCodeBlockView({ node, updateAttributes }: NodeViewProps) {
   const settingsBtnRef = useRef<HTMLButtonElement>(null);
   const langBtnRef = useRef<HTMLButtonElement>(null);
 
+  const siteConfig = useSiteConfigStore(state => state.siteConfig);
+  const macStyle = siteConfig?.post?.code_block?.mac_style !== false;
+
   const language = (node.attrs.language as string) || "plaintext";
   const title = (node.attrs.title as string) || "";
   const showLineNumbers = node.attrs.showLineNumbers !== false;
@@ -448,6 +452,14 @@ function EnhancedCodeBlockView({ node, updateAttributes }: NodeViewProps) {
           >
             <ChevronDown className="w-4 h-4" />
           </button>
+
+          {macStyle && (
+            <span className="editor-code-mac-dots" contentEditable={false}>
+              <span className="mac-dot red" />
+              <span className="mac-dot yellow" />
+              <span className="mac-dot green" />
+            </span>
+          )}
 
           {titleEditing ? (
             <input

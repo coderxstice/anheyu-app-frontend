@@ -51,6 +51,41 @@
   }
 }
 
+// Mac 风格装饰圆点
+.editor-code-mac-dots {
+  display: flex;
+  gap: 6px;
+  margin-left: 4px;
+  margin-right: 4px;
+  flex-shrink: 0;
+
+  .mac-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+
+    &.red {
+      background: linear-gradient(135deg, #ff6159, #ff5f52);
+      box-shadow: 0 1px 3px rgba(255, 97, 89, 0.4);
+    }
+
+    &.yellow {
+      background: linear-gradient(135deg, #ffbd2e, #ffbb28);
+      box-shadow: 0 1px 3px rgba(255, 189, 46, 0.4);
+    }
+
+    &.green {
+      background: linear-gradient(135deg, #28ca42, #27c93f);
+      box-shadow: 0 1px 3px rgba(40, 202, 66, 0.4);
+    }
+  }
+
+  &:hover .mac-dot {
+    transform: scale(1.1);
+  }
+}
+
 // 标题文本态
 .editor-code-title-label {
   font-size: 0.95em;

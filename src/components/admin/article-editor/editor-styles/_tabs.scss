@@ -3,8 +3,7 @@
 // ============================================
 
 .tiptap {
-  .tabs,
-  .tabs-block-wrapper {
+  .tabs {
     position: relative;
     padding: 8px;
     margin: 1rem 0;
@@ -15,8 +14,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   }
 
-  .tabs > .nav-tabs,
-  .tabs-block-wrapper .nav-tabs {
+  .tabs > .nav-tabs {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -26,8 +24,7 @@
     list-style: none;
   }
 
-  .tabs > .nav-tabs > .tab,
-  .tabs-block-wrapper .nav-tabs .tab {
+  .tabs > .nav-tabs > .tab {
     padding: 8px 18px;
     margin: 4px;
     line-height: 1;

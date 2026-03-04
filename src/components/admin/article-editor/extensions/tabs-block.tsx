@@ -66,7 +66,7 @@ function TabsBlockView({ node, updateAttributes }: NodeViewProps) {
   };
 
   return (
-    <NodeViewWrapper className="tabs-block-wrapper my-3">
+    <NodeViewWrapper className="my-3">
       <div className="editor-node-hover-wrap" contentEditable={false}>
         <div className="editor-tabs">
           {/* 标签导航 */}

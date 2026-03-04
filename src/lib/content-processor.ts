@@ -93,7 +93,49 @@ export function processHtmlForSave(html: string): string {
     }
   });
 
-  // 5. KaTeX 公式：确保 data-latex 属性保留
+  // 5. 代码块：将裸 <pre><code> 转换为 details.md-editor-code 结构
+  doc.querySelectorAll("pre").forEach(pre => {
+    if (pre.closest(".md-editor-code")) return;
+
+    const code = pre.querySelector("code");
+    if (!code) return;
+
+    const langMatch = code.className.match(/language-(\w+)/);
+    const language = langMatch ? langMatch[1] : "";
+    const title = pre.getAttribute("data-title") || "";
+    const displayLabel = title || language || "plaintext";
+    const codeText = code.textContent || "";
+    const lines = codeText.split("\n");
+    if (lines[lines.length - 1] === "") lines.pop();
+
+    const lineNumberSpans = lines.map(() => "<span></span>").join("");
+
+    const details = doc.createElement("details");
+    details.className = "md-editor-code";
+    details.setAttribute("open", "");
+
+    const summary = doc.createElement("summary");
+    summary.className = "md-editor-code-head";
+    summary.innerHTML = `<div class="code-lang">${displayLabel.toUpperCase()}</div>`;
+    details.appendChild(summary);
+
+    const newPre = doc.createElement("pre");
+    const newCode = doc.createElement("code");
+    if (language) {
+      newCode.className = `language-${language}`;
+      newCode.setAttribute("language", language);
+    }
+    const escapedText = codeText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    newCode.innerHTML =
+      `<span class="md-editor-code-block">${escapedText}</span>` +
+      `<span rn-wrapper="" aria-hidden="true">${lineNumberSpans}</span>`;
+    newPre.appendChild(newCode);
+    details.appendChild(newPre);
+
+    pre.replaceWith(details);
+  });
+
+  // 6. KaTeX 公式：确保 data-latex 属性保留
   doc.querySelectorAll("[data-type='math-block']").forEach(el => {
     const latex = el.getAttribute("data-latex") || "";
     if (latex) {

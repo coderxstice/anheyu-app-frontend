@@ -1,19 +1,22 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { addToast, Spinner } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import TurndownService from "turndown";
+import { marked } from "marked";
 import { EditorHeader } from "./EditorHeader";
-import { EditorToolbar } from "./EditorToolbar";
+import { EditorToolbar, type EditorMode } from "./EditorToolbar";
 import { TiptapEditor } from "./TiptapEditor";
+import { SourceCodeEditor } from "./SourceCodeEditor";
 import { EditorSidebar, TOCContent } from "./EditorSidebar";
 import { useArticleEditor } from "./use-article-editor";
 import { useArticleMeta } from "./use-article-meta";
 import { useAutoSave } from "./use-auto-save";
 import { useArticleForEdit, useCreateArticle, useUpdateArticle } from "@/hooks/queries/use-post-management";
 import { processHtmlForSave } from "@/lib/content-processor";
+import { registerCustomRules } from "@/lib/turndown-rules";
 import { articleApi } from "@/lib/api/article";
 import { useAuthStore } from "@/store/auth-store";
 
@@ -59,6 +62,7 @@ const turndownService = new TurndownService({
   codeBlockStyle: "fenced",
   bulletListMarker: "-",
 });
+registerCustomRules(turndownService);
 
 export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
   const router = useRouter();
@@ -83,6 +87,63 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
     initialContent: "",
     placeholder: "开始编写内容...",
   });
+
+  // 编辑模式切换（可视化 / HTML / Markdown）
+  const [editorMode, setEditorMode] = useState<EditorMode>("visual");
+  const [sourceContent, setSourceContent] = useState("");
+  const visualBackupRef = useRef<Record<string, unknown> | null>(null);
+  const sourceModifiedRef = useRef(false);
+
+  const handleSourceChange = useCallback((value: string) => {
+    setSourceContent(value);
+    sourceModifiedRef.current = true;
+  }, []);
+
+  const handleModeChange = useCallback(
+    (newMode: EditorMode) => {
+      if (newMode === editorMode) return;
+
+      if (editorMode === "visual") {
+        if (editor && !editor.isDestroyed) {
+          visualBackupRef.current = editor.getJSON() as Record<string, unknown>;
+        }
+        sourceModifiedRef.current = false;
+
+        const rawHtml = editor?.getHTML() ?? "";
+        if (newMode === "html") {
+          setSourceContent(rawHtml);
+        } else {
+          setSourceContent(turndownService.turndown(processHtmlForSave(rawHtml)));
+        }
+      } else if (newMode === "visual") {
+        if (!sourceModifiedRef.current && visualBackupRef.current) {
+          if (editor && !editor.isDestroyed) {
+            const backupSnapshot = visualBackupRef.current;
+            queueMicrotask(() => editor.commands.setContent(backupSnapshot));
+          }
+        } else if (editorMode === "html") {
+          if (editor && !editor.isDestroyed) {
+            queueMicrotask(() => editor.commands.setContent(sourceContent));
+          }
+        } else {
+          const html = marked.parse(sourceContent, { async: false }) as string;
+          if (editor && !editor.isDestroyed) {
+            queueMicrotask(() => editor.commands.setContent(html));
+          }
+        }
+        visualBackupRef.current = null;
+      } else {
+        if (editorMode === "html") {
+          setSourceContent(turndownService.turndown(sourceContent));
+        } else {
+          setSourceContent(marked.parse(sourceContent, { async: false }) as string);
+        }
+      }
+
+      setEditorMode(newMode);
+    },
+    [editorMode, editor, sourceContent]
+  );
 
   // 分类和标签列表
   const { data: categories = [], isLoading: isLoadingCategories } = useQuery({
@@ -113,6 +174,8 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
     getSubmitData,
     interval: 30000,
     enabled: isEditMode,
+    editorMode,
+    sourceContent,
   });
 
   // 从文章数据初始化标题和元数据
@@ -142,7 +205,6 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
 
   // 保存文章
   const handleSave = () => {
-    const rawHtml = editor?.getHTML() ?? "";
     const currentTitle = title.trim();
 
     if (!currentTitle) {
@@ -150,8 +212,20 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
       return;
     }
 
-    const html = processHtmlForSave(rawHtml);
-    const markdown = turndownService.turndown(html);
+    let html: string;
+    let markdown: string;
+
+    if (editorMode === "visual") {
+      const rawHtml = editor?.getHTML() ?? "";
+      html = processHtmlForSave(rawHtml);
+      markdown = turndownService.turndown(html);
+    } else if (editorMode === "html") {
+      html = sourceContent;
+      markdown = turndownService.turndown(html);
+    } else {
+      markdown = sourceContent;
+      html = marked.parse(sourceContent, { async: false }) as string;
+    }
 
     // 合并元数据
     const metaData = getSubmitData();
@@ -228,28 +302,41 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
       />
 
       {/* 工具栏 */}
-      <EditorToolbar editor={editor} />
+      <EditorToolbar
+        editor={editor}
+        editorMode={editorMode}
+        onModeChange={handleModeChange}
+      />
 
       {/* 主体区域：编辑器 + 大纲（固定布局） */}
       <div className="flex flex-1 min-h-0 overflow-hidden relative">
         {/* 编辑器区域 - 始终占满剩余空间 */}
-        <div className="flex-1 min-h-0 relative">
-          <div className="h-full overflow-auto bg-card">
+        <div className="flex-1 min-h-0 relative flex flex-col">
+          {/* TipTap 始终挂载，源码模式时隐藏（避免 flushSync 重挂载错误） */}
+          <div className={editorMode === "visual" ? "flex-1 overflow-auto bg-card" : "hidden"}>
             <div className="max-w-4xl mx-auto">
               <TiptapEditor editor={editor} />
             </div>
           </div>
-          {/* 字数统计 - 左下角 */}
-          <WordCount editor={editor} />
+          {editorMode === "visual" && <WordCount editor={editor} />}
+          {editorMode !== "visual" && (
+            <SourceCodeEditor
+              value={sourceContent}
+              onChange={handleSourceChange}
+              language={editorMode === "html" ? "html" : "markdown"}
+            />
+          )}
         </div>
 
-        {/* 大纲面板 - 始终显示在右侧，固定宽度 */}
-        <div className="w-64 shrink-0 h-full overflow-auto py-4 px-5">
-          <h3 className="text-base font-bold text-foreground mb-3 pl-1">大纲</h3>
-          <div className="border-l-2 border-border/60 pl-2">
-            <TOCContent editor={editor} />
+        {/* 大纲面板 - 仅可视化模式显示 */}
+        {editorMode === "visual" && (
+          <div className="w-64 shrink-0 h-full overflow-auto py-4 px-5">
+            <h3 className="text-base font-bold text-foreground mb-3 pl-1">大纲</h3>
+            <div className="border-l-2 border-border/60 pl-2">
+              <TOCContent editor={editor} />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* 文章设置面板 - 覆盖层，不影响内容布局 */}
         {sidebarOpen && (
