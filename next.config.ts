@@ -46,33 +46,13 @@ const nextConfig: NextConfig = {
         },
       ],
       // afterFiles: 先检查 public 目录，找不到才代理到 Go 后端
+      // sitemap.xml / robots.txt 由 Next.js 元数据约定处理（src/app/sitemap.ts、robots.ts）
+      // RSS Feed 由 Route Handler 处理（src/app/rss.xml/route.ts 等），运行时读取后端地址
       afterFiles: [
         // 静态文件代理（后端上传的图片等，优先使用 public 目录中的默认文件）
         {
           source: "/static/:path*",
           destination: `${backendUrl}/static/:path*`,
-        },
-        // SEO 相关文件代理（动态生成）
-        {
-          source: "/sitemap.xml",
-          destination: `${backendUrl}/sitemap.xml`,
-        },
-        {
-          source: "/robots.txt",
-          destination: `${backendUrl}/robots.txt`,
-        },
-        // RSS Feed 代理
-        {
-          source: "/rss.xml",
-          destination: `${backendUrl}/rss.xml`,
-        },
-        {
-          source: "/feed.xml",
-          destination: `${backendUrl}/feed.xml`,
-        },
-        {
-          source: "/atom.xml",
-          destination: `${backendUrl}/atom.xml`,
         },
       ],
       fallback: [],

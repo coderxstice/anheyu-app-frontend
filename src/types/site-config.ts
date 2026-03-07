@@ -68,6 +68,8 @@ export interface SiteConfigData {
   DEFAULT_BIG_PARAM?: string;
   /** 默认主题模式：light | dark | system | auto */
   DEFAULT_THEME_MODE?: string;
+  /** 是否尊重系统减弱动效偏好 */
+  RESPECT_REDUCED_MOTION?: boolean | string;
   SITE_ANNOUNCEMENT?: string;
   GRAVATAR_URL?: string;
   DEFAULT_GRAVATAR_TYPE?: string;
