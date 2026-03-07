@@ -5,6 +5,7 @@
 
 import { useRef, useEffect, useState, useCallback, useSyncExternalStore } from "react";
 import { useScroll } from "framer-motion";
+import { useSiteConfigStore } from "@/store/site-config-store";
 
 /**
  * 检测元素是否在视口内
@@ -28,8 +29,14 @@ export function useInViewport(ref: React.RefObject<HTMLElement | null>, rootMarg
 /**
  * 检测用户是否偏好减少动画
  * 使用 useSyncExternalStore 避免 hydration 问题
+ *
+ * 行为受后台配置 RESPECT_REDUCED_MOTION 控制：
+ * - 配置为 false（默认）：始终返回 false，忽略系统偏好
+ * - 配置为 true：返回系统 prefers-reduced-motion 的实际值
  */
 export function usePrefersReducedMotion() {
+  const respectReducedMotion = useRespectReducedMotionConfig();
+
   const subscribe = useCallback((callback: () => void) => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     mediaQuery.addEventListener("change", callback);
@@ -43,7 +50,17 @@ export function usePrefersReducedMotion() {
 
   const getServerSnapshot = useCallback(() => false, []);
 
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const osPreference = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  return respectReducedMotion && osPreference;
+}
+
+/**
+ * 从站点配置中读取 RESPECT_REDUCED_MOTION 的值
+ */
+function useRespectReducedMotionConfig(): boolean {
+  const value = useSiteConfigStore(s => s.siteConfig?.RESPECT_REDUCED_MOTION);
+  return value === true || value === "true";
 }
 
 /**

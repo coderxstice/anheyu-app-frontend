@@ -991,10 +991,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .album-grid-item,
-  .album-download-bar,
-  .poptrox-popup,
-  #album-header {
+  html.respect-reduced-motion .album-grid-item,
+  html.respect-reduced-motion .album-download-bar,
+  html.respect-reduced-motion .poptrox-popup,
+  html.respect-reduced-motion #album-header {
     animation: none !important;
     transition: none !important;
   }

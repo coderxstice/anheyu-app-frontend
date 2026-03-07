@@ -18,6 +18,7 @@ import { QueryProvider } from "./query-provider";
 import { GlobalLoading } from "@/components/common/GlobalLoading";
 import { CustomCodeInjector } from "./custom-code-injector";
 import { DefaultThemeSync } from "./DefaultThemeSync";
+import { ReducedMotionSync } from "./ReducedMotionSync";
 
 interface ProvidersProps {
   children: ReactNode;
@@ -87,6 +88,7 @@ export function Providers({ children }: ProvidersProps) {
           <AuthTokenInitializer>
             <SiteConfigLoader>
               <DefaultThemeSync />
+              <ReducedMotionSync />
               <GlobalLoading />
               <CustomCodeInjector />
               {children}

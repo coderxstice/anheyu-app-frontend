@@ -103,6 +103,7 @@ export const KEY_WEATHER_RECTANGLE = "sidebar.weather.rectangle";
 
 // ==================== 页面样式 ====================
 export const KEY_ENABLE_EXTERNAL_LINK_WARNING = "ENABLE_EXTERNAL_LINK_WARNING";
+export const KEY_RESPECT_REDUCED_MOTION = "RESPECT_REDUCED_MOTION";
 export const KEY_CUSTOM_HEADER_HTML = "CUSTOM_HEADER_HTML";
 export const KEY_CUSTOM_FOOTER_HTML = "CUSTOM_FOOTER_HTML";
 export const KEY_CUSTOM_CSS = "CUSTOM_CSS";

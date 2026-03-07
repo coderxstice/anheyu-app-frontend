@@ -1129,23 +1129,23 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .musicBackground,
-  .musicBackgroundAura,
-  .backgroundOverlay,
-  .artworkContainer,
-  .artworkRotateWrapper,
-  .controlBtn,
-  .songItem,
-  .closeBtn {
+  :global(html.respect-reduced-motion) .musicBackground,
+  :global(html.respect-reduced-motion) .musicBackgroundAura,
+  :global(html.respect-reduced-motion) .backgroundOverlay,
+  :global(html.respect-reduced-motion) .artworkContainer,
+  :global(html.respect-reduced-motion) .artworkRotateWrapper,
+  :global(html.respect-reduced-motion) .controlBtn,
+  :global(html.respect-reduced-motion) .songItem,
+  :global(html.respect-reduced-motion) .closeBtn {
     transition: none !important;
   }
 
-  .musicHome:not(.noSong) .musicBackground,
-  .musicBackgroundAura,
-  .artworkRotateWrapper,
-  .waveBar,
-  .songWaveAnimation .songWaveBar,
-  .loadingIcon {
+  :global(html.respect-reduced-motion) .musicHome:not(.noSong) .musicBackground,
+  :global(html.respect-reduced-motion) .musicBackgroundAura,
+  :global(html.respect-reduced-motion) .artworkRotateWrapper,
+  :global(html.respect-reduced-motion) .waveBar,
+  :global(html.respect-reduced-motion) .songWaveAnimation .songWaveBar,
+  :global(html.respect-reduced-motion) .loadingIcon {
     animation: none !important;
   }
 }
