@@ -79,7 +79,7 @@ export function PageStyleForm({ values, onChange, loading }: PageStyleFormProps)
           value={values[KEY_CUSTOM_HEADER_HTML]}
           onValueChange={v => onChange(KEY_CUSTOM_HEADER_HTML, v)}
           language="html"
-          description="注入到 <head> 标签内的自定义 HTML 代码"
+          description="注入到 <head> 标签内的自定义 HTML 代码，支持 <script>、<link>、<meta> 等标签。如需引入外部 JS 文件，请在此处添加 <script src='...'></script>"
         />
 
         <FormCodeEditor
@@ -87,7 +87,7 @@ export function PageStyleForm({ values, onChange, loading }: PageStyleFormProps)
           value={values[KEY_CUSTOM_FOOTER_HTML]}
           onValueChange={v => onChange(KEY_CUSTOM_FOOTER_HTML, v)}
           language="html"
-          description="注入到 <body> 底部的自定义 HTML 代码"
+          description="注入到 <body> 底部的自定义 HTML 代码，支持 <script>、<div> 等标签。如需引入外部 JS 文件，也可在此处添加 <script src='...'></script>"
         />
 
         <FormCodeEditor
@@ -95,7 +95,7 @@ export function PageStyleForm({ values, onChange, loading }: PageStyleFormProps)
           value={values[KEY_CUSTOM_CSS]}
           onValueChange={v => onChange(KEY_CUSTOM_CSS, v)}
           language="css"
-          description="全站生效的自定义 CSS 样式"
+          description="全站生效的自定义 CSS 样式，直接填写 CSS 代码即可，无需包裹 <style> 标签"
         />
 
         <FormCodeEditor
@@ -103,7 +103,7 @@ export function PageStyleForm({ values, onChange, loading }: PageStyleFormProps)
           value={values[KEY_CUSTOM_JS]}
           onValueChange={v => onChange(KEY_CUSTOM_JS, v)}
           language="javascript"
-          description="全站生效的自定义 JavaScript 代码"
+          description="全站生效的自定义 JavaScript 代码，直接填写 JS 代码即可，无需包裹 <script> 标签。如需引入外部 JS 文件请使用上方的「头部 HTML」或「底部 HTML」"
         />
 
         <FormCodeEditor
