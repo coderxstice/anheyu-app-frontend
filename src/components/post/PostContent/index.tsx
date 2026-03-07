@@ -1385,27 +1385,42 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
 
     normalizeLinkCardStructure();
 
-    // 处理图片懒加载
-    const images = currentContent.querySelectorAll("img[data-src]");
-    if (images.length > 0 && "IntersectionObserver" in window) {
-      const observer = new IntersectionObserver(
-        entries => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              const img = entry.target as HTMLImageElement;
-              const dataSrc = img.getAttribute("data-src");
-              if (dataSrc) {
-                img.src = dataSrc;
-                img.removeAttribute("data-src");
-              }
-              observer.unobserve(img);
-            }
-          });
-        },
-        { rootMargin: "100px" }
-      );
+    // 处理图片懒加载：先立即加载视口内的图片，再用 IntersectionObserver 处理剩余的
+    const images = currentContent.querySelectorAll<HTMLImageElement>("img[data-src]");
+    if (images.length > 0) {
+      const viewportHeight = window.innerHeight;
+      images.forEach(img => {
+        const rect = img.getBoundingClientRect();
+        if (rect.top < viewportHeight + 200) {
+          const dataSrc = img.getAttribute("data-src");
+          if (dataSrc) {
+            img.src = dataSrc;
+            img.removeAttribute("data-src");
+          }
+        }
+      });
 
-      images.forEach(img => observer.observe(img));
+      const remaining = currentContent.querySelectorAll<HTMLImageElement>("img[data-src]");
+      if (remaining.length > 0 && "IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(
+          entries => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                const img = entry.target as HTMLImageElement;
+                const dataSrc = img.getAttribute("data-src");
+                if (dataSrc) {
+                  img.src = dataSrc;
+                  img.removeAttribute("data-src");
+                }
+                observer.unobserve(img);
+              }
+            });
+          },
+          { rootMargin: "200px" }
+        );
+
+        remaining.forEach(img => observer.observe(img));
+      }
     }
 
     // 初始化标签插件事件
