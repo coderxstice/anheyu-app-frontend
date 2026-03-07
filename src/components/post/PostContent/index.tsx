@@ -695,10 +695,11 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
         // 添加可折叠类
         codeBlock.classList.add("is-collapsible");
 
-        // 如果还没有 open 属性，添加折叠状态
-        if (!codeBlock.hasAttribute("open")) {
+        // 首次渲染或用户未手动展开时，设置折叠状态
+        const existingExpandBtn = codeBlock.querySelector(".code-expand-btn");
+        if (!existingExpandBtn || !existingExpandBtn.classList.contains("is-expanded")) {
+          codeBlock.setAttribute("open", "");
           codeBlock.classList.add("is-collapsed");
-          // 设置折叠高度
           if (preElement) {
             (preElement as HTMLElement).style.height = `${collapsedHeight}px`;
             (preElement as HTMLElement).style.overflow = "hidden";

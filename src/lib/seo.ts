@@ -243,6 +243,7 @@ export async function buildPageMetadata(options: BuildPageMetadataOptions): Prom
   const image = options.image || site.logoUrl;
   const noindex = Boolean(options.noindex);
   const shouldEmitCanonical = options.includeCanonical ?? !noindex;
+  const ogTitle = options.absoluteTitle ? options.title : `${options.title} | ${site.siteName}`;
 
   return {
     title: options.absoluteTitle ? { absolute: options.title } : options.title,
@@ -260,7 +261,7 @@ export async function buildPageMetadata(options: BuildPageMetadataOptions): Prom
       type: options.type || "website",
       locale: "zh_CN",
       siteName: site.siteName,
-      title: options.title,
+      title: ogTitle,
       description,
       url: canonicalPath,
       images: image ? [image] : undefined,
@@ -274,7 +275,7 @@ export async function buildPageMetadata(options: BuildPageMetadataOptions): Prom
     },
     twitter: {
       card: image ? "summary_large_image" : "summary",
-      title: options.title,
+      title: ogTitle,
       description,
       images: image ? [image] : undefined,
     },
