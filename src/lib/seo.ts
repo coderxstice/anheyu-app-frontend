@@ -72,7 +72,7 @@ export function normalizePath(path: string): string {
 }
 
 export function getSeoBackendUrl(): string {
-  return process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8091";
+  return process.env.API_URL || process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8091";
 }
 
 export async function fetchSiteConfigForSeo(revalidateSeconds = 60): Promise<SiteConfigData | null> {
