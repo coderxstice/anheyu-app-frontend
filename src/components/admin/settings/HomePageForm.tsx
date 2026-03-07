@@ -66,14 +66,14 @@ const defaultSocialIcon: Record<string, unknown> = {
 // ─── 徽章字段定义 ────────────────────────────────────────────────
 
 const badgeFields: FieldDef[] = [
-  { key: "title", label: "标题", type: "text", placeholder: "例如：Deployed on Vercel" },
-  { key: "img", label: "图片地址", type: "url", placeholder: "徽章图片 URL" },
+  { key: "message", label: "提示文案", type: "text", placeholder: "例如：本站使用AnHeYu框架" },
+  { key: "shields", label: "徽章图片", type: "url", placeholder: "徽章图片 URL（shields.io 等）" },
   { key: "link", label: "链接", type: "url", placeholder: "https://..." },
 ];
 
 const defaultBadge: Record<string, unknown> = {
-  title: "",
-  img: "",
+  message: "",
+  shields: "",
   link: "",
 };
 
@@ -442,7 +442,7 @@ export function HomePageForm({ values, onChange, loading }: HomePageFormProps) {
             onValueChange={v => onChange(KEY_FOOTER_BADGE_LIST, v)}
             fields={badgeFields}
             defaultItem={defaultBadge}
-            itemLabel={item => (item.title as string) || "未命名徽章"}
+            itemLabel={item => (item.message as string) || "未命名徽章"}
             addButtonText="添加徽章"
             description="页脚徽章配置列表"
           />
