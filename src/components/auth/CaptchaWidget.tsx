@@ -20,11 +20,13 @@ interface GeetestValidate {
 /** 极验 4.0 验证实例（gt4.js 回调参数） */
 interface GeetestCaptchaInstance {
   appendTo: (el: string | HTMLElement) => void;
+  showCaptcha: () => void;
   getValidate: () => GeetestValidate | false;
   reset: () => void;
   onReady: (cb: () => void) => GeetestCaptchaInstance;
   onSuccess: (cb: () => void) => GeetestCaptchaInstance;
   onError: (cb: (err: { code?: string; msg?: string }) => void) => GeetestCaptchaInstance;
+  onClose: (cb: () => void) => GeetestCaptchaInstance;
 }
 
 declare global {
@@ -70,6 +72,7 @@ export interface CaptchaResult {
 
 export interface CaptchaWidgetRef {
   getCaptchaParams: () => CaptchaResult;
+  verify: () => Promise<CaptchaResult | null>;
   refresh: () => void;
   isReady: () => boolean;
 }
@@ -94,9 +97,9 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
   const [geetestInstanceReady, setGeetestInstanceReady] = useState(false);
   const [geetestError, setGeetestError] = useState(false);
   const [geetestRetryKey, setGeetestRetryKey] = useState(0);
-  const geetestContainerRef = useRef<HTMLDivElement>(null);
   const geetestInstanceRef = useRef<GeetestCaptchaInstance | null>(null);
   const geetestLoadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const geetestVerifyResolveRef = useRef<((result: CaptchaResult | null) => void) | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -202,8 +205,7 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
     const GEETEST_LOAD_TIMEOUT_MS = 15000;
 
     const init = () => {
-      const el = geetestContainerRef.current;
-      if (!window.initGeetest4 || !el?.isConnected) return;
+      if (!window.initGeetest4) return;
 
       geetestLoadTimeoutRef.current = setTimeout(() => {
         geetestLoadTimeoutRef.current = null;
@@ -214,7 +216,7 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
       window.initGeetest4(
         {
           captchaId,
-          product: "float",
+          product: "bind",
           language: "zho",
           protocol: typeof window !== "undefined" ? `${window.location.protocol}//` : "https://",
           onError: () => {
@@ -235,9 +237,32 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
           setGeetestInstanceReady(true);
           captchaObj.onSuccess(() => {
             const v = captchaObj.getValidate();
-            if (v) setGeetestResult(v);
+            if (v) {
+              setGeetestResult(v);
+              if (geetestVerifyResolveRef.current) {
+                geetestVerifyResolveRef.current({
+                  geetest_lot_number: v.lot_number,
+                  geetest_captcha_output: v.captcha_output,
+                  geetest_pass_token: v.pass_token,
+                  geetest_gen_time: v.gen_time,
+                });
+                geetestVerifyResolveRef.current = null;
+              }
+            }
           });
-          captchaObj.onError(() => setGeetestResult(null));
+          captchaObj.onClose(() => {
+            if (geetestVerifyResolveRef.current) {
+              geetestVerifyResolveRef.current(null);
+              geetestVerifyResolveRef.current = null;
+            }
+          });
+          captchaObj.onError(() => {
+            setGeetestResult(null);
+            if (geetestVerifyResolveRef.current) {
+              geetestVerifyResolveRef.current(null);
+              geetestVerifyResolveRef.current = null;
+            }
+          });
         }
       );
     };
@@ -252,6 +277,10 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
       setGeetestInstanceReady(false);
       setGeetestError(false);
       geetestInstanceRef.current = null;
+      if (geetestVerifyResolveRef.current) {
+        geetestVerifyResolveRef.current(null);
+        geetestVerifyResolveRef.current = null;
+      }
     };
 
     if (window.initGeetest4) {
@@ -267,15 +296,6 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
 
     return cleanup;
   }, [config?.provider, config?.geetest_captcha_id, geetestRetryKey]);
-
-  useEffect(() => {
-    if (!geetestInstanceReady || config?.provider !== "geetest") return;
-    const container = geetestContainerRef.current;
-    const instance = geetestInstanceRef.current;
-    if (container?.isConnected && instance) {
-      instance.appendTo(container);
-    }
-  }, [geetestInstanceReady, config?.provider]);
 
   useImperativeHandle(
     ref,
@@ -298,6 +318,27 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
         }
         return {};
       },
+      verify(): Promise<CaptchaResult | null> {
+        if (!config || config.provider === "none") return Promise.resolve({});
+        if (config.provider === "image") {
+          if (imageData?.id && answer.trim()) {
+            return Promise.resolve({ image_captcha_id: imageData.id, image_captcha_answer: answer });
+          }
+          return Promise.resolve(null);
+        }
+        if (config.provider === "turnstile") {
+          return Promise.resolve(turnstileToken ? { turnstile_token: turnstileToken } : null);
+        }
+        if (config.provider === "geetest") {
+          const instance = geetestInstanceRef.current;
+          if (!instance || geetestError) return Promise.resolve(null);
+          return new Promise<CaptchaResult | null>((resolve) => {
+            geetestVerifyResolveRef.current = resolve;
+            instance.showCaptcha();
+          });
+        }
+        return Promise.resolve({});
+      },
       refresh() {
         if (config?.provider === "image") fetchImage();
         if (config?.provider === "turnstile" && turnstileWidgetIdRef.current) {
@@ -313,11 +354,11 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
         if (!config || config.provider === "none") return true;
         if (config.provider === "image") return !!(imageData?.id && answer.trim());
         if (config.provider === "turnstile") return !!turnstileToken;
-        if (config.provider === "geetest") return !!geetestResult;
+        if (config.provider === "geetest") return geetestInstanceReady;
         return true;
       },
     }),
-    [config, imageData, answer, fetchImage, turnstileToken, geetestResult]
+    [config, imageData, answer, fetchImage, turnstileToken, geetestResult, geetestInstanceReady, geetestError]
   );
 
   if (!config || config.provider === "none") return null;
@@ -384,37 +425,34 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
   }
 
   if (config.provider === "geetest" && config.geetest_captcha_id) {
+    if (!geetestError) return null;
     return (
       <div className={cn("flex flex-col gap-2 items-center", className)}>
-        {geetestError ? (
-          <div className="flex flex-col gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-500" />
-              <div className="flex-1 space-y-1">
-                <p className="text-sm font-medium text-amber-800 dark:text-amber-200">验证码加载失败</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  可能是网络问题，请点击下方按钮重试。若为本地开发，可在后台「系统设置 →
-                  人机验证」中切换为「图形验证码」。
-                </p>
-              </div>
+        <div className="flex flex-col gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-500" />
+            <div className="flex-1 space-y-1">
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-200">验证码加载失败</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                可能是网络问题，请点击下方按钮重试。若为本地开发，可在后台「系统设置 →
+                人机验证」中切换为「图形验证码」。
+              </p>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                setGeetestError(false);
-                setGeetestRetryKey(k => k + 1);
-                document.querySelectorAll('script[src*="static.geetest.com"]').forEach(s => s.remove());
-                delete (window as { initGeetest4?: unknown }).initGeetest4;
-              }}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-500/20 dark:text-amber-200 dark:hover:bg-amber-500/15"
-            >
-              <RefreshCw className="h-4 w-4" />
-              重新加载
-            </button>
           </div>
-        ) : (
-          <div ref={geetestContainerRef} className="flex min-h-[50px] items-center [&_.geetest_captcha]:my-0" />
-        )}
+          <button
+            type="button"
+            onClick={() => {
+              setGeetestError(false);
+              setGeetestRetryKey(k => k + 1);
+              document.querySelectorAll('script[src*="static.geetest.com"]').forEach(s => s.remove());
+              delete (window as { initGeetest4?: unknown }).initGeetest4;
+            }}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-500/20 dark:text-amber-200 dark:hover:bg-amber-500/15"
+          >
+            <RefreshCw className="h-4 w-4" />
+            重新加载
+          </button>
+        </div>
       </div>
     );
   }

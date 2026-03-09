@@ -8,6 +8,7 @@ import { Tooltip, Popover, PopoverTrigger, PopoverContent } from "@heroui/react"
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
+import { useSiteConfigStore } from "@/store/site-config-store";
 import { useIsMobile } from "@/hooks/use-media-query";
 import { useTravellingLink } from "@/hooks/use-travelling-link";
 
@@ -37,6 +38,7 @@ export function HeaderRight({
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, logout, roles } = useAuthStore();
+  const registrationEnabled = useSiteConfigStore(s => s.enableRegistration());
   const isMobile = useIsMobile();
   const { handleTravelClick } = useTravellingLink();
 
@@ -123,7 +125,7 @@ export function HeaderRight({
           }}
         >
           <PopoverTrigger>
-            <button className={styles.navButton} title="登录 / 注册">
+            <button className={styles.navButton} title={registrationEnabled ? "登录 / 注册" : "登录"}>
               <Icon icon="ri:user-fill" width="1.3rem" height="1.3rem" />
             </button>
           </PopoverTrigger>
@@ -141,10 +143,12 @@ export function HeaderRight({
                   <Icon icon="ri:login-box-line" width={14} height={14} />
                   <span>登录</span>
                 </Link>
-                <Link href="/login?register=1" className={styles.registerBtn}>
-                  <Icon icon="ri:user-add-line" width={14} height={14} />
-                  <span>注册</span>
-                </Link>
+                {registrationEnabled && (
+                  <Link href="/login?register=1" className={styles.registerBtn}>
+                    <Icon icon="ri:user-add-line" width={14} height={14} />
+                    <span>注册</span>
+                  </Link>
+                )}
               </div>
             </div>
           </PopoverContent>

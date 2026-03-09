@@ -116,8 +116,9 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
   const router = useRouter();
   const { resolvedTheme } = useTheme();
   const setAuth = useAuthStore(state => state.setAuth);
-  const { getTitle, getHorizontalLogo } = useSiteConfigStore();
+  const { getTitle, getHorizontalLogo, enableRegistration } = useSiteConfigStore();
   const siteConfig = useSiteConfigStore(state => state.siteConfig);
+  const registrationEnabled = enableRegistration();
 
   // 防止 hydration 错误
   const [mounted, setMounted] = useState(false);
@@ -197,7 +198,13 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
     try {
       const response = await authService.checkEmail(email);
       if (response.code === 200) {
-        switchStep(response.data?.exists ? "login-password" : "confirm-register");
+        if (response.data?.exists) {
+          switchStep("login-password");
+        } else if (registrationEnabled) {
+          switchStep("confirm-register");
+        } else {
+          setError("该账号不存在，且站点未开放注册");
+        }
       } else {
         addToast({ title: response.message || "检查邮箱失败", color: "danger", timeout: 3000 });
       }
@@ -215,13 +222,15 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
       addToast({ title: "请输入密码", color: "warning", timeout: 3000 });
       return;
     }
-    if (!skipCaptcha && captchaRef.current && !captchaRef.current.isReady()) {
-      addToast({ title: "请完成验证码", color: "warning", timeout: 3000 });
-      return;
+
+    let captchaParams = {};
+    if (!skipCaptcha && captchaRef.current) {
+      const result = await captchaRef.current.verify();
+      if (result === null) return;
+      captchaParams = result;
     }
 
     setIsLoading(true);
-    const captchaParams = skipCaptcha ? {} : (captchaRef.current?.getCaptchaParams() ?? {});
 
     try {
       const response = await authService.login({ email, password, ...captchaParams });
@@ -272,14 +281,15 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
       setError("两次密码不一致");
       return;
     }
-    if (captchaRef.current && !captchaRef.current.isReady()) {
-      addToast({ title: "请完成验证码", color: "warning", timeout: 3000 });
-      return;
+    let captchaParams = {};
+    if (captchaRef.current) {
+      const result = await captchaRef.current.verify();
+      if (result === null) return;
+      captchaParams = result;
     }
 
     setIsLoading(true);
     setError("");
-    const captchaParams = captchaRef.current?.getCaptchaParams() ?? {};
 
     try {
       const response = await authService.register({
@@ -297,11 +307,22 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
           await handleLogin(true);
         }
       } else {
-        addToast({ title: response.message || "注册失败", color: "danger", timeout: 3000 });
+        const msg = response.message || "注册失败";
+        // 邮箱已被注册时在邮箱输入框下方内联展示，不弹 toast
+        if (msg === "该邮箱已被注册" || (msg.includes("邮箱") && msg.includes("注册"))) {
+          setError(msg);
+        } else {
+          addToast({ title: msg, color: "danger", timeout: 3000 });
+        }
         captchaRef.current?.refresh();
       }
     } catch (err) {
-      addToast({ title: getErrorMessage(err), color: "danger", timeout: 3000 });
+      const msg = getErrorMessage(err);
+      if (msg === "该邮箱已被注册" || (msg.includes("邮箱") && msg.includes("注册"))) {
+        setError(msg);
+      } else {
+        addToast({ title: msg, color: "danger", timeout: 3000 });
+      }
       captchaRef.current?.refresh();
     } finally {
       setIsLoading(false);
@@ -423,16 +444,18 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
                 </Button>
 
                 {/* 注册链接 */}
-                <p className="text-sm text-center text-muted-foreground">
-                  还没有账号？{" "}
-                  <button
-                    type="button"
-                    onClick={() => switchStep("register")}
-                    className="text-primary hover:underline cursor-pointer font-medium"
-                  >
-                    立即注册
-                  </button>
-                </p>
+                {registrationEnabled && (
+                  <p className="text-sm text-center text-muted-foreground">
+                    还没有账号？{" "}
+                    <button
+                      type="button"
+                      onClick={() => switchStep("register")}
+                      className="text-primary hover:underline cursor-pointer font-medium"
+                    >
+                      立即注册
+                    </button>
+                  </p>
+                )}
 
                 {/* 第三方登录 */}
                 {hasOAuthProviders && (
@@ -616,8 +639,13 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
                   type="email"
                   placeholder="电子邮箱"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={e => {
+                    setEmail(e.target.value);
+                    if (error) setError("");
+                  }}
                   autoFocus
+                  error={!!error && error !== "两次密码不一致"}
+                  helperText={error && error !== "两次密码不一致" ? error : undefined}
                   startAdornment={<MailIcon className="w-5 h-5" />}
                 />
 
