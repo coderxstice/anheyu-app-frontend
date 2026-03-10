@@ -27,6 +27,20 @@ interface PostContentProps {
   enableScripts?: boolean;
 }
 
+/**
+ * 将后端 convertImagesToLazyLoad 处理过的图片还原为正常 src，
+ * 改用浏览器原生 loading="lazy" 懒加载。
+ * 在 HTML 字符串层面处理，避免 React 重渲染覆盖 DOM 修改。
+ */
+function restoreLazyImages(html: string): string {
+  return html
+    .replace(/(<img\s[^>]*?)src="data:image\/svg\+xml;base64,[^"]*"(\s[^>]*?)data-src="([^"]*)"([^>]*>)/g,
+      (_, before, mid, realSrc, after) =>
+        `${before}src="${realSrc}"${mid}loading="lazy"${after}`
+          .replace(/\s*data-lazy-processed="[^"]*"/g, "")
+    );
+}
+
 // Mermaid 缩放功能的清理函数类型
 type MermaidCleanupFn = (() => void) | null;
 
@@ -290,11 +304,15 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
         });
       });
 
-      // 默认激活第一个标签
-      if (tabs.length > 0 && !container.querySelector(".tab.active")) {
-        tabs[0].classList.add("active");
-        if (contents[0]) {
-          contents[0].classList.add("active");
+      // 确保导航和内容的 active 状态同步
+      const activeBtn = container.querySelector(".nav-tabs .tab.active");
+      if (tabs.length > 0) {
+        if (!activeBtn) {
+          tabs[0].classList.add("active");
+        }
+        const activeIdx = activeBtn ? Array.from(tabs).indexOf(activeBtn) : 0;
+        if (!container.querySelector(".tab-item-content.active") && contents[activeIdx]) {
+          contents[activeIdx].classList.add("active");
         }
       }
     });
@@ -1207,8 +1225,9 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
       const updateTransform = () => {
         const svg = el.querySelector("svg");
         if (svg) {
-          (svg as unknown as HTMLElement).style.transform =
-            `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+          (
+            svg as unknown as HTMLElement
+          ).style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
           (svg as unknown as HTMLElement).style.transformOrigin = "center center";
         }
       };
@@ -1387,17 +1406,22 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     normalizeLinkCardStructure();
 
     // 处理图片懒加载：先立即加载视口内的图片，再用 IntersectionObserver 处理剩余的
+    const loadImage = (img: HTMLImageElement) => {
+      const dataSrc = img.getAttribute("data-src");
+      if (!dataSrc) return;
+      img.src = dataSrc;
+      img.removeAttribute("data-src");
+      img.removeAttribute("loading");
+      img.removeAttribute("data-lazy-processed");
+    };
+
     const images = currentContent.querySelectorAll<HTMLImageElement>("img[data-src]");
     if (images.length > 0) {
       const viewportHeight = window.innerHeight;
       images.forEach(img => {
         const rect = img.getBoundingClientRect();
-        if (rect.top < viewportHeight + 200) {
-          const dataSrc = img.getAttribute("data-src");
-          if (dataSrc) {
-            img.src = dataSrc;
-            img.removeAttribute("data-src");
-          }
+        if (rect.top < viewportHeight + 300 || rect.height === 0) {
+          loadImage(img);
         }
       });
 
@@ -1407,17 +1431,12 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
           entries => {
             entries.forEach(entry => {
               if (entry.isIntersecting) {
-                const img = entry.target as HTMLImageElement;
-                const dataSrc = img.getAttribute("data-src");
-                if (dataSrc) {
-                  img.src = dataSrc;
-                  img.removeAttribute("data-src");
-                }
-                observer.unobserve(img);
+                loadImage(entry.target as HTMLImageElement);
+                observer.unobserve(entry.target);
               }
             });
           },
-          { rootMargin: "200px" }
+          { rootMargin: "300px" }
         );
 
         remaining.forEach(img => observer.observe(img));
@@ -1523,7 +1542,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
       ref={contentRef}
       className={styles.postContent}
       data-post-content="true"
-      dangerouslySetInnerHTML={{ __html: content }}
+      dangerouslySetInnerHTML={{ __html: restoreLazyImages(content) }}
     />
   );
 }

@@ -333,7 +333,7 @@ export const GalleryBlock = Node.create({
           el.querySelectorAll(".gallery-item").forEach(itemEl => {
             const img = itemEl.querySelector("img");
             galleryItems.push({
-              src: img?.getAttribute("src") || "",
+              src: img?.getAttribute("data-src") || img?.getAttribute("src") || "",
               alt: img?.getAttribute("alt") || "",
               title: itemEl.querySelector(".gallery-item-title")?.textContent || "",
               desc: itemEl.querySelector(".gallery-item-desc")?.textContent || "",

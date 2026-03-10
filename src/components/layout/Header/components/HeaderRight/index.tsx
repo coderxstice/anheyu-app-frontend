@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
@@ -38,8 +38,11 @@ export function HeaderRight({
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, logout, roles } = useAuthStore();
-  const registrationEnabled = useSiteConfigStore(s => s.enableRegistration());
+  const registrationEnabledRaw = useSiteConfigStore(s => s.enableRegistration());
   const isMobile = useIsMobile();
+
+  const isClient = useSyncExternalStore(() => () => {}, () => true, () => false);
+  const registrationEnabled = isClient && registrationEnabledRaw;
   const { handleTravelClick } = useTravellingLink();
 
   // 是否在首页

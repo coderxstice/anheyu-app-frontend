@@ -19,7 +19,7 @@ import { MusicBlock } from "./extensions/music-block";
 import { ButtonBlock } from "./extensions/button-block";
 import { GalleryBlock } from "./extensions/gallery-block";
 import { VideoGalleryBlock } from "./extensions/video-gallery-block";
-import { TabsBlock } from "./extensions/tabs-block";
+import { TabsBlock, TabPanel } from "./extensions/tabs-block";
 import { PaidContent } from "./extensions/paid-content";
 import { PasswordContent } from "./extensions/password-content";
 import { LoginRequiredContent } from "./extensions/login-required-content";
@@ -206,6 +206,7 @@ export function useArticleEditor({
       GalleryBlock,
       VideoGalleryBlock,
       TabsBlock,
+      TabPanel,
       // Phase 3: PRO 业务功能
       PaidContent,
       PasswordContent,

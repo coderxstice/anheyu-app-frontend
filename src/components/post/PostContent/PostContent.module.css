@@ -144,8 +144,9 @@
   box-shadow: none;
 }
 
-/* 懒加载占位（兼容旧 data-src 文章）- 仅 data-src 存在时显示背景 */
+/* 懒加载占位 - 占位图未加载时保持可见尺寸 */
 .postContent :global(img[data-src]) {
+  min-height: 100px;
   background: var(--muted, #f0f2f5);
   border-radius: 8px;
 }
@@ -1290,6 +1291,7 @@
   border-radius: 12px;
   background: var(--card);
   transition: all 0.3s ease;
+  aspect-ratio: var(--gallery-ratio, 4/3);
 }
 
 .postContent :global(.gallery-container .gallery-item img) {
@@ -1316,20 +1318,50 @@
   transition: all 0.3s ease;
 }
 
-.postContent :global(.gallery-container .gallery-item:hover .gallery-caption) {
+.postContent :global(.gallery-container .gallery-item:hover .gallery-caption),
+.postContent :global(.gallery-container .gallery-item:hover .gallery-item-title),
+.postContent :global(.gallery-container .gallery-item:hover .gallery-item-desc) {
   opacity: 1;
   transform: translateY(0);
 }
 
-.postContent :global(.gallery-container .gallery-title) {
+.postContent :global(.gallery-container .gallery-title),
+.postContent :global(.gallery-container .gallery-item-title) {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  padding: 0 16px;
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 4px;
+  color: #fff;
+  opacity: 0;
+  transition: all 0.3s ease;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  z-index: 1;
 }
 
-.postContent :global(.gallery-container .gallery-desc) {
+/* title 作为最后一个子元素时（无 desc），移到底部并加渐变背景 */
+.postContent :global(.gallery-container .gallery-item-title:last-child) {
+  bottom: 0;
+  padding: 12px 16px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3), transparent);
+}
+
+.postContent :global(.gallery-container .gallery-desc),
+.postContent :global(.gallery-container .gallery-item-desc) {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 16px;
   font-size: 12px;
-  opacity: 0.9;
+  opacity: 0;
+  color: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4), transparent);
+  transition: all 0.3s ease;
+  z-index: 1;
 }
 
 /* Gallery 列数配置 */

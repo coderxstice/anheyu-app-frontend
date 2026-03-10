@@ -1044,9 +1044,11 @@
   height: 100%;
   content: "";
   box-shadow: 0 -69px 203px 11px #453e38 inset;
+  pointer-events: none;
 }
 .bannerButtonGroup {
   position: absolute;
+  z-index: 1;
   right: 2rem;
   bottom: 1.5rem;
 }
