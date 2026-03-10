@@ -1,5 +1,5 @@
 // ============================================
-// Tab 面板（与文章详情一致）
+// Tab 面板（与文章详情一致 - 前端渲染样式）
 // ============================================
 
 .tiptap {
@@ -62,13 +62,19 @@
   }
 }
 
-// ---- 编辑器 Tab NodeView 样式 ----
+// ============================================
+// 编辑器 Tab NodeView 样式
+// ============================================
+
+.editor-tabs-block {
+  margin: 1rem 0;
+}
+
 .editor-tabs {
   position: relative;
-  margin: 1rem 0;
   background: var(--anzhiyu-card-bg, #fff);
   border: 3px solid var(--anzhiyu-card-bg-grey, #f1f3f8);
-  border-radius: 12px;
+  border-radius: 12px 12px 0 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   overflow: hidden;
 }
@@ -78,7 +84,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  padding: 12px 12px 0;
+  padding: 12px 12px 12px;
   gap: 4px;
 }
 
@@ -105,7 +111,6 @@
   }
 }
 
-// Tab 包裹层
 .editor-tabs-tab-wrap {
   position: relative;
   display: inline-flex;
@@ -144,7 +149,6 @@
   }
 }
 
-// 双击编辑标题
 .editor-tabs-tab-input {
   width: 60px;
   padding: 2px 4px;
@@ -156,7 +160,6 @@
   outline: none;
 }
 
-// 添加按钮
 .editor-tabs-add {
   display: flex;
   align-items: center;
@@ -176,29 +179,26 @@
   }
 }
 
-// 内容区
-.editor-tabs-content {
-  padding: 12px;
+// 面板内容容器
+.editor-tabs-panels {
+  border: 3px solid var(--anzhiyu-card-bg-grey, #f1f3f8);
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
 }
 
-.editor-tabs-textarea {
-  width: 100%;
-  min-height: 80px;
-  padding: 12px;
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--anzhiyu-fontcolor, var(--foreground));
-  background: var(--anzhiyu-background, #f7f9fe);
-  border: 1px solid var(--anzhiyu-card-border, #e3e8f7);
-  border-radius: 8px;
-  outline: none;
-  resize: vertical;
-  transition: border-color 0.2s;
+// 单个面板
+.editor-tab-panel {
+  .editor-tab-panel-content {
+    min-height: 60px;
+    padding: 16px;
+    background: var(--anzhiyu-background, #f7f9fe);
 
-  &:focus {
-    border-color: var(--anzhiyu-theme, #3b82f6);
-  }
-  &::placeholder {
-    color: var(--anzhiyu-secondtext, #9ca3af);
+    > *:first-child {
+      margin-top: 0;
+    }
+    > *:last-child {
+      margin-bottom: 0;
+    }
   }
 }

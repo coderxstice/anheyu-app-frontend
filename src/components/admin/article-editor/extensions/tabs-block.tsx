@@ -1,139 +1,231 @@
 /**
- * TabsBlock 扩展
- * 标签页面板，样式与文章详情一致
- * 支持多 Tab 切换、标题编辑、内容编辑、添加/删除 Tab
+ * TabsBlock + TabPanel 扩展
+ * 标签页面板，每个 Tab 支持任意富文本内容（图片、代码块、列表等）
+ *
+ * 节点结构：tabsBlock > tabPanel+ > block+
  */
 import { Node, mergeAttributes } from "@tiptap/core";
-import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
-import { useState } from "react";
+import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent, type NodeViewProps } from "@tiptap/react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Plus, X } from "lucide-react";
 
-// ---- 类型定义 ----
-interface TabItem {
-  title: string;
-  content: string;
+// ============================================================
+// TabPanel 节点 —— 单个标签页，内部承载任意 block 内容
+// ============================================================
+
+function TabPanelView({ node }: NodeViewProps) {
+  return (
+    <NodeViewWrapper className="editor-tab-panel" data-title={node.attrs.title}>
+      <NodeViewContent className="editor-tab-panel-content" />
+    </NodeViewWrapper>
+  );
 }
 
-const DEFAULT_TABS: TabItem[] = [
-  { title: "标签 1", content: "" },
-  { title: "标签 2", content: "" },
-];
+export const TabPanel = Node.create({
+  name: "tabPanel",
 
-// ---- React NodeView 组件 ----
-function TabsBlockView({ node, updateAttributes }: NodeViewProps) {
-  const tabsRaw = (node.attrs.tabs as string) || JSON.stringify(DEFAULT_TABS);
+  group: "tabPanel",
 
-  let tabs: TabItem[] = [];
-  try {
-    tabs = JSON.parse(tabsRaw);
-  } catch {
-    tabs = [...DEFAULT_TABS];
-  }
+  content: "block+",
 
-  const [activeIdx, setActiveIdx] = useState(parseInt((node.attrs.activeIndex as string) || "0", 10));
+  defining: true,
+
+  isolating: true,
+
+  addAttributes() {
+    return {
+      title: { default: "标签" },
+    };
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: "div.tab-item-content",
+        getAttrs: (el: HTMLElement) => {
+          const dataTitle = el.getAttribute("data-title");
+          if (dataTitle) return { title: dataTitle };
+
+          const tabsContainer = el.closest(".tabs");
+          if (!tabsContainer) return { title: "标签" };
+
+          const allContent = tabsContainer.querySelectorAll(".tab-item-content");
+          const myIndex = Array.from(allContent).indexOf(el);
+          const buttons = tabsContainer.querySelectorAll(".nav-tabs .tab, .nav-tabs button");
+          return { title: buttons[myIndex]?.textContent?.trim() || `标签 ${myIndex + 1}` };
+        },
+      },
+    ];
+  },
+
+  renderHTML({ node, HTMLAttributes }) {
+    return [
+      "div",
+      mergeAttributes(HTMLAttributes, {
+        class: "tab-item-content",
+        "data-title": node.attrs.title || "",
+      }),
+      0,
+    ];
+  },
+
+  addNodeView() {
+    return ReactNodeViewRenderer(TabPanelView);
+  },
+});
+
+// ============================================================
+// TabsBlock 节点 —— 标签页容器，管理标签导航和活跃状态
+// ============================================================
+
+const DEFAULT_PANEL_TITLES = ["标签 1", "标签 2"];
+
+function TabsBlockView({ node, updateAttributes, editor, getPos }: NodeViewProps) {
   const [editingTab, setEditingTab] = useState<number | null>(null);
+  const panelsRef = useRef<HTMLDivElement>(null);
 
-  const safeIdx = Math.min(Math.max(0, activeIdx), tabs.length - 1);
+  const activeIndex = parseInt((node.attrs.activeIndex as string) || "0", 10);
+  const panelCount = node.content.childCount;
+  const safeIdx = Math.min(Math.max(0, activeIndex), panelCount - 1);
 
-  const saveTabs = (newTabs: TabItem[], newIdx?: number) => {
-    const idx = newIdx ?? safeIdx;
-    updateAttributes({ tabs: JSON.stringify(newTabs), activeIndex: String(idx) });
-    if (newIdx !== undefined) setActiveIdx(newIdx);
-  };
+  const titles: string[] = [];
+  node.content.forEach(child => {
+    titles.push((child.attrs.title as string) || "标签");
+  });
 
-  const handleAddTab = () => {
-    const newTabs = [...tabs, { title: `标签 ${tabs.length + 1}`, content: "" }];
-    saveTabs(newTabs);
-  };
+  // 切换面板可见性
+  useEffect(() => {
+    const container = panelsRef.current;
+    if (!container) return;
+    const panels = container.querySelectorAll<HTMLElement>(":scope > .editor-tab-panel");
+    panels.forEach((panel, i) => {
+      panel.style.display = i === safeIdx ? "" : "none";
+    });
+  }, [safeIdx, panelCount]);
 
-  const handleRemoveTab = (index: number) => {
-    if (tabs.length <= 1) return;
-    const newTabs = tabs.filter((_, i) => i !== index);
-    const newIdx = safeIdx >= newTabs.length ? newTabs.length - 1 : safeIdx;
-    saveTabs(newTabs, newIdx);
-  };
+  const resolvePos = useCallback(() => {
+    return typeof getPos === "function" ? getPos() : 0;
+  }, [getPos]);
 
-  const handleTitleChange = (index: number, value: string) => {
-    const newTabs = [...tabs];
-    newTabs[index] = { ...newTabs[index], title: value };
-    saveTabs(newTabs);
-  };
+  const switchTab = useCallback(
+    (index: number) => {
+      updateAttributes({ activeIndex: String(index) });
+      try {
+        const pos = resolvePos();
+        let childStart = pos + 1;
+        for (let i = 0; i < index; i++) {
+          childStart += node.content.child(i).nodeSize;
+        }
+        editor.commands.setTextSelection(childStart + 1);
+      } catch {
+        /* 切换 tab 时聚焦失败不影响功能 */
+      }
+    },
+    [updateAttributes, resolvePos, node, editor]
+  );
 
-  const handleContentChange = (value: string) => {
-    const newTabs = [...tabs];
-    newTabs[safeIdx] = { ...newTabs[safeIdx], content: value };
-    saveTabs(newTabs);
-  };
+  const addTab = useCallback(() => {
+    const pos = resolvePos();
+    const endPos = pos + node.nodeSize - 1;
+    const newPanel = editor.schema.nodes.tabPanel.create(
+      { title: `标签 ${panelCount + 1}` },
+      editor.schema.nodes.paragraph.create()
+    );
+    editor.view.dispatch(editor.state.tr.insert(endPos, newPanel));
+  }, [resolvePos, node, editor, panelCount]);
+
+  const removeTab = useCallback(
+    (index: number) => {
+      if (panelCount <= 1) return;
+      const pos = resolvePos();
+      let childPos = pos + 1;
+      for (let i = 0; i < index; i++) {
+        childPos += node.content.child(i).nodeSize;
+      }
+      const child = node.content.child(index);
+      const tr = editor.state.tr.delete(childPos, childPos + child.nodeSize);
+
+      const newCount = panelCount - 1;
+      const newIdx = safeIdx >= newCount ? newCount - 1 : safeIdx;
+      tr.setNodeMarkup(pos, undefined, { ...node.attrs, activeIndex: String(newIdx) });
+      editor.view.dispatch(tr);
+    },
+    [resolvePos, node, editor, panelCount, safeIdx]
+  );
+
+  const changeTitle = useCallback(
+    (index: number, title: string) => {
+      const pos = resolvePos();
+      let childPos = pos + 1;
+      for (let i = 0; i < index; i++) {
+        childPos += node.content.child(i).nodeSize;
+      }
+      editor.view.dispatch(
+        editor.state.tr.setNodeMarkup(childPos, undefined, {
+          ...node.content.child(index).attrs,
+          title,
+        })
+      );
+    },
+    [resolvePos, node, editor]
+  );
 
   return (
-    <NodeViewWrapper className="my-3">
-      <div className="editor-node-hover-wrap" contentEditable={false}>
-        <div className="editor-tabs">
-          {/* 标签导航 */}
-          <div className="editor-tabs-nav">
-            {tabs.map((tab, i) => (
-              <div key={i} className="editor-tabs-tab-wrap">
+    <NodeViewWrapper className="editor-tabs-block">
+      <div className="editor-tabs" contentEditable={false}>
+        {/* 标签导航 */}
+        <div className="editor-tabs-nav">
+          {titles.map((title, i) => (
+            <div key={i} className="editor-tabs-tab-wrap">
+              <button
+                type="button"
+                className={`editor-tabs-tab ${i === safeIdx ? "is-active" : ""}`}
+                onClick={() => switchTab(i)}
+                onDoubleClick={e => {
+                  e.stopPropagation();
+                  setEditingTab(i);
+                }}
+              >
+                {editingTab === i ? (
+                  <input
+                    value={title}
+                    onChange={e => changeTitle(i, e.target.value)}
+                    onBlur={() => setEditingTab(null)}
+                    onKeyDown={e => {
+                      if (e.key === "Enter" || e.key === "Escape") setEditingTab(null);
+                    }}
+                    onClick={e => e.stopPropagation()}
+                    className="editor-tabs-tab-input"
+                    autoFocus
+                  />
+                ) : (
+                  title
+                )}
+              </button>
+              {panelCount > 1 && (
                 <button
                   type="button"
-                  className={`editor-tabs-tab ${i === safeIdx ? "is-active" : ""}`}
-                  onClick={() => {
-                    setActiveIdx(i);
-                    updateAttributes({ activeIndex: String(i) });
-                  }}
-                  onDoubleClick={e => {
+                  className="editor-tabs-tab-remove"
+                  onClick={e => {
                     e.stopPropagation();
-                    setEditingTab(i);
+                    removeTab(i);
                   }}
+                  title="删除标签"
                 >
-                  {editingTab === i ? (
-                    <input
-                      value={tab.title}
-                      onChange={e => handleTitleChange(i, e.target.value)}
-                      onBlur={() => setEditingTab(null)}
-                      onKeyDown={e => {
-                        if (e.key === "Enter" || e.key === "Escape") setEditingTab(null);
-                      }}
-                      onClick={e => e.stopPropagation()}
-                      className="editor-tabs-tab-input"
-                      autoFocus
-                    />
-                  ) : (
-                    tab.title
-                  )}
+                  <X className="w-3 h-3" />
                 </button>
-                {tabs.length > 1 && (
-                  <button
-                    type="button"
-                    className="editor-tabs-tab-remove"
-                    onClick={e => {
-                      e.stopPropagation();
-                      handleRemoveTab(i);
-                    }}
-                    title="删除标签"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                )}
-              </div>
-            ))}
+              )}
+            </div>
+          ))}
 
-            {/* 添加按钮 */}
-            <button type="button" className="editor-tabs-add" onClick={handleAddTab} title="添加标签">
-              <Plus className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* 内容区 */}
-          <div className="editor-tabs-content">
-            <textarea
-              value={tabs[safeIdx]?.content || ""}
-              onChange={e => handleContentChange(e.target.value)}
-              className="editor-tabs-textarea"
-              placeholder="输入标签内容..."
-            />
-          </div>
+          <button type="button" className="editor-tabs-add" onClick={addTab} title="添加标签">
+            <Plus className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
+
+      {/* 面板内容 — 由 TipTap 渲染子 TabPanel 节点 */}
+      <NodeViewContent ref={panelsRef} className="editor-tabs-panels" />
     </NodeViewWrapper>
   );
 }
@@ -142,25 +234,23 @@ function TabsBlockView({ node, updateAttributes }: NodeViewProps) {
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     tabsBlock: {
-      insertTabsBlock: (attrs?: { tabs?: string; activeIndex?: number }) => ReturnType;
+      insertTabsBlock: (attrs?: { titles?: string[]; activeIndex?: number }) => ReturnType;
     };
   }
 }
 
-// ---- Tiptap 扩展 ----
 export const TabsBlock = Node.create({
   name: "tabsBlock",
 
   group: "block",
 
-  atom: true,
+  content: "tabPanel+",
+
+  defining: true,
 
   addAttributes() {
     return {
       activeIndex: { default: "0" },
-      tabs: {
-        default: JSON.stringify(DEFAULT_TABS),
-      },
     };
   },
 
@@ -169,63 +259,40 @@ export const TabsBlock = Node.create({
       {
         tag: "div.tabs",
         getAttrs: (el: HTMLElement) => {
-          const parsedTabs: TabItem[] = [];
-          const navButtons = el.querySelectorAll(".nav-tabs button, .nav-tabs .tab-button, .nav-tabs .tab");
-          const contentDivs = el.querySelectorAll(
-            ".tab-item-content, .tab-content > .tab-pane, .tab-contents > .tab-item-content"
-          );
-
-          if (navButtons.length > 0) {
-            navButtons.forEach((btn, i) => {
-              parsedTabs.push({
-                title: btn.textContent?.trim() || `标签 ${i + 1}`,
-                content: contentDivs[i]?.textContent?.trim() || "",
-              });
-            });
-          }
-
           let activeIndex = "0";
           const activeBtn = el.querySelector(".nav-tabs .active, .nav-tabs [aria-selected='true']");
-          if (activeBtn && navButtons.length > 0) {
-            const idx = Array.from(navButtons).indexOf(activeBtn);
+          if (activeBtn) {
+            const allBtns = el.querySelectorAll(".nav-tabs .tab, .nav-tabs button");
+            const idx = Array.from(allBtns).indexOf(activeBtn);
             if (idx >= 0) activeIndex = String(idx);
           }
-
-          return {
-            tabs: JSON.stringify(parsedTabs.length > 0 ? parsedTabs : DEFAULT_TABS),
-            activeIndex,
-          };
+          return { activeIndex };
         },
+        contentElement: ".tab-contents",
       },
     ];
   },
 
   renderHTML({ node, HTMLAttributes }) {
-    let tabs: TabItem[] = [];
-    try {
-      tabs = JSON.parse((node.attrs.tabs as string) || "[]");
-    } catch {
-      tabs = [...DEFAULT_TABS];
-    }
     const activeIndex = parseInt((node.attrs.activeIndex as string) || "0", 10);
 
-    const navTabs = tabs.map((tab, i) => [
-      "button",
-      { class: `tab${i === activeIndex ? " active" : ""}`, "data-index": String(i) },
-      tab.title,
-    ]);
-
-    const contentDivs = tabs.map((tab, i) => [
-      "div",
-      { class: `tab-item-content${i === activeIndex ? " active" : ""}` },
-      tab.content,
-    ]);
+    const navButtons: unknown[] = [];
+    let index = 0;
+    node.content.forEach(child => {
+      const title = (child.attrs.title as string) || `标签 ${index + 1}`;
+      navButtons.push([
+        "button",
+        { class: `tab${index === activeIndex ? " active" : ""}`, "data-index": String(index) },
+        title,
+      ]);
+      index++;
+    });
 
     return [
       "div",
       mergeAttributes(HTMLAttributes, { class: "tabs" }),
-      ["div", { class: "nav-tabs" }, ...navTabs],
-      ["div", { class: "tab-contents" }, ...contentDivs],
+      ["div", { class: "nav-tabs" }, ...navButtons],
+      ["div", { class: "tab-contents" }, 0],
     ];
   },
 
@@ -237,13 +304,16 @@ export const TabsBlock = Node.create({
     return {
       insertTabsBlock:
         (attrs = {}) =>
-        ({ commands }) => {
+        ({ editor, commands }) => {
+          const titles = attrs?.titles ?? DEFAULT_PANEL_TITLES;
           return commands.insertContent({
             type: this.name,
-            attrs: {
-              tabs: attrs?.tabs ?? JSON.stringify(DEFAULT_TABS),
-              activeIndex: String(attrs?.activeIndex ?? 0),
-            },
+            attrs: { activeIndex: String(attrs?.activeIndex ?? 0) },
+            content: titles.map(title => ({
+              type: "tabPanel",
+              attrs: { title },
+              content: [{ type: "paragraph" }],
+            })),
           });
         },
     };

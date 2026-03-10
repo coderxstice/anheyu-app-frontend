@@ -7,16 +7,19 @@
  */
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { addToast, Spinner, Switch, Input, Textarea, Button } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import TurndownService from "turndown";
+import { marked } from "marked";
 import { ArrowLeft, PanelRightClose, PanelRightOpen, Save } from "lucide-react";
-import { EditorToolbar } from "../article-editor/EditorToolbar";
+import { EditorToolbar, type EditorMode } from "../article-editor/EditorToolbar";
 import { TiptapEditor } from "../article-editor/TiptapEditor";
+import { SourceCodeEditor } from "../article-editor/SourceCodeEditor";
 import { useArticleEditor } from "../article-editor/use-article-editor";
 import { useAdminPageDetail, useCreatePage, useUpdatePage } from "@/hooks/queries/use-page-management";
 import { processHtmlForSave } from "@/lib/content-processor";
+import { registerCustomRules } from "@/lib/turndown-rules";
 
 import type { Editor } from "@tiptap/react";
 
@@ -56,6 +59,7 @@ const turndownService = new TurndownService({
   codeBlockStyle: "fenced",
   bulletListMarker: "-",
 });
+registerCustomRules(turndownService);
 
 function normalizePagePath(value: string): string {
   const trimmed = value.trim();
@@ -91,6 +95,62 @@ export function PageEditorPage({ pageId }: PageEditorPageProps) {
     placeholder: "开始编写页面内容...",
   });
 
+  const [editorMode, setEditorMode] = useState<EditorMode>("visual");
+  const [sourceContent, setSourceContent] = useState("");
+  const visualBackupRef = useRef<Record<string, unknown> | null>(null);
+  const sourceModifiedRef = useRef(false);
+
+  const handleSourceChange = useCallback((value: string) => {
+    setSourceContent(value);
+    sourceModifiedRef.current = true;
+  }, []);
+
+  const handleModeChange = useCallback(
+    (newMode: EditorMode) => {
+      if (newMode === editorMode) return;
+
+      if (editorMode === "visual") {
+        if (editor && !editor.isDestroyed) {
+          visualBackupRef.current = editor.getJSON() as Record<string, unknown>;
+        }
+        sourceModifiedRef.current = false;
+
+        const rawHtml = editor?.getHTML() ?? "";
+        if (newMode === "html") {
+          setSourceContent(rawHtml);
+        } else {
+          setSourceContent(turndownService.turndown(processHtmlForSave(rawHtml)));
+        }
+      } else if (newMode === "visual") {
+        if (!sourceModifiedRef.current && visualBackupRef.current) {
+          if (editor && !editor.isDestroyed) {
+            const backupSnapshot = visualBackupRef.current;
+            queueMicrotask(() => editor.commands.setContent(backupSnapshot));
+          }
+        } else if (editorMode === "html") {
+          if (editor && !editor.isDestroyed) {
+            queueMicrotask(() => editor.commands.setContent(sourceContent));
+          }
+        } else {
+          const html = marked.parse(sourceContent, { async: false }) as string;
+          if (editor && !editor.isDestroyed) {
+            queueMicrotask(() => editor.commands.setContent(html));
+          }
+        }
+        visualBackupRef.current = null;
+      } else {
+        if (editorMode === "html") {
+          setSourceContent(turndownService.turndown(sourceContent));
+        } else {
+          setSourceContent(marked.parse(sourceContent, { async: false }) as string);
+        }
+      }
+
+      setEditorMode(newMode);
+    },
+    [editorMode, editor, sourceContent]
+  );
+
   const createMutation = useCreatePage();
   const updateMutation = useUpdatePage();
   const isSaving = createMutation.isPending || updateMutation.isPending;
@@ -123,7 +183,6 @@ export function PageEditorPage({ pageId }: PageEditorPageProps) {
   }, [pageData, editor]);
 
   const handleSave = () => {
-    const rawHtml = editor?.getHTML() ?? "";
     const currentTitle = title.trim();
     const currentPath = normalizePagePath(path);
 
@@ -144,8 +203,20 @@ export function PageEditorPage({ pageId }: PageEditorPageProps) {
       setPath(currentPath);
     }
 
-    const html = processHtmlForSave(rawHtml);
-    const markdown = turndownService.turndown(html);
+    let html: string;
+    let markdown: string;
+
+    if (editorMode === "visual") {
+      const rawHtml = editor?.getHTML() ?? "";
+      html = processHtmlForSave(rawHtml);
+      markdown = turndownService.turndown(html);
+    } else if (editorMode === "html") {
+      html = sourceContent;
+      markdown = turndownService.turndown(html);
+    } else {
+      markdown = sourceContent;
+      html = marked.parse(sourceContent, { async: false }) as string;
+    }
 
     const data = {
       title: currentTitle,
@@ -239,18 +310,25 @@ export function PageEditorPage({ pageId }: PageEditorPageProps) {
       </div>
 
       {/* 工具栏 */}
-      <EditorToolbar editor={editor} />
+      <EditorToolbar editor={editor} editorMode={editorMode} onModeChange={handleModeChange} />
 
       {/* 主体区域 */}
       <div className="flex flex-1 min-h-0 overflow-hidden relative">
         {/* 编辑器 */}
-        <div className="flex-1 min-h-0 relative">
-          <div className="h-full overflow-auto bg-card">
+        <div className="flex-1 min-h-0 relative flex flex-col">
+          <div className={editorMode === "visual" ? "flex-1 overflow-auto bg-card" : "hidden"}>
             <div className="max-w-4xl mx-auto">
               <TiptapEditor editor={editor} />
             </div>
           </div>
-          <WordCount editor={editor} />
+          {editorMode === "visual" && <WordCount editor={editor} />}
+          {editorMode !== "visual" && (
+            <SourceCodeEditor
+              value={sourceContent}
+              onChange={handleSourceChange}
+              language={editorMode === "html" ? "html" : "markdown"}
+            />
+          )}
         </div>
 
         {/* 设置面板 */}
