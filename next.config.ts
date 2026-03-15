@@ -34,10 +34,10 @@ const nextConfig: NextConfig = {
           source: "/api/:path*",
           destination: `${backendUrl}/api/:path*`,
         },
-        // 文件代理
+        // 文件直链代理（后端路由在 /api/f/ 下，需带 /api 前缀）
         {
           source: "/f/:path*",
-          destination: `${backendUrl}/f/:path*`,
+          destination: `${backendUrl}/api/f/:path*`,
         },
         // 缓存文件代理
         {
