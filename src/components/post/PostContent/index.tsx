@@ -30,15 +30,18 @@ interface PostContentProps {
 /**
  * 将后端 convertImagesToLazyLoad 处理过的图片还原为正常 src，
  * 改用浏览器原生 loading="lazy" 懒加载。
- * 在 HTML 字符串层面处理，避免 React 重渲染覆盖 DOM 修改。
+ * 支持 src 与 data-src 任意顺序，避免 8091（Docker）等环境下占位符一直不替换。
  */
 function restoreLazyImages(html: string): string {
-  return html
-    .replace(/(<img\s[^>]*?)src="data:image\/svg\+xml;base64,[^"]*"(\s[^>]*?)data-src="([^"]*)"([^>]*>)/g,
-      (_, before, mid, realSrc, after) =>
-        `${before}src="${realSrc}"${mid}loading="lazy"${after}`
-          .replace(/\s*data-lazy-processed="[^"]*"/g, "")
-    );
+  const srcFirstRe = /(<img\s[^>]*?)src="(data:image\/svg\+xml;base64,[^"]*)"([^>]*?)data-src="([^"]*)"([^>]*>)/g;
+  let out = html.replace(srcFirstRe, (_, before, _pl, mid, realSrc, after) =>
+    `${before}src="${realSrc}"${mid}loading="lazy"${after}`.replace(/\s*data-lazy-processed="[^"]*"/g, "")
+  );
+  const dataSrcFirstRe = /(<img\s[^>]*?)data-src="([^"]*)"([^>]*?)src="(data:image\/svg\+xml;base64,[^"]*)"([^>]*>)/g;
+  out = out.replace(dataSrcFirstRe, (_, before, realSrc, mid, _pl, after) =>
+    `${before}src="${realSrc}"${mid}loading="lazy"${after}`.replace(/\s*data-lazy-processed="[^"]*"/g, "")
+  );
+  return out;
 }
 
 // Mermaid 缩放功能的清理函数类型
@@ -1417,29 +1420,34 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
 
     const images = currentContent.querySelectorAll<HTMLImageElement>("img[data-src]");
     if (images.length > 0) {
-      const viewportHeight = window.innerHeight;
+      const hasPlaceholder = (el: HTMLImageElement) => (el.getAttribute("src") || "").startsWith("data:image/svg+xml;base64,");
       images.forEach(img => {
-        const rect = img.getBoundingClientRect();
-        if (rect.top < viewportHeight + 300 || rect.height === 0) {
-          loadImage(img);
-        }
+        if (hasPlaceholder(img)) loadImage(img);
       });
 
       const remaining = currentContent.querySelectorAll<HTMLImageElement>("img[data-src]");
-      if (remaining.length > 0 && "IntersectionObserver" in window) {
-        const observer = new IntersectionObserver(
-          entries => {
-            entries.forEach(entry => {
-              if (entry.isIntersecting) {
-                loadImage(entry.target as HTMLImageElement);
-                observer.unobserve(entry.target);
-              }
-            });
-          },
-          { rootMargin: "300px" }
-        );
+      if (remaining.length > 0) {
+        const viewportHeight = window.innerHeight;
+        remaining.forEach(img => {
+          const rect = img.getBoundingClientRect();
+          if (rect.top < viewportHeight + 300 || rect.height === 0) loadImage(img);
+        });
 
-        remaining.forEach(img => observer.observe(img));
+        const stillRemaining = currentContent.querySelectorAll<HTMLImageElement>("img[data-src]");
+        if (stillRemaining.length > 0 && "IntersectionObserver" in window) {
+          const observer = new IntersectionObserver(
+            entries => {
+              entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                  loadImage(entry.target as HTMLImageElement);
+                  observer.unobserve(entry.target);
+                }
+              });
+            },
+            { rootMargin: "300px" }
+          );
+          stillRemaining.forEach(img => observer.observe(img));
+        }
       }
     }
 

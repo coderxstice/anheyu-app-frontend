@@ -150,8 +150,10 @@ function PolicyEditForm({ initialData }: { initialData: StoragePolicy }) {
   const handleSave = useCallback(async () => {
     if (!initialData.id) return;
     try {
+      // 后端 UpdatePolicyRequest 要求必填 type，提交时带上当前策略类型（与后端一致）
       const updateData: Record<string, unknown> = {
         name: formData.name,
+        type: formData.type ?? initialData.type,
         virtual_path: formData.virtual_path,
         base_path: formData.base_path,
         flag: formData.flag ?? "",
@@ -172,7 +174,7 @@ function PolicyEditForm({ initialData }: { initialData: StoragePolicy }) {
     } catch (e) {
       addToast({ title: getErrorMessage(e), color: "danger" });
     }
-  }, [initialData.id, formData, updateMutation]);
+  }, [initialData.id, initialData.type, formData, updateMutation]);
 
   const goBack = useCallback(() => {
     router.push("/admin/storage");

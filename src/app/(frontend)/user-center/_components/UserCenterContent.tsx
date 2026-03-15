@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
 import { userCenterApi } from "@/lib/api/user-center";
+import { getErrorMessage } from "@/lib/api/client";
 import { EditProfileDialog } from "./EditProfileDialog";
 import { ChangePasswordDialog } from "./ChangePasswordDialog";
 import { NotificationSettingsDialog } from "./NotificationSettingsDialog";
@@ -84,8 +85,9 @@ export function UserCenterContent() {
         } else {
           alert(res.message || "头像上传失败");
         }
-      } catch {
-        alert("头像上传失败，请稍后再试");
+      } catch (err) {
+        const msg = getErrorMessage(err);
+        alert(msg && msg !== "请求失败" ? msg : "头像上传失败，请稍后再试");
       } finally {
         setAvatarUploading(false);
       }
