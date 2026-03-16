@@ -112,6 +112,7 @@ function TabsBlockView({ node, updateAttributes, editor, getPos }: NodeViewProps
       updateAttributes({ activeIndex: String(index) });
       try {
         const pos = resolvePos();
+        if (pos === undefined) return;
         let childStart = pos + 1;
         for (let i = 0; i < index; i++) {
           childStart += node.content.child(i).nodeSize;
@@ -126,6 +127,7 @@ function TabsBlockView({ node, updateAttributes, editor, getPos }: NodeViewProps
 
   const addTab = useCallback(() => {
     const pos = resolvePos();
+    if (pos === undefined) return;
     const endPos = pos + node.nodeSize - 1;
     const newPanel = editor.schema.nodes.tabPanel.create(
       { title: `标签 ${panelCount + 1}` },
@@ -138,6 +140,7 @@ function TabsBlockView({ node, updateAttributes, editor, getPos }: NodeViewProps
     (index: number) => {
       if (panelCount <= 1) return;
       const pos = resolvePos();
+      if (pos === undefined) return;
       let childPos = pos + 1;
       for (let i = 0; i < index; i++) {
         childPos += node.content.child(i).nodeSize;
@@ -156,6 +159,7 @@ function TabsBlockView({ node, updateAttributes, editor, getPos }: NodeViewProps
   const changeTitle = useCallback(
     (index: number, title: string) => {
       const pos = resolvePos();
+      if (pos === undefined) return;
       let childPos = pos + 1;
       for (let i = 0; i < index; i++) {
         childPos += node.content.child(i).nodeSize;
@@ -304,7 +308,7 @@ export const TabsBlock = Node.create({
     return {
       insertTabsBlock:
         (attrs = {}) =>
-        ({ editor, commands }) => {
+        ({ commands }) => {
           const titles = attrs?.titles ?? DEFAULT_PANEL_TITLES;
           return commands.insertContent({
             type: this.name,
