@@ -12,7 +12,6 @@ describe("ADMIN_EMPTY_TEXTS", () => {
     "friends",
     "orders",
     "supports",
-    "donations",
     "products",
   ] as const;
 

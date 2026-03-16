@@ -1048,7 +1048,7 @@
 }
 .bannerButtonGroup {
   position: absolute;
-  z-index: 1;
+  z-index: 10;
   right: 2rem;
   bottom: 1.5rem;
 }
@@ -1069,11 +1069,12 @@
   color: #fff;
   text-decoration: none;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.25);
   backdrop-filter: saturate(180%) blur(20px);
   border-radius: 20px;
   transition: 0.3s;
   transform: translateZ(0);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
 }
 .bannerButton:hover {
   background: var(--primary);
@@ -1096,12 +1097,13 @@
 /* ---------- 赞赏名单 ---------- */
 .reward {
   width: 100%;
+  min-height: 280px;
   position: relative;
 }
 .rewardDescription {
   margin: 0.5rem 0 0;
   font-size: 14px;
-  color: var(--muted-foreground);
+  color: var(--anzhiyu-secondtext, var(--muted-foreground));
   line-height: 1.6;
 }
 .rewardListAll {
@@ -1109,6 +1111,16 @@
   grid-template-columns: repeat(5, 1fr);
   gap: 12px;
   margin: 20px 0;
+}
+.rewardListEmpty {
+  grid-column: 1 / -1;
+  padding: 24px;
+  font-size: 14px;
+  color: var(--anzhiyu-secondtext, var(--muted-foreground));
+  text-align: center;
+  background: var(--anzhiyu-card-bg, var(--card));
+  border: 1px dashed var(--anzhiyu-card-border, var(--border));
+  border-radius: 8px;
 }
 @media (max-width: 1024px) {
   .rewardListAll {
@@ -1123,8 +1135,8 @@
 }
 .rewardListItem {
   padding: 12px;
-  background: var(--card, #fff);
-  border: 1px solid var(--border, #e5e7eb);
+  background: var(--anzhiyu-card-bg, var(--card));
+  border: 1px solid var(--anzhiyu-card-border, var(--border));
   border-radius: 8px;
   transition: all 0.3s ease;
 }
@@ -1136,7 +1148,7 @@
   margin-bottom: 8px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--foreground);
+  color: var(--anzhiyu-fontcolor, var(--foreground));
 }
 .rewardBottomGroup {
   display: flex;
@@ -1149,7 +1161,7 @@
   font-size: 12px;
   font-weight: bold;
   color: #fff;
-  background: var(--foreground);
+  background: var(--font-color, var(--foreground));
   border-radius: 4px;
 }
 .rewardItemMoneyLarge {
@@ -1157,12 +1169,12 @@
 }
 .rewardItemTime {
   font-size: 12px;
-  color: var(--muted-foreground);
+  color: var(--anzhiyu-secondtext, var(--muted-foreground));
 }
 .rewardUpdateDate {
   margin-top: 16px;
   font-size: 14px;
-  color: var(--muted-foreground);
+  color: var(--anzhiyu-secondtext, var(--muted-foreground));
 }
 .rewardUpdateDateTime {
   font-weight: 500;
@@ -1322,14 +1334,15 @@
 .rewardDialogOverlay {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 10050;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: fadeIn 0.2s ease;
+  padding: 1rem;
+  animation: rewardOverlayIn 0.25s ease-out;
 }
-@keyframes fadeIn {
+@keyframes rewardOverlayIn {
   from {
     opacity: 0;
   }
@@ -1342,17 +1355,19 @@
   border-radius: 12px;
   width: 500px;
   max-width: 90vw;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
-  animation: dialogSlideUp 0.3s ease;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
+  animation: rewardDialogIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-@keyframes dialogSlideUp {
+@keyframes rewardDialogIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: scale(0.96) translateY(16px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1) translateY(0);
   }
 }
 .rewardDialogHeader {
@@ -1402,6 +1417,10 @@
     flex-direction: column;
     gap: 30px;
     align-items: center;
+  }
+  .qrCodeItem .qrImage {
+    width: 160px;
+    height: 160px;
   }
 }
 .qrCodeItem {

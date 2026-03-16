@@ -6,7 +6,7 @@ import { useSiteConfigStore } from "@/store/site-config-store";
 import type { DonationItem } from "@/types/about";
 import styles from "../about.module.css";
 
-// 充电动画 SVG 管道
+// 充电动画 SVG 管道（1:1 还原 assets-old）
 function TubeSVG({ color }: { color: string }) {
   return (
     <svg viewBox="0 0 1028 385" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -41,6 +41,7 @@ export function RewardCard() {
     let cancelled = false;
     (async () => {
       try {
+        // anheyu-app 无 donations API，保持空列表
         if (!cancelled) {
           setDonations([]);
           setTotal(0);
@@ -70,28 +71,33 @@ export function RewardCard() {
     return `${y}-${m}-${d}`;
   };
 
+  const isLargeAmount = (amount: number) => amount >= 50;
+
+  // 与旧版一致：只要关于页启用了打赏，就显示板块（无记录时显示空状态 + 为TA充电）
+  const shouldShow = !loading;
+
   if (loading) {
     return <div className={styles.rewardLoading}>加载中...</div>;
   }
 
-  if (donations.length === 0) return null;
+  if (!shouldShow) return null;
 
   return (
     <>
       <div className={styles.authorContent}>
         <div className={`${styles.item} ${styles.single} ${styles.reward}`}>
-          <div className={styles.cardContent}>
-            <div className={styles.itemTips}>致谢</div>
-            <span className={styles.itemTitle}>赞赏名单</span>
-            <div className={styles.rewardDescription}>感谢因为有你们，让我更加有创作的动力。</div>
+          <div className={styles.itemTips}>致谢</div>
+          <span className={styles.itemTitle}>赞赏名单</span>
+          <div className={styles.rewardDescription}>感谢因为有你们，让我更加有创作的动力。</div>
 
-            <div className={styles.rewardListAll}>
-              {donations.map(item => (
+          <div className={styles.rewardListAll}>
+            {donations.length > 0 ? (
+              donations.map(item => (
                 <div key={item.id} className={styles.rewardListItem}>
                   <div className={styles.rewardItemName}>{item.name}</div>
                   <div className={styles.rewardBottomGroup}>
                     <div
-                      className={`${styles.rewardItemMoney} ${item.amount >= 50 ? styles.rewardItemMoneyLarge : ""}`}
+                      className={`${styles.rewardItemMoney} ${isLargeAmount(item.amount) ? styles.rewardItemMoneyLarge : ""}`}
                     >
                       ¥{item.amount}
                       {item.suffix}
@@ -99,16 +105,18 @@ export function RewardCard() {
                     <div className={styles.rewardItemTime}>{formatDate(item.created_at)}</div>
                   </div>
                 </div>
-              ))}
-            </div>
-
-            {latestUpdate && (
-              <div className={styles.rewardUpdateDate}>
-                最新更新时间：
-                <time className={styles.rewardUpdateDateTime}>{formatDate(latestUpdate.created_at)}</time>
-              </div>
+              ))
+            ) : (
+              <div className={styles.rewardListEmpty}>暂无打赏记录，快来成为第一个吧</div>
             )}
           </div>
+
+          {latestUpdate && (
+            <div className={styles.rewardUpdateDate}>
+              最新更新时间：
+              <time className={styles.rewardUpdateDateTime}>{formatDate(latestUpdate.created_at)}</time>
+            </div>
+          )}
 
           {/* 充电动画 */}
           <div className={styles.aboutReward}>

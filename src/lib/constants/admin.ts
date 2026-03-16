@@ -72,11 +72,6 @@ export const ADMIN_EMPTY_TEXTS = {
     emptyText: "暂无工单",
     emptyHint: "当用户提交售后问题后会显示在这里",
   },
-  donations: {
-    filterEmptyText: "没有匹配的打赏记录",
-    emptyText: "暂无打赏记录",
-    emptyHint: "点击「新增打赏」创建第一条记录",
-  },
   products: {
     filterEmptyText: "没有匹配的商品",
     emptyText: "暂无商品",
