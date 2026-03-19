@@ -118,13 +118,13 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
   const setAuth = useAuthStore(state => state.setAuth);
   const { getTitle, getHorizontalLogo, enableRegistration } = useSiteConfigStore();
   const siteConfig = useSiteConfigStore(state => state.siteConfig);
-  const registrationEnabled = enableRegistration();
 
-  // 防止 hydration 错误
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const registrationEnabled = mounted && enableRegistration();
 
   // 获取当前主题对应的横向 Logo
   const isDark = mounted ? resolvedTheme === "dark" : false;

@@ -88,6 +88,7 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const previewRef = useRef<HTMLDivElement | null>(null);
   const emojiPickerRef = useRef<HTMLButtonElement | null>(null);
+  const emojiPanelRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
   // 使用基于 props 的确定性 ID，避免 useId() 在 SSR/客户端 hydration 时不一致
@@ -112,10 +113,12 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
   const [isAnonymousDialogOpen, setIsAnonymousDialogOpen] = useState(false);
   const [emojiPackages, setEmojiPackages] = useState<EmojiPackage[]>([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [isEmojiClosing, setIsEmojiClosing] = useState(false);
   const [activeEmojiPackageIndex, setActiveEmojiPackageIndex] = useState(0);
   const [previewEmojiUrl, setPreviewEmojiUrl] = useState("");
   const [isEmojiPreviewVisible, setIsEmojiPreviewVisible] = useState(false);
   const [emojiPreviewPosition, setEmojiPreviewPosition] = useState({ x: 0, y: 0 });
+  const [panelPosition, setPanelPosition] = useState({ top: 0, left: 0 });
   const [quoteText, setQuoteText] = useState("");
   const uploadedFileUrlsRef = useRef<Map<string, string>>(new Map());
 
@@ -132,6 +135,15 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
 
   const isReply = Boolean(parentId);
   const shouldShowCancel = Boolean(showCancelButton ?? isReply);
+
+  const closeEmojiPicker = useCallback(() => {
+    if (!showEmojiPicker || isEmojiClosing) return;
+    setIsEmojiClosing(true);
+    setTimeout(() => {
+      setShowEmojiPicker(false);
+      setIsEmojiClosing(false);
+    }, 150);
+  }, [showEmojiPicker, isEmojiClosing]);
 
   const emojiMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -293,20 +305,33 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
   useEffect(() => {
     if (!showEmojiPicker) return;
     const handleClick = (event: globalThis.MouseEvent) => {
-      if (!emojiPickerRef.current) return;
-      if (emojiPickerRef.current.contains(event.target as Node)) return;
-      setShowEmojiPicker(false);
+      const target = event.target as Node;
+      if (emojiPickerRef.current?.contains(target)) return;
+      if (emojiPanelRef.current?.contains(target)) return;
+      closeEmojiPicker();
     };
+    const handleScroll = () => closeEmojiPicker();
     document.addEventListener("click", handleClick);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
       document.removeEventListener("click", handleClick);
+      window.removeEventListener("scroll", handleScroll);
     };
-  }, [showEmojiPicker]);
+  }, [showEmojiPicker, closeEmojiPicker]);
 
   useEffect(() => {
     if (!showEmojiPicker) {
       setIsEmojiPreviewVisible(false);
+      return;
     }
+    if (!emojiPickerRef.current) return;
+    const rect = emojiPickerRef.current.getBoundingClientRect();
+    const panelWidth = 500;
+    let left = rect.left;
+    if (left + panelWidth > window.innerWidth) {
+      left = Math.max(8, window.innerWidth - panelWidth - 8);
+    }
+    setPanelPosition({ top: rect.bottom + 8, left });
   }, [showEmojiPicker]);
 
   useEffect(() => {
@@ -588,7 +613,7 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
                 aria-haspopup="dialog"
                 aria-expanded={showEmojiPicker}
                 aria-controls={emojiPanelId}
-                onClick={() => setShowEmojiPicker(prev => !prev)}
+                onClick={() => (showEmojiPicker ? closeEmojiPicker() : setShowEmojiPicker(true))}
               >
                 <div className={styles.owoLogo}>
                   <svg
@@ -601,44 +626,6 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
                     <path d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm141.4 389.4c-37.8 37.8-88 58.6-141.4 58.6s-103.6-20.8-141.4-58.6S48 309.4 48 256s20.8-103.6 58.6-141.4S194.6 56 248 56s103.6 20.8 141.4 58.6S448 202.6 448 256s-20.8 103.6-58.6 141.4zM328 224c17.7 0 32-14.3 32-32s-14.3-32-32-32-32 14.3-32 32 14.3 32 32 32zm-160 0c17.7 0 32-14.3 32-32s-14.3-32-32-32-32 14.3-32 32 14.3 32 32 32zm194.4 64H133.6c-8.2 0-14.5 7-13.5 15 7.5 59.2 58.9 105 121.1 105h13.6c62.2 0 113.6-45.8 121.1-105 1-8-5.3-15-13.5-15z" />
                   </svg>
                 </div>
-                {showEmojiPicker && (
-                  <div
-                    id={emojiPanelId}
-                    className={styles.owoBody}
-                    role="dialog"
-                    aria-label="表情选择器"
-                    onClick={event => event.stopPropagation()}
-                  >
-                    <ul className={styles.owoItems}>
-                      {emojiPackages[activeEmojiPackageIndex]?.items.map(emoji => (
-                        <li
-                          key={emoji.text}
-                          className={styles.owoItem}
-                          title={emoji.text}
-                          onClick={() => addEmoji(emoji.text)}
-                          onMouseEnter={event => handleEmojiEnter(event, emoji)}
-                          onMouseLeave={handleEmojiLeave}
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={emoji.icon} alt={emoji.text} />
-                        </li>
-                      ))}
-                    </ul>
-                    <div className={styles.owoBar}>
-                      <ul className={styles.owoPackages}>
-                        {emojiPackages.map((pkg, index) => (
-                          <li
-                            key={pkg.name}
-                            className={cn(index === activeEmojiPackageIndex && styles.owoPackageActive)}
-                            onClick={() => setActiveEmojiPackageIndex(index)}
-                          >
-                            <div dangerouslySetInnerHTML={{ __html: pkg.iconHtml }} />
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
               </button>
             )}
             {config.allowImageUpload && (
@@ -828,6 +815,56 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
           </div>
         </div>
       )}
+
+      {(showEmojiPicker || isEmojiClosing) &&
+        emojiPackages.length > 0 &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <>
+            <div className={cn(styles.owoOverlay, isEmojiClosing && styles.owoOverlayClosing)} onClick={closeEmojiPicker} />
+            <div
+              ref={emojiPanelRef}
+              id={emojiPanelId}
+              className={cn(styles.owoBody, isEmojiClosing && styles.owoBodyClosing)}
+              role="dialog"
+              aria-label="表情选择器"
+              onClick={event => event.stopPropagation()}
+              style={
+                { "--owo-top": `${panelPosition.top}px`, "--owo-left": `${panelPosition.left}px` } as React.CSSProperties
+              }
+            >
+              <ul className={styles.owoItems}>
+                {emojiPackages[activeEmojiPackageIndex]?.items.map(emoji => (
+                  <li
+                    key={emoji.text}
+                    className={styles.owoItem}
+                    title={emoji.text}
+                    onClick={() => addEmoji(emoji.text)}
+                    onMouseEnter={event => handleEmojiEnter(event, emoji)}
+                    onMouseLeave={handleEmojiLeave}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={emoji.icon} alt={emoji.text} />
+                  </li>
+                ))}
+              </ul>
+              <div className={styles.owoBar}>
+                <ul className={styles.owoPackages}>
+                  {emojiPackages.map((pkg, index) => (
+                    <li
+                      key={pkg.name}
+                      className={cn(index === activeEmojiPackageIndex && styles.owoPackageActive)}
+                      onClick={() => setActiveEmojiPackageIndex(index)}
+                    >
+                      <div dangerouslySetInnerHTML={{ __html: pkg.iconHtml }} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </>,
+          document.body
+        )}
 
       {isEmojiPreviewVisible &&
         previewEmojiUrl &&

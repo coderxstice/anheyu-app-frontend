@@ -17,6 +17,7 @@ import { useAutoSave } from "./use-auto-save";
 import { useArticleForEdit, useCreateArticle, useUpdateArticle } from "@/hooks/queries/use-post-management";
 import { processHtmlForSave } from "@/lib/content-processor";
 import { registerCustomRules } from "@/lib/turndown-rules";
+import { registerMarkedExtensions } from "@/lib/marked-extensions";
 import { articleApi } from "@/lib/api/article";
 import { useAuthStore } from "@/store/auth-store";
 
@@ -63,6 +64,7 @@ const turndownService = new TurndownService({
   bulletListMarker: "-",
 });
 registerCustomRules(turndownService);
+registerMarkedExtensions(marked);
 
 export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
   const router = useRouter();
