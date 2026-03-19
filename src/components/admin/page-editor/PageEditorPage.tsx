@@ -20,6 +20,7 @@ import { useArticleEditor } from "../article-editor/use-article-editor";
 import { useAdminPageDetail, useCreatePage, useUpdatePage } from "@/hooks/queries/use-page-management";
 import { processHtmlForSave } from "@/lib/content-processor";
 import { registerCustomRules } from "@/lib/turndown-rules";
+import { registerMarkedExtensions } from "@/lib/marked-extensions";
 
 import type { Editor } from "@tiptap/react";
 
@@ -60,6 +61,7 @@ const turndownService = new TurndownService({
   bulletListMarker: "-",
 });
 registerCustomRules(turndownService);
+registerMarkedExtensions(marked);
 
 function normalizePagePath(value: string): string {
   const trimmed = value.trim();

@@ -268,10 +268,6 @@
   position: relative;
 }
 
-.owoOpen .owoBody {
-  display: block;
-}
-
 .owoLogo {
   display: flex;
   align-items: center;
@@ -280,10 +276,22 @@
   height: 1.25em;
 }
 
+.owoOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1999;
+  background: transparent;
+  transition: opacity 0.15s ease;
+}
+
+.owoOverlayClosing {
+  opacity: 0;
+}
+
 .owoBody {
-  position: absolute;
-  top: 2rem;
-  left: 0;
+  position: fixed;
+  top: var(--owo-top, auto);
+  left: var(--owo-left, 0);
   z-index: 2000;
   min-width: 31.25rem;
   max-width: 500px;
@@ -294,8 +302,23 @@
   border: var(--style-border-always);
   border-radius: 8px;
   box-shadow: 0 8px 24px -4px rgb(0 0 0 / 12%);
-  transform: translateZ(0);
   animation: owoPanelIn 0.2s ease-out;
+}
+
+.owoBodyClosing {
+  animation: owoPanelOut 0.15s ease-in forwards;
+}
+
+@keyframes owoPanelOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(4px);
+  }
 }
 
 .owoItems {
@@ -1037,13 +1060,53 @@
   text-decoration: underline;
 }
 
+@keyframes owoMobileSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes owoMobileSlideDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
 @media (width <= 768px) {
+  .owoOverlay {
+    background: rgb(0 0 0 / 30%);
+  }
+
   .owoBody {
-    right: 0;
-    left: auto;
-    width: calc(100% + 32px);
-    min-width: auto !important;
-    max-width: calc(100vw - 2rem);
+    top: auto !important;
+    bottom: 0;
+    left: 0 !important;
+    width: 100vw;
+    min-width: auto;
+    max-width: none;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -4px 24px -4px rgb(0 0 0 / 12%);
+    animation: owoMobileSlideUp 0.25s ease-out;
+  }
+
+  .owoBodyClosing {
+    animation: owoMobileSlideDown 0.15s ease-in forwards;
+  }
+
+  .owoItems {
+    max-height: 35vh;
   }
 
   .owoItem {

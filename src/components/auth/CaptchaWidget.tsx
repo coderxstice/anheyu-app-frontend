@@ -365,53 +365,51 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
 
   if (config.provider === "image") {
     return (
-      <div className={cn("flex flex-col gap-2", className)}>
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-3">
-            <div className="relative shrink-0 overflow-hidden rounded-lg border border-border bg-muted/30">
-              {loading ? (
-                <div className="flex h-[40px] w-[120px] items-center justify-center">
-                  <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
-                </div>
-              ) : imageData ? (
-                /* eslint-disable-next-line @next/next/no-img-element -- base64 captcha, not suitable for next/image */
-                <img
-                  src={imageData.base64}
-                  alt="验证码"
-                  className="h-[40px] w-[120px] object-contain dark:invert dark:hue-rotate-180"
-                  draggable={false}
-                />
-              ) : (
-                <div className="flex h-[40px] w-[120px] items-center justify-center text-xs text-muted-foreground">
-                  加载失败
-                </div>
-              )}
+      <div className={cn("flex w-full items-center gap-3", className)}>
+        <button
+          type="button"
+          onClick={fetchImage}
+          disabled={loading}
+          className="group relative shrink-0 overflow-hidden rounded-lg border border-border bg-muted/30 cursor-pointer transition-all duration-200 hover:border-primary/40 disabled:cursor-wait"
+          title="点击刷新验证码"
+        >
+          {loading ? (
+            <div className="flex h-[44px] w-[140px] items-center justify-center">
+              <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
             </div>
-            <button
-              type="button"
-              onClick={fetchImage}
-              disabled={loading}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50 cursor-pointer"
-              title="刷新验证码"
-            >
-              <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
-            </button>
-            <input
-              type="text"
-              value={answer}
-              onChange={e => setAnswer(e.target.value)}
-              placeholder="请输入验证码"
-              maxLength={config.image_captcha_length || 6}
-              autoComplete="one-time-code"
-              className={cn(
-                "h-10 flex-1 rounded-lg border border-border bg-background px-3 text-sm text-foreground",
-                "placeholder:text-muted-foreground/60",
-                "outline-none transition-all duration-200",
-                "focus:border-primary/60 focus:ring-2 focus:ring-primary/15"
-              )}
-            />
-          </div>
-        </div>
+          ) : imageData ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element -- base64 captcha, not suitable for next/image */}
+              <img
+                src={imageData.base64}
+                alt="验证码"
+                className="h-[44px] w-[140px] object-contain dark:invert dark:hue-rotate-180"
+                draggable={false}
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <RefreshCw className="h-4 w-4 text-white" />
+              </div>
+            </>
+          ) : (
+            <div className="flex h-[44px] w-[140px] items-center justify-center text-xs text-muted-foreground">
+              加载失败
+            </div>
+          )}
+        </button>
+        <input
+          type="text"
+          value={answer}
+          onChange={e => setAnswer(e.target.value)}
+          placeholder="请输入验证码"
+          maxLength={config.image_captcha_length || 6}
+          autoComplete="one-time-code"
+          className={cn(
+            "h-11 min-w-0 flex-1 rounded-lg border border-border bg-muted/50 px-3 text-sm text-foreground",
+            "placeholder:text-muted-foreground",
+            "outline-none transition-all duration-200",
+            "focus:border-primary focus:bg-card"
+          )}
+        />
       </div>
     );
   }
