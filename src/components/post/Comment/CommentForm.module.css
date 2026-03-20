@@ -276,6 +276,18 @@
   height: 1.25em;
 }
 
+/* 表情面板整体容器：仅用于“点击外部关闭”判断，不拦截点击 */
+.owoPortalWrap {
+  position: fixed;
+  inset: 0;
+  z-index: 1998;
+  pointer-events: none;
+}
+
+.owoPortalWrap > * {
+  pointer-events: auto;
+}
+
 .owoOverlay {
   position: fixed;
   inset: 0;

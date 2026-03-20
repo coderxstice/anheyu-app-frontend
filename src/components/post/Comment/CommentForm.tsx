@@ -121,6 +121,7 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
   const [panelPosition, setPanelPosition] = useState({ top: 0, left: 0 });
   const [quoteText, setQuoteText] = useState("");
   const uploadedFileUrlsRef = useRef<Map<string, string>>(new Map());
+  const isInteractingWithEmojiRef = useRef(false);
 
   const accessToken = useAuthStore(state => state.accessToken);
   const user = useAuthStore(state => state.user);
@@ -304,17 +305,33 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
 
   useEffect(() => {
     if (!showEmojiPicker) return;
+    const isInsideEmojiPanel = (target: Node) =>
+      emojiPickerRef.current?.contains(target) ||
+      emojiPanelRef.current?.contains(target) ||
+      (target instanceof Element && target.closest("[data-emoji-portal]"));
+    const handleMouseDown = (event: globalThis.MouseEvent) => {
+      if (isInsideEmojiPanel(event.target as Node)) {
+        isInteractingWithEmojiRef.current = true;
+      }
+    };
     const handleClick = (event: globalThis.MouseEvent) => {
-      const target = event.target as Node;
-      if (emojiPickerRef.current?.contains(target)) return;
-      if (emojiPanelRef.current?.contains(target)) return;
+      if (isInteractingWithEmojiRef.current) {
+        isInteractingWithEmojiRef.current = false;
+        return;
+      }
+      if (isInsideEmojiPanel(event.target as Node)) return;
       closeEmojiPicker();
     };
-    const handleScroll = () => closeEmojiPicker();
-    document.addEventListener("click", handleClick);
+    const handleScroll = () => {
+      if (isInteractingWithEmojiRef.current) return;
+      closeEmojiPicker();
+    };
+    document.addEventListener("mousedown", handleMouseDown, true);
+    document.addEventListener("click", handleClick, true);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
-      document.removeEventListener("click", handleClick);
+      document.removeEventListener("mousedown", handleMouseDown, true);
+      document.removeEventListener("click", handleClick, true);
       window.removeEventListener("scroll", handleScroll);
     };
   }, [showEmojiPicker, closeEmojiPicker]);
@@ -820,10 +837,14 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
         emojiPackages.length > 0 &&
         typeof document !== "undefined" &&
         createPortal(
-          <>
+          <div
+            ref={emojiPanelRef}
+            className={styles.owoPortalWrap}
+            data-emoji-portal
+            aria-hidden
+          >
             <div className={cn(styles.owoOverlay, isEmojiClosing && styles.owoOverlayClosing)} onClick={closeEmojiPicker} />
             <div
-              ref={emojiPanelRef}
               id={emojiPanelId}
               className={cn(styles.owoBody, isEmojiClosing && styles.owoBodyClosing)}
               role="dialog"
@@ -854,7 +875,10 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
                     <li
                       key={pkg.name}
                       className={cn(index === activeEmojiPackageIndex && styles.owoPackageActive)}
-                      onClick={() => setActiveEmojiPackageIndex(index)}
+                      onClick={e => {
+                        e.stopPropagation();
+                        setActiveEmojiPackageIndex(index);
+                      }}
                     >
                       <div dangerouslySetInnerHTML={{ __html: pkg.iconHtml }} />
                     </li>
@@ -862,7 +886,7 @@ export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(funct
                 </ul>
               </div>
             </div>
-          </>,
+          </div>,
           document.body
         )}
 
