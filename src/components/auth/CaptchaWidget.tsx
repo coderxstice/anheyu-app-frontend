@@ -153,7 +153,8 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
     };
 
     if (window.turnstile) {
-      window.turnstile.ready(renderWidget);
+      // api.js 若以 async/defer 加载则 turnstile.ready() 会抛错；已就绪时直接 render
+      queueMicrotask(renderWidget);
       return () => {
         if (turnstileWidgetIdRef.current) {
           window.turnstile?.remove(turnstileWidgetIdRef.current);
@@ -165,10 +166,10 @@ export const CaptchaWidget = forwardRef<CaptchaWidgetRef, CaptchaWidgetProps>(fu
 
     const script = document.createElement("script");
     script.src = TURNSTILE_SCRIPT_URL;
-    script.async = true;
-    script.defer = true;
+    // 动态插入的 script 默认 async=true；与 Turnstile explicit 模式组合时需同步加载语义，避免 api.js 内部校验失败
+    script.async = false;
     script.onload = () => {
-      window.turnstile?.ready(renderWidget);
+      renderWidget();
     };
     document.head.appendChild(script);
 
