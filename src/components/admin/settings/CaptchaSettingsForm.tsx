@@ -1,13 +1,11 @@
 "use client";
 
 import { FormInput } from "@/components/ui/form-input";
-import { FormSwitch } from "@/components/ui/form-switch";
 import { FormSelect, FormSelectItem } from "@/components/ui/form-select";
 import { SettingsSection, SettingsFieldGroup } from "./SettingsSection";
 import { Spinner } from "@/components/ui/spinner";
 import {
   KEY_CAPTCHA_PROVIDER,
-  KEY_TURNSTILE_ENABLE,
   KEY_TURNSTILE_SITE_KEY,
   KEY_TURNSTILE_SECRET_KEY,
   KEY_GEETEST_CAPTCHA_ID,
@@ -31,26 +29,23 @@ export function CaptchaSettingsForm({ values, onChange, loading }: CaptchaSettin
     );
   }
 
-  const selectedProvider = values[KEY_CAPTCHA_PROVIDER] || "none";
-  const isLegacyTurnstileMode = selectedProvider === "none" && values[KEY_TURNSTILE_ENABLE] === "true";
-  const activeProvider = isLegacyTurnstileMode ? "turnstile" : selectedProvider;
+  const provider = values[KEY_CAPTCHA_PROVIDER] || "none";
   const providerLabel =
-    activeProvider === "turnstile"
+    provider === "turnstile"
       ? "Cloudflare Turnstile"
-      : activeProvider === "geetest"
+      : provider === "geetest"
         ? "极验 GeeTest"
-        : activeProvider === "image"
+        : provider === "image"
           ? "系统图形验证码"
           : "未启用";
 
   return (
     <div className="space-y-8">
-      {/* 验证方式 */}
       <SettingsSection title="验证方式" description="仅显示当前启用方案的配置项；未启用方案会自动隐藏。">
         <FormSelect
           label="验证码提供商"
           placeholder="请选择验证方式"
-          value={activeProvider}
+          value={provider}
           onValueChange={v => onChange(KEY_CAPTCHA_PROVIDER, v)}
         >
           <FormSelectItem key="none">无</FormSelectItem>
@@ -61,18 +56,11 @@ export function CaptchaSettingsForm({ values, onChange, loading }: CaptchaSettin
 
         <div className="rounded-xl border border-border/60 bg-muted/30 px-3 py-2 text-xs text-foreground/80 dark:bg-muted dark:text-muted-foreground/40">
           当前启用：<span className="font-medium text-foreground">{providerLabel}</span>
-          {isLegacyTurnstileMode ? "（兼容旧配置 turnstile.enable=true）" : ""}
         </div>
       </SettingsSection>
 
-      {activeProvider === "turnstile" && (
+      {provider === "turnstile" && (
         <SettingsSection title="Turnstile 配置">
-          <FormSwitch
-            label="启用 Turnstile"
-            description="兼容旧配置，建议优先使用「验证码提供商」选择"
-            checked={values[KEY_TURNSTILE_ENABLE] === "true"}
-            onCheckedChange={v => onChange(KEY_TURNSTILE_ENABLE, String(v))}
-          />
           <SettingsFieldGroup cols={2}>
             <FormInput
               label="Site Key"
@@ -93,7 +81,7 @@ export function CaptchaSettingsForm({ values, onChange, loading }: CaptchaSettin
         </SettingsSection>
       )}
 
-      {activeProvider === "geetest" && (
+      {provider === "geetest" && (
         <SettingsSection title="GeeTest 配置">
           <SettingsFieldGroup cols={2}>
             <FormInput
@@ -115,7 +103,7 @@ export function CaptchaSettingsForm({ values, onChange, loading }: CaptchaSettin
         </SettingsSection>
       )}
 
-      {activeProvider === "image" && (
+      {provider === "image" && (
         <SettingsSection title="图形验证码">
           <SettingsFieldGroup cols={2}>
             <FormInput
