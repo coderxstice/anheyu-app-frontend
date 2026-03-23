@@ -80,10 +80,16 @@ export interface RegisterResponseData {
   activation_required: boolean;
 }
 
-// 忘记密码请求
+// 忘记密码请求（与后端 CaptchaParams 一致，支持多种验证码）
 export interface ForgotPasswordRequest {
   email: string;
   turnstile_token?: string;
+  geetest_lot_number?: string;
+  geetest_captcha_output?: string;
+  geetest_pass_token?: string;
+  geetest_gen_time?: string;
+  image_captcha_id?: string;
+  image_captcha_answer?: string;
 }
 
 // 重置密码请求
