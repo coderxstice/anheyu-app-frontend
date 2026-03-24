@@ -9,8 +9,8 @@ interface OneDriveFormProps {
 }
 
 const ENDPOINTS = [
-  { key: "https://graph.microsoft.com", label: "Microsoft Graph（国际版）" },
-  { key: "https://microsoftgraph.chinacloudapi.cn", label: "世纪互联（中国版）" },
+  { key: "https://graph.microsoft.com/v1.0", label: "Microsoft Graph（国际版）" },
+  { key: "https://microsoftgraph.chinacloudapi.cn/v1.0", label: "世纪互联（中国版）" },
 ];
 
 const DRIVE_TYPES = [

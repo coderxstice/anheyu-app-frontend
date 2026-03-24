@@ -366,6 +366,7 @@ export function MusicPlayer() {
         onPrevious={audioPlayer.previousSong}
         onNext={() => audioPlayer.nextSong()}
         onToggleMute={audioPlayer.toggleMute}
+        onVolumeChange={audioPlayer.setVolume}
         onTogglePlaylist={handleTogglePlaylist}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}

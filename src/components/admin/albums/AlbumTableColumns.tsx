@@ -119,18 +119,36 @@ export function useAlbumRenderCell({ onAction, categories = [] }: UseAlbumRender
             </div>
           );
         case "time": {
+          const published = item.published_at ? formatDateTimeParts(item.published_at) : null;
           const created = formatDateTimeParts(item.created_at);
           const updated = formatDateTimeParts(item.updated_at);
           return (
             <div className="flex flex-col gap-1 text-xs">
-              <div className="text-muted-foreground tabular-nums">
-                <div>{created.date}</div>
-                <div className="text-muted-foreground/60">{created.time}</div>
-              </div>
-              <div className="text-muted-foreground/50 tabular-nums">
-                <div>{updated.date}</div>
-                <div className="text-muted-foreground/40">{updated.time}</div>
-              </div>
+              {published ? (
+                <>
+                  <div className="tabular-nums">
+                    <div className="text-[10px] text-primary/70 font-medium mb-0.5">发布</div>
+                    <div className="text-muted-foreground">{published.date}</div>
+                    <div className="text-muted-foreground/60">{published.time}</div>
+                  </div>
+                  <div className="text-muted-foreground/50 tabular-nums">
+                    <div className="text-[10px] text-muted-foreground/40 mb-0.5">创建</div>
+                    <div>{created.date}</div>
+                    <div className="text-muted-foreground/40">{created.time}</div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-muted-foreground tabular-nums">
+                    <div>{created.date}</div>
+                    <div className="text-muted-foreground/60">{created.time}</div>
+                  </div>
+                  <div className="text-muted-foreground/50 tabular-nums">
+                    <div>{updated.date}</div>
+                    <div className="text-muted-foreground/40">{updated.time}</div>
+                  </div>
+                </>
+              )}
             </div>
           );
         }

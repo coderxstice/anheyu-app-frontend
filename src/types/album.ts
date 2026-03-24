@@ -12,6 +12,7 @@ export interface Album {
   id: number;
   created_at: string;
   updated_at: string;
+  published_at?: string | null;
   categoryId: number | null;
   imageUrl: string;
   bigImageUrl: string;
@@ -83,6 +84,7 @@ export interface PublicAlbumItem {
   id: number;
   created_at?: string;
   updated_at?: string;
+  published_at?: string | null;
   categoryId?: number | null;
   imageUrl: string;
   bigImageUrl?: string;
@@ -138,6 +140,7 @@ export interface AlbumForm {
   title?: string;
   description?: string;
   location?: string;
+  published_at?: string | null;
 }
 
 /** 导出格式 */
