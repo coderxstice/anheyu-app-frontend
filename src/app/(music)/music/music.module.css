@@ -503,7 +503,11 @@
   font-weight: 500;
   line-height: 1.6;
   color: rgb(255 255 255 / 40%);
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  text-shadow: 0 0 0 transparent;
+  transition:
+    all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    text-shadow 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    filter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   filter: blur(1px);
 }
 
@@ -517,11 +521,13 @@
 
 .lyricItem.isPassed .lyricText {
   color: rgb(255 255 255 / 30%);
+  text-shadow: 0 0 0 transparent;
   filter: blur(0.5px);
 }
 
 .lyricItem.isUpcoming .lyricText {
   color: rgb(255 255 255 / 40%);
+  text-shadow: 0 0 0 transparent;
 }
 
 .lyricItem:hover .lyricText {

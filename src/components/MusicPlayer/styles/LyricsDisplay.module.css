@@ -1,20 +1,3 @@
-@keyframes lyricGlow {
-  0% {
-    text-shadow: 0 1px 2px rgb(0 0 0 / 30%);
-    transform: scale(1);
-  }
-  50% {
-    text-shadow:
-      0 1px 3px rgb(255 255 255 / 40%),
-      0 0 8px rgb(255 255 255 / 20%);
-    transform: scale(1.02);
-  }
-  100% {
-    text-shadow: 0 1px 3px rgb(255 255 255 / 30%);
-    transform: scale(1);
-  }
-}
-
 @keyframes lyricTextScroll {
   0% {
     transform: translateX(0);
@@ -102,20 +85,27 @@
   font-size: 10px;
   font-weight: 400;
   color: rgb(255 255 255 / 30%);
+  text-shadow:
+    0 0 0 transparent,
+    0 0 0 transparent;
 }
 
 .current .lyricText {
   font-size: 11px;
   font-weight: 600;
   color: rgb(255 255 255 / 100%);
-  text-shadow: 0 1px 3px rgb(255 255 255 / 30%);
-  animation: lyricGlow 1s ease-in-out;
+  text-shadow:
+    0 1px 3px rgb(255 255 255 / 30%),
+    0 0 8px rgb(255 255 255 / 15%);
 }
 
 .upcoming .lyricText {
   font-size: 10px;
   font-weight: 400;
   color: rgb(255 255 255 / 50%);
+  text-shadow:
+    0 0 0 transparent,
+    0 0 0 transparent;
 }
 
 .lyricText {
@@ -133,7 +123,9 @@
   font-weight: 400;
   text-overflow: unset;
   white-space: nowrap;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition:
+    all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    text-shadow 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .textScrolling {

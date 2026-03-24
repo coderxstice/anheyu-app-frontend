@@ -30,6 +30,7 @@ interface MusicCapsuleProps {
   onPrevious: () => void;
   onNext: () => void;
   onToggleMute: () => void;
+  onVolumeChange: (volume: number) => void;
   onTogglePlaylist: () => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
@@ -54,6 +55,7 @@ export function MusicCapsule({
   onPrevious,
   onNext,
   onToggleMute,
+  onVolumeChange,
   onTogglePlaylist,
   onMouseEnter,
   onMouseLeave,
@@ -142,6 +144,7 @@ export function MusicCapsule({
         onTogglePlay={onTogglePlay}
         onNext={onNext}
         onToggleMute={onToggleMute}
+        onVolumeChange={onVolumeChange}
         onTogglePlaylist={onTogglePlaylist}
       />
 
