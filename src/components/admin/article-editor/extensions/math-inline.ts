@@ -56,29 +56,28 @@ export const MathInline = Node.create({
 
   renderHTML({ node, HTMLAttributes }) {
     const latex = (node.attrs.latex as string) || "";
-
-    // 直接渲染 KaTeX HTML（用于序列化）
-    let rendered = "";
-    try {
-      rendered = katex.renderToString(latex, {
-        displayMode: false,
-        throwOnError: false,
-        output: "html",
-      });
-    } catch {
-      rendered = latex;
+    const dom = document.createElement("span");
+    const attrs = mergeAttributes(HTMLAttributes, {
+      "data-latex": latex,
+      "data-type": "math-inline",
+      class: "math-inline",
+      contenteditable: "false",
+    });
+    Object.entries(attrs).forEach(([key, val]) => {
+      if (val !== undefined && val !== null) dom.setAttribute(key, String(val));
+    });
+    if (latex) {
+      try {
+        dom.innerHTML = katex.renderToString(latex, {
+          displayMode: false,
+          throwOnError: false,
+          output: "html",
+        });
+      } catch {
+        dom.textContent = latex;
+      }
     }
-
-    return [
-      "span",
-      mergeAttributes(HTMLAttributes, {
-        "data-latex": latex,
-        "data-type": "math-inline",
-        class: "math-inline",
-        contenteditable: "false",
-      }),
-      rendered,
-    ];
+    return dom;
   },
 
   addNodeView() {

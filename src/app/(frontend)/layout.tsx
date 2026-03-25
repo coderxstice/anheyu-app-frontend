@@ -1,6 +1,7 @@
 import { Header, Footer, OneImageBanner, KeyboardShortcutsProvider } from "@/components/layout";
 import { ScrollInitializer } from "@/providers/scroll-initializer";
 import { ExternalLinkInterceptor } from "@/providers/external-link-interceptor";
+import { ConsolePrinter } from "@/providers/console-printer";
 import { MusicPlayer } from "@/components/MusicPlayer";
 import { RightMenu } from "@/components/RightMenu";
 
@@ -8,6 +9,7 @@ export default function FrontendLayout({ children }: { children: React.ReactNode
   return (
     <div id="frontend-layout" className="frontend-layout">
       <ScrollInitializer />
+      <ConsolePrinter />
       <ExternalLinkInterceptor />
       <KeyboardShortcutsProvider />
       <Header />

@@ -17,7 +17,7 @@ import { useAutoSave } from "./use-auto-save";
 import { useArticleForEdit, useCreateArticle, useUpdateArticle } from "@/hooks/queries/use-post-management";
 import { processHtmlForSave } from "@/lib/content-processor";
 import { registerCustomRules } from "@/lib/turndown-rules";
-import { registerMarkedExtensions } from "@/lib/marked-extensions";
+import { registerMarkedExtensions, fixTaskListHtml } from "@/lib/marked-extensions";
 import { articleApi } from "@/lib/api/article";
 import { useAuthStore } from "@/store/auth-store";
 
@@ -112,10 +112,11 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
         sourceModifiedRef.current = false;
 
         const rawHtml = editor?.getHTML() ?? "";
+        const processedHtml = processHtmlForSave(rawHtml);
         if (newMode === "html") {
-          setSourceContent(rawHtml);
+          setSourceContent(processedHtml);
         } else {
-          setSourceContent(turndownService.turndown(processHtmlForSave(rawHtml)));
+          setSourceContent(turndownService.turndown(processedHtml));
         }
       } else if (newMode === "visual") {
         if (!sourceModifiedRef.current && visualBackupRef.current) {
@@ -128,7 +129,7 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
             queueMicrotask(() => editor.commands.setContent(sourceContent));
           }
         } else {
-          const html = marked.parse(sourceContent, { async: false }) as string;
+          const html = fixTaskListHtml(marked.parse(sourceContent, { async: false }) as string);
           if (editor && !editor.isDestroyed) {
             queueMicrotask(() => editor.commands.setContent(html));
           }
@@ -138,7 +139,7 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
         if (editorMode === "html") {
           setSourceContent(turndownService.turndown(sourceContent));
         } else {
-          setSourceContent(marked.parse(sourceContent, { async: false }) as string);
+          setSourceContent(fixTaskListHtml(marked.parse(sourceContent, { async: false }) as string));
         }
       }
 
@@ -222,11 +223,11 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
       html = processHtmlForSave(rawHtml);
       markdown = turndownService.turndown(html);
     } else if (editorMode === "html") {
-      html = sourceContent;
+      html = processHtmlForSave(sourceContent);
       markdown = turndownService.turndown(html);
     } else {
       markdown = sourceContent;
-      html = marked.parse(sourceContent, { async: false }) as string;
+      html = processHtmlForSave(fixTaskListHtml(marked.parse(sourceContent, { async: false }) as string));
     }
 
     // 合并元数据

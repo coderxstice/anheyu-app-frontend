@@ -273,6 +273,29 @@ export function registerCustomRules(td: TurndownService) {
     },
   });
 
+  // --- 行内隐藏 ---
+  td.addRule("hiddenInline", {
+    filter: (node) =>
+      node.nodeName === "SPAN" && (node as HTMLElement).classList.contains("hide-inline"),
+    replacement: (_content, node) => {
+      const el = node as HTMLElement;
+      const button = el.querySelector(".hide-button") as HTMLElement | null;
+      const hideContent = el.querySelector(".hide-content") as HTMLElement | null;
+      if (!button || !hideContent) return _content;
+
+      const displayText = button.textContent?.trim() || "查看";
+      const bgColor = (button as HTMLElement).style.backgroundColor || "";
+      const textColor = (button as HTMLElement).style.color || "";
+      const inner = hideContent.textContent?.trim() || "";
+
+      let params = `display=${displayText}`;
+      if (bgColor) params += ` bg=${bgColor}`;
+      if (textColor) params += ` color=${textColor}`;
+
+      return `{hide ${params}}${inner}{/hide}`;
+    },
+  });
+
   // --- 按钮组 ---
   td.addRule("btns", {
     filter: (node) =>
@@ -497,6 +520,48 @@ export function registerCustomRules(td: TurndownService) {
       }
 
       return `{music id=${neteaseId}}{/music}`;
+    },
+  });
+
+  // --- Mermaid 图表 ---
+  td.addRule("mermaidBlock", {
+    filter: (node) => {
+      const el = node as HTMLElement;
+      return (
+        el.nodeName === "DIV" &&
+        (el.hasAttribute("data-mermaid-code") || el.classList.contains("mermaid-block"))
+      );
+    },
+    replacement: (_content, node) => {
+      const el = node as HTMLElement;
+      const code =
+        el.getAttribute("data-mermaid-code") ||
+        el.querySelector("code.language-mermaid")?.textContent ||
+        el.querySelector("code")?.textContent ||
+        "";
+      if (!code.trim()) return "";
+      return `\n\`\`\`mermaid\n${code}\n\`\`\`\n\n`;
+    },
+  });
+
+  // --- 任务列表 ---
+  td.addRule("taskList", {
+    filter: (node) =>
+      node.nodeName === "UL" && (node as HTMLElement).getAttribute("data-type") === "taskList",
+    replacement: (content) => `\n${content}\n`,
+  });
+
+  td.addRule("taskItem", {
+    filter: (node) =>
+      node.nodeName === "LI" && (node as HTMLElement).getAttribute("data-type") === "taskItem",
+    replacement: (content, node) => {
+      const el = node as HTMLElement;
+      const checked = el.getAttribute("data-checked") === "true";
+      const text = content
+        .replace(/^\s*\n+/, "")
+        .replace(/\n+\s*$/, "")
+        .replace(/\n/g, "\n  ");
+      return `- [${checked ? "x" : " "}] ${text}\n`;
     },
   });
 

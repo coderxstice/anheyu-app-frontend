@@ -7,6 +7,7 @@ import { processHtmlForSave } from "@/lib/content-processor";
 import TurndownService from "turndown";
 import { registerCustomRules } from "@/lib/turndown-rules";
 import { marked } from "marked";
+import { fixTaskListHtml } from "@/lib/marked-extensions";
 import type { EditorMode } from "./EditorToolbar";
 
 /** 自动保存状态 */
@@ -107,11 +108,11 @@ export function useAutoSave({
         html = processHtmlForSave(contentForHash);
         markdown = turndownService.turndown(html);
       } else if (editorMode === "html") {
-        html = sourceContent;
+        html = processHtmlForSave(sourceContent);
         markdown = turndownService.turndown(html);
       } else {
         markdown = sourceContent;
-        html = marked.parse(sourceContent, { async: false }) as string;
+        html = processHtmlForSave(fixTaskListHtml(marked.parse(sourceContent, { async: false }) as string));
       }
 
       const metaData = getSubmitData();
@@ -190,11 +191,11 @@ export function useAutoSave({
           html = processHtmlForSave(contentForHash);
           markdown = turndownService.turndown(html);
         } else if (editorMode === "html") {
-          html = sourceContent;
+          html = processHtmlForSave(sourceContent);
           markdown = turndownService.turndown(html);
         } else {
           markdown = sourceContent;
-          html = marked.parse(sourceContent, { async: false }) as string;
+          html = processHtmlForSave(fixTaskListHtml(marked.parse(sourceContent, { async: false }) as string));
         }
         const data = JSON.stringify({ title: title.trim(), content_html: html, content_md: markdown });
         navigator.sendBeacon?.(`/api/articles/${articleId}`, new Blob([data], { type: "application/json" }));

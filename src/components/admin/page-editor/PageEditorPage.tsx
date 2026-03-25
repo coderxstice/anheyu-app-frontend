@@ -21,7 +21,7 @@ import { useAdminPageDetail, useCreatePage, useUpdatePage, pageManagementKeys } 
 import { useQueryClient } from "@tanstack/react-query";
 import { processHtmlForSave } from "@/lib/content-processor";
 import { registerCustomRules } from "@/lib/turndown-rules";
-import { registerMarkedExtensions } from "@/lib/marked-extensions";
+import { registerMarkedExtensions, fixTaskListHtml } from "@/lib/marked-extensions";
 
 import type { Editor } from "@tiptap/react";
 
@@ -119,10 +119,11 @@ export function PageEditorPage({ pageId }: PageEditorPageProps) {
         sourceModifiedRef.current = false;
 
         const rawHtml = editor?.getHTML() ?? "";
+        const processedHtml = processHtmlForSave(rawHtml);
         if (newMode === "html") {
-          setSourceContent(rawHtml);
+          setSourceContent(processedHtml);
         } else {
-          setSourceContent(turndownService.turndown(processHtmlForSave(rawHtml)));
+          setSourceContent(turndownService.turndown(processedHtml));
         }
       } else if (newMode === "visual") {
         if (!sourceModifiedRef.current && visualBackupRef.current) {
@@ -135,7 +136,7 @@ export function PageEditorPage({ pageId }: PageEditorPageProps) {
             queueMicrotask(() => editor.commands.setContent(sourceContent));
           }
         } else {
-          const html = marked.parse(sourceContent, { async: false }) as string;
+          const html = fixTaskListHtml(marked.parse(sourceContent, { async: false }) as string);
           if (editor && !editor.isDestroyed) {
             queueMicrotask(() => editor.commands.setContent(html));
           }
@@ -145,7 +146,7 @@ export function PageEditorPage({ pageId }: PageEditorPageProps) {
         if (editorMode === "html") {
           setSourceContent(turndownService.turndown(sourceContent));
         } else {
-          setSourceContent(marked.parse(sourceContent, { async: false }) as string);
+          setSourceContent(fixTaskListHtml(marked.parse(sourceContent, { async: false }) as string));
         }
       }
 
@@ -215,11 +216,11 @@ export function PageEditorPage({ pageId }: PageEditorPageProps) {
       html = processHtmlForSave(rawHtml);
       markdown = turndownService.turndown(html);
     } else if (editorMode === "html") {
-      html = sourceContent;
+      html = processHtmlForSave(sourceContent);
       markdown = turndownService.turndown(html);
     } else {
       markdown = sourceContent;
-      html = marked.parse(sourceContent, { async: false }) as string;
+      html = processHtmlForSave(fixTaskListHtml(marked.parse(sourceContent, { async: false }) as string));
     }
 
     const data = {

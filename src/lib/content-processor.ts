@@ -1,7 +1,7 @@
 /**
  * 内容处理器
- * 保存文章时对 HTML 进行后处理，确保输出与 anheyu-app 后端兼容
- * 参考 anheyu-app useContentProcessor.ts
+ * 保存文章时对 HTML 进行后处理，确保输出与 anheyu-pro 后端兼容
+ * 参考 anheyu-pro useContentProcessor.ts
  */
 
 /**
@@ -96,6 +96,7 @@ export function processHtmlForSave(html: string): string {
   // 5. 代码块：将裸 <pre><code> 转换为 details.md-editor-code 结构
   doc.querySelectorAll("pre").forEach(pre => {
     if (pre.closest(".md-editor-code")) return;
+    if (pre.closest("[data-mermaid-code]") || pre.closest(".mermaid-block")) return;
 
     const code = pre.querySelector("code");
     if (!code) return;
@@ -143,18 +144,9 @@ export function processHtmlForSave(html: string): string {
     pre.replaceWith(details);
   });
 
-  // 6. KaTeX 公式：确保 data-latex 属性保留
-  doc.querySelectorAll("[data-type='math-block']").forEach(el => {
-    const latex = el.getAttribute("data-latex") || "";
-    if (latex) {
-      el.setAttribute("data-latex", latex);
-    }
-  });
+  // 6. KaTeX 公式：清理编辑器专用属性
   doc.querySelectorAll("[data-type='math-inline']").forEach(el => {
-    const latex = el.getAttribute("data-latex") || "";
-    if (latex) {
-      el.setAttribute("data-latex", latex);
-    }
+    el.removeAttribute("contenteditable");
   });
 
   return doc.body.innerHTML;
