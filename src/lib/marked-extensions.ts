@@ -338,6 +338,19 @@ const inlineSimpleTags: Record<string, (content: string) => string> = {
   psw: (c) => `<span class="inline-password">${c}</span>`,
 };
 
+function renderInlineHide(params: string, content: string): string {
+  const display = extractAttr(params, "display") || "查看";
+  const bg = extractAttr(params, "bg");
+  const color = extractAttr(params, "color");
+
+  let btnStyle = "";
+  if (bg) btnStyle += `background-color:${bg};`;
+  if (color) btnStyle += `color:${color};`;
+  const styleAttr = btnStyle ? ` style="${btnStyle}"` : "";
+
+  return `<span class="hide-inline"><button type="button" class="hide-button"${styleAttr}>${escapeHtml(display)}</button><span class="hide-content" style="display: none;">${content}</span></span>`;
+}
+
 const inlineComplexTags: Record<string, (params: string) => string> = {
   linkcard: renderInlineLinkcard,
   btn: renderInlineBtn,
@@ -384,6 +397,30 @@ export function registerMarkedExtensions(marked: typeof Marked) {
     ],
   });
 
+  // 块级数学公式 $$..$$
+  marked.use({
+    extensions: [
+      {
+        name: "mathBlock",
+        level: "block" as const,
+        start(src: string) {
+          return src.match(/^\$\$/m)?.index;
+        },
+        tokenizer(src: string) {
+          const m = src.match(/^\$\$\n([\s\S]+?)\n\$\$(?:\n|$)/);
+          if (m) return { type: "mathBlock", raw: m[0], latex: m[1].trim() };
+          const m2 = src.match(/^\$\$([^\n]+?)\$\$(?:\n|$)/);
+          if (m2) return { type: "mathBlock", raw: m2[0], latex: m2[1].trim() };
+          return undefined;
+        },
+        renderer(token: Tokens.Generic) {
+          const latex = (token as Tokens.Generic & { latex: string }).latex;
+          return `<div data-latex="${escapeHtml(latex)}" data-type="math-block" class="math-block">${escapeHtml(latex)}</div>`;
+        },
+      },
+    ],
+  });
+
   // 行内 {tag params}content{/tag} 扩展
   marked.use({
     extensions: [
@@ -391,7 +428,7 @@ export function registerMarkedExtensions(marked: typeof Marked) {
         name: "inlineCustomTag",
         level: "inline" as const,
         start(src: string) {
-          return src.match(/\{(?:linkcard|btn|tip|music|u|emp|wavy|del|kbd|psw)\s/)?.index;
+          return src.match(/\{(?:linkcard|btn|tip|music|hide|u|emp|wavy|del|kbd|psw)\s/)?.index;
         },
         tokenizer(src: string) {
           const m = src.match(/^\{(\w+)\s([^}]*)\}([\s\S]*?)\{\/\1\}/);
@@ -408,10 +445,103 @@ export function registerMarkedExtensions(marked: typeof Marked) {
             content: string;
           };
           if (inlineSimpleTags[tag]) return inlineSimpleTags[tag](content);
+          if (tag === "hide") return renderInlineHide(params, content);
           if (inlineComplexTags[tag]) return inlineComplexTags[tag](params);
           return `{${tag} ${params}}${content}{/${tag}}`;
         },
       },
     ],
   });
+
+  // 行内扩展：高亮 ==text==、下标 ~text~、上标 ^text^、行内数学 $latex$
+  marked.use({
+    extensions: [
+      {
+        name: "highlight",
+        level: "inline" as const,
+        start(src: string) { return src.match(/==/)?.index; },
+        tokenizer(src: string) {
+          const m = src.match(/^==([^=]+?)==/);
+          if (m) return { type: "highlight", raw: m[0], text: m[1] };
+          return undefined;
+        },
+        renderer(token: Tokens.Generic) {
+          return `<mark>${(token as Tokens.Generic & { text: string }).text}</mark>`;
+        },
+      },
+      {
+        name: "subscript",
+        level: "inline" as const,
+        start(src: string) { return src.match(/~(?!~)/)?.index; },
+        tokenizer(src: string) {
+          const m = src.match(/^~([^~\n]+?)~/);
+          if (m) return { type: "subscript", raw: m[0], text: m[1] };
+          return undefined;
+        },
+        renderer(token: Tokens.Generic) {
+          return `<sub>${(token as Tokens.Generic & { text: string }).text}</sub>`;
+        },
+      },
+      {
+        name: "superscript",
+        level: "inline" as const,
+        start(src: string) { return src.match(/\^(?!\^)/)?.index; },
+        tokenizer(src: string) {
+          const m = src.match(/^\^([^^\n]+?)\^/);
+          if (m) return { type: "superscript", raw: m[0], text: m[1] };
+          return undefined;
+        },
+        renderer(token: Tokens.Generic) {
+          return `<sup>${(token as Tokens.Generic & { text: string }).text}</sup>`;
+        },
+      },
+      {
+        name: "mathInline",
+        level: "inline" as const,
+        start(src: string) { return src.match(/\$(?!\$)/)?.index; },
+        tokenizer(src: string) {
+          const m = src.match(/^\$([^\s$]([^$]*?[^\s$])?)\$(?!\$)/);
+          if (m) return { type: "mathInline", raw: m[0], latex: m[1] };
+          return undefined;
+        },
+        renderer(token: Tokens.Generic) {
+          const latex = (token as Tokens.Generic & { latex: string }).latex;
+          return `<span data-latex="${escapeHtml(latex)}" data-type="math-inline" class="math-inline">${escapeHtml(latex)}</span>`;
+        },
+      },
+    ],
+  });
+}
+
+/**
+ * 修复 marked 输出的任务列表 HTML，使其与 TipTap TaskList/TaskItem 兼容
+ * marked 输出: <li><input type="checkbox" checked disabled> text</li>
+ * TipTap 需要: <li data-type="taskItem" data-checked="true">...</li>
+ */
+export function fixTaskListHtml(html: string): string {
+  if (typeof window === "undefined" || !html.includes('type="checkbox"')) return html;
+
+  const doc = new DOMParser().parseFromString(html, "text/html");
+
+  doc.querySelectorAll("li").forEach(li => {
+    const checkbox = li.querySelector('input[type="checkbox"]') as HTMLInputElement | null;
+    if (!checkbox) return;
+
+    const checked = checkbox.checked || checkbox.hasAttribute("checked");
+    li.setAttribute("data-type", "taskItem");
+    li.setAttribute("data-checked", checked ? "true" : "false");
+
+    checkbox.remove();
+    const content = li.innerHTML.trim();
+    li.innerHTML = `<label><input type="checkbox"${checked ? " checked" : ""}><span></span></label><div>${content || "<p></p>"}</div>`;
+  });
+
+  doc.querySelectorAll("ul").forEach(ul => {
+    if (ul.querySelector(':scope > li[data-type="taskItem"]')) {
+      ul.setAttribute("data-type", "taskList");
+      ul.classList.add("not-prose", "pl-2");
+    }
+  });
+
+  return doc.body.innerHTML;
 }
