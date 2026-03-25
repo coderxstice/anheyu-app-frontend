@@ -407,7 +407,11 @@ function EnhancedCodeBlockView({ node, updateAttributes }: NodeViewProps) {
   const indentMode = (node.attrs.indentMode as string) || "space";
   const indentWidth = (node.attrs.indentWidth as string) || "2";
 
-  const lineCount = useMemo(() => (node.textContent || "").split("\n").length, [node.textContent]);
+  const lineCount = useMemo(() => {
+    const text = node.textContent || "";
+    if (!text) return 1;
+    return text.split("\n").length + 1;
+  }, [node.textContent]);
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(node.textContent || "").then(() => {
@@ -669,22 +673,56 @@ export function createEnhancedCodeBlock(lowlight: unknown) {
           getAttrs: (element: HTMLElement) => {
             const code = element.querySelector("code");
             if (!code) return {};
+            if (code.classList.contains("language-mermaid")) return false;
             const langMatch = code.className.match(/language-(\w+)/);
-            return { language: langMatch ? langMatch[1] : null };
+            return {
+              language: langMatch ? langMatch[1] : null,
+              isOpen: element.getAttribute("data-open") !== "false",
+              isCollapsed: element.getAttribute("data-collapsed") === "true",
+            };
           },
         },
         {
           tag: "details.md-editor-code",
           preserveWhitespace: "full" as const,
+          contentElement: "pre",
           getAttrs: (element: HTMLElement) => {
             const code = element.querySelector("code");
             if (!code) return false;
             const langMatch = code.className.match(/language-(\w+)/);
             const langEl = element.querySelector(".code-lang");
-            return { language: langMatch ? langMatch[1] : null, title: langEl?.textContent || "" };
+            return {
+              language: langMatch ? langMatch[1] : null,
+              title: langEl?.textContent || "",
+              isOpen: element.hasAttribute("open"),
+              isCollapsed: element.getAttribute("data-collapsed") === "true",
+            };
           },
         },
       ];
+    },
+    addKeyboardShortcuts() {
+      return {
+        ...this.parent?.(),
+        "Mod-a": ({ editor }) => {
+          const { state } = editor;
+          const { $from, from: selFrom, to: selTo } = state.selection;
+
+          if ($from.parent.type.name !== this.name) {
+            return false;
+          }
+
+          const blockStart = $from.start($from.depth);
+          const blockEnd = $from.end($from.depth);
+
+          if (selFrom === blockStart && selTo === blockEnd) {
+            return false;
+          }
+
+          editor.commands.setTextSelection({ from: blockStart, to: blockEnd });
+          return true;
+        },
+      };
     },
     addNodeView() {
       return ReactNodeViewRenderer(EnhancedCodeBlockView);
