@@ -9,7 +9,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { Pencil } from "lucide-react";
 
 // ---- React NodeView 组件 ----
-function MathBlockView({ node, updateAttributes, selected }: NodeViewProps) {
+function MathBlockView({ node, updateAttributes }: NodeViewProps) {
   const [isEditing, setIsEditing] = useState(false);
   const latex = (node.attrs.latex as string) || "";
   const [editValue, setEditValue] = useState(latex);
@@ -86,9 +86,7 @@ function MathBlockView({ node, updateAttributes, selected }: NodeViewProps) {
           <Pencil /> 编辑
         </div>
         <div
-          className={`math-block-display cursor-pointer py-4 text-center transition-colors rounded-lg ${
-            selected ? "bg-primary/5 ring-1 ring-primary/20" : "hover:bg-muted/30"
-          }`}
+          className="math-block-display cursor-pointer py-4 text-center transition-colors rounded-lg"
           onClick={() => setIsEditing(true)}
           title="点击编辑公式"
           dangerouslySetInnerHTML={{ __html: renderedHtml }}
@@ -149,14 +147,28 @@ export const MathBlock = Node.create({
   },
 
   renderHTML({ node, HTMLAttributes }) {
-    return [
-      "div",
-      mergeAttributes(HTMLAttributes, {
-        "data-latex": node.attrs.latex,
-        "data-type": "math-block",
-        class: "math-block",
-      }),
-    ];
+    const latex = (node.attrs.latex as string) || "";
+    const el = document.createElement("div");
+    const attrs = mergeAttributes(HTMLAttributes, {
+      "data-latex": latex,
+      "data-type": "math-block",
+      class: "math-block",
+    });
+    Object.entries(attrs).forEach(([key, val]) => {
+      if (val !== undefined && val !== null) el.setAttribute(key, String(val));
+    });
+    if (latex) {
+      try {
+        el.innerHTML = katex.renderToString(latex, {
+          displayMode: true,
+          throwOnError: false,
+          output: "html",
+        });
+      } catch {
+        /* initKatex on detail page will handle fallback */
+      }
+    }
+    return el;
   },
 
   addNodeView() {

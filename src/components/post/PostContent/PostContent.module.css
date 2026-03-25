@@ -2859,6 +2859,20 @@
   white-space: nowrap;
 }
 
+/* TipTap 编辑器公式样式 */
+.postContent :global(.math-block) {
+  display: block;
+  overflow-x: auto;
+  margin: 1em 0;
+  padding: 0.5em 0;
+  text-align: center;
+}
+
+.postContent :global(.math-inline) {
+  display: inline;
+  vertical-align: baseline;
+}
+
 /* ================================
    fadeIn 动画
    ================================ */
