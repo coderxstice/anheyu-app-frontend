@@ -294,17 +294,15 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
       const contents = container.querySelectorAll(".tab-contents .tab-item-content");
 
       tabs.forEach((tab, index) => {
-        tab.addEventListener("click", () => {
-          // 移除所有 active 状态
-          tabs.forEach(t => t.classList.remove("active"));
-          contents.forEach(c => c.classList.remove("active"));
-
-          // 添加当前 active 状态
-          tab.classList.add("active");
-          if (contents[index]) {
-            contents[index].classList.add("active");
-          }
-        });
+        (tab as HTMLElement).setAttribute(
+          "onclick",
+          `var c=this.closest('.tabs');` +
+          `c.querySelectorAll('.nav-tabs .tab').forEach(function(t){t.classList.remove('active')});` +
+          `c.querySelectorAll('.tab-contents .tab-item-content').forEach(function(p){p.classList.remove('active')});` +
+          `this.classList.add('active');` +
+          `var panels=c.querySelectorAll('.tab-contents .tab-item-content');` +
+          `if(panels[${index}])panels[${index}].classList.add('active');`
+        );
       });
 
       // 确保导航和内容的 active 状态同步
@@ -593,11 +591,19 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
       const lines = codeText.split("\n");
       if (lines[lines.length - 1] === "") lines.pop();
 
+      const isOpen = pre.getAttribute("data-open") !== "false";
+      const isCollapsed = pre.getAttribute("data-collapsed") === "true";
+
       const lineNumberSpans = lines.map(() => "<span></span>").join("");
 
       const details = document.createElement("details");
       details.className = "md-editor-code";
-      details.setAttribute("open", "");
+      if (isOpen) {
+        details.setAttribute("open", "");
+      }
+      if (isCollapsed) {
+        details.setAttribute("data-collapsed", "true");
+      }
 
       const summary = document.createElement("summary");
       summary.className = "md-editor-code-head";
@@ -661,8 +667,9 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
         }
       }
 
-      // 判断是否需要折叠（codeMaxLines 为 -1 表示不折叠）
-      const needsCollapse = codeMaxLines !== -1 && lineCount > codeMaxLines;
+      // 判断是否需要折叠：优先使用编辑器保存的状态，否则按 codeMaxLines 配置
+      const savedCollapsed = codeBlock.getAttribute("data-collapsed");
+      const needsCollapse = savedCollapsed === "true" || (savedCollapsed === null && codeMaxLines !== -1 && lineCount > codeMaxLines);
 
       // 添加复制按钮图标（所有代码块都需要）
       let copyBtn = codeHead.querySelector(".copy-button");
@@ -817,15 +824,27 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     const katexInlineElements = contentRef.current.querySelectorAll(".md-editor-katex-inline:not([data-processed])");
     const katexBlockElements = contentRef.current.querySelectorAll(".md-editor-katex-block:not([data-processed])");
 
+    // 查找 TipTap 编辑器格式的公式元素（通过 data-latex 属性识别）
+    const tiptapBlockElements = contentRef.current.querySelectorAll("[data-type='math-block'][data-latex]:not([data-processed])");
+    const tiptapInlineElements = contentRef.current.querySelectorAll("[data-type='math-inline'][data-latex]:not([data-processed])");
+
     // 如果没有 md-editor 格式的 KaTeX 元素，尝试处理原始 $...$ 格式
     const needsRawProcessing =
       katexInlineElements.length === 0 &&
       katexBlockElements.length === 0 &&
+      tiptapBlockElements.length === 0 &&
+      tiptapInlineElements.length === 0 &&
       (contentRef.current.innerHTML.includes("$") ||
         contentRef.current.innerHTML.includes("\\(") ||
         contentRef.current.innerHTML.includes("\\["));
 
-    if (katexInlineElements.length === 0 && katexBlockElements.length === 0 && !needsRawProcessing) {
+    if (
+      katexInlineElements.length === 0 &&
+      katexBlockElements.length === 0 &&
+      tiptapBlockElements.length === 0 &&
+      tiptapInlineElements.length === 0 &&
+      !needsRawProcessing
+    ) {
       return;
     }
 
@@ -857,6 +876,36 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
         element.setAttribute("data-processed", "true");
       } catch (err) {
         console.warn("KaTeX 块级公式渲染失败:", err);
+      }
+    });
+
+    // 渲染 TipTap 编辑器格式的块级公式
+    tiptapBlockElements.forEach(element => {
+      try {
+        const latex = element.getAttribute("data-latex") || "";
+        if (!latex) return;
+        katex.render(latex, element as HTMLElement, {
+          throwOnError: false,
+          displayMode: true,
+        });
+        element.setAttribute("data-processed", "true");
+      } catch (err) {
+        console.warn("KaTeX TipTap 块级公式渲染失败:", err);
+      }
+    });
+
+    // 渲染 TipTap 编辑器格式的行内公式
+    tiptapInlineElements.forEach(element => {
+      try {
+        const latex = element.getAttribute("data-latex") || "";
+        if (!latex) return;
+        katex.render(latex, element as HTMLElement, {
+          throwOnError: false,
+          displayMode: false,
+        });
+        element.setAttribute("data-processed", "true");
+      } catch (err) {
+        console.warn("KaTeX TipTap 行内公式渲染失败:", err);
       }
     });
 

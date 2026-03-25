@@ -17,7 +17,8 @@ import { EditorToolbar, type EditorMode } from "../article-editor/EditorToolbar"
 import { TiptapEditor } from "../article-editor/TiptapEditor";
 import { SourceCodeEditor } from "../article-editor/SourceCodeEditor";
 import { useArticleEditor } from "../article-editor/use-article-editor";
-import { useAdminPageDetail, useCreatePage, useUpdatePage } from "@/hooks/queries/use-page-management";
+import { useAdminPageDetail, useCreatePage, useUpdatePage, pageManagementKeys } from "@/hooks/queries/use-page-management";
+import { useQueryClient } from "@tanstack/react-query";
 import { processHtmlForSave } from "@/lib/content-processor";
 import { registerCustomRules } from "@/lib/turndown-rules";
 import { registerMarkedExtensions } from "@/lib/marked-extensions";
@@ -153,6 +154,7 @@ export function PageEditorPage({ pageId }: PageEditorPageProps) {
     [editorMode, editor, sourceContent]
   );
 
+  const queryClient = useQueryClient();
   const createMutation = useCreatePage();
   const updateMutation = useUpdatePage();
   const isSaving = createMutation.isPending || updateMutation.isPending;
@@ -247,8 +249,9 @@ export function PageEditorPage({ pageId }: PageEditorPageProps) {
       );
     } else {
       createMutation.mutate(data, {
-        onSuccess: () => {
+        onSuccess: async () => {
           addToast({ title: "页面已创建", color: "success" });
+          await queryClient.invalidateQueries({ queryKey: pageManagementKeys.lists() });
           router.push("/admin/page-management");
         },
         onError: error => {

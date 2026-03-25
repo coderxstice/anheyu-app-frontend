@@ -73,7 +73,7 @@ export function CustomPageContent({ page }: CustomPageContentProps) {
       </header>
 
       <article ref={articleRef} className="min-h-[200px]">
-        <PostContent content={page.content} />
+        <PostContent content={page.content} enableScripts />
       </article>
 
       {page.show_comment && (

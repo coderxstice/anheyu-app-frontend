@@ -6,6 +6,108 @@
 import type TurndownService from "turndown";
 
 export function registerCustomRules(td: TurndownService) {
+  // --- GFM 表格 ---
+  // 跳过 table 内部元素的默认处理，让 table 规则统一处理
+  td.addRule("tableCell", {
+    filter: ["th", "td"],
+    replacement: (content) => content,
+  });
+  td.addRule("tableRow", {
+    filter: "tr",
+    replacement: (content) => content,
+  });
+  td.addRule("tableSection", {
+    filter: ["thead", "tbody", "tfoot"],
+    replacement: (content) => content,
+  });
+
+  td.addRule("table", {
+    filter: "table",
+    replacement: (_content, node) => {
+      const table = node as HTMLElement;
+      const rows = Array.from(table.querySelectorAll("tr"));
+      if (rows.length === 0) return _content;
+
+      const matrix: { text: string; isHeader: boolean; align: string }[][] = [];
+
+      rows.forEach(row => {
+        const cells = Array.from(row.querySelectorAll("th, td"));
+        const rowData = cells.map(cell => {
+          const el = cell as HTMLElement;
+          const isHeader = cell.nodeName === "TH";
+          const align = el.style.textAlign || el.getAttribute("align") || "";
+          const text = (el.textContent || "").trim().replace(/\|/g, "\\|").replace(/\n/g, " ");
+          return { text, isHeader, align };
+        });
+        matrix.push(rowData);
+      });
+
+      if (matrix.length === 0) return _content;
+
+      const colCount = Math.max(...matrix.map(r => r.length));
+      const colWidths: number[] = Array(colCount).fill(3);
+
+      matrix.forEach(row => {
+        row.forEach((cell, i) => {
+          colWidths[i] = Math.max(colWidths[i], cell.text.length);
+        });
+      });
+
+      const pad = (text: string, width: number) => text + " ".repeat(Math.max(0, width - text.length));
+
+      const formatRow = (row: { text: string }[]) => {
+        const cells = [];
+        for (let i = 0; i < colCount; i++) {
+          cells.push(pad(row[i]?.text || "", colWidths[i]));
+        }
+        return `| ${cells.join(" | ")} |`;
+      };
+
+      // Determine if first row is the header
+      const firstRow = matrix[0];
+      const hasHeader = firstRow.some(c => c.isHeader) || table.querySelector("thead") !== null;
+
+      let headerRow: typeof firstRow;
+      let bodyRows: typeof matrix;
+
+      if (hasHeader) {
+        headerRow = firstRow;
+        bodyRows = matrix.slice(1);
+      } else {
+        headerRow = Array(colCount).fill(null).map(() => ({ text: "", isHeader: true, align: "" }));
+        bodyRows = matrix;
+      }
+
+      const headerLine = formatRow(headerRow);
+
+      const separatorCells: string[] = [];
+      for (let i = 0; i < colCount; i++) {
+        const align = headerRow[i]?.align || "";
+        const w = colWidths[i];
+        if (align === "center") {
+          separatorCells.push(":" + "-".repeat(Math.max(1, w - 2)) + ":");
+        } else if (align === "right") {
+          separatorCells.push("-".repeat(Math.max(1, w - 1)) + ":");
+        } else {
+          separatorCells.push("-".repeat(w));
+        }
+      }
+      const separatorLine = `| ${separatorCells.join(" | ")} |`;
+
+      const lines = [headerLine, separatorLine];
+      bodyRows.forEach(row => lines.push(formatRow(row)));
+
+      return `\n\n${lines.join("\n")}\n\n`;
+    },
+  });
+
+  // 如果表格被 div.table-container 包裹，跳过包装层
+  td.addRule("tableContainer", {
+    filter: (node) =>
+      node.nodeName === "DIV" && (node as HTMLElement).classList.contains("table-container"),
+    replacement: (content) => content,
+  });
+
   // --- 付费内容 ---
   td.addRule("paidContent", {
     filter: (node) =>
@@ -445,5 +547,49 @@ export function registerCustomRules(td: TurndownService) {
   td.addRule("inlinePassword", {
     filter: (node) => node.nodeName === "SPAN" && (node as HTMLElement).classList.contains("inline-password"),
     replacement: (content) => `{psw}${content}{/psw}`,
+  });
+
+  // --- 块级数学公式 (TipTap math-block) ---
+  td.addRule("mathBlock", {
+    filter: (node) => {
+      const el = node as HTMLElement;
+      return (
+        (el.getAttribute?.("data-type") === "math-block") ||
+        (el.classList?.contains("math-block") && el.hasAttribute?.("data-latex")) ||
+        el.classList?.contains("katex-display")
+      );
+    },
+    replacement: (_content, node) => {
+      const el = node as HTMLElement;
+      const latex =
+        el.getAttribute("data-latex") ||
+        el.querySelector('annotation[encoding="application/x-tex"]')?.textContent ||
+        el.textContent?.trim() ||
+        "";
+      if (!latex) return _content;
+      return `\n\n$$\n${latex}\n$$\n\n`;
+    },
+  });
+
+  // --- 行内数学公式 (TipTap math-inline) ---
+  td.addRule("mathInline", {
+    filter: (node) => {
+      const el = node as HTMLElement;
+      return (
+        (el.getAttribute?.("data-type") === "math-inline") ||
+        (el.classList?.contains("math-inline") && el.hasAttribute?.("data-latex")) ||
+        (el.classList?.contains("katex") && !el.closest?.(".katex-display"))
+      );
+    },
+    replacement: (_content, node) => {
+      const el = node as HTMLElement;
+      const latex =
+        el.getAttribute("data-latex") ||
+        el.querySelector('annotation[encoding="application/x-tex"]')?.textContent ||
+        el.textContent?.trim() ||
+        "";
+      if (!latex) return _content;
+      return `$${latex}$`;
+    },
   });
 }

@@ -108,11 +108,19 @@ export function processHtmlForSave(html: string): string {
     const lines = codeText.split("\n");
     if (lines[lines.length - 1] === "") lines.pop();
 
+    const isOpen = pre.getAttribute("data-open") !== "false";
+    const isCollapsed = pre.getAttribute("data-collapsed") === "true";
+
     const lineNumberSpans = lines.map(() => "<span></span>").join("");
 
     const details = doc.createElement("details");
     details.className = "md-editor-code";
-    details.setAttribute("open", "");
+    if (isOpen) {
+      details.setAttribute("open", "");
+    }
+    if (isCollapsed) {
+      details.setAttribute("data-collapsed", "true");
+    }
 
     const summary = doc.createElement("summary");
     summary.className = "md-editor-code-head";

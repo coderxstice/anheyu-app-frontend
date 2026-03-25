@@ -34,6 +34,8 @@ export interface FormImageUploadProps {
   className?: string;
   /** 接受的文件类型 */
   accept?: string;
+  /** 是否必填（label 后显示红色星号） */
+  isRequired?: boolean;
 }
 
 const FormImageUpload = React.forwardRef<HTMLDivElement, FormImageUploadProps>(
@@ -52,6 +54,7 @@ const FormImageUpload = React.forwardRef<HTMLDivElement, FormImageUploadProps>(
       hidePreview,
       className,
       accept = "image/*",
+      isRequired,
     },
     ref
   ) => {
@@ -114,10 +117,15 @@ const FormImageUpload = React.forwardRef<HTMLDivElement, FormImageUploadProps>(
 
     return (
       <div ref={ref} className={cn("flex flex-col gap-2", className)}>
-        {label && <label className="text-sm font-medium text-foreground/80">{label}</label>}
+        {label && (
+          <label className="text-sm font-medium text-foreground/80">
+            {label}
+            {isRequired && <span className="ml-0.5 text-danger">*</span>}
+          </label>
+        )}
 
         {/* 输入行：可选 inlineLabel + input + 上传按钮 */}
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           {inlineLabel && (
             <span
               className={cn(
@@ -135,6 +143,7 @@ const FormImageUpload = React.forwardRef<HTMLDivElement, FormImageUploadProps>(
             onValueChange={onValueChange}
             isClearable
             onClear={() => onValueChange?.("")}
+            className="min-w-0 flex-1"
             classNames={{
               inputWrapper: cn(
                 "rounded-xl border border-border/60 bg-card shadow-none!",
