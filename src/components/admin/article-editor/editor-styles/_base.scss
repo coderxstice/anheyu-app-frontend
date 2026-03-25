@@ -399,6 +399,7 @@
   table {
     display: table;
     width: 100%;
+    min-width: 100%;
     margin: 0;
     empty-cells: show;
     border-spacing: 0;
@@ -406,6 +407,7 @@
 
     td,
     th {
+      position: relative;
       padding: 0.5rem 0.75rem;
       vertical-align: middle;
       text-align: left;
@@ -443,14 +445,23 @@
   }
 
   .column-resize-handle {
-    background-color: var(--anzhiyu-theme, #3b82f6);
-    width: 2px;
     position: absolute;
-    right: -1px;
+    right: -2px;
     top: 0;
-    bottom: 0;
+    bottom: -2px;
+    width: 4px;
+    background-color: var(--anzhiyu-theme, #3b82f6);
     z-index: 20;
     pointer-events: none;
+  }
+
+  td:last-child .column-resize-handle,
+  th:last-child .column-resize-handle {
+    display: none;
+  }
+
+  .resize-cursor {
+    cursor: col-resize;
   }
 
   // ---- 高亮 ----

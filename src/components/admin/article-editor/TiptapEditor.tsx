@@ -2,6 +2,7 @@
 
 import { EditorContent } from "@tiptap/react";
 import type { Editor } from "@tiptap/react";
+import "katex/dist/katex.min.css";
 import "./editor-styles/index.scss";
 import "@/components/post/PostContent/code-highlight.css";
 

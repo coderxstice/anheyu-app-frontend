@@ -386,10 +386,10 @@ function LangDropdown({
 // ---- React NodeView 组件 ----
 function EnhancedCodeBlockView({ node, updateAttributes }: NodeViewProps) {
   const [copied, setCopied] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
   const [isCollapsible, setIsCollapsible] = useState(false);
-  const [open, setOpen] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const open = node.attrs.isOpen !== false;
+  const collapsed = node.attrs.isCollapsed === true;
   const [titleEditing, setTitleEditing] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -447,7 +447,7 @@ function EnhancedCodeBlockView({ node, updateAttributes }: NodeViewProps) {
           {/* 左侧：折叠箭头 + 标题 */}
           <button
             type="button"
-            onClick={() => setOpen(!open)}
+            onClick={() => updateAttributes({ isOpen: !open })}
             className={`editor-code-expand ${open ? "is-open" : ""}`}
           >
             <ChevronDown className="w-4 h-4" />
@@ -568,31 +568,30 @@ function EnhancedCodeBlockView({ node, updateAttributes }: NodeViewProps) {
           />
         )}
 
-        {/* 代码内容区 */}
-        {open && (
-          <div className={`editor-code-body ${collapsed ? "is-collapsed" : ""}`}>
-            <div className="editor-code-content-row">
-              {showLineNumbers && (
-                <div
-                  className="editor-code-line-numbers"
-                  contentEditable={false}
-                  aria-hidden="true"
-                  style={lineNumStyle}
-                >
-                  {Array.from({ length: lineCount }, (_, i) => (
-                    <span key={i}>{i + 1}</span>
-                  ))}
-                </div>
-              )}
-              <div className="editor-code-pre-wrapper" style={codeStyle}>
-                <NodeViewContent />
+        {/* 代码内容区 - NodeViewContent 必须始终挂载，否则 ProseMirror 会丢失内容 */}
+        <div className={`editor-code-body ${collapsed ? "is-collapsed" : ""}`} style={open ? undefined : { display: "none" }}>
+          <div className="editor-code-content-row">
+            {showLineNumbers && (
+              <div
+                className="editor-code-line-numbers"
+                contentEditable={false}
+                aria-hidden="true"
+                style={lineNumStyle}
+              >
+                {Array.from({ length: lineCount }, (_, i) => (
+                  <span key={i}>{i + 1}</span>
+                ))}
               </div>
+            )}
+            <div className="editor-code-pre-wrapper" style={codeStyle}>
+              <NodeViewContent />
             </div>
+          </div>
 
-            {collapsed && (
+          {collapsed && (
               <button
                 type="button"
-                onClick={() => setCollapsed(false)}
+                onClick={() => updateAttributes({ isCollapsed: false })}
                 className="editor-code-expand-btn"
                 contentEditable={false}
               >
@@ -600,12 +599,11 @@ function EnhancedCodeBlockView({ node, updateAttributes }: NodeViewProps) {
               </button>
             )}
           </div>
-        )}
 
         {open && !collapsed && isCollapsible && (
           <button
             type="button"
-            onClick={() => setCollapsed(true)}
+            onClick={() => updateAttributes({ isCollapsed: true })}
             className="editor-code-collapse-trigger"
             contentEditable={false}
           >
@@ -639,6 +637,28 @@ export function createEnhancedCodeBlock(lowlight: unknown) {
         codeFontSize: { default: "", parseHTML: () => "", renderHTML: () => ({}) },
         indentMode: { default: "space", parseHTML: () => "space", renderHTML: () => ({}) },
         indentWidth: { default: "2", parseHTML: () => "2", renderHTML: () => ({}) },
+        isOpen: {
+          default: true,
+          parseHTML: (element: HTMLElement) => {
+            if (element.tagName === "DETAILS") return element.hasAttribute("open");
+            const val = element.getAttribute("data-open");
+            return val !== "false";
+          },
+          renderHTML: (attributes: Record<string, unknown>) => {
+            if (attributes.isOpen === false) return { "data-open": "false" };
+            return {};
+          },
+        },
+        isCollapsed: {
+          default: false,
+          parseHTML: (element: HTMLElement) => {
+            return element.getAttribute("data-collapsed") === "true" || element.classList.contains("is-collapsed");
+          },
+          renderHTML: (attributes: Record<string, unknown>) => {
+            if (attributes.isCollapsed) return { "data-collapsed": "true" };
+            return {};
+          },
+        },
       };
     },
     parseHTML() {

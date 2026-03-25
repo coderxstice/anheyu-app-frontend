@@ -82,7 +82,7 @@ const DEFAULT_PANEL_TITLES = ["标签 1", "标签 2"];
 
 function TabsBlockView({ node, updateAttributes, editor, getPos }: NodeViewProps) {
   const [editingTab, setEditingTab] = useState<number | null>(null);
-  const panelsRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const activeIndex = parseInt((node.attrs.activeIndex as string) || "0", 10);
   const panelCount = node.content.childCount;
@@ -93,14 +93,27 @@ function TabsBlockView({ node, updateAttributes, editor, getPos }: NodeViewProps
     titles.push((child.attrs.title as string) || "标签");
   });
 
-  // 切换面板可见性
+  // NodeViewContent does NOT forward user refs (@tiptap/react v3 overrides ref
+  // with its internal nodeViewContentRef), so we query from NodeViewWrapper instead.
   useEffect(() => {
-    const container = panelsRef.current;
-    if (!container) return;
-    const panels = container.querySelectorAll<HTMLElement>(":scope > .editor-tab-panel");
-    panels.forEach((panel, i) => {
-      panel.style.display = i === safeIdx ? "" : "none";
-    });
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    const applyVisibility = () => {
+      // Tiptap v3 inserts two intermediate wrappers between the NodeViewContent
+      // container and each child's NodeViewWrapper: a contentDOMElement and
+      // a per-node renderer element (.node-tabPanel). Use descendant selector.
+      const panels = wrapper.querySelectorAll<HTMLElement>(
+        ".editor-tabs-panels .node-tabPanel"
+      );
+      panels.forEach((panel, i) => {
+        panel.style.display = i === safeIdx ? "" : "none";
+      });
+    };
+
+    applyVisibility();
+    const rafId = requestAnimationFrame(applyVisibility);
+    return () => cancelAnimationFrame(rafId);
   }, [safeIdx, panelCount]);
 
   const resolvePos = useCallback(() => {
@@ -175,7 +188,7 @@ function TabsBlockView({ node, updateAttributes, editor, getPos }: NodeViewProps
   );
 
   return (
-    <NodeViewWrapper className="editor-tabs-block">
+    <NodeViewWrapper ref={wrapperRef} className="editor-tabs-block">
       <div className="editor-tabs" contentEditable={false}>
         {/* 标签导航 */}
         <div className="editor-tabs-nav">
@@ -229,7 +242,7 @@ function TabsBlockView({ node, updateAttributes, editor, getPos }: NodeViewProps
       </div>
 
       {/* 面板内容 — 由 TipTap 渲染子 TabPanel 节点 */}
-      <NodeViewContent ref={panelsRef} className="editor-tabs-panels" />
+      <NodeViewContent className="editor-tabs-panels" />
     </NodeViewWrapper>
   );
 }

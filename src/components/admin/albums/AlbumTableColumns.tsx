@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import Image from "next/image";
 import { Chip, Button, Tooltip } from "@heroui/react";
 import { Edit, Trash2, Eye, Download } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
@@ -45,13 +44,17 @@ export function useAlbumRenderCell({ onAction, categories = [] }: UseAlbumRender
           return (
             <div className="flex gap-3 items-center min-w-0">
               <div className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-muted ring-1 ring-border/20">
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={item.imageUrl + (item.thumbParam || "")}
                   alt={item.title || "相册图片"}
-                  fill
-                  className="object-cover"
-                  sizes="64px"
-                  unoptimized
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                  onError={e => {
+                    const target = e.currentTarget;
+                    target.style.display = "none";
+                  }}
                 />
               </div>
               <div className="min-w-0 flex-1">

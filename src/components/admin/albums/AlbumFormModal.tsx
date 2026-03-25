@@ -8,10 +8,19 @@ import type { ZonedDateTime } from "@internationalized/date";
 import { Image as ImageIcon, Pencil } from "lucide-react";
 import { AdminDialog } from "@/components/admin/AdminDialog";
 import { FormInput } from "@/components/ui/form-input";
+import { FormImageUpload } from "@/components/ui/form-image-upload";
 import { FormSelect, FormSelectItem } from "@/components/ui/form-select";
 import { FormTextarea } from "@/components/ui/form-textarea";
 import { useCreateAlbum, useUpdateAlbum } from "@/hooks/queries/use-album";
 import type { Album, AlbumCategory } from "@/types/album";
+
+async function sha256Hex(input: string): Promise<string> {
+  const data = new TextEncoder().encode(input);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
 interface AlbumFormModalProps {
   isOpen: boolean;
@@ -117,7 +126,8 @@ function AlbumFormContent({
         await updateAlbum.mutateAsync({ id: editItem.id, data: formData });
         addToast({ title: "更新成功", color: "success", timeout: 2000 });
       } else {
-        await createAlbum.mutateAsync({ ...formData, fileHash: imageUrl.trim() });
+        const fileHash = await sha256Hex(imageUrl.trim());
+        await createAlbum.mutateAsync({ ...formData, fileHash });
         addToast({ title: "添加成功", color: "success", timeout: 2000 });
       }
       onClose();
@@ -164,12 +174,14 @@ function AlbumFormContent({
           ))}
         </FormSelect>
 
-        <FormInput
+        <FormImageUpload
           label="图片 URL"
-          placeholder="请输入图片地址"
+          isRequired
+          placeholder="粘贴外链或上传后自动填入，可随时修改"
+          description="支持本地上传（右侧按钮）或手动填写/修改链接"
           value={imageUrl}
           onValueChange={setImageUrl}
-          isRequired
+          previewSize="md"
         />
 
         <FormInput label="标题" placeholder="图片标题（可选）" value={title} onValueChange={setTitle} maxLength={100} />
