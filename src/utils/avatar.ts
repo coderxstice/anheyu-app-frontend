@@ -4,6 +4,7 @@
  */
 
 import md5 from "blueimp-md5";
+import { toSameOriginMediaUrl } from "./same-origin-media-url";
 
 export interface AvatarConfig {
   gravatarUrl?: string;
@@ -61,9 +62,9 @@ export function getUserAvatarUrl(
   config?: AvatarConfig,
   size = 80
 ): string {
-  // 1. 优先使用用户自定义头像
+  // 1. 优先使用用户自定义头像（本站直链可能带生产域名，需压成相对路径以便本地/当前站点加载）
   if (user.avatar) {
-    return user.avatar;
+    return toSameOriginMediaUrl(user.avatar);
   }
 
   // 2. 如果昵称是 QQ 号格式，尝试获取 QQ 头像

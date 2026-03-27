@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { LoginUserInfoResponse } from "@/types/auth";
+import { toSameOriginMediaUrl } from "@/utils/same-origin-media-url";
 
 interface AuthStore {
   // 访问令牌
@@ -27,6 +28,9 @@ interface AuthStore {
 
   // 更新访问令牌（刷新 token 后调用）
   updateAccessToken: (accessToken: string, expires: string) => void;
+
+  // 更新持久化用户信息中的头像 URL（上传头像成功后调用，与数据库保持一致）
+  updateUserAvatar: (avatarUrl: string) => void;
 
   // 退出登录
   logout: () => void;
@@ -56,7 +60,10 @@ export const useAuthStore = create<AuthStore>()(
           accessToken: data.accessToken,
           refreshToken: data.refreshToken,
           expires: data.expires,
-          user: data.userInfo,
+          user:
+            data.userInfo && data.userInfo.avatar
+              ? { ...data.userInfo, avatar: toSameOriginMediaUrl(data.userInfo.avatar) }
+              : data.userInfo,
           roles: data.roles,
         }),
 
@@ -65,6 +72,11 @@ export const useAuthStore = create<AuthStore>()(
           accessToken,
           expires,
         }),
+
+      updateUserAvatar: avatarUrl =>
+        set(state => ({
+          user: state.user ? { ...state.user, avatar: toSameOriginMediaUrl(avatarUrl) } : null,
+        })),
 
       logout: () =>
         set({

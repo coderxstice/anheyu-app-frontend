@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Chip, Button, Tooltip } from "@heroui/react";
 import { Mail, Calendar, Edit, KeyRound, Ban, CheckCircle, Trash2 } from "lucide-react";
 import { formatDateTimeParts } from "@/utils/date";
+import { toSameOriginMediaUrl } from "@/utils/same-origin-media-url";
 import type { AdminUser } from "@/types/user-management";
 import { USER_STATUS, USER_STATUS_LABEL, USER_STATUS_COLOR } from "@/types/user-management";
 
@@ -36,7 +37,14 @@ export function useUserRenderCell({ onAction }: UseUserRenderCellOptions) {
             <div className="flex items-center gap-3 min-w-0">
               {user.avatar ? (
                 <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 ring-1 ring-border/20">
-                  <Image src={user.avatar} alt="" fill className="object-cover" sizes="36px" unoptimized />
+                  <Image
+                    src={toSameOriginMediaUrl(user.avatar)}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="36px"
+                    unoptimized
+                  />
                 </div>
               ) : (
                 <div className="w-9 h-9 rounded-full bg-linear-to-br from-primary/20 to-primary/40 flex items-center justify-center shrink-0 text-primary font-medium text-sm">

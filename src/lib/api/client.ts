@@ -294,6 +294,13 @@ const createAxiosInstance = (): AxiosInstance => {
   // 请求拦截器
   instance.interceptors.request.use(
     config => {
+      // FormData 上传必须由浏览器设置 multipart boundary；默认的 application/json 会导致 Gin 无法解析 multipart
+      if (config.data instanceof FormData) {
+        const headers = AxiosHeaders.from(config.headers ?? {});
+        headers.delete("Content-Type");
+        config.headers = headers;
+      }
+
       if (!shouldAttachAccessToken(config)) {
         return config;
       }

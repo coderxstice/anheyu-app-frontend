@@ -9,6 +9,7 @@ import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
 import { useSiteConfigStore } from "@/store/site-config-store";
+import { getUserAvatarUrl } from "@/utils/avatar";
 import { useIsMobile } from "@/hooks/use-media-query";
 import { useTravellingLink } from "@/hooks/use-travelling-link";
 
@@ -39,6 +40,7 @@ export function HeaderRight({
   const pathname = usePathname();
   const { user, isAuthenticated, logout, roles } = useAuthStore();
   const registrationEnabledRaw = useSiteConfigStore(s => s.enableRegistration());
+  const siteConfig = useSiteConfigStore(s => s.siteConfig);
   const isMobile = useIsMobile();
 
   const isClient = useSyncExternalStore(() => () => {}, () => true, () => false);
@@ -61,6 +63,18 @@ export function HeaderRight({
   const isAdmin = useMemo(() => {
     return user?.userGroupID === 1 || roles.includes("1");
   }, [user, roles]);
+
+  const panelAvatarUrl = useMemo(() => {
+    if (!user) return `https://cravatar.cn/avatar/?s=200&d=mp`;
+    return getUserAvatarUrl(
+      { avatar: user.avatar, email: user.email, nickname: user.nickname },
+      {
+        gravatarUrl: siteConfig?.GRAVATAR_URL,
+        defaultGravatarType: siteConfig?.DEFAULT_GRAVATAR_TYPE,
+      },
+      200
+    );
+  }, [user, siteConfig?.GRAVATAR_URL, siteConfig?.DEFAULT_GRAVATAR_TYPE]);
 
   // 滚动到顶部
   const scrollToTop = useCallback(() => {
@@ -175,7 +189,7 @@ export function HeaderRight({
               {/* 用户信息头部 */}
               <div className={styles.panelHeader}>
                 <Image
-                  src={user?.avatar || `https://cravatar.cn/avatar/${user?.email}?s=200&d=mp`}
+                  src={panelAvatarUrl}
                   className={styles.userAvatar}
                   alt="头像"
                   width={48}
