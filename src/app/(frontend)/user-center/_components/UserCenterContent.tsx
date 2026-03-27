@@ -16,8 +16,10 @@ import {
   Home,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
+import { useSiteConfigStore } from "@/store/site-config-store";
 import { userCenterApi } from "@/lib/api/user-center";
 import { getErrorMessage } from "@/lib/api/client";
+import { getUserAvatarUrl } from "@/utils/avatar";
 import { EditProfileDialog } from "./EditProfileDialog";
 import { ChangePasswordDialog } from "./ChangePasswordDialog";
 import { NotificationSettingsDialog } from "./NotificationSettingsDialog";
@@ -36,6 +38,7 @@ export function UserCenterContent() {
   const accessToken = useAuthStore(s => s.accessToken);
   const logout = useAuthStore(s => s.logout);
   const _hasHydrated = useAuthStore(s => s._hasHydrated);
+  const siteConfig = useSiteConfigStore(s => s.siteConfig);
 
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
@@ -45,10 +48,16 @@ export function UserCenterContent() {
   const isLoggedIn = useMemo(() => !!accessToken && !!user, [accessToken, user]);
 
   const userAvatar = useMemo(() => {
-    if (user?.avatar) return user.avatar;
-    if (user?.email) return `https://cravatar.cn/avatar/${user.email}?s=200&d=mp`;
-    return "/static/img/avatar.jpg";
-  }, [user]);
+    if (!user) return "/static/img/avatar.jpg";
+    return getUserAvatarUrl(
+      { avatar: user.avatar, email: user.email, nickname: user.nickname },
+      {
+        gravatarUrl: siteConfig?.GRAVATAR_URL,
+        defaultGravatarType: siteConfig?.DEFAULT_GRAVATAR_TYPE,
+      },
+      200
+    );
+  }, [user, siteConfig?.GRAVATAR_URL, siteConfig?.DEFAULT_GRAVATAR_TYPE]);
 
   const joinTimeText = useMemo(() => {
     if (!user?.created_at) return "未知";
@@ -80,8 +89,11 @@ export function UserCenterContent() {
       setAvatarUploading(true);
       try {
         const res = await userCenterApi.uploadAvatar(file);
-        if (res.code === 200) {
-          window.location.reload();
+        if (res.code === 200 && res.data?.url) {
+          // 后端已更新头像，但 Zustand persist 里仍是登录时的 user，需写入新 URL 否则刷新后仍显示 Gravatar/旧图
+          useAuthStore.getState().updateUserAvatar(res.data.url);
+        } else if (res.code === 200) {
+          alert(res.message || "头像上传成功但未返回地址，请刷新页面");
         } else {
           alert(res.message || "头像上传失败");
         }

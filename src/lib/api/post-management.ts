@@ -16,6 +16,7 @@ import type {
   ArticleHistoryListResponse,
   ArticleHistoryDetail,
 } from "@/types/post-management";
+import { toSameOriginMediaUrl } from "@/utils/same-origin-media-url";
 
 export const postManagementApi = {
   /**
@@ -124,12 +125,7 @@ export const postManagementApi = {
       const { url } = response.data;
 
       if (url) {
-        try {
-          const urlObj = new URL(url);
-          return urlObj.pathname;
-        } catch {
-          return url;
-        }
+        return toSameOriginMediaUrl(url);
       }
     }
 
