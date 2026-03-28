@@ -37,7 +37,9 @@ export const MathInline = Node.create({
       {
         tag: ".katex:not(.katex-display .katex)",
         getAttrs: (element: HTMLElement) => {
-          const annotation = element.querySelector('annotation[encoding="application/x-tex"]');
+          const annotation =
+            element.querySelector('annotation[encoding="application/x-tex"]') ||
+            element.querySelector("annotation");
           if (annotation?.textContent) {
             return { latex: annotation.textContent };
           }

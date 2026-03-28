@@ -128,8 +128,10 @@ export const MathBlock = Node.create({
       {
         tag: ".katex-display",
         getAttrs: (element: HTMLElement) => {
-          // 尝试从 annotation 中提取原始 LaTeX
-          const annotation = element.querySelector('annotation[encoding="application/x-tex"]');
+          // 尝试从 annotation 中提取原始 LaTeX（后端净化可能去掉 encoding 属性）
+          const annotation =
+            element.querySelector('annotation[encoding="application/x-tex"]') ||
+            element.querySelector("annotation");
           if (annotation?.textContent) {
             return { latex: annotation.textContent };
           }
