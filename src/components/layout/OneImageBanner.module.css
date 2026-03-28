@@ -10,7 +10,8 @@
   height: 100vh;
   color: #fff;
   text-align: center;
-  overflow: hidden;
+  /* 与 .frontend-layout 同理：fixed + z-index:-1 的视频背景需落在本层叠上下文内 */
+  isolation: isolate;
 }
 
 .videoBackground {
