@@ -1243,6 +1243,8 @@ html.dark [data-slot="content"][role="tooltip"] {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  /* 建立层叠上下文，避免 ::before（z-index: -1）落到 body 背景下方导致一图流图片不可见 */
+  isolation: isolate;
 }
 
 .frontend-layout::before {
