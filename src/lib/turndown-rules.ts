@@ -629,6 +629,7 @@ export function registerCustomRules(td: TurndownService) {
       const latex =
         el.getAttribute("data-latex") ||
         el.querySelector('annotation[encoding="application/x-tex"]')?.textContent ||
+        el.querySelector("annotation")?.textContent ||
         el.textContent?.trim() ||
         "";
       if (!latex) return _content;
@@ -651,6 +652,7 @@ export function registerCustomRules(td: TurndownService) {
       const latex =
         el.getAttribute("data-latex") ||
         el.querySelector('annotation[encoding="application/x-tex"]')?.textContent ||
+        el.querySelector("annotation")?.textContent ||
         el.textContent?.trim() ||
         "";
       if (!latex) return _content;
