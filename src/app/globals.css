@@ -1588,3 +1588,74 @@ html.with-fancybox body.hide-scrollbar {
   --f-zoomOutDown-scale: 0.92;
   --f-zoomOutDown-y: 24px;
 }
+
+/* ===================== 打印样式 ===================== */
+@media print {
+  /* 页面基础：白底黑字，设置页边距 */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  @page {
+    margin: 1.5cm 2cm;
+    size: A4;
+  }
+
+  /* 隐藏全局导航、页头、页脚 */
+  header,
+  footer,
+  nav {
+    display: none !important;
+  }
+
+  /* 隐藏右键菜单、右下角浮动按钮 */
+  [class*="rightMenu"],
+  [class*="RightMenu"],
+  [class*="console"],
+  [class*="Console"] {
+    display: none !important;
+  }
+
+  /* 隐藏所有 fixed/sticky 定位元素（浮动翻页、弹幕等） */
+  *[style*="position: fixed"],
+  *[style*="position:fixed"] {
+    display: none !important;
+  }
+
+  /* 隐藏弹幕容器（CommentBarrage） */
+  [class*="commentBarrage"],
+  [class*="CommentBarrage"],
+  [class*="barrage"] {
+    display: none !important;
+  }
+
+  /* 隐藏翻页浮动（PostPaginationFloat） */
+  [class*="paginationFloat"],
+  [class*="PaginationFloat"] {
+    display: none !important;
+  }
+
+  /* 隐藏音乐播放器胶囊 */
+  [class*="musicCapsule"],
+  [class*="MusicCapsule"],
+  [class*="aplayer"],
+  [class*="meting"] {
+    display: none !important;
+  }
+
+  /* 文章布局：去掉最大宽度限制，充分利用页面 */
+  .frontend-layout {
+    background: transparent !important;
+  }
+
+  .frontend-layout::before {
+    display: none !important;
+  }
+}

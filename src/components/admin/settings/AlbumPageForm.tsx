@@ -20,6 +20,7 @@ import {
   KEY_ALBUM_API_URL,
   KEY_ALBUM_DEFAULT_THUMB_PARAM,
   KEY_ALBUM_DEFAULT_BIG_PARAM,
+  KEY_ALBUM_ABOUT_LINK,
 } from "@/lib/settings/setting-keys";
 
 interface AlbumPageFormProps {
@@ -190,6 +191,14 @@ export function AlbumPageForm({ values, onChange, loading }: AlbumPageFormProps)
             value={values[KEY_ALBUM_API_URL]}
             onValueChange={v => onChange(KEY_ALBUM_API_URL, v)}
             description="相册页面请求后端 URL，需以 / 结尾"
+          />
+          <FormInput
+            label="关于链接"
+            placeholder="https://example.com/about"
+            value={values[KEY_ALBUM_ABOUT_LINK]}
+            onValueChange={v => onChange(KEY_ALBUM_ABOUT_LINK, v)}
+            description="相册页面头部关于按钮跳转链接，留空则使用全局关于链接"
+            className="mt-4"
           />
           <SettingsFieldGroup cols={2} className="mt-4">
             <FormInput

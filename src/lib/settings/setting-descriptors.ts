@@ -789,6 +789,7 @@ const categoryDescriptors: Record<SettingCategoryId, SettingDescriptor[]> = {
     { backendKey: K.KEY_ALBUM_API_URL, type: "string" },
     { backendKey: K.KEY_ALBUM_DEFAULT_THUMB_PARAM, type: "string" },
     { backendKey: K.KEY_ALBUM_DEFAULT_BIG_PARAM, type: "string" },
+    { backendKey: K.KEY_ALBUM_ABOUT_LINK, type: "string" },
   ],
   "pages-music": [
     { backendKey: K.KEY_MUSIC_PLAYER_ENABLE, type: "boolean" },

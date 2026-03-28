@@ -446,6 +446,7 @@ export const KEY_ALBUM_ENABLE_COMMENT = "album.enable_comment";
 export const KEY_ALBUM_API_URL = "album.api_url";
 export const KEY_ALBUM_DEFAULT_THUMB_PARAM = "album.default_thumb_param";
 export const KEY_ALBUM_DEFAULT_BIG_PARAM = "album.default_big_param";
+export const KEY_ALBUM_ABOUT_LINK = "album.about_link";
 
 // ==================== 音乐页面配置 ====================
 export const KEY_MUSIC_PLAYER_ENABLE = "music.player.enable";
