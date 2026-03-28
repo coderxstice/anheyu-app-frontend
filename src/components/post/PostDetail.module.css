@@ -242,3 +242,42 @@
     background: var(--card);
   }
 }
+
+/* ===================== 打印样式 ===================== */
+@media print {
+  /* 重置布局：单列、无间距 */
+  .postDetailContainer {
+    min-height: unset;
+  }
+
+  .layout {
+    display: block;
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+    gap: 0;
+  }
+
+  .postContentInner {
+    width: 100% !important;
+  }
+
+  /* 文章内容卡片：去除卡片感 */
+  .postDetailContent {
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    animation: none;
+    gap: 0;
+  }
+
+  /* 隐藏非内容元素 */
+  .postTagBar,
+  .paginationInlineWrap,
+  .footerBar,
+  .commentSection {
+    display: none !important;
+  }
+}

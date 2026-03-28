@@ -171,6 +171,7 @@ export interface SiteConfigData {
   "album.banner.title"?: string;
   "album.banner.description"?: string;
   "album.banner.background"?: string;
+  "album.about_link"?: string;
 
   // 首页顶部配置
   HOME_TOP?: {

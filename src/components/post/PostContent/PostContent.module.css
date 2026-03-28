@@ -3067,3 +3067,92 @@
     font-size: 0.9rem;
   }
 }
+
+/* ===================== 打印样式 ===================== */
+@media print {
+  /* 基础排版：黑白、衬线字体、可读行距 */
+  .postContent {
+    font-size: 12pt;
+    line-height: 1.8;
+    color: #000 !important;
+    background: transparent !important;
+  }
+
+  /* 标题：黑色，保留字重 */
+  .postContent :global(h1),
+  .postContent :global(h2),
+  .postContent :global(h3),
+  .postContent :global(h4),
+  .postContent :global(h5),
+  .postContent :global(h6) {
+    color: #000 !important;
+    page-break-after: avoid;
+  }
+
+  /* 段落 */
+  .postContent :global(p) {
+    color: #000 !important;
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* 链接：黑色文字，括号展示 URL */
+  .postContent :global(a) {
+    color: #000 !important;
+    text-decoration: underline !important;
+    border-bottom: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .postContent :global(a[href^="http"]:not([href^="javascript"]))::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    color: #555;
+  }
+
+  /* 图片：居中，不超页宽 */
+  .postContent :global(img) {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+
+  /* 代码块：浅色背景，保留等宽字体 */
+  .postContent :global(pre),
+  .postContent :global(code) {
+    background: #f5f5f5 !important;
+    color: #333 !important;
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+
+  /* 引用块 */
+  .postContent :global(blockquote) {
+    border-left: 3px solid #999 !important;
+    color: #444 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  /* 表格 */
+  .postContent :global(table) {
+    border-collapse: collapse !important;
+    page-break-inside: avoid;
+  }
+
+  .postContent :global(th),
+  .postContent :global(td) {
+    border: 1px solid #999 !important;
+    color: #000 !important;
+  }
+
+  /* 隐藏音乐播放器、交互组件等 */
+  .postContent :global(.aplayer),
+  .postContent :global(.meting-js),
+  .postContent :global(.btn-anzhiyu),
+  .postContent :global(.anzhiyu-tag),
+  .postContent :global([data-fancybox]) {
+    display: none !important;
+  }
+}

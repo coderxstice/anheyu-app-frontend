@@ -52,7 +52,7 @@ export function AlbumPageClient() {
 
   const siteName = siteConfig?.APP_NAME || "安和鱼";
   const siteLogo = siteConfig?.USER_AVATAR || "https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg";
-  const aboutLink = siteConfig?.ABOUT_LINK || "#";
+  const aboutLink = siteConfig?.["album.about_link"] || siteConfig?.ABOUT_LINK || "#";
 
   useEffect(() => {
     if (typeof window === "undefined") {
