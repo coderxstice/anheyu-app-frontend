@@ -21,12 +21,41 @@ export interface PosterConfig {
 }
 
 /**
- * 加载图片
+ * 与文章详情 PostHeader 一致：优先顶部大图 top_img_url，其次 cover_url。
+ * 避免仅配置了头图时分享海报缺少主图。
+ */
+export function getPosterCoverImageUrl(article: {
+  top_img_url?: string;
+  cover_url?: string;
+}): string | undefined {
+  const raw = (article.top_img_url || article.cover_url || "").trim();
+  return raw === "" ? undefined : raw;
+}
+
+function shouldSetCrossOriginForImageLoad(url: string): boolean {
+  if (typeof window === "undefined") {
+    return true;
+  }
+  if (url.startsWith("data:") || url.startsWith("blob:")) {
+    return false;
+  }
+  try {
+    const resolved = new URL(url, window.location.href);
+    return resolved.origin !== window.location.origin;
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * 加载图片（跨域资源需 anonymous 以便 canvas 导出；同源不设置，减少异常失败）
  */
 function loadImage(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = "anonymous";
+    if (shouldSetCrossOriginForImageLoad(url)) {
+      img.crossOrigin = "anonymous";
+    }
     img.onload = () => resolve(img);
     img.onerror = reject;
     img.src = url;

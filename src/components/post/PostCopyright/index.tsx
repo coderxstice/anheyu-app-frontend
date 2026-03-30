@@ -11,7 +11,7 @@ import { Icon } from "@iconify/react";
 import type { Article } from "@/types/article";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import { apiClient } from "@/lib/api/client";
-import { generatePoster, downloadPoster } from "@/utils/poster-generator";
+import { generatePoster, downloadPoster, getPosterCoverImageUrl } from "@/utils/poster-generator";
 import { formatDate } from "@/utils/date";
 import styles from "./PostCopyright.module.css";
 
@@ -335,8 +335,8 @@ export function PostCopyright({ article }: PostCopyrightProps) {
     try {
       setIsGeneratingPoster(true);
 
-      // 获取文章封面图
-      const coverImage = article.cover_url || undefined;
+      // 与 PostHeader 一致：优先 top_img_url，其次 cover_url
+      const coverImage = getPosterCoverImageUrl(article);
 
       // 获取文章简介
       const description = article.summaries?.[0] || undefined;
