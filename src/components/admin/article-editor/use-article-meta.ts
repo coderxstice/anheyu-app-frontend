@@ -6,6 +6,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import type { ArticleStatus, ArticleDetailForEdit, CreateArticleRequest } from "@/types/post-management";
+import { datetimeLocalToRFC3339, isoStringToDatetimeLocal } from "@/lib/datetime-local";
 
 /** 文章元数据状态 */
 export interface ArticleMeta {
@@ -39,6 +40,8 @@ export interface ArticleMeta {
   doc_sort: number;
   // 定时发布
   scheduled_at: string;
+  /** 自定义发布时间（datetime-local），对应后端 created_at；定时发布状态下不使用 */
+  custom_published_at: string;
 }
 
 const DEFAULT_META: ArticleMeta = {
@@ -66,6 +69,7 @@ const DEFAULT_META: ArticleMeta = {
   doc_series_id: "",
   doc_sort: 0,
   scheduled_at: "",
+  custom_published_at: "",
 };
 
 /**
@@ -96,7 +100,8 @@ function initFromArticle(article: ArticleDetailForEdit): ArticleMeta {
     is_doc: article.is_doc || false,
     doc_series_id: article.doc_series_id || "",
     doc_sort: article.doc_sort || 0,
-    scheduled_at: article.scheduled_at || "",
+    scheduled_at: isoStringToDatetimeLocal(article.scheduled_at ?? undefined),
+    custom_published_at: isoStringToDatetimeLocal(article.created_at),
   };
 }
 
@@ -161,6 +166,20 @@ export function useArticleMeta(article?: ArticleDetailForEdit | null, options?: 
         custom_js: meta.custom_js,
       };
     }
+
+    if (meta.status === "SCHEDULED") {
+      const rfc = datetimeLocalToRFC3339(meta.scheduled_at);
+      if (rfc) {
+        data.scheduled_at = rfc;
+      }
+    } else {
+      data.scheduled_at = "";
+      const pub = datetimeLocalToRFC3339(meta.custom_published_at);
+      if (pub) {
+        data.custom_published_at = pub;
+      }
+    }
+
     return data;
   }, [isAdmin, meta]);
 

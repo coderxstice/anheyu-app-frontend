@@ -192,6 +192,9 @@ export interface CreateArticleRequest {
   is_doc?: boolean;
   doc_series_id?: string;
   doc_sort?: number;
+  // 时间：RFC3339；scheduled_at 在非 SCHEDULED 状态下传空字符串可清除定时
+  scheduled_at?: string;
+  custom_published_at?: string;
 }
 
 /**

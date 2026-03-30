@@ -662,6 +662,20 @@ function SettingsContent({
         ))}
       </div>
 
+      {meta.status !== "SCHEDULED" && (
+        <SbSection title="发布时间" defaultOpen>
+          <SbInput
+            label="自定义发布日期"
+            value={meta.custom_published_at}
+            onChange={v => onUpdateField("custom_published_at", v)}
+            type="datetime-local"
+          />
+          <p className="text-[11px] text-muted-foreground -mt-1 mb-0.5 leading-snug px-0.5">
+            用于前台列表、归档与排序的发布日期（对应文章创建时间）。留空则使用保存时的当前时间。
+          </p>
+        </SbSection>
+      )}
+
       {/* ── 基础设置 ── */}
       <SbSection title="基础" defaultOpen>
         <SbMultiSelect
@@ -954,7 +968,7 @@ function SettingsContent({
       {meta.status === "SCHEDULED" && (
         <SbSection title="定时发布" defaultOpen>
           <SbInput
-            label="发布时间"
+            label="计划发布时间"
             value={meta.scheduled_at}
             onChange={v => onUpdateField("scheduled_at", v)}
             type="datetime-local"
