@@ -1477,6 +1477,11 @@ html.dark [data-site-header-toolbar] [data-slot="trigger"][data-open="true"],
   background-color: transparent !important;
 }
 
+/* 顶栏图标按钮：不用 Select 触发器的 hover 边框，与相邻 .navButton 一致 */
+[data-site-header-toolbar] [data-slot="trigger"][data-hover="true"] {
+  border-color: transparent !important;
+}
+
 [data-slot="trigger"][data-hover="true"] {
   border-color: color-mix(in srgb, var(--primary) 40%, var(--border) 60%) !important;
 }
