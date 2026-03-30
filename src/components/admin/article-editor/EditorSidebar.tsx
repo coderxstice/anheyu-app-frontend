@@ -212,27 +212,42 @@ function SbInput({
   );
 }
 
+/** 摘要等长文本：超过此高度后内部滚动（像素） */
+const SUMMARY_TEXTAREA_MAX_HEIGHT_PX = 200;
+
 /** 自定义文本域 */
 function SbTextarea({
   value,
   onChange,
   placeholder,
   className = "",
+  maxHeightPx,
 }: {
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
   className?: string;
+  /** 设置后高度随内容增长，但不超过该值，超出部分在框内滚动 */
+  maxHeightPx?: number;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
 
-  // 自适应高度（先 auto 再量 scrollHeight，单行时比 height:0 更准、避免内容视觉偏移）
+  // 自适应高度（先 auto 再量 scrollHeight）；可选上限 + overflow 滚动
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     el.style.height = "auto";
-    el.style.height = `${Math.max(el.scrollHeight, 32)}px`;
-  }, [value]);
+    const minH = 32;
+    const natural = Math.max(el.scrollHeight, minH);
+    if (maxHeightPx != null && maxHeightPx > 0) {
+      const h = Math.min(natural, maxHeightPx);
+      el.style.height = `${h}px`;
+      el.style.overflowY = natural > maxHeightPx ? "auto" : "hidden";
+    } else {
+      el.style.height = `${natural}px`;
+      el.style.overflowY = "hidden";
+    }
+  }, [value, maxHeightPx]);
 
   return (
     <textarea
@@ -1016,6 +1031,7 @@ function SettingsContent({
                 onChange={v => onUpdateField("summaries", v.trim() ? [v] : [])}
                 placeholder="文章摘要（可选）"
                 className="flex-1"
+                maxHeightPx={SUMMARY_TEXTAREA_MAX_HEIGHT_PX}
               />
             ) : (
               <>
@@ -1030,6 +1046,7 @@ function SettingsContent({
                       }}
                       placeholder={`摘要 ${i + 1}`}
                       className="flex-1"
+                      maxHeightPx={SUMMARY_TEXTAREA_MAX_HEIGHT_PX}
                     />
                     <button
                       type="button"
