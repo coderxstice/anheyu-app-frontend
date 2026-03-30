@@ -83,6 +83,15 @@ const QUICK_TIMES = [
 // 原子 UI 组件（纯手写，不依赖任何 UI 库）
 // ═══════════════════════════════════════════
 
+/** label/htmlFor 用短 id；非 HTTPS 环境下 crypto.randomUUID 不可用 */
+function sbDomId(prefix: string): string {
+  const uuid = globalThis.crypto?.randomUUID?.();
+  if (uuid) {
+    return `${prefix}-${uuid.replace(/-/g, "").slice(0, 8)}`;
+  }
+  return `${prefix}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`.replace(/[^a-z0-9]/gi, "").slice(0, 12);
+}
+
 /** 自定义输入框 */
 function SbInput({
   label,
@@ -99,7 +108,7 @@ function SbInput({
   type?: string;
   className?: string;
 }) {
-  const [id] = useState(() => `sb-${crypto.randomUUID().slice(0, 8)}`);
+  const [id] = useState(() => sbDomId("sb"));
   return (
     <div className={`sb-field ${className}`}>
       {label && (
