@@ -1,6 +1,7 @@
 "use client";
 
 import { Input, Select, SelectItem, Switch } from "@heroui/react";
+import { StorageSecretField } from "@/components/admin/storage/StorageSecretField";
 import type { StoragePolicy } from "@/types/storage-policy";
 
 interface QiniuKodoFormProps {
@@ -90,11 +91,8 @@ export function QiniuKodoForm({ form, onChange }: QiniuKodoFormProps) {
         onValueChange={v => onChange({ ...form, access_key: v })}
       />
 
-      <Input
+      <StorageSecretField
         label="SecretKey"
-        labelPlacement="outside"
-        size="sm"
-        type="password"
         isRequired
         value={form.secret_key ?? ""}
         onValueChange={v => onChange({ ...form, secret_key: v })}

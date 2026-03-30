@@ -1,6 +1,7 @@
 "use client";
 
 import { Input, Switch } from "@heroui/react";
+import { StorageSecretField } from "@/components/admin/storage/StorageSecretField";
 import type { StoragePolicy } from "@/types/storage-policy";
 
 interface TencentCosFormProps {
@@ -74,11 +75,8 @@ export function TencentCosForm({ form, onChange }: TencentCosFormProps) {
         onValueChange={v => onChange({ ...form, access_key: v })}
       />
 
-      <Input
+      <StorageSecretField
         label="SecretKey"
-        labelPlacement="outside"
-        size="sm"
-        type="password"
         isRequired
         value={form.secret_key ?? ""}
         onValueChange={v => onChange({ ...form, secret_key: v })}

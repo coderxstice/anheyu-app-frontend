@@ -1,7 +1,9 @@
 "use client";
 
-import { Input, Select, SelectItem } from "@heroui/react";
-import type { StoragePolicy } from "@/types/storage-policy";
+import { Button, Input, Select, SelectItem, addToast } from "@heroui/react";
+import { Copy } from "lucide-react";
+import { StorageSecretField } from "@/components/admin/storage/StorageSecretField";
+import { ONEDRIVE_OAUTH_CALLBACK_PATH, type StoragePolicy } from "@/types/storage-policy";
 
 interface OneDriveFormProps {
   form: Partial<StoragePolicy>;
@@ -24,9 +26,45 @@ export function OneDriveForm({ form, onChange }: OneDriveFormProps) {
     onChange({ ...form, settings: { ...settings, ...patch } });
   };
 
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const fullRedirectUri = origin ? `${origin}${ONEDRIVE_OAUTH_CALLBACK_PATH}` : "";
+
+  const copyRedirectUri = async () => {
+    if (!fullRedirectUri) return;
+    try {
+      await navigator.clipboard.writeText(fullRedirectUri);
+      addToast({ title: "已复制重定向 URI", color: "success" });
+    } catch {
+      addToast({ title: "复制失败，请手动复制", color: "danger" });
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="text-sm font-medium text-primary border-b border-border/40 pb-2">OneDrive 配置</div>
+
+      <div suppressHydrationWarning>
+        <Input
+          label="Azure 重定向 URI（固定）"
+          labelPlacement="outside"
+          size="sm"
+          isReadOnly
+          value={fullRedirectUri || "（加载当前站点地址后显示）"}
+          description="在 Azure 门户 → 应用注册 → 身份验证 → 重定向 URI 中新增「Web」类型，并填入上述地址。请勿使用其它路径。"
+          endContent={
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              aria-label="复制重定向 URI"
+              isDisabled={!fullRedirectUri}
+              onPress={copyRedirectUri}
+            >
+              <Copy className="w-4 h-4" />
+            </Button>
+          }
+        />
+      </div>
 
       <Select
         label="Microsoft Graph 端点"
@@ -57,11 +95,8 @@ export function OneDriveForm({ form, onChange }: OneDriveFormProps) {
         description="在 Azure 门户注册的应用程序 ID"
       />
 
-      <Input
+      <StorageSecretField
         label="客户端密码"
-        labelPlacement="outside"
-        size="sm"
-        type="password"
         isRequired
         value={form.secret_key ?? ""}
         onValueChange={v => onChange({ ...form, secret_key: v })}

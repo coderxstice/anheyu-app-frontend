@@ -98,6 +98,9 @@ export type StoragePolicyUpdateRequest = Partial<Omit<StoragePolicy, "id" | "cre
 //     OneDrive 授权
 // ===================================
 
+/** 与后端 `pkg/service/volume/strategy/onedrive.go` 中 JoinPath(siteURL, ...) 的路径一致 */
+export const ONEDRIVE_OAUTH_CALLBACK_PATH = "/admin/storage-policy/oauth";
+
 export interface OneDriveAuthUrlResponse {
   url: string;
 }

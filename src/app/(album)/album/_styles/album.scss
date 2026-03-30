@@ -29,8 +29,19 @@
 }
 
 .album-grid-layout {
+  /* 与 #album-header 高度一致：底栏固定时主内容需预留空间，避免分页与最后一行被遮挡 */
+  --album-grid-fixed-footer-height: 80px;
   width: 100%;
   min-height: 100vh;
+}
+
+/* 网格模式底栏固定在视口底部；瀑布流走普通 Header/Footer，不加大底部留白 */
+.album-grid-layout #album-wrapper {
+  padding-bottom: calc(var(--album-grid-fixed-footer-height) + 2.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.album-grid-layout .album-comment-section {
+  padding-bottom: calc(2rem + var(--album-grid-fixed-footer-height) + env(safe-area-inset-bottom, 0px));
 }
 
 .album-comment-section {
@@ -857,6 +868,19 @@
 }
 
 @media screen and (width <= 768px) {
+  /* 小屏下相册头栏改到顶部，底栏不再占位 */
+  .album-grid-layout {
+    --album-grid-fixed-footer-height: 0px;
+  }
+
+  .album-grid-layout #album-wrapper {
+    padding-bottom: max(2rem, 1.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .album-grid-layout .album-comment-section {
+    padding-bottom: max(2rem, 1rem + env(safe-area-inset-bottom, 0px));
+  }
+
   #album-header {
     top: 0;
     bottom: auto;
