@@ -2,6 +2,7 @@
 
 import { FormInput } from "@/components/ui/form-input";
 import { FormTextarea } from "@/components/ui/form-textarea";
+import { FormMonacoEditor } from "@/components/ui/form-monaco-editor";
 import { FormSwitch } from "@/components/ui/form-switch";
 import { FormSelect, FormSelectItem } from "@/components/ui/form-select";
 import { SettingsSection, SettingsFieldGroup } from "./SettingsSection";
@@ -23,6 +24,9 @@ import {
   KEY_DEFAULT_THUMB_PARAM,
   KEY_DEFAULT_BIG_PARAM,
 } from "@/lib/settings/setting-keys";
+
+const SITE_ANNOUNCEMENT_EXAMPLE = `<p>站点维护通知：今晚 22:00–24:00 进行升级，期间可能短暂不可用。</p>
+<p><a href="/about">查看详情</a> · <strong>感谢理解</strong></p>`;
 
 interface SiteBasicFormProps {
   values: Record<string, string>;
@@ -125,13 +129,41 @@ export function SiteBasicForm({ values, onChange, loading }: SiteBasicFormProps)
           <FormSelectItem key="dark">深色模式</FormSelectItem>
         </FormSelect>
 
-        <FormTextarea
-          label="站点公告"
-          placeholder="请输入站点公告内容"
-          value={values[KEY_SITE_ANNOUNCEMENT]}
+        <FormMonacoEditor
+          label="站点公告（HTML）"
+          language="html"
+          height={220}
+          wordWrap
+          value={values[KEY_SITE_ANNOUNCEMENT] ?? ""}
           onValueChange={v => onChange(KEY_SITE_ANNOUNCEMENT, v)}
-          minRows={3}
+          description="与邮件模板相同：此处为 HTML 源码，保存后会在全站导航栏下方原样渲染（仅管理员可编辑，请自行确保内容安全）。留空则不显示公告条。"
         />
+        <div
+          className="rounded-lg border-2 border-primary/25 bg-muted/50 shadow-sm"
+          role="note"
+          aria-label="站点公告填写说明"
+        >
+          <div className="border-b border-border/80 bg-primary/5 px-3 py-2">
+            <span className="text-xs font-semibold tracking-wide text-foreground/90">填写说明</span>
+            <span className="ml-2 text-[11px] text-muted-foreground">（与邮件模板一致的 HTML 编辑方式）</span>
+          </div>
+          <div className="space-y-2 px-3 py-2.5">
+            <ul className="list-disc space-y-1 pl-4 text-[11px] leading-relaxed text-foreground/75">
+              <li>支持任意 HTML 标签与内联样式，例如段落、链接、加粗、列表等。</li>
+              <li>不需要包裹整页结构（无需 <code className="rounded bg-muted px-1 font-mono text-[10px]">&lt;html&gt;</code> / <code className="rounded bg-muted px-1 font-mono text-[10px]">&lt;body&gt;</code>），只写公告区域片段即可。</li>
+              <li>脚本类标签可能被浏览器拦截；图片请使用可访问的 HTTPS 地址。</li>
+            </ul>
+            <div>
+              <p className="mb-1.5 text-[11px] font-medium text-foreground/85">示例（可复制修改）</p>
+              <pre
+                className="max-h-40 overflow-auto rounded-md border border-border/80 bg-[#1e1e1e] p-3 font-mono text-[11px] leading-relaxed text-[#d4d4d4] dark:bg-black/40"
+                tabIndex={0}
+              >
+                {SITE_ANNOUNCEMENT_EXAMPLE}
+              </pre>
+            </div>
+          </div>
+        </div>
 
         <SettingsFieldGroup cols={2}>
           <FormInput

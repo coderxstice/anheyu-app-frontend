@@ -70,6 +70,7 @@ export interface SiteConfigData {
   DEFAULT_THEME_MODE?: string;
   /** 是否尊重系统减弱动效偏好 */
   RESPECT_REDUCED_MOTION?: boolean | string;
+  /** 站点公告 HTML，展示在导航栏下方；由管理员配置 */
   SITE_ANNOUNCEMENT?: string;
   GRAVATAR_URL?: string;
   DEFAULT_GRAVATAR_TYPE?: string;
