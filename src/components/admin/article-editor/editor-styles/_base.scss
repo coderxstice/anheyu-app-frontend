@@ -124,10 +124,20 @@
   }
 
   // ---- 加粗 ----
+  // 默认用主题色；若文字颜色在父级 span（TipTap textStyle），strong 继承该行内色（选择器避开 background-color）
   &.ProseMirror b,
   &.ProseMirror strong {
     font-weight: 700;
     color: var(--anzhiyu-theme, hsl(var(--primary)));
+  }
+
+  &.ProseMirror span[style^="color:"] b,
+  &.ProseMirror span[style^="color:"] strong,
+  &.ProseMirror span[style*="; color:"] b,
+  &.ProseMirror span[style*="; color:"] strong,
+  &.ProseMirror span[style*=";color:"] b,
+  &.ProseMirror span[style*=";color:"] strong {
+    color: inherit;
   }
 
   // ---- 引用块 ----
