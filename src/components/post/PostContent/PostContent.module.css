@@ -526,11 +526,20 @@
   height: 16px;
 }
 
-/* 加粗样式 */
+/* 加粗：默认主题色；父级为 TipTap 行内 color 的 span 时继承自定义色（属性选择器避开 background-color） */
 .postContent :global(b),
 .postContent :global(strong) {
   font-weight: 700;
   color: var(--primary);
+}
+
+.postContent :global(span[style^="color:"] b),
+.postContent :global(span[style^="color:"] strong),
+.postContent :global(span[style*="; color:"] b),
+.postContent :global(span[style*="; color:"] strong),
+.postContent :global(span[style*=";color:"] b),
+.postContent :global(span[style*=";color:"] strong) {
+  color: inherit;
 }
 
 /* 行内代码样式 - 只应用于非代码块内的 code 标签 */
