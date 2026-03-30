@@ -212,11 +212,11 @@ function SbTextarea({
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
 
-  // 自适应高度
+  // 自适应高度（先 auto 再量 scrollHeight，单行时比 height:0 更准、避免内容视觉偏移）
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    el.style.height = "0";
+    el.style.height = "auto";
     el.style.height = `${Math.max(el.scrollHeight, 32)}px`;
   }, [value]);
 
