@@ -144,6 +144,7 @@ export function useFileManager() {
 
   // ===== Context menu =====
   const [contextMenuTrigger, setContextMenuTrigger] = useState<ContextMenuTrigger | null>(null);
+  const contextMenuOpenSeqRef = useRef(0);
 
   const handleContextMenuTrigger = (event: MouseEvent, file?: FileItem) => {
     if (!file && selection.hasSelection) {
@@ -152,11 +153,15 @@ export function useFileManager() {
     if (file?.id && !selection.selectedFiles.has(file.id)) {
       selection.selectSingle(file.id);
     }
-    setContextMenuTrigger({ event, file });
+    contextMenuOpenSeqRef.current += 1;
+    setContextMenuTrigger({ event, file, openSeq: contextMenuOpenSeqRef.current });
   };
 
   const handleContextMenuClosed = () => setContextMenuTrigger(null);
-  const openBlankMenu = (event: MouseEvent) => setContextMenuTrigger({ event });
+  const openBlankMenu = (event: MouseEvent) => {
+    contextMenuOpenSeqRef.current += 1;
+    setContextMenuTrigger({ event, openSeq: contextMenuOpenSeqRef.current });
+  };
 
   const onMenuSelect = (action: string) => {
     const actionMap: Record<string, (() => void) | undefined> = {

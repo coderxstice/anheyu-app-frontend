@@ -16,7 +16,7 @@
 
     &:not(.custom-color)[open] {
       background: var(--anzhiyu-card-bg, #fff);
-      border: 1px solid var(--anzhiyu-theme, hsl(var(--primary)));
+      border: 1px solid var(--anzhiyu-theme, var(--primary));
       border-radius: 15px;
     }
 
@@ -69,7 +69,7 @@
     // 非自定义颜色 hover 效果
     &:not(.custom-color) summary:not(.md-editor-code-head):hover {
       color: #fff !important;
-      background: var(--anzhiyu-theme, hsl(var(--primary)));
+      background: var(--anzhiyu-theme, var(--primary));
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       transition: all 0.3s ease;
     }
@@ -84,7 +84,7 @@
     &:not(.custom-color)[open] > summary:not(.md-editor-code-head) {
       margin-bottom: 0;
       color: #fff !important;
-      background: var(--anzhiyu-theme, hsl(var(--primary)));
+      background: var(--anzhiyu-theme, var(--primary));
       border-top: none !important;
       border-right: none !important;
       border-left: none !important;

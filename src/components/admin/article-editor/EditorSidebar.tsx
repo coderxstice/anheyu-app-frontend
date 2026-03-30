@@ -23,7 +23,17 @@ import {
   Archive,
   Loader2,
   Upload,
+  TextQuote,
 } from "lucide-react";
+import {
+  addToast,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Button,
+} from "@heroui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { articleApi } from "@/lib/api/article";
 import { postManagementApi } from "@/lib/api/post-management";
@@ -31,13 +41,13 @@ import type { Editor } from "@tiptap/react";
 import type { ArticleStatus } from "@/types/post-management";
 import type { PostCategory, PostTag } from "@/types/article";
 import type { ArticleMeta } from "./use-article-meta";
+import { clipSummaryPlainText, SUMMARY_AUTO_MAX_CHARS } from "@/lib/article-summary";
 
 // ═══════════════════════════════════════════
 // Props & 常量
 // ═══════════════════════════════════════════
 
 interface EditorSidebarProps {
-  editor: Editor | null;
   meta: ArticleMeta;
   onUpdateField: <K extends keyof ArticleMeta>(key: K, value: ArticleMeta[K]) => void;
   isAdmin: boolean;
@@ -45,6 +55,10 @@ interface EditorSidebarProps {
   tags: PostTag[];
   isLoadingCategories?: boolean;
   isLoadingTags?: boolean;
+  /** 社区版为 app（仅 1 条摘要）；与 PRO 共用组件时传 pro */
+  editorVariant: "app" | "pro";
+  getBodyPlainTextForSummary?: () => string;
+  getCompleteHtmlForAISummary?: () => string;
 }
 
 const STATUS_OPTIONS: {
@@ -198,27 +212,42 @@ function SbInput({
   );
 }
 
+/** 摘要等长文本：超过此高度后内部滚动（像素） */
+const SUMMARY_TEXTAREA_MAX_HEIGHT_PX = 200;
+
 /** 自定义文本域 */
 function SbTextarea({
   value,
   onChange,
   placeholder,
   className = "",
+  maxHeightPx,
 }: {
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
   className?: string;
+  /** 设置后高度随内容增长，但不超过该值，超出部分在框内滚动 */
+  maxHeightPx?: number;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
 
-  // 自适应高度
+  // 自适应高度（先 auto 再量 scrollHeight）；可选上限 + overflow 滚动
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    el.style.height = "0";
-    el.style.height = `${Math.max(el.scrollHeight, 32)}px`;
-  }, [value]);
+    el.style.height = "auto";
+    const minH = 32;
+    const natural = Math.max(el.scrollHeight, minH);
+    if (maxHeightPx != null && maxHeightPx > 0) {
+      const h = Math.min(natural, maxHeightPx);
+      el.style.height = `${h}px`;
+      el.style.overflowY = natural > maxHeightPx ? "auto" : "hidden";
+    } else {
+      el.style.height = `${natural}px`;
+      el.style.overflowY = "hidden";
+    }
+  }, [value, maxHeightPx]);
 
   return (
     <textarea
@@ -696,6 +725,8 @@ interface SettingsContentProps {
   tags: PostTag[];
   isLoadingCategories?: boolean;
   isLoadingTags?: boolean;
+  editorVariant: EditorSidebarProps["editorVariant"];
+  getBodyPlainTextForSummary?: EditorSidebarProps["getBodyPlainTextForSummary"];
 }
 
 function SettingsContent({
@@ -706,12 +737,64 @@ function SettingsContent({
   tags,
   isLoadingCategories,
   isLoadingTags,
+  editorVariant,
+  getBodyPlainTextForSummary,
 }: SettingsContentProps) {
   const queryClient = useQueryClient();
   const topImgInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingTopImg, setIsUploadingTopImg] = useState(false);
   const coverImgInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [fillSummaryDialogOpen, setFillSummaryDialogOpen] = useState(false);
+  const [pendingSummaryClip, setPendingSummaryClip] = useState<string | null>(null);
+
+  const maxSummarySlots = editorVariant === "pro" ? 3 : 1;
+
+  const confirmFillSummaryOverwrite = useCallback(() => {
+    const clip = pendingSummaryClip;
+    setFillSummaryDialogOpen(false);
+    setPendingSummaryClip(null);
+    if (!clip) return;
+    if (editorVariant === "app") {
+      onUpdateField("summaries", [clip]);
+      return;
+    }
+    onUpdateField(
+      "summaries",
+      [clip, ...meta.summaries.slice(1, maxSummarySlots)].slice(0, maxSummarySlots)
+    );
+  }, [pendingSummaryClip, editorVariant, onUpdateField, meta.summaries, maxSummarySlots]);
+
+  const handleFillSummaryFromBody = useCallback(() => {
+    const raw = getBodyPlainTextForSummary?.() ?? "";
+    const clip = clipSummaryPlainText(raw, SUMMARY_AUTO_MAX_CHARS);
+    if (!clip) {
+      addToast({ title: "正文中没有可用文字", color: "warning" });
+      return;
+    }
+    if (editorVariant === "app") {
+      if (meta.summaries[0]?.trim()) {
+        setPendingSummaryClip(clip);
+        setFillSummaryDialogOpen(true);
+        return;
+      }
+      onUpdateField("summaries", [clip]);
+      return;
+    }
+    const arr = [...meta.summaries];
+    const emptyIdx = arr.findIndex(s => !s.trim());
+    if (emptyIdx >= 0) {
+      arr[emptyIdx] = clip;
+      onUpdateField("summaries", arr.slice(0, maxSummarySlots));
+      return;
+    }
+    if (arr.length < maxSummarySlots) {
+      onUpdateField("summaries", [...arr, clip]);
+      return;
+    }
+    setPendingSummaryClip(clip);
+    setFillSummaryDialogOpen(true);
+  }, [editorVariant, getBodyPlainTextForSummary, maxSummarySlots, meta.summaries, onUpdateField]);
 
   // 创建分类
   const handleCreateCategory = useCallback(
@@ -766,7 +849,8 @@ function SettingsContent({
   );
 
   return (
-    <div className="sb-body">
+    <>
+      <div className="sb-body">
       {/* ── 状态选择器 ── */}
       <div className="sb-status-bar" role="radiogroup" aria-label="文章状态">
         {STATUS_OPTIONS.map(opt => (
@@ -928,42 +1012,62 @@ function SettingsContent({
       <SbSection title="摘要 & SEO" defaultOpen>
         <div className="sb-field">
           <span className="sb-label">摘要</span>
+          <p className="text-[11px] text-muted-foreground leading-snug mb-1.5">
+            可手动填写，或使用下方工具从正文取前 {SUMMARY_AUTO_MAX_CHARS} 字。
+            {editorVariant === "pro"
+              ? " PRO 最多 3 条，前台随机展示其中一条，读者可切换。"
+              : " 社区版仅保存 1 条。"}
+          </p>
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            <button type="button" className="sb-add-btn py-1! px-2! text-[11px]" onClick={handleFillSummaryFromBody}>
+              <TextQuote className="w-3 h-3 shrink-0" />
+              取自正文前{SUMMARY_AUTO_MAX_CHARS}字
+            </button>
+          </div>
           <div className="space-y-1.5">
-            {meta.summaries.map((s, i) => (
-              <div key={i} className="group flex gap-1 items-start">
-                <SbTextarea
-                  value={s}
-                  onChange={v => {
-                    const arr = [...meta.summaries];
-                    arr[i] = v;
-                    onUpdateField("summaries", arr);
-                  }}
-                  placeholder={`摘要 ${i + 1}`}
-                  className="flex-1"
-                />
-                <button
-                  type="button"
-                  className="sb-icon-btn opacity-0 group-hover:opacity-100 mt-1.5"
-                  onClick={() =>
-                    onUpdateField(
-                      "summaries",
-                      meta.summaries.filter((_, j) => j !== i)
-                    )
-                  }
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            ))}
-            {meta.summaries.length < 3 && (
-              <button
-                type="button"
-                className="sb-add-btn"
-                onClick={() => onUpdateField("summaries", [...meta.summaries, ""])}
-              >
-                <Plus className="w-3 h-3" />
-                添加摘要
-              </button>
+            {editorVariant === "app" ? (
+              <SbTextarea
+                value={meta.summaries[0] ?? ""}
+                onChange={v => onUpdateField("summaries", v.trim() ? [v] : [])}
+                placeholder="文章摘要（可选）"
+                className="flex-1"
+                maxHeightPx={SUMMARY_TEXTAREA_MAX_HEIGHT_PX}
+              />
+            ) : (
+              <>
+                {meta.summaries.map((s, i) => (
+                  <div key={i} className="group flex gap-1 items-start">
+                    <SbTextarea
+                      value={s}
+                      onChange={v => {
+                        const arr = [...meta.summaries];
+                        arr[i] = v;
+                        onUpdateField("summaries", arr);
+                      }}
+                      placeholder={`摘要 ${i + 1}`}
+                      className="flex-1"
+                      maxHeightPx={SUMMARY_TEXTAREA_MAX_HEIGHT_PX}
+                    />
+                    <button
+                      type="button"
+                      className="sb-icon-btn opacity-0 group-hover:opacity-100 mt-1.5"
+                      onClick={() => onUpdateField("summaries", meta.summaries.filter((_, j) => j !== i))}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+                {meta.summaries.length < maxSummarySlots && (
+                  <button
+                    type="button"
+                    className="sb-add-btn"
+                    onClick={() => onUpdateField("summaries", [...meta.summaries, ""])}
+                  >
+                    <Plus className="w-3 h-3" />
+                    添加摘要
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -1112,7 +1216,39 @@ function SettingsContent({
           </div>
         </SbSection>
       )}
-    </div>
+      </div>
+
+      <Modal
+        isOpen={fillSummaryDialogOpen}
+        onOpenChange={open => {
+          setFillSummaryDialogOpen(open);
+          if (!open) setPendingSummaryClip(null);
+        }}
+        placement="center"
+      >
+        <ModalContent>
+          <ModalHeader className="flex flex-col gap-1">覆盖摘要？</ModalHeader>
+          <ModalBody className="text-sm text-default-600">
+            {editorVariant === "app" ? (
+              <p className="m-0">当前已有摘要，确定要用正文前 {SUMMARY_AUTO_MAX_CHARS} 字覆盖吗？</p>
+            ) : (
+              <p className="m-0">
+                当前 {maxSummarySlots} 条摘要均已填写，确定要用正文前 {SUMMARY_AUTO_MAX_CHARS}{" "}
+                字替换第一条吗？
+              </p>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="flat" onPress={() => setFillSummaryDialogOpen(false)}>
+              取消
+            </Button>
+            <Button color="primary" onPress={confirmFillSummaryOverwrite}>
+              确定覆盖
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
   );
 }
 
@@ -1128,7 +1264,9 @@ export function EditorSidebar({
   tags,
   isLoadingCategories,
   isLoadingTags,
-}: Omit<EditorSidebarProps, "editor">) {
+  editorVariant,
+  getBodyPlainTextForSummary,
+}: EditorSidebarProps) {
   return (
     <div className="sb-root">
       <div className="sb-header">
@@ -1143,6 +1281,8 @@ export function EditorSidebar({
           tags={tags}
           isLoadingCategories={isLoadingCategories}
           isLoadingTags={isLoadingTags}
+          editorVariant={editorVariant}
+          getBodyPlainTextForSummary={getBodyPlainTextForSummary}
         />
       </div>
     </div>

@@ -51,6 +51,8 @@ export interface ConfirmDialogState {
 export interface ContextMenuTrigger {
   event: MouseEvent;
   file?: FileItem;
+  /** 每次打开右键菜单递增，保证 ContextMenu 子树 key 唯一、避免同毫秒重复打开时状态残留 */
+  openSeq: number;
 }
 
 export type ImagePreviewItem = {

@@ -33,13 +33,27 @@ const THUMB_CLASS = cn(
   "forced-colors:bg-[Highlight]!"
 );
 
+function hexEqualsIgnoreCase(a: string, b: string): boolean {
+  return a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
 interface FormColorPickerProps {
   value: string;
   onChange: (color: string) => void;
   className?: string;
+  /** 为 true 时不可打开取色面板 */
+  disabled?: boolean;
+  /** 色块按钮的无障碍标签（默认：选择颜色: ${value}） */
+  triggerAriaLabel?: string;
 }
 
-export function FormColorPicker({ value, onChange, className }: FormColorPickerProps) {
+export function FormColorPicker({
+  value,
+  onChange,
+  className,
+  disabled,
+  triggerAriaLabel,
+}: FormColorPickerProps) {
   const color = useMemo(() => {
     try {
       return parseColor(value).toFormat("hsb");
@@ -55,14 +69,16 @@ export function FormColorPicker({ value, onChange, className }: FormColorPickerP
       <PopoverTrigger>
         <button
           type="button"
+          disabled={disabled}
           className={cn(
             "shrink-0 w-8 h-8 rounded-lg border-2 border-border/60 cursor-pointer",
             "transition-all hover:scale-110 hover:border-border/80",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+            disabled && "opacity-50 cursor-not-allowed hover:scale-100",
             className
           )}
           style={{ backgroundColor: value }}
-          aria-label={`选择颜色: ${value}`}
+          aria-label={triggerAriaLabel ?? `选择颜色: ${value}`}
         />
       </PopoverTrigger>
       <PopoverContent className="p-0">
@@ -73,11 +89,13 @@ export function FormColorPicker({ value, onChange, className }: FormColorPickerP
               <button
                 key={`${preset}-${i}`}
                 type="button"
+                disabled={disabled}
                 className={cn(
                   "w-5.5 h-5.5 rounded-full cursor-pointer transition-transform",
                   "hover:scale-115",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
-                  value.toLowerCase() === preset.toLowerCase() && "ring-2 ring-offset-1 ring-default-400 scale-110"
+                  "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
+                  hexEqualsIgnoreCase(value, preset) && "ring-2 ring-offset-1 ring-default-400 scale-110"
                 )}
                 style={{ backgroundColor: preset }}
                 onClick={() => onChange(preset)}
@@ -93,6 +111,7 @@ export function FormColorPicker({ value, onChange, className }: FormColorPickerP
             yChannel="brightness"
             value={color}
             onChange={handleColorChange}
+            isDisabled={disabled}
             className="w-full h-36 rounded-xl overflow-hidden"
           >
             <ColorThumb className={THUMB_CLASS} />
@@ -105,6 +124,7 @@ export function FormColorPicker({ value, onChange, className }: FormColorPickerP
               colorSpace="hsb"
               value={color}
               onChange={handleColorChange}
+              isDisabled={disabled}
               className="flex-1"
             >
               <SliderTrack className="h-3 w-full rounded-full">
@@ -113,11 +133,13 @@ export function FormColorPicker({ value, onChange, className }: FormColorPickerP
             </AriaColorSlider>
             <button
               type="button"
+              disabled={disabled}
               onClick={() => onChange(randomHexColor())}
               className={cn(
                 "shrink-0 w-7 h-7 flex items-center justify-center rounded-full",
                 "bg-muted hover:bg-secondary transition-colors cursor-pointer",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+                "disabled:opacity-50 disabled:cursor-not-allowed"
               )}
               aria-label="随机颜色"
             >
@@ -133,6 +155,7 @@ export function FormColorPicker({ value, onChange, className }: FormColorPickerP
               onChange={c => {
                 if (c) handleColorChange(c);
               }}
+              isDisabled={disabled}
               className="flex-1"
             >
               <Label className="sr-only">Hex</Label>

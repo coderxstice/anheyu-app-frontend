@@ -325,7 +325,7 @@
       top: 0;
       left: 0;
       height: 100%;
-      background: var(--anzhiyu-theme, hsl(var(--primary)));
+      background: var(--anzhiyu-theme, var(--primary));
       opacity: 0.08;
       transition: width 0.1s linear;
       pointer-events: none;

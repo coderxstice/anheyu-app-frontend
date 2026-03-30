@@ -1,36 +1,65 @@
-.wrapper {
-  width: 100%;
-  border-bottom: 1px solid var(--anzhiyu-card-border);
-  background: var(--anzhiyu-secondbg);
+/* 站点公告：在 AnHeYuDialog 上叠加宽度与正文 HTML 样式 */
+
+.announcementContainer {
+  width: 40%;
+  max-width: 95vw;
+  max-height: 85vh;
 }
 
-.inner {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0.625rem 1rem;
+/* 移动端：与 AnHeYuDialog 底部抽屉同宽，主按钮全宽便于点击 */
+@media (width <= 768px) {
+  .announcementContainer {
+    width: 100%;
+    max-width: 100%;
+    max-height: min(
+      88dvh,
+      calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem)
+    );
+  }
+
+  .announcementAckBtn {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+.announcementContent {
   font-size: 0.875rem;
   line-height: 1.6;
   color: var(--anzhiyu-fontcolor);
 }
 
-.inner :global(a) {
+@media (width <= 768px) {
+  .announcementContent {
+    font-size: 0.9375rem;
+    line-height: 1.65;
+  }
+
+  .announcementContent :global(img) {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+.announcementContent :global(a) {
   color: var(--anzhiyu-theme);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
-.inner :global(a:hover) {
+.announcementContent :global(a:hover) {
   opacity: 0.9;
 }
 
-.inner :global(p) {
+.announcementContent :global(p) {
   margin: 0.25rem 0;
 }
 
-.inner :global(p:first-child) {
+.announcementContent :global(p:first-child) {
   margin-top: 0;
 }
 
-.inner :global(p:last-child) {
+.announcementContent :global(p:last-child) {
   margin-bottom: 0;
 }

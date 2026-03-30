@@ -66,6 +66,10 @@ export interface SiteConfigData {
   LOGO_URL_512x512?: string;
   DEFAULT_THUMB_PARAM?: string;
   DEFAULT_BIG_PARAM?: string;
+  /** 换肤预设 ID（与前台内置方案一致） */
+  APPEARANCE_SKIN?: string;
+  /** 按亮/暗模式覆盖颜色令牌（JSON 对象或字符串） */
+  APPEARANCE_TOKENS?: string | Record<string, unknown>;
   /** 默认主题模式：light | dark | system | auto */
   DEFAULT_THEME_MODE?: string;
   /** 是否尊重系统减弱动效偏好 */

@@ -115,7 +115,10 @@ export function HeaderRight({
   }, [router]);
 
   return (
-    <div className={cn(styles.headerRight, isTextWhite && styles.textIsWhite, isConsoleOpen && styles.consoleOpen)}>
+    <div
+      className={cn(styles.headerRight, isTextWhite && styles.textIsWhite, isConsoleOpen && styles.consoleOpen)}
+      data-site-header-toolbar
+    >
       {/* 开往（仅首页 + 桌面端 + 开启时显示） */}
       {navConfig?.travelling === true && isHomePage && !isMobile && (
         <Tooltip
@@ -142,7 +145,12 @@ export function HeaderRight({
           }}
         >
           <PopoverTrigger>
-            <button className={styles.navButton} title={registrationEnabled ? "登录 / 注册" : "登录"}>
+            <button
+              type="button"
+              className={styles.navButton}
+              title={registrationEnabled ? "登录 / 注册" : "登录"}
+              aria-label={registrationEnabled ? "登录或注册" : "登录"}
+            >
               <Icon icon="ri:user-fill" width="1.3rem" height="1.3rem" />
             </button>
           </PopoverTrigger>
@@ -180,7 +188,12 @@ export function HeaderRight({
           }}
         >
           <PopoverTrigger>
-            <button className={cn(styles.navButton, styles.userCenterButton)} title="个人中心">
+            <button
+              type="button"
+              className={cn(styles.navButton, styles.userCenterButton)}
+              title="个人中心"
+              aria-label="个人中心"
+            >
               <Icon icon="ri:user-fill" width="1.3rem" height="1.3rem" />
             </button>
           </PopoverTrigger>

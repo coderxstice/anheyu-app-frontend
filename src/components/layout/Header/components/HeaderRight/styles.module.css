@@ -170,7 +170,8 @@
   transition: color 0.3s;
 }
 
-.navButton:not(.navTotop):hover {
+.navButton:not(.navTotop):hover,
+.navButton:not(.navTotop)[data-hover="true"] {
   color: var(--primary-foreground);
   background: var(--primary);
 }
@@ -181,10 +182,23 @@
   box-shadow: none !important;
 }
 
-.navButton[data-slot="trigger"]:hover {
+.navButton[data-slot="trigger"]:hover,
+.navButton[data-slot="trigger"][data-hover="true"] {
   color: var(--primary-foreground);
   background: var(--primary);
   border-radius: 50px !important;
+}
+
+/*
+ * 深色模式下 globals 对顶栏 [data-slot="trigger"] 使用了 background-color: transparent !important，
+ * 特异性高于本模块的 :hover，导致登录/个人中心按钮 hover 无主色底。用 :global + !important 对齐相邻图标。
+ */
+:global(html.dark) .headerRight .navButton[data-slot="trigger"]:hover,
+:global(html.dark) .headerRight .navButton[data-slot="trigger"][data-hover="true"],
+:global(.dark) .headerRight .navButton[data-slot="trigger"]:hover,
+:global(.dark) .headerRight .navButton[data-slot="trigger"][data-hover="true"] {
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
 }
 
 /* 白色文字状态（页面顶部透明时） */
@@ -192,9 +206,18 @@
   color: #fff;
 }
 
-.textIsWhite .navButton:not(.navTotop):hover {
+.textIsWhite .navButton:not(.navTotop):hover,
+.textIsWhite .navButton:not(.navTotop)[data-hover="true"] {
   color: #fff;
   background: rgba(255, 255, 255, 0.2);
+}
+
+:global(html.dark) .headerRight.textIsWhite .navButton[data-slot="trigger"]:hover,
+:global(html.dark) .headerRight.textIsWhite .navButton[data-slot="trigger"][data-hover="true"],
+:global(.dark) .headerRight.textIsWhite .navButton[data-slot="trigger"]:hover,
+:global(.dark) .headerRight.textIsWhite .navButton[data-slot="trigger"][data-hover="true"] {
+  background-color: rgb(255 255 255 / 20%) !important;
+  color: #fff !important;
 }
 
 .textIsWhite .consoleIcon {

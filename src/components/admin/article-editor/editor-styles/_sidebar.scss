@@ -271,8 +271,13 @@
 
 .sb-textarea {
   resize: none;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden; /* 无上限时由 JS 自适应高度；有 maxHeightPx 时由 JS 设为 auto 以在框内滚动 */
   min-height: 32px;
+  /* 单行摘要：略收紧行高并微调上下内边距，避免中文字形在框内视觉偏下 */
+  line-height: 1.28;
+  padding-top: 6px;
+  padding-bottom: 6px;
 }
 
 // ---- 开关 ----

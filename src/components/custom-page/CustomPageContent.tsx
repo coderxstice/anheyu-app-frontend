@@ -67,10 +67,13 @@ export function CustomPageContent({ page }: CustomPageContentProps) {
     <div className="w-full max-w-[1400px] mx-auto px-6 py-8">
       {customCSS ? <style data-custom-page-style={page.path} dangerouslySetInnerHTML={{ __html: customCSS }} /> : null}
 
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">{page.title}</h1>
-        {page.description && <p className="mt-2 text-muted-foreground">{page.description}</p>}
-      </header>
+      {/* 仅明确为草稿时展示标题区（预览）；已发布或缺省 is_published 时不展示，避免接口异常时重复标题 */}
+      {page.is_published === false ? (
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground">{page.title}</h1>
+          {page.description ? <p className="mt-2 text-muted-foreground">{page.description}</p> : null}
+        </header>
+      ) : null}
 
       <article ref={articleRef} className="min-h-[200px]">
         <PostContent content={page.content} enableScripts />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   RiArrowDownSLine,
@@ -21,8 +21,96 @@ import {
 import { addToast } from "@heroui/react";
 import { extractLogicalPathFromUri } from "@/utils/file-manager";
 import { Tooltip } from "@/components/ui/tooltip";
+import { useRovingMenuNavigation } from "@/hooks/file-manager/use-roving-menu-navigation";
 import { springTransition, contextMenuVariants, menuItemVariants } from "@/lib/motion";
 import styles from "./FileBreadcrumb.module.css";
+
+const BREADCRUMB_DROPDOWN_ACTION_LABELS = new Map([
+  ["share", "分享"],
+  ["rename", "重命名"],
+  ["copy", "复制"],
+  ["link", "获取直链"],
+  ["tags", "标签"],
+  ["organize", "整理"],
+  ["more", "更多操作"],
+]);
+
+interface BreadcrumbDropdownRow {
+  key: string;
+  label: string;
+  icon: React.ReactNode;
+  divider?: boolean;
+  danger?: boolean;
+}
+
+interface FileBreadcrumbDropdownMenuProps {
+  menuId: string;
+  items: BreadcrumbDropdownRow[];
+  onItemSelect: (key: string) => void;
+  onClose: () => void;
+}
+
+function FileBreadcrumbDropdownMenu({ menuId, items, onItemSelect, onClose }: FileBreadcrumbDropdownMenuProps) {
+  const itemsRef = useRef(items);
+  const onItemSelectRef = useRef(onItemSelect);
+  useLayoutEffect(() => {
+    itemsRef.current = items;
+    onItemSelectRef.current = onItemSelect;
+  }, [items, onItemSelect]);
+
+  const onCommitFlat = useCallback((flat: number) => {
+    const row = itemsRef.current[flat];
+    if (row) onItemSelectRef.current(row.key);
+  }, []);
+
+  const { itemRefs, focusedDomIndex, handleKeyDown, setNavToFlat } = useRovingMenuNavigation({
+    length: items.length,
+    onClose,
+    flatToRefIndex: i => i,
+    onCommitFlat,
+    escapeStopPropagation: true,
+  });
+
+  return (
+    <motion.div
+      id={menuId}
+      className={styles["dropdown-menu"]}
+      variants={contextMenuVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      transition={springTransition}
+      role="menu"
+      aria-label="当前路径操作"
+      aria-orientation="vertical"
+    >
+      {items.map((item, itemIndex) => (
+        <motion.div
+          key={item.key}
+          variants={menuItemVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          transition={{ ...springTransition, delay: itemIndex * 0.02 }}
+          className={`${styles["dropdown-item"]} ${item.divider ? styles.divider : ""} ${
+            item.danger ? styles["dropdown-danger"] : ""
+          }`}
+          ref={el => {
+            itemRefs.current[itemIndex] = el;
+          }}
+          role="menuitem"
+          tabIndex={focusedDomIndex === itemIndex ? 0 : -1}
+          onMouseEnter={() => setNavToFlat(itemIndex)}
+          onKeyDown={handleKeyDown}
+          onClick={() => onItemSelect(item.key)}
+        >
+          <span className={styles["dropdown-icon"]}>{item.icon}</span>
+          <span>{item.label}</span>
+        </motion.div>
+      ))}
+    </motion.div>
+  );
+}
 
 interface FileBreadcrumbProps {
   path: string;
@@ -46,20 +134,10 @@ export function FileBreadcrumb({
   const [isEditing, setIsEditing] = useState(false);
   const [pathInput, setPathInput] = useState(path);
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [dropdownOpenGeneration, setDropdownOpenGeneration] = useState(0);
+  const pathDropdownMenuId = useId();
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const toast = (title: string, color: "success" | "warning" | "danger" | "default" = "default") =>
-    addToast({ title, color, timeout: 3000 });
-  const actionLabels = new Map([
-    ["share", "分享"],
-    ["rename", "重命名"],
-    ["copy", "复制"],
-    ["link", "获取直链"],
-    ["tags", "标签"],
-    ["organize", "整理"],
-    ["more", "更多操作"],
-  ]);
-
   useEffect(() => {
     setPathInput(path);
   }, [path]);
@@ -74,6 +152,10 @@ export function FileBreadcrumb({
     window.addEventListener("click", onClick);
     return () => window.removeEventListener("click", onClick);
   }, [dropdownVisible]);
+
+  const closeDropdown = useCallback(() => {
+    setDropdownVisible(false);
+  }, []);
 
   const pathSegments = useMemo(() => {
     const logicalPath = extractLogicalPathFromUri(path || "/");
@@ -90,11 +172,14 @@ export function FileBreadcrumb({
     return result;
   }, [path]);
 
-  const handleNavigate = (target: string) => {
-    const logicalPath = extractLogicalPathFromUri(target);
-    if (logicalPath === path && logicalPath !== "/") return;
-    onNavigate(logicalPath);
-  };
+  const handleNavigate = useCallback(
+    (target: string) => {
+      const logicalPath = extractLogicalPathFromUri(target);
+      if (logicalPath === path && logicalPath !== "/") return;
+      onNavigate(logicalPath);
+    },
+    [path, onNavigate]
+  );
 
   const handleSubmit = () => {
     let finalPath = pathInput.trim();
@@ -116,65 +201,75 @@ export function FileBreadcrumb({
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
-  const handleDropdownAction = (action: string) => {
-    const parentId = parentInfo?.id;
-    switch (action) {
-      case "enter":
-        handleNavigate(path);
-        break;
-      case "download":
-        if (!parentId) {
-          toast("无法获取当前目录信息", "warning");
+  const handleDropdownAction = useCallback(
+    (action: string) => {
+      const parentId = parentInfo?.id;
+      switch (action) {
+        case "enter":
+          handleNavigate(path);
           break;
-        }
-        onDownloadFolder(parentId);
-        break;
-      case "info":
-        if (!parentId) {
-          toast("无法获取当前目录信息", "warning");
+        case "download":
+          if (!parentId) {
+            addToast({ title: "无法获取当前目录信息", color: "warning", timeout: 3000 });
+            break;
+          }
+          onDownloadFolder(parentId);
           break;
-        }
-        onShowDetails(parentId);
-        break;
-      case "delete":
-        if (!parentId) {
-          toast("无法获取当前目录信息", "warning");
+        case "info":
+          if (!parentId) {
+            addToast({ title: "无法获取当前目录信息", color: "warning", timeout: 3000 });
+            break;
+          }
+          onShowDetails(parentId);
           break;
-        }
-        if (onDeleteFolder) {
-          onDeleteFolder(parentId);
-        } else {
-          toast("删除操作应由父组件处理", "warning");
-        }
-        break;
-      case "share":
-      case "rename":
-      case "copy":
-      case "link":
-      case "tags":
-      case "organize":
-      case "more":
-        toast(`功能「${actionLabels.get(action) ?? action}」正在开发中`, "default");
-        break;
-      default:
-        break;
-    }
-    setDropdownVisible(false);
-  };
+        case "delete":
+          if (!parentId) {
+            addToast({ title: "无法获取当前目录信息", color: "warning", timeout: 3000 });
+            break;
+          }
+          if (onDeleteFolder) {
+            onDeleteFolder(parentId);
+          } else {
+            addToast({ title: "删除操作应由父组件处理", color: "warning", timeout: 3000 });
+          }
+          break;
+        case "share":
+        case "rename":
+        case "copy":
+        case "link":
+        case "tags":
+        case "organize":
+        case "more":
+          addToast({
+            title: `功能「${BREADCRUMB_DROPDOWN_ACTION_LABELS.get(action) ?? action}」正在开发中`,
+            color: "default",
+            timeout: 3000,
+          });
+          break;
+        default:
+          break;
+      }
+      setDropdownVisible(false);
+    },
+    [handleNavigate, onDeleteFolder, onDownloadFolder, onShowDetails, parentInfo?.id, path]
+  );
 
-  const dropdownItems = [
-    { key: "enter", label: "进入", icon: <RiFolderOpenLine /> },
-    { key: "download", label: "下载", icon: <RiDownload2Line /> },
-    { key: "share", label: "分享", icon: <RiShareLine /> },
-    { key: "rename", label: "重命名", icon: <RiEdit2Line /> },
-    { key: "copy", label: "复制", icon: <RiFileCopyLine /> },
-    { key: "link", label: "获取直链", icon: <RiLinkM /> },
-    { key: "tags", label: "标签", icon: <RiPriceTag3Line />, divider: true },
-    { key: "organize", label: "整理", icon: <RiFolderSettingsLine /> },
-    { key: "more", label: "更多操作", icon: <RiMore2Line /> },
-    { key: "info", label: "详细信息", icon: <RiInformationLine />, divider: true },
-    { key: "delete", label: "删除", icon: <RiDeleteBin6Line />, danger: true },
-  ];
+  const dropdownItems = useMemo<BreadcrumbDropdownRow[]>(
+    () => [
+      { key: "enter", label: "进入", icon: <RiFolderOpenLine /> },
+      { key: "download", label: "下载", icon: <RiDownload2Line /> },
+      { key: "share", label: "分享", icon: <RiShareLine /> },
+      { key: "rename", label: "重命名", icon: <RiEdit2Line /> },
+      { key: "copy", label: "复制", icon: <RiFileCopyLine /> },
+      { key: "link", label: "获取直链", icon: <RiLinkM /> },
+      { key: "tags", label: "标签", icon: <RiPriceTag3Line />, divider: true },
+      { key: "organize", label: "整理", icon: <RiFolderSettingsLine /> },
+      { key: "more", label: "更多操作", icon: <RiMore2Line /> },
+      { key: "info", label: "详细信息", icon: <RiInformationLine />, divider: true },
+      { key: "delete", label: "删除", icon: <RiDeleteBin6Line />, danger: true },
+    ],
+    []
+  );
 
   return (
     <div className={styles["file-breadcrumb-wrapper"]} onClick={handleSwitchToEditMode}>
@@ -249,9 +344,27 @@ export function FileBreadcrumb({
                       {isLast && showDropdown ? (
                         <div
                           className={styles["dropdown-trigger"]}
+                          role="button"
+                          tabIndex={0}
+                          aria-haspopup="menu"
+                          aria-expanded={dropdownVisible}
+                          aria-controls={pathDropdownMenuId}
                           onClick={event => {
                             event.stopPropagation();
-                            setDropdownVisible(!dropdownVisible);
+                            if (!dropdownVisible) {
+                              setDropdownOpenGeneration(g => g + 1);
+                            }
+                            setDropdownVisible(v => !v);
+                          }}
+                          onKeyDown={event => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              if (!dropdownVisible) {
+                                setDropdownOpenGeneration(g => g + 1);
+                              }
+                              setDropdownVisible(v => !v);
+                            }
                           }}
                           ref={dropdownRef}
                         >
@@ -261,32 +374,13 @@ export function FileBreadcrumb({
                           </motion.span>
                           <AnimatePresence>
                             {dropdownVisible ? (
-                              <motion.div
-                                className={styles["dropdown-menu"]}
-                                variants={contextMenuVariants}
-                                initial="initial"
-                                animate="animate"
-                                exit="exit"
-                                transition={springTransition}
-                              >
-                                {dropdownItems.map((item, itemIndex) => (
-                                  <motion.div
-                                    key={item.key}
-                                    variants={menuItemVariants}
-                                    initial="initial"
-                                    animate="animate"
-                                    exit="exit"
-                                    transition={{ ...springTransition, delay: itemIndex * 0.02 }}
-                                    className={`${styles["dropdown-item"]} ${item.divider ? styles.divider : ""} ${
-                                      item.danger ? styles["dropdown-danger"] : ""
-                                    }`}
-                                    onClick={() => handleDropdownAction(item.key)}
-                                  >
-                                    <span className={styles["dropdown-icon"]}>{item.icon}</span>
-                                    <span>{item.label}</span>
-                                  </motion.div>
-                                ))}
-                              </motion.div>
+                              <FileBreadcrumbDropdownMenu
+                                key={dropdownOpenGeneration}
+                                menuId={pathDropdownMenuId}
+                                items={dropdownItems}
+                                onItemSelect={handleDropdownAction}
+                                onClose={closeDropdown}
+                              />
                             ) : null}
                           </AnimatePresence>
                         </div>

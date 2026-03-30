@@ -19,6 +19,7 @@ import { processHtmlForSave } from "@/lib/content-processor";
 import { registerCustomRules } from "@/lib/turndown-rules";
 import { registerMarkedExtensions, fixTaskListHtml } from "@/lib/marked-extensions";
 import { articleApi } from "@/lib/api/article";
+import { plainTextFromHtmlSource, roughPlainTextFromMarkdown } from "@/lib/article-summary";
 import { useAuthStore } from "@/store/auth-store";
 
 import type { Editor } from "@tiptap/react";
@@ -82,7 +83,10 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // 文章元数据
-  const { meta, updateField, initFromData, getSubmitData } = useArticleMeta(undefined, { isAdmin });
+  const { meta, updateField, initFromData, getSubmitData } = useArticleMeta(undefined, {
+    isAdmin,
+    maxSummaries: 1,
+  });
 
   // Tiptap 编辑器实例
   const editor = useArticleEditor({
@@ -276,6 +280,16 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
     }
   };
 
+  const getBodyPlainTextForSummary = useCallback(() => {
+    if (editorMode === "visual" && editor && !editor.isDestroyed) {
+      return editor.getText();
+    }
+    if (editorMode === "html") {
+      return plainTextFromHtmlSource(sourceContent);
+    }
+    return roughPlainTextFromMarkdown(sourceContent);
+  }, [editorMode, editor, sourceContent]);
+
   // 编辑模式加载中
   if (isEditMode && isLoadingArticle) {
     return (
@@ -352,6 +366,8 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
               tags={tags}
               isLoadingCategories={isLoadingCategories}
               isLoadingTags={isLoadingTags}
+              editorVariant="app"
+              getBodyPlainTextForSummary={getBodyPlainTextForSummary}
             />
           </div>
         )}

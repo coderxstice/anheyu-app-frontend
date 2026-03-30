@@ -502,11 +502,18 @@
   user-select: none;
 }
 
-/* 复制按钮 */
+/* 复制按钮（须为 button，避免 summary 内 span 点击切换 details） */
 .postContent :global(.md-editor-code .md-editor-code-head .copy-button) {
   position: absolute;
   right: 14px;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
   cursor: pointer;
+  appearance: none;
+  background: transparent;
+  border: none;
   transition: color 0.2s;
   display: flex;
   align-items: center;
