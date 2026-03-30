@@ -19,6 +19,7 @@ import { GlobalLoading } from "@/components/common/GlobalLoading";
 import { CustomCodeInjector } from "./custom-code-injector";
 import { DefaultThemeSync } from "./DefaultThemeSync";
 import { ReducedMotionSync } from "./ReducedMotionSync";
+import { VisitStatisticsTracker } from "./visit-statistics-tracker";
 
 interface ProvidersProps {
   children: ReactNode;
@@ -91,6 +92,7 @@ export function Providers({ children }: ProvidersProps) {
               <ReducedMotionSync />
               <GlobalLoading />
               <CustomCodeInjector />
+              <VisitStatisticsTracker />
               {children}
             </SiteConfigLoader>
           </AuthTokenInitializer>

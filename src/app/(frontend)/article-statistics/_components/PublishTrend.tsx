@@ -33,7 +33,15 @@ export function PublishTrend({ data }: PublishTrendProps) {
           <div className={styles.trendBars}>
             {safeData.map((item, i) => (
               <div key={i} className={styles.trendBarWrapper}>
-                <div className={styles.trendBar} style={{ height: `${Math.max((item.count / maxCount) * 100, 1)}%` }}>
+                <div
+                  className={styles.trendBar}
+                  style={{
+                    height:
+                      item.count <= 0
+                        ? "0"
+                        : `${Math.max((item.count / maxCount) * 100, 6)}%`,
+                  }}
+                >
                   <span className={styles.trendBarValue}>{item.count}</span>
                 </div>
                 <span className={styles.trendBarLabel}>{formatMonth(item.month)}</span>

@@ -70,7 +70,7 @@ export function useDashboardPage() {
     }));
   }, [summary?.analytics?.top_referers]);
 
-  // 转换设备数据格式
+  // 转换设备数据格式（后端 UA 解析为中文：桌面 / 手机 / 平板）
   const deviceChartData = useMemo(() => {
     const topDevices = summary?.analytics?.top_devices;
     if (!topDevices) return [];
@@ -81,19 +81,23 @@ export function useDashboardPage() {
       tablet: "ri:tablet-line",
       other: "ri:device-line",
     };
-    return topDevices.slice(0, 3).map(item => ({
-      name:
-        item.device === "desktop"
-          ? "桌面端"
-          : item.device === "mobile"
-            ? "移动端"
-            : item.device === "tablet"
-              ? "平板"
-              : "其他",
-      value: item.count,
-      percentage: total > 0 ? Math.round((item.count / total) * 100) : 0,
-      icon: iconMap[item.device.toLowerCase()] || "ri:device-line",
-    }));
+    const resolveDevice = (raw: string) => {
+      const t = raw.trim();
+      const lower = t.toLowerCase();
+      if (t === "桌面" || lower === "desktop") return { label: "桌面端", key: "desktop" as const };
+      if (t === "手机" || lower === "mobile") return { label: "移动端", key: "mobile" as const };
+      if (t === "平板" || lower === "tablet") return { label: "平板", key: "tablet" as const };
+      return { label: "其他", key: "other" as const };
+    };
+    return topDevices.slice(0, 3).map(item => {
+      const { label, key } = resolveDevice(item.device);
+      return {
+        name: label,
+        value: item.count,
+        percentage: total > 0 ? Math.round((item.count / total) * 100) : 0,
+        icon: iconMap[key] || "ri:device-line",
+      };
+    });
   }, [summary?.analytics?.top_devices]);
 
   // 转换热门文章数据格式

@@ -1,0 +1,36 @@
+.wrapper {
+  width: 100%;
+  border-bottom: 1px solid var(--anzhiyu-card-border);
+  background: var(--anzhiyu-secondbg);
+}
+
+.inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--anzhiyu-fontcolor);
+}
+
+.inner :global(a) {
+  color: var(--anzhiyu-theme);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.inner :global(a:hover) {
+  opacity: 0.9;
+}
+
+.inner :global(p) {
+  margin: 0.25rem 0;
+}
+
+.inner :global(p:first-child) {
+  margin-top: 0;
+}
+
+.inner :global(p:last-child) {
+  margin-bottom: 0;
+}

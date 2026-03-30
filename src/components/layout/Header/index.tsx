@@ -24,6 +24,7 @@ import { BackMenuListGroups } from "./components/BackMenuListGroups";
 // 类型和样式
 import type { MenuItem, NavConfig, HeaderConfig } from "./types";
 import styles from "./Header.module.css";
+import { SiteAnnouncementBar } from "../SiteAnnouncementBar";
 
 export function Header() {
   const pathname = usePathname();
@@ -376,6 +377,8 @@ export function Header() {
           </div>
         </div>
       </header>
+
+      <SiteAnnouncementBar />
 
       {/* 移动端菜单 */}
       <MobileMenu

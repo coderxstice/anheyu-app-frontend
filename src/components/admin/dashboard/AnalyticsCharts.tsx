@@ -156,9 +156,9 @@ export function SourceChart({ data, className, isLoading }: SourceChartProps) {
         {/* 饼图 */}
         <div className="relative w-28 h-28 shrink-0">
           <svg viewBox="0 0 32 32" className="w-full h-full">
-            {arcData.map(arc => (
+            {arcData.map((arc, arcIdx) => (
               <path
-                key={arc.name}
+                key={`source-arc-${arcIdx}`}
                 d={arc.path}
                 className={sourceTextColors[arc.colorIndex % sourceTextColors.length]}
                 fill="currentColor"
@@ -177,7 +177,7 @@ export function SourceChart({ data, className, isLoading }: SourceChartProps) {
         {/* 图例 */}
         <div className="flex-1 min-w-0 space-y-2 overflow-hidden">
           {data.slice(0, 5).map((item, index) => (
-            <div key={item.name} className="flex items-center justify-between gap-2 text-sm">
+            <div key={`source-legend-${index}-${item.name}`} className="flex items-center justify-between gap-2 text-sm">
               <div className="flex items-center gap-2 min-w-0 flex-1">
                 <span className={cn("w-2 h-2 rounded-full shrink-0", sourceColors[index % sourceColors.length])} />
                 <span className="text-muted-foreground truncate" title={item.name}>
