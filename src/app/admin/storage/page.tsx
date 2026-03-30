@@ -100,10 +100,9 @@ function PolicyCard({
     <div
       className={cn(
         "rounded-2xl",
-        "bg-white dark:bg-white/4",
-        "border border-border/50 dark:border-white/6",
-        "hover:border-border dark:hover:border-white/12",
-        "hover:shadow-[0_4px_12px_rgba(0,0,0,0.04)] dark:hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)]",
+        "bg-card text-card-foreground",
+        "border border-border/60",
+        "hover:border-border hover:shadow-md",
         "transition-all duration-200 ease-out",
         "flex items-center gap-3.5 px-4 py-3.5"
       )}
@@ -116,7 +115,7 @@ function PolicyCard({
       {/* 信息 */}
       <div className="flex flex-col gap-0.5 min-w-0 flex-1">
         <div className="flex items-center gap-1.5 min-w-0">
-          <h4 className="text-sm font-semibold leading-tight line-clamp-1">{policy.name}</h4>
+          <h4 className="text-sm font-semibold leading-tight line-clamp-1 text-foreground">{policy.name}</h4>
           {policy.flag && (
             <span className="shrink-0 text-[10px] font-medium px-1.5 py-px rounded-md bg-foreground/5 text-muted-foreground">
               {POLICY_FLAG_LABELS[policy.flag] ?? policy.flag}
@@ -204,7 +203,7 @@ function AddCard({ onPress }: { onPress: () => void }) {
         "group"
       )}
     >
-      <div className="w-10 h-10 rounded-xl bg-muted dark:bg-white/4 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors duration-300">
+      <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors duration-300">
         <Plus className="w-4.5 h-4.5 text-muted-foreground/50 group-hover:text-primary transition-colors duration-300" />
       </div>
       <div>

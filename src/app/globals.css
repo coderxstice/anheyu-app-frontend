@@ -1,6 +1,9 @@
 /* ===================== Tailwind CSS v4 导入 ===================== */
 @import "tailwindcss";
 
+/* next-themes 使用 attribute="class"，暗色由 html.dark 控制；默认 dark: 仅跟随时区媒体查询会失效 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ===================== CSS Reset - 与 anheyu-app 保持一致 ===================== */
 /* 注意：必须放在 @layer base 中，否则会覆盖 Tailwind utilities */
 @layer base {

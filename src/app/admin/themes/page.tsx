@@ -72,16 +72,15 @@ function ThemeCard({
     <div
       className={cn(
         "rounded-2xl overflow-hidden",
-        "bg-white dark:bg-white/[0.04]",
-        "border border-border/50 dark:border-white/[0.06]",
-        "hover:border-border dark:hover:border-white/[0.12]",
-        "hover:shadow-[0_4px_12px_rgba(0,0,0,0.04)] dark:hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)]",
+        "bg-card text-card-foreground",
+        "border border-border/60",
+        "hover:border-border hover:shadow-md",
         "transition-all duration-200 ease-out group",
         isCurrent && "ring-2 ring-primary/60 ring-offset-2 ring-offset-background"
       )}
     >
       {/* 预览区 */}
-      <div className="relative aspect-[16/9] bg-gradient-to-br from-default-100 to-default-50 dark:from-default-100/20 dark:to-default-50/10">
+      <div className="relative aspect-video bg-gradient-to-br from-default-100 to-default-50 dark:from-default-100/20 dark:to-default-50/10">
         {theme.previewUrl ? (
           <img src={theme.previewUrl} alt={theme.name} className="absolute inset-0 w-full h-full object-cover" />
         ) : (
@@ -96,7 +95,7 @@ function ThemeCard({
             <Button
               size="sm"
               variant="flat"
-              className="bg-white/90 dark:bg-white/20 backdrop-blur-sm shadow-sm"
+              className="bg-card/95 backdrop-blur-sm shadow-sm border border-border/50"
               onPress={() => window.open(theme.demoUrl, "_blank")}
             >
               <Eye className="w-3.5 h-3.5 mr-1.5" />
@@ -144,7 +143,7 @@ function ThemeCard({
       <div className="px-4 pt-3.5 pb-4">
         <div className="flex items-start justify-between mb-1.5">
           <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-semibold leading-tight">{theme.name}</h3>
+            <h3 className="text-sm font-semibold leading-tight text-foreground">{theme.name}</h3>
             <p className="text-[11px] text-muted-foreground/60 mt-0.5">
               {theme.author} · v{theme.version}
             </p>
@@ -167,7 +166,7 @@ function ThemeCard({
             {theme.tags.slice(0, 3).map(tag => (
               <span
                 key={tag}
-                className="text-[10px] px-1.5 py-px rounded-md bg-foreground/[0.04] text-muted-foreground"
+                className="text-[10px] px-1.5 py-px rounded-md bg-muted text-muted-foreground"
               >
                 {tag}
               </span>
@@ -374,7 +373,7 @@ function ThemeSkeleton() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="rounded-2xl overflow-hidden bg-muted/10 animate-pulse">
-                <div className="aspect-[16/9] bg-muted/20" />
+                <div className="aspect-video bg-muted/20" />
                 <div className="p-4 space-y-2">
                   <div className="h-4 w-24 rounded bg-muted/30" />
                   <div className="h-3 w-32 rounded bg-muted/20" />
