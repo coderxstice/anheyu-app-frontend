@@ -23,6 +23,7 @@ export interface SettingDescriptor {
 export type SettingCategoryId =
   | "site-basic"
   | "site-icon"
+  | "appearance-skin"
   | "appearance-home"
   | "appearance-sidebar"
   | "appearance-page"
@@ -438,7 +439,6 @@ const categoryDescriptors: Record<SettingCategoryId, SettingDescriptor[]> = {
     { backendKey: K.KEY_POLICE_RECORD_ICON, type: "string" },
     { backendKey: K.KEY_ENABLE_REGISTRATION, type: "boolean", defaultValue: "false" },
     { backendKey: K.KEY_DEFAULT_THEME_MODE, type: "string", defaultValue: "light" },
-    { backendKey: K.KEY_THEME_COLOR, type: "string" },
     { backendKey: K.KEY_ABOUT_LINK, type: "string" },
     { backendKey: K.KEY_DEFAULT_THUMB_PARAM, type: "string" },
     { backendKey: K.KEY_DEFAULT_BIG_PARAM, type: "string" },
@@ -453,6 +453,10 @@ const categoryDescriptors: Record<SettingCategoryId, SettingDescriptor[]> = {
     { backendKey: K.KEY_USER_AVATAR, type: "string" },
     { backendKey: K.KEY_GRAVATAR_URL, type: "string" },
     { backendKey: K.KEY_DEFAULT_GRAVATAR_TYPE, type: "string", defaultValue: "mp" },
+  ],
+  "appearance-skin": [
+    { backendKey: K.KEY_APPEARANCE_SKIN, type: "string", defaultValue: "brand_blue" },
+    { backendKey: K.KEY_APPEARANCE_TOKENS, type: "json", defaultValue: "{}" },
   ],
   "appearance-home": [
     { backendKey: K.KEY_HOME_TOP, type: "json" },

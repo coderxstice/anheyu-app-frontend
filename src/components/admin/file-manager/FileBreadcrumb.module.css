@@ -163,6 +163,20 @@
   transform: translateX(2px);
 }
 
+.dropdown-item:focus {
+  outline: none;
+}
+
+.dropdown-item:focus-visible {
+  outline: 2px solid var(--anzhiyu-theme);
+  outline-offset: 2px;
+}
+
+.dropdown-item.dropdown-danger:focus-visible,
+.dropdown-danger:focus-visible {
+  outline-color: var(--anzhiyu-red);
+}
+
 /* 危险操作 */
 .dropdown-danger {
   color: var(--anzhiyu-red);

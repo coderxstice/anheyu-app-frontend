@@ -24,10 +24,32 @@
   font-size: 13px;
   color: var(--anzhiyu-fontcolor);
   cursor: pointer;
+  /* 仅用 CSS 做 hover：避免 Framer whileHover 对 background 插值产生整块脏色 */
+  transition:
+    background-color 0.12s ease,
+    transform 0.12s ease;
 }
 
 .menu-item:hover {
   background: var(--anzhiyu-theme-op);
+  transform: translateX(2px);
+}
+
+.menu-item.danger:hover {
+  background: color-mix(in srgb, var(--anzhiyu-red) 14%, transparent);
+}
+
+.menu-item:focus {
+  outline: none;
+}
+
+.menu-item:focus-visible {
+  outline: 2px solid var(--anzhiyu-theme);
+  outline-offset: 2px;
+}
+
+.menu-item.danger:focus-visible {
+  outline-color: var(--anzhiyu-red);
 }
 
 .divider {

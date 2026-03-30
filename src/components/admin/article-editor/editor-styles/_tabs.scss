@@ -39,12 +39,12 @@
   .tabs > .nav-tabs > .tab.active {
     cursor: default;
     background: var(--anzhiyu-background, #f7f9fe);
-    border-color: var(--anzhiyu-theme, hsl(var(--primary)));
+    border-color: var(--anzhiyu-theme, var(--primary));
   }
 
   .tabs > .nav-tabs > .tab:not(.active):hover {
     color: #fff;
-    background: var(--anzhiyu-theme, hsl(var(--primary)));
+    background: var(--anzhiyu-theme, var(--primary));
   }
 
   .tab-item-content {

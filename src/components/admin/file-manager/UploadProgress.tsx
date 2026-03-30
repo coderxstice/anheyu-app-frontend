@@ -249,6 +249,8 @@ function UploadItemRow({
         return item.errorMessage || "文件冲突";
       case "resumable":
         return "可续传";
+      case "processing":
+        return "正在准备上传…";
       default:
         return "";
     }
@@ -259,7 +261,7 @@ function UploadItemRow({
       ? styles["status-success"]
       : item.status === "error"
         ? styles["status-error"]
-        : item.status === "uploading"
+        : item.status === "uploading" || item.status === "processing"
           ? styles["status-uploading"]
           : item.status === "conflict"
             ? styles["status-conflict"]
@@ -272,7 +274,7 @@ function UploadItemRow({
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* 进度背景填充 */}
-      {(item.status === "uploading" || item.status === "pending") && (
+      {(item.status === "uploading" || item.status === "pending" || item.status === "processing") && (
         <motion.div
           className={styles["progress-fill"]}
           animate={{ width: `${item.progress}%` }}
@@ -286,7 +288,7 @@ function UploadItemRow({
           <RiCheckboxCircleFill className={styles["icon-success"]} />
         ) : item.status === "error" ? (
           <RiCloseCircleFill className={styles["icon-error"]} />
-        ) : item.status === "uploading" ? (
+        ) : item.status === "uploading" || item.status === "processing" ? (
           <RiLoader4Line className={styles["icon-uploading"]} />
         ) : item.status === "conflict" ? (
           <RiAlertLine className={styles["icon-conflict"]} />
@@ -312,7 +314,7 @@ function UploadItemRow({
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.15 }}
               >
-                {["uploading", "resumable"].includes(item.status) ? (
+                {["uploading", "processing", "resumable"].includes(item.status) ? (
                   <div className={styles["item-detail-info"]}>
                     <span className={styles["progress-percent"]}>{item.progress}%</span>
                     <span className={styles["speed-badge"]}>{speed ? `${formatBytes(speed)}/s` : "--"}</span>

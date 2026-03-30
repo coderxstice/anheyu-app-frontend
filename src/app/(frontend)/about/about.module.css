@@ -1566,12 +1566,12 @@
   color: var(--foreground);
 }
 .customContentBlock a {
-  color: hsl(var(--primary));
+  color: var(--primary);
   text-decoration: none;
   transition: all 0.3s ease;
 }
 .customContentBlock a:hover {
-  color: hsl(var(--primary) / 0.7);
+  color: color-mix(in srgb, var(--primary) 70%, transparent);
   text-decoration: underline;
 }
 .customContentBlock ul,
@@ -1597,7 +1597,7 @@
   transition: all 0.3s ease;
 }
 .customContentBlock details summary:hover {
-  color: hsl(var(--primary));
+  color: var(--primary);
 }
 .customContentBlock details .content {
   margin-top: 1rem;
@@ -1605,7 +1605,7 @@
 .customContentBlock blockquote {
   margin: 1rem 0;
   padding: 0.75rem 1rem;
-  border-left: 4px solid hsl(var(--primary));
+  border-left: 4px solid var(--primary);
   background: var(--muted, #f4f4f5);
   border-radius: 4px;
 }

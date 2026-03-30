@@ -22,7 +22,7 @@ export async function uploadFileChunksWorker(item: UploadItem): Promise<void> {
         default:
           throw new Error(`不支持的存储类型: ${item.storageType}`);
       }
-      item.status = "success";
+      // 客户端直传需在调用方执行 finalize 后再置 success，避免未落库却显示成功
       return;
     }
 

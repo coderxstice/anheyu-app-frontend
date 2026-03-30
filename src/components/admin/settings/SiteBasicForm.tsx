@@ -19,7 +19,6 @@ import {
   KEY_POLICE_RECORD_ICON,
   KEY_ENABLE_REGISTRATION,
   KEY_DEFAULT_THEME_MODE,
-  KEY_THEME_COLOR,
   KEY_ABOUT_LINK,
   KEY_DEFAULT_THUMB_PARAM,
   KEY_DEFAULT_BIG_PARAM,
@@ -165,14 +164,7 @@ export function SiteBasicForm({ values, onChange, loading }: SiteBasicFormProps)
           </div>
         </div>
 
-        <SettingsFieldGroup cols={2}>
-          <FormInput
-            label="主题色"
-            placeholder="#163bf2"
-            value={values[KEY_THEME_COLOR]}
-            onValueChange={v => onChange(KEY_THEME_COLOR, v)}
-            description="站点主题色，如 #163bf2"
-          />
+        <SettingsFieldGroup cols={1}>
           <FormInput
             label="关于链接"
             placeholder="/about"

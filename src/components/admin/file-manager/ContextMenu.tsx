@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -20,6 +20,7 @@ import {
   RiRestartLine,
 } from "react-icons/ri";
 import type { ContextMenuTrigger } from "@/hooks/file-manager/use-file-manager";
+import { useRovingMenuNavigation } from "@/hooks/file-manager/use-roving-menu-navigation";
 import { contextMenuVariants, menuItemVariants, springTransition } from "@/lib/motion";
 import styles from "./ContextMenu.module.css";
 
@@ -31,6 +32,10 @@ interface MenuItem {
   divider?: boolean;
 }
 
+interface MenuContext {
+  selectedIds?: string[];
+}
+
 interface ContextMenuProps {
   trigger: ContextMenuTrigger | null;
   selectedFileIds: Set<string>;
@@ -38,8 +43,90 @@ interface ContextMenuProps {
   onClosed: () => void;
 }
 
-interface MenuContext {
-  selectedIds?: string[];
+interface ContextMenuBodyProps {
+  items: MenuItem[];
+  menuContext: MenuContext | null;
+  onSelect: (action: string, context?: MenuContext) => void;
+  closeMenu: () => void;
+}
+
+function ContextMenuBody({ items, menuContext, onSelect, closeMenu }: ContextMenuBodyProps) {
+  const navigableIndices = useMemo(
+    () => items.reduce<number[]>((acc, it, i) => {
+      if (!it.divider) acc.push(i);
+      return acc;
+    }, []),
+    [items]
+  );
+
+  const onCommitFlat = useCallback(
+    (flat: number) => {
+      const idx = navigableIndices[flat];
+      const item = items[idx];
+      if (item && !item.divider && item.action) {
+        onSelect(item.action, menuContext || undefined);
+        closeMenu();
+      }
+    },
+    [closeMenu, items, menuContext, navigableIndices, onSelect]
+  );
+
+  const flatToRefIndex = useCallback((flat: number) => navigableIndices[flat], [navigableIndices]);
+
+  const { itemRefs, focusedDomIndex, handleKeyDown, setNavToFlat } = useRovingMenuNavigation({
+    length: navigableIndices.length,
+    onClose: closeMenu,
+    flatToRefIndex,
+    onCommitFlat,
+    escapeStopPropagation: true,
+  });
+
+  const onItemClick = useCallback(
+    (item: MenuItem) => {
+      if (!item.action) return;
+      onSelect(item.action, menuContext || undefined);
+      closeMenu();
+    },
+    [closeMenu, menuContext, onSelect]
+  );
+
+  return (
+    <>
+      {items.map((item, index) =>
+        item.divider ? (
+          <div
+            key={`divider-${index}`}
+            className={styles.divider}
+            role="separator"
+            aria-orientation="horizontal"
+          />
+        ) : (
+          <motion.div
+            key={`${item.label}-${index}`}
+            className={`${styles["menu-item"]} ${item.danger ? styles.danger : ""}`}
+            variants={menuItemVariants}
+            initial="initial"
+            animate="animate"
+            transition={{ ...springTransition, delay: index * 0.015 }}
+            ref={el => {
+              itemRefs.current[index] = el;
+            }}
+            onClick={() => onItemClick(item)}
+            onKeyDown={handleKeyDown}
+            onMouseEnter={() => {
+              const p = navigableIndices.indexOf(index);
+              if (p >= 0) setNavToFlat(p);
+            }}
+            role="menuitem"
+            tabIndex={focusedDomIndex === index ? 0 : -1}
+          >
+            <span className={styles["menu-icon"]}>{item.icon}</span>
+            <span>{item.label}</span>
+          </motion.div>
+        )
+      )}
+    </>
+  );
 }
 
 export function ContextMenu({ trigger, selectedFileIds, onSelect, onClosed }: ContextMenuProps) {
@@ -47,6 +134,12 @@ export function ContextMenu({ trigger, selectedFileIds, onSelect, onClosed }: Co
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [transformOrigin, setTransformOrigin] = useState("top left");
   const visible = !!trigger;
+
+  /** file / 时间戳 + openSeq（由 useFileManager 单调递增），避免同毫秒重复打开时子组件状态残留 */
+  const menuInstanceKey = useMemo(() => {
+    if (!trigger) return "closed";
+    return `${trigger.file?.id ?? "blank"}-${trigger.event.timeStamp}-${trigger.openSeq}`;
+  }, [trigger]);
 
   const blankMenu = useMemo<MenuItem[]>(
     () => [
@@ -94,6 +187,10 @@ export function ContextMenu({ trigger, selectedFileIds, onSelect, onClosed }: Co
     return { items: nextItems, menuContext: { selectedIds: [...selectedFileIds] } };
   }, [trigger, blankMenu, itemMenu, selectedFileIds]);
 
+  const closeMenu = useCallback(() => {
+    onClosed();
+  }, [onClosed]);
+
   useEffect(() => {
     if (!trigger) return;
     const { event } = trigger;
@@ -101,48 +198,46 @@ export function ContextMenu({ trigger, selectedFileIds, onSelect, onClosed }: Co
     const initialX = event.clientX;
     const initialY = event.clientY;
 
-    requestAnimationFrame(() => {
-      const menuEl = contextMenuRef.current;
-      if (!menuEl) return;
-      const menuWidth = menuEl.offsetWidth;
-      const menuHeight = menuEl.offsetHeight;
-      const { innerWidth, innerHeight } = window;
-      let finalX = initialX;
-      let finalY = initialY;
-      let originX = "left";
-      let originY = "top";
+    let innerRaf = 0;
+    const outerRaf = requestAnimationFrame(() => {
+      innerRaf = requestAnimationFrame(() => {
+        const menuEl = contextMenuRef.current;
+        if (!menuEl) return;
+        const menuWidth = menuEl.offsetWidth;
+        const menuHeight = menuEl.offsetHeight;
+        const { innerWidth, innerHeight } = window;
+        let finalX = initialX;
+        let finalY = initialY;
+        let originX = "left";
+        let originY = "top";
 
-      if (initialX + menuWidth > innerWidth) {
-        finalX = initialX - menuWidth;
-        originX = "right";
-      }
-      if (initialY + menuHeight > innerHeight) {
-        finalY = initialY - menuHeight;
-        originY = "bottom";
-      }
-      setPosition({ x: Math.max(5, finalX), y: Math.max(5, finalY) });
-      setTransformOrigin(`${originY} ${originX}`);
+        if (initialX + menuWidth > innerWidth) {
+          finalX = initialX - menuWidth;
+          originX = "right";
+        }
+        if (initialY + menuHeight > innerHeight) {
+          finalY = initialY - menuHeight;
+          originY = "bottom";
+        }
+        setPosition({ x: Math.max(5, finalX), y: Math.max(5, finalY) });
+        setTransformOrigin(`${originY} ${originX}`);
+      });
     });
+    return () => {
+      cancelAnimationFrame(outerRaf);
+      cancelAnimationFrame(innerRaf);
+    };
   }, [trigger]);
-
-  const closeMenu = () => {
-    onClosed();
-  };
 
   const handleOverlayRightClick = (event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
   };
 
-  const onItemClick = (item: MenuItem) => {
-    if (item.action) {
-      onSelect(item.action, menuContext || undefined);
-    }
-    closeMenu();
-  };
+  const menuAriaLabel = trigger?.file ? "选中文件或文件夹的操作" : "当前目录的操作";
 
   return createPortal(
     <AnimatePresence>
-      {visible ? (
+      {visible && trigger ? (
         <>
           <div className={styles["context-menu-overlay"]} onClick={closeMenu} onContextMenu={handleOverlayRightClick} />
           <motion.div
@@ -155,26 +250,17 @@ export function ContextMenu({ trigger, selectedFileIds, onSelect, onClosed }: Co
             exit="exit"
             transition={springTransition}
             onContextMenu={event => event.preventDefault()}
+            role="menu"
+            aria-label={menuAriaLabel}
+            aria-orientation="vertical"
           >
-            {items.map((item, index) =>
-              item.divider ? (
-                <div key={`divider-${index}`} className={styles.divider} />
-              ) : (
-                <motion.div
-                  key={`${item.label}-${index}`}
-                  className={`${styles["menu-item"]} ${item.danger ? styles.danger : ""}`}
-                  variants={menuItemVariants}
-                  initial="initial"
-                  animate="animate"
-                  transition={{ ...springTransition, delay: index * 0.015 }}
-                  onClick={() => onItemClick(item)}
-                  whileHover={{ x: 2, backgroundColor: "var(--anzhiyu-theme-op)" }}
-                >
-                  <span className={styles["menu-icon"]}>{item.icon}</span>
-                  <span>{item.label}</span>
-                </motion.div>
-              )
-            )}
+            <ContextMenuBody
+              key={menuInstanceKey}
+              items={items}
+              menuContext={menuContext}
+              onSelect={onSelect}
+              closeMenu={closeMenu}
+            />
           </motion.div>
         </>
       ) : null}

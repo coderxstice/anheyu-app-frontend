@@ -2,6 +2,7 @@ import {
   Globe,
   Image as ImageIcon,
   Home,
+  Sparkles,
   PanelLeft,
   Paintbrush,
   FileText,
@@ -49,6 +50,12 @@ export const settingsCategories: CategorySection[] = [
     label: "外观配置",
     icon: Paintbrush,
     children: [
+      {
+        id: "appearance-skin",
+        label: "换肤与配色",
+        icon: Sparkles,
+        keywords: ["换肤", "主题", "配色", "品牌色", "语义色", "皮肤"],
+      },
       {
         id: "appearance-home",
         label: "首页设置",

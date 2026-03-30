@@ -1464,6 +1464,19 @@ html.dark [data-slot="trigger"][data-open="true"],
   background-color: var(--secondary) !important;
 }
 
+/* 顶栏 Popover 触发器（登录/个人中心）不应套用上面为 Select 准备的 muted 底 */
+html.dark [data-site-header-toolbar] [data-slot="trigger"],
+.dark [data-site-header-toolbar] [data-slot="trigger"] {
+  background-color: transparent !important;
+}
+
+html.dark [data-site-header-toolbar] [data-slot="trigger"][data-focus="true"],
+html.dark [data-site-header-toolbar] [data-slot="trigger"][data-open="true"],
+.dark [data-site-header-toolbar] [data-slot="trigger"][data-focus="true"],
+.dark [data-site-header-toolbar] [data-slot="trigger"][data-open="true"] {
+  background-color: transparent !important;
+}
+
 [data-slot="trigger"][data-hover="true"] {
   border-color: color-mix(in srgb, var(--primary) 40%, var(--border) 60%) !important;
 }
@@ -1580,7 +1593,7 @@ html.with-fancybox body.hide-scrollbar {
   margin-right: 8px;
   pointer-events: none;
   cursor: pointer;
-  accent-color: hsl(var(--primary));
+  accent-color: var(--primary);
   transform: translateY(2px);
   vertical-align: middle;
 }

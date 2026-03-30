@@ -185,17 +185,19 @@ export function useFileUpload({
       await createSessionWithLock(item);
       await uploadFileChunksWorker(item);
 
-      if (
-        item.uploadMethod === "client" &&
-        item.policyId &&
-        ["tencent_cos", "aliyun_oss", "aws_s3"].includes(item.storageType || "")
-      ) {
+      // 所有云端「客户端直传」完成后必须 finalize，才能在库中创建文件实体（含大小）；含 OneDrive、七牛等
+      if (item.uploadMethod === "client") {
+        if (!item.policyId) {
+          throw new Error("缺少存储策略 ID，无法完成上传");
+        }
         const fullPath = joinPath(item.targetPath, item.relativePath);
         const finalizeRes = await finalizeClientUploadApi(fullPath, item.policyId, item.size);
         if (!finalizeRes || finalizeRes.code !== 200) {
           throw new Error(finalizeRes?.message || "创建文件记录失败");
         }
       }
+
+      item.status = "success";
     } catch (error) {
       if (item.status !== "canceled") {
         const err = error as Error & { isConflict?: boolean };

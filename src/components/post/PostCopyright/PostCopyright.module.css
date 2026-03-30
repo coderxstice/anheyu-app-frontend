@@ -24,7 +24,7 @@
   background: var(--primary);
   border: 1px solid var(--border);
   border-radius: 66px;
-  box-shadow: 0 8px 12px -3px hsl(var(--primary) / 0.3);
+  box-shadow: 0 8px 12px -3px color-mix(in srgb, var(--primary) 30%, transparent);
   transition: all 0.2s ease 0s;
 }
 

@@ -121,7 +121,7 @@
   font-weight: 500;
   color: var(--foreground);
   background: var(--anzhiyu-card-bg, #fff);
-  border: 1px solid var(--anzhiyu-theme, hsl(var(--primary)));
+  border: 1px solid var(--anzhiyu-theme, var(--primary));
   border-radius: 4px;
   outline: none;
   flex-shrink: 0;
@@ -186,7 +186,7 @@
   border-radius: 4px;
 
   &:hover {
-    color: var(--anzhiyu-theme, hsl(var(--primary)));
+    color: var(--anzhiyu-theme, var(--primary));
     background: var(--anzhiyu-card-bg, #fff);
   }
 
@@ -376,7 +376,7 @@
     background: var(--anzhiyu-card-bg-grey, #f0f2f5);
   }
   &.is-active {
-    color: var(--anzhiyu-theme, hsl(var(--primary)));
+    color: var(--anzhiyu-theme, var(--primary));
   }
 }
 
@@ -469,7 +469,7 @@
   transition: border-color 0.2s;
 
   &:focus {
-    border-color: var(--anzhiyu-theme, hsl(var(--primary)));
+    border-color: var(--anzhiyu-theme, var(--primary));
   }
   &::placeholder {
     color: var(--anzhiyu-secondtext, #9ca3af);
@@ -502,7 +502,7 @@
   transition: all 0.3s;
 
   &:hover {
-    background: var(--anzhiyu-theme, hsl(var(--primary)));
+    background: var(--anzhiyu-theme, var(--primary));
     color: #fff;
   }
 }
@@ -521,7 +521,7 @@
   transition: all 0.3s;
 
   &:hover {
-    background: var(--anzhiyu-theme, hsl(var(--primary)));
+    background: var(--anzhiyu-theme, var(--primary));
     color: #fff;
   }
 }

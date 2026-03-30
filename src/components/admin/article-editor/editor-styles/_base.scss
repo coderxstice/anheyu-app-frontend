@@ -128,7 +128,7 @@
   &.ProseMirror b,
   &.ProseMirror strong {
     font-weight: 700;
-    color: var(--anzhiyu-theme, hsl(var(--primary)));
+    color: var(--anzhiyu-theme, var(--primary));
   }
 
   &.ProseMirror span[style^="color:"] b,
@@ -260,12 +260,12 @@
           vertical-align: middle;
 
           &:hover {
-            border-color: var(--anzhiyu-theme, hsl(var(--primary)));
+            border-color: var(--anzhiyu-theme, var(--primary));
           }
 
           &:checked {
-            background: var(--anzhiyu-theme, hsl(var(--primary)));
-            border-color: var(--anzhiyu-theme, hsl(var(--primary)));
+            background: var(--anzhiyu-theme, var(--primary));
+            border-color: var(--anzhiyu-theme, var(--primary));
 
             &::after {
               content: "";
@@ -311,7 +311,7 @@
     font-weight: 500;
     line-height: 2;
     color: #fff;
-    background: var(--anzhiyu-theme, hsl(var(--primary)));
+    background: var(--anzhiyu-theme, var(--primary));
     border-radius: 4px;
     box-shadow: 0 8px 16px -4px rgba(44, 45, 48, 0.05);
     -webkit-font-smoothing: antialiased;
@@ -345,13 +345,13 @@
     line-height: 1.25rem;
     color: var(--anzhiyu-fontcolor, var(--foreground));
     text-decoration: none;
-    border-bottom: dotted 2px var(--anzhiyu-theme, hsl(var(--primary)));
+    border-bottom: dotted 2px var(--anzhiyu-theme, var(--primary));
     transition: all 0.2s ease 0s;
     cursor: pointer;
 
     &:hover {
       color: #fff;
-      background: var(--anzhiyu-theme, hsl(var(--primary)));
+      background: var(--anzhiyu-theme, var(--primary));
       border-radius: 0.25rem;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
       border-bottom-color: transparent;

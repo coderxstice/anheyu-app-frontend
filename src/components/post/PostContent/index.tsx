@@ -671,20 +671,38 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
       const savedCollapsed = codeBlock.getAttribute("data-collapsed");
       const needsCollapse = savedCollapsed === "true" || (savedCollapsed === null && codeMaxLines !== -1 && lineCount > codeMaxLines);
 
-      // 添加复制按钮图标（所有代码块都需要）
+      // 添加复制按钮（必须用真实 button：summary 内非交互元素点击会切换 details 的 open）
       let copyBtn = codeHead.querySelector(".copy-button");
       if (!copyBtn) {
-        copyBtn = document.createElement("span");
-        copyBtn.className = "copy-button";
-        copyBtn.innerHTML = copyIcon;
-        copyBtn.setAttribute("data-copy-icon", copyIcon);
-        copyBtn.setAttribute("data-check-icon", checkIcon);
-        copyBtn.setAttribute("title", "复制代码");
-        codeHead.appendChild(copyBtn);
-      } else if (!copyBtn.querySelector("svg")) {
-        copyBtn.innerHTML = copyIcon;
-        copyBtn.setAttribute("data-copy-icon", copyIcon);
-        copyBtn.setAttribute("data-check-icon", checkIcon);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "copy-button";
+        btn.innerHTML = copyIcon;
+        btn.setAttribute("data-copy-icon", copyIcon);
+        btn.setAttribute("data-check-icon", checkIcon);
+        btn.setAttribute("title", "复制代码");
+        codeHead.appendChild(btn);
+        copyBtn = btn;
+      } else if (copyBtn.tagName !== "BUTTON") {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = copyBtn.className;
+        const t = copyBtn.getAttribute("title");
+        if (t) btn.setAttribute("title", t);
+        const dc = copyBtn.getAttribute("data-copy-icon");
+        const dch = copyBtn.getAttribute("data-check-icon");
+        if (dc) btn.setAttribute("data-copy-icon", dc);
+        if (dch) btn.setAttribute("data-check-icon", dch);
+        btn.innerHTML = copyBtn.innerHTML;
+        copyBtn.replaceWith(btn);
+        copyBtn = btn;
+      } else {
+        (copyBtn as HTMLButtonElement).type = "button";
+        if (!copyBtn.querySelector("svg")) {
+          copyBtn.innerHTML = copyIcon;
+          copyBtn.setAttribute("data-copy-icon", copyIcon);
+          copyBtn.setAttribute("data-check-icon", checkIcon);
+        }
       }
 
       // 所有代码块都添加展开箭头图标（用于展开/收起代码内容）
@@ -1202,7 +1220,9 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     const cleanups: (() => void)[] = [];
 
     copyButtons.forEach(btn => {
-      const handleClick = async () => {
+      const handleClick = async (e: Event) => {
+        e.preventDefault();
+        e.stopPropagation();
         const codeBlock = btn.closest(".md-editor-code");
         if (!codeBlock) return;
 

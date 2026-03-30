@@ -18,6 +18,7 @@ import { QueryProvider } from "./query-provider";
 import { GlobalLoading } from "@/components/common/GlobalLoading";
 import { CustomCodeInjector } from "./custom-code-injector";
 import { DefaultThemeSync } from "./DefaultThemeSync";
+import { SiteThemeColorsSync } from "./SiteThemeColorsSync";
 import { ReducedMotionSync } from "./ReducedMotionSync";
 import { VisitStatisticsTracker } from "./visit-statistics-tracker";
 
@@ -89,6 +90,7 @@ export function Providers({ children }: ProvidersProps) {
           <AuthTokenInitializer>
             <SiteConfigLoader>
               <DefaultThemeSync />
+              <SiteThemeColorsSync />
               <ReducedMotionSync />
               <GlobalLoading />
               <CustomCodeInjector />
