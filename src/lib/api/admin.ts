@@ -47,6 +47,27 @@ export const statisticsApi = {
   },
 
   /**
+   * 上报一次页面访问（SPA 路由需由前端主动调用；对应 POST /api/public/statistics/visit）
+   */
+  async recordVisit(payload: {
+    url_path: string;
+    page_title?: string;
+    referer?: string;
+    duration?: number;
+  }): Promise<void> {
+    try {
+      await apiClient.post("/api/public/statistics/visit", {
+        url_path: payload.url_path,
+        page_title: payload.page_title ?? "",
+        referer: payload.referer ?? "",
+        duration: payload.duration ?? 0,
+      });
+    } catch {
+      // 统计失败不影响页面使用
+    }
+  },
+
+  /**
    * 获取访客趋势数据
    * GET /api/statistics/trend
    * @param period 时间周期 (daily/weekly/monthly)

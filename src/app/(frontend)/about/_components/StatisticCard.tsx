@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useCallback, useState } from "react";
-import { PieChart, ArrowRight } from "lucide-react";
+import { PieChart } from "lucide-react";
+import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { statisticsApi } from "@/lib/api/admin";
 import styles from "../about.module.css";
@@ -130,7 +131,7 @@ export function StatisticCard({ cover }: StatisticCardProps) {
             <span>数据由本站自主统计</span>
           </div>
           <Link href="/article-statistics" className={styles.articleStatsBtn}>
-            <ArrowRight style={{ width: 16, height: 16 }} />
+            <Icon icon="tabler:circle-arrow-up-right-filled" width={22} height={22} />
             <span>文章统计</span>
           </Link>
         </div>

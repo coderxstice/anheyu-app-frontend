@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { Icon } from "@iconify/react";
 import type { Music } from "@/types/about";
 import styles from "../about.module.css";
 
@@ -29,7 +29,7 @@ export function MusicCard({ music, authorName }: MusicCardProps) {
       {music.link && (
         <div className={styles.bannerButtonGroup}>
           <Link href={music.link} className={styles.bannerButton}>
-            <ArrowRight style={{ width: 16, height: 16 }} />
+            <Icon icon="tabler:circle-arrow-up-right-filled" width={22} height={22} />
             <span className={styles.bannerButtonText}>更多推荐</span>
           </Link>
         </div>
