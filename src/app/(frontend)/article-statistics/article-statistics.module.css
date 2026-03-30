@@ -440,10 +440,14 @@
   min-height: 280px;
   display: flex;
   flex-direction: column;
+  /* 柱顶数字 position: absolute 向上偏移，避免被裁切 */
+  padding-top: 0.5rem;
+  overflow: visible;
 }
 .trendBars {
   display: flex;
-  align-items: flex-end;
+  /* stretch：每列占满图表高度，子元素 height:% 相对列高计算；flex-end 会让列高≈内容高度导致柱子几乎为 0 */
+  align-items: stretch;
   gap: 4px;
   flex: 1;
   min-height: 220px;
@@ -455,35 +459,34 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 100%;
   justify-content: flex-end;
+  min-height: 0;
 }
 .trendBar {
   width: 100%;
-  max-width: 40px;
-  background: linear-gradient(to top, rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0.8));
+  max-width: 48px;
+  background: linear-gradient(to top, rgba(59, 130, 246, 0.35), rgba(59, 130, 246, 0.9));
   border-radius: 4px 4px 0 0;
   transition: all 0.3s;
-  min-height: 2px;
+  /* 有数据时保证肉眼可见（极小占比时仍有一截柱形） */
+  min-height: 4px;
   position: relative;
+  box-sizing: border-box;
 }
 .trendBar:hover {
   background: linear-gradient(to top, rgba(59, 130, 246, 0.5), rgba(59, 130, 246, 1));
 }
 .trendBarValue {
   position: absolute;
-  top: -20px;
+  top: -22px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 11px;
-  font-weight: 600;
-  color: #3b82f6;
+  font-size: 12px;
+  font-weight: 700;
+  color: hsl(var(--primary));
   white-space: nowrap;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.trendBar:hover .trendBarValue {
   opacity: 1;
+  pointer-events: none;
 }
 .trendBarLabel {
   font-size: 11px;
