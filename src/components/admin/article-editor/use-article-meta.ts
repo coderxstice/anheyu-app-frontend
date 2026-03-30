@@ -72,10 +72,15 @@ const DEFAULT_META: ArticleMeta = {
   custom_published_at: "",
 };
 
+function normalizeSummaries(raw: string[] | undefined, max: number): string[] {
+  const cleaned = (raw || []).map(s => s.trim()).filter(Boolean);
+  return cleaned.slice(0, max);
+}
+
 /**
  * 从文章数据初始化元数据
  */
-function initFromArticle(article: ArticleDetailForEdit): ArticleMeta {
+function initFromArticle(article: ArticleDetailForEdit, maxSummaries: number): ArticleMeta {
   return {
     status: article.status || "PUBLISHED",
     post_category_ids: article.post_categories?.map(c => c.id) || [],
@@ -84,7 +89,7 @@ function initFromArticle(article: ArticleDetailForEdit): ArticleMeta {
     top_img_url: article.top_img_url || "",
     is_reprint: article.is_reprint || false,
     copyright_author: article.copyright_author || "",
-    summaries: article.summaries || [],
+    summaries: normalizeSummaries(article.summaries, maxSummaries),
     keywords: article.keywords || "",
     abbrlink: article.abbrlink || "",
     show_on_home: article.show_on_home ?? true,
@@ -105,9 +110,15 @@ function initFromArticle(article: ArticleDetailForEdit): ArticleMeta {
   };
 }
 
-export function useArticleMeta(article?: ArticleDetailForEdit | null, options?: { isAdmin?: boolean }) {
+export function useArticleMeta(
+  article?: ArticleDetailForEdit | null,
+  options?: { isAdmin?: boolean; maxSummaries?: number }
+) {
   const isAdmin = options?.isAdmin ?? false;
-  const [meta, setMeta] = useState<ArticleMeta>(article ? initFromArticle(article) : { ...DEFAULT_META });
+  const maxSummaries = options?.maxSummaries ?? 1;
+  const [meta, setMeta] = useState<ArticleMeta>(
+    article ? initFromArticle(article, maxSummaries) : { ...DEFAULT_META }
+  );
   const [initialized, setInitialized] = useState(false);
   const initialCustomJsRef = useRef(article?.extra_config?.custom_js || "");
 
@@ -115,13 +126,13 @@ export function useArticleMeta(article?: ArticleDetailForEdit | null, options?: 
   const initFromData = useCallback(
     (data: ArticleDetailForEdit) => {
       if (!initialized) {
-        const nextMeta = initFromArticle(data);
+        const nextMeta = initFromArticle(data, maxSummaries);
         setMeta(nextMeta);
         initialCustomJsRef.current = nextMeta.custom_js;
         setInitialized(true);
       }
     },
-    [initialized]
+    [initialized, maxSummaries]
   );
 
   // 更新单个字段
@@ -136,13 +147,14 @@ export function useArticleMeta(article?: ArticleDetailForEdit | null, options?: 
 
   // 生成提交数据（合并到 CreateArticleRequest）
   const getSubmitData = useCallback((): Partial<CreateArticleRequest> => {
+    const summariesForSubmit = normalizeSummaries(meta.summaries, maxSummaries);
     const data: Partial<CreateArticleRequest> = {
       status: meta.status,
       post_category_ids: meta.post_category_ids.length > 0 ? meta.post_category_ids : undefined,
       post_tag_ids: meta.post_tag_ids.length > 0 ? meta.post_tag_ids : undefined,
       cover_url: meta.cover_url || undefined,
       top_img_url: meta.top_img_url || undefined,
-      summaries: meta.summaries.length > 0 ? meta.summaries : undefined,
+      summaries: summariesForSubmit.length > 0 ? summariesForSubmit : undefined,
       keywords: meta.keywords || undefined,
       abbrlink: meta.abbrlink || undefined,
       show_on_home: meta.show_on_home,
@@ -181,7 +193,7 @@ export function useArticleMeta(article?: ArticleDetailForEdit | null, options?: 
     }
 
     return data;
-  }, [isAdmin, meta]);
+  }, [isAdmin, maxSummaries, meta]);
 
   return {
     meta,

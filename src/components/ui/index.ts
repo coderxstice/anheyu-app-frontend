@@ -1,3 +1,4 @@
+export * from "./anheyu-dialog";
 export * from "./card";
 export * from "./icon-button";
 export * from "./button";
