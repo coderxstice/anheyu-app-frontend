@@ -7,6 +7,7 @@ import { parseAbsoluteToLocal } from "@internationalized/date";
 import type { ZonedDateTime } from "@internationalized/date";
 import { Image as ImageIcon, Pencil } from "lucide-react";
 import { AdminDialog } from "@/components/admin/AdminDialog";
+import { AdminDatePickerLocale } from "@/components/admin/AdminDatePickerLocale";
 import { FormInput } from "@/components/ui/form-input";
 import { FormImageUpload } from "@/components/ui/form-image-upload";
 import { FormSelect, FormSelectItem } from "@/components/ui/form-select";
@@ -225,23 +226,27 @@ function AlbumFormContent({
 
         <div className="flex flex-col gap-2">
           <label className="text-sm font-semibold tracking-tight text-foreground/80">发布时间</label>
-          <DatePicker
-            label={undefined}
-            granularity="minute"
-            value={publishedAtValue ?? undefined}
-            onChange={(d: ZonedDateTime | null) => {
-              if (d) {
-                setPublishedAt(d.toAbsoluteString());
-              } else {
-                setPublishedAt(null);
-              }
-            }}
-            labelPlacement="outside"
-            classNames={{
-              inputWrapper:
-                "h-9 min-h-9 rounded-xl border border-border/60 bg-card shadow-none transition-all duration-200",
-            }}
-          />
+          <AdminDatePickerLocale>
+            <DatePicker
+              label={undefined}
+              granularity="minute"
+              hideTimeZone
+              hourCycle={24}
+              value={publishedAtValue ?? undefined}
+              onChange={(d: ZonedDateTime | null) => {
+                if (d) {
+                  setPublishedAt(d.toAbsoluteString());
+                } else {
+                  setPublishedAt(null);
+                }
+              }}
+              labelPlacement="outside"
+              classNames={{
+                inputWrapper:
+                  "h-9 min-h-9 rounded-xl border border-border/60 bg-card shadow-none transition-all duration-200",
+              }}
+            />
+          </AdminDatePickerLocale>
           <p className="text-xs leading-relaxed text-muted-foreground">
             可选，不设置则使用创建时间作为发布时间
           </p>

@@ -5,6 +5,7 @@ import { FormInput } from "@/components/ui/form-input";
 import { FormSwitch } from "@/components/ui/form-switch";
 import { FormImageUpload } from "@/components/ui/form-image-upload";
 import { DatePicker } from "@heroui/date-picker";
+import { AdminDatePickerLocale } from "@/components/admin/AdminDatePickerLocale";
 import { parseDateTime, CalendarDateTime as CalDateTime } from "@internationalized/date";
 import type { CalendarDateTime } from "@internationalized/date";
 import { SettingsSection, SettingsFieldGroup } from "./SettingsSection";
@@ -141,23 +142,27 @@ function LaunchTimePicker({
   return (
     <div className="flex flex-col gap-2">
       {label && <label className="text-sm font-semibold tracking-tight text-foreground/80">{label}</label>}
-      <DatePicker
-        label={undefined}
-        granularity="minute"
-        value={dateValue ?? undefined}
-        onChange={d => {
-          if (d) {
-            onValueChange(formatLaunchTime(d as CalendarDateTime));
-          } else {
-            onValueChange("");
-          }
-        }}
-        labelPlacement="outside"
-        classNames={{
-          inputWrapper:
-            "h-9 min-h-9 rounded-xl border border-border/60 bg-card shadow-none transition-all duration-200",
-        }}
-      />
+      <AdminDatePickerLocale>
+        <DatePicker
+          label={undefined}
+          granularity="minute"
+          hideTimeZone
+          hourCycle={24}
+          value={dateValue ?? undefined}
+          onChange={d => {
+            if (d) {
+              onValueChange(formatLaunchTime(d as CalendarDateTime));
+            } else {
+              onValueChange("");
+            }
+          }}
+          labelPlacement="outside"
+          classNames={{
+            inputWrapper:
+              "h-9 min-h-9 rounded-xl border border-border/60 bg-card shadow-none transition-all duration-200",
+          }}
+        />
+      </AdminDatePickerLocale>
       {description && <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>}
     </div>
   );

@@ -136,9 +136,11 @@ export function LyricsScroll({ lyrics, lyricsState, dominantColor, onLyricClick 
     if (currentIndex !== prevIndexRef.current && currentIndex >= 0) {
       prevIndexRef.current = currentIndex;
       if (!userScrollingRef.current) {
-        // Defer scroll to avoid synchronous setState in effect
+        // 双 rAF：等待歌词行 ref 挂载后再算 offset（对齐旧版 Vue 行为）
         requestAnimationFrame(() => {
-          scrollToCurrentLyricCenter(currentIndex);
+          requestAnimationFrame(() => {
+            scrollToCurrentLyricCenter(currentIndex);
+          });
         });
       }
     }

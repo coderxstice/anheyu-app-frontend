@@ -1,6 +1,7 @@
 "use client";
 
 import { Input, Switch } from "@heroui/react";
+import { StorageSecretField } from "@/components/admin/storage/StorageSecretField";
 import type { StoragePolicy } from "@/types/storage-policy";
 
 interface AwsS3FormProps {
@@ -71,11 +72,8 @@ export function AwsS3Form({ form, onChange }: AwsS3FormProps) {
         onValueChange={v => onChange({ ...form, access_key: v })}
       />
 
-      <Input
+      <StorageSecretField
         label="Secret Access Key"
-        labelPlacement="outside"
-        size="sm"
-        type="password"
         isRequired
         value={form.secret_key ?? ""}
         onValueChange={v => onChange({ ...form, secret_key: v })}

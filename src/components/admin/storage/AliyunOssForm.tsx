@@ -1,6 +1,7 @@
 "use client";
 
 import { Input, Switch } from "@heroui/react";
+import { StorageSecretField } from "@/components/admin/storage/StorageSecretField";
 import type { StoragePolicy } from "@/types/storage-policy";
 
 interface AliyunOssFormProps {
@@ -74,11 +75,8 @@ export function AliyunOssForm({ form, onChange }: AliyunOssFormProps) {
         onValueChange={v => onChange({ ...form, access_key: v })}
       />
 
-      <Input
+      <StorageSecretField
         label="AccessKey Secret"
-        labelPlacement="outside"
-        size="sm"
-        type="password"
         isRequired
         value={form.secret_key ?? ""}
         onValueChange={v => onChange({ ...form, secret_key: v })}

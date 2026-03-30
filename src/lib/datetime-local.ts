@@ -29,3 +29,12 @@ export function datetimeLocalToRFC3339(local: string): string | undefined {
   if (Number.isNaN(d.getTime())) return undefined;
   return d.toISOString();
 }
+
+/**
+ * 从当前时刻起经过指定小时数后的本地日期时间（YYYY-MM-DDTHH:mm），
+ * 与定时发布、HeroUI DatePicker 使用的格式一致；基于绝对时间毫秒加法，再按本地时区展示。
+ */
+export function datetimeLocalAfterHoursFromNow(hours: number): string {
+  const d = new Date(Date.now() + hours * 3600000);
+  return isoStringToDatetimeLocal(d.toISOString());
+}

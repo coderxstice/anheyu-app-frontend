@@ -1,6 +1,15 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, type ReactNode } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from "react";
+import { DatePicker } from "@heroui/date-picker";
+import { AdminDatePickerLocale } from "@/components/admin/AdminDatePickerLocale";
+import { parseAbsoluteToLocal } from "@internationalized/date";
+import type { ZonedDateTime } from "@internationalized/date";
+import {
+  datetimeLocalToRFC3339,
+  datetimeLocalAfterHoursFromNow,
+  isoStringToDatetimeLocal,
+} from "@/lib/datetime-local";
 import {
   X,
   Plus,
@@ -78,6 +87,67 @@ const QUICK_TIMES = [
   { label: "后天", hours: 48 },
   { label: "一周后", hours: 168 },
 ];
+
+/** HeroUI 日期时间选择器：与相册/站点设置一致，替代原生 datetime-local */
+function SbDateTimePicker({
+  label,
+  value,
+  onChange,
+  hint,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  hint?: ReactNode;
+}) {
+  const pickerValue = useMemo(() => {
+    const t = value?.trim();
+    if (!t) return undefined;
+    const rfc = datetimeLocalToRFC3339(t);
+    if (!rfc) return undefined;
+    try {
+      return parseAbsoluteToLocal(rfc);
+    } catch {
+      return undefined;
+    }
+  }, [value]);
+
+  return (
+    <div className="sb-field">
+      <span className="sb-label">{label}</span>
+      <AdminDatePickerLocale>
+        <DatePicker
+          aria-label={label}
+          label={undefined}
+          granularity="minute"
+          hourCycle={24}
+          hideTimeZone
+          value={pickerValue}
+          onChange={(d: ZonedDateTime | null) => {
+            if (!d) {
+              onChange("");
+              return;
+            }
+            onChange(isoStringToDatetimeLocal(d.toAbsoluteString()));
+          }}
+          labelPlacement="outside"
+          classNames={{
+            base: "w-full max-w-full min-w-0",
+            inputWrapper:
+              "h-9 min-h-9 gap-2 rounded-xl border border-border/70 bg-background/80 px-2 py-0 shadow-sm backdrop-blur-sm transition-all duration-200 hover:border-border data-[hover=true]:bg-background data-[focus=true]:border-primary/60 data-[focus=true]:shadow-md",
+            innerWrapper: "min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
+            input: "text-sm min-w-0",
+            segment: "text-sm tabular-nums",
+            selectorButton: "h-8 w-8 min-h-8 min-w-8 shrink-0 rounded-lg",
+            selectorIcon: "text-muted-foreground",
+            popoverContent: "rounded-2xl border border-border/60 shadow-xl",
+          }}
+        />
+      </AdminDatePickerLocale>
+      {hint}
+    </div>
+  );
+}
 
 // ═══════════════════════════════════════════
 // 原子 UI 组件（纯手写，不依赖任何 UI 库）
@@ -175,7 +245,13 @@ function SbToggle({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <button type="button" className="sb-toggle-row" onClick={() => onChange(!checked)}>
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      className="sb-toggle-row"
+      onClick={() => onChange(!checked)}
+    >
       <div className="min-w-0 flex-1">
         <span className="sb-toggle-label">{label}</span>
         {description && <span className="sb-toggle-desc">{description}</span>}
@@ -211,19 +287,36 @@ function SbMultiSelect({
   const [search, setSearch] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [listboxId] = useState(() => sbDomId("sb-ms-l"));
 
-  // 点击外部关闭
+  const closeDropdown = useCallback(() => {
+    setOpen(false);
+    setSearch("");
+  }, []);
+
   useEffect(() => {
     if (!open) return;
-    const handler = (e: MouseEvent) => {
+
+    const onPointerDown = (e: PointerEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-        setSearch("");
+        closeDropdown();
       }
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeDropdown();
+      }
+    };
+
+    document.addEventListener("pointerdown", onPointerDown, true);
+    document.addEventListener("keydown", onKeyDown, true);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown, true);
+      document.removeEventListener("keydown", onKeyDown, true);
+    };
+  }, [open, closeDropdown]);
 
   const toggle = (id: string) => {
     onChange(selectedIds.includes(id) ? selectedIds.filter(x => x !== id) : [...selectedIds, id]);
@@ -253,10 +346,25 @@ function SbMultiSelect({
     }
   };
 
+  const valueLabel = isLoading
+    ? "加载中"
+    : selectedNames.length > 0
+      ? selectedNames.join("、")
+      : placeholder || "请选择";
+  const triggerAriaLabel = label ? `${label}：${valueLabel}` : valueLabel;
+
   return (
     <div className="sb-field" ref={containerRef}>
       {label && <span className="sb-label">{label}</span>}
-      <button type="button" className="sb-select-trigger" onClick={() => setOpen(!open)}>
+      <button
+        type="button"
+        className="sb-select-trigger"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={open ? listboxId : undefined}
+        aria-label={triggerAriaLabel}
+        onClick={() => setOpen(!open)}
+      >
         {isLoading ? (
           <span className="sb-select-placeholder">
             <Loader2 className="w-3 h-3 animate-spin inline mr-1" />
@@ -270,18 +378,18 @@ function SbMultiSelect({
         <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
 
-      {/* 下拉面板 */}
       {open && (
         <div className="sb-dropdown">
-          {/* 搜索 */}
           <div className="sb-dropdown-search">
-            <Search className="w-3 h-3 text-(--sb-muted)" />
+            <Search className="w-3 h-3 text-(--sb-muted)" aria-hidden />
             <input
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="搜索..."
               className="sb-dropdown-search-input"
+              aria-label="搜索选项"
+              aria-controls={listboxId}
               autoFocus
               onKeyDown={e => {
                 if (e.key === "Enter" && canCreate) {
@@ -291,40 +399,50 @@ function SbMultiSelect({
               }}
             />
           </div>
-          {/* 选项列表 */}
-          <div className="sb-dropdown-list">
-            {filtered.length === 0 && !canCreate && <div className="sb-dropdown-empty">无匹配项</div>}
+          <div
+            id={listboxId}
+            role="listbox"
+            aria-multiselectable="true"
+            aria-label={label ?? "选项列表"}
+            className="sb-dropdown-list"
+          >
+            {filtered.length === 0 && !canCreate && (
+              <div className="sb-dropdown-empty" role="status">
+                无匹配项
+              </div>
+            )}
             {filtered.map(opt => {
               const isSelected = selectedIds.includes(opt.id);
               return (
                 <button
                   key={opt.id}
                   type="button"
+                  role="option"
+                  aria-selected={isSelected}
                   className={`sb-dropdown-item ${isSelected ? "sb-dropdown-item-active" : ""}`}
                   onClick={() => toggle(opt.id)}
                 >
-                  <span className={`sb-checkbox ${isSelected ? "sb-checkbox-checked" : ""}`}>
+                  <span className={`sb-checkbox ${isSelected ? "sb-checkbox-checked" : ""}`} aria-hidden>
                     {isSelected && <Check className="w-2.5 h-2.5" />}
                   </span>
                   <span className="truncate">{opt.name}</span>
                 </button>
               );
             })}
-            {/* 创建新选项 */}
-            {canCreate && (
-              <button
-                type="button"
-                className="sb-dropdown-item sb-dropdown-create"
-                onClick={handleCreate}
-                disabled={isCreating}
-              >
-                {isCreating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
-                <span className="truncate">
-                  {createLabel || "创建"} &ldquo;{search.trim()}&rdquo;
-                </span>
-              </button>
-            )}
           </div>
+          {canCreate && (
+            <button
+              type="button"
+              className="sb-dropdown-item sb-dropdown-create"
+              onClick={handleCreate}
+              disabled={isCreating}
+            >
+              {isCreating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+              <span className="truncate">
+                {createLabel || "创建"} &ldquo;{search.trim()}&rdquo;
+              </span>
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -362,10 +480,16 @@ function SbSection({
 
   return (
     <div className="sb-section">
-      <button type="button" className="sb-section-trigger" onClick={() => setOpen(!open)}>
+      <button
+        type="button"
+        className="sb-section-trigger"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+      >
         <span className="sb-section-title">{title}</span>
         <ChevronDown
           className={`w-3 h-3 text-(--sb-muted) transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          aria-hidden
         />
       </button>
       <div
@@ -386,13 +510,6 @@ function SbSection({
 function CoverPreview({ url }: { url: string }) {
   const [hasError, setHasError] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const [prevUrl, setPrevUrl] = useState(url);
-
-  if (url !== prevUrl) {
-    setPrevUrl(url);
-    setHasError(false);
-    setLoaded(false);
-  }
 
   if (!url || hasError) {
     return (
@@ -430,8 +547,8 @@ function TagPill({ name, onRemove }: { name: string; onRemove: () => void }) {
   return (
     <span className="sb-tag">
       {name}
-      <button type="button" className="sb-tag-remove" onClick={onRemove}>
-        <X className="w-2.5 h-2.5" />
+      <button type="button" className="sb-tag-remove" onClick={onRemove} aria-label={`移除标签 ${name}`}>
+        <X className="w-2.5 h-2.5" aria-hidden />
       </button>
     </span>
   );
@@ -493,6 +610,8 @@ function TOCTreeNode({
         {hasChildren ? (
           <button
             type="button"
+            aria-expanded={!collapsed}
+            aria-label={collapsed ? "展开子大纲" : "收起子大纲"}
             onClick={e => {
               e.stopPropagation();
               setCollapsed(!collapsed);
@@ -501,6 +620,7 @@ function TOCTreeNode({
           >
             <span
               className={`text-[9px] leading-none transition-transform duration-150 ${collapsed ? "" : "rotate-90"}`}
+              aria-hidden
             >
               ▶
             </span>
@@ -648,11 +768,13 @@ function SettingsContent({
   return (
     <div className="sb-body">
       {/* ── 状态选择器 ── */}
-      <div className="sb-status-bar">
+      <div className="sb-status-bar" role="radiogroup" aria-label="文章状态">
         {STATUS_OPTIONS.map(opt => (
           <button
             key={opt.key}
             type="button"
+            role="radio"
+            aria-checked={meta.status === opt.key}
             onClick={() => onUpdateField("status", opt.key)}
             className={`sb-status-item ${meta.status === opt.key ? opt.activeClass : ""}`}
           >
@@ -664,15 +786,16 @@ function SettingsContent({
 
       {meta.status !== "SCHEDULED" && (
         <SbSection title="发布时间" defaultOpen>
-          <SbInput
+          <SbDateTimePicker
             label="自定义发布日期"
             value={meta.custom_published_at}
             onChange={v => onUpdateField("custom_published_at", v)}
-            type="datetime-local"
+            hint={
+              <p className="text-[11px] text-muted-foreground mt-1.5 mb-0 leading-snug px-0.5">
+                用于前台列表、归档与排序的发布日期（对应文章创建时间）。留空则使用保存时的当前时间。
+              </p>
+            }
           />
-          <p className="text-[11px] text-muted-foreground -mt-1 mb-0.5 leading-snug px-0.5">
-            用于前台列表、归档与排序的发布日期（对应文章创建时间）。留空则使用保存时的当前时间。
-          </p>
         </SbSection>
       )}
 
@@ -722,7 +845,7 @@ function SettingsContent({
         {/* 封面 */}
         <div className="sb-field">
           <span className="sb-label">封面图</span>
-          <CoverPreview url={meta.cover_url} />
+          <CoverPreview key={meta.cover_url || "cover-empty"} url={meta.cover_url} />
           <div className="flex gap-1.5 mt-1.5">
             <input
               type="text"
@@ -757,7 +880,7 @@ function SettingsContent({
         {/* 顶部大图 */}
         <div className="sb-field">
           <span className="sb-label">顶部大图</span>
-          <CoverPreview url={meta.top_img_url} />
+          <CoverPreview key={meta.top_img_url || "topimg-empty"} url={meta.top_img_url} />
           <div className="flex gap-1.5 mt-1.5">
             <input
               type="text"
@@ -967,11 +1090,10 @@ function SettingsContent({
       {/* ── 定时发布（仅定时状态时） ── */}
       {meta.status === "SCHEDULED" && (
         <SbSection title="定时发布" defaultOpen>
-          <SbInput
+          <SbDateTimePicker
             label="计划发布时间"
             value={meta.scheduled_at}
             onChange={v => onUpdateField("scheduled_at", v)}
-            type="datetime-local"
           />
           <div className="sb-field">
             <span className="sb-label">快捷设定</span>
@@ -981,10 +1103,7 @@ function SettingsContent({
                   key={qt.label}
                   type="button"
                   className="sb-quick-btn"
-                  onClick={() => {
-                    const target = new Date(Date.now() + qt.hours * 3600000);
-                    onUpdateField("scheduled_at", target.toISOString().slice(0, 16));
-                  }}
+                  onClick={() => onUpdateField("scheduled_at", datetimeLocalAfterHoursFromNow(qt.hours))}
                 >
                   {qt.label}
                 </button>

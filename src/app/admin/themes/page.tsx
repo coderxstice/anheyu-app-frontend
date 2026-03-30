@@ -80,7 +80,7 @@ function ThemeCard({
       )}
     >
       {/* 预览区 */}
-      <div className="relative aspect-video bg-gradient-to-br from-default-100 to-default-50 dark:from-default-100/20 dark:to-default-50/10">
+      <div className="relative aspect-video bg-linear-to-br from-default-100 to-default-50 dark:from-default-100/20 dark:to-default-50/10">
         {theme.previewUrl ? (
           <img src={theme.previewUrl} alt={theme.name} className="absolute inset-0 w-full h-full object-cover" />
         ) : (
@@ -196,7 +196,7 @@ function ThemeCard({
                       当前主题
                     </Button>
                     {theme.ssrStatus === "running" && theme.ssrPort && (
-                      <span className="text-[10px] text-muted-foreground/60 bg-muted dark:bg-white/[0.06] px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] text-muted-foreground/60 bg-muted dark:bg-white/6 px-1.5 py-0.5 rounded">
                         端口: {theme.ssrPort}
                       </span>
                     )}
