@@ -9,6 +9,7 @@ import { useAuthStore } from "@/store/auth-store";
 import { Spinner } from "@/components/ui";
 
 type ActivateStatus = "loading" | "success" | "error";
+const MISSING_PARAMS_MESSAGE = "激活链接无效：缺少必要参数。";
 
 function ActivateInner() {
   const searchParams = useSearchParams();
@@ -17,24 +18,25 @@ function ActivateInner() {
 
   const id = searchParams.get("id");
   const sign = searchParams.get("sign");
+  const hasRequiredParams = Boolean(id && sign);
 
-  const [status, setStatus] = useState<ActivateStatus>("loading");
-  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState<ActivateStatus>(hasRequiredParams ? "loading" : "error");
+  const [message, setMessage] = useState(hasRequiredParams ? "" : MISSING_PARAMS_MESSAGE);
   const activatedRef = useRef(false);
 
   useEffect(() => {
     if (activatedRef.current) return;
+    const activationId = id;
+    const activationSign = sign;
 
-    if (!id || !sign) {
-      setStatus("error");
-      setMessage("激活链接无效：缺少必要参数。");
+    if (!hasRequiredParams || !activationId || !activationSign) {
       return;
     }
 
     activatedRef.current = true;
 
     authApi
-      .activateUser(id, sign)
+      .activateUser(activationId, activationSign)
       .then((response) => {
         if (response.code === 200 && response.data) {
           setAuth({
@@ -56,7 +58,7 @@ function ActivateInner() {
         setStatus("error");
         setMessage("激活链接无效或已过期，请重新注册或联系管理员。");
       });
-  }, [id, sign, setAuth, router]);
+  }, [hasRequiredParams, id, sign, setAuth, router]);
 
   return (
     <div className="w-full max-w-[400px] mx-4">

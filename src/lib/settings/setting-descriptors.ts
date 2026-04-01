@@ -25,6 +25,7 @@ export type SettingCategoryId =
   | "site-icon"
   | "appearance-skin"
   | "appearance-home"
+  | "appearance-userpanel"
   | "appearance-sidebar"
   | "appearance-page"
   | "content-post"
@@ -488,6 +489,12 @@ const categoryDescriptors: Record<SettingCategoryId, SettingDescriptor[]> = {
     { backendKey: K.KEY_FOOTER_BAR_LINK_LIST, type: "json" },
     { backendKey: K.KEY_FOOTER_UPTIME_KUMA_ENABLE, type: "boolean" },
     { backendKey: K.KEY_FOOTER_UPTIME_KUMA_PAGE_URL, type: "string" },
+  ],
+  "appearance-userpanel": [
+    { backendKey: K.KEY_USERPANEL_SHOW_USER_CENTER, type: "boolean", defaultValue: "true" },
+    { backendKey: K.KEY_USERPANEL_SHOW_NOTIFICATIONS, type: "boolean", defaultValue: "true" },
+    { backendKey: K.KEY_USERPANEL_SHOW_PUBLISH_ARTICLE, type: "boolean", defaultValue: "true" },
+    { backendKey: K.KEY_USERPANEL_SHOW_ADMIN_DASHBOARD, type: "boolean", defaultValue: "true" },
   ],
   "appearance-sidebar": [
     { backendKey: K.KEY_SIDEBAR_AUTHOR_ENABLE, type: "boolean", defaultValue: "true" },

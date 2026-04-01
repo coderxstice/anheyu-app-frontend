@@ -17,6 +17,9 @@ export const settingsFormRegistry: Record<SettingCategoryId, LazyForm> = {
   "appearance-home": lazy(() =>
     import("@/components/admin/settings/HomePageForm").then(m => ({ default: m.HomePageForm }))
   ) as LazyForm,
+  "appearance-userpanel": lazy(() =>
+    import("@/components/admin/settings/UserPanelSettingsForm").then(m => ({ default: m.UserPanelSettingsForm }))
+  ) as LazyForm,
   "appearance-sidebar": lazy(() =>
     import("@/components/admin/settings/SidebarForm").then(m => ({ default: m.SidebarForm }))
   ) as LazyForm,

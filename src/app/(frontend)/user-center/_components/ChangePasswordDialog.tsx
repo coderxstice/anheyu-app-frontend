@@ -28,14 +28,14 @@ export function ChangePasswordDialog({ open, onClose }: ChangePasswordDialogProp
     }
   }, [open]);
 
-  const validate = (): string | null => {
+  const validate = useCallback((): string | null => {
     if (!oldPassword) return "请输入当前密码";
     if (!newPassword) return "请输入新密码";
     if (newPassword.length < 6) return "新密码长度不能少于 6 位";
     if (newPassword === oldPassword) return "新密码不能与旧密码相同";
     if (newPassword !== confirmPassword) return "两次输入的密码不一致";
     return null;
-  };
+  }, [oldPassword, newPassword, confirmPassword]);
 
   const handleSubmit = useCallback(async () => {
     if (submitting) return;
@@ -60,7 +60,7 @@ export function ChangePasswordDialog({ open, onClose }: ChangePasswordDialogProp
     } finally {
       setSubmitting(false);
     }
-  }, [oldPassword, newPassword, confirmPassword, onClose, logout]);
+  }, [submitting, validate, oldPassword, newPassword, onClose, logout]);
 
   useEffect(() => {
     if (!open) return;

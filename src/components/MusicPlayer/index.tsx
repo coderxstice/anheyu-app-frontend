@@ -173,13 +173,6 @@ export function MusicPlayer() {
       }
     };
 
-    // 监听其他播放器播放事件，避免冲突
-    const handleEssayMusicPlay = () => {
-      if (audioPlayerRef.current.audioState.isPlaying) {
-        audioPlayerRef.current.togglePlay();
-      }
-    };
-
     window.addEventListener("music-toggle", handleMusicToggle);
     window.addEventListener("music-next", handleMusicNext);
     window.addEventListener("music-prev", handleMusicPrev);
@@ -188,7 +181,6 @@ export function MusicPlayer() {
     window.addEventListener("music-player-next", handleMusicNext);
     window.addEventListener("music-player-get-play-status", handleGetPlayStatus);
     window.addEventListener("music-player-get-song-name", handleGetSongName);
-    window.addEventListener("essay-music-play", handleEssayMusicPlay);
 
     return () => {
       window.removeEventListener("music-toggle", handleMusicToggle);
@@ -199,7 +191,6 @@ export function MusicPlayer() {
       window.removeEventListener("music-player-next", handleMusicNext);
       window.removeEventListener("music-player-get-play-status", handleGetPlayStatus);
       window.removeEventListener("music-player-get-song-name", handleGetSongName);
-      window.removeEventListener("essay-music-play", handleEssayMusicPlay);
     };
   }, []);
 
