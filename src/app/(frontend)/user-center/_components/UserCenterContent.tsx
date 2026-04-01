@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   User,
@@ -165,7 +166,14 @@ export function UserCenterContent() {
           <div className={styles.profileHeader}>
             <div className={styles.avatarSection}>
               <div className={styles.avatarWrapper} onClick={handleAvatarClick}>
-                <img src={userAvatar} alt={user?.nickname || "avatar"} className={styles.avatar} />
+                <Image
+                  src={userAvatar}
+                  alt={user?.nickname || "avatar"}
+                  className={styles.avatar}
+                  width={120}
+                  height={120}
+                  unoptimized
+                />
                 <div className={styles.avatarOverlay}>
                   <Camera />
                 </div>

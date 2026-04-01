@@ -37,6 +37,10 @@ export const KEY_HEADER_MENU = "header.menu";
 export const KEY_HEADER_NAV_TRAVELLING = "header.nav.travelling";
 export const KEY_HEADER_NAV_CLOCK = "header.nav.clock";
 export const KEY_HEADER_NAV_MENU = "header.nav.menu";
+export const KEY_USERPANEL_SHOW_USER_CENTER = "userpanel.show_user_center";
+export const KEY_USERPANEL_SHOW_NOTIFICATIONS = "userpanel.show_notifications";
+export const KEY_USERPANEL_SHOW_PUBLISH_ARTICLE = "userpanel.show_publish_article";
+export const KEY_USERPANEL_SHOW_ADMIN_DASHBOARD = "userpanel.show_admin_dashboard";
 export const KEY_HOME_TOP = "HOME_TOP";
 export const KEY_CREATIVITY = "CREATIVITY";
 

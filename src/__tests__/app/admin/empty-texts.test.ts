@@ -8,7 +8,6 @@ describe("ADMIN_EMPTY_TEXTS", () => {
     "albums",
     "docSeries",
     "comments",
-    "essays",
     "friends",
     "orders",
     "supports",
@@ -34,5 +33,9 @@ describe("ADMIN_EMPTY_TEXTS", () => {
       const entry = ADMIN_EMPTY_TEXTS[key];
       expect(entry.filterEmptyText).toMatch(/^没有匹配的/);
     }
+  });
+
+  it("community edition does not expose essays module", () => {
+    expect(ADMIN_EMPTY_TEXTS).not.toHaveProperty("essays");
   });
 });

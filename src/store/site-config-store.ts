@@ -20,6 +20,13 @@ interface CachedData {
   timestamp: number;
 }
 
+interface UserPanelPublicConfig {
+  show_user_center?: unknown;
+  show_notifications?: unknown;
+  show_publish_article?: unknown;
+  show_admin_dashboard?: unknown;
+}
+
 interface SiteConfigState {
   // 状态
   siteConfig: SiteConfigData;
@@ -35,11 +42,27 @@ interface SiteConfigState {
   getSiteUrl: () => string | null;
   getApiUrl: () => string | null;
   enableRegistration: () => boolean;
+  userPanelConfig: () => {
+    showUserCenter: boolean;
+    showNotifications: boolean;
+    showPublishArticle: boolean;
+    showAdminDashboard: boolean;
+  };
 
   // Actions
   fetchSiteConfig: () => Promise<void>;
   clearCache: () => void;
   forceRefreshFromServer: () => Promise<void>;
+}
+
+function isSettingEnabled(value: unknown, defaultValue = true): boolean {
+  if (value === undefined || value === null || value === "") {
+    return defaultValue;
+  }
+  if (typeof value === "boolean") {
+    return value;
+  }
+  return String(value).toLowerCase() === "true";
 }
 
 export const useSiteConfigStore = create<SiteConfigState>((set, get) => ({
@@ -81,6 +104,18 @@ export const useSiteConfigStore = create<SiteConfigState>((set, get) => ({
       return apiUrl.endsWith("/") ? apiUrl : apiUrl + "/";
     }
     return null;
+  },
+
+  userPanelConfig: () => {
+    const config = get().siteConfig;
+    const userPanel = (config.userpanel ?? {}) as UserPanelPublicConfig;
+
+    return {
+      showUserCenter: isSettingEnabled(userPanel.show_user_center),
+      showNotifications: isSettingEnabled(userPanel.show_notifications),
+      showPublishArticle: isSettingEnabled(userPanel.show_publish_article),
+      showAdminDashboard: isSettingEnabled(userPanel.show_admin_dashboard),
+    };
   },
 
   enableRegistration: () => {

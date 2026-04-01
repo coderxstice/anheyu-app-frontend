@@ -49,12 +49,6 @@ export const ADMIN_EMPTY_TEXTS = {
     emptyText: "还没有评论",
     emptyHint: "用户发表评论后将在这里显示",
   },
-  essays: {
-    filterEmptyText: "没有匹配的说说",
-    emptyText: "还没有说说",
-    filterHint: "试试调整筛选条件",
-    emptyHint: "点击「发布说说」开始分享你的动态",
-  },
   friends: {
     filterEmptyText: "没有匹配的友链",
     emptyText: "还没有友链",

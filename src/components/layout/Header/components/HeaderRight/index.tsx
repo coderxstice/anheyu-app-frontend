@@ -38,9 +38,10 @@ export function HeaderRight({
 }: HeaderRightProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated, logout, roles } = useAuthStore();
+  const { user, isAuthenticated, logout, isAdmin: checkIsAdmin } = useAuthStore();
   const registrationEnabledRaw = useSiteConfigStore(s => s.enableRegistration());
   const siteConfig = useSiteConfigStore(s => s.siteConfig);
+  const userPanelConfig = useSiteConfigStore(s => s.userPanelConfig());
   const isMobile = useIsMobile();
 
   const isClient = useSyncExternalStore(() => () => {}, () => true, () => false);
@@ -60,9 +61,7 @@ export function HeaderRight({
   }, [isFooterVisible, scrollPercent]);
 
   // 是否为管理员
-  const isAdmin = useMemo(() => {
-    return user?.userGroupID === 1 || roles.includes("1");
-  }, [user, roles]);
+  const isAdmin = useMemo(() => checkIsAdmin(), [checkIsAdmin]);
 
   const panelAvatarUrl = useMemo(() => {
     if (!user) return `https://cravatar.cn/avatar/?s=200&d=mp`;
@@ -217,42 +216,50 @@ export function HeaderRight({
 
               {/* 功能网格 */}
               <div className={styles.panelGrid}>
-                <div className={styles.gridItem} onClick={handleGoToUserCenter}>
-                  <div className={styles.gridIcon} style={{ background: "#e8f4ff", color: "#409eff" }}>
-                    <Icon icon="ri:user-3-line" width={20} height={20} />
+                {userPanelConfig.showUserCenter && (
+                  <div className={styles.gridItem} onClick={handleGoToUserCenter}>
+                    <div className={styles.gridIcon} style={{ background: "#e8f4ff", color: "#409eff" }}>
+                      <Icon icon="ri:user-3-line" width={20} height={20} />
+                    </div>
+                    <span>用户中心</span>
                   </div>
-                  <span>用户中心</span>
-                </div>
-                <div
-                  className={styles.gridItem}
-                  onClick={() => {
-                    window.open("/notifications", "_blank");
-                  }}
-                >
-                  <div className={styles.gridIcon} style={{ background: "#fff8e8", color: "#e6a23c" }}>
-                    <Icon icon="ri:notification-2-line" width={20} height={20} />
+                )}
+                {userPanelConfig.showNotifications && (
+                  <div
+                    className={styles.gridItem}
+                    onClick={() => {
+                      window.open("/notifications", "_blank");
+                    }}
+                  >
+                    <div className={styles.gridIcon} style={{ background: "#fff8e8", color: "#e6a23c" }}>
+                      <Icon icon="ri:notification-2-line" width={20} height={20} />
+                    </div>
+                    <span>全部通知</span>
                   </div>
-                  <span>全部通知</span>
-                </div>
+                )}
                 {isAdmin && (
                   <>
-                    <div
-                      className={styles.gridItem}
-                      onClick={() => {
-                        window.open("/admin/post-management", "_blank");
-                      }}
-                    >
-                      <div className={styles.gridIcon} style={{ background: "#e8fff0", color: "#67c23a" }}>
-                        <Icon icon="ri:article-line" width={20} height={20} />
+                    {userPanelConfig.showPublishArticle && (
+                      <div
+                        className={styles.gridItem}
+                        onClick={() => {
+                          window.open("/admin/post-management", "_blank");
+                        }}
+                      >
+                        <div className={styles.gridIcon} style={{ background: "#e8fff0", color: "#67c23a" }}>
+                          <Icon icon="ri:article-line" width={20} height={20} />
+                        </div>
+                        <span>发布文章</span>
                       </div>
-                      <span>发布文章</span>
-                    </div>
-                    <div className={styles.gridItem} onClick={handleGoToAdmin}>
-                      <div className={styles.gridIcon} style={{ background: "#f0e8ff", color: "#9c27b0" }}>
-                        <Icon icon="ri:settings-3-line" width={20} height={20} />
+                    )}
+                    {userPanelConfig.showAdminDashboard && (
+                      <div className={styles.gridItem} onClick={handleGoToAdmin}>
+                        <div className={styles.gridIcon} style={{ background: "#f0e8ff", color: "#9c27b0" }}>
+                          <Icon icon="ri:settings-3-line" width={20} height={20} />
+                        </div>
+                        <span>后台管理</span>
                       </div>
-                      <span>后台管理</span>
-                    </div>
+                    )}
                   </>
                 )}
                 <div className={styles.gridItem} onClick={handleLogout}>
