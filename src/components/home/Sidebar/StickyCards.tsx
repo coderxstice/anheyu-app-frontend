@@ -65,6 +65,7 @@ const TagsCard = memo(function TagsCard({ highlightIds = [] }: TagsCardProps) {
               <Link
                 key={tag.id}
                 href={`/tags/${encodeURIComponent(tag.name)}/`}
+                prefetch={false}
                 onClick={e => handleTagClick(e, tag.name)}
                 className={`${styles.tagLink} ${isHighlight ? styles.isHighlight : ""} ${
                   isSelected ? styles.isSelected : ""
@@ -79,7 +80,7 @@ const TagsCard = memo(function TagsCard({ highlightIds = [] }: TagsCardProps) {
       </div>
       {isOverflow && (
         <div className={styles.cardFooter}>
-          <Link href="/tags" className={styles.viewAllButton}>
+          <Link href="/tags" prefetch={false} className={styles.viewAllButton}>
             查看全部
           </Link>
         </div>
@@ -118,7 +119,7 @@ const ArchivesCard = memo(function ArchivesCard() {
         <ul className={styles.archiveList}>
           {archives.map(archive => (
             <li key={`${archive.year}-${archive.month}`} className={styles.archiveItem}>
-              <Link href={`/archives/${archive.year}/${archive.month}/`} className={styles.archiveLink}>
+              <Link href={`/archives/${archive.year}/${archive.month}/`} prefetch={false} className={styles.archiveLink}>
                 <span className={styles.archiveDate}>
                   {getMonthName(archive.month)} {archive.year}
                 </span>

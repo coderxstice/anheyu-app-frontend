@@ -163,12 +163,12 @@ export function HeaderRight({
                 <div className={styles.loginDesc}>登录后解锁更多功能</div>
               </div>
               <div className={styles.loginActions}>
-                <Link href="/login" className={styles.loginBtn}>
+                <Link href="/login" prefetch={false} className={styles.loginBtn}>
                   <Icon icon="ri:login-box-line" width={14} height={14} />
                   <span>登录</span>
                 </Link>
                 {registrationEnabled && (
-                  <Link href="/login?register=1" className={styles.registerBtn}>
+                  <Link href="/login?register=1" prefetch={false} className={styles.registerBtn}>
                     <Icon icon="ri:user-add-line" width={14} height={14} />
                     <span>注册</span>
                   </Link>

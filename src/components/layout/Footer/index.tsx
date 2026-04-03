@@ -86,7 +86,7 @@ function FooterLink({
 
   if (isInternalLink(href) && !openInNewTab) {
     return (
-      <Link className={className} href={href} title={title}>
+      <Link className={className} href={href} prefetch={false} title={title}>
         {children}
       </Link>
     );
@@ -389,7 +389,7 @@ export function Footer() {
                       {friend.name}
                     </a>
                   ))}
-                  <Link href="/link" className={styles.footerItem} title="更多友情链接">
+                  <Link href="/link" prefetch={false} className={styles.footerItem} title="更多友情链接">
                     更多
                   </Link>
                 </div>
