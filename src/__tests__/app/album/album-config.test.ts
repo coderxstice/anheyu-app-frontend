@@ -70,7 +70,7 @@ describe("parseAlbumConfig", () => {
 
     const parsed = parseAlbumConfig(config);
 
-    expect(parsed.layoutMode).toBe("grid");
+    expect(parsed.layoutMode).toBe("waterfall");
     expect(parsed.pageSize).toBe(24);
     expect(parsed.enableComment).toBe(false);
     expect(parsed.waterfall.gap).toBe(16);
