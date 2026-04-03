@@ -24,6 +24,7 @@ import { PostPaginationFloat } from "./PostPaginationFloat";
 import { CommentSection } from "./Comment";
 import { CommentBarrage } from "./CommentBarrage";
 import { PostSidebar } from "./Sidebar";
+import { useShallow } from "zustand/shallow";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import { useUiStore } from "@/store/ui-store";
 import { usePageStore } from "@/store/page-store";
@@ -45,10 +46,15 @@ function buildArticleContentWithCustomJS(contentHTML: string, customJS?: string)
 }
 
 export function PostDetailContent({ article, recentArticles = [] }: PostDetailContentProps) {
-  const siteConfig = useSiteConfigStore(state => state.siteConfig);
+  const commentConfig = useSiteConfigStore(useShallow(state => state.siteConfig?.comment));
+  const appName = useSiteConfigStore(state => state.siteConfig?.APP_NAME);
+  const siteOwnerName = useSiteConfigStore(state => state.siteConfig?.frontDesk?.siteOwner?.name);
+  const postDefaultCover = useSiteConfigStore(state => state.siteConfig?.post?.default?.default_cover);
+  const articleShowRelated = useSiteConfigStore(state => state.siteConfig?.article?.showRelated);
+  const gravatarUrl = useSiteConfigStore(state => state.siteConfig?.GRAVATAR_URL);
+  const defaultGravatarType = useSiteConfigStore(state => state.siteConfig?.DEFAULT_GRAVATAR_TYPE);
   const setPageTitle = usePageStore(state => state.setPageTitle);
   const isCommentBarrageVisible = useUiStore(state => state.isCommentBarrageVisible);
-  const commentConfig = siteConfig?.comment;
   const isCommentEnabled =
     commentConfig?.enable === undefined || commentConfig?.enable === true || commentConfig?.enable === "true";
   const isCommentBarrageEnabledBySite =
@@ -111,12 +117,11 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
     };
   }, [article.primary_color]);
 
-  const siteName = siteConfig?.APP_NAME || "安知鱼";
-  const ownerName = siteConfig?.frontDesk?.siteOwner?.name || "安知鱼";
-  const defaultCover = siteConfig?.post?.default?.default_cover || "/images/default-cover.webp";
+  const siteName = appName || "安知鱼";
+  const ownerName = siteOwnerName || "安知鱼";
+  const defaultCover = postDefaultCover || "/images/default-cover.webp";
   const customJS = article.extra_config?.custom_js;
   const hasCustomJS = !!customJS && customJS.trim() !== "";
-  const articleShowRelated = (siteConfig as Record<string, unknown>)["article.showRelated"];
   const isRelatedEnabled = articleShowRelated !== false && articleShowRelated !== "false";
   const contentWithCustomJS = useMemo(
     () => buildArticleContentWithCustomJS(article.content_html, customJS),
@@ -208,8 +213,8 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
       />
       {isCommentEnabled && isCommentBarrageEnabledBySite && isCommentBarrageVisible && (
         <CommentBarrage
-          gravatarUrl={siteConfig?.GRAVATAR_URL || "https://cravatar.cn/"}
-          defaultGravatarType={siteConfig?.DEFAULT_GRAVATAR_TYPE || "mp"}
+          gravatarUrl={gravatarUrl || "https://cravatar.cn/"}
+          defaultGravatarType={defaultGravatarType || "mp"}
           masterTag={commentConfig?.master_tag || "博主"}
         />
       )}

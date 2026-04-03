@@ -5,12 +5,10 @@
 "use client";
 
 import { useEffect, useRef, useCallback, useMemo } from "react";
-import { Fancybox } from "@fancyapps/ui";
 import { addToast } from "@heroui/react";
-import "@fancyapps/ui/dist/fancybox/fancybox.css";
-import "katex/dist/katex.min.css";
 import styles from "./PostContent.module.css";
 import "./code-highlight.css";
+import { useShallow } from "zustand/shallow";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import { apiClient } from "@/lib/api/client";
 
@@ -59,11 +57,13 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
   const contentRef = useRef<HTMLDivElement>(null);
   const mermaidCleanupRef = useRef<MermaidCleanupFn>(null);
   const codeCopyCleanupRef = useRef<(() => void) | null>(null);
-  const siteConfig = useSiteConfigStore(state => state.siteConfig);
+  const copyConfig = useSiteConfigStore(useShallow(state => state.siteConfig?.post?.copy));
+  const codeBlockRawConfig = useSiteConfigStore(useShallow(state => state.siteConfig?.post?.code_block));
+  const appName = useSiteConfigStore(state => state.siteConfig?.APP_NAME);
+  const siteOwnerName = useSiteConfigStore(state => state.siteConfig?.frontDesk?.siteOwner?.name);
 
   // ── 复制版权拦截 ──
   useEffect(() => {
-    const copyConfig = siteConfig?.post?.copy;
     // 如果复制功能被禁用或版权追加未启用，直接返回
     if (copyConfig?.enable === false) {
       // 禁止复制
@@ -92,8 +92,8 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
 
       // 生成版权文本
       const currentUrl = window.location.href;
-      const siteName = siteConfig?.APP_NAME || "本站";
-      const ownerName = siteConfig?.frontDesk?.siteOwner?.name || "博主";
+      const siteName = appName || "本站";
+      const ownerName = siteOwnerName || "博主";
       let copyrightText: string;
 
       if (articleInfo?.isReprint) {
@@ -127,16 +127,16 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
 
     document.addEventListener("copy", handleCopy as EventListener, true);
     return () => document.removeEventListener("copy", handleCopy as EventListener, true);
-  }, [siteConfig, articleInfo]);
+  }, [copyConfig, appName, siteOwnerName, articleInfo]);
 
   // 代码块配置
   const codeBlockConfig = useMemo(() => {
-    const codeMaxLines = siteConfig?.post?.code_block?.code_max_lines ?? 10;
-    const macStyle = siteConfig?.post?.code_block?.mac_style !== false;
+    const codeMaxLines = codeBlockRawConfig?.code_max_lines ?? 10;
+    const macStyle = codeBlockRawConfig?.mac_style !== false;
     // 每行高度约 26px (font-size 16px * line-height 1.6)，加上 padding 20px
     const collapsedHeight = codeMaxLines > 0 ? codeMaxLines * 26 + 20 : 0;
     return { codeMaxLines, collapsedHeight, macStyle };
-  }, [siteConfig?.post?.code_block?.code_max_lines, siteConfig?.post?.code_block?.mac_style]);
+  }, [codeBlockRawConfig?.code_max_lines, codeBlockRawConfig?.mac_style]);
 
   // 存储 Tip 清理函数
   const tipCleanupFnsRef = useRef<(() => void)[]>([]);
@@ -866,7 +866,8 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
       return;
     }
 
-    // 动态导入 KaTeX 和 auto-render
+    // 动态导入 KaTeX 样式和库
+    await import("katex/dist/katex.min.css");
     const katex = await import("katex").then(m => m.default);
 
     // 渲染 md-editor 格式的行内公式
@@ -1550,13 +1551,21 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     }
     mermaidCleanupRef.current = initMermaidZoom(currentContent);
 
-    // 初始化 Fancybox 图片查看器
-    Fancybox.bind(currentContent, "img:not(a img)", {
-      groupAll: true,
+    // 动态导入 Fancybox 图片查看器
+    let fancyboxModule: typeof import("@fancyapps/ui") | null = null;
+    let cancelled = false;
+    import("@fancyapps/ui/dist/fancybox/fancybox.css");
+    import("@fancyapps/ui").then(mod => {
+      if (cancelled) return;
+      fancyboxModule = mod;
+      mod.Fancybox.bind(currentContent, "img:not(a img)", {
+        groupAll: true,
+      });
     });
 
     // 清理函数
     return () => {
+      cancelled = true;
       if (codeCopyCleanupRef.current) {
         codeCopyCleanupRef.current();
         codeCopyCleanupRef.current = null;
@@ -1567,8 +1576,10 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
       }
       delete window.__musicPlayerToggle;
       delete window.__musicPlayerSeek;
-      Fancybox.unbind(currentContent);
-      Fancybox.close(true);
+      if (fancyboxModule) {
+        fancyboxModule.Fancybox.unbind(currentContent);
+        fancyboxModule.Fancybox.close(true);
+      }
     };
   }, [
     content,
