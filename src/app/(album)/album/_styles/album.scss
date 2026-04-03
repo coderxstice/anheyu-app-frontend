@@ -169,9 +169,7 @@
     z-index: 1;
     pointer-events: none;
     opacity: 0.9;
-    transition:
-      opacity 0.3s ease,
-      transform 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 
     h2 {
       margin: 0;
@@ -325,9 +323,7 @@
   backdrop-filter: saturate(180%) blur(20px);
   opacity: 0;
   transform: translateY(4em);
-  animation:
-    album-header-slide-up 0.8s ease-out 1s forwards,
-    album-header-fade-in 0.6s ease-in 1s forwards;
+  animation: album-header-slide-up 0.8s ease-out 1s forwards, album-header-fade-in 0.6s ease-in 1s forwards;
 
   .header-left {
     display: flex;
@@ -635,9 +631,7 @@
     border-radius: 50%;
     cursor: pointer;
     opacity: 0;
-    transition:
-      opacity 0.25s ease,
-      background 0.25s ease;
+    transition: opacity 0.25s ease, background 0.25s ease;
 
     svg {
       width: 20px;
@@ -662,9 +656,7 @@
     border: 0;
     cursor: pointer;
     opacity: 0;
-    transition:
-      opacity 0.25s ease,
-      color 0.25s ease;
+    transition: opacity 0.25s ease, color 0.25s ease;
 
     svg {
       width: 32px;
@@ -725,9 +717,7 @@
   box-shadow: 0 2px 6px rgb(0 0 0 / 20%);
   transform: translateY(-100%);
   opacity: 0;
-  transition:
-    transform 0.3s ease,
-    opacity 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease;
 
   &.is-visible {
     transform: translateY(0);
@@ -789,9 +779,7 @@
     height: 56px;
     padding: 0 12px;
     transform: translateY(0);
-    animation:
-      album-header-slide-up 0.6s ease-out 0.5s forwards,
-      album-header-fade-in 0.4s ease-in 0.5s forwards;
+    animation: album-header-slide-up 0.6s ease-out 0.5s forwards, album-header-fade-in 0.4s ease-in 0.5s forwards;
 
     .site-logo {
       width: 32px;

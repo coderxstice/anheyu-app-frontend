@@ -10,6 +10,11 @@ export const siteConfigApi = {
   getSiteConfig(): Promise<ApiResponse<SiteConfigData>> {
     return apiClient.get<SiteConfigData>("/api/public/site-config");
   },
+
+  /** 获取配置版本号（轻量接口，供缓存校验） */
+  getConfigVersion(): Promise<ApiResponse<{ version: number }>> {
+    return apiClient.get<{ version: number }>("/api/public/site-config/version");
+  },
 };
 
 /** @deprecated 使用 siteConfigApi 代替 */

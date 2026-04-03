@@ -15,6 +15,7 @@ import { useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { FaHashtag } from "react-icons/fa6";
 import { PostHeader } from "./PostHeader";
+import { ArticleLeadSummary } from "./ArticleLeadSummary";
 import { PostContent } from "./PostContent";
 import { PostCopyright } from "./PostCopyright";
 import { PostRelatedPosts } from "./PostRelatedPosts";
@@ -131,6 +132,9 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
       <div className={styles.layout}>
         <main className={styles.postContentInner}>
           <div className={styles.postDetailContent}>
+            {/* 文章摘要 */}
+            <ArticleLeadSummary article={article} />
+
             {/* 文章内容 */}
             <PostContent
               content={contentWithCustomJS}

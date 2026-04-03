@@ -281,3 +281,42 @@
     display: none !important;
   }
 }
+
+/* 文章摘要 */
+.articleLead {
+  margin: 0 0 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--anzhiyu-secondbg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.articleLeadTitle {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.3;
+  color: var(--muted-foreground);
+}
+
+.articleLeadIcon {
+  flex-shrink: 0;
+  width: 19px;
+  height: 19px;
+  color: var(--primary);
+  transform: translateY(1px);
+}
+
+.articleLeadTitleText {
+  font-weight: bold;
+  color: var(--primary);
+  user-select: none;
+}
+
+.articleLeadText {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--foreground);
+}
