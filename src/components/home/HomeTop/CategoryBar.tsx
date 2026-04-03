@@ -94,6 +94,7 @@ export function CategoryBar({ selectedCategory: controlledCategory, onCategoryCh
               <Link
                 key={category.id}
                 href={`/categories/${category.slug || encodeURIComponent(category.name)}/`}
+                prefetch={false}
                 onClick={e => handleCategoryClick(e, category.name)}
                 className={cn(styles.catalogListItem, selectedId === category.id && styles.select)}
               >
@@ -111,7 +112,7 @@ export function CategoryBar({ selectedCategory: controlledCategory, onCategoryCh
             <FaAnglesRight className={cn(styles.scrollIcon, isScrolledToEnd && styles.isRotated)} aria-hidden="true" />
           </button>
         )}
-        <Link href="/categories" className={styles.catalogMore}>
+        <Link href="/categories" prefetch={false} className={styles.catalogMore}>
           更多
         </Link>
       </div>

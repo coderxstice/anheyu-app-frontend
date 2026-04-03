@@ -160,7 +160,7 @@ export function Console({ isOpen, onClose }: ConsoleProps) {
                 <div className={styles.authorContentItemTips}>互动</div>
                 <div className={styles.cardHorContent}>
                   <span className={styles.authorContentItemTitle}>最近评论</span>
-                  <Link href="/recentcomments" className={styles.goToRecentComments} onClick={onClose} title="最近评论">
+                  <Link href="/recentcomments" prefetch={false} className={styles.goToRecentComments} onClick={onClose} title="最近评论">
                     <ChevronRight size={22} />
                   </Link>
                 </div>
@@ -208,7 +208,7 @@ export function Console({ isOpen, onClose }: ConsoleProps) {
               <div className={styles.cardTagCloud} onClick={handleBlankClick}>
                 {tags.length > 0 ? (
                   tags.map(tag => (
-                    <Link key={tag.id} href={`/tags/${tag.name}/`} className={styles.tagItem} onClick={onClose}>
+                    <Link key={tag.id} href={`/tags/${tag.name}/`} prefetch={false} className={styles.tagItem} onClick={onClose}>
                       {tag.name}
                       <sup>{tag.count}</sup>
                     </Link>

@@ -187,7 +187,7 @@ export function HomeTop() {
                     ))}
                 </a>
               ) : (
-                <Link className={styles.categoryButton} href={item.path} style={{ background: item.background }}>
+                <Link className={styles.categoryButton} href={item.path} prefetch={false} style={{ background: item.background }}>
                   <span className={styles.categoryButtonText}>{item.name}</span>
                   {item.icon &&
                     (item.icon.startsWith("http") ? (
@@ -219,6 +219,7 @@ export function HomeTop() {
                 key={article.id}
                 className={styles.recentPostItem}
                 href={article.is_doc ? `/doc/${article.id}` : `/posts/${article.id}`}
+                prefetch={false}
                 title={article.title}
               >
                 <div className={styles.postCover}>

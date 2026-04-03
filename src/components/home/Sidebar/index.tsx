@@ -1,13 +1,17 @@
 "use client";
 
 import { useMemo } from "react";
+import dynamic from "next/dynamic";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import { AuthorInfoCard } from "./AuthorInfoCard";
 import { CardWechat } from "./CardWechat";
-import { CardClock } from "./CardClock";
 import { CustomSidebarBlocks } from "./CustomSidebarBlocks";
 import { StickyCards } from "./StickyCards";
 import styles from "./Sidebar.module.css";
+
+const CardClock = dynamic(() => import("./CardClock").then(m => m.CardClock), {
+  ssr: false,
+});
 
 export function Sidebar() {
   const siteConfig = useSiteConfigStore(state => state.siteConfig);

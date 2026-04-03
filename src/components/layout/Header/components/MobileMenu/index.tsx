@@ -222,7 +222,7 @@ export function MobileMenu({ isOpen, onClose, navConfig, menuConfig }: MobileMen
           {siteData.map(item => (
             <div key={item.name} className={cn(styles.dataItem, styles.isCenter)}>
               <div className={styles.dataItemLink}>
-                <Link href={item.link} onClick={handleInternalLinkClick}>
+                <Link href={item.link} prefetch={false} onClick={handleInternalLinkClick}>
                   <div className={styles.headline}>{item.name}</div>
                   <div className={styles.lengthNum}>{item.count}</div>
                 </Link>
@@ -305,6 +305,7 @@ export function MobileMenu({ isOpen, onClose, navConfig, menuConfig }: MobileMen
                         <Link
                           key={child.name}
                           href={child.href || "#"}
+                          prefetch={false}
                           className={styles.menuGroupItem}
                           onClick={handleInternalLinkClick}
                         >
@@ -332,7 +333,7 @@ export function MobileMenu({ isOpen, onClose, navConfig, menuConfig }: MobileMen
                         <span>{menu.name}</span>
                       </a>
                     ) : (
-                      <Link href={menu.href} className={styles.menuGroupItem} onClick={handleInternalLinkClick}>
+                      <Link href={menu.href} prefetch={false} className={styles.menuGroupItem} onClick={handleInternalLinkClick}>
                         <MenuIcon icon={menu.icon} />
                         <span>{menu.name}</span>
                       </Link>
@@ -350,7 +351,7 @@ export function MobileMenu({ isOpen, onClose, navConfig, menuConfig }: MobileMen
           {mockTags.length > 0 ? (
             <div className={styles.cardTagCloud}>
               {mockTags.map(tag => (
-                <Link key={tag.name} href={`/tags/${tag.name}/`} onClick={handleInternalLinkClick}>
+                <Link key={tag.name} href={`/tags/${tag.name}/`} prefetch={false} onClick={handleInternalLinkClick}>
                   {tag.name}
                   <sup>{tag.count}</sup>
                 </Link>

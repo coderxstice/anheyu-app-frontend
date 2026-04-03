@@ -18,6 +18,12 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  experimental: {
+    staleTimes: {
+      dynamic: 30,
+      static: 180,
+    },
+  },
 
   // 代理配置 - 客户端请求代理到 Go 后端
   async rewrites() {

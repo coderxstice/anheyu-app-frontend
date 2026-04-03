@@ -311,6 +311,7 @@ export function Header() {
                       ) : (
                         <Link
                           href={menuItem.path || "#"}
+                          prefetch={false}
                           target={menuItem.isExternal ? "_blank" : "_self"}
                           rel={menuItem.isExternal ? "noopener noreferrer" : undefined}
                           className={cn(styles.menuTitle, styles.directLink, styles.sitePage)}
@@ -344,7 +345,7 @@ export function Header() {
                                   <span>{item.title}</span>
                                 </a>
                               ) : (
-                                <Link href={item.path} className={styles.sitePage}>
+                                <Link href={item.path} prefetch={false} className={styles.sitePage}>
                                   <MenuIcon
                                     icon={item.icon}
                                     className={styles.menuIcon}
