@@ -160,11 +160,11 @@ export const useSiteConfigStore = create<SiteConfigState>((set, get) => ({
                     "%c[SiteConfig] 检测到配置版本变更，后台刷新中...",
                     "color: #f59e0b; font-weight: bold;",
                   );
-                  get().forceRefreshFromServer();
+                  return get().forceRefreshFromServer();
                 }
               })
               .catch(() => {
-                // 版本校验失败不影响正常使用
+                // 版本校验或刷新失败不影响正常使用
               });
 
             return;
