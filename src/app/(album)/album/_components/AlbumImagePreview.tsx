@@ -8,6 +8,7 @@ import { Icon } from "@iconify/react";
 import type { AlbumStatType, PublicAlbumItem } from "@/types/album";
 import { useMounted } from "@/hooks/use-mounted";
 import { DownloadProgressBar, type DownloadProgressBarHandle } from "./DownloadProgressBar";
+import { buildAlbumImageWithParam } from "../_utils/album-image-src";
 
 interface AlbumImagePreviewProps {
   siteName?: string;
@@ -52,15 +53,13 @@ function getImageExtension(url: string): string {
 
 function buildPreviewImageUrl(item: PublicAlbumItem | undefined): string {
   if (!item) return "";
-  if (item.bigParam && item.bigParam.trim() !== "") {
-    return `${item.imageUrl}?${item.bigParam}`;
-  }
-  return item.imageUrl;
+  return buildAlbumImageWithParam(item.imageUrl, item.bigParam);
 }
 
 function getImageSize(url: string): Promise<{ width: number; height: number }> {
   return new Promise((resolve, reject) => {
     const image = new Image();
+    image.referrerPolicy = "no-referrer";
     image.onload = () => {
       resolve({ width: image.naturalWidth, height: image.naturalHeight });
     };
@@ -80,7 +79,6 @@ export const AlbumImagePreview = forwardRef<AlbumImagePreviewHandle, AlbumImageP
   const [previewList, setPreviewList] = useState<PublicAlbumItem[]>([]);
   const [previewIndex, setPreviewIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [showControls, setShowControls] = useState(false);
   const [downloadCount, setDownloadCount] = useState(0);
   const [imageKey, setImageKey] = useState("");
 
@@ -143,13 +141,12 @@ export const AlbumImagePreview = forwardRef<AlbumImagePreviewHandle, AlbumImageP
 
     gsap.to(popupRef.current, {
       opacity: 0,
-      scale: isMobile ? 0.95 : 0.7,
-      duration: 0.2,
-      ease: "power2.in",
+      scale: isMobile ? 0.95 : 0.85,
+      duration: 0.25,
+      ease: "power3.in",
       onComplete: () => {
         setVisible(false);
         setLoading(true);
-        setShowControls(false);
       },
     });
   }, []);
@@ -163,7 +160,6 @@ export const AlbumImagePreview = forwardRef<AlbumImagePreviewHandle, AlbumImageP
       setPreviewIndex(safeIndex);
       setVisible(true);
       setLoading(true);
-      setShowControls(false);
       setImageKey(`${safeIndex}-${Date.now()}`);
       setDownloadCount(item?.downloadCount ?? 0);
 
@@ -237,7 +233,7 @@ export const AlbumImagePreview = forwardRef<AlbumImagePreviewHandle, AlbumImageP
           {
             width: "150px",
             height: "150px",
-            scale: 0.7,
+            scale: 0.85,
             opacity: 0,
             left: "50%",
             top: "50%",
@@ -247,8 +243,8 @@ export const AlbumImagePreview = forwardRef<AlbumImagePreviewHandle, AlbumImageP
           {
             scale: 1,
             opacity: 1,
-            duration: 0.2,
-            ease: "power2.out",
+            duration: 0.35,
+            ease: "back.out(1.4)",
           }
         );
       });
@@ -315,7 +311,7 @@ export const AlbumImagePreview = forwardRef<AlbumImagePreviewHandle, AlbumImageP
         close();
         return;
       }
-      if (!showControls) {
+      if (loading) {
         return;
       }
       if (event.key === "ArrowLeft") {
@@ -337,12 +333,11 @@ export const AlbumImagePreview = forwardRef<AlbumImagePreviewHandle, AlbumImageP
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("resize", onResize);
     };
-  }, [close, next, prev, resizePopup, showControls, visible]);
+  }, [close, loading, next, prev, resizePopup, visible]);
 
   const handleImageLoad = useCallback(() => {
     if (!popupRef.current) {
       setLoading(false);
-      setShowControls(true);
       return;
     }
 
@@ -355,11 +350,7 @@ export const AlbumImagePreview = forwardRef<AlbumImagePreviewHandle, AlbumImageP
     }
 
     const isMobile = window.innerWidth <= 736;
-    const timeline = gsap.timeline({
-      onComplete: () => {
-        setShowControls(true);
-      },
-    });
+    const timeline = gsap.timeline();
 
     if (!isMobile) {
       const viewportWidth = window.innerWidth * 0.9;
@@ -397,7 +388,7 @@ export const AlbumImagePreview = forwardRef<AlbumImagePreviewHandle, AlbumImageP
 
   const handleTouchEnd = useCallback(
     (event: React.TouchEvent<HTMLDivElement>) => {
-      if (!showControls || previewList.length <= 1) {
+      if (loading || previewList.length <= 1) {
         return;
       }
 
@@ -414,7 +405,7 @@ export const AlbumImagePreview = forwardRef<AlbumImagePreviewHandle, AlbumImageP
         next();
       }
     },
-    [next, prev, previewList.length, showControls]
+    [loading, next, prev, previewList.length]
   );
 
   if (typeof document === "undefined") {
@@ -440,6 +431,7 @@ export const AlbumImagePreview = forwardRef<AlbumImagePreviewHandle, AlbumImageP
                 className="az-preview-image"
                 src={currentImageUrl}
                 alt={currentItem?.title || "预览图"}
+                referrerPolicy="no-referrer"
                 onLoad={handleImageLoad}
               />
             </div>
@@ -481,13 +473,13 @@ export const AlbumImagePreview = forwardRef<AlbumImagePreviewHandle, AlbumImageP
               </div>
             ) : null}
 
-            {showControls ? (
+            {!loading ? (
               <button type="button" className="az-preview-close closer" aria-label="关闭预览" onClick={close}>
                 <Icon icon="ri:close-line" />
               </button>
             ) : null}
 
-            {previewList.length > 1 && showControls ? (
+            {previewList.length > 1 && !loading ? (
               <>
                 <button type="button" className="az-nav nav-previous" aria-label="上一张" onClick={prev}>
                   <Icon icon="ri:arrow-left-s-line" />
