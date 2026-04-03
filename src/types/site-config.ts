@@ -409,6 +409,12 @@ export interface SiteConfigData {
     list?: string;
   };
 
+  // 文章配置
+  article?: {
+    showRelated?: boolean | string;
+    [key: string]: unknown;
+  };
+
   // 版权配置
   copyright?: {
     license?: string;
