@@ -18,6 +18,7 @@ const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 小时
 interface CachedData {
   config: SiteConfigData;
   timestamp: number;
+  configVersion?: number;
 }
 
 interface UserPanelPublicConfig {
@@ -123,11 +124,10 @@ export const useSiteConfigStore = create<SiteConfigState>((set, get) => ({
     return value === true || value === "true";
   },
 
-  // 获取站点配置
+  // 获取站点配置（stale-while-revalidate：先用缓存渲染，后台校验版本号）
   fetchSiteConfig: async () => {
     const state = get();
 
-    // 如果已加载，直接返回
     if (state.isLoaded) {
       return;
     }
@@ -137,16 +137,36 @@ export const useSiteConfigStore = create<SiteConfigState>((set, get) => ({
       try {
         const cachedData = localStorage.getItem(CACHE_KEY);
         if (cachedData) {
-          const { config: cachedConfig, timestamp }: CachedData = JSON.parse(cachedData);
-          // 检查缓存是否过期
-          if (Date.now() - timestamp < CACHE_TTL) {
+          const parsed: CachedData = JSON.parse(cachedData);
+          if (Date.now() - parsed.timestamp < CACHE_TTL) {
             set({
-              siteConfig: cachedConfig,
+              siteConfig: parsed.config,
               isLoaded: true,
               loading: false,
             });
 
-            console.log("%c[SiteConfig] 从缓存加载站点配置", "color: #10b981; font-weight: bold;", cachedConfig);
+            console.log("%c[SiteConfig] 从缓存加载站点配置", "color: #10b981; font-weight: bold;");
+
+            // 后台校验配置版本号，若服务端版本更新则自动刷新
+            siteConfigService
+              .getConfigVersion()
+              .then((res) => {
+                if (
+                  res.code === 200 &&
+                  res.data?.version &&
+                  res.data.version !== parsed.configVersion
+                ) {
+                  console.log(
+                    "%c[SiteConfig] 检测到配置版本变更，后台刷新中...",
+                    "color: #f59e0b; font-weight: bold;",
+                  );
+                  get().forceRefreshFromServer();
+                }
+              })
+              .catch(() => {
+                // 版本校验失败不影响正常使用
+              });
+
             return;
           } else {
             localStorage.removeItem(CACHE_KEY);
@@ -167,12 +187,14 @@ export const useSiteConfigStore = create<SiteConfigState>((set, get) => ({
       if (res.code === 200 && res.data) {
         const configData = res.data;
 
-        // 确保 API_URL 以 / 结尾
+        // 提取并移除配置版本号（不属于业务配置）
+        const configVersion = (configData as Record<string, unknown>)._config_version as number | undefined;
+        delete (configData as Record<string, unknown>)._config_version;
+
         if (configData.API_URL && !configData.API_URL.endsWith("/")) {
           configData.API_URL += "/";
         }
 
-        // 更新状态
         set({
           siteConfig: configData,
           isLoaded: true,
@@ -180,11 +202,12 @@ export const useSiteConfigStore = create<SiteConfigState>((set, get) => ({
           error: null,
         });
 
-        // 缓存到 localStorage
+        // 缓存到 localStorage（含版本号）
         if (typeof window !== "undefined") {
           const dataToCache: CachedData = {
             config: configData,
             timestamp: Date.now(),
+            configVersion,
           };
           localStorage.setItem(CACHE_KEY, JSON.stringify(dataToCache));
         }
@@ -199,7 +222,7 @@ export const useSiteConfigStore = create<SiteConfigState>((set, get) => ({
       set({
         loading: false,
         error: errorMessage,
-        isLoaded: true, // 即使出错也标记为已加载，避免重复请求
+        isLoaded: true,
       });
     }
   },

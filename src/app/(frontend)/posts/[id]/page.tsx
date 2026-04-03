@@ -148,7 +148,8 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
       copyright_author: article.copyright_author,
     },
     siteUrl,
-    articlePath
+    articlePath,
+    site.siteName
   );
 
   return (

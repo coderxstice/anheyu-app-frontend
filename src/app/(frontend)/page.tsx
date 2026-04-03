@@ -12,7 +12,6 @@ import { buildPageMetadata } from "@/lib/seo";
 export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
     title: "首页",
-    description: "安和鱼博客首页，持续分享前端、开发与生活内容。",
     path: "/",
   });
 }

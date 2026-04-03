@@ -169,9 +169,7 @@
     z-index: 1;
     pointer-events: none;
     opacity: 0.9;
-    transition:
-      opacity 0.3s ease,
-      transform 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 
     h2 {
       margin: 0;
@@ -240,16 +238,18 @@
   }
 }
 
+/* 对齐 Hexo 主题 album_detail：卡片内顺序为文案 → 标签 → 图 → 虚线 → 底栏 */
 .waterfall-container {
   display: flex;
-  gap: var(--waterfall-gap, 16px);
+  gap: var(--waterfall-gap, 6px);
   align-items: flex-start;
+  margin-top: 1rem;
 
   .waterfall-column {
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: var(--waterfall-gap, 16px);
+    gap: var(--waterfall-gap, 6px);
     min-width: 0;
   }
 
@@ -261,182 +261,47 @@
 }
 
 .album-waterfall-item {
-  display: flex;
-  flex-flow: column nowrap;
-  align-items: flex-start;
-  justify-content: space-between;
+  position: relative;
+  display: block;
+  width: 100%;
   overflow: hidden;
   cursor: pointer;
-  padding: 1rem 1rem 0.5rem;
-  background: var(--anzhiyu-card-bg);
-  border: var(--style-border-always);
   border-radius: 12px;
-  box-shadow: var(--anzhiyu-shadow-border);
-  transition: border 0.3s ease;
 
-  &:hover {
-    border: var(--style-border-hover);
-
-    .waterfall-image {
-      transform: scale(1.02);
-    }
-  }
-
-  .waterfall-item-content {
-    position: relative;
+  .waterfall-image {
+    display: block;
     width: 100%;
-    overflow: hidden;
+    height: auto;
+    margin: 0;
+    object-fit: cover;
     border-radius: 12px;
-    margin-bottom: 1rem;
-
-    .waterfall-image {
-      display: block;
-      width: 100%;
-      height: auto;
-      object-fit: cover;
-      border-radius: 12px;
-      transition: transform 0.35s ease;
-    }
-
-    &::after {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      content: "";
-      background: linear-gradient(to top, rgb(10 17 25 / 45%) 5%, transparent 40%);
-      opacity: 0.8;
-      transition: opacity 0.3s ease;
-    }
-
-    .image-info {
-      position: absolute;
-      right: 16px;
-      bottom: 16px;
-      left: 16px;
-      z-index: 1;
-      pointer-events: none;
-      opacity: 0.9;
-      transition:
-        opacity 0.3s ease,
-        transform 0.3s ease;
-
-      h2 {
-        margin: 0;
-        font-size: 14px;
-        font-weight: 600;
-        line-height: 1.4;
-        color: #fff;
-        text-shadow: 0 1px 3px rgb(0 0 0 / 50%);
-      }
-
-      .image-desc {
-        display: -webkit-box;
-        margin: 4px 0 0;
-        overflow: hidden;
-        font-size: 12px;
-        line-height: 1.5;
-        color: rgb(255 255 255 / 85%);
-        text-shadow: 0 1px 2px rgb(0 0 0 / 50%);
-        line-clamp: 2;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-      }
-    }
-
-    .tag-info {
-      position: absolute;
-      top: 16px;
-      left: 16px;
-      z-index: 1;
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      margin: 0;
-      font-size: 14px;
-      font-weight: bold;
-      color: #fff;
-      pointer-events: none;
-
-      .tag-categorys {
-        display: flex;
-        flex-wrap: wrap;
-
-        .tag {
-          padding: 8px;
-          margin-left: 8px;
-          font-size: 12px;
-          line-height: 1;
-          color: #f7f7fa;
-          background: rgb(0 0 0 / 30%);
-          backdrop-filter: saturate(180%) blur(20px);
-          border-radius: 8px;
-          transition: all 0.3s ease;
-
-          &:first-child {
-            margin-left: 0;
-          }
-        }
-      }
-    }
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
-  .album-item-bottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
+  &:hover .waterfall-image {
+    transform: scale(1.03);
   }
 
-  .album-item-info {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
+  .waterfall-location-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: inline-flex;
     align-items: center;
-    font-size: 0.8125rem;
-
-    .album-info-time,
-    .album-info-location {
-      display: flex;
-      gap: 0.2rem;
-      align-items: center;
-      padding: 0 8px;
-      font-size: 0.7rem;
-      color: var(--anzhiyu-fontcolor);
-      cursor: default;
-      background-color: var(--anzhiyu-gray-op);
-      border-radius: 20px;
-
-      svg {
-        width: 0.875rem;
-        height: 0.875rem;
-      }
-    }
-  }
-
-  .album-reply {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    color: var(--anzhiyu-secondtext);
-    cursor: pointer;
-    background: transparent;
-    border: 0;
-    border-radius: 8px;
-    transition: all 0.3s ease;
+    gap: 4px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #fff;
+    background: rgb(0 0 0 / 40%);
+    backdrop-filter: saturate(180%) blur(10px);
+    border-radius: 6px;
+    pointer-events: none;
 
     svg {
-      width: 1.125rem;
-      height: 1.125rem;
-    }
-
-    &:hover {
-      color: var(--anzhiyu-main);
-      background: var(--anzhiyu-main-op);
+      flex-shrink: 0;
+      width: 12px;
+      height: 12px;
     }
   }
 }
@@ -458,9 +323,7 @@
   backdrop-filter: saturate(180%) blur(20px);
   opacity: 0;
   transform: translateY(4em);
-  animation:
-    album-header-slide-up 0.8s ease-out 1s forwards,
-    album-header-fade-in 0.6s ease-in 1s forwards;
+  animation: album-header-slide-up 0.8s ease-out 1s forwards, album-header-fade-in 0.6s ease-in 1s forwards;
 
   .header-left {
     display: flex;
@@ -646,6 +509,7 @@
   z-index: 10040;
   background: rgb(31 34 36 / 80%);
   backdrop-filter: blur(6px);
+  animation: album-overlay-fade-in 0.3s ease forwards;
 }
 
 .poptrox-popup {
@@ -729,12 +593,14 @@
 
       .download-btn {
         display: inline-flex;
+        flex-shrink: 0;
         align-items: center;
         gap: 4px;
         padding: 6px 12px;
         font-size: 0.8125rem;
         font-weight: 600;
         color: #fff;
+        white-space: nowrap;
         background: rgb(255 255 255 / 14%);
         border: 1px solid rgb(255 255 255 / 26%);
         border-radius: 999px;
@@ -749,45 +615,73 @@
     }
   }
 
-  .az-preview-close,
+  .az-preview-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    color: rgb(255 255 255 / 85%);
+    background: rgb(0 0 0 / 30%);
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.25s ease, background 0.25s ease;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    &:hover {
+      background: rgb(0 0 0 / 55%);
+    }
+  }
+
   .az-nav {
     position: absolute;
     z-index: 3;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    color: #fff;
-    background: rgb(0 0 0 / 35%);
+    width: 48px;
+    height: 48px;
+    color: rgb(255 255 255 / 80%);
+    background: none;
     border: 0;
-    border-radius: 50%;
     cursor: pointer;
-    transition: all 0.3s ease;
+    opacity: 0;
+    transition: opacity 0.25s ease, color 0.25s ease;
 
     svg {
-      width: 22px;
-      height: 22px;
+      width: 32px;
+      height: 32px;
+      filter: drop-shadow(0 1px 4px rgb(0 0 0 / 50%));
     }
 
     &:hover {
-      background: rgb(0 0 0 / 60%);
+      color: #fff;
     }
   }
 
-  .az-preview-close {
-    top: 12px;
-    right: 12px;
+  &:hover .az-preview-close,
+  &:hover .az-nav {
+    opacity: 1;
   }
 
   .nav-previous {
-    left: 12px;
+    left: 8px;
     top: 50%;
     transform: translateY(-50%);
   }
 
   .nav-next {
-    right: 12px;
+    right: 8px;
     top: 50%;
     transform: translateY(-50%);
   }
@@ -823,9 +717,7 @@
   box-shadow: 0 2px 6px rgb(0 0 0 / 20%);
   transform: translateY(-100%);
   opacity: 0;
-  transition:
-    transform 0.3s ease,
-    opacity 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease;
 
   &.is-visible {
     transform: translateY(0);
@@ -887,9 +779,7 @@
     height: 56px;
     padding: 0 12px;
     transform: translateY(0);
-    animation:
-      album-header-slide-up 0.6s ease-out 0.5s forwards,
-      album-header-fade-in 0.4s ease-in 0.5s forwards;
+    animation: album-header-slide-up 0.6s ease-out 0.5s forwards, album-header-fade-in 0.4s ease-in 0.5s forwards;
 
     .site-logo {
       width: 32px;
@@ -943,6 +833,11 @@
       }
     }
 
+    .az-preview-close,
+    .az-nav {
+      opacity: 1;
+    }
+
     .az-preview-close {
       top: 10px;
       right: 10px;
@@ -950,8 +845,13 @@
 
     .nav-previous,
     .nav-next {
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
+
+      svg {
+        width: 28px;
+        height: 28px;
+      }
     }
   }
 }
@@ -1041,6 +941,18 @@
 
   to {
     opacity: 1;
+  }
+}
+
+@keyframes album-overlay-fade-in {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+
+  to {
+    opacity: 1;
+    backdrop-filter: blur(6px);
   }
 }
 

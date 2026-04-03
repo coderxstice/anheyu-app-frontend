@@ -3,6 +3,7 @@
 
 import { useMemo } from "react";
 import type { PublicAlbumItem } from "@/types/album";
+import { buildAlbumImageWithParam } from "../_utils/album-image-src";
 
 interface AlbumGridItemProps {
   item: PublicAlbumItem;
@@ -24,9 +25,10 @@ export function AlbumGridItem({ item, index, onPreview }: AlbumGridItemProps) {
   return (
     <div className="album-grid-item" style={{ ["--item-index" as string]: index }} onClick={() => onPreview(index)}>
       <img
-        src={item.thumbParam ? `${item.imageUrl}?${item.thumbParam}` : item.imageUrl}
+        src={buildAlbumImageWithParam(item.imageUrl, item.thumbParam)}
         alt={item.title || "相册图片"}
         loading="lazy"
+        referrerPolicy="no-referrer"
       />
 
       {item.title || item.description ? (

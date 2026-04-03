@@ -166,7 +166,8 @@ export interface ArticleJsonLdInput {
 export function buildArticleJsonLd(
   article: ArticleJsonLdInput,
   siteUrl: string,
-  articlePath: string
+  articlePath: string,
+  siteName?: string
 ): Record<string, unknown> {
   const base = normalizeSiteUrl(siteUrl) || siteUrl;
   const url = `${base.replace(/\/$/, "")}${articlePath.startsWith("/") ? articlePath : `/${articlePath}`}`;
@@ -177,7 +178,8 @@ export function buildArticleJsonLd(
       ? article.cover_url
       : `${base.replace(/\/$/, "")}${article.cover_url.startsWith("/") ? article.cover_url : `/${article.cover_url}`}`
     : undefined;
-  const authorName = article.copyright_author || "安知鱼";
+  const resolvedSiteName = siteName || DEFAULT_SITE_NAME;
+  const authorName = article.copyright_author || resolvedSiteName;
 
   return {
     "@context": "https://schema.org",
@@ -193,7 +195,7 @@ export function buildArticleJsonLd(
     },
     publisher: {
       "@type": "Organization",
-      name: "AnHeYu",
+      name: resolvedSiteName,
       logo: {
         "@type": "ImageObject",
         url: `${base.replace(/\/$/, "")}/static/img/logo-192x192.png`,

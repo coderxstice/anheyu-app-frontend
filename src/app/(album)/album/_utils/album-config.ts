@@ -26,7 +26,7 @@ const DEFAULT_CONFIG: ParsedAlbumConfig = {
   pageSize: 24,
   enableComment: false,
   waterfall: {
-    gap: 16,
+    gap: 6,
     columnCount: {
       large: 4,
       medium: 3,
