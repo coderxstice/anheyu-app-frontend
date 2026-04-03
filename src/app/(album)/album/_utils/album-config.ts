@@ -22,7 +22,7 @@ export interface ParsedAlbumConfig {
 }
 
 const DEFAULT_CONFIG: ParsedAlbumConfig = {
-  layoutMode: "grid",
+  layoutMode: "waterfall",
   pageSize: 24,
   enableComment: false,
   waterfall: {
@@ -87,7 +87,9 @@ function parsePositiveNumber(value: unknown, fallback: number): number {
 }
 
 function parseLayoutMode(value: unknown): AlbumLayoutMode {
-  return value === "waterfall" ? "waterfall" : "grid";
+  if (value === "waterfall") return "waterfall";
+  if (value === "grid") return "grid";
+  return DEFAULT_CONFIG.layoutMode;
 }
 
 function parseColumnCount(value: unknown): ParsedAlbumConfig["waterfall"]["columnCount"] {

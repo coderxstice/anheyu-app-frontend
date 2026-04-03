@@ -50,7 +50,7 @@ function serializeWaterfallColumns(cols: { large: number; medium: number; small:
 }
 
 export function AlbumPageForm({ values, onChange, loading }: AlbumPageFormProps) {
-  const layoutMode = values[KEY_ALBUM_LAYOUT_MODE] || "grid";
+  const layoutMode = values[KEY_ALBUM_LAYOUT_MODE] || "waterfall";
   const isWaterfall = layoutMode === "waterfall";
 
   const waterfallColumnsValue = values[KEY_ALBUM_WATERFALL_COLUMNS];
