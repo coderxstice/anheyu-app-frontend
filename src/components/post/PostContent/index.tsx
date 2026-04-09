@@ -132,11 +132,9 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
   // 代码块配置：拆分为独立原始值 memo，避免对象引用变化导致 useEffect 不必要重跑。
   // 当 codeBlockRawConfig 从 undefined 变为实际值时，若计算结果（原始值）相同，
   // useCallback 的依赖不会变化，主 useEffect 不会重新执行。
+  // 与站点类型一致：mac_style 为 boolean；未配置或非 false 时启用 Mac 风格
   const macStyle = useMemo(() => {
-    const v = codeBlockRawConfig?.mac_style;
-    if (v === undefined || v === null || v === "") return true;
-    if (typeof v === "boolean") return v;
-    return String(v).toLowerCase() !== "false";
+    return codeBlockRawConfig?.mac_style !== false;
   }, [codeBlockRawConfig?.mac_style]);
 
   const codeMaxLines = useMemo(() => {
