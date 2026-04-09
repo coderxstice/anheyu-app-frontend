@@ -2,6 +2,7 @@
 
 import { EditorContent } from "@tiptap/react";
 import type { Editor } from "@tiptap/react";
+import { EditorBubbleMenu } from "./EditorBubbleMenu";
 import "katex/dist/katex.min.css";
 import "./editor-styles/index.scss";
 import "@/components/post/PostContent/code-highlight.css";
@@ -13,7 +14,7 @@ interface TiptapEditorProps {
 
 /**
  * Tiptap 编辑器渲染组件
- * 接收外部传入的 editor 实例，仅负责渲染编辑区域
+ * 包含 BubbleMenu 浮动工具栏
  */
 export function TiptapEditor({ editor }: TiptapEditorProps) {
   if (!editor) {
@@ -24,5 +25,10 @@ export function TiptapEditor({ editor }: TiptapEditorProps) {
     );
   }
 
-  return <EditorContent editor={editor} />;
+  return (
+    <>
+      <EditorBubbleMenu editor={editor} />
+      <EditorContent editor={editor} />
+    </>
+  );
 }

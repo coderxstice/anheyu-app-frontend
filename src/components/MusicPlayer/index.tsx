@@ -11,11 +11,25 @@ import { useLyrics } from "@/hooks/use-lyrics";
 import { useColorExtraction } from "@/hooks/use-color-extraction";
 import { useMusicAPI } from "@/hooks/use-music-api";
 import { useUiStore } from "@/store/ui-store";
+import { useSiteConfigStore } from "@/store/site-config-store";
 import { MusicCapsule } from "./MusicCapsule";
 import { Playlist } from "./Playlist";
 import styles from "./styles/MusicPlayer.module.css";
 
+/**
+ * 外层包装：读取站点配置判断是否启用，仅在启用时挂载内部播放器
+ */
 export function MusicPlayer() {
+  const siteConfig = useSiteConfigStore(state => state.siteConfig);
+  const musicConfig = siteConfig?.music as Record<string, unknown> | undefined;
+  const playerConfig = musicConfig?.player as Record<string, unknown> | undefined;
+  const isPlayerEnabled = playerConfig?.enable === true || playerConfig?.enable === "true";
+
+  if (!isPlayerEnabled) return null;
+  return <MusicPlayerInner />;
+}
+
+function MusicPlayerInner() {
   // UI 状态
   const [isExpanded, setIsExpanded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);

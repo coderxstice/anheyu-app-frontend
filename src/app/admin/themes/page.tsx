@@ -412,7 +412,7 @@ export default function ThemesPage() {
       >
         {/* 标题区 */}
         <div className="shrink-0 px-5 pt-4 pb-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <h1 className="text-lg font-semibold tracking-tight text-foreground">主题商城</h1>
               <p className="text-xs text-muted-foreground mt-1">发现精美主题，打造个性化站点</p>

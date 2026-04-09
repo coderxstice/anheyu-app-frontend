@@ -523,6 +523,31 @@ export function registerCustomRules(td: TurndownService) {
     },
   });
 
+  // --- Admonition 警告框 ---
+  td.addRule("admonition", {
+    filter: (node) =>
+      node.nodeName === "DIV" && (node as HTMLElement).classList.contains("admonition"),
+    replacement: (_content, node) => {
+      const el = node as HTMLElement;
+      let adType = "note";
+      for (const t of ["note", "tip", "warning", "danger"]) {
+        if (el.classList.contains(t)) {
+          adType = t;
+          break;
+        }
+      }
+      const titleEl = el.querySelector(".admonition-title");
+      const title = titleEl?.textContent?.trim() || "";
+      const bodyEl = el.querySelector(".admonition-body") || el;
+      const bodyChildren = Array.from(bodyEl.children).filter(
+        c => !c.classList.contains("admonition-title")
+      );
+      const inner = bodyChildren.map(c => (c as HTMLElement).innerHTML?.trim() || c.textContent?.trim() || "").join("\n");
+
+      return `\n:::${adType}${title ? ` ${title}` : ""}\n${inner || _content}\n:::\n\n`;
+    },
+  });
+
   // --- Mermaid 图表 ---
   td.addRule("mermaidBlock", {
     filter: (node) => {

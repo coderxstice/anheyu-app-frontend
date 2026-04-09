@@ -14,6 +14,7 @@ import { allInlineStyleMarks } from "./extensions/inline-styles";
 import { FoldingBlock } from "./extensions/folding-block";
 import { LinkCard } from "./extensions/link-card";
 import { CalloutBlock } from "./extensions/callout-block";
+import { AdmonitionBlock } from "./extensions/admonition-block";
 import { HiddenBlock } from "./extensions/hidden-block";
 import { MusicBlock } from "./extensions/music-block";
 import { ButtonBlock } from "./extensions/button-block";
@@ -23,6 +24,7 @@ import { TabsBlock, TabPanel } from "./extensions/tabs-block";
 import { PaidContent } from "./extensions/paid-content";
 import { PasswordContent } from "./extensions/password-content";
 import { LoginRequiredContent } from "./extensions/login-required-content";
+import { SlashCommands } from "./extensions/slash-commands";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { FontSize } from "./extensions/font-size";
 import Color from "@tiptap/extension-color";
@@ -141,7 +143,7 @@ interface UseArticleEditorOptions {
 export function useArticleEditor({
   initialContent = "",
   onUpdate,
-  placeholder = "开始编写内容...",
+  placeholder = "输入 / 打开命令菜单...",
 }: UseArticleEditorOptions = {}) {
   const editor = useEditor({
     extensions: [
@@ -200,6 +202,7 @@ export function useArticleEditor({
       FoldingBlock,
       LinkCard,
       CalloutBlock,
+      AdmonitionBlock,
       HiddenBlock,
       MusicBlock,
       ButtonBlock,
@@ -211,6 +214,9 @@ export function useArticleEditor({
       PaidContent,
       PasswordContent,
       LoginRequiredContent,
+      SlashCommands.configure({
+        hasAIWriting: false,
+      }),
     ],
     content: initialContent,
     editorProps: {

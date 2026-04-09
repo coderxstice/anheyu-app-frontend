@@ -23,12 +23,12 @@ export function FriendsToolbar({ cm }: FriendsToolbarProps) {
     <>
       {/* ===== 标题区 + 操作按钮 ===== */}
       <div className="shrink-0 px-5 pt-4 pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h1 className="text-lg font-semibold tracking-tight text-foreground">友链管理</h1>
             <p className="text-xs text-muted-foreground mt-1">管理友情链接，支持分类、标签和健康检查</p>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             <Button
               size="sm"
               color="primary"
@@ -81,7 +81,7 @@ export function FriendsToolbar({ cm }: FriendsToolbarProps) {
 
       {/* ===== 筛选栏 ===== */}
       <div className="shrink-0 px-5 pb-3">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <Input
             size="sm"
             isClearable
@@ -99,7 +99,7 @@ export function FriendsToolbar({ cm }: FriendsToolbarProps) {
 
           {/* 状态筛选 */}
           <Dropdown>
-            <DropdownTrigger className="hidden sm:flex">
+            <DropdownTrigger className="flex">
               <Button size="sm" variant="flat" endContent={<ChevronDown className="w-3.5 h-3.5" />} className="h-8">
                 {cm.statusFilter
                   ? (STATUS_OPTIONS.find(o => o.key === cm.statusFilter)?.label ?? "友链状态")
@@ -125,7 +125,7 @@ export function FriendsToolbar({ cm }: FriendsToolbarProps) {
           {/* 分类筛选 */}
           {cm.categories.length > 0 && (
             <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
+              <DropdownTrigger className="flex">
                 <Button size="sm" variant="flat" endContent={<ChevronDown className="w-3.5 h-3.5" />} className="h-8">
                   {cm.categoryFilter
                     ? (cm.categories.find(c => String(c.id) === cm.categoryFilter)?.name ?? "分类")
@@ -152,7 +152,7 @@ export function FriendsToolbar({ cm }: FriendsToolbarProps) {
           {/* 标签筛选 */}
           {cm.tags.length > 0 && (
             <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
+              <DropdownTrigger className="flex">
                 <Button size="sm" variant="flat" endContent={<ChevronDown className="w-3.5 h-3.5" />} className="h-8">
                   {cm.tagFilter ? (cm.tags.find(t => String(t.id) === cm.tagFilter)?.name ?? "标签") : "标签"}
                 </Button>

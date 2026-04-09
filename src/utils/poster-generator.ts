@@ -48,12 +48,43 @@ function shouldSetCrossOriginForImageLoad(url: string): boolean {
 }
 
 /**
- * 加载图片（跨域资源需 anonymous 以便 canvas 导出；同源不设置，减少异常失败）
+ * 加载图片，跨域资源优先使用 fetch+Blob 策略以规避浏览器缓存导致的 CORS 失败。
+ *
+ * 背景：页面 <img> 标签在不带 crossOrigin 属性的情况下加载过图片后，浏览器
+ * 会缓存不含 CORS 响应头的版本。随后 Canvas 以 crossOrigin="anonymous" 请求
+ * 同一 URL 时，浏览器复用了缓存中的无 CORS 响应，导致加载失败。fetch 和 <img>
+ * 使用独立的 HTTP 缓存，因此通过 fetch 获取后转为同源 Blob URL 可彻底绕开此问题。
  */
-function loadImage(url: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
+async function loadImage(url: string): Promise<HTMLImageElement> {
+  const isCrossOrigin = shouldSetCrossOriginForImageLoad(url);
+
+  if (isCrossOrigin) {
+    try {
+      const res = await fetch(url, { mode: "cors" });
+      if (res.ok) {
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        return new Promise<HTMLImageElement>((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            URL.revokeObjectURL(blobUrl);
+            resolve(img);
+          };
+          img.onerror = () => {
+            URL.revokeObjectURL(blobUrl);
+            reject(new Error(`Image blob load failed: ${url}`));
+          };
+          img.src = blobUrl;
+        });
+      }
+    } catch {
+      // fetch 失败（如网络错误），回退到 crossOrigin 方式
+    }
+  }
+
+  return new Promise<HTMLImageElement>((resolve, reject) => {
     const img = new Image();
-    if (shouldSetCrossOriginForImageLoad(url)) {
+    if (isCrossOrigin) {
       img.crossOrigin = "anonymous";
     }
     img.onload = () => resolve(img);

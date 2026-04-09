@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Tooltip } from "@heroui/react";
-import { ArrowLeft, PanelRight, SmilePlus, X, Lock, Cloud, Loader2, ExternalLink } from "lucide-react";
+import { ArrowLeft, PanelRight, SmilePlus, X, Lock, Cloud, Loader2, ExternalLink, Focus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
 import type { AutoSaveStatus } from "./use-auto-save";
@@ -234,6 +234,10 @@ interface EditorHeaderProps {
   lastSavedAt?: Date | null;
   /** 文章最后更新时间（用于编辑模式初始显示） */
   articleUpdatedAt?: string;
+  /** 专注模式状态 */
+  focusMode?: boolean;
+  /** 切换专注模式 */
+  onToggleFocusMode?: () => void;
 }
 
 /** 格式化时间为 HH:mm:ss */
@@ -254,6 +258,8 @@ export function EditorHeader({
   autoSaveStatus = "idle",
   lastSavedAt,
   articleUpdatedAt,
+  focusMode = false,
+  onToggleFocusMode,
 }: EditorHeaderProps) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
@@ -540,6 +546,20 @@ export function EditorHeader({
               aria-label="查看文章"
             >
               <ExternalLink className="w-4 h-4" />
+            </Button>
+          </Tooltip>
+        )}
+        {onToggleFocusMode && (
+          <Tooltip content={focusMode ? "退出专注模式 (Esc)" : "专注模式"} size="sm" delay={400} closeDelay={0}>
+            <Button
+              isIconOnly
+              variant={focusMode ? "flat" : "light"}
+              size="sm"
+              onPress={onToggleFocusMode}
+              aria-label={focusMode ? "退出专注模式" : "进入专注模式"}
+              className={focusMode ? "text-primary" : ""}
+            >
+              <Focus className="w-4 h-4" />
             </Button>
           </Tooltip>
         )}

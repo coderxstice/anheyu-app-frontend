@@ -42,7 +42,7 @@ export function UserFilterBar({
 }: UserFilterBarProps) {
   return (
     <div className="shrink-0 px-5 pb-3">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         <Input
           size="sm"
           isClearable
@@ -58,7 +58,7 @@ export function UserFilterBar({
           }}
         />
         <Dropdown>
-          <DropdownTrigger className="hidden sm:flex">
+          <DropdownTrigger className="flex">
             <Button size="sm" variant="flat" endContent={<ChevronDown className="w-3.5 h-3.5" />} className="h-8">
               {statusFilter ? (STATUS_OPTIONS.find(o => o.key === statusFilter)?.label ?? "用户状态") : "用户状态"}
             </Button>
@@ -79,7 +79,7 @@ export function UserFilterBar({
           </DropdownMenu>
         </Dropdown>
         <Dropdown>
-          <DropdownTrigger className="hidden sm:flex">
+          <DropdownTrigger className="flex">
             <Button size="sm" variant="flat" endContent={<ChevronDown className="w-3.5 h-3.5" />} className="h-8">
               {groupFilter ? (userGroups.find(g => g.id === groupFilter)?.name ?? "用户组") : "用户组"}
             </Button>

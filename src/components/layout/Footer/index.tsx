@@ -124,7 +124,12 @@ export function Footer() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [rotationCount, setRotationCount] = useState(0);
   const [uptimeStatus, setUptimeStatus] = useState<"loading" | "ok" | "partial" | "error">("loading");
-
+  const [runtimeState, setRuntimeState] = useState({
+    days: 0,
+    time: "0 小时 0 分 0 秒",
+    statusImg: "",
+    statusDesc: "",
+  });
   // Footer 配置
   const footerConfig = useMemo(() => {
     return {
@@ -136,6 +141,9 @@ export function Footer() {
       badge: siteConfig?.footer?.badge,
     };
   }, [siteConfig]);
+
+  // 页脚运行时间配置
+  const runtimeConfig = useMemo(() => siteConfig?.footer?.runtime, [siteConfig]);
 
   // 备案信息
   const icpNumber = siteConfig?.ICP_NUMBER;
@@ -232,6 +240,49 @@ export function Footer() {
     }
   }, [uptimeKumaConfig]);
 
+  /** 计算运行时间并更新上/下班状态，合并为单次 setState 避免多次 re-render */
+  const calculateRuntime = useCallback(() => {
+    if (!runtimeConfig?.launch_time) return;
+    try {
+      const launchDate = new Date(runtimeConfig.launch_time);
+      const diff = Date.now() - launchDate.getTime();
+      const days = Math.floor(diff / (1000 * 3600 * 24));
+
+      const remainder = diff % (1000 * 3600 * 24);
+      const h = Math.floor(remainder / (1000 * 3600));
+      const m = Math.floor((remainder % (1000 * 3600)) / (1000 * 60));
+      const s = Math.floor((remainder % (1000 * 60)) / 1000);
+
+      const hour = new Date().getHours();
+      const isWorking = hour >= 9 && hour < 18;
+
+      setRuntimeState({
+        days,
+        time: `${h} 小时 ${m} 分 ${s} 秒`,
+        statusImg: isWorking
+          ? (runtimeConfig.work_img || runtimeConfig.offduty_img || "")
+          : (runtimeConfig.offduty_img || runtimeConfig.work_img || ""),
+        statusDesc: isWorking
+          ? (runtimeConfig.work_description || runtimeConfig.offduty_description || "")
+          : (runtimeConfig.offduty_description || runtimeConfig.work_description || ""),
+      });
+    } catch (error) {
+      console.error("Invalid launch_time format:", error);
+    }
+  }, [runtimeConfig]);
+
+  // 运行时间是否实际启用
+  const runtimeEnabled = runtimeConfig?.enable === true || runtimeConfig?.enable === "true";
+
+  // 初始化运行时间定时器
+  useEffect(() => {
+    if (runtimeEnabled && runtimeConfig?.launch_time) {
+      calculateRuntime();
+      const id = setInterval(calculateRuntime, 1000);
+      return () => clearInterval(id);
+    }
+  }, [runtimeEnabled, runtimeConfig?.launch_time, calculateRuntime]);
+
   // 初始化加载友链
   useEffect(() => {
     if (footerConfig.randomFriendsCount > 0) {
@@ -284,7 +335,8 @@ export function Footer() {
     footerConfig.socialBar ||
     footerConfig.projectList.length > 0 ||
     footerConfig.bar ||
-    badgeList.length > 0;
+    badgeList.length > 0 ||
+    runtimeEnabled;
   if (!hasContent) return null;
 
   return (
@@ -424,6 +476,30 @@ export function Footer() {
           </p>
         )}
       </div>
+
+      {/* 页脚运行时间 */}
+      {runtimeEnabled && runtimeConfig?.launch_time && (
+        <div className={styles.footerRuntimeBoard}>
+          {runtimeState.statusImg && (
+            <div className={styles.statusImgRow}>
+              <img
+                className={styles.statusBadge}
+                src={runtimeState.statusImg}
+                title={runtimeState.statusDesc}
+                alt="工作状态"
+                onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
+              />
+            </div>
+          )}
+          <div className={styles.runtimeInfoRow}>
+            <span className={styles.runtimeText}>
+              本站居然运行了 {runtimeState.days} 天
+            </span>
+            <span className={styles.runtimeTimeText}>{runtimeState.time}</span>
+            <Icon icon="fa:heartbeat" className={styles.heartbeatIcon} style={{ color: "red" }} />
+          </div>
+        </div>
+      )}
 
       {/* Footer Bottom Bar */}
       {footerConfig.bar && (

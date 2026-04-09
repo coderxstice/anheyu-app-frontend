@@ -19,6 +19,7 @@ import { ComicCard } from "./ComicCard";
 import { LikeTechCard } from "./LikeTechCard";
 import { MusicCard } from "./MusicCard";
 import { RewardCard } from "./RewardCard";
+import { CommentSection } from "@/components/post/Comment";
 import styles from "../about.module.css";
 
 export function AboutPageContent() {
@@ -151,6 +152,12 @@ export function AboutPageContent() {
       )}
       {/* 赞赏名单 */}
       {enable.reward && <RewardCard />}
+      {/* 评论区 */}
+      {enable.comment && (
+        <div className="mt-12">
+          <CommentSection targetTitle="关于" targetPath="/about" />
+        </div>
+      )}
     </div>
   );
 }

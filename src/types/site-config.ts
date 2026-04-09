@@ -210,8 +210,12 @@ export interface SiteConfigData {
       page_url?: string;
     };
     runtime?: {
-      enable?: boolean;
+      enable?: boolean | string;
       launch_time?: string;
+      work_img?: string;
+      work_description?: string;
+      offduty_img?: string;
+      offduty_description?: string;
     };
     socialBar?: {
       left?: Array<{ title: string; icon: string; link: string }>;

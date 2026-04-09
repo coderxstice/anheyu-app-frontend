@@ -41,7 +41,7 @@ export function PostFilterBar({
 }: PostFilterBarProps) {
   return (
     <div className="shrink-0 px-5 pb-3">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         <Input
           size="sm"
           isClearable
@@ -57,7 +57,7 @@ export function PostFilterBar({
           }}
         />
         <Dropdown>
-          <DropdownTrigger className="hidden sm:flex">
+          <DropdownTrigger className="flex">
             <Button size="sm" variant="flat" endContent={<ChevronDown className="w-3.5 h-3.5" />} className="h-8">
               {statusFilter
                 ? (ARTICLE_STATUS_OPTIONS.find(o => o.key === statusFilter)?.label ?? "文章状态")
@@ -80,7 +80,7 @@ export function PostFilterBar({
           </DropdownMenu>
         </Dropdown>
         <Dropdown>
-          <DropdownTrigger className="hidden sm:flex">
+          <DropdownTrigger className="flex">
             <Button size="sm" variant="flat" endContent={<ChevronDown className="w-3.5 h-3.5" />} className="h-8">
               {reviewStatusFilter
                 ? (REVIEW_STATUS_OPTIONS.find(o => o.key === reviewStatusFilter)?.label ?? "审核状态")

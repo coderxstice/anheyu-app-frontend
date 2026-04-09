@@ -7,6 +7,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { Tooltip, Popover, PopoverTrigger, PopoverContent } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
+import { useShallow } from "zustand/shallow";
 import { useAuthStore } from "@/store/auth-store";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import { getUserAvatarUrl } from "@/utils/avatar";
@@ -41,7 +42,7 @@ export function HeaderRight({
   const { user, isAuthenticated, logout, isAdmin: checkIsAdmin } = useAuthStore();
   const registrationEnabledRaw = useSiteConfigStore(s => s.enableRegistration());
   const siteConfig = useSiteConfigStore(s => s.siteConfig);
-  const userPanelConfig = useSiteConfigStore(s => s.userPanelConfig());
+  const userPanelConfig = useSiteConfigStore(useShallow(s => s.userPanelConfig()));
   const isMobile = useIsMobile();
 
   const isClient = useSyncExternalStore(() => () => {}, () => true, () => false);
