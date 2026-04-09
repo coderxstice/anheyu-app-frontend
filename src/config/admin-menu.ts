@@ -136,6 +136,13 @@ export const adminMenuConfig: AdminMenuGroup[] = [
         icon: "ri:palette-line",
         roles: ["admin"],
       },
+      {
+        id: "plugins",
+        label: "插件管理",
+        href: "/admin/plugins",
+        icon: "ri:plug-line",
+        roles: ["admin"],
+      },
     ],
   },
 ];
