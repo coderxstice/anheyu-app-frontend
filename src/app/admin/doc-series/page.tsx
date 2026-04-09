@@ -121,7 +121,7 @@ export default function DocSeriesPage() {
       >
         {/* 标题区 + 操作按钮 */}
         <div className="shrink-0 px-5 pt-4 pb-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <h1 className="text-lg font-semibold tracking-tight text-foreground">文档系列管理</h1>
               <p className="text-xs text-muted-foreground mt-1">管理文档系列，组织系列化文档内容</p>

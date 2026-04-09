@@ -19,7 +19,7 @@ export function CommentFilters({ cm }: CommentFiltersProps) {
     <>
       {/* 标题区 + 操作按钮 */}
       <div className="shrink-0 px-5 pt-4 pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h1 className="text-lg font-semibold tracking-tight text-foreground">评论管理</h1>
             <p className="text-xs text-muted-foreground mt-1">审核和管理用户评论，支持批量操作</p>
@@ -40,7 +40,7 @@ export function CommentFilters({ cm }: CommentFiltersProps) {
 
       {/* 筛选栏 */}
       <div className="shrink-0 px-5 pb-3">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <Input
             size="sm"
             isClearable
@@ -56,7 +56,7 @@ export function CommentFilters({ cm }: CommentFiltersProps) {
             }}
           />
           <Dropdown>
-            <DropdownTrigger className="hidden sm:flex">
+            <DropdownTrigger className="flex">
               <Button size="sm" variant="flat" endContent={<ChevronDown className="w-3.5 h-3.5" />} className="h-8">
                 {cm.statusFilter
                   ? (COMMENT_STATUS_OPTIONS.find(o => o.key === cm.statusFilter)?.label ?? "评论状态")

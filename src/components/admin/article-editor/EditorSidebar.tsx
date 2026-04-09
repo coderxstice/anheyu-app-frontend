@@ -42,6 +42,7 @@ import type { ArticleStatus } from "@/types/post-management";
 import type { PostCategory, PostTag } from "@/types/article";
 import type { ArticleMeta } from "./use-article-meta";
 import { clipSummaryPlainText, SUMMARY_AUTO_MAX_CHARS } from "@/lib/article-summary";
+import { SeoScorePanel } from "./SeoScorePanel";
 
 // ═══════════════════════════════════════════
 // Props & 常量
@@ -59,6 +60,8 @@ interface EditorSidebarProps {
   editorVariant: "app" | "pro";
   getBodyPlainTextForSummary?: () => string;
   getCompleteHtmlForAISummary?: () => string;
+  editor?: Editor | null;
+  articleTitle?: string;
 }
 
 const STATUS_OPTIONS: {
@@ -1266,24 +1269,58 @@ export function EditorSidebar({
   isLoadingTags,
   editorVariant,
   getBodyPlainTextForSummary,
+  editor,
+  articleTitle,
 }: EditorSidebarProps) {
+  const [activeTab, setActiveTab] = useState<"settings" | "seo">("settings");
+
   return (
     <div className="sb-root">
       <div className="sb-header">
-        <span>文章设置</span>
+        <div className="flex items-center gap-1 bg-muted/60 rounded-lg p-0.5 w-full">
+          <button
+            type="button"
+            className={`flex-1 px-2 py-1 text-xs font-medium rounded-md transition-all ${
+              activeTab === "settings" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+            }`}
+            onClick={() => setActiveTab("settings")}
+          >
+            文章设置
+          </button>
+          <button
+            type="button"
+            className={`flex-1 px-2 py-1 text-xs font-medium rounded-md transition-all ${
+              activeTab === "seo" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+            }`}
+            onClick={() => setActiveTab("seo")}
+          >
+            SEO 分析
+          </button>
+        </div>
       </div>
       <div className="sb-scroll">
-        <SettingsContent
-          meta={meta}
-          onUpdateField={onUpdateField}
-          isAdmin={isAdmin}
-          categories={categories}
-          tags={tags}
-          isLoadingCategories={isLoadingCategories}
-          isLoadingTags={isLoadingTags}
-          editorVariant={editorVariant}
-          getBodyPlainTextForSummary={getBodyPlainTextForSummary}
-        />
+        {activeTab === "settings" ? (
+          <SettingsContent
+            meta={meta}
+            onUpdateField={onUpdateField}
+            isAdmin={isAdmin}
+            categories={categories}
+            tags={tags}
+            isLoadingCategories={isLoadingCategories}
+            isLoadingTags={isLoadingTags}
+            editorVariant={editorVariant}
+            getBodyPlainTextForSummary={getBodyPlainTextForSummary}
+          />
+        ) : (
+          <div className="p-4">
+            <SeoScorePanel
+              title={articleTitle ?? ""}
+              slug={meta.abbrlink ?? ""}
+              description={meta.summaries?.[0] ?? ""}
+              editor={editor ?? null}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

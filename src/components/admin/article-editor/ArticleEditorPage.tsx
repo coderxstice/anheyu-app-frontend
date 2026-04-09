@@ -18,6 +18,7 @@ import { useArticleForEdit, useCreateArticle, useUpdateArticle } from "@/hooks/q
 import { processHtmlForSave } from "@/lib/content-processor";
 import { registerCustomRules } from "@/lib/turndown-rules";
 import { registerMarkedExtensions, fixTaskListHtml } from "@/lib/marked-extensions";
+import { MobileToolbar } from "./MobileToolbar";
 import { articleApi } from "@/lib/api/article";
 import { plainTextFromHtmlSource, roughPlainTextFromMarkdown } from "@/lib/article-summary";
 import { useAuthStore } from "@/store/auth-store";
@@ -81,6 +82,19 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
 
   // 右侧面板
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // 专注模式
+  const [focusMode, setFocusMode] = useState(false);
+  const toggleFocusMode = useCallback(() => setFocusMode((prev) => !prev), []);
+
+  useEffect(() => {
+    if (!focusMode) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFocusMode(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [focusMode]);
 
   // 文章元数据
   const { meta, updateField, initFromData, getSubmitData } = useArticleMeta(undefined, {
@@ -302,28 +316,36 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
 
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden">
-      {/* 标题栏 */}
-      <EditorHeader
-        title={title}
-        onTitleChange={setTitle}
-        onSave={handleSave}
-        isSaving={isSaving}
-        isEditMode={isEditMode}
-        sidebarOpen={sidebarOpen}
-        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        articleId={articleId}
-        isDoc={meta.is_doc}
-        autoSaveStatus={autoSaveStatus}
-        lastSavedAt={lastSavedAt}
-        articleUpdatedAt={article?.updated_at}
-      />
+      {/* 标题栏 - 专注模式下隐藏 */}
+      {!focusMode && (
+        <EditorHeader
+          title={title}
+          onTitleChange={setTitle}
+          onSave={handleSave}
+          isSaving={isSaving}
+          isEditMode={isEditMode}
+          sidebarOpen={sidebarOpen}
+          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          articleId={articleId}
+          isDoc={meta.is_doc}
+          autoSaveStatus={autoSaveStatus}
+          lastSavedAt={lastSavedAt}
+          articleUpdatedAt={article?.updated_at}
+          focusMode={focusMode}
+          onToggleFocusMode={toggleFocusMode}
+        />
+      )}
 
-      {/* 工具栏 */}
-      <EditorToolbar
-        editor={editor}
-        editorMode={editorMode}
-        onModeChange={handleModeChange}
-      />
+      {/* 工具栏 - 专注模式下隐藏桌面端工具栏 */}
+      {!focusMode && (
+        <div className="hidden md:block">
+          <EditorToolbar
+            editor={editor}
+            editorMode={editorMode}
+            onModeChange={handleModeChange}
+          />
+        </div>
+      )}
 
       {/* 主体区域：编辑器 + 大纲（固定布局） */}
       <div className="flex flex-1 min-h-0 overflow-hidden relative">
@@ -345,8 +367,8 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
           )}
         </div>
 
-        {/* 大纲面板 - 仅可视化模式显示 */}
-        {editorMode === "visual" && (
+        {/* 大纲面板 - 仅可视化模式且非专注模式显示 */}
+        {editorMode === "visual" && !focusMode && (
           <div className="w-64 shrink-0 h-full overflow-auto py-4 px-5">
             <h3 className="text-base font-bold text-foreground mb-3 pl-1">大纲</h3>
             <div className="border-l-2 border-border/60 pl-2">
@@ -355,8 +377,8 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
           </div>
         )}
 
-        {/* 文章设置面板 - 覆盖层，不影响内容布局 */}
-        {sidebarOpen && (
+        {/* 文章设置面板 - 专注模式下隐藏 */}
+        {sidebarOpen && !focusMode && (
           <div className="absolute top-0 right-0 h-full w-64 z-20 bg-background border-l-[0.5px] border-border/60 shadow-md overflow-auto">
             <EditorSidebar
               meta={meta}
@@ -368,10 +390,26 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
               isLoadingTags={isLoadingTags}
               editorVariant="app"
               getBodyPlainTextForSummary={getBodyPlainTextForSummary}
+              editor={editor}
+              articleTitle={title}
             />
           </div>
         )}
       </div>
+
+      {/* 移动端底部工具栏 */}
+      <MobileToolbar editor={editor} />
+
+      {/* 专注模式退出按钮 */}
+      {focusMode && (
+        <button
+          type="button"
+          onClick={() => setFocusMode(false)}
+          className="fixed top-4 right-4 z-50 px-3 py-1.5 text-xs text-muted-foreground bg-card/80 backdrop-blur border border-border rounded-lg shadow-sm hover:bg-card transition-all opacity-0 hover:opacity-100 focus:opacity-100"
+        >
+          ESC 退出专注模式
+        </button>
+      )}
     </div>
   );
 }

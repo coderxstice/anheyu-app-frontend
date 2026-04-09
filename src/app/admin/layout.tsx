@@ -14,8 +14,9 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth-store";
 import { useShallow } from "zustand/shallow";
 import { AdminSidebar } from "@/components/admin";
-import { Logo } from "@/components/common";
+import { useSiteConfigStore } from "@/store/site-config-store";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -30,6 +31,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   );
   const isAuthenticated = !!accessToken && !!user;
   const hasAdminAccess = isAuthenticated && isAdmin();
+  const siteTitle = useSiteConfigStore(state => state.getTitle());
 
   useEffect(() => {
     if (!_hasHydrated) return;
@@ -44,7 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="admin-layout h-screen flex flex-col overflow-hidden bg-muted/30">
       {/* 移动端顶部导航 */}
       <div className="lg:hidden flex items-center justify-between p-4 bg-card border-b border-border shrink-0">
-        <Logo href="/admin" />
+        <Link href="/admin" className="font-bold text-xl gradient-text">{siteTitle}</Link>
         <IconButton size="sm" onClick={() => setSidebarOpen(!sidebarOpen)}>
           {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </IconButton>

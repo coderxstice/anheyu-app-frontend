@@ -257,6 +257,14 @@ function renderVideoGallery(body: string, params: string): string {
   return `<div class="video-gallery-container video-gallery-cols-${cols}"${styleAttr}>${items}</div>`;
 }
 
+/** 渲染 Admonition 警告框（:::note、:::tip、:::warning、:::danger） */
+function renderAdmonition(type: string): BlockRenderer {
+  return (body: string, params: string, parse: (md: string) => string) => {
+    const title = params.trim() || ({ note: "注意", tip: "提示", warning: "警告", danger: "危险" }[type] ?? type);
+    return `<div class="admonition ${type}"><div class="admonition-title">${escapeHtml(title)}</div><div class="admonition-body">${parse(body)}</div></div>`;
+  };
+}
+
 const blockRenderers: Record<string, BlockRenderer> = {
   tabs: renderTabs,
   "password-content": renderPasswordContent,
@@ -267,6 +275,10 @@ const blockRenderers: Record<string, BlockRenderer> = {
   btns: renderBtns,
   gallery: renderGallery,
   "video-gallery": renderVideoGallery,
+  note: renderAdmonition("note"),
+  tip: renderAdmonition("tip"),
+  warning: renderAdmonition("warning"),
+  danger: renderAdmonition("danger"),
 };
 
 // ---------- 行内渲染器 ----------

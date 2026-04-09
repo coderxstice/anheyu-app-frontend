@@ -22,7 +22,7 @@ export function MapAndInfoCard({ map, selfInfo }: MapAndInfoCardProps) {
     return () => observer.disconnect();
   }, []);
 
-  const bgImage = isDark ? map.backgroundDark : map.background;
+  const bgImage = isDark ? (map.backgroundDark || map.background) : map.background;
 
   return (
     <div className={`${styles.itemGroup} ${styles.mapAndInfo}`}>

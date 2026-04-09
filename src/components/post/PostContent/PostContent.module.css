@@ -1276,6 +1276,43 @@
   font-weight: 600;
   margin-bottom: 0.5rem;
 }
+.postContent :global(.admonition.note) :global(.admonition-title) {
+  color: #3b82f6;
+}
+.postContent :global(.admonition.tip) :global(.admonition-title) {
+  color: #10b981;
+}
+.postContent :global(.admonition.warning) :global(.admonition-title) {
+  color: #f59e0b;
+}
+.postContent :global(.admonition.danger) :global(.admonition-title) {
+  color: #ef4444;
+}
+
+/* Admonition 暗色模式适配 */
+:global(html.dark) .postContent :global(.admonition.note) {
+  background: rgba(59, 130, 246, 0.15);
+}
+:global(html.dark) .postContent :global(.admonition.tip) {
+  background: rgba(16, 185, 129, 0.15);
+}
+:global(html.dark) .postContent :global(.admonition.warning) {
+  background: rgba(245, 158, 11, 0.15);
+}
+:global(html.dark) .postContent :global(.admonition.danger) {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.postContent :global(.admonition-body) {
+  font-size: 0.95em;
+  line-height: 1.7;
+}
+.postContent :global(.admonition-body) > :first-child {
+  margin-top: 0;
+}
+.postContent :global(.admonition-body) > :last-child {
+  margin-bottom: 0;
+}
 
 /* ================================
    Gallery 图片画廊样式

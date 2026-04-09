@@ -621,12 +621,15 @@
   padding: 0.5rem 2rem;
   font-size: 20px;
   color: var(--foreground);
-  background: var(--background-alpha, rgba(255, 255, 255, 0.6));
+  background: rgba(255, 255, 255, 0.6);
   backdrop-filter: saturate(180%) blur(20px);
   transition:
     all 1s,
     color 0s ease-in-out;
   transform: translateZ(0);
+}
+:global(html.dark) .mapTitle {
+  background: rgba(24, 23, 29, 0.6);
 }
 .mapTitle b {
   color: var(--foreground);

@@ -18,7 +18,8 @@ interface TagsCardProps {
  * 在标签详情页时支持状态驱动切换，其他页面使用路由导航
  */
 const TagsCard = memo(function TagsCard({ highlightIds = [] }: TagsCardProps) {
-  const { data: tags = [], isLoading } = useTags();
+  const { data: rawTags = [], isLoading } = useTags();
+  const tags = useMemo(() => rawTags.filter(t => t.count > 0), [rawTags]);
   const tagCloudRef = useRef<HTMLDivElement>(null);
   const [isOverflow, setIsOverflow] = useState(false);
   const tagFilter = useTagFilter(); // 在标签详情页时有值，其他页面为 null

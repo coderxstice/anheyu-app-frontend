@@ -137,12 +137,12 @@ export default function PageManagementPage() {
       >
         {/* 标题区 + 操作按钮 */}
         <div className="shrink-0 px-5 pt-4 pb-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <h1 className="text-lg font-semibold tracking-tight text-foreground">页面管理</h1>
               <p className="text-xs text-muted-foreground mt-1">管理自定义页面，支持创建隐私政策、关于等静态页面</p>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
               <Button
                 size="sm"
                 variant="flat"
@@ -168,7 +168,7 @@ export default function PageManagementPage() {
 
         {/* 筛选栏 */}
         <div className="shrink-0 px-5 pb-3">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <Input
               size="sm"
               isClearable
@@ -184,7 +184,7 @@ export default function PageManagementPage() {
               }}
             />
             <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
+              <DropdownTrigger className="flex">
                 <Button size="sm" variant="flat" endContent={<ChevronDown className="w-3.5 h-3.5" />} className="h-8">
                   {pm.publishFilter
                     ? (PUBLISH_OPTIONS.find(o => o.key === pm.publishFilter)?.label ?? "发布状态")
