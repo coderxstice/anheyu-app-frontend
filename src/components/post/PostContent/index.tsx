@@ -129,14 +129,26 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     return () => document.removeEventListener("copy", handleCopy as EventListener, true);
   }, [copyConfig, appName, siteOwnerName, articleInfo]);
 
-  // 代码块配置
-  const codeBlockConfig = useMemo(() => {
-    const codeMaxLines = codeBlockRawConfig?.code_max_lines ?? 10;
-    const macStyle = codeBlockRawConfig?.mac_style !== false;
-    // 每行高度约 26px (font-size 16px * line-height 1.6)，加上 padding 20px
-    const collapsedHeight = codeMaxLines > 0 ? codeMaxLines * 26 + 20 : 0;
-    return { codeMaxLines, collapsedHeight, macStyle };
-  }, [codeBlockRawConfig?.code_max_lines, codeBlockRawConfig?.mac_style]);
+  // 代码块配置：拆分为独立原始值 memo，避免对象引用变化导致 useEffect 不必要重跑。
+  // 当 codeBlockRawConfig 从 undefined 变为实际值时，若计算结果（原始值）相同，
+  // useCallback 的依赖不会变化，主 useEffect 不会重新执行。
+  const macStyle = useMemo(() => {
+    const v = codeBlockRawConfig?.mac_style;
+    if (v === undefined || v === null || v === "") return true;
+    if (typeof v === "boolean") return v;
+    return String(v).toLowerCase() !== "false";
+  }, [codeBlockRawConfig?.mac_style]);
+
+  const codeMaxLines = useMemo(() => {
+    const v = codeBlockRawConfig?.code_max_lines;
+    if (typeof v === "number") return v;
+    if (typeof v === "string") return parseInt(v, 10) || 10;
+    return 10;
+  }, [codeBlockRawConfig?.code_max_lines]);
+
+  const collapsedHeight = useMemo(() => {
+    return codeMaxLines > 0 ? codeMaxLines * 26 + 20 : 0;
+  }, [codeMaxLines]);
 
   // 存储 Tip 清理函数
   const tipCleanupFnsRef = useRef<(() => void)[]>([]);
@@ -630,8 +642,6 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
   const initCodeBlockIcons = useCallback(() => {
     if (!contentRef.current) return;
 
-    const { codeMaxLines, collapsedHeight, macStyle } = codeBlockConfig;
-
     // SVG 图标
     // 展开箭头 (fa6-solid:chevron-down) - 向下箭头，收起时旋转向右
     const expandIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 448 512"><path fill="currentColor" d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7L86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"/></svg>`;
@@ -786,7 +796,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
         }
       }
     });
-  }, [codeBlockConfig]);
+  }, [macStyle, codeMaxLines, collapsedHeight]);
 
   // 代码块展开/收起事件已通过内联 onclick 处理，无需额外事件委托
   const initCodeExpandEvents = useCallback(() => {
