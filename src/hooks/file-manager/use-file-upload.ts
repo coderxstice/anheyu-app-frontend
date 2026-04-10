@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FileItem, StoragePolicy, UploadItem } from "@/types/file-manager";
 import {
   createUploadSessionApi,
@@ -18,6 +18,16 @@ import type {
   UploadGlobalCommandValue,
 } from "./types";
 import { createFileInput, DEFAULT_CHUNK_SIZE, getErrorMessage, processDragDropItems, toast } from "./types";
+
+/**
+ * validateUploadRenameSegment 校验冲突重命名时的文件名分段，禁止路径分隔符与 ..。
+ */
+function validateUploadRenameSegment(value: string): true | string {
+  const t = value.trim();
+  if (!t) return "文件名不能为空";
+  if (/[/\\]/.test(t) || t.includes("..")) return "文件名不能包含路径分隔符或 ..";
+  return true;
+}
 
 interface UseFileUploadOptions {
   path: string;
@@ -38,9 +48,12 @@ export function useFileUpload({
 }: UseFileUploadOptions) {
   // ===== Upload Queue =====
   const uploadQueueRef = useRef<UploadItem[]>([]);
-  const [, setUploadQueueVersion] = useState(0);
+  /** 与队列内容同步递增，供子组件 useMemo 依赖（队列数组引用不变，仅原地变更） */
+  const [uploadQueueVersion, setUploadQueueVersion] = useState(0);
+  const [queueLength, setQueueLength] = useState(0);
   const updateQueueView = useCallback(() => {
     setUploadQueueVersion(v => v + 1);
+    setQueueLength(uploadQueueRef.current.length);
   }, []);
 
   const addTask = useCallback(
@@ -178,6 +191,9 @@ export function useFileUpload({
   const processFilePipeline = async (item: UploadItem): Promise<void> => {
     try {
       await new Promise(resolve => setTimeout(resolve, 200));
+      if (item.status === "canceled") {
+        return;
+      }
       item.status = "uploading";
       item.startTime = Date.now();
       updateQueueView();
@@ -351,6 +367,25 @@ export function useFileUpload({
     removeTask(itemId);
   };
 
+  /**
+   * applyPendingReset 将任务恢复为可调度状态，清空分片、会话与客户端直传相关字段。
+   */
+  const applyPendingReset = (item: UploadItem) => {
+    item.status = "pending";
+    item.errorMessage = undefined;
+    item.progress = 0;
+    item.uploadedChunks = new Set();
+    item.uploadedSize = 0;
+    item.sessionId = undefined;
+    item.chunkSize = undefined;
+    item.totalChunks = undefined;
+    item.uploadMethod = undefined;
+    item.uploadUrl = undefined;
+    item.storageType = undefined;
+    item.policyId = undefined;
+    item.contentType = undefined;
+  };
+
   const retryItem = (itemId: string) => {
     const item = findTask(itemId);
     if (!item || !["error", "conflict", "resumable"].includes(item.status)) return;
@@ -379,14 +414,7 @@ export function useFileUpload({
       return;
     }
 
-    item.status = "pending";
-    item.errorMessage = undefined;
-    item.progress = 0;
-    item.uploadedChunks = new Set();
-    item.uploadedSize = 0;
-    item.sessionId = undefined;
-    item.chunkSize = undefined;
-    item.totalChunks = undefined;
+    applyPendingReset(item);
     updateQueueView();
     if (!isProcessingQueueRef.current) processUploadQueue();
   };
@@ -395,14 +423,7 @@ export function useFileUpload({
     let hasFailedTasks = false;
     uploadQueueRef.current.forEach(item => {
       if (item.status === "error") {
-        item.status = "pending";
-        item.errorMessage = undefined;
-        item.progress = 0;
-        item.uploadedChunks = new Set();
-        item.uploadedSize = 0;
-        item.sessionId = undefined;
-        item.chunkSize = undefined;
-        item.totalChunks = undefined;
+        applyPendingReset(item);
         hasFailedTasks = true;
       }
     });
@@ -412,33 +433,95 @@ export function useFileUpload({
     }
   };
 
+  /**
+   * resolveConflict 处理同名冲突：覆盖则带 overwrite 重入队；重命名则弹出输入框并保留相对路径中的目录前缀。
+   */
   const resolveConflict = (itemId: string, strategy: "overwrite" | "rename") => {
     const item = findTask(itemId);
     if (!item || item.status !== "conflict") return;
     if (strategy === "overwrite") {
       item.overwrite = true;
-      item.status = "pending";
-    } else {
-      const extIndex = item.name.lastIndexOf(".");
-      const baseName = extIndex > 0 ? item.name.slice(0, extIndex) : item.name;
-      const ext = extIndex > 0 ? item.name.slice(extIndex) : "";
-      item.name = `${baseName}-副本${ext}`;
-      item.relativePath = `${baseName}-副本${ext}`;
-      item.status = "pending";
+      applyPendingReset(item);
+      updateQueueView();
+      if (!isProcessingQueueRef.current) processUploadQueue();
+      return;
     }
-    item.errorMessage = undefined;
-    updateQueueView();
-    if (!isProcessingQueueRef.current) processUploadQueue();
+
+    const defaultName = item.name.includes(".") ? `(副本) ${item.name}` : `(副本)${item.name}`;
+    openPrompt({
+      title: "重命名上传",
+      description: "请输入新的文件名（仅文件名，勿含路径或 ..）",
+      defaultValue: defaultName,
+      confirmText: "确定",
+      cancelText: "取消",
+      validator: v => validateUploadRenameSegment(v),
+    }).then(value => {
+      if (value == null) return;
+      const trimmed = String(value).trim();
+      const segCheck = validateUploadRenameSegment(trimmed);
+      if (segCheck !== true) {
+        toast(segCheck, "warning");
+        return;
+      }
+      const current = findTask(itemId);
+      if (!current || current.status !== "conflict") return;
+      const oldPath = current.relativePath;
+      const lastSlash = oldPath.lastIndexOf("/");
+      current.relativePath =
+        lastSlash === -1 ? trimmed : `${oldPath.slice(0, lastSlash)}/${trimmed}`;
+      current.name = trimmed;
+      current.overwrite = false;
+      applyPendingReset(current);
+      updateQueueView();
+      if (!isProcessingQueueRef.current) processUploadQueue();
+    });
   };
 
+  /**
+   * setGlobalOverwriteAndRetry 与旧版 Vue 一致：开启全局覆盖时对每个冲突项设置 overwrite 并 retry；关闭时仅同步冲突项上的 overwrite 标志。
+   */
   const setGlobalOverwriteAndRetry = (value: boolean) => {
     setGlobalOverwrite(value);
-    uploadQueueRef.current.forEach(item => {
-      if (item.status === "conflict") {
-        item.overwrite = value;
-      }
-    });
-    updateQueueView();
+    if (value) {
+      const conflictIds = uploadQueueRef.current.filter(i => i.status === "conflict").map(i => i.id);
+      conflictIds.forEach(id => {
+        const it = findTask(id);
+        if (it && it.status === "conflict") {
+          it.overwrite = true;
+        }
+      });
+      conflictIds.forEach(id => retryItem(id));
+      updateQueueView();
+    } else {
+      uploadQueueRef.current.forEach(item => {
+        if (item.status === "conflict") {
+          item.overwrite = false;
+        }
+      });
+      updateQueueView();
+    }
+  };
+
+  /**
+   * cancelAllActiveUploads 取消所有待处理/准备中/上传中的任务（与单条 removeItem 一致，含删会话）。
+   */
+  const cancelAllActiveUploads = async () => {
+    const ids = [...uploadQueueRef.current]
+      .filter(i => ["pending", "uploading", "processing"].includes(i.status))
+      .map(i => i.id);
+    for (const id of ids) {
+      await removeItem(id);
+    }
+  };
+
+  /**
+   * clearAllFailedUploads 从队列移除所有失败项（含 deleteUploadSession，与 removeItem 一致）。
+   */
+  const clearAllFailedUploads = async () => {
+    const ids = [...uploadQueueRef.current].filter(i => i.status === "error").map(i => i.id);
+    for (const id of ids) {
+      await removeItem(id);
+    }
   };
 
   const handleUploadGlobalCommand = (command: UploadGlobalCommand, value?: UploadGlobalCommandValue) => {
@@ -451,6 +534,31 @@ export function useFileUpload({
         break;
       case "clear-finished":
         clearFinishedUploads();
+        break;
+      case "cancel-all-active":
+        openConfirm({
+          title: "取消上传",
+          description:
+            "将取消所有等待中、准备中、正在上传的任务并从列表移除。当前分片请求无法被浏览器立即中断，正在传输的分片仍可能完成。",
+          confirmText: "确定取消",
+          cancelText: "返回",
+          tone: "danger",
+        }).then(confirmed => {
+          if (!confirmed) return;
+          void cancelAllActiveUploads();
+        });
+        break;
+      case "clear-all-failed":
+        openConfirm({
+          title: "清除失败任务",
+          description: "将从上传列表中移除所有失败条目。确定吗？",
+          confirmText: "确定",
+          cancelText: "取消",
+          tone: "default",
+        }).then(confirmed => {
+          if (!confirmed) return;
+          void clearAllFailedUploads();
+        });
         break;
       case "set-concurrency":
         openPrompt({
@@ -473,7 +581,7 @@ export function useFileUpload({
     }
   };
 
-  const showUploadProgress = uploadQueueRef.current.length > 0;
+  const showUploadProgress = queueLength > 0;
 
   // ===== Drag & Drop =====
   const [isDragging, setIsDragging] = useState(false);
@@ -542,20 +650,23 @@ export function useFileUpload({
   const [isPanelCollapsed, setPanelCollapsed] = useState(false);
 
   const handlePanelClose = () => {
-    if (uploadQueueRef.current.some(item => ["uploading", "pending", "error", "conflict"].includes(item.status))) {
+    if (
+      uploadQueueRef.current.some(item =>
+        ["uploading", "pending", "processing", "error", "conflict"].includes(item.status)
+      )
+    ) {
       openConfirm({
         title: "警告",
         description: "关闭面板会取消所有进行中和待处理的上传任务，确定吗？",
         confirmText: "确定",
         cancelText: "取消",
         tone: "danger",
-      }).then(confirmed => {
+      }).then(async confirmed => {
         if (!confirmed) return;
-        [...uploadQueueRef.current].forEach(item => {
-          if (!["success", "canceled"].includes(item.status)) {
-            removeItem(item.id);
-          }
-        });
+        const snapshot = [...uploadQueueRef.current].filter(
+          item => !["success", "canceled"].includes(item.status)
+        );
+        await Promise.all(snapshot.map(item => removeItem(item.id)));
         setPanelVisible(false);
       });
     } else {
@@ -564,10 +675,10 @@ export function useFileUpload({
   };
 
   useEffect(() => {
-    if (!showUploadProgress) {
+    if (queueLength === 0) {
       setPanelVisible(false);
     }
-  }, [showUploadProgress]);
+  }, [queueLength]);
 
   // ===== File / Dir Upload =====
   const handleUploadFile = () => {
@@ -615,8 +726,19 @@ export function useFileUpload({
     input.click();
   };
 
+  /**
+   * 队列快照：每次 updateQueueView 时生成新数组引用（浅拷贝），
+   * 使 React 子组件的 useMemo 能通过引用变化正确重算。
+   * 旧版 Vue 用 reactive([]) 自动追踪变更，React 中需要手动产生新引用。
+   */
+  const uploadQueueSnapshot = useMemo(
+    () => [...uploadQueueRef.current],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ref 内容随 version 同步变更
+    [uploadQueueVersion]
+  );
+
   return {
-    uploadQueue: uploadQueueRef.current,
+    uploadQueue: uploadQueueSnapshot,
     isPanelVisible,
     isPanelCollapsed,
     speedDisplayMode,

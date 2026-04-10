@@ -60,7 +60,7 @@ export function useCreateStoragePolicy() {
   return useMutation({
     mutationFn: (data: Partial<StoragePolicyCreateRequest>) => storagePolicyApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: storagePolicyKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: storagePolicyKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -71,8 +71,8 @@ export function useUpdateStoragePolicy() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: StoragePolicyUpdateRequest }) => storagePolicyApi.update(id, data),
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: storagePolicyKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: storagePolicyKeys.detail(variables.id) });
+      queryClient.invalidateQueries({ queryKey: storagePolicyKeys.lists(), refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: storagePolicyKeys.detail(variables.id), refetchType: "all" });
     },
   });
 }
@@ -83,7 +83,7 @@ export function useDeleteStoragePolicy() {
   return useMutation({
     mutationFn: (id: string) => storagePolicyApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: storagePolicyKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: storagePolicyKeys.lists(), refetchType: "all" });
     },
   });
 }

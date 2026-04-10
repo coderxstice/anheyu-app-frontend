@@ -33,7 +33,9 @@ import {
   ModalFooter,
   ModalHeader,
   Button,
+  Input,
 } from "@heroui/react";
+import { FormColorPicker } from "@/components/ui/form-color-picker";
 import { useQueryClient } from "@tanstack/react-query";
 import { articleApi } from "@/lib/api/article";
 import { postManagementApi } from "@/lib/api/post-management";
@@ -803,7 +805,7 @@ function SettingsContent({
   const handleCreateCategory = useCallback(
     async (name: string) => {
       const created = await articleApi.createCategory({ name });
-      queryClient.invalidateQueries({ queryKey: ["post-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["post-categories"], refetchType: "all" });
       return created;
     },
     [queryClient]
@@ -813,7 +815,7 @@ function SettingsContent({
   const handleCreateTag = useCallback(
     async (name: string) => {
       const created = await articleApi.createTag({ name });
-      queryClient.invalidateQueries({ queryKey: ["post-tags"] });
+      queryClient.invalidateQueries({ queryKey: ["post-tags"], refetchType: "all" });
       return created;
     },
     [queryClient]
@@ -1120,18 +1122,23 @@ function SettingsContent({
         />
         {meta.is_primary_color_manual && (
           <div className="flex items-center gap-2">
-            <input
-              type="color"
-              value={meta.primary_color || "#4259ef"}
-              onChange={e => onUpdateField("primary_color", e.target.value)}
-              className="sb-color-input"
+            <FormColorPicker
+              value={meta.primary_color?.trim() || "#4259ef"}
+              onChange={v => onUpdateField("primary_color", v)}
+              triggerAriaLabel="手动主色调：打开取色器"
+              className="h-8 w-8 shrink-0"
             />
-            <input
-              type="text"
-              value={meta.primary_color}
-              onChange={e => onUpdateField("primary_color", e.target.value)}
+            <Input
+              size="sm"
+              classNames={{
+                base: "flex-1 min-w-0",
+                input: "font-mono text-xs",
+                inputWrapper: "h-9",
+              }}
+              aria-label="手动主色调 HEX"
               placeholder="#4259ef"
-              className="sb-input flex-1"
+              value={meta.primary_color}
+              onValueChange={v => onUpdateField("primary_color", v)}
             />
           </div>
         )}

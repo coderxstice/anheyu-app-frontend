@@ -86,7 +86,7 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
 
   // 专注模式
   const [focusMode, setFocusMode] = useState(false);
-  const toggleFocusMode = useCallback(() => setFocusMode((prev) => !prev), []);
+  const toggleFocusMode = useCallback(() => setFocusMode(prev => !prev), []);
 
   useEffect(() => {
     if (!focusMode) return;
@@ -215,14 +215,21 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
     if (!article || !editor || editor.isDestroyed) return;
     if (editorSyncedRef.current === article.id) return;
     editorSyncedRef.current = article.id;
-    const contentHtml = article.content_html;
-    if (contentHtml) {
-      queueMicrotask(() => {
-        if (!editor.isDestroyed) {
-          editor.commands.setContent(contentHtml);
-        }
-      });
-    }
+    const contentHtml = article.content_html?.trim();
+    const contentMd = article.content_md?.trim();
+    queueMicrotask(() => {
+      if (editor.isDestroyed) return;
+      if (contentHtml) {
+        editor.commands.setContent(contentHtml);
+        return;
+      }
+      // 兼容仅返回 Markdown、或历史数据中 content_html 为空的场景：用 MD 转 HTML 初始化可视化编辑器
+      if (contentMd) {
+        const html = fixTaskListHtml(marked.parse(contentMd, { async: false }) as string);
+        editor.commands.setContent(html);
+        setSourceContent(contentMd);
+      }
+    });
   }, [article, editor]);
 
   // 保存文章
@@ -340,11 +347,7 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
       {/* 工具栏 - 专注模式下隐藏桌面端工具栏 */}
       {!focusMode && (
         <div className="hidden md:block">
-          <EditorToolbar
-            editor={editor}
-            editorMode={editorMode}
-            onModeChange={handleModeChange}
-          />
+          <EditorToolbar editor={editor} editorMode={editorMode} onModeChange={handleModeChange} />
         </div>
       )}
 

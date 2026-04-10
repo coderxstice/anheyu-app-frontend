@@ -67,7 +67,7 @@ export const friendsApi = {
   async createLink(data: CreateLinkRequest): Promise<LinkItem> {
     const response = await apiClient.post<LinkItem>("/api/links", data);
 
-    if (response.code === 200 && response.data) {
+    if (response.code >= 200 && response.code < 300 && response.data) {
       return response.data;
     }
 
@@ -94,7 +94,7 @@ export const friendsApi = {
    */
   async deleteLink(id: number): Promise<void> {
     const response = await apiClient.delete(`/api/links/${id}`);
-    if (response.code !== 200) {
+    if (response.code < 200 || response.code >= 300) {
       throw new Error(response.message || "删除友链失败");
     }
   },
@@ -105,7 +105,7 @@ export const friendsApi = {
    */
   async reviewLink(id: number, data: ReviewLinkRequest): Promise<void> {
     const response = await apiClient.put(`/api/links/${id}/review`, data);
-    if (response.code !== 200) {
+    if (response.code < 200 || response.code >= 300) {
       throw new Error(response.message || "审核友链失败");
     }
   },
@@ -135,7 +135,7 @@ export const friendsApi = {
   async createCategory(data: CreateCategoryRequest): Promise<LinkCategory> {
     const response = await apiClient.post<LinkCategory>("/api/links/categories", data);
 
-    if (response.code === 200 && response.data) {
+    if (response.code >= 200 && response.code < 300 && response.data) {
       return response.data;
     }
 
@@ -162,7 +162,7 @@ export const friendsApi = {
    */
   async deleteCategory(id: number): Promise<void> {
     const response = await apiClient.delete(`/api/links/categories/${id}`);
-    if (response.code !== 200) {
+    if (response.code < 200 || response.code >= 300) {
       throw new Error(response.message || "删除分类失败");
     }
   },
@@ -192,7 +192,7 @@ export const friendsApi = {
   async createTag(data: CreateTagRequest): Promise<LinkTag> {
     const response = await apiClient.post<LinkTag>("/api/links/tags", data);
 
-    if (response.code === 200 && response.data) {
+    if (response.code >= 200 && response.code < 300 && response.data) {
       return response.data;
     }
 
@@ -219,7 +219,7 @@ export const friendsApi = {
    */
   async deleteTag(id: number): Promise<void> {
     const response = await apiClient.delete(`/api/links/tags/${id}`);
-    if (response.code !== 200) {
+    if (response.code < 200 || response.code >= 300) {
       throw new Error(response.message || "删除标签失败");
     }
   },
@@ -308,7 +308,7 @@ export const friendsApi = {
    */
   async batchUpdateSort(data: BatchUpdateLinkSortRequest): Promise<void> {
     const response = await apiClient.put("/api/links/sort", data);
-    if (response.code !== 200) {
+    if (response.code < 200 || response.code >= 300) {
       throw new Error(response.message || "更新排序失败");
     }
   },

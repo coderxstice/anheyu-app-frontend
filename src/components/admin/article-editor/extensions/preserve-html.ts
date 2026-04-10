@@ -42,11 +42,20 @@ export const PreserveHTML = Node.create({
           return html ? { html } : false;
         },
       },
+      // details.md-editor-code 必须由 createEnhancedCodeBlock 解析（其 parse 规则默认 priority 50）；
+      // 若在此用更高 priority 兜底，会整块变成 preserveHTML「嵌入内容」，代码块样式丢失。
+      // 前台已渲染的 Mermaid（p 内嵌 SVG），避免被当成普通段落拆解析
+      {
+        tag: "p.md-editor-mermaid",
+        priority: 88,
+        getAttrs: (element: HTMLElement) => ({ html: element.outerHTML }),
+      },
     ];
   },
 
   renderHTML({ node }) {
     const html = (node.attrs.html as string) || "";
+    // atom 节点不得使用内容孔 `0`，否则 editor.getHTML() 会抛 Content hole not allowed in a leaf node spec
     return [
       "div",
       {
@@ -54,7 +63,6 @@ export const PreserveHTML = Node.create({
         class: "preserve-html-wrapper",
         "data-html": html,
       },
-      0,
     ];
   },
 

@@ -127,6 +127,24 @@ function handleImageUpload(view: EditorView, files: File[], pos?: number) {
   });
 }
 
+/**
+ * 预处理 HTML：将裸 <a class="btn-anzhiyu"> 包裹进 <div class="btn-container">，
+ * 使 ProseMirror 能在块级上下文中正确匹配 buttonBlock 节点规则。
+ * 使用正则替换而非 DOMParser，避免破坏 SVG/Mermaid 等特殊内容。
+ */
+function preprocessButtonHTML(html: string): string {
+  if (!html || !html.includes("btn-anzhiyu")) return html;
+
+  return html.replace(
+    /<a\s+(?=[^>]*class="[^"]*\bbtn-anzhiyu\b[^"]*")([^>]*>[\s\S]*?<\/a>)/g,
+    (match, _inner, offset) => {
+      const preceding = html.substring(Math.max(0, offset - 200), offset);
+      if (/(?:btn-container|btns-container)[^>]*>\s*$/.test(preceding)) return match;
+      return `<div class="btn-container">${match}</div>`;
+    }
+  );
+}
+
 interface UseArticleEditorOptions {
   /** 初始 HTML 内容 */
   initialContent?: string;
@@ -218,7 +236,7 @@ export function useArticleEditor({
         hasAIWriting: false,
       }),
     ],
-    content: initialContent,
+    content: preprocessButtonHTML(initialContent),
     editorProps: {
       attributes: {
         class: "prose prose-sm sm:prose-base max-w-none focus:outline-none min-h-[500px] px-8 py-6",

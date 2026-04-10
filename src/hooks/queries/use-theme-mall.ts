@@ -55,8 +55,8 @@ export function useInstallTheme() {
     mutationFn: (data: { theme_name: string; download_url: string; theme_market_id?: number }) =>
       themeMallApi.installTheme(data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: themeKeys.installed() });
-      qc.invalidateQueries({ queryKey: themeKeys.current() });
+      qc.invalidateQueries({ queryKey: themeKeys.installed(), refetchType: "all" });
+      qc.invalidateQueries({ queryKey: themeKeys.current(), refetchType: "all" });
     },
   });
 }
@@ -67,7 +67,7 @@ export function useSwitchTheme() {
   return useMutation({
     mutationFn: (data: { theme_name: string }) => themeMallApi.switchTheme(data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: themeKeys.all });
+      qc.invalidateQueries({ queryKey: themeKeys.all, refetchType: "all" });
     },
   });
 }
@@ -78,7 +78,7 @@ export function useSwitchToOfficial() {
   return useMutation({
     mutationFn: () => themeMallApi.switchToOfficial(),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: themeKeys.all });
+      qc.invalidateQueries({ queryKey: themeKeys.all, refetchType: "all" });
     },
   });
 }
@@ -89,8 +89,8 @@ export function useUninstallTheme() {
   return useMutation({
     mutationFn: (data: { theme_name: string }) => themeMallApi.uninstallTheme(data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: themeKeys.installed() });
-      qc.invalidateQueries({ queryKey: themeKeys.current() });
+      qc.invalidateQueries({ queryKey: themeKeys.installed(), refetchType: "all" });
+      qc.invalidateQueries({ queryKey: themeKeys.current(), refetchType: "all" });
     },
   });
 }
@@ -102,7 +102,7 @@ export function useUploadTheme() {
     mutationFn: ({ file, forceUpdate }: { file: File; forceUpdate?: boolean }) =>
       themeMallApi.uploadTheme(file, forceUpdate),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: themeKeys.installed() });
+      qc.invalidateQueries({ queryKey: themeKeys.installed(), refetchType: "all" });
     },
   });
 }
@@ -115,8 +115,8 @@ export function useInstallSSRTheme() {
   return useMutation({
     mutationFn: (data: SSRThemeInstallRequest) => themeMallApi.installSSRTheme(data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: themeKeys.ssrList() });
-      qc.invalidateQueries({ queryKey: themeKeys.installed() });
+      qc.invalidateQueries({ queryKey: themeKeys.ssrList(), refetchType: "all" });
+      qc.invalidateQueries({ queryKey: themeKeys.installed(), refetchType: "all" });
     },
   });
 }
@@ -127,9 +127,9 @@ export function useUninstallSSRTheme() {
   return useMutation({
     mutationFn: (name: string) => themeMallApi.uninstallSSRTheme(name),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: themeKeys.ssrList() });
-      qc.invalidateQueries({ queryKey: themeKeys.installed() });
-      qc.invalidateQueries({ queryKey: themeKeys.current() });
+      qc.invalidateQueries({ queryKey: themeKeys.ssrList(), refetchType: "all" });
+      qc.invalidateQueries({ queryKey: themeKeys.installed(), refetchType: "all" });
+      qc.invalidateQueries({ queryKey: themeKeys.current(), refetchType: "all" });
     },
   });
 }
@@ -140,7 +140,7 @@ export function useStartSSRTheme() {
   return useMutation({
     mutationFn: (name: string) => themeMallApi.startSSRTheme(name),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: themeKeys.all });
+      qc.invalidateQueries({ queryKey: themeKeys.all, refetchType: "all" });
     },
   });
 }
@@ -151,7 +151,7 @@ export function useStopSSRTheme() {
   return useMutation({
     mutationFn: (name: string) => themeMallApi.stopSSRTheme(name),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: themeKeys.ssrList() });
+      qc.invalidateQueries({ queryKey: themeKeys.ssrList(), refetchType: "all" });
     },
   });
 }

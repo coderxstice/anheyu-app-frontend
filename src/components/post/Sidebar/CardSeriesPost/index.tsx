@@ -9,6 +9,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { FaArrowRight, FaBook } from "react-icons/fa6";
 import { formatDate } from "@/utils/date";
+import { toSameOriginMediaUrl } from "@/utils/same-origin-media-url";
 import styles from "./CardSeriesPost.module.css";
 
 interface SeriesArticle {
@@ -30,6 +31,48 @@ interface CardSeriesPostProps {
   seriesCategory: SeriesCategory | null;
   currentArticleId?: number | string;
   defaultCover?: string;
+}
+
+/**
+ * 解析系列文章列表项封面：无有效封面时用默认图，否则做本站媒体同源压缩。
+ */
+function resolveSeriesPostCoverSrc(coverUrl: string | undefined, defaultCover: string): string {
+  const trimmed = coverUrl?.trim();
+  if (!trimmed) {
+    return defaultCover;
+  }
+  return toSameOriginMediaUrl(trimmed);
+}
+
+interface SeriesPostCoverImageProps {
+  coverUrl?: string;
+  defaultCover: string;
+  alt: string;
+}
+
+/**
+ * 系列文章缩略图：空封面用默认图，加载失败时回退到默认图。
+ */
+function SeriesPostCoverImage({ coverUrl, defaultCover, alt }: SeriesPostCoverImageProps) {
+  const [loadFailed, setLoadFailed] = useState(false);
+
+  const src = useMemo(() => {
+    if (loadFailed) {
+      return defaultCover;
+    }
+    return resolveSeriesPostCoverSrc(coverUrl, defaultCover);
+  }, [coverUrl, defaultCover, loadFailed]);
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={64}
+      height={64}
+      className={styles.coverImage}
+      onError={() => setLoadFailed(true)}
+    />
+  );
 }
 
 export function CardSeriesPost({
@@ -82,13 +125,7 @@ export function CardSeriesPost({
           {filteredArticles.map(article => (
             <Link key={article.id} href={`/doc/${article.id}`} className={styles.articleItem}>
               <div className={styles.cover}>
-                <Image
-                  src={article.cover_url || defaultCover}
-                  alt={article.title}
-                  width={64}
-                  height={64}
-                  className={styles.coverImage}
-                />
+                <SeriesPostCoverImage coverUrl={article.cover_url} defaultCover={defaultCover} alt={article.title} />
               </div>
               <div className={styles.info}>
                 <h4 className={styles.title}>{article.title}</h4>

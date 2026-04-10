@@ -349,6 +349,15 @@ export const MermaidBlock = Node.create({
         },
       },
       {
+        tag: "p.md-editor-mermaid",
+        priority: 61,
+        getAttrs: (element: HTMLElement) => {
+          const code = element.getAttribute("data-mermaid-code") || element.textContent?.trim() || "";
+          if (!code) return false;
+          return { code };
+        },
+      },
+      {
         tag: "div.mermaid",
         priority: 60,
         getAttrs: (element: HTMLElement) => {

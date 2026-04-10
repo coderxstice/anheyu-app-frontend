@@ -674,41 +674,6 @@
   }
 }
 
-// ---- 颜色选择器 ----
-.sb-color-input {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--sb-radius);
-  border: 2px solid var(--sb-border);
-  cursor: pointer;
-  padding: 0;
-  overflow: hidden;
-  appearance: none;
-  background: transparent;
-  flex-shrink: 0;
-  transition:
-    border-color 0.2s,
-    transform 0.12s ease,
-    box-shadow 0.2s;
-
-  @include sb-focus-ring;
-
-  &:hover {
-    border-color: var(--sb-accent);
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
-  &::-webkit-color-swatch-wrapper {
-    padding: 2px;
-  }
-  &::-webkit-color-swatch {
-    border: none;
-    border-radius: 4px;
-  }
-}
-
 // ---- 小按钮 ----
 .sb-icon-btn {
   width: 24px;

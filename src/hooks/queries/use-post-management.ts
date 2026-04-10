@@ -71,7 +71,8 @@ export function useCreateArticle() {
   return useMutation({
     mutationFn: (data: CreateArticleRequest) => postManagementApi.createArticle(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: postManagementKeys.lists() });
+      // refetchType: all — 列表页未挂载时（如在编辑器）也需预刷新缓存；全局 refetchOnMount 为 false 时否则返回列表仍显示旧数据
+      queryClient.invalidateQueries({ queryKey: postManagementKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -82,9 +83,9 @@ export function useUpdateArticle() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateArticleRequest }) => postManagementApi.updateArticle(id, data),
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: postManagementKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: postManagementKeys.detail(variables.id) });
-      queryClient.invalidateQueries({ queryKey: postManagementKeys.editDetail(variables.id) });
+      queryClient.invalidateQueries({ queryKey: postManagementKeys.lists(), refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: postManagementKeys.detail(variables.id), refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: postManagementKeys.editDetail(variables.id), refetchType: "all" });
     },
   });
 }
@@ -95,7 +96,7 @@ export function useDeleteArticle() {
   return useMutation({
     mutationFn: (id: string) => postManagementApi.deleteArticle(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: postManagementKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: postManagementKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -106,7 +107,7 @@ export function useImportArticles() {
   return useMutation({
     mutationFn: (params: ImportArticlesParams) => postManagementApi.importArticles(params),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: postManagementKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: postManagementKeys.lists(), refetchType: "all" });
     },
   });
 }

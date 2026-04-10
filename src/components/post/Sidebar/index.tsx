@@ -13,6 +13,7 @@ import { CardToc } from "./CardToc";
 import { CardSeriesPost } from "./CardSeriesPost";
 import { CardRecentPost } from "./CardRecentPost";
 import { useSiteConfigStore } from "@/store/site-config-store";
+import { resolvePostDefaultCoverUrl } from "@/utils/same-origin-media-url";
 import type { Article, RecentArticle } from "@/types/article";
 import styles from "./PostSidebar.module.css";
 
@@ -92,8 +93,11 @@ export function PostSidebar({ article, recentArticles = [] }: PostSidebarProps) 
     };
   }, [siteConfig]);
 
-  // 默认封面
-  const defaultCover = siteConfig?.post?.default?.default_cover || "/images/default-cover.webp";
+  // 默认封面（与文章详情页一致：后台配置 + 同源压缩 + 内置占位）
+  const defaultCover = useMemo(
+    () => resolvePostDefaultCoverUrl(siteConfig?.post?.default?.default_cover),
+    [siteConfig?.post?.default?.default_cover]
+  );
 
   const currentArticleId = article.id;
 

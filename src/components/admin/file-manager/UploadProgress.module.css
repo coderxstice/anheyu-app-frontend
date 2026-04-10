@@ -1,4 +1,4 @@
-/* ── 上传队列面板 - 匹配 anheyu-app ── */
+/* ── 上传队列面板 - 匹配 anheyu-pro ── */
 .upload-progress-panel {
   position: fixed;
   bottom: 20px;
@@ -25,21 +25,71 @@
 
 /* ── 面板头部 ── */
 .panel-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   flex-shrink: 0;
   align-items: center;
-  justify-content: space-between;
-  height: 53px;
-  padding: 0 20px;
+  gap: 10px;
+  min-height: 53px;
+  padding: 8px 16px 8px 20px;
   font-size: 14px;
   font-weight: 500;
   border-bottom: 1px solid var(--anzhiyu-card-border);
+}
+
+.panel-title-wrap {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.panel-title-main {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.panel-title-stats {
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--anzhiyu-secondtext);
+  word-break: break-word;
+}
+
+.upload-dropdown-content {
+  z-index: 2200 !important;
+  min-width: 220px;
+}
+
+.menu-check {
+  flex-shrink: 0;
+  font-size: 15px;
+  color: var(--anzhiyu-theme);
+}
+
+/* HeroUI Dropdown 触发器：与 .icon-wrapper 尺寸、配色一致 */
+.dropdown-icon-trigger {
+  width: 28px !important;
+  min-width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  color: var(--anzhiyu-secondtext) !important;
+  background: transparent !important;
+}
+
+.dropdown-icon-trigger:hover {
+  color: var(--anzhiyu-theme) !important;
+  background: color-mix(in srgb, var(--anzhiyu-secondtext) 8%, transparent) !important;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
   gap: 12px;
+  justify-self: end;
 }
 
 .icon-wrapper {
@@ -132,7 +182,7 @@
   background-color: var(--anzhiyu-card-border);
 }
 
-/* ── 上传条目 - 匹配 anheyu-app 横向布局 ── */
+/* ── 上传条目 - 匹配 anheyu-pro 横向布局 ── */
 .upload-item {
   position: relative;
   display: flex;
@@ -268,6 +318,26 @@
   white-space: nowrap;
 }
 
+.item-error-display {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 6px 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--anzhiyu-orange, #e38100);
+  background-color: color-mix(in srgb, var(--anzhiyu-orange, #e38100) 10%, var(--anzhiyu-card-bg));
+  border-radius: 8px;
+}
+
+.item-error-icon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  margin-top: 2px;
+}
+
 /* 状态/操作切换区域 */
 .status-action-wrapper {
   position: relative;
@@ -277,9 +347,30 @@
   margin-top: 4px;
 }
 
+.upload-item.touch-layout {
+  align-items: flex-start;
+}
+
+.upload-item.touch-layout .status-action-wrapper {
+  height: auto;
+}
+
+.touch-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  min-height: 32px;
+}
+
+.touch-status {
+  width: 100%;
+}
+
 /* 上传详情（进度%、速度、大小） */
 .item-detail-info {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   align-items: center;
   font-size: 12px;

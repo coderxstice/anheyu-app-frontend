@@ -573,15 +573,13 @@ function EnhancedCodeBlockView({ node, updateAttributes }: NodeViewProps) {
         )}
 
         {/* 代码内容区 - NodeViewContent 必须始终挂载，否则 ProseMirror 会丢失内容 */}
-        <div className={`editor-code-body ${collapsed ? "is-collapsed" : ""}`} style={open ? undefined : { display: "none" }}>
+        <div
+          className={`editor-code-body ${collapsed ? "is-collapsed" : ""}`}
+          style={open ? undefined : { display: "none" }}
+        >
           <div className="editor-code-content-row">
             {showLineNumbers && (
-              <div
-                className="editor-code-line-numbers"
-                contentEditable={false}
-                aria-hidden="true"
-                style={lineNumStyle}
-              >
+              <div className="editor-code-line-numbers" contentEditable={false} aria-hidden="true" style={lineNumStyle}>
                 {Array.from({ length: lineCount }, (_, i) => (
                   <span key={i}>{i + 1}</span>
                 ))}
@@ -593,16 +591,16 @@ function EnhancedCodeBlockView({ node, updateAttributes }: NodeViewProps) {
           </div>
 
           {collapsed && (
-              <button
-                type="button"
-                onClick={() => updateAttributes({ isCollapsed: false })}
-                className="editor-code-expand-btn"
-                contentEditable={false}
-              >
-                <ChevronDown className="w-4 h-4" />
-              </button>
-            )}
-          </div>
+            <button
+              type="button"
+              onClick={() => updateAttributes({ isCollapsed: false })}
+              className="editor-code-expand-btn"
+              contentEditable={false}
+            >
+              <ChevronDown className="w-4 h-4" />
+            </button>
+          )}
+        </div>
 
         {open && !collapsed && isCollapsible && (
           <button
@@ -684,6 +682,7 @@ export function createEnhancedCodeBlock(lowlight: unknown) {
         },
         {
           tag: "details.md-editor-code",
+          priority: 100,
           preserveWhitespace: "full" as const,
           contentElement: "pre",
           getAttrs: (element: HTMLElement) => {

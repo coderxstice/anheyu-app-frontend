@@ -168,9 +168,9 @@ export function useApproveComment() {
     mutationFn: (id: string) => adminApi.recentComments.approveComment(id),
     onSuccess: () => {
       // 刷新评论列表
-      queryClient.invalidateQueries({ queryKey: dashboardKeys.recentComments() });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.recentComments(), refetchType: "all" });
       // 刷新内容统计
-      queryClient.invalidateQueries({ queryKey: dashboardKeys.content() });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.content(), refetchType: "all" });
     },
   });
 }
@@ -185,9 +185,9 @@ export function useRejectComment() {
     mutationFn: (id: string) => adminApi.recentComments.rejectComment(id),
     onSuccess: () => {
       // 刷新评论列表
-      queryClient.invalidateQueries({ queryKey: dashboardKeys.recentComments() });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.recentComments(), refetchType: "all" });
       // 刷新内容统计
-      queryClient.invalidateQueries({ queryKey: dashboardKeys.content() });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.content(), refetchType: "all" });
     },
   });
 }

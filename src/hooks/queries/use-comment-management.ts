@@ -60,7 +60,7 @@ export function useDeleteComments() {
   return useMutation({
     mutationFn: (ids: string[]) => commentManagementApi.deleteComments(ids),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: commentManagementKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: commentManagementKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -75,7 +75,7 @@ export function useUpdateCommentStatus() {
     mutationFn: ({ id, status }: { id: string; status: number }) =>
       commentManagementApi.updateCommentStatus(id, status),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: commentManagementKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: commentManagementKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -90,7 +90,7 @@ export function useUpdateCommentInfo() {
     mutationFn: ({ id, data }: { id: string; data: UpdateCommentInfoRequest }) =>
       commentManagementApi.updateCommentInfo(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: commentManagementKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: commentManagementKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -104,7 +104,7 @@ export function useToggleCommentPin() {
   return useMutation({
     mutationFn: ({ id, pinned }: { id: string; pinned: boolean }) => commentManagementApi.togglePin(id, pinned),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: commentManagementKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: commentManagementKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -137,7 +137,7 @@ export function useImportComments() {
   return useMutation({
     mutationFn: (params: ImportCommentsParams) => commentManagementApi.importComments(params),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: commentManagementKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: commentManagementKeys.lists(), refetchType: "all" });
     },
   });
 }

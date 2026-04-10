@@ -183,7 +183,11 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
 
             {/* 上一篇/下一篇（屏宽 < 1400px 时在版权下方显示） */}
             <div className={styles.paginationInlineWrap}>
-              <PostPagination prevArticle={article.prev_article} nextArticle={article.next_article} />
+              <PostPagination
+                prevArticle={article.prev_article}
+                nextArticle={article.next_article}
+                defaultCover={defaultCover}
+              />
             </div>
 
             {/* 评论区 */}
@@ -208,6 +212,7 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
       <PostPaginationFloat
         prevArticle={article.prev_article}
         nextArticle={article.next_article}
+        defaultCover={defaultCover}
         commentBarrageEnabled={
           isCommentEnabled && isCommentBarrageEnabledBySite && isCommentBarrageVisible
         }
