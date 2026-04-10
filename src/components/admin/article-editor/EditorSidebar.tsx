@@ -34,9 +34,12 @@ import {
   ModalHeader,
   Button,
   Input,
+  Autocomplete,
+  AutocompleteItem,
 } from "@heroui/react";
 import { FormColorPicker } from "@/components/ui/form-color-picker";
 import { useQueryClient } from "@tanstack/react-query";
+import { useDocSeriesList } from "@/hooks/queries/use-doc-series";
 import { articleApi } from "@/lib/api/article";
 import { postManagementApi } from "@/lib/api/post-management";
 import type { Editor } from "@tiptap/react";
@@ -719,6 +722,47 @@ export function TOCContent({ editor }: { editor: Editor | null }) {
 }
 
 // ═══════════════════════════════════════════
+// 文档系列下拉选择
+// ═══════════════════════════════════════════
+
+function DocSeriesSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [filterText, setFilterText] = useState("");
+  const { data, isLoading } = useDocSeriesList({ page: 1, pageSize: 50, keyword: filterText || undefined });
+  const seriesList = data?.list ?? [];
+
+  return (
+    <div className="sb-field">
+      <span className="sb-label">所属系列</span>
+      <Autocomplete
+        aria-label="选择文档系列"
+        placeholder="搜索或选择系列"
+        size="sm"
+        variant="bordered"
+        isClearable
+        selectedKey={value || null}
+        onSelectionChange={key => onChange(key ? String(key) : "")}
+        onInputChange={setFilterText}
+        isLoading={isLoading}
+        classNames={{
+          base: "w-full",
+          listboxWrapper: "max-h-[240px]",
+        }}
+        listboxProps={{ emptyContent: isLoading ? "加载中..." : "暂无系列，请先在系列管理中创建" }}
+      >
+        {seriesList.map(s => (
+          <AutocompleteItem key={s.id} textValue={s.name}>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm">{s.name}</span>
+              <span className="text-xs text-default-400">{s.id}</span>
+            </div>
+          </AutocompleteItem>
+        ))}
+      </Autocomplete>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
 // 文章设置主内容
 // ═══════════════════════════════════════════
 
@@ -1190,7 +1234,10 @@ function SettingsContent({
         />
         {meta.is_doc && (
           <div className="sb-sub-group">
-            <SbInput label="系列 ID" value={meta.doc_series_id} onChange={v => onUpdateField("doc_series_id", v)} />
+            <DocSeriesSelect
+              value={meta.doc_series_id}
+              onChange={v => onUpdateField("doc_series_id", v)}
+            />
             <SbInput
               label="文档排序"
               value={String(meta.doc_sort)}
