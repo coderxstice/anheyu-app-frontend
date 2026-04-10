@@ -80,7 +80,7 @@ export function useCreateUser() {
   return useMutation({
     mutationFn: (data: AdminCreateUserRequest) => userManagementApi.createUser(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userManagementKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: userManagementKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -94,7 +94,7 @@ export function useUpdateUser() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: AdminUpdateUserRequest }) => userManagementApi.updateUser(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userManagementKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: userManagementKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -108,7 +108,7 @@ export function useDeleteUser() {
   return useMutation({
     mutationFn: (id: string) => userManagementApi.deleteUser(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userManagementKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: userManagementKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -124,7 +124,7 @@ export function useBatchDeleteUsers() {
       await Promise.all(ids.map(id => userManagementApi.deleteUser(id)));
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userManagementKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: userManagementKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -139,7 +139,7 @@ export function useResetPassword() {
     mutationFn: ({ id, data }: { id: string; data: AdminResetPasswordRequest }) =>
       userManagementApi.resetPassword(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userManagementKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: userManagementKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -154,7 +154,7 @@ export function useUpdateUserStatus() {
     mutationFn: ({ id, data }: { id: string; data: AdminUpdateUserStatusRequest }) =>
       userManagementApi.updateUserStatus(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userManagementKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: userManagementKeys.lists(), refetchType: "all" });
     },
   });
 }

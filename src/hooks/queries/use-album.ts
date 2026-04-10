@@ -69,7 +69,7 @@ export function useCreateAlbum() {
   return useMutation({
     mutationFn: (data: AlbumForm) => albumApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: albumKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: albumKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -81,7 +81,7 @@ export function useUpdateAlbum() {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: AlbumForm }) => albumApi.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: albumKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: albumKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -93,7 +93,7 @@ export function useDeleteAlbum() {
   return useMutation({
     mutationFn: (id: number) => albumApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: albumKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: albumKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -105,7 +105,7 @@ export function useBatchDeleteAlbums() {
   return useMutation({
     mutationFn: (ids: number[]) => albumApi.batchDelete(ids),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: albumKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: albumKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -117,8 +117,8 @@ export function useCreateAlbumCategory() {
   return useMutation({
     mutationFn: (data: CreateAlbumCategoryRequest) => albumApi.createCategory(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: albumKeys.categories() });
-      queryClient.invalidateQueries({ queryKey: albumKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: albumKeys.categories(), refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: albumKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -130,8 +130,8 @@ export function useUpdateAlbumCategory() {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateAlbumCategoryRequest }) => albumApi.updateCategory(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: albumKeys.categories() });
-      queryClient.invalidateQueries({ queryKey: albumKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: albumKeys.categories(), refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: albumKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -143,8 +143,8 @@ export function useDeleteAlbumCategory() {
   return useMutation({
     mutationFn: (id: number) => albumApi.deleteCategory(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: albumKeys.categories() });
-      queryClient.invalidateQueries({ queryKey: albumKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: albumKeys.categories(), refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: albumKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -156,8 +156,8 @@ export function useBatchImportAlbums() {
   return useMutation({
     mutationFn: (data: BatchImportAlbumsRequest) => albumApi.batchImportAlbums(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: albumKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: albumKeys.categories() });
+      queryClient.invalidateQueries({ queryKey: albumKeys.lists(), refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: albumKeys.categories(), refetchType: "all" });
     },
   });
 }
@@ -169,8 +169,8 @@ export function useImportAlbums() {
   return useMutation({
     mutationFn: (formData: FormData) => albumApi.importAlbums(formData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: albumKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: albumKeys.categories() });
+      queryClient.invalidateQueries({ queryKey: albumKeys.lists(), refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: albumKeys.categories(), refetchType: "all" });
     },
   });
 }

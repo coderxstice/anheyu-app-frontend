@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import Image from "next/image";
 import { Chip, Button, Tooltip } from "@heroui/react";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Eye } from "lucide-react";
 import { formatDateTimeParts } from "@/utils/date";
 import type { DocSeries } from "@/types/doc-series";
 
@@ -79,6 +79,18 @@ export function useDocSeriesRenderCell({ onAction }: UseDocSeriesRenderCellOptio
         case "actions":
           return (
             <div className="flex items-center justify-center gap-1">
+              <Tooltip content="查看文档" placement="top" size="sm">
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant="light"
+                  radius="full"
+                  className="w-7 h-7 min-w-0 text-primary bg-primary/10 hover:bg-primary/20"
+                  onPress={() => onAction(item, "detail")}
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                </Button>
+              </Tooltip>
               <Tooltip content="编辑" placement="top" size="sm">
                 <Button
                   isIconOnly

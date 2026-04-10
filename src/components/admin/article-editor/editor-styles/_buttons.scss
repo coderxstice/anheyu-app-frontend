@@ -660,6 +660,32 @@
       --btn-hover: #85ce61;
     }
 
+    // 旧版仅写 data-color、未带 btn-{color} 类名时的回退（与 .btn-* 变量一致）
+    &[data-color="blue"] {
+      --btn-color: #409eff;
+      --btn-hover: #66b1ff;
+    }
+    &[data-color="pink"] {
+      --btn-color: #ff69b4;
+      --btn-hover: #ff85c0;
+    }
+    &[data-color="red"] {
+      --btn-color: #f56c6c;
+      --btn-hover: #f78989;
+    }
+    &[data-color="purple"] {
+      --btn-color: #9d5cff;
+      --btn-hover: #b07dff;
+    }
+    &[data-color="orange"] {
+      --btn-color: #ff9800;
+      --btn-hover: #ffad33;
+    }
+    &[data-color="green"] {
+      --btn-color: #67c23a;
+      --btn-hover: #85ce61;
+    }
+
     &[class*="btn-"]:not(.btn-outline):not(.btn-container):not(.btn-larger) {
       background: var(--btn-color, var(--anzhiyu-theme));
       border-color: var(--btn-color, var(--anzhiyu-theme));

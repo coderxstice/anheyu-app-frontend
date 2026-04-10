@@ -1,8 +1,10 @@
 import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { addToast, useDisclosure } from "@heroui/react";
+import { useQuery } from "@tanstack/react-query";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useAdminArticles, useDeleteArticle, useImportArticles } from "@/hooks/queries/use-post-management";
+import { articleApi } from "@/lib/api/article";
 import type { AdminArticle, AdminArticleListParams, ArticleStatus, ReviewStatus } from "@/types/post-management";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import { FALLBACK_COVER } from "@/lib/constants/admin";
@@ -23,9 +25,22 @@ export function usePostManagementPage() {
   const debouncedSearch = useDebouncedValue(searchInput, 300);
   const [statusFilter, setStatusFilter] = useState("");
   const [reviewStatusFilter, setReviewStatusFilter] = useState("");
-  const [categoryFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [tagFilter, setTagFilter] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  // ---- 分类/标签选项列表 ----
+  const { data: categoryOptions = [] } = useQuery({
+    queryKey: ["post-categories"],
+    queryFn: () => articleApi.getCategoryList(),
+    staleTime: 1000 * 60 * 5,
+  });
+  const { data: tagOptions = [] } = useQuery({
+    queryKey: ["post-tags", "name"],
+    queryFn: () => articleApi.getTagList("name"),
+    staleTime: 1000 * 60 * 5,
+  });
 
   // ---- 选择 ----
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -46,8 +61,9 @@ export function usePostManagementPage() {
       status: (statusFilter as ArticleStatus) || undefined,
       review_status: (reviewStatusFilter as ReviewStatus) || undefined,
       category: categoryFilter || undefined,
+      tag: tagFilter || undefined,
     }),
-    [page, pageSize, debouncedSearch, statusFilter, reviewStatusFilter, categoryFilter]
+    [page, pageSize, debouncedSearch, statusFilter, reviewStatusFilter, categoryFilter, tagFilter]
   );
 
   const { data, isLoading, isFetching } = useAdminArticles(queryParams);
@@ -144,6 +160,8 @@ export function usePostManagementPage() {
     setSearchInput("");
     setStatusFilter("");
     setReviewStatusFilter("");
+    setCategoryFilter("");
+    setTagFilter("");
     setPage(1);
   }, []);
 
@@ -161,6 +179,11 @@ export function usePostManagementPage() {
     reviewStatusFilter,
     setReviewStatusFilter,
     categoryFilter,
+    setCategoryFilter,
+    tagFilter,
+    setTagFilter,
+    categoryOptions,
+    tagOptions,
     page,
     setPage,
     pageSize,

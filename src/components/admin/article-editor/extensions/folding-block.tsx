@@ -95,11 +95,13 @@ function FoldingBlockView({ node, updateAttributes }: NodeViewProps) {
     containerStyle.borderColor = color;
   }
 
-  // 标题栏样式
   const summaryStyle: React.CSSProperties = {};
-  if (hasCustomColor && open) {
+  if (hasCustomColor) {
     summaryStyle.backgroundColor = color;
-    summaryStyle.borderColor = color;
+    summaryStyle.color = "#fff";
+    if (open) {
+      summaryStyle.borderColor = color;
+    }
   }
 
   return (
@@ -110,7 +112,7 @@ function FoldingBlockView({ node, updateAttributes }: NodeViewProps) {
       >
         {/* 标题栏 */}
         <div
-          className={`editor-folding-summary ${open ? "is-open" : ""}`}
+          className={`editor-folding-summary ${open ? "is-open" : ""} ${hasCustomColor ? "has-custom-color" : ""}`}
           style={summaryStyle}
           onClick={() => {
             if (!titleEditing) {
@@ -196,8 +198,11 @@ export const FoldingBlock = Node.create({
         tag: "details.folding-tag",
         getAttrs: (el: HTMLElement) => {
           const summary = el.querySelector("summary");
-          const style = el.getAttribute("style") || "";
-          const colorMatch = style.match(/border-color:\s*([^;]+)/);
+          const detailsStyle = el.getAttribute("style") || "";
+          const summaryStyle = summary?.getAttribute("style") || "";
+          const colorMatch =
+            summaryStyle.match(/background-color:\s*([^;]+)/) ||
+            detailsStyle.match(/border-color:\s*([^;]+)/);
           return {
             title: summary?.textContent || "点击展开",
             color: colorMatch ? colorMatch[1].trim() : null,
@@ -218,10 +223,15 @@ export const FoldingBlock = Node.create({
       attrs.style = `border-color: ${node.attrs.color as string}`;
     }
 
+    const summaryAttrs: Record<string, string> = {};
+    if (node.attrs.color) {
+      summaryAttrs.style = `background-color: ${node.attrs.color as string}; color: #fff; border-color: ${node.attrs.color as string};`;
+    }
+
     return [
       "details",
       attrs,
-      ["summary", {}, (node.attrs.title as string) || "点击展开"],
+      ["summary", summaryAttrs, (node.attrs.title as string) || "点击展开"],
       ["div", { class: "content" }, 0],
     ];
   },

@@ -4,8 +4,10 @@
  */
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { toSameOriginMediaUrl } from "@/utils/same-origin-media-url";
 import type { ArticleLink } from "@/types/article";
 import styles from "./PostPaginationFloat.module.css";
 
@@ -20,6 +22,8 @@ const CARD_UP_DELAY_MS = 350;
 interface PostPaginationFloatProps {
   prevArticle?: ArticleLink | null;
   nextArticle?: ArticleLink | null;
+  /** 无封面或封面加载失败时使用，建议传入 resolvePostDefaultCoverUrl 的结果 */
+  defaultCover?: string;
   /** 是否开启了评论弹幕：为 true 时卡片仅在滚动到评论区后上移显示，与弹幕先后顺序 */
   commentBarrageEnabled?: boolean;
 }
@@ -31,9 +35,52 @@ function getArticleHref(link: ArticleLink): string {
   return `/posts/${link.abbrlink || link.id}`;
 }
 
+/**
+ * 解析浮动上下篇封面地址：无有效封面时用默认图，否则做本站媒体同源压缩。
+ */
+function resolveFloatPaginationCoverSrc(coverUrl: string | undefined, defaultCover: string): string {
+  const trimmed = coverUrl?.trim();
+  if (!trimmed) {
+    return defaultCover;
+  }
+  return toSameOriginMediaUrl(trimmed);
+}
+
+interface FloatNavCoverImageProps {
+  coverUrl?: string;
+  defaultCover: string;
+  alt: string;
+}
+
+/**
+ * 浮动上下篇封面缩略图：空封面用默认图，加载失败时回退到默认图。
+ */
+function FloatNavCoverImage({ coverUrl, defaultCover, alt }: FloatNavCoverImageProps) {
+  const [loadFailed, setLoadFailed] = useState(false);
+
+  const src = useMemo(() => {
+    if (loadFailed) {
+      return defaultCover;
+    }
+    return resolveFloatPaginationCoverSrc(coverUrl, defaultCover);
+  }, [coverUrl, defaultCover, loadFailed]);
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={48}
+      height={48}
+      className={styles.floatCoverImage}
+      onError={() => setLoadFailed(true)}
+    />
+  );
+}
+
 export function PostPaginationFloat({
   prevArticle,
   nextArticle,
+  defaultCover = "/images/default-cover.webp",
   commentBarrageEnabled = false,
 }: PostPaginationFloatProps) {
   const [cardVisible, setCardVisible] = useState(!commentBarrageEnabled);
@@ -92,9 +139,14 @@ export function PostPaginationFloat({
       data-visible={commentBarrageEnabled ? (cardVisible ? "true" : "false") : "true"}
     >
       <Link href={getArticleHref(link)} className={styles.floatCard}>
-        <span className={styles.floatLabel}>{label}</span>
-        <span className={styles.floatDivider} />
-        <span className={styles.floatTitle}>{link.title}</span>
+        <div className={styles.floatThumb}>
+          <FloatNavCoverImage coverUrl={link.cover_url} defaultCover={defaultCover} alt="" />
+        </div>
+        <div className={styles.floatText}>
+          <span className={styles.floatLabel}>{label}</span>
+          <span className={styles.floatDivider} />
+          <span className={styles.floatTitle}>{link.title}</span>
+        </div>
       </Link>
     </nav>
   );

@@ -20,7 +20,9 @@ export type UploadGlobalCommand =
   | "set-concurrency"
   | "set-overwrite-all"
   | "retry-all"
-  | "clear-finished";
+  | "clear-finished"
+  | "cancel-all-active"
+  | "clear-all-failed";
 
 export type UploadGlobalCommandValue = boolean | "instant" | "average" | undefined;
 

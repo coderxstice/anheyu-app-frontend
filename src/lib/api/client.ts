@@ -405,44 +405,74 @@ class ApiClient {
     this.instance = instance;
   }
 
+  private extractServerError(error: unknown): never {
+    if (axios.isAxiosError(error) && error.response?.data) {
+      const body = error.response.data as { message?: string; code?: number };
+      if (body.message) {
+        throw new Error(body.message);
+      }
+    }
+    throw error;
+  }
+
   /**
    * GET 请求
    */
   async get<T>(endpoint: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    const response = await this.instance.get<ApiResponse<T>>(endpoint, config);
-    return response.data;
+    try {
+      const response = await this.instance.get<ApiResponse<T>>(endpoint, config);
+      return response.data;
+    } catch (error) {
+      this.extractServerError(error);
+    }
   }
 
   /**
    * POST 请求
    */
   async post<T>(endpoint: string, data?: unknown, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    const response = await this.instance.post<ApiResponse<T>>(endpoint, data, config);
-    return response.data;
+    try {
+      const response = await this.instance.post<ApiResponse<T>>(endpoint, data, config);
+      return response.data;
+    } catch (error) {
+      this.extractServerError(error);
+    }
   }
 
   /**
    * PUT 请求
    */
   async put<T>(endpoint: string, data?: unknown, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    const response = await this.instance.put<ApiResponse<T>>(endpoint, data, config);
-    return response.data;
+    try {
+      const response = await this.instance.put<ApiResponse<T>>(endpoint, data, config);
+      return response.data;
+    } catch (error) {
+      this.extractServerError(error);
+    }
   }
 
   /**
    * PATCH 请求
    */
   async patch<T>(endpoint: string, data?: unknown, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    const response = await this.instance.patch<ApiResponse<T>>(endpoint, data, config);
-    return response.data;
+    try {
+      const response = await this.instance.patch<ApiResponse<T>>(endpoint, data, config);
+      return response.data;
+    } catch (error) {
+      this.extractServerError(error);
+    }
   }
 
   /**
    * DELETE 请求
    */
   async delete<T>(endpoint: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    const response = await this.instance.delete<ApiResponse<T>>(endpoint, config);
-    return response.data;
+    try {
+      const response = await this.instance.delete<ApiResponse<T>>(endpoint, config);
+      return response.data;
+    } catch (error) {
+      this.extractServerError(error);
+    }
   }
 
   /**

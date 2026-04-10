@@ -140,13 +140,6 @@
     border-width: 1px;
     border-style: solid;
   }
-
-  &.has-color .editor-folding-summary {
-    &:hover,
-    &.is-open {
-      background: inherit;
-    }
-  }
 }
 
 .editor-folding-summary {
@@ -162,15 +155,26 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
 
-  &:hover {
+  // 默认折叠块：hover 用主题色；自定义标题色时背景由内联 style 提供，避免被此处覆盖或 inherit 成透明
+  &:hover:not(.has-custom-color) {
     color: #fff;
     background: var(--anzhiyu-theme, #3b82f6);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
-  &.is-open:not(:hover) {
+  &.has-custom-color:hover {
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &.is-open:not(:hover):not(.has-custom-color) {
     color: #fff;
     background: var(--anzhiyu-theme, #3b82f6);
+    border-radius: 0;
+  }
+
+  &.is-open.has-custom-color:not(:hover) {
+    color: #fff;
     border-radius: 0;
   }
 
@@ -263,9 +267,7 @@
   border: 2px solid transparent;
   border-radius: 6px;
   cursor: pointer;
-  transition:
-    transform 0.15s,
-    border-color 0.15s;
+  transition: transform 0.15s, border-color 0.15s;
 
   &:hover {
     transform: scale(1.2);

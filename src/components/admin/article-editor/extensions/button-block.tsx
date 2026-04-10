@@ -9,6 +9,7 @@ import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps } from "@tip
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Icon } from "@iconify/react";
 import { Pencil } from "lucide-react";
+import { FormIconSelector } from "@/components/ui/form-icon-selector";
 
 // ---- 类型 ----
 interface ButtonGroupItem {
@@ -25,14 +26,33 @@ interface ButtonGroupItem {
 function faClassToIconify(fa: string): string {
   if (!fa) return "";
   if (fa.includes(":")) return fa; // 已经是 Iconify 格式
-  const parts = fa.trim().split(/\s+/);
-  if (parts.length < 2) return fa;
+  const trimmed = fa.trim();
+  // 安和鱼主题图标字体（如 `anzhiyufont anzhiyu-icon-circle-arrow-right`）勿按 FA 规则拼接，否则会变成无效的 `anzhiyufont:...`
+  if (trimmed.includes("anzhiyu-icon") || trimmed.includes("anzhiyufont")) {
+    return trimmed;
+  }
+  const parts = trimmed.split(/\s+/);
+  if (parts.length < 2) return trimmed;
   const prefix = parts[0].replace("fa-", "fa6-");
   const name = parts
     .slice(1)
     .map(p => p.replace(/^fa-/, ""))
     .join("-");
   return `${prefix}:${name}`;
+}
+
+/** 从按钮 <a> 的 class 解析颜色（旧 HTML 常用 `btn-blue` 而无 data-color） */
+function btnColorFromAnchorClass(a: HTMLAnchorElement): string {
+  const cls = a.className || "";
+  const m = cls.match(/\bbtn-(blue|pink|red|purple|orange|green)\b/);
+  return m ? m[1] : "";
+}
+
+/** 从 <i> 读取图标：主题字体类名原样保留，FA 类转为 Iconify */
+function iconFromButtonInnerI(i: Element | null | undefined): string {
+  if (!i) return "";
+  const cls = (i as HTMLElement).className?.toString?.() || "";
+  return cls.trim() ? faClassToIconify(cls.trim()) : "";
 }
 
 /** Iconify → FA class：`fa6-solid:plus` → `fa-solid fa-plus` */
@@ -62,279 +82,20 @@ const COLORS = [
 
 // ---- 图标选择器 ----
 
-/** 常用推荐图标（Iconify 格式） */
-const PRESET_ICONS: { label: string; icons: string[] }[] = [
-  {
-    label: "常用",
-    icons: [
-      "fa6-solid:link",
-      "fa6-solid:arrow-right",
-      "fa6-solid:arrow-up-right-from-square",
-      "fa6-solid:download",
-      "fa6-solid:play",
-      "fa6-solid:star",
-      "fa6-solid:heart",
-      "fa6-solid:bookmark",
-      "fa6-solid:share-nodes",
-      "fa6-solid:eye",
-      "fa6-solid:pen",
-      "fa6-solid:plus",
-      "fa6-solid:circle-info",
-      "fa6-solid:circle-check",
-      "fa6-solid:triangle-exclamation",
-      "fa6-solid:lightbulb",
-      "fa6-solid:bell",
-      "fa6-solid:lock",
-      "fa6-solid:book",
-      "fa6-solid:image",
-      "fa6-solid:video",
-      "fa6-solid:music",
-      "fa6-solid:code",
-      "fa6-solid:file",
-    ],
-  },
-  {
-    label: "社交",
-    icons: [
-      "fa6-brands:github",
-      "fa6-brands:twitter",
-      "fa6-brands:weixin",
-      "fa6-brands:qq",
-      "fa6-brands:bilibili",
-      "fa6-brands:weibo",
-      "fa6-brands:youtube",
-      "fa6-brands:discord",
-      "fa6-brands:telegram",
-      "fa6-brands:tiktok",
-      "fa6-brands:instagram",
-      "fa6-brands:facebook",
-    ],
-  },
-  {
-    label: "装饰",
-    icons: [
-      "fa6-solid:bolt",
-      "fa6-solid:fire",
-      "fa6-solid:rocket",
-      "fa6-solid:gift",
-      "fa6-solid:crown",
-      "fa6-solid:wand-magic-sparkles",
-      "fa6-solid:globe",
-      "fa6-solid:paper-plane",
-      "fa6-solid:house",
-      "fa6-solid:gear",
-      "fa6-solid:user",
-      "fa6-solid:envelope",
-    ],
-  },
-];
+// 内联 IconPicker 已移除，统一使用 FormIconSelector
 
-function IconPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const [tab, setTab] = useState(0);
-  const [apiResults, setApiResults] = useState<string[]>([]);
-  const [searching, setSearching] = useState(false);
-  const pickerRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+// IconPicker 已移除，使用 FormIconSelector 代替
 
-  // 点击外部关闭
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (pickerRef.current && !pickerRef.current.contains(e.target as globalThis.Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
-
-  // Iconify API 搜索（防抖）
-  const doSearch = useCallback((query: string) => {
-    if (!query.trim()) {
-      setApiResults([]);
-      setSearching(false);
-      return;
-    }
-    setSearching(true);
-    fetch(`https://api.iconify.design/search?query=${encodeURIComponent(query)}&limit=60`)
-      .then(r => r.json())
-      .then(data => {
-        setApiResults(data.icons || []);
-        setSearching(false);
-      })
-      .catch(() => {
-        setSearching(false);
-      });
-  }, []);
-
-  const handleSearchChange = (val: string) => {
-    setSearch(val);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => doSearch(val), 350);
-  };
-
-  // 清理防抖
-  useEffect(
-    () => () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    },
-    []
-  );
-
-  const isSearching = search.trim().length > 0;
-  const presetCategory = PRESET_ICONS[tab];
-  const displayIcons = isSearching ? apiResults : (presetCategory?.icons ?? []);
-
-  const selectIcon = (icon: string) => {
-    onChange(icon);
-    setOpen(false);
-    setSearch("");
-    setApiResults([]);
-  };
-
-  return (
-    <div className="editor-btn-field" ref={pickerRef}>
-      <span className="editor-btn-label">图标</span>
-      <button type="button" className="editor-icon-trigger" onClick={() => setOpen(!open)}>
-        {value ? (
-          <span className="editor-icon-trigger-preview">
-            <Icon icon={value} width={16} height={16} />
-            <span className="editor-icon-trigger-text">{value}</span>
-          </span>
-        ) : (
-          <span className="editor-icon-trigger-placeholder">选择图标（可选）</span>
-        )}
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="editor-icon-trigger-arrow">
-          <path
-            d="M3 4.5L6 7.5L9 4.5"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-
-      {open && (
-        <div className="editor-icon-dropdown">
-          {/* 搜索框 */}
-          <div className="editor-icon-search-bar">
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              style={{ flexShrink: 0, opacity: 0.4 }}
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="M21 21l-4.35-4.35" strokeLinecap="round" />
-            </svg>
-            <input
-              value={search}
-              onChange={e => handleSearchChange(e.target.value)}
-              className="editor-icon-search-input"
-              placeholder="搜索全部图标（支持英文，如 arrow, home, star ...）"
-              autoFocus
-            />
-            {search && (
-              <button
-                type="button"
-                className="editor-icon-mode-btn"
-                onClick={() => {
-                  setSearch("");
-                  setApiResults([]);
-                }}
-                title="清除搜索"
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            )}
-          </div>
-
-          {/* 分类标签 - 仅在未搜索时显示 */}
-          {!isSearching && (
-            <div className="editor-icon-tabs">
-              {PRESET_ICONS.map((cat, i) => (
-                <button
-                  key={cat.label}
-                  type="button"
-                  className={`editor-icon-tab ${tab === i ? "is-active" : ""}`}
-                  onClick={() => setTab(i)}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* 搜索提示 */}
-          {isSearching && !searching && apiResults.length > 0 && (
-            <div className="editor-icon-search-hint">找到 {apiResults.length} 个图标</div>
-          )}
-
-          {/* 图标网格 */}
-          <div className="editor-icon-grid">
-            {/* 无图标选项 */}
-            <button
-              type="button"
-              className={`editor-icon-item ${!value ? "is-active" : ""}`}
-              onClick={() => selectIcon("")}
-              title="无图标"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                opacity={0.3}
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-
-            {displayIcons.map(ic => (
-              <button
-                key={ic}
-                type="button"
-                className={`editor-icon-item ${value === ic ? "is-active" : ""}`}
-                onClick={() => selectIcon(ic)}
-                title={ic}
-              >
-                <Icon icon={ic} width={18} height={18} />
-              </button>
-            ))}
-
-            {/* 加载中 */}
-            {searching && (
-              <div className="editor-icon-empty">
-                <span className="animate-pulse">搜索中...</span>
-              </div>
-            )}
-
-            {/* 无结果 */}
-            {isSearching && !searching && apiResults.length === 0 && (
-              <div className="editor-icon-empty">未找到相关图标，试试其他英文关键词</div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** 在编辑器中渲染图标（统一用 Iconify <Icon> 组件） */
+/**
+ * 在编辑器中渲染图标：Iconify 名称用 <Icon>；安和鱼主题字体（anzhiyufont / anzhiyu-icon-*）用原生 <i class>
+ */
 function RenderIcon({ icon, className }: { icon: string; className?: string }) {
   if (!icon) return null;
+  if (icon.includes("anzhiyu-icon") || icon.includes("anzhiyufont")) {
+    return (
+      <i className={[icon, className].filter(Boolean).join(" ")} aria-hidden style={{ display: "inline-block" }} />
+    );
+  }
   return <Icon icon={icon} className={className} style={{ display: "inline-block", verticalAlign: "-0.125em" }} />;
 }
 
@@ -370,7 +131,9 @@ function ButtonBlockView({ node, updateAttributes, editor }: NodeViewProps) {
   useEffect(() => {
     if (!editing) return;
     const handler = (e: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as globalThis.Node)) setEditing(false);
+      const target = e.target as HTMLElement | null;
+      if (target?.closest('[data-form-icon-selector-popover="true"]')) return;
+      if (panelRef.current && target && !panelRef.current.contains(target)) setEditing(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -381,7 +144,7 @@ function ButtonBlockView({ node, updateAttributes, editor }: NodeViewProps) {
     if (c) p.push(`btn-${c}`);
     if (s === "outline") p.push("btn-outline");
     if (sz === "larger") p.push("btn-larger");
-    return p.join("");
+    return p.join(" ");
   };
 
   // ---- 编辑：单按钮 ----
@@ -425,7 +188,16 @@ function ButtonBlockView({ node, updateAttributes, editor }: NodeViewProps) {
               </label>
             </div>
 
-            <IconPicker value={icon} onChange={v => updateAttributes({ icon: v })} />
+            <div className="editor-btn-field">
+              <span className="editor-btn-label">图标</span>
+              <FormIconSelector
+                value={icon}
+                onValueChange={v => updateAttributes({ icon: v.trim() })}
+                className="editor-btn-icon-selector"
+                placeholder="搜索图标或输入 URL"
+                size="sm"
+              />
+            </div>
 
             <div className="editor-btn-field">
               <span className="editor-btn-label">颜色</span>
@@ -622,15 +394,16 @@ function ButtonBlockView({ node, updateAttributes, editor }: NodeViewProps) {
                         </label>
                       </div>
                       <div className="editor-btn-row">
-                        <label className="editor-btn-field">
-                          <span className="editor-btn-label">图标（Iconify）</span>
-                          <input
+                        <div className="editor-btn-field">
+                          <span className="editor-btn-label">图标</span>
+                          <FormIconSelector
                             value={item.icon || ""}
-                            onChange={e => updateItem(i, "icon", e.target.value)}
-                            className="editor-btn-input"
-                            placeholder="fa6-solid:link"
+                            onValueChange={v => updateItem(i, "icon", v.trim())}
+                            className="editor-btn-icon-selector"
+                            placeholder="搜索图标或输入 URL"
+                            size="sm"
                           />
-                        </label>
+                        </div>
                         <label className="editor-btn-field">
                           <span className="editor-btn-label">描述</span>
                           <input
@@ -773,7 +546,8 @@ export const ButtonBlock = Node.create({
       url: { default: "" },
       text: { default: "按钮" },
       icon: { default: "" }, // Iconify 格式，如 "fa6-solid:plus"
-      color: { default: "blue" },
+      // 空字符串表示「主题色」，与 COLORS[0] 一致；勿默认 "blue"，否则与前台/教程 btn 语义不一致
+      color: { default: "" },
       style: { default: "default" },
       size: { default: "default" },
       cols: { default: "3" },
@@ -788,22 +562,25 @@ export const ButtonBlock = Node.create({
         tag: "div.btns-container",
         priority: 60,
         getAttrs: (el: HTMLElement) => {
-          const links = el.querySelectorAll("a.btn-anzhiyu");
+          let links = el.querySelectorAll("a.btn-anzhiyu");
+          if (links.length === 0) links = el.querySelectorAll("a.btn-item");
           const groupItems: ButtonGroupItem[] = [];
           links.forEach(a => {
             const anchor = a as HTMLAnchorElement;
-            const faClass = anchor.querySelector("i")?.className || "";
+            const titleEl = anchor.querySelector(".btn-title");
+            const descEl = anchor.querySelector(".btn-desc");
+            const colorFromItemClass = (anchor.className.match(/\bbtn-color-(blue|pink|red|purple|orange|green)\b/) || [])[1] || "";
             groupItems.push({
-              icon: faClass ? faClassToIconify(faClass) : "",
-              title: anchor.textContent?.trim() || "",
+              icon: iconFromButtonInnerI(anchor.querySelector("i")),
+              title: titleEl?.textContent?.trim() || anchor.textContent?.trim() || "",
               url: anchor.getAttribute("href") || "",
-              desc: anchor.getAttribute("data-desc") || "",
-              color: anchor.getAttribute("data-color") || "",
+              desc: descEl?.textContent?.trim() || anchor.getAttribute("data-desc") || "",
+              color: anchor.getAttribute("data-color") || btnColorFromAnchorClass(anchor) || colorFromItemClass || "",
             });
           });
           const classList = el.className || "";
           const colsMatch = classList.match(/btns-cols-(\d)/);
-          const styleMatch = classList.match(/btns-style-(card|simple)/);
+          const styleMatch = classList.match(/btns-style-(card|simple|default)/);
           return {
             type: "group",
             cols: colsMatch ? colsMatch[1] : "3",
@@ -818,13 +595,12 @@ export const ButtonBlock = Node.create({
         getAttrs: (el: HTMLElement) => {
           const a = el.querySelector("a.btn-anzhiyu") as HTMLAnchorElement | null;
           if (!a) return false;
-          const faClass = a.querySelector("i")?.className || "";
           return {
             type: "single",
             url: a.getAttribute("href") || "",
             text: a.textContent?.trim() || "",
-            icon: faClass ? faClassToIconify(faClass) : "",
-            color: a.getAttribute("data-color") || "blue",
+            icon: iconFromButtonInnerI(a.querySelector("i")),
+            color: a.getAttribute("data-color") || btnColorFromAnchorClass(a) || "",
             style: a.classList.contains("btn-outline") ? "outline" : "default",
             size: a.classList.contains("btn-larger") ? "larger" : "default",
           };
@@ -835,13 +611,12 @@ export const ButtonBlock = Node.create({
         priority: 50,
         getAttrs: (el: HTMLElement) => {
           const a = el as HTMLAnchorElement;
-          const faClass = a.querySelector("i")?.className || "";
           return {
             type: "single",
             url: a.getAttribute("href") || "",
             text: a.textContent?.trim() || "",
-            icon: faClass ? faClassToIconify(faClass) : "",
-            color: a.getAttribute("data-color") || "blue",
+            icon: iconFromButtonInnerI(a.querySelector("i")),
+            color: a.getAttribute("data-color") || btnColorFromAnchorClass(a) || "",
             style: a.classList.contains("btn-outline") ? "outline" : "default",
             size: a.classList.contains("btn-larger") ? "larger" : "default",
           };
@@ -864,9 +639,11 @@ export const ButtonBlock = Node.create({
       }
       const containerClass = ["btns-container", `btns-cols-${cols}`, gStyle !== "default" ? `btns-style-${gStyle}` : ""]
         .filter(Boolean)
-        .join("");
+        .join(" ");
       const children = items.map(item => {
-        const la: Record<string, string> = { class: "btn-anzhiyu", href: item.url || "#" };
+        const linkClasses = ["btn-anzhiyu"];
+        if (item.color) linkClasses.push(`btn-${item.color}`);
+        const la: Record<string, string> = { class: linkClasses.join(" "), href: item.url || "#" };
         if (item.color) la["data-color"] = item.color;
         if (item.desc) la["data-desc"] = item.desc;
         if (item.icon) {
@@ -881,25 +658,26 @@ export const ButtonBlock = Node.create({
     const urlVal = (node.attrs.url as string) || "#";
     const textVal = (node.attrs.text as string) || "按钮";
     const iconVal = (node.attrs.icon as string) || "";
-    const colorVal = (node.attrs.color as string) || "blue";
+    const colorVal = ((node.attrs.color as string) || "").trim();
     const styleVal = (node.attrs.style as string) || "default";
     const sizeVal = (node.attrs.size as string) || "default";
 
     const linkClass = [
       "btn-anzhiyu",
+      colorVal ? `btn-${colorVal}` : "",
       styleVal === "outline" ? "btn-outline" : "",
       sizeVal === "larger" ? "btn-larger" : "",
     ]
       .filter(Boolean)
-      .join("");
+      .join(" ");
     const la: Record<string, string> = { class: linkClass, href: urlVal };
     if (colorVal) la["data-color"] = colorVal;
 
     if (iconVal) {
       const faClass = isFaIcon(iconVal) ? iconifyToFaClass(iconVal) : iconVal;
-      return ["a", mergeAttributes(HTMLAttributes, la), ["i", { class: faClass }], ` ${textVal}`];
+      return ["div", mergeAttributes(HTMLAttributes, { class: "btn-container" }), ["a", la, ["i", { class: faClass }], ` ${textVal}`]];
     }
-    return ["a", mergeAttributes(HTMLAttributes, la), textVal];
+    return ["div", mergeAttributes(HTMLAttributes, { class: "btn-container" }), ["a", la, textVal]];
   },
 
   addNodeView() {
@@ -918,7 +696,7 @@ export const ButtonBlock = Node.create({
               url: attrs.url ?? "",
               text: attrs.text ?? "按钮",
               icon: attrs.icon ?? "",
-              color: attrs.color ?? "blue",
+              color: attrs.color ?? "",
               style: attrs.style ?? "default",
               size: attrs.size ?? "default",
             },

@@ -94,7 +94,7 @@ export function useCreatePage() {
   return useMutation({
     mutationFn: (data: CreatePageRequest) => pageManagementApi.createPage(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: pageManagementKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: pageManagementKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -108,8 +108,8 @@ export function useUpdatePage() {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdatePageRequest }) => pageManagementApi.updatePage(id, data),
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: pageManagementKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: pageManagementKeys.detail(variables.id) });
+      queryClient.invalidateQueries({ queryKey: pageManagementKeys.lists(), refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: pageManagementKeys.detail(variables.id), refetchType: "all" });
     },
   });
 }
@@ -123,7 +123,7 @@ export function useDeletePage() {
   return useMutation({
     mutationFn: (id: number) => pageManagementApi.deletePage(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: pageManagementKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: pageManagementKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -137,7 +137,7 @@ export function useInitializeDefaultPages() {
   return useMutation({
     mutationFn: () => pageManagementApi.initializeDefaultPages(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: pageManagementKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: pageManagementKeys.lists(), refetchType: "all" });
     },
   });
 }

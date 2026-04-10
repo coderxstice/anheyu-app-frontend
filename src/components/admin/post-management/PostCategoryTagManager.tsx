@@ -33,9 +33,9 @@ export default function PostCategoryTagManager({ isOpen, onClose }: PostCategory
   const [showAddTag, setShowAddTag] = useState(false);
 
   const invalidate = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ["post-categories"] });
-    queryClient.invalidateQueries({ queryKey: ["post-tags"] });
-    queryClient.invalidateQueries({ queryKey: ["articles"] });
+    queryClient.invalidateQueries({ queryKey: ["post-categories"], refetchType: "all" });
+    queryClient.invalidateQueries({ queryKey: ["post-tags"], refetchType: "all" });
+    queryClient.invalidateQueries({ queryKey: ["articles"], refetchType: "all" });
   }, [queryClient]);
 
   const handleAddCategory = useCallback(async () => {

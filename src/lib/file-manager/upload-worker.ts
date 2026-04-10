@@ -1,3 +1,7 @@
+/**
+ * 分片上传取消策略：各循环在迭代间检查 `item.status === "canceled"`；axios 请求未挂 AbortSignal，
+ * 已发出的 HTTP 请求无法被立即中断，需后续在 uploadChunkApi / 直传封装中传入 signal 才可硬取消。
+ */
 import type { UploadItem } from "@/types/file-manager";
 import { uploadChunkApi } from "@/lib/api/file-manager";
 import { uploadChunkToOneDriveApi } from "@/lib/file-manager/external/onedrive";

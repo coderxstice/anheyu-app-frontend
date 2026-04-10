@@ -253,7 +253,7 @@ export function PageEditorPage({ pageId }: PageEditorPageProps) {
       createMutation.mutate(data, {
         onSuccess: async () => {
           addToast({ title: "页面已创建", color: "success" });
-          await queryClient.invalidateQueries({ queryKey: pageManagementKeys.lists() });
+          await queryClient.invalidateQueries({ queryKey: pageManagementKeys.lists(), refetchType: "all" });
           router.push("/admin/page-management");
         },
         onError: error => {

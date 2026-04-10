@@ -39,7 +39,7 @@ export default function HealthCheckPanel({ isOpen, onClose }: HealthCheckPanelPr
   // 当健康检查完成时停止轮询并刷新列表
   const handleCheckComplete = useCallback(() => {
     setIsPolling(false);
-    queryClient.invalidateQueries({ queryKey: friendsKeys.lists() });
+    queryClient.invalidateQueries({ queryKey: friendsKeys.lists(), refetchType: "all" });
   }, [queryClient]);
 
   // 使用 refetchInterval 的函数形式来管理轮询停止

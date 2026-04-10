@@ -28,9 +28,11 @@
 .paginationItem {
   display: flex;
   flex: 1;
-  align-items: flex-start;
+  flex-direction: row;
+  gap: 0.75rem;
+  align-items: center;
   height: 150px;
-  padding: 0.5rem 0;
+  padding: 0.5rem 1rem;
   text-decoration: none;
   background: var(--muted);
   backdrop-filter: blur(5px);
@@ -39,8 +41,27 @@
   transition: background 0.3s ease;
 }
 
+.paginationItem.right {
+  flex-direction: row-reverse;
+}
+
 .paginationItem.right .paginationInfo {
   text-align: right;
+}
+
+.paginationCover {
+  position: relative;
+  flex-shrink: 0;
+  width: 4rem;
+  height: 4rem;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.paginationCoverImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .paginationItem:hover {
@@ -56,11 +77,12 @@
   position: relative;
   top: 0;
   display: flex;
+  flex: 1;
   flex-direction: column;
   justify-content: center;
-  width: 100%;
+  min-width: 0;
   height: 100%;
-  padding: 0.625rem 1.25rem;
+  padding: 0.625rem 0;
   margin: auto;
   text-align: left;
   transform: none;
@@ -108,6 +130,10 @@
 
   .paginationItem {
     height: 100px;
+  }
+
+  .paginationItem.right {
+    flex-direction: row;
   }
 
   .paginationItem.right .paginationInfo {

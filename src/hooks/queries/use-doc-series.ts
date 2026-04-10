@@ -49,7 +49,7 @@ export function useCreateDocSeries() {
   return useMutation({
     mutationFn: (data: DocSeriesForm) => docSeriesApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: docSeriesKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: docSeriesKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -61,7 +61,7 @@ export function useUpdateDocSeries() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<DocSeriesForm> }) => docSeriesApi.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: docSeriesKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: docSeriesKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -73,7 +73,7 @@ export function useDeleteDocSeries() {
   return useMutation({
     mutationFn: (id: string) => docSeriesApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: docSeriesKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: docSeriesKeys.lists(), refetchType: "all" });
     },
   });
 }

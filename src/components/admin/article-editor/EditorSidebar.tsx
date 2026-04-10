@@ -33,8 +33,13 @@ import {
   ModalFooter,
   ModalHeader,
   Button,
+  Input,
+  Autocomplete,
+  AutocompleteItem,
 } from "@heroui/react";
+import { FormColorPicker } from "@/components/ui/form-color-picker";
 import { useQueryClient } from "@tanstack/react-query";
+import { useDocSeriesList } from "@/hooks/queries/use-doc-series";
 import { articleApi } from "@/lib/api/article";
 import { postManagementApi } from "@/lib/api/post-management";
 import type { Editor } from "@tiptap/react";
@@ -717,6 +722,47 @@ export function TOCContent({ editor }: { editor: Editor | null }) {
 }
 
 // ═══════════════════════════════════════════
+// 文档系列下拉选择
+// ═══════════════════════════════════════════
+
+function DocSeriesSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [filterText, setFilterText] = useState("");
+  const { data, isLoading } = useDocSeriesList({ page: 1, pageSize: 50, keyword: filterText || undefined });
+  const seriesList = data?.list ?? [];
+
+  return (
+    <div className="sb-field">
+      <span className="sb-label">所属系列</span>
+      <Autocomplete
+        aria-label="选择文档系列"
+        placeholder="搜索或选择系列"
+        size="sm"
+        variant="bordered"
+        isClearable
+        selectedKey={value || null}
+        onSelectionChange={key => onChange(key ? String(key) : "")}
+        onInputChange={setFilterText}
+        isLoading={isLoading}
+        classNames={{
+          base: "w-full",
+          listboxWrapper: "max-h-[240px]",
+        }}
+        listboxProps={{ emptyContent: isLoading ? "加载中..." : "暂无系列，请先在系列管理中创建" }}
+      >
+        {seriesList.map(s => (
+          <AutocompleteItem key={s.id} textValue={s.name}>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm">{s.name}</span>
+              <span className="text-xs text-default-400">{s.id}</span>
+            </div>
+          </AutocompleteItem>
+        ))}
+      </Autocomplete>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
 // 文章设置主内容
 // ═══════════════════════════════════════════
 
@@ -803,7 +849,7 @@ function SettingsContent({
   const handleCreateCategory = useCallback(
     async (name: string) => {
       const created = await articleApi.createCategory({ name });
-      queryClient.invalidateQueries({ queryKey: ["post-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["post-categories"], refetchType: "all" });
       return created;
     },
     [queryClient]
@@ -813,7 +859,7 @@ function SettingsContent({
   const handleCreateTag = useCallback(
     async (name: string) => {
       const created = await articleApi.createTag({ name });
-      queryClient.invalidateQueries({ queryKey: ["post-tags"] });
+      queryClient.invalidateQueries({ queryKey: ["post-tags"], refetchType: "all" });
       return created;
     },
     [queryClient]
@@ -1120,18 +1166,23 @@ function SettingsContent({
         />
         {meta.is_primary_color_manual && (
           <div className="flex items-center gap-2">
-            <input
-              type="color"
-              value={meta.primary_color || "#4259ef"}
-              onChange={e => onUpdateField("primary_color", e.target.value)}
-              className="sb-color-input"
+            <FormColorPicker
+              value={meta.primary_color?.trim() || "#4259ef"}
+              onChange={v => onUpdateField("primary_color", v)}
+              triggerAriaLabel="手动主色调：打开取色器"
+              className="h-8 w-8 shrink-0"
             />
-            <input
-              type="text"
-              value={meta.primary_color}
-              onChange={e => onUpdateField("primary_color", e.target.value)}
+            <Input
+              size="sm"
+              classNames={{
+                base: "flex-1 min-w-0",
+                input: "font-mono text-xs",
+                inputWrapper: "h-9",
+              }}
+              aria-label="手动主色调 HEX"
               placeholder="#4259ef"
-              className="sb-input flex-1"
+              value={meta.primary_color}
+              onValueChange={v => onUpdateField("primary_color", v)}
             />
           </div>
         )}
@@ -1183,7 +1234,10 @@ function SettingsContent({
         />
         {meta.is_doc && (
           <div className="sb-sub-group">
-            <SbInput label="系列 ID" value={meta.doc_series_id} onChange={v => onUpdateField("doc_series_id", v)} />
+            <DocSeriesSelect
+              value={meta.doc_series_id}
+              onChange={v => onUpdateField("doc_series_id", v)}
+            />
             <SbInput
               label="文档排序"
               value={String(meta.doc_sort)}

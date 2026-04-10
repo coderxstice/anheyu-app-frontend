@@ -108,7 +108,7 @@ export function useCreateLink() {
   return useMutation({
     mutationFn: (data: CreateLinkRequest) => friendsApi.createLink(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: friendsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: friendsKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -120,7 +120,7 @@ export function useUpdateLink() {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateLinkRequest }) => friendsApi.updateLink(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: friendsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: friendsKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -132,7 +132,7 @@ export function useDeleteLink() {
   return useMutation({
     mutationFn: (id: number) => friendsApi.deleteLink(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: friendsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: friendsKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -144,7 +144,7 @@ export function useReviewLink() {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: ReviewLinkRequest }) => friendsApi.reviewLink(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: friendsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: friendsKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -160,7 +160,7 @@ export function useCreateCategory() {
   return useMutation({
     mutationFn: (data: CreateCategoryRequest) => friendsApi.createCategory(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: friendsKeys.categories() });
+      queryClient.invalidateQueries({ queryKey: friendsKeys.categories(), refetchType: "all" });
     },
   });
 }
@@ -172,7 +172,7 @@ export function useUpdateCategory() {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateCategoryRequest }) => friendsApi.updateCategory(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: friendsKeys.categories() });
+      queryClient.invalidateQueries({ queryKey: friendsKeys.categories(), refetchType: "all" });
     },
   });
 }
@@ -184,8 +184,8 @@ export function useDeleteCategory() {
   return useMutation({
     mutationFn: (id: number) => friendsApi.deleteCategory(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: friendsKeys.categories() });
-      queryClient.invalidateQueries({ queryKey: friendsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: friendsKeys.categories(), refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: friendsKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -201,7 +201,7 @@ export function useCreateTag() {
   return useMutation({
     mutationFn: (data: CreateTagRequest) => friendsApi.createTag(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: friendsKeys.tags() });
+      queryClient.invalidateQueries({ queryKey: friendsKeys.tags(), refetchType: "all" });
     },
   });
 }
@@ -213,7 +213,7 @@ export function useUpdateTag() {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateTagRequest }) => friendsApi.updateTag(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: friendsKeys.tags() });
+      queryClient.invalidateQueries({ queryKey: friendsKeys.tags(), refetchType: "all" });
     },
   });
 }
@@ -225,8 +225,8 @@ export function useDeleteTag() {
   return useMutation({
     mutationFn: (id: number) => friendsApi.deleteTag(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: friendsKeys.tags() });
-      queryClient.invalidateQueries({ queryKey: friendsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: friendsKeys.tags(), refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: friendsKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -242,9 +242,9 @@ export function useImportLinks() {
   return useMutation({
     mutationFn: (data: ImportLinksRequest) => friendsApi.importLinks(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: friendsKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: friendsKeys.categories() });
-      queryClient.invalidateQueries({ queryKey: friendsKeys.tags() });
+      queryClient.invalidateQueries({ queryKey: friendsKeys.lists(), refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: friendsKeys.categories(), refetchType: "all" });
+      queryClient.invalidateQueries({ queryKey: friendsKeys.tags(), refetchType: "all" });
     },
   });
 }
@@ -276,7 +276,7 @@ export function useTriggerHealthCheck() {
   return useMutation({
     mutationFn: () => friendsApi.triggerHealthCheck(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: friendsKeys.healthCheck() });
+      queryClient.invalidateQueries({ queryKey: friendsKeys.healthCheck(), refetchType: "all" });
     },
   });
 }
@@ -288,7 +288,7 @@ export function useBatchUpdateSort() {
   return useMutation({
     mutationFn: (data: BatchUpdateLinkSortRequest) => friendsApi.batchUpdateSort(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: friendsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: friendsKeys.lists(), refetchType: "all" });
     },
   });
 }
@@ -334,7 +334,7 @@ export function useApplyLink() {
   return useMutation({
     mutationFn: (data: ApplyLinkRequest) => friendsApi.applyLink(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: friendsKeys.all });
+      queryClient.invalidateQueries({ queryKey: friendsKeys.all, refetchType: "all" });
     },
   });
 }

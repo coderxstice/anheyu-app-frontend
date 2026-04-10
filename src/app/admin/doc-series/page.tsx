@@ -24,6 +24,7 @@ import { TABLE_COLUMNS, useDocSeriesRenderCell } from "@/components/admin/doc-se
 import { DocSeriesSkeleton } from "@/components/admin/doc-series/DocSeriesSkeleton";
 import { DocSeriesFilterBar } from "@/components/admin/doc-series/DocSeriesFilterBar";
 import DocSeriesFormModal from "@/components/admin/doc-series/DocSeriesFormModal";
+import DocSeriesArticlesModal from "@/components/admin/doc-series/DocSeriesArticlesModal";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { FloatingSelectionBar } from "@/components/admin/FloatingSelectionBar";
 import { TableEmptyState } from "@/components/admin/TableEmptyState";
@@ -250,6 +251,12 @@ export default function DocSeriesPage() {
       />
 
       <DocSeriesFormModal isOpen={ds.formModal.isOpen} onClose={ds.handleFormClose} editItem={ds.editItem} />
+
+      <DocSeriesArticlesModal
+        isOpen={ds.detailModal.isOpen}
+        onClose={ds.handleDetailClose}
+        series={ds.detailTarget}
+      />
     </motion.div>
   );
 }

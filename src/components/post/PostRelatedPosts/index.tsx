@@ -4,9 +4,11 @@
  */
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { FaStar } from "react-icons/fa6";
+import { toSameOriginMediaUrl } from "@/utils/same-origin-media-url";
 import type { ArticleLink } from "@/types/article";
 import styles from "./PostRelatedPosts.module.css";
 
@@ -23,11 +25,46 @@ function getArticleHref(link: ArticleLink): string {
   return `/posts/${link.abbrlink || link.id}`;
 }
 
-function getCoverUrl(link: ArticleLink, defaultCover: string): string {
-  if (link.cover_url && link.cover_url.trim() !== "") {
-    return link.cover_url;
+/**
+ * 解析相关推荐条目封面：无有效封面时用默认图，否则做本站媒体同源压缩。
+ */
+function resolveRelatedPostCoverSrc(coverUrl: string | undefined, defaultCover: string): string {
+  const trimmed = coverUrl?.trim();
+  if (!trimmed) {
+    return defaultCover;
   }
-  return defaultCover;
+  return toSameOriginMediaUrl(trimmed);
+}
+
+interface RelatedPostCoverImageProps {
+  coverUrl?: string;
+  defaultCover: string;
+  alt: string;
+}
+
+/**
+ * 相关推荐封面：空封面用默认图，加载失败时回退到默认图。
+ */
+function RelatedPostCoverImage({ coverUrl, defaultCover, alt }: RelatedPostCoverImageProps) {
+  const [loadFailed, setLoadFailed] = useState(false);
+
+  const src = useMemo(() => {
+    if (loadFailed) {
+      return defaultCover;
+    }
+    return resolveRelatedPostCoverSrc(coverUrl, defaultCover);
+  }, [coverUrl, defaultCover, loadFailed]);
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      sizes="(max-width: 768px) 100vw, 45vw"
+      className={styles.cover}
+      onError={() => setLoadFailed(true)}
+    />
+  );
 }
 
 export function PostRelatedPosts({
@@ -61,13 +98,7 @@ export function PostRelatedPosts({
           <article key={post.id} className={styles.item}>
             <Link href={getArticleHref(post)} className={styles.itemLink} title={post.title}>
               <div className={styles.coverWrap}>
-                <Image
-                  src={getCoverUrl(post, defaultCover)}
-                  alt={post.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 45vw"
-                  className={styles.cover}
-                />
+                <RelatedPostCoverImage coverUrl={post.cover_url} defaultCover={defaultCover} alt={post.title} />
               </div>
               <div className={styles.content}>
                 <h4 className={styles.title}>{post.title}</h4>

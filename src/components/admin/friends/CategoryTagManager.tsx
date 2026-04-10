@@ -399,8 +399,8 @@ export default function CategoryTagManager({ isOpen, onClose }: CategoryTagManag
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span
-                          className="w-4 h-4 rounded-full border border-border/60"
-                          style={{ backgroundColor: tag.color || "#999" }}
+                          className="w-4 h-4 rounded-full border border-border/60 shrink-0"
+                          style={{ background: tag.color || "#999" }}
                         />
                         <span className="font-medium text-sm">{tag.name}</span>
                         <span className="text-xs text-muted-foreground">{tag.color}</span>

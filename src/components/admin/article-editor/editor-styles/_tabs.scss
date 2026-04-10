@@ -76,7 +76,8 @@
   border: 3px solid var(--anzhiyu-card-bg-grey, #f1f3f8);
   border-radius: 12px 12px 0 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
+  // 勿 hidden：会裁掉按钮块等 atom 节点顶部的「编辑」浮层（top: -14px）
+  overflow: visible;
 }
 
 .editor-tabs-nav {
@@ -184,7 +185,7 @@
   border: 3px solid var(--anzhiyu-card-bg-grey, #f1f3f8);
   border-top: none;
   border-radius: 0 0 12px 12px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 // 单个面板
