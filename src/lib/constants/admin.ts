@@ -5,11 +5,13 @@
  * @LastEditTime: 2026-02-27 18:28:03
  * @LastEditors: 安知鱼
  */
+import { BUILTIN_POST_DEFAULT_COVER_PATH } from "@/utils/same-origin-media-url";
+
 /** 通用每页条数选项 */
 export const PAGE_SIZES = [10, 20, 50];
 
 /** 默认封面图 */
-export const FALLBACK_COVER = "/images/default-cover.webp";
+export const FALLBACK_COVER = BUILTIN_POST_DEFAULT_COVER_PATH;
 
 /** 后台表格空状态文案配置 */
 export interface TableEmptyTexts {

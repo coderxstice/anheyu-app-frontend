@@ -5,6 +5,7 @@ import type { Editor } from "@tiptap/react";
 import { postManagementApi } from "@/lib/api/post-management";
 import { processHtmlForSave } from "@/lib/content-processor";
 import TurndownService from "turndown";
+import { turndownArticleMarkdown } from "@/lib/editor-tabs-export";
 import { registerCustomRules } from "@/lib/turndown-rules";
 import { marked } from "marked";
 import { fixTaskListHtml } from "@/lib/marked-extensions";
@@ -106,7 +107,7 @@ export function useAutoSave({
 
       if (editorMode === "visual") {
         html = processHtmlForSave(contentForHash);
-        markdown = turndownService.turndown(html);
+        markdown = turndownArticleMarkdown(editor, turndownService, html);
       } else if (editorMode === "html") {
         html = processHtmlForSave(sourceContent);
         markdown = turndownService.turndown(html);
@@ -189,7 +190,7 @@ export function useAutoSave({
         let markdown: string;
         if (editorMode === "visual") {
           html = processHtmlForSave(contentForHash);
-          markdown = turndownService.turndown(html);
+          markdown = turndownArticleMarkdown(editor, turndownService, html);
         } else if (editorMode === "html") {
           html = processHtmlForSave(sourceContent);
           markdown = turndownService.turndown(html);

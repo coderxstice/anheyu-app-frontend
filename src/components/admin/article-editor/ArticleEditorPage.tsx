@@ -16,6 +16,7 @@ import { useArticleMeta } from "./use-article-meta";
 import { useAutoSave } from "./use-auto-save";
 import { useArticleForEdit, useCreateArticle, useUpdateArticle } from "@/hooks/queries/use-post-management";
 import { processHtmlForSave } from "@/lib/content-processor";
+import { turndownArticleMarkdown } from "@/lib/editor-tabs-export";
 import { registerCustomRules } from "@/lib/turndown-rules";
 import { registerMarkedExtensions, fixTaskListHtml } from "@/lib/marked-extensions";
 import { MobileToolbar } from "./MobileToolbar";
@@ -134,7 +135,7 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
         if (newMode === "html") {
           setSourceContent(processedHtml);
         } else {
-          setSourceContent(turndownService.turndown(processedHtml));
+          setSourceContent(turndownArticleMarkdown(editor, turndownService, processedHtml));
         }
       } else if (newMode === "visual") {
         if (!sourceModifiedRef.current && visualBackupRef.current) {
@@ -239,7 +240,7 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
     if (editorMode === "visual") {
       const rawHtml = editor?.getHTML() ?? "";
       html = processHtmlForSave(rawHtml);
-      markdown = turndownService.turndown(html);
+      markdown = turndownArticleMarkdown(editor, turndownService, html);
     } else if (editorMode === "html") {
       html = processHtmlForSave(sourceContent);
       markdown = turndownService.turndown(html);

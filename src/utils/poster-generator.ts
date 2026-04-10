@@ -4,6 +4,7 @@
  */
 
 import QRCode from "qrcode";
+import { BUILTIN_POST_DEFAULT_COVER_PATH } from "@/utils/same-origin-media-url";
 
 /**
  * 海报生成配置
@@ -21,15 +22,22 @@ export interface PosterConfig {
 }
 
 /**
- * 与文章详情 PostHeader 一致：优先顶部大图 top_img_url，其次 cover_url。
- * 避免仅配置了头图时分享海报缺少主图。
+ * 与文章详情 PostHeader / 列表卡片一致：优先 top_img_url，其次 cover_url，再无则站点默认封面，最后内置占位图。
+ * 保证分享海报在无自定义封面时仍能绘制与前台一致的默认封面区域。
  */
-export function getPosterCoverImageUrl(article: {
-  top_img_url?: string;
-  cover_url?: string;
-}): string | undefined {
+export function getPosterCoverImageUrl(
+  article: {
+    top_img_url?: string;
+    cover_url?: string;
+  },
+  defaultCoverUrl?: string
+): string {
   const raw = (article.top_img_url || article.cover_url || "").trim();
-  return raw === "" ? undefined : raw;
+  if (raw !== "") {
+    return raw;
+  }
+  const configured = (defaultCoverUrl || "").trim();
+  return configured !== "" ? configured : BUILTIN_POST_DEFAULT_COVER_PATH;
 }
 
 function shouldSetCrossOriginForImageLoad(url: string): boolean {
@@ -124,21 +132,41 @@ async function loadImage(url: string): Promise<HTMLImageElement> {
 }
 
 /**
- * 绘制圆形头像
+ * 在圆形区域内绘制头像：从图源取中心正方形区域再缩放（等同 object-fit: cover），避免非正方形图片被压扁。
  */
 function drawCircleAvatar(
   ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
+  cx: number,
+  cy: number,
   radius: number,
   image: HTMLImageElement
 ) {
+  const iw = image.naturalWidth || image.width;
+  const ih = image.naturalHeight || image.height;
+  if (iw <= 0 || ih <= 0) {
+    return;
+  }
+
+  let sx = 0;
+  let sy = 0;
+  let sSide = 0;
+  if (iw >= ih) {
+    sSide = ih;
+    sx = (iw - ih) / 2;
+    sy = 0;
+  } else {
+    sSide = iw;
+    sx = 0;
+    sy = (ih - iw) / 2;
+  }
+
+  const d = radius * 2;
   ctx.save();
   ctx.beginPath();
-  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
   ctx.closePath();
   ctx.clip();
-  ctx.drawImage(image, x - radius, y - radius, radius * 2, radius * 2);
+  ctx.drawImage(image, sx, sy, sSide, sSide, cx - radius, cy - radius, d, d);
   ctx.restore();
 }
 
@@ -213,12 +241,26 @@ export async function generatePoster(config: PosterConfig): Promise<string> {
   ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, width, height);
 
-  // 绘制封面图（如果有）
+  // 绘制封面图（无图、加载失败时与成功时使用同一封面区高度，避免默认封面 404 时顶部只剩窄条）
   let coverY = 0;
   const coverHeight = 420;
-  if (config.coverImage) {
+
+  /**
+   * 在海报顶部绘制与「无自定义封面」一致的渐变占位块。
+   */
+  const drawFallbackCoverBand = () => {
+    const gradient = ctx.createLinearGradient(0, 0, width, coverHeight);
+    gradient.addColorStop(0, primaryColor);
+    gradient.addColorStop(1, "#60a5fa");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, coverHeight);
+    coverY = coverHeight;
+  };
+
+  const coverSrc = (config.coverImage || "").trim();
+  if (coverSrc !== "") {
     try {
-      const coverImg = await loadImage(config.coverImage);
+      const coverImg = await loadImage(coverSrc);
       const coverWidth = width;
 
       const imgAspectRatio = coverImg.width / coverImg.height;
@@ -240,23 +282,11 @@ export async function generatePoster(config: PosterConfig): Promise<string> {
       ctx.drawImage(coverImg, sourceX, sourceY, sourceWidth, sourceHeight, 0, coverY, coverWidth, coverHeight);
       coverY += coverHeight;
     } catch (error) {
-      console.warn("封面图加载失败，跳过:", error);
-      const defaultCoverHeight = 80;
-      const gradient = ctx.createLinearGradient(0, 0, width, defaultCoverHeight);
-      gradient.addColorStop(0, primaryColor);
-      gradient.addColorStop(1, "#60a5fa");
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, width, defaultCoverHeight);
-      coverY = defaultCoverHeight;
+      console.warn("封面图加载失败，使用渐变占位:", error);
+      drawFallbackCoverBand();
     }
   } else {
-    const defaultCoverHeight = 80;
-    const gradient = ctx.createLinearGradient(0, 0, width, defaultCoverHeight);
-    gradient.addColorStop(0, primaryColor);
-    gradient.addColorStop(1, "#60a5fa");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, defaultCoverHeight);
-    coverY = defaultCoverHeight;
+    drawFallbackCoverBand();
   }
 
   // 绘制内容区域背景

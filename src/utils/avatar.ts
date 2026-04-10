@@ -64,7 +64,16 @@ export function getUserAvatarUrl(
 ): string {
   // 1. 优先使用用户自定义头像（本站直链可能带生产域名，需压成相对路径以便本地/当前站点加载）
   if (user.avatar) {
-    return toSameOriginMediaUrl(user.avatar);
+    let resolved = user.avatar.trim();
+    // 后端常见存储：avatar/{md5}?d=identicon（无协议、非 / 开头）。若直接交给 toSameOriginMediaUrl 会原样返回，
+    // 浏览器会按当前文章路径解析导致 404；需先拼成 Gravatar 绝对地址（与认证接口展开逻辑一致）。
+    const isAbsolute =
+      /^https?:\/\//i.test(resolved) || resolved.startsWith("/") || resolved.startsWith("//");
+    if (!isAbsolute && resolved.startsWith("avatar/")) {
+      const baseUrl = (config?.gravatarUrl || DEFAULT_GRAVATAR_URL).replace(/\/$/, "");
+      resolved = `${baseUrl}/${resolved}`;
+    }
+    return toSameOriginMediaUrl(resolved);
   }
 
   // 2. 如果昵称是 QQ 号格式，尝试获取 QQ 头像

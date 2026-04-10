@@ -197,6 +197,16 @@ export function registerCustomRules(td: TurndownService) {
     },
   });
 
+  // --- 标签页占位（由 prepareHtmlForTabsTurndown 注入，避免丢失隐藏面板内容）---
+  td.addRule("tabsTurndownSource", {
+    filter: (node) =>
+      node.nodeName === "DIV" && (node as HTMLElement).classList.contains("tabs-turndown-source"),
+    replacement: (_content, node) => {
+      const text = (node as HTMLElement).textContent?.trim() ?? "";
+      return text ? `\n${text}\n\n` : "\n\n";
+    },
+  });
+
   // --- 标签页 (Tabs) ---
   td.addRule("tabs", {
     filter: (node) =>

@@ -95,8 +95,8 @@
   transition: color 0.2s ease;
 }
 
-:global([data-theme="dark"]) .floatCard,
-:global(.dark) .floatCard {
+:global(html.dark) .floatCard,
+:global([data-theme="dark"]) .floatCard {
   background: rgb(30 30 30 / 80%);
 }
 

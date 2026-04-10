@@ -12,6 +12,8 @@ import type { Article } from "@/types/article";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import { apiClient } from "@/lib/api/client";
 import { generatePoster, downloadPoster, getPosterCoverImageUrl } from "@/utils/poster-generator";
+import { getUserAvatarUrl } from "@/utils/avatar";
+import { resolvePostDefaultCoverUrl } from "@/utils/same-origin-media-url";
 import { formatDate } from "@/utils/date";
 import styles from "./PostCopyright.module.css";
 
@@ -75,25 +77,41 @@ export function PostCopyright({ article }: PostCopyrightProps) {
     return null;
   }, [isReprintArticle, article.copyright_author_href]);
 
-  // 获取文章发布者的头像
+  // 获取文章发布者的头像（与头部个人中心相同规则：本站图床压同源 + Gravatar/QQ 一致）
   const articleAuthorAvatar = useMemo(() => {
-    const avatar = article.owner_avatar;
-    if (avatar) {
-      // 如果是完整 URL，直接使用
-      if (avatar.startsWith("http://") || avatar.startsWith("https://")) {
-        return avatar;
-      }
-      // 如果是 Gravatar 相对路径（如 avatar/xxx?d=identicon），拼接 Gravatar base URL
-      if (avatar.startsWith("avatar/")) {
-        const baseUrl = siteConfig.GRAVATAR_URL || "https://cravatar.cn";
-        return `${baseUrl}/${avatar}`;
-      }
-      // 其他情况直接返回（可能是本地路径）
-      return avatar;
+    const hasOwnerIdentity =
+      (article.owner_avatar && article.owner_avatar.trim() !== "") ||
+      (article.owner_email && article.owner_email.trim() !== "") ||
+      (article.owner_nickname && article.owner_nickname.trim() !== "");
+    if (!hasOwnerIdentity) {
+      return siteConfig.USER_AVATAR || "/avatar.png";
     }
-    // 否则使用站点所有者头像
-    return siteConfig.USER_AVATAR || "/avatar.png";
-  }, [article.owner_avatar, siteConfig.GRAVATAR_URL, siteConfig.USER_AVATAR]);
+    return getUserAvatarUrl(
+      {
+        avatar: article.owner_avatar,
+        email: article.owner_email,
+        nickname: article.owner_nickname,
+      },
+      {
+        gravatarUrl: siteConfig.GRAVATAR_URL,
+        defaultGravatarType: siteConfig.DEFAULT_GRAVATAR_TYPE,
+      },
+      132
+    );
+  }, [
+    article.owner_avatar,
+    article.owner_email,
+    article.owner_nickname,
+    siteConfig.GRAVATAR_URL,
+    siteConfig.DEFAULT_GRAVATAR_TYPE,
+    siteConfig.USER_AVATAR,
+  ]);
+
+  /** 与 PostHeader、站点配置一致：后台「文章默认封面」优先，否则内置图 */
+  const posterDefaultCover = useMemo(
+    () => resolvePostDefaultCoverUrl(siteConfig.post?.default?.default_cover),
+    [siteConfig.post?.default?.default_cover]
+  );
 
   // 版权声明内容
   const copyrightInfo = useMemo(() => {
@@ -335,8 +353,7 @@ export function PostCopyright({ article }: PostCopyrightProps) {
     try {
       setIsGeneratingPoster(true);
 
-      // 与 PostHeader 一致：优先 top_img_url，其次 cover_url
-      const coverImage = getPosterCoverImageUrl(article);
+      const coverImage = getPosterCoverImageUrl(article, posterDefaultCover);
 
       // 获取文章简介
       const description = article.summaries?.[0] || undefined;
@@ -366,7 +383,7 @@ export function PostCopyright({ article }: PostCopyrightProps) {
     } finally {
       setIsGeneratingPoster(false);
     }
-  }, [isGeneratingPoster, article, articleAuthor, articleAuthorAvatar, siteConfig, articleUrl]);
+  }, [isGeneratingPoster, article, articleAuthor, articleAuthorAvatar, siteConfig, articleUrl, posterDefaultCover]);
 
   // 下载海报
   const handleDownloadPoster = useCallback(() => {

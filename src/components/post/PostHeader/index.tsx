@@ -17,6 +17,8 @@ import styles from "./PostHeader.module.css";
 
 interface PostHeaderProps {
   article: Article;
+  /** 无头图/封面或主图加载失败时使用，须与后台「文章默认封面」一致（由父组件传入 resolvePostDefaultCoverUrl 的结果） */
+  defaultCoverUrl: string;
 }
 
 /**
@@ -61,7 +63,7 @@ function WavesArea() {
   );
 }
 
-export function PostHeader({ article }: PostHeaderProps) {
+export function PostHeader({ article, defaultCoverUrl }: PostHeaderProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
@@ -102,15 +104,14 @@ export function PostHeader({ article }: PostHeaderProps) {
     return article.is_reprint ? "转载" : "原创";
   }, [article.is_reprint]);
 
-  // 封面图片 URL - 优先使用 top_img_url，其次 cover_url，最后使用默认封面
+  // 封面图片 URL - 优先使用 top_img_url，其次 cover_url，最后使用后台默认封面
   const topCoverUrl = useMemo(() => {
     const url = article.top_img_url || article.cover_url;
-    // 确保返回有效的 URL
     if (!url || url.trim() === "") {
-      return "/images/default-cover.webp";
+      return defaultCoverUrl;
     }
     return url;
-  }, [article.top_img_url, article.cover_url]);
+  }, [article.top_img_url, article.cover_url, defaultCoverUrl]);
 
   // 初始化图片源（用于 SSR）
   const currentImageSrc = imageSrc || topCoverUrl;
@@ -133,8 +134,8 @@ export function PostHeader({ article }: PostHeaderProps) {
 
   // 图片加载错误时使用默认封面
   const handleImageError = () => {
-    if (currentImageSrc !== "/images/default-cover.webp") {
-      setImageSrc("/images/default-cover.webp");
+    if (currentImageSrc !== defaultCoverUrl) {
+      setImageSrc(defaultCoverUrl);
     } else {
       // 默认封面也加载失败，直接显示背景色
       setIsImageLoaded(true);
