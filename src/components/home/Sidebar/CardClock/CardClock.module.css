@@ -56,6 +56,7 @@
   z-index: 2;
 }
 
+:global(html.dark) .cardBackground,
 :global([data-theme="dark"]) .cardBackground {
   background-color: #212121;
 }
@@ -86,8 +87,8 @@
   white-space: nowrap;
 }
 
-:global([data-theme="dark"]) .clockRow,
-:global(.dark) .clockRow {
+:global(html.dark) .clockRow,
+:global([data-theme="dark"]) .clockRow {
   color: #fff;
 }
 

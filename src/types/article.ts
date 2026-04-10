@@ -209,6 +209,7 @@ export interface Article {
   owner_nickname?: string; // 发布者昵称
   owner_name?: string; // 发布者名称
   owner_avatar?: string; // 发布者头像
+  owner_email?: string; // 发布者邮箱（用于与头部一致解析 QQ/Gravatar 头像）
   // 版权区域按钮显示控制（文章级别）
   show_reward_button?: boolean;
   show_share_button?: boolean;

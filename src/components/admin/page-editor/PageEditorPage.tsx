@@ -20,6 +20,7 @@ import { useArticleEditor } from "../article-editor/use-article-editor";
 import { useAdminPageDetail, useCreatePage, useUpdatePage, pageManagementKeys } from "@/hooks/queries/use-page-management";
 import { useQueryClient } from "@tanstack/react-query";
 import { processHtmlForSave } from "@/lib/content-processor";
+import { turndownArticleMarkdown } from "@/lib/editor-tabs-export";
 import { registerCustomRules } from "@/lib/turndown-rules";
 import { registerMarkedExtensions, fixTaskListHtml } from "@/lib/marked-extensions";
 
@@ -123,7 +124,7 @@ export function PageEditorPage({ pageId }: PageEditorPageProps) {
         if (newMode === "html") {
           setSourceContent(processedHtml);
         } else {
-          setSourceContent(turndownService.turndown(processedHtml));
+          setSourceContent(turndownArticleMarkdown(editor, turndownService, processedHtml));
         }
       } else if (newMode === "visual") {
         if (!sourceModifiedRef.current && visualBackupRef.current) {
@@ -214,7 +215,7 @@ export function PageEditorPage({ pageId }: PageEditorPageProps) {
     if (editorMode === "visual") {
       const rawHtml = editor?.getHTML() ?? "";
       html = processHtmlForSave(rawHtml);
-      markdown = turndownService.turndown(html);
+      markdown = turndownArticleMarkdown(editor, turndownService, html);
     } else if (editorMode === "html") {
       html = processHtmlForSave(sourceContent);
       markdown = turndownService.turndown(html);

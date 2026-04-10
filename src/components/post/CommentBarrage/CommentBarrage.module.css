@@ -95,8 +95,8 @@
   transform: translate(-50%, -50%) rotate(-45deg);
 }
 
-:global([data-theme="dark"]) .commentBarrageItem,
-:global(.dark) .commentBarrageItem {
+:global(html.dark) .commentBarrageItem,
+:global([data-theme="dark"]) .commentBarrageItem {
   background: rgb(30 30 30 / 80%);
 }
 

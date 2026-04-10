@@ -1,7 +1,7 @@
 /**
  * TurndownService 自定义规则
  * 将自定义 HTML 组件转换为对应的 Markdown 语法
- * 语法规范：块级 :::tagName params ... ::: ，行内 {tagName params}content{/tagName}
+ * 语法规范：块级 :::tagName params ... :::（通用）；!!!note|tip|warning|danger ... !!!（提示框），行内 {tagName params}content{/tagName}
  */
 import type TurndownService from "turndown";
 
@@ -194,6 +194,16 @@ export function registerCustomRules(td: TurndownService) {
       if (code.endsWith("\n")) code = code.slice(0, -1);
 
       return `\n\`\`\`${language}\n${code}\n\`\`\`\n\n`;
+    },
+  });
+
+  // --- 标签页占位（由 prepareHtmlForTabsTurndown 注入，避免丢失隐藏面板内容）---
+  td.addRule("tabsTurndownSource", {
+    filter: (node) =>
+      node.nodeName === "DIV" && (node as HTMLElement).classList.contains("tabs-turndown-source"),
+    replacement: (_content, node) => {
+      const text = (node as HTMLElement).textContent?.trim() ?? "";
+      return text ? `\n${text}\n\n` : "\n\n";
     },
   });
 
@@ -544,7 +554,7 @@ export function registerCustomRules(td: TurndownService) {
       );
       const inner = bodyChildren.map(c => (c as HTMLElement).innerHTML?.trim() || c.textContent?.trim() || "").join("\n");
 
-      return `\n:::${adType}${title ? ` ${title}` : ""}\n${inner || _content}\n:::\n\n`;
+      return `\n!!!${adType}${title ? ` ${title}` : ""}\n${inner || _content}\n!!!\n\n`;
     },
   });
 

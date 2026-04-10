@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 安知鱼
+ * @Date: 2026-03-27 16:00:44
+ * @LastEditTime: 2026-04-10 11:41:12
+ * @LastEditors: 安知鱼
+ */
 /**
  * 将后端返回的「本站托管媒体」绝对 URL 转为相对路径（pathname + search）。
  *
@@ -15,11 +22,7 @@ export function toSameOriginMediaUrl(url: string): string {
   try {
     const u = new URL(trimmed);
     const path = u.pathname + u.search;
-    if (
-      path.startsWith("/api/f/") ||
-      path.startsWith("/static/") ||
-      path.startsWith("/needcache/")
-    ) {
+    if (path.startsWith("/api/f/") || path.startsWith("/static/") || path.startsWith("/needcache/")) {
       return path;
     }
   } catch {
@@ -28,4 +31,16 @@ export function toSameOriginMediaUrl(url: string): string {
   }
 
   return trimmed;
+}
+
+export const BUILTIN_POST_DEFAULT_COVER_PATH = "/images/default-cover.webp";
+
+/**
+ * 解析文章默认封面 URL：优先使用后台 post.default.default_cover，否则使用内置占位图；
+ * 对本站托管的绝对地址做同源压缩（见 toSameOriginMediaUrl）。
+ */
+export function resolvePostDefaultCoverUrl(configuredUrl?: string | null): string {
+  const raw = configuredUrl?.trim();
+  const base = raw && raw !== "" ? raw : BUILTIN_POST_DEFAULT_COVER_PATH;
+  return toSameOriginMediaUrl(base);
 }

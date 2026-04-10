@@ -4,6 +4,7 @@
  * AdmonitionBlock 扩展
  * 块级警告/提示框（note/tip/warning/danger），使用 React NodeView
  * 前台渲染 HTML: <div class="admonition {type}"><div class="admonition-title">{title}</div>...</div>
+ * 导出 Markdown 使用 !!!type ... !!!（见 turndown-rules / marked-extensions）
  */
 import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent, type NodeViewProps } from "@tiptap/react";

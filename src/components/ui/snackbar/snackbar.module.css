@@ -40,9 +40,9 @@
   overflow: hidden;
 }
 
-/* 暗色模式使用主色调 */
-:global([data-theme="dark"]) .inner,
-:global(.dark) .inner {
+/* 暗色模式使用主色调（next-themes：html.dark） */
+:global(html.dark) .inner,
+:global([data-theme="dark"]) .inner {
   background: #425aef;
 }
 

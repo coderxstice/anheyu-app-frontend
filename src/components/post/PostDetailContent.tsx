@@ -29,6 +29,7 @@ import { useSiteConfigStore } from "@/store/site-config-store";
 import { useUiStore } from "@/store/ui-store";
 import { usePageStore } from "@/store/page-store";
 import { setArticleMetaThemeColor, restoreMetaThemeColor } from "@/utils/theme-manager";
+import { resolvePostDefaultCoverUrl } from "@/utils/same-origin-media-url";
 import type { Article, RecentArticle } from "@/types/article";
 import styles from "./PostDetail.module.css";
 
@@ -119,7 +120,7 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
 
   const siteName = appName || "安知鱼";
   const ownerName = siteOwnerName || "安知鱼";
-  const defaultCover = postDefaultCover || "/images/default-cover.webp";
+  const defaultCover = useMemo(() => resolvePostDefaultCoverUrl(postDefaultCover), [postDefaultCover]);
   const customJS = article.extra_config?.custom_js;
   const hasCustomJS = !!customJS && customJS.trim() !== "";
   const isRelatedEnabled = articleShowRelated !== false && articleShowRelated !== "false";
@@ -131,7 +132,7 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
   return (
     <div className={styles.postDetailContainer}>
       {/* 文章头部 */}
-      <PostHeader article={article} />
+      <PostHeader article={article} defaultCoverUrl={defaultCover} />
 
       {/* 主内容区域 */}
       <div className={styles.layout}>
