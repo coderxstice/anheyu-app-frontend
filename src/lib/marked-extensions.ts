@@ -1,7 +1,7 @@
 /**
  * marked 自定义扩展
  * 处理自定义 Markdown 语法 → HTML 转换
- * 块级：:::tagName params ... :::
+ * 块级：:::tagName params ... :::（通用容器）；!!!note|tip|warning|danger ... !!!（提示框，推荐）
  * 行内：{tagName params}content{/tagName}
  */
 import type { marked as Marked, Tokens } from "marked";
@@ -61,6 +61,56 @@ function matchContainerBlock(src: string): { raw: string; tagName: string; param
   if (depth !== 0) return null;
 
   const bodyEnd = src.lastIndexOf(":::", pos - 1);
+  const body = src.slice(openMatch[0].length, bodyEnd).replace(/\n$/, "");
+  return { raw: src.slice(0, pos), tagName, params, body };
+}
+
+/** Admonition 块支持的标签（与 turndown、编辑器一致；!!! 与类型之间可有空格） */
+const ADMONITION_OPEN_RE = /^!!!\s*(note|tip|warning|danger)\s*(.*)\n/;
+const ADMONITION_NESTED_OPEN_RE = /^!!!\s*(?:note|tip|warning|danger)\b/;
+
+/**
+ * 从 src 开头匹配 !!!note|tip|warning|danger ... !!! 块（闭合为单独一行的 !!!，支持嵌套与代码块跳过）
+ * 旧版 :::type ... ::: 仍由 matchContainerBlock 解析。
+ */
+function matchAdmonitionBlock(src: string): { raw: string; tagName: string; params: string; body: string } | null {
+  const openMatch = src.match(ADMONITION_OPEN_RE);
+  if (!openMatch) return null;
+
+  const tagName = openMatch[1];
+  const params = openMatch[2].trim();
+  let pos = openMatch[0].length;
+  let depth = 1;
+  let inCode = false;
+  let codeMark = "";
+
+  while (pos < src.length && depth > 0) {
+    const lineEnd = src.indexOf("\n", pos);
+    if (lineEnd === -1) break;
+    const line = src.slice(pos, lineEnd).trim();
+
+    const cm = line.match(/^(`{3,}|~{3,})/);
+    if (cm) {
+      if (!inCode) {
+        inCode = true;
+        codeMark = cm[1];
+      } else if (line === codeMark) {
+        inCode = false;
+        codeMark = "";
+      }
+    }
+
+    if (!inCode) {
+      if (ADMONITION_NESTED_OPEN_RE.test(line)) depth++;
+      else if (line === "!!!") depth--;
+    }
+
+    pos = lineEnd + 1;
+  }
+
+  if (depth !== 0) return null;
+
+  const bodyEnd = src.lastIndexOf("!!!", pos - 1);
   const body = src.slice(openMatch[0].length, bodyEnd).replace(/\n$/, "");
   return { raw: src.slice(0, pos), tagName, params, body };
 }
@@ -257,7 +307,7 @@ function renderVideoGallery(body: string, params: string): string {
   return `<div class="video-gallery-container video-gallery-cols-${cols}"${styleAttr}>${items}</div>`;
 }
 
-/** 渲染 Admonition 警告框（:::note、:::tip、:::warning、:::danger） */
+/** 渲染 Admonition 警告框（!!!note / :::note 等均解析为此 HTML） */
 function renderAdmonition(type: string): BlockRenderer {
   return (body: string, params: string, parse: (md: string) => string) => {
     const title = params.trim() || ({ note: "注意", tip: "提示", warning: "警告", danger: "危险" }[type] ?? type);
@@ -375,7 +425,48 @@ const inlineComplexTags: Record<string, (params: string) => string> = {
 export function registerMarkedExtensions(marked: typeof Marked) {
   const parseInline = (md: string) => marked.parse(md, { async: false }) as string;
 
-  // 块级 ::: 容器扩展
+  /**
+   * 渲染容器 token（admonition 与其它 ::: 块共用 blockRenderers）
+   */
+  function renderContainerToken(token: Tokens.Generic): string {
+    const { tagName, params, body } = token as Tokens.Generic & {
+      tagName: string;
+      params: string;
+      body: string;
+    };
+    const renderer = blockRenderers[tagName];
+    if (renderer) return renderer(body, params, parseInline);
+    return `<div class="custom-block custom-block-${tagName}">${parseInline(body)}</div>`;
+  }
+
+  // 块级 !!!note|tip|warning|danger 容器（须在 ::: 之前注册）
+  marked.use({
+    extensions: [
+      {
+        name: "admonitionBangBlock",
+        level: "block" as const,
+        start(src: string) {
+          return src.match(/^!!!\s*(?:note|tip|warning|danger)\b/m)?.index;
+        },
+        tokenizer(src: string) {
+          const block = matchAdmonitionBlock(src);
+          if (!block) return undefined;
+          return {
+            type: "admonitionBangBlock",
+            raw: block.raw,
+            tagName: block.tagName,
+            params: block.params,
+            body: block.body,
+          };
+        },
+        renderer(token: Tokens.Generic) {
+          return renderContainerToken(token);
+        },
+      },
+    ],
+  });
+
+  // 块级 ::: 容器扩展（含旧版 :::note 等，兼容历史正文）
   marked.use({
     extensions: [
       {
@@ -396,14 +487,7 @@ export function registerMarkedExtensions(marked: typeof Marked) {
           };
         },
         renderer(token: Tokens.Generic) {
-          const { tagName, params, body } = token as Tokens.Generic & {
-            tagName: string;
-            params: string;
-            body: string;
-          };
-          const renderer = blockRenderers[tagName];
-          if (renderer) return renderer(body, params, parseInline);
-          return `<div class="custom-block custom-block-${tagName}">${parseInline(body)}</div>`;
+          return renderContainerToken(token);
         },
       },
     ],

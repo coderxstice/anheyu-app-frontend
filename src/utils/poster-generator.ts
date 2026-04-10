@@ -48,6 +48,35 @@ function shouldSetCrossOriginForImageLoad(url: string): boolean {
 }
 
 /**
+ * 将跨域 HTTP(S) 图片改走本站 /api/proxy/download，避免第三方未返回 CORS 头导致 Canvas 污染、头像/封面无法绘制。
+ * data:、blob:、同源 URL 保持原样；已是代理地址时不重复包装。
+ */
+function rewriteCrossOriginImageUrlForPosterCanvas(imageUrl: string): string {
+  if (typeof window === "undefined") {
+    return imageUrl;
+  }
+  const trimmed = imageUrl.trim();
+  if (trimmed === "" || trimmed.startsWith("data:") || trimmed.startsWith("blob:")) {
+    return imageUrl;
+  }
+  if (trimmed.includes("/api/proxy/download?")) {
+    return imageUrl;
+  }
+  try {
+    const resolved = new URL(imageUrl, window.location.href);
+    if (resolved.origin === window.location.origin) {
+      return imageUrl;
+    }
+    if (resolved.protocol !== "http:" && resolved.protocol !== "https:") {
+      return imageUrl;
+    }
+    return `/api/proxy/download?url=${encodeURIComponent(resolved.href)}`;
+  } catch {
+    return imageUrl;
+  }
+}
+
+/**
  * 加载图片，跨域资源优先使用 fetch+Blob 策略以规避浏览器缓存导致的 CORS 失败。
  *
  * 背景：页面 <img> 标签在不带 crossOrigin 属性的情况下加载过图片后，浏览器
@@ -56,6 +85,7 @@ function shouldSetCrossOriginForImageLoad(url: string): boolean {
  * 使用独立的 HTTP 缓存，因此通过 fetch 获取后转为同源 Blob URL 可彻底绕开此问题。
  */
 async function loadImage(url: string): Promise<HTMLImageElement> {
+  url = rewriteCrossOriginImageUrlForPosterCanvas(url);
   const isCrossOrigin = shouldSetCrossOriginForImageLoad(url);
 
   if (isCrossOrigin) {
