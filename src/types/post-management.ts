@@ -85,6 +85,7 @@ export interface AdminArticleListParams {
   review_status?: ReviewStatus | "";
   author_id?: string;
   category?: string;
+  tag?: string;
 }
 
 // ===================================

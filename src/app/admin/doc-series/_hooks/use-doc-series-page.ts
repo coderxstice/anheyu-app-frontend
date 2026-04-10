@@ -18,9 +18,12 @@ export function useDocSeriesPage() {
   const [editItem, setEditItem] = useState<DocSeries | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DocSeries | null>(null);
 
+  const [detailTarget, setDetailTarget] = useState<DocSeries | null>(null);
+
   const formModal = useDisclosure();
   const deleteModal = useDisclosure();
   const batchDeleteModal = useDisclosure();
+  const detailModal = useDisclosure();
 
   // ---- 查询 ----
   const queryParams: DocSeriesListParams = useMemo(
@@ -132,10 +135,27 @@ export function useDocSeriesPage() {
     batchDeleteModal.onClose();
   }, [selectedIds, deleteDocSeries, batchDeleteModal]);
 
+  // ---- 查看文档详情 ----
+  const handleDetail = useCallback(
+    (item: DocSeries) => {
+      setDetailTarget(item);
+      detailModal.onOpen();
+    },
+    [detailModal]
+  );
+
+  const handleDetailClose = useCallback(() => {
+    detailModal.onClose();
+    setDetailTarget(null);
+  }, [detailModal]);
+
   // ---- 行操作分发 ----
   const handleAction = useCallback(
     (item: DocSeries, key: string) => {
       switch (key) {
+        case "detail":
+          handleDetail(item);
+          break;
         case "edit":
           handleEdit(item);
           break;
@@ -144,7 +164,7 @@ export function useDocSeriesPage() {
           break;
       }
     },
-    [handleEdit, handleDeleteClick]
+    [handleDetail, handleEdit, handleDeleteClick]
   );
 
   // ---- 重置筛选 ----
@@ -183,6 +203,11 @@ export function useDocSeriesPage() {
     handleEdit,
     handleFormClose,
     formModal,
+
+    // 详情
+    detailTarget,
+    detailModal,
+    handleDetailClose,
 
     // 删除
     deleteTarget,

@@ -24,7 +24,7 @@ export const postManagementApi = {
    * GET /api/articles
    */
   async getArticles(params: AdminArticleListParams = {}): Promise<AdminArticleListResponse> {
-    const { page = 1, pageSize = 10, query, status, author_id, category } = params;
+    const { page = 1, pageSize = 10, query, status, author_id, category, tag } = params;
     const queryParams = new URLSearchParams();
     queryParams.append("page", String(page));
     queryParams.append("pageSize", String(pageSize));
@@ -32,6 +32,7 @@ export const postManagementApi = {
     if (status) queryParams.append("status", status);
     if (author_id) queryParams.append("author_id", author_id);
     if (category) queryParams.append("category", category);
+    if (tag) queryParams.append("tag", tag);
 
     const response = await apiClient.get<AdminArticleListResponse>(`/api/articles?${queryParams.toString()}`);
 

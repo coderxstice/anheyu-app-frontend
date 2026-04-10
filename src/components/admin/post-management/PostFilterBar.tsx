@@ -2,6 +2,7 @@
 
 import { Input, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
 import { Search, ChevronDown, RotateCcw } from "lucide-react";
+import type { PostCategory, PostTag } from "@/types/article";
 
 /** 审核状态选项 */
 const REVIEW_STATUS_OPTIONS = [
@@ -25,6 +26,12 @@ interface PostFilterBarProps {
   onStatusFilterChange: (value: string) => void;
   reviewStatusFilter: string;
   onReviewStatusFilterChange: (value: string) => void;
+  categoryFilter: string;
+  onCategoryFilterChange: (value: string) => void;
+  tagFilter: string;
+  onTagFilterChange: (value: string) => void;
+  categoryOptions: PostCategory[];
+  tagOptions: PostTag[];
   onReset: () => void;
   onPageReset: () => void;
 }
@@ -36,9 +43,17 @@ export function PostFilterBar({
   onStatusFilterChange,
   reviewStatusFilter,
   onReviewStatusFilterChange,
+  categoryFilter,
+  onCategoryFilterChange,
+  tagFilter,
+  onTagFilterChange,
+  categoryOptions,
+  tagOptions,
   onReset,
   onPageReset,
 }: PostFilterBarProps) {
+  const hasFilter = !!(searchInput || statusFilter || reviewStatusFilter || categoryFilter || tagFilter);
+
   return (
     <div className="shrink-0 px-5 pb-3">
       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -102,13 +117,71 @@ export function PostFilterBar({
             ))}
           </DropdownMenu>
         </Dropdown>
+        {categoryOptions.length > 0 && (
+          <Dropdown>
+            <DropdownTrigger className="flex">
+              <Button size="sm" variant="flat" endContent={<ChevronDown className="w-3.5 h-3.5" />} className="h-8">
+                {categoryFilter
+                  ? (categoryOptions.find(c => c.name === categoryFilter)?.name ?? "分类")
+                  : "分类"}
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label="分类筛选"
+              selectedKeys={categoryFilter ? new Set([categoryFilter]) : new Set()}
+              selectionMode="single"
+              className="max-h-64 overflow-y-auto"
+              onSelectionChange={keys => {
+                const v = Array.from(keys)[0];
+                onCategoryFilterChange(v ? (v as string) : "");
+                onPageReset();
+              }}
+            >
+              {categoryOptions.map(cat => (
+                <DropdownItem key={cat.name}>
+                  {cat.name}
+                  <span className="ml-1.5 text-xs text-muted-foreground">({cat.count})</span>
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+        )}
+        {tagOptions.length > 0 && (
+          <Dropdown>
+            <DropdownTrigger className="flex">
+              <Button size="sm" variant="flat" endContent={<ChevronDown className="w-3.5 h-3.5" />} className="h-8">
+                {tagFilter
+                  ? (tagOptions.find(t => t.name === tagFilter)?.name ?? "标签")
+                  : "标签"}
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label="标签筛选"
+              selectedKeys={tagFilter ? new Set([tagFilter]) : new Set()}
+              selectionMode="single"
+              className="max-h-64 overflow-y-auto"
+              onSelectionChange={keys => {
+                const v = Array.from(keys)[0];
+                onTagFilterChange(v ? (v as string) : "");
+                onPageReset();
+              }}
+            >
+              {tagOptions.map(tag => (
+                <DropdownItem key={tag.name}>
+                  {tag.name}
+                  <span className="ml-1.5 text-xs text-muted-foreground">({tag.count})</span>
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+        )}
         <div className="ml-auto">
           <Button
             size="sm"
             variant="flat"
             startContent={<RotateCcw className="w-3.5 h-3.5" />}
             onPress={onReset}
-            isDisabled={!searchInput && !statusFilter && !reviewStatusFilter}
+            isDisabled={!hasFilter}
             className="text-foreground/70"
           >
             重置

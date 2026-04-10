@@ -178,6 +178,12 @@ export default function PostManagementPage() {
           onStatusFilterChange={pm.setStatusFilter}
           reviewStatusFilter={pm.reviewStatusFilter}
           onReviewStatusFilterChange={pm.setReviewStatusFilter}
+          categoryFilter={pm.categoryFilter}
+          onCategoryFilterChange={pm.setCategoryFilter}
+          tagFilter={pm.tagFilter}
+          onTagFilterChange={pm.setTagFilter}
+          categoryOptions={pm.categoryOptions}
+          tagOptions={pm.tagOptions}
           onReset={pm.handleReset}
           onPageReset={() => pm.setPage(1)}
         />
@@ -220,7 +226,7 @@ export default function PostManagementPage() {
               emptyContent={
                 <TableEmptyState
                   icon={FileText}
-                  hasFilter={!!(pm.debouncedSearch || pm.statusFilter || pm.categoryFilter)}
+                  hasFilter={!!(pm.debouncedSearch || pm.statusFilter || pm.categoryFilter || pm.tagFilter)}
                   filterEmptyText={ADMIN_EMPTY_TEXTS.posts.filterEmptyText}
                   emptyText={ADMIN_EMPTY_TEXTS.posts.emptyText}
                   emptyHint={ADMIN_EMPTY_TEXTS.posts.emptyHint}
