@@ -106,7 +106,7 @@
 .weatherIcon {
   display: inline-block;
   width: 20px;
-  font-family: "qweather-icons";
+  font-family: "qweather-icons" !important;
   font-style: normal;
   font-weight: normal;
   line-height: 1;
@@ -116,7 +116,7 @@
 }
 
 .temp {
-  font-family: UnidreamLED;
+  font-family: UnidreamLED !important;
 }
 
 /* 时间 */
@@ -135,7 +135,7 @@
 
 .windIcon {
   display: inline-block;
-  font-family: "qweather-icons";
+  font-family: "qweather-icons" !important;
   font-style: normal;
   font-weight: normal;
   line-height: 1;

@@ -5,6 +5,7 @@
   min-height: 400px;
   margin: 0 auto;
   padding: 1rem;
+  overflow-x: hidden;
 }
 
 /* ---------- 页面头部 ---------- */
@@ -195,6 +196,8 @@
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   animation: cardFadeIn 0.5s ease backwards;
+  min-width: 0;
+  overflow: hidden;
 }
 .chartTitle {
   display: flex;
@@ -240,6 +243,8 @@
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   animation: cardFadeIn 0.5s ease backwards;
+  min-width: 0;
+  overflow: hidden;
 }
 .listCardTitle {
   display: flex;
