@@ -4,11 +4,9 @@
  */
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { FaStar } from "react-icons/fa6";
-import { toSameOriginMediaUrl } from "@/utils/same-origin-media-url";
 import type { ArticleLink } from "@/types/article";
 import styles from "./PostRelatedPosts.module.css";
 
@@ -25,17 +23,6 @@ function getArticleHref(link: ArticleLink): string {
   return `/posts/${link.abbrlink || link.id}`;
 }
 
-/**
- * 解析相关推荐条目封面：无有效封面时用默认图，否则做本站媒体同源压缩。
- */
-function resolveRelatedPostCoverSrc(coverUrl: string | undefined, defaultCover: string): string {
-  const trimmed = coverUrl?.trim();
-  if (!trimmed) {
-    return defaultCover;
-  }
-  return toSameOriginMediaUrl(trimmed);
-}
-
 interface RelatedPostCoverImageProps {
   coverUrl?: string;
   defaultCover: string;
@@ -43,24 +30,16 @@ interface RelatedPostCoverImageProps {
 }
 
 /**
- * 相关推荐封面：空封面用默认图，加载失败时回退到默认图。
+ * 相关推荐封面：直接使用原始 URL（与首页一致），加载失败时回退到默认图。
  */
 function RelatedPostCoverImage({ coverUrl, defaultCover, alt }: RelatedPostCoverImageProps) {
   const [loadFailed, setLoadFailed] = useState(false);
-
-  const src = useMemo(() => {
-    if (loadFailed) {
-      return defaultCover;
-    }
-    return resolveRelatedPostCoverSrc(coverUrl, defaultCover);
-  }, [coverUrl, defaultCover, loadFailed]);
+  const src = loadFailed || !coverUrl?.trim() ? defaultCover : coverUrl.trim();
 
   return (
-    <Image
+    <img
       src={src}
       alt={alt}
-      fill
-      sizes="(max-width: 768px) 100vw, 45vw"
       className={styles.cover}
       onError={() => setLoadFailed(true)}
     />
@@ -95,7 +74,11 @@ export function PostRelatedPosts({
 
       <div className={styles.list}>
         {relatedPosts.map(post => (
-          <article key={post.id} className={styles.item}>
+          <article
+            key={post.id}
+            className={styles.item}
+            style={post.primary_color ? { "--item-primary": post.primary_color } as React.CSSProperties : undefined}
+          >
             <Link href={getArticleHref(post)} className={styles.itemLink} title={post.title}>
               <div className={styles.coverWrap}>
                 <RelatedPostCoverImage coverUrl={post.cover_url} defaultCover={defaultCover} alt={post.title} />

@@ -3,6 +3,7 @@
 
 import { useMemo, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Icon } from "@iconify/react";
 import { Tooltip } from "@/components/ui";
 import { useSiteConfigStore } from "@/store/site-config-store";
@@ -119,6 +120,7 @@ function SocialIcon({ icon, title }: { icon: string; title: string }) {
 }
 
 export function Footer() {
+  const pathname = usePathname();
   const siteConfig = useSiteConfigStore(state => state.siteConfig);
   const [displayedFriends, setDisplayedFriends] = useState<FriendLink[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -339,8 +341,16 @@ export function Footer() {
     runtimeEnabled;
   if (!hasContent) return null;
 
+  const isPostDetailPage = pathname?.startsWith("/posts/");
+  const footerContainerClass = [
+    styles.footerContainer,
+    isPostDetailPage ? styles.footerContainerPostDetail : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <footer className={styles.footerContainer}>
+    <footer className={footerContainerClass}>
       <div className={styles.footerWrap}>
         {/* 社交图标栏 */}
         {footerConfig.socialBar && (

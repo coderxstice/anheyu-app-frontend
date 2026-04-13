@@ -31,7 +31,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   );
   const isAuthenticated = !!accessToken && !!user;
   const hasAdminAccess = isAuthenticated && isAdmin();
-  const siteTitle = useSiteConfigStore(state => state.getTitle());
+  const storeSiteTitle = useSiteConfigStore(state => state.getTitle());
+  const [siteTitle, setSiteTitle] = useState("AnHeYu");
+
+  useEffect(() => {
+    setSiteTitle(storeSiteTitle);
+  }, [storeSiteTitle]);
 
   useEffect(() => {
     if (!_hasHydrated) return;

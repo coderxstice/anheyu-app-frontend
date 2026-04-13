@@ -485,11 +485,17 @@
 
   .footerContainer {
     z-index: 99;
-    margin-top: -1px;
-    background: var(--anzhiyu-card-bg);
+    margin-top: 1rem;
+    background: linear-gradient(180deg, transparent 0, var(--anzhiyu-card-bg) 25%);
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
+  }
+
+  .footerContainerPostDetail {
+    margin-top: -1px;
+    background: var(--anzhiyu-card-bg);
+    touch-action: pan-y;
   }
 
   .footerLinkGrid {
