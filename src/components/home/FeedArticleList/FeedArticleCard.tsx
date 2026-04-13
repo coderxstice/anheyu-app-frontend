@@ -1,7 +1,7 @@
 "use client";
 
 /* eslint-disable @next/next/no-img-element */
-import { useState, useMemo, useCallback, memo } from "react";
+import { useState, useMemo, useCallback, useRef, memo } from "react";
 import { useRouter } from "next/navigation";
 import { FaBagShopping, FaBook, FaFire, FaHashtag, FaThumbtack } from "react-icons/fa6";
 import { useSiteConfigStore } from "@/store/site-config-store";
@@ -74,6 +74,18 @@ export const FeedArticleCard = memo(function FeedArticleCard({
   const [isRead, setIsRead] = useState(() => checkIsRead(article.id));
   const [imageLoaded, setImageLoaded] = useState(false);
   const [useDefaultCover, setUseDefaultCover] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  // 图片 ref 回调：检测浏览器缓存命中时直接跳过淡入动画
+  const imgRefCallback = useCallback(
+    (node: HTMLImageElement | null) => {
+      imgRef.current = node;
+      if (node && node.complete && node.naturalWidth > 0) {
+        setImageLoaded(true);
+      }
+    },
+    [],
+  );
 
   // 是否启用主色调标签样式
   const enablePrimaryColorTag = useMemo(() => {
@@ -173,7 +185,8 @@ export const FeedArticleCard = memo(function FeedArticleCard({
       <div className={styles.postCover}>
         <div className={styles.coverWrapper} title={article.title}>
           <img
-            className={cn(styles.postBg, styles.lazyLoading, imageLoaded && styles.lazyLoaded)}
+            ref={imgRefCallback}
+            className={cn(styles.postBg, imageLoaded ? styles.lazyLoaded : styles.lazyLoading)}
             src={coverUrl}
             alt={article.title}
             onLoad={() => setImageLoaded(true)}

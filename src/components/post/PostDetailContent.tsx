@@ -186,7 +186,6 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
               <PostPagination
                 prevArticle={article.prev_article}
                 nextArticle={article.next_article}
-                defaultCover={defaultCover}
               />
             </div>
 
@@ -212,7 +211,6 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
       <PostPaginationFloat
         prevArticle={article.prev_article}
         nextArticle={article.next_article}
-        defaultCover={defaultCover}
         commentBarrageEnabled={
           isCommentEnabled && isCommentBarrageEnabledBySite && isCommentBarrageVisible
         }

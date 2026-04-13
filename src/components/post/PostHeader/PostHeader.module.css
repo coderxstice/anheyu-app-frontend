@@ -321,14 +321,21 @@
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 1;
     width: 100%;
-    height: 70%;
+    height: 100%;
     content: "";
-    box-shadow: 0 0 105px 99px var(--primary-color, var(--primary)) inset;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--primary-color, var(--primary)) 30%, transparent) 0%,
+      color-mix(in srgb, var(--primary-color, var(--primary)) 50%, transparent) 30%,
+      color-mix(in srgb, var(--primary-color, var(--primary)) 80%, transparent) 55%,
+      var(--primary-color, var(--primary)) 70%
+    );
   }
 
   .postTopBg {
-    height: 70%;
+    height: 75%;
     min-height: 18.75rem;
     filter: none;
     border-radius: 0;

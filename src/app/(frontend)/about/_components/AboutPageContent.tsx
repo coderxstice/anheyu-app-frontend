@@ -154,7 +154,7 @@ export function AboutPageContent() {
       {enable.reward && <RewardCard />}
       {/* 评论区 */}
       {enable.comment && (
-        <div className="mt-12">
+        <div style={{ width: "100%", marginTop: "3rem" }}>
           <CommentSection targetTitle="关于" targetPath="/about" />
         </div>
       )}
