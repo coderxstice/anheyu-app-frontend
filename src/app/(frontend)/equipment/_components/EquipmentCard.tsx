@@ -12,7 +12,7 @@ export function EquipmentCard({ item }: EquipmentCardProps) {
   const [imgError, setImgError] = useState(false);
 
   const handleCommentQuote = () => {
-    const quoteText = item.description.trim().slice(0, 50);
+    const quoteText = item.description.trim();
 
     window.dispatchEvent(
       new CustomEvent("comment-form-set-quote", {
@@ -31,9 +31,9 @@ export function EquipmentCard({ item }: EquipmentCardProps) {
   };
 
   return (
-    <div className="relative min-h-[400px] overflow-hidden rounded-xl border border-(--style-border-color) bg-(--anzhiyu-card-bg) shadow-(--anzhiyu-shadow-border)">
+    <div className="relative min-h-[400px] overflow-hidden rounded-xl border border-(--anzhiyu-card-border) bg-(--anzhiyu-card-bg) shadow-(--anzhiyu-shadow-border)">
       {/* 图片区域 */}
-      <div className="flex h-[200px] items-center justify-center border-b border-(--style-border-color) bg-(--anzhiyu-secondbg)">
+      <div className="flex h-[200px] items-center justify-center border-b border-(--anzhiyu-card-border) bg-(--anzhiyu-secondbg)">
         {item.image && !imgError ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
