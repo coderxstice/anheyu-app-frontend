@@ -9,8 +9,14 @@
   padding: 0;
   cursor: pointer;
   background: #57bd6a;
+  border: var(--style-border);
   border-radius: 12px;
   overflow: hidden;
+  transition: border-color 0.3s ease;
+}
+
+.cardWechat:hover {
+  border: var(--style-border-hover);
 }
 
 .cardWechat:hover::before {
