@@ -410,7 +410,7 @@ function EnhancedCodeBlockView({ node, updateAttributes }: NodeViewProps) {
   const lineCount = useMemo(() => {
     const text = node.textContent || "";
     if (!text) return 1;
-    return text.split("\n").length + 1;
+    return text.split("\n").length;
   }, [node.textContent]);
 
   const handleCopy = useCallback(() => {

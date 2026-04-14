@@ -589,9 +589,11 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     const pres = contentRef.current.querySelectorAll("pre");
     pres.forEach(pre => {
       if (pre.closest(".md-editor-code")) return;
+      if (pre.closest("[data-mermaid-code]") || pre.closest(".mermaid-block")) return;
 
       const code = pre.querySelector("code");
       if (!code) return;
+      if (code.classList.contains("language-mermaid")) return;
 
       const langMatch = code.className.match(/language-(\w+)/);
       const language = langMatch ? langMatch[1] : "";
@@ -634,6 +636,61 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
 
       pre.replaceWith(details);
     });
+  }, []);
+
+  // 渲染 Mermaid 图表：将源码转为 SVG
+  const renderMermaidBlocks = useCallback(async (container: HTMLElement) => {
+    const blocks: { element: Element; code: string }[] = [];
+    const seen = new WeakSet<Element>();
+
+    container.querySelectorAll("div[data-mermaid-code], div.mermaid-block").forEach(div => {
+      if (seen.has(div)) return;
+      seen.add(div);
+      const code =
+        (div as HTMLElement).getAttribute("data-mermaid-code") ||
+        (div.querySelector("code.language-mermaid")?.textContent || "");
+      if (code.trim()) blocks.push({ element: div, code });
+    });
+
+    container.querySelectorAll("pre").forEach(pre => {
+      if (pre.closest("[data-mermaid-code]") || pre.closest(".mermaid-block")) return;
+      if (pre.closest(".md-editor-code")) return;
+      const codeEl = pre.querySelector("code.language-mermaid");
+      if (!codeEl) return;
+      if (seen.has(pre)) return;
+      blocks.push({ element: pre, code: codeEl.textContent || "" });
+    });
+
+    if (blocks.length === 0) return;
+
+    try {
+      const { default: mermaid } = await import("mermaid");
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: "loose",
+        theme: document.documentElement.classList.contains("dark") ? "dark" : "default",
+        flowchart: { useMaxWidth: true, htmlLabels: true },
+        sequence: { useMaxWidth: true },
+        gantt: { useMaxWidth: true },
+      });
+
+      for (const block of blocks) {
+        try {
+          const id = `mermaid-${Math.random().toString(36).slice(2, 11)}`;
+          const { svg } = await mermaid.render(id, block.code);
+          const wrapper = document.createElement("p");
+          wrapper.className = "md-editor-mermaid";
+          wrapper.setAttribute("data-processed", "");
+          wrapper.setAttribute("data-mermaid-code", block.code);
+          wrapper.innerHTML = svg;
+          block.element.replaceWith(wrapper);
+        } catch {
+          // 单个图表渲染失败时保留源码
+        }
+      }
+    } catch {
+      // mermaid 库加载失败
+    }
   }, []);
 
   // 初始化代码块图标（展开箭头和复制按钮）
@@ -1553,11 +1610,15 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     window.__musicPlayerSeek = handleMusicPlayerSeek;
     initMusicPlayers(currentContent);
 
-    // 初始化 Mermaid 缩放功能
+    // 渲染 Mermaid 图表并初始化缩放功能
     if (mermaidCleanupRef.current) {
       mermaidCleanupRef.current();
+      mermaidCleanupRef.current = null;
     }
-    mermaidCleanupRef.current = initMermaidZoom(currentContent);
+    renderMermaidBlocks(currentContent).then(() => {
+      if (cancelled) return;
+      mermaidCleanupRef.current = initMermaidZoom(currentContent);
+    });
 
     // 动态导入 Fancybox 图片查看器
     let fancyboxModule: typeof import("@fancyapps/ui") | null = null;
@@ -1608,6 +1669,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     initMusicPlayers,
     handleMusicPlayerToggle,
     handleMusicPlayerSeek,
+    renderMermaidBlocks,
     initMermaidZoom,
   ]);
 
