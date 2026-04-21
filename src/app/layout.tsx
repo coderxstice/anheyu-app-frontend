@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import parse from "html-react-parser";
 import "./globals.css";
 import { Providers } from "@/providers";
 import {
@@ -83,6 +84,10 @@ function createMetadata(config: {
   };
 }
 
+function getTrimmedString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -99,6 +104,10 @@ export default async function RootLayout({
 }>) {
   const siteConfig = await fetchSiteConfigForSeo();
   const site = resolveSeoSiteInfo(siteConfig);
+  const customHeaderHtml = getTrimmedString(siteConfig?.CUSTOM_HEADER_HTML);
+  const customFooterHtml = getTrimmedString(siteConfig?.CUSTOM_FOOTER_HTML);
+  const customCss = getTrimmedString(siteConfig?.CUSTOM_CSS);
+  const customJs = getTrimmedString(siteConfig?.CUSTOM_JS);
   const webSiteJsonLd =
     site.siteUrl && site.siteName
       ? buildWebSiteJsonLd(site.siteName, site.siteUrl, site.description)
@@ -113,6 +122,9 @@ export default async function RootLayout({
             dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
           />
         )}
+        {customCss && <style id="anheyu-custom-css" dangerouslySetInnerHTML={{ __html: customCss }} />}
+        {customJs && <script id="anheyu-custom-js" dangerouslySetInnerHTML={{ __html: customJs }} />}
+        {customHeaderHtml && <>{parse(customHeaderHtml)}</>}
       </head>
       <body className="antialiased min-h-screen flex flex-col">
         {/* 初始加载动画 - 纯 CSS + SVG，JS 加载前就显示，样式在 globals.css */}
@@ -124,6 +136,7 @@ export default async function RootLayout({
           <span className="sr-only">页面加载中</span>
         </div>
         <Providers>{children}</Providers>
+        {customFooterHtml && <>{parse(customFooterHtml)}</>}
       </body>
     </html>
   );

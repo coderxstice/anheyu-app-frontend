@@ -66,8 +66,8 @@ function matchContainerBlock(src: string): { raw: string; tagName: string; param
 }
 
 /** Admonition 块支持的标签（与 turndown、编辑器一致；!!! 与类型之间可有空格） */
-const ADMONITION_OPEN_RE = /^!!!\s*(note|tip|warning|danger)\s*(.*)\n/;
-const ADMONITION_NESTED_OPEN_RE = /^!!!\s*(?:note|tip|warning|danger)\b/;
+const ADMONITION_OPEN_RE = /^!!!\s*(note|info|tip|warning|danger)\s*(.*)\n/;
+const ADMONITION_NESTED_OPEN_RE = /^!!!\s*(?:note|info|tip|warning|danger)\b/;
 
 /**
  * 从 src 开头匹配 !!!note|tip|warning|danger ... !!! 块（闭合为单独一行的 !!!，支持嵌套与代码块跳过）
@@ -310,7 +310,7 @@ function renderVideoGallery(body: string, params: string): string {
 /** 渲染 Admonition 警告框（!!!note / :::note 等均解析为此 HTML） */
 function renderAdmonition(type: string): BlockRenderer {
   return (body: string, params: string, parse: (md: string) => string) => {
-    const title = params.trim() || ({ note: "注意", tip: "提示", warning: "警告", danger: "危险" }[type] ?? type);
+    const title = params.trim() || ({ note: "注意", info: "信息", tip: "提示", warning: "警告", danger: "危险" }[type] ?? type);
     return `<div class="admonition ${type}"><div class="admonition-title">${escapeHtml(title)}</div><div class="admonition-body">${parse(body)}</div></div>`;
   };
 }
@@ -326,6 +326,7 @@ const blockRenderers: Record<string, BlockRenderer> = {
   gallery: renderGallery,
   "video-gallery": renderVideoGallery,
   note: renderAdmonition("note"),
+  info: renderAdmonition("info"),
   tip: renderAdmonition("tip"),
   warning: renderAdmonition("warning"),
   danger: renderAdmonition("danger"),
@@ -446,7 +447,7 @@ export function registerMarkedExtensions(marked: typeof Marked) {
         name: "admonitionBangBlock",
         level: "block" as const,
         start(src: string) {
-          return src.match(/^!!!\s*(?:note|tip|warning|danger)\b/m)?.index;
+          return src.match(/^!!!\s*(?:note|info|tip|warning|danger)\b/m)?.index;
         },
         tokenizer(src: string) {
           const block = matchAdmonitionBlock(src);

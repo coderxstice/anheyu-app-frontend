@@ -124,7 +124,7 @@ export interface TakedownArticleRequest {
 // ===================================
 
 export interface BatchDeleteRequest {
-  article_ids: string[];
+  ids: string[];
 }
 
 export interface ExportArticlesRequest {

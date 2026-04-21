@@ -101,6 +101,17 @@ export function useDeleteArticle() {
   });
 }
 
+export function useBatchDeleteArticles() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (articleIds: string[]) => postManagementApi.batchDeleteArticles(articleIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: postManagementKeys.lists(), refetchType: "all" });
+    },
+  });
+}
+
 export function useImportArticles() {
   const queryClient = useQueryClient();
 
