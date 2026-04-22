@@ -3,7 +3,13 @@ import { useRouter } from "next/navigation";
 import { addToast, useDisclosure } from "@heroui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { useAdminArticles, useDeleteArticle, useBatchDeleteArticles, useImportArticles } from "@/hooks/queries/use-post-management";
+import {
+  useAdminArticles,
+  useDeleteArticle,
+  useBatchDeleteArticles,
+  useExportArticles,
+  useImportArticles,
+} from "@/hooks/queries/use-post-management";
 import { articleApi } from "@/lib/api/article";
 import type { AdminArticle, AdminArticleListParams, ArticleStatus, ReviewStatus } from "@/types/post-management";
 import { useSiteConfigStore } from "@/store/site-config-store";
@@ -73,6 +79,7 @@ export function usePostManagementPage() {
   // ---- Mutations ----
   const deleteArticle = useDeleteArticle();
   const batchDeleteArticles = useBatchDeleteArticles();
+  const exportArticles = useExportArticles();
   const importArticlesHook = useImportArticles();
 
   // ---- 选择逻辑 ----
@@ -127,6 +134,22 @@ export function usePostManagementPage() {
     }
     batchDeleteModal.onClose();
   }, [selectedIds, batchDeleteArticles, batchDeleteModal]);
+
+  // ---- 导出 ----
+  const exportArticlesAsync = exportArticles.mutateAsync;
+  const handleExport = useCallback(async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) {
+      addToast({ title: "请先选择要导出的文章", color: "warning", timeout: 3000 });
+      return;
+    }
+    try {
+      await exportArticlesAsync(ids);
+      addToast({ title: `已导出 ${ids.length} 篇文章`, color: "success", timeout: 3000 });
+    } catch (error) {
+      addToast({ title: error instanceof Error ? error.message : "导出失败", color: "danger", timeout: 3000 });
+    }
+  }, [selectedIds, exportArticlesAsync]);
 
   // ---- 行操作分发 ----
   const handleAction = useCallback(
@@ -204,7 +227,9 @@ export function usePostManagementPage() {
     handleDeleteConfirm,
     handleBatchDeleteConfirm,
 
-    // 导入
+    // 导出 & 导入
+    exportArticles,
+    handleExport,
     importModal,
     importArticlesHook,
 

@@ -17,7 +17,7 @@ import {
 } from "@heroui/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, lazy, Suspense } from "react";
-import { Plus, Upload, Trash2, ShieldAlert, ChevronDown, FileText, Tags } from "lucide-react";
+import { Plus, Upload, Download, Trash2, ShieldAlert, ChevronDown, FileText, Tags } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const PostCategoryTagManager = lazy(() => import("@/components/admin/post-management/PostCategoryTagManager"));
@@ -259,6 +259,13 @@ export default function PostManagementPage() {
           <FloatingSelectionBar
             count={pm.selectedIds.size}
             actions={[
+              {
+                key: "export",
+                label: "导出",
+                icon: <Download className="w-3.5 h-3.5" />,
+                onClick: pm.handleExport,
+                disabled: pm.exportArticles.isPending,
+              },
               {
                 key: "delete",
                 label: "删除",

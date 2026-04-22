@@ -112,6 +112,29 @@ export function useBatchDeleteArticles() {
   });
 }
 
+/**
+ * 导出文章（成功后触发浏览器下载 ZIP）
+ */
+export function useExportArticles() {
+  return useMutation({
+    mutationFn: (articleIds: string[]) => postManagementApi.exportArticles(articleIds),
+    onSuccess: blob => {
+      const url = URL.createObjectURL(blob);
+      try {
+        const timestamp = new Date().toISOString().replace(/[-:.]/g, "").slice(0, 15);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `articles-export-${timestamp}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    },
+  });
+}
+
 export function useImportArticles() {
   const queryClient = useQueryClient();
 
