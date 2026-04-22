@@ -3,7 +3,7 @@
  * 对接 anheyu-app 后端 /api/articles 接口
  */
 
-import { apiClient } from "./client";
+import { apiClient, axiosInstance } from "./client";
 import type {
   AdminArticle,
   AdminArticleListParams,
@@ -11,6 +11,7 @@ import type {
   BatchDeleteRequest,
   CreateArticleRequest,
   UpdateArticleRequest,
+  ExportArticlesRequest,
   ImportArticlesParams,
   ImportArticlesResult,
   ArticleDetailForEdit,
@@ -141,6 +142,19 @@ export const postManagementApi = {
     }
 
     throw new Error(response.message || "上传图片失败");
+  },
+
+  /**
+   * 导出文章（返回 ZIP Blob）
+   * POST /api/articles/export
+   */
+  async exportArticles(articleIds: string[]): Promise<Blob> {
+    const response = await axiosInstance.post(
+      "/api/articles/export",
+      { article_ids: articleIds } as ExportArticlesRequest,
+      { responseType: "blob" }
+    );
+    return response.data;
   },
 
   /**
