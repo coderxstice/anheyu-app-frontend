@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import parse from "html-react-parser";
 import "./globals.css";
 import { Providers } from "@/providers";
+import { renderCustomBodyHtml, renderCustomHeadHtml } from "@/lib/custom-html";
 import {
   buildWebSiteJsonLd,
   createRobotsMetadata,
@@ -124,7 +124,7 @@ export default async function RootLayout({
         )}
         {customCss && <style id="anheyu-custom-css" dangerouslySetInnerHTML={{ __html: customCss }} />}
         {customJs && <script id="anheyu-custom-js" dangerouslySetInnerHTML={{ __html: customJs }} />}
-        {customHeaderHtml && <>{parse(customHeaderHtml)}</>}
+        {renderCustomHeadHtml(customHeaderHtml)}
       </head>
       <body className="antialiased min-h-screen flex flex-col">
         {/* 初始加载动画 - 纯 CSS + SVG，JS 加载前就显示，样式在 globals.css */}
@@ -136,7 +136,7 @@ export default async function RootLayout({
           <span className="sr-only">页面加载中</span>
         </div>
         <Providers>{children}</Providers>
-        {customFooterHtml && <>{parse(customFooterHtml)}</>}
+        {renderCustomBodyHtml(customFooterHtml)}
       </body>
     </html>
   );
