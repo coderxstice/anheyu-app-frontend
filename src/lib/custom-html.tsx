@@ -1,10 +1,16 @@
 import type { ReactNode } from "react";
-import parse, { type DOMNode, Element } from "html-react-parser";
+import type { Element as DomElement } from "domhandler";
+import { ElementType, isTag } from "domelementtype";
+import parse, { type DOMNode } from "html-react-parser";
 
 // 允许出现在 <head> 中的标签集合。
 // 管理员配置 CUSTOM_HEADER_HTML 时，非白名单标签会被静默过滤，
 // 避免攻击者借助错放到 head 的节点（如 iframe）形成滥用。
 const HEAD_ALLOWED_TAGS = new Set(["meta", "link", "script", "style", "base", "title", "noscript"]);
+
+// 这些 head 标签的子节点应为原始文本（CSS/JS/标题），不能用空节点替换，
+// 否则 html-react-parser 的 replace 会把 <style> 内文本当成「多余节点」清空。
+const HEAD_TAGS_WITH_RAW_TEXT_CHILD = new Set(["style", "script", "title", "noscript"]);
 
 // body 末尾（footer 注入）禁止的事件属性；全部事件 handler 一律拒绝，
 // 避免管理员配置被绕过时直接 on* 注入执行任意脚本。
@@ -38,8 +44,19 @@ export function renderCustomHeadHtml(html: string): ReactNode {
   return parse(normalizedHtml, {
     trim: true,
     replace(domNode: DOMNode) {
-      if (domNode instanceof Element && domNode.type === "tag") {
-        return HEAD_ALLOWED_TAGS.has(domNode.name) ? undefined : <></>;
+      // 使用 isTag / type 判别，避免 instanceof 与解析器实际节点类不一致（双份 domhandler 时全被丢弃）
+      if (isTag(domNode)) {
+        const el = domNode as DomElement;
+        return HEAD_ALLOWED_TAGS.has(el.name) ? undefined : <></>;
+      }
+      if (domNode.type === ElementType.Text) {
+        const parent = domNode.parent;
+        if (parent && isTag(parent)) {
+          const p = parent as DomElement;
+          if (HEAD_TAGS_WITH_RAW_TEXT_CHILD.has(p.name)) {
+            return undefined;
+          }
+        }
       }
       return <></>;
     },
@@ -63,10 +80,10 @@ export function renderCustomBodyHtml(html: string): ReactNode {
   return parse(normalizedHtml, {
     trim: false,
     replace(domNode: DOMNode) {
-      if (!(domNode instanceof Element) || domNode.type !== "tag") {
+      if (!isTag(domNode)) {
         return;
       }
-      const attribs = domNode.attribs;
+      const attribs = (domNode as DomElement).attribs;
       if (!attribs) {
         return;
       }

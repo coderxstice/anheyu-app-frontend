@@ -10,6 +10,12 @@ import {
   resolveSeoSiteInfo,
 } from "@/lib/seo";
 
+// Next.js 16 默认会尝试将 root layout 静态化（即使 fetch 带 cache:"no-store"，
+// 也只是跳过 Data Cache，不会让整个路由 shell 转为 dynamic）。
+// 自定义 HTML/CSS/JS、站点名、logo 等必须在 admin 保存后立即生效，
+// 所以显式把根布局声明为 dynamic，使每次请求都重新读取最新站点配置。
+export const dynamic = "force-dynamic";
+
 /**
  * 动态生成 Metadata
  * 从后端 API 获取站点配置，实现 SEO 动态化
