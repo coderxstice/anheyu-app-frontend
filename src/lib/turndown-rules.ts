@@ -1,7 +1,7 @@
 /**
  * TurndownService 自定义规则
  * 将自定义 HTML 组件转换为对应的 Markdown 语法
- * 语法规范：块级 :::tagName params ... :::（通用）；!!!note|tip|warning|danger ... !!!（提示框），行内 {tagName params}content{/tagName}
+ * 语法规范：块级 :::tagName params ... :::（通用）；!!!note|info|tip|success|warning|danger ... !!!（提示框），行内 {tagName params}content{/tagName}
  */
 import type TurndownService from "turndown";
 
@@ -541,7 +541,7 @@ export function registerCustomRules(td: TurndownService) {
     replacement: (_content, node) => {
       const el = node as HTMLElement;
       let adType = "note";
-      for (const t of ["note", "info", "tip", "warning", "danger"]) {
+      for (const t of ["note", "info", "tip", "success", "warning", "danger"]) {
         if (el.classList.contains(t)) {
           adType = t;
           break;
