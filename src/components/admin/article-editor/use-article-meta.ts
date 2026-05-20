@@ -156,6 +156,7 @@ export function useArticleMeta(
       top_img_url: meta.top_img_url || undefined,
       summaries: summariesForSubmit.length > 0 ? summariesForSubmit : undefined,
       keywords: meta.keywords || undefined,
+      ip_location: meta.ip_location.trim() || undefined,
       abbrlink: meta.abbrlink || undefined,
       show_on_home: meta.show_on_home,
       home_sort: meta.home_sort,
