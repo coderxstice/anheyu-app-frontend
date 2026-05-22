@@ -49,6 +49,11 @@ export function FilteredArticleList({ filterType, filterValue, page = 1, onPageC
   const feedItems = useMemo(() => data?.list || [], [data]);
   const total = data?.total || 0;
   const totalPages = Math.ceil(total / pageSize);
+  const skeletonCount = Math.min(Math.max(pageSize, 6), 12);
+  const listStateClassName = cn(
+    styles.feedArticleList,
+    (isLoading || isError || feedItems.length === 0) && styles.feedArticleListStable
+  );
 
   const handlePageChange = useCallback(
     (nextPage: number) => {
@@ -68,9 +73,9 @@ export function FilteredArticleList({ filterType, filterValue, page = 1, onPageC
 
   if (isLoading) {
     return (
-      <div className={styles.feedArticleList}>
+      <div className={listStateClassName}>
         <div className={cn(styles.articleList, isDoubleColumn && styles.doubleColumnContainer)}>
-          {Array.from({ length: 6 }).map((_, index) => (
+          {Array.from({ length: skeletonCount }).map((_, index) => (
             <div key={index} className={cn(styles.skeletonCard, isDoubleColumn && styles.skeletonCardDouble)}>
               <div className={styles.skeletonCover} />
               <div className={styles.skeletonContent}>
@@ -87,7 +92,7 @@ export function FilteredArticleList({ filterType, filterValue, page = 1, onPageC
 
   if (isError) {
     return (
-      <div className={styles.feedArticleList}>
+      <div className={listStateClassName}>
         <div className={styles.errorState}>
           <FaTriangleExclamation aria-hidden="true" />
           <p>加载文章列表失败，请稍后重试</p>
@@ -98,7 +103,7 @@ export function FilteredArticleList({ filterType, filterValue, page = 1, onPageC
 
   if (feedItems.length === 0) {
     return (
-      <div className={styles.feedArticleList}>
+      <div className={listStateClassName}>
         <div className={styles.emptyState}>
           <FaFileLines aria-hidden="true" />
           <p>暂无文章</p>

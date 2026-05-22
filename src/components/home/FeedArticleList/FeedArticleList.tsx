@@ -42,6 +42,11 @@ export function FeedArticleList({ category, tag, pageSize: propPageSize }: FeedA
   const articles = useMemo(() => data?.list || [], [data]);
   const total = data?.total || 0;
   const totalPages = Math.ceil(total / pageSize);
+  const skeletonCount = Math.min(Math.max(pageSize, 6), 12);
+  const listStateClassName = cn(
+    styles.feedArticleList,
+    (isLoading || isError || articles.length === 0) && styles.feedArticleListStable
+  );
 
   // 判断是否是最新文章（第一页第一条）
   const isNewest = (index: number) => currentPage === 1 && index === 0;
@@ -58,9 +63,9 @@ export function FeedArticleList({ category, tag, pageSize: propPageSize }: FeedA
   // 加载状态 - 骨架屏
   if (isLoading) {
     return (
-      <div className={styles.feedArticleList}>
+      <div className={listStateClassName}>
         <div className={cn(styles.articleList, isDoubleColumn && styles.doubleColumnContainer)}>
-          {Array.from({ length: 6 }).map((_, index) => (
+          {Array.from({ length: skeletonCount }).map((_, index) => (
             <div key={index} className={cn(styles.skeletonCard, isDoubleColumn && styles.skeletonCardDouble)}>
               <div className={styles.skeletonCover} />
               <div className={styles.skeletonContent}>
@@ -78,7 +83,7 @@ export function FeedArticleList({ category, tag, pageSize: propPageSize }: FeedA
   // 错误状态
   if (isError) {
     return (
-      <div className={styles.feedArticleList}>
+      <div className={listStateClassName}>
         <div className={styles.errorState}>
           <FaTriangleExclamation aria-hidden="true" />
           <p>加载文章列表失败，请稍后重试</p>
@@ -90,7 +95,7 @@ export function FeedArticleList({ category, tag, pageSize: propPageSize }: FeedA
   // 空状态
   if (articles.length === 0) {
     return (
-      <div className={styles.feedArticleList}>
+      <div className={listStateClassName}>
         <div className={styles.emptyState}>
           <FaFileLines aria-hidden="true" />
           <p>暂无文章</p>

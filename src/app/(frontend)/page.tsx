@@ -7,12 +7,18 @@
  */
 import type { Metadata } from "next";
 import { HomePageContent } from "@/components/home";
-import { buildPageMetadata } from "@/lib/seo";
+import { buildPageMetadata, fetchSiteConfigForSeo, resolveSeoSiteInfo } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
+  const siteConfig = await fetchSiteConfigForSeo();
+  const site = resolveSeoSiteInfo(siteConfig);
+  const homepageTitle = site.description ? `${site.siteName} - ${site.description}` : site.siteName;
+
   return buildPageMetadata({
-    title: "首页",
+    title: homepageTitle,
     path: "/",
+    absoluteTitle: true,
+    siteConfig,
   });
 }
 
