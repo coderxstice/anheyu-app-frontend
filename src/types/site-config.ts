@@ -193,6 +193,7 @@ export interface SiteConfigData {
 
   // 外部链接跳转提醒
   ENABLE_EXTERNAL_LINK_WARNING?: boolean;
+  DISABLE_RIGHT_MENU?: boolean | string;
 
   // 创意图标配置
   CREATIVITY?: {
