@@ -12,6 +12,7 @@ import { addToast } from "@heroui/react";
 import { useUiStore } from "@/store/ui-store";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import { useTheme } from "@/hooks/use-theme";
+import { shouldUseSiteRightMenu } from "./right-menu-policy";
 import styles from "./styles.module.css";
 
 /**
@@ -33,6 +34,7 @@ export function RightMenu() {
   const isCommentBarrageVisible = useUiStore(s => s.isCommentBarrageVisible);
   const toggleCommentBarrage = useUiStore(s => s.toggleCommentBarrage);
   const siteConfig = useSiteConfigStore(s => s.siteConfig);
+  const isRightMenuDisabled = useSiteConfigStore(s => s.isRightMenuDisabled());
 
   const [isVisible, setIsVisible] = useState(false);
   const [isHiding, setIsHiding] = useState(false);
@@ -55,6 +57,7 @@ export function RightMenu() {
     useCustomContextMenu,
     pathname,
     siteConfig,
+    isRightMenuDisabled,
   });
 
   // 同步 ref（放在 useEffect 中避免 lint 警告）
@@ -63,8 +66,8 @@ export function RightMenu() {
   }, [isVisible]);
 
   useEffect(() => {
-    stateRef.current = { useCustomContextMenu, pathname, siteConfig };
-  }, [useCustomContextMenu, pathname, siteConfig]);
+    stateRef.current = { useCustomContextMenu, pathname, siteConfig, isRightMenuDisabled };
+  }, [useCustomContextMenu, pathname, siteConfig, isRightMenuDisabled]);
 
   // 隐藏菜单（用 ref 读取 isVisible，避免 stale closure）
   const hideMenu = useCallback(() => {
@@ -120,10 +123,17 @@ export function RightMenu() {
   // 全局事件监听 - 注册一次，通过 ref 读取最新状态
   useEffect(() => {
     const handleContextMenu = (event: MouseEvent) => {
-      const { useCustomContextMenu: enabled, pathname: path } = stateRef.current;
-      if (!enabled) return;
-      if (path.startsWith("/doc/")) return;
-      if (window.innerWidth < 768) return;
+      const { useCustomContextMenu: enabled, pathname: path, isRightMenuDisabled: disabled } = stateRef.current;
+      if (
+        !shouldUseSiteRightMenu({
+          localEnabled: enabled,
+          siteDisabled: disabled,
+          pathname: path,
+          viewportWidth: window.innerWidth,
+        })
+      ) {
+        return;
+      }
 
       event.preventDefault();
 
