@@ -101,31 +101,28 @@ function loadImageElement(url: string, crossOrigin: boolean): Promise<HTMLImageE
 }
 
 /**
- * 加载图片时统一转为 Blob URL 后绘制，避免复用无 CORS 图片缓存或代理链路差异导致 Canvas 被污染。
+ * 加载图片时统一转为 Blob URL 后绘制。
+ * 跨域图只走同源代理；代理或 fetch 失败时交给调用方降级占位，避免回退到远程 img 后污染 Canvas。
  */
 async function loadImage(url: string): Promise<HTMLImageElement> {
   const resolvedUrl = rewriteCrossOriginImageUrlForPosterCanvas(url);
 
   if (!isInlineImageUrl(resolvedUrl)) {
+    const fetchMode: RequestMode = shouldSetCrossOriginForImageLoad(resolvedUrl) ? "cors" : "same-origin";
+    const res = await fetch(resolvedUrl, {
+      mode: fetchMode,
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      throw new Error(`Image fetch failed: ${res.status}`);
+    }
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
     try {
-      const fetchMode: RequestMode = shouldSetCrossOriginForImageLoad(resolvedUrl) ? "cors" : "same-origin";
-      const res = await fetch(resolvedUrl, {
-        mode: fetchMode,
-        credentials: "same-origin",
-        cache: "no-store",
-      });
-      if (!res.ok) {
-        throw new Error(`Image fetch failed: ${res.status}`);
-      }
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      try {
-        return await loadImageElement(blobUrl, false);
-      } finally {
-        URL.revokeObjectURL(blobUrl);
-      }
-    } catch {
-      // 兜底保留原 img 加载路径；正常代理路径应优先走上面的 Blob 绘制。
+      return await loadImageElement(blobUrl, false);
+    } finally {
+      URL.revokeObjectURL(blobUrl);
     }
   }
 

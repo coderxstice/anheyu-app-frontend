@@ -482,6 +482,8 @@ export const KEY_WECHAT_SHARE_APP_ID = "wechat.share.app_id";
 export const KEY_WECHAT_SHARE_APP_SECRET = "wechat.share.app_secret";
 
 // ==================== AI 配置 (PRO) ====================
+export const KEY_AI_PROFILES = "ai_profiles";
+export const KEY_AI_DEFAULT_PROFILE_ID = "ai_default_profile_id";
 export const KEY_AI_SUMMARY_PROVIDER = "ai_summary_provider";
 export const KEY_AI_SUMMARY_API_KEY = "ai_summary_api_key";
 export const KEY_AI_SUMMARY_API_URL = "ai_summary_api_url";

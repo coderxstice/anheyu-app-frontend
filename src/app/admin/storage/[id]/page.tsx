@@ -15,6 +15,7 @@ import { TencentCosForm } from "@/components/admin/storage/TencentCosForm";
 import { AliyunOssForm } from "@/components/admin/storage/AliyunOssForm";
 import { AwsS3Form } from "@/components/admin/storage/AwsS3Form";
 import { QiniuKodoForm } from "@/components/admin/storage/QiniuKodoForm";
+import { UpyunForm } from "@/components/admin/storage/UpyunForm";
 
 // ===================================
 // 大小单位换算
@@ -59,6 +60,7 @@ const STORAGE_TYPE_OPTIONS = [
   { key: "aliyun_oss", label: "阿里云OSS" },
   { key: "aws_s3", label: "AWS S3" },
   { key: "qiniu_kodo", label: "七牛云存储" },
+  { key: "upyun", label: "又拍云存储" },
 ];
 
 // ===================================
@@ -72,6 +74,7 @@ const PROVIDER_FORMS: Record<StoragePolicyType, typeof LocalForm> = {
   aliyun_oss: AliyunOssForm,
   aws_s3: AwsS3Form,
   qiniu_kodo: QiniuKodoForm,
+  upyun: UpyunForm,
 };
 
 // ===================================

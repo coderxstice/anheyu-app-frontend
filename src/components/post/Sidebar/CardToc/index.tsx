@@ -100,6 +100,11 @@ function getHeadingElement(item: TocItem, headings: HTMLElement[]): HTMLElement 
   return element instanceof HTMLElement ? element : null;
 }
 
+function findTocElementById(container: HTMLElement, activeId: string): HTMLElement | null {
+  const items = container.querySelectorAll<HTMLElement>("[data-id]");
+  return Array.from(items).find(item => item.dataset.id === activeId) ?? null;
+}
+
 /**
  * 计算当前激活的标题 ID
  * 基于滚动位置和标题元素位置
@@ -169,7 +174,7 @@ export function CardToc({ contentHtml, collapseMode = false }: CardTocProps) {
   const updateIndicator = useCallback(() => {
     if (!tocContainerRef.current || !indicatorRef.current) return;
 
-    const activeElement = tocContainerRef.current.querySelector(`[data-id="${activeId}"]`) as HTMLElement;
+    const activeElement = findTocElementById(tocContainerRef.current, activeId);
     if (activeElement) {
       const indicatorHeight = activeElement.offsetHeight / 2;
       const topOffset = activeElement.offsetTop + (activeElement.offsetHeight - indicatorHeight) / 2;
@@ -185,7 +190,7 @@ export function CardToc({ contentHtml, collapseMode = false }: CardTocProps) {
   useEffect(() => {
     if (!activeId || !tocContainerRef.current) return;
 
-    const activeElement = tocContainerRef.current.querySelector(`[data-id="${activeId}"]`);
+    const activeElement = findTocElementById(tocContainerRef.current, activeId);
     if (activeElement) {
       activeElement.scrollIntoView({
         behavior: "smooth",
