@@ -113,4 +113,44 @@ describe("generatePoster", () => {
     expect(imageElementProxyLoads).toEqual([]);
     expect(loadedImageSources).toContain("data:image/png;base64,qr");
   });
+
+  it("代理失败时仍可用 CORS 读取真实跨域封面生成海报", async () => {
+    const coverUrl = "https://resources.olei.me/iicats/1778299161243386156.png";
+    const createObjectURLSpy = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:poster-cover");
+    const revokeObjectURLSpy = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async input => {
+        const requestedUrl = String(input);
+        if (requestedUrl.includes("/api/proxy/download?")) {
+          throw new TypeError("proxy unavailable");
+        }
+        if (requestedUrl === coverUrl) {
+          return new Response(new Blob(["png"], { type: "image/png" }), {
+            status: 200,
+            headers: { "Content-Type": "image/png" },
+          });
+        }
+        throw new Error(`unexpected fetch: ${requestedUrl}`);
+      })
+    );
+
+    await expect(
+      generatePoster({
+        title: "真实跨域封面海报",
+        description: "代理链失败时，带 CORS 的远程图片仍应能生成海报。",
+        author: "作者",
+        articleUrl: "https://iicats.com/posts/CX9R",
+        coverImage: coverUrl,
+      })
+    ).resolves.toBe("data:image/png;base64,poster");
+
+    expect(fetch).toHaveBeenCalledWith(expect.stringContaining("/api/proxy/download?url="), expect.any(Object));
+    expect(fetch).toHaveBeenCalledWith(coverUrl, expect.objectContaining({ mode: "cors" }));
+    expect(loadedImageSources).not.toContain(coverUrl);
+    expect(loadedImageSources).toContain("blob:poster-cover");
+    expect(createObjectURLSpy).toHaveBeenCalled();
+    expect(revokeObjectURLSpy).toHaveBeenCalledWith("blob:poster-cover");
+  });
 });

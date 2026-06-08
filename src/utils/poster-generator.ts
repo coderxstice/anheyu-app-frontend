@@ -44,47 +44,46 @@ function isInlineImageUrl(url: string): boolean {
   return url.startsWith("data:") || url.startsWith("blob:");
 }
 
-function shouldSetCrossOriginForImageLoad(url: string): boolean {
-  if (typeof window === "undefined") {
-    return true;
-  }
-  if (isInlineImageUrl(url)) {
-    return false;
-  }
-  try {
-    const resolved = new URL(url, window.location.href);
-    return resolved.origin !== window.location.origin;
-  } catch {
-    return true;
-  }
-}
+type ImageFetchCandidate = {
+  url: string;
+  mode: RequestMode;
+  credentials: RequestCredentials;
+};
 
 /**
- * 将跨域 HTTP(S) 图片改走本站 /api/proxy/download，避免第三方未返回 CORS 头导致 Canvas 污染、头像/封面无法绘制。
- * data:、blob:、同源 URL 保持原样；已是代理地址时不重复包装。
+ * 为海报图片构造 fetch 候选。
+ * 跨域 HTTP(S) 图优先走本站代理；代理不可用时再尝试 CORS 直取，覆盖图床本身已开放 CORS 的场景。
  */
-function rewriteCrossOriginImageUrlForPosterCanvas(imageUrl: string): string {
-  if (typeof window === "undefined") {
-    return imageUrl;
-  }
+function getImageFetchCandidates(imageUrl: string): ImageFetchCandidate[] {
   const trimmed = imageUrl.trim();
   if (trimmed === "" || isInlineImageUrl(trimmed)) {
-    return imageUrl;
+    return [];
   }
-  if (trimmed.includes("/api/proxy/download?")) {
-    return imageUrl;
+  if (typeof window === "undefined") {
+    return [{ url: trimmed, mode: "cors", credentials: "omit" }];
   }
+
   try {
-    const resolved = new URL(imageUrl, window.location.href);
+    const resolved = new URL(trimmed, window.location.href);
     if (resolved.origin === window.location.origin) {
-      return imageUrl;
+      return [{ url: trimmed, mode: "same-origin", credentials: "same-origin" }];
     }
     if (resolved.protocol !== "http:" && resolved.protocol !== "https:") {
-      return imageUrl;
+      return [{ url: trimmed, mode: "cors", credentials: "omit" }];
     }
-    return `/api/proxy/download?url=${encodeURIComponent(resolved.href)}`;
+
+    const candidates: ImageFetchCandidate[] = [];
+    if (!trimmed.includes("/api/proxy/download?")) {
+      candidates.push({
+        url: `/api/proxy/download?url=${encodeURIComponent(resolved.href)}`,
+        mode: "same-origin",
+        credentials: "same-origin",
+      });
+    }
+    candidates.push({ url: resolved.href, mode: "cors", credentials: "omit" });
+    return candidates;
   } catch {
-    return imageUrl;
+    return [{ url: trimmed, mode: "cors", credentials: "omit" }];
   }
 }
 
@@ -102,31 +101,44 @@ function loadImageElement(url: string, crossOrigin: boolean): Promise<HTMLImageE
 
 /**
  * 加载图片时统一转为 Blob URL 后绘制。
- * 跨域图只走同源代理；代理或 fetch 失败时交给调用方降级占位，避免回退到远程 img 后污染 Canvas。
+ * 代理与 CORS 直取都失败时交给调用方降级占位，避免回退到远程 img 后污染 Canvas。
  */
 async function loadImage(url: string): Promise<HTMLImageElement> {
-  const resolvedUrl = rewriteCrossOriginImageUrlForPosterCanvas(url);
+  const trimmed = url.trim();
 
-  if (!isInlineImageUrl(resolvedUrl)) {
-    const fetchMode: RequestMode = shouldSetCrossOriginForImageLoad(resolvedUrl) ? "cors" : "same-origin";
-    const res = await fetch(resolvedUrl, {
-      mode: fetchMode,
-      credentials: "same-origin",
-      cache: "no-store",
-    });
-    if (!res.ok) {
-      throw new Error(`Image fetch failed: ${res.status}`);
+  if (!isInlineImageUrl(trimmed)) {
+    const candidates = getImageFetchCandidates(trimmed);
+    let lastError: unknown;
+
+    for (const candidate of candidates) {
+      try {
+        const res = await fetch(candidate.url, {
+          mode: candidate.mode,
+          credentials: candidate.credentials,
+          cache: "no-store",
+        });
+        if (!res.ok) {
+          throw new Error(`Image fetch failed: ${res.status}`);
+        }
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        try {
+          return await loadImageElement(blobUrl, false);
+        } finally {
+          URL.revokeObjectURL(blobUrl);
+        }
+      } catch (error) {
+        lastError = error;
+      }
     }
-    const blob = await res.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    try {
-      return await loadImageElement(blobUrl, false);
-    } finally {
-      URL.revokeObjectURL(blobUrl);
+
+    if (lastError instanceof Error) {
+      throw lastError;
     }
+    throw new Error(`Image load failed: ${trimmed}`);
   }
 
-  return loadImageElement(resolvedUrl, shouldSetCrossOriginForImageLoad(resolvedUrl));
+  return loadImageElement(trimmed, false);
 }
 
 /**
