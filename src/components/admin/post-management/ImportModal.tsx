@@ -2,7 +2,7 @@
 
 import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, addToast } from "@heroui/react";
-import { Upload, FileText } from "lucide-react";
+import { ChevronDown, FileText, Info, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { useImportArticles } from "@/hooks/queries/use-post-management";
 
@@ -15,6 +15,7 @@ interface ImportModalProps {
 export function ImportModal({ isOpen, onOpenChange, onImport }: ImportModalProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isFormatHelpOpen, setIsFormatHelpOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isSupportedFile = (nextFile: File) => {
@@ -88,7 +89,7 @@ export function ImportModal({ isOpen, onOpenChange, onImport }: ImportModalProps
   };
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur" placement="center">
+    <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur" placement="center" size="lg" scrollBehavior="inside">
       <ModalContent>
         {onClose => (
           <>
@@ -104,6 +105,60 @@ export function ImportModal({ isOpen, onOpenChange, onImport }: ImportModalProps
               </div>
             </ModalHeader>
             <ModalBody>
+              <div className="rounded-xl border border-primary/15 bg-primary-50/30 dark:bg-primary-900/10">
+                <button
+                  type="button"
+                  onClick={() => setIsFormatHelpOpen(open => !open)}
+                  className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+                >
+                  <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <Info className="h-4 w-4 text-primary" />
+                    查看导入格式
+                  </span>
+                  <ChevronDown
+                    className={cn(
+                      "h-4 w-4 text-muted-foreground transition-transform",
+                      isFormatHelpOpen ? "rotate-180" : ""
+                    )}
+                  />
+                </button>
+                {isFormatHelpOpen && (
+                  <div className="space-y-4 border-t border-primary/10 px-4 pb-4 pt-3 text-xs leading-5 text-muted-foreground">
+                    <div>
+                      <p className="font-medium text-foreground">支持文件</p>
+                      <p>可上传系统导出的 ZIP 包，或直接上传 ZIP 内的 articles.json。</p>
+                      <p>ZIP 根目录必须包含 articles.json；markdown/ 目录只作为阅读备份，导入时不会单独解析 Markdown 文件。</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">JSON 顶层结构</p>
+                      <pre className="mt-2 max-h-36 overflow-auto rounded-lg bg-muted/60 p-3 text-[11px] text-foreground">
+{`{
+  "version": "1.0",
+  "export_at": "2026-06-08T12:00:00Z",
+  "articles": [
+    {
+      "title": "文章标题",
+      "content_md": "Markdown 正文",
+      "content_html": "<p>HTML 正文</p>",
+      "status": "DRAFT"
+    }
+  ],
+  "meta": {}
+}`}
+                      </pre>
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">文章字段</p>
+                      <p>必填建议包含 title、content_md、content_html；status 可为 DRAFT、PUBLISHED、ARCHIVED 或 SCHEDULED，缺省时按草稿导入。</p>
+                      <p>可选字段包括 categories、tags、summaries、cover_url、top_img_url、abbrlink、keywords、home_sort、pin_sort、copyright、is_reprint、copyright_author、copyright_author_href、copyright_url。</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">导入策略</p>
+                      <p>默认自动创建不存在的分类和标签，并按 abbrlink 或标题跳过已存在文章。</p>
+                    </div>
+                  </div>
+                )}
+              </div>
               <input
                 ref={fileInputRef}
                 type="file"
