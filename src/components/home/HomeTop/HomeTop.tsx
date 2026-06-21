@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
 import { addToast } from "@heroui/react";
 import { cn } from "@/lib/utils";
+import { CreativityIcon } from "@/components/ui/creativity-icon";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import { articleApi } from "@/lib/api/article";
 
@@ -14,6 +15,33 @@ import styles from "./HomeTop.module.css";
 
 // 按需加载 Lottie 组件 - 仅当 banner.image 为空时才加载
 const HelloLottie = lazy(() => import("./HelloLottie").then(mod => ({ default: mod.HelloLottie })));
+
+const CATEGORY_FALLBACK_BACKGROUNDS = [
+  "linear-gradient(135deg, #358bff 0%, #15c6ff 100%)",
+  "linear-gradient(135deg, #ff6b6b 0%, #feca57 100%)",
+  "linear-gradient(135deg, #22c55e 0%, #14b8a6 100%)",
+  "linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)",
+];
+
+const IMAGE_BACKGROUND_PATTERN = /^(?:https?:\/\/|\/(?!\/)|\.{1,2}\/|data:image\/)/i;
+
+function escapeCssUrl(url: string) {
+  return url.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+function getCategoryBackground(background: string | undefined, index: number) {
+  const value = background?.trim();
+
+  if (!value) {
+    return CATEGORY_FALLBACK_BACKGROUNDS[index % CATEGORY_FALLBACK_BACKGROUNDS.length];
+  }
+
+  if (IMAGE_BACKGROUND_PATTERN.test(value)) {
+    return `linear-gradient(rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.16)), url("${escapeCssUrl(value)}") center / cover no-repeat`;
+  }
+
+  return value;
+}
 
 interface RecommendedArticle {
   id: number;
@@ -57,6 +85,8 @@ export function HomeTop() {
   const hasRecommendedArticles = recommendedArticles && recommendedArticles.length > 0;
   const hasBanner = homeTopConfig?.banner && homeTopConfig.banner.title;
   const showRightSection = hasRecommendedArticles || hasBanner;
+  const categories = homeTopConfig?.category ?? [];
+  const hasCategories = categories.length > 0;
 
   // 判断是否需要加载 Lottie 组件（仅当 banner.image 为空时）
   const shouldLoadLottie = useMemo(() => {
@@ -110,7 +140,7 @@ export function HomeTop() {
   return (
     <div className={cn(styles.homeTopContainer, !showRightSection && styles.leftOnly)}>
       {/* 左侧区域 */}
-      <div className={cn(styles.leftSection, !showRightSection && styles.fullWidth)}>
+      <div className={cn(styles.leftSection, !showRightSection && styles.fullWidth, !hasCategories && styles.noCategories)}>
         <div className={styles.randomBanner}>
           {/* 标题 */}
           <div className={styles.bannersTitle}>
@@ -125,23 +155,21 @@ export function HomeTop() {
               {creativityPairs.map((pair, index) => (
                 <div key={index} className={styles.tagsGroupIconPair}>
                   <div className={styles.tagsGroupIcon} style={{ background: pair[0].color }}>
-                    <Image
-                      src={pair[0].icon}
+                    <CreativityIcon
+                      icon={pair[0].icon}
                       alt={pair[0].name}
                       title={pair[0].name}
-                      width={60}
-                      height={60}
-                      unoptimized
+                      size={60}
+                      className={styles.creativityIconGraphic}
                     />
                   </div>
                   <div className={styles.tagsGroupIcon} style={{ background: pair[1].color }}>
-                    <Image
-                      src={pair[1].icon}
+                    <CreativityIcon
+                      icon={pair[1].icon}
                       alt={pair[1].name}
                       title={pair[1].name}
-                      width={60}
-                      height={60}
-                      unoptimized
+                      size={60}
+                      className={styles.creativityIconGraphic}
                     />
                   </div>
                 </div>
@@ -160,53 +188,60 @@ export function HomeTop() {
         </div>
 
         {/* 分类按钮 */}
-        <div className={styles.categoryGroup}>
-          {homeTopConfig.category?.map(item => (
-            <div key={item.name} className={styles.categoryItem}>
-              {item.isExternal || /^https?:\/\//.test(item.path) ? (
-                <a
-                  className={styles.categoryButton}
-                  href={item.path}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ background: item.background }}
-                >
-                  <span className={styles.categoryButtonText}>{item.name}</span>
-                  {item.icon &&
-                    (item.icon.startsWith("http") ? (
-                      <Image
-                        src={item.icon}
-                        alt={item.name}
-                        width={80}
-                        height={80}
-                        className={cn(styles.categoryIcon, styles.categoryIconImg)}
-                        unoptimized
-                      />
-                    ) : (
-                      <Icon icon={item.icon} className={styles.categoryIcon} />
-                    ))}
-                </a>
-              ) : (
-                <Link className={styles.categoryButton} href={item.path} prefetch={false} style={{ background: item.background }}>
-                  <span className={styles.categoryButtonText}>{item.name}</span>
-                  {item.icon &&
-                    (item.icon.startsWith("http") ? (
-                      <Image
-                        src={item.icon}
-                        alt={item.name}
-                        width={80}
-                        height={80}
-                        className={cn(styles.categoryIcon, styles.categoryIconImg)}
-                        unoptimized
-                      />
-                    ) : (
-                      <Icon icon={item.icon} className={styles.categoryIcon} />
-                    ))}
-                </Link>
-              )}
-            </div>
-          ))}
-        </div>
+        {hasCategories && (
+          <div className={styles.categoryGroup}>
+            {categories.map((item, index) => (
+              <div key={item.name} className={styles.categoryItem}>
+                {item.isExternal || /^https?:\/\//.test(item.path) ? (
+                  <a
+                    className={styles.categoryButton}
+                    href={item.path}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ background: getCategoryBackground(item.background, index) }}
+                  >
+                    <span className={styles.categoryButtonText}>{item.name}</span>
+                    {item.icon &&
+                      (item.icon.startsWith("http") ? (
+                        <Image
+                          src={item.icon}
+                          alt={item.name}
+                          width={80}
+                          height={80}
+                          className={cn(styles.categoryIcon, styles.categoryIconImg)}
+                          unoptimized
+                        />
+                      ) : (
+                        <Icon icon={item.icon} className={styles.categoryIcon} />
+                      ))}
+                  </a>
+                ) : (
+                  <Link
+                    className={styles.categoryButton}
+                    href={item.path}
+                    prefetch={false}
+                    style={{ background: getCategoryBackground(item.background, index) }}
+                  >
+                    <span className={styles.categoryButtonText}>{item.name}</span>
+                    {item.icon &&
+                      (item.icon.startsWith("http") ? (
+                        <Image
+                          src={item.icon}
+                          alt={item.name}
+                          width={80}
+                          height={80}
+                          className={cn(styles.categoryIcon, styles.categoryIconImg)}
+                          unoptimized
+                        />
+                      ) : (
+                        <Icon icon={item.icon} className={styles.categoryIcon} />
+                      ))}
+                  </Link>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 右侧区域 - 只有有内容时才显示 */}
