@@ -287,6 +287,7 @@ function renderVideoGallery(body: string, params: string): string {
   const styleAttr = style ? ` style="${style}"` : "";
 
   let items = "";
+  let itemCount = 0;
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) continue;
@@ -303,9 +304,12 @@ function renderVideoGallery(body: string, params: string): string {
     const posterAttr = poster ? ` poster="${escapeHtml(poster)}"` : "";
 
     items += `<div class="video-gallery-item"><video controls${posterAttr}><source src="${escapeHtml(url)}" type="${escapeHtml(type)}" /></video>${meta}</div>`;
+    itemCount += 1;
   }
 
-  return `<div class="video-gallery-container video-gallery-cols-${cols}"${styleAttr}>${items}</div>`;
+  const countClass = itemCount > 0 ? ` video-gallery-count-${Math.min(itemCount, 4)}` : "";
+
+  return `<div class="video-gallery-container video-gallery-cols-${cols}${countClass}"${styleAttr}>${items}</div>`;
 }
 
 /** 渲染 Admonition 警告框（!!!note / :::note 等均解析为此 HTML） */

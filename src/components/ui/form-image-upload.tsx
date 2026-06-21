@@ -34,6 +34,8 @@ export interface FormImageUploadProps {
   className?: string;
   /** 接受的文件类型 */
   accept?: string;
+  /** 上传后是否跳过文章图片样式后缀 */
+  disableImageStyle?: boolean;
   /** 是否必填（label 后显示红色星号） */
   isRequired?: boolean;
 }
@@ -54,6 +56,7 @@ const FormImageUpload = React.forwardRef<HTMLDivElement, FormImageUploadProps>(
       hidePreview,
       className,
       accept = "image/*",
+      disableImageStyle,
       isRequired,
     },
     ref
@@ -76,16 +79,29 @@ const FormImageUpload = React.forwardRef<HTMLDivElement, FormImageUploadProps>(
 
     const showPreview = value && !imgError && !hidePreview;
 
+    const isAcceptedImageFile = React.useCallback(
+      (file: File) => {
+        if (file.type.startsWith("image/")) {
+          return true;
+        }
+        return accept
+          .split(",")
+          .map(item => item.trim().toLowerCase())
+          .some(item => item.startsWith(".") && file.name.toLowerCase().endsWith(item));
+      },
+      [accept]
+    );
+
     // 处理文件上传
     const handleFileSelect = React.useCallback(
       async (file: File) => {
-        if (!file.type.startsWith("image/")) {
+        if (!isAcceptedImageFile(file)) {
           addToast({ title: "请选择图片文件", color: "warning" });
           return;
         }
         setUploading(true);
         try {
-          const url = await postManagementApi.uploadArticleImage(file);
+          const url = await postManagementApi.uploadArticleImage(file, { disableImageStyle });
           onValueChange?.(url);
           addToast({ title: "上传成功", color: "success" });
         } catch (err) {
@@ -99,7 +115,7 @@ const FormImageUpload = React.forwardRef<HTMLDivElement, FormImageUploadProps>(
           setUploading(false);
         }
       },
-      [onValueChange]
+      [disableImageStyle, isAcceptedImageFile, onValueChange]
     );
 
     const handleUploadClick = () => {

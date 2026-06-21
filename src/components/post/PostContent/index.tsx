@@ -12,6 +12,7 @@ import { useShallow } from "zustand/shallow";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import { apiClient } from "@/lib/api/client";
 import { useTheme } from "@/hooks/use-theme";
+import { renderKatexInElement } from "@/lib/katex-render";
 
 interface ArticleCopyInfo {
   isReprint?: boolean;
@@ -945,114 +946,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
   // 初始化 KaTeX 数学公式渲染
   const initKatex = useCallback(async () => {
     if (!contentRef.current) return;
-
-    // 查找所有未渲染的 KaTeX 元素（md-editor 格式）
-    const katexInlineElements = contentRef.current.querySelectorAll(".md-editor-katex-inline:not([data-processed])");
-    const katexBlockElements = contentRef.current.querySelectorAll(".md-editor-katex-block:not([data-processed])");
-
-    // 查找 TipTap 编辑器格式的公式元素（通过 data-latex 属性识别）
-    const tiptapBlockElements = contentRef.current.querySelectorAll("[data-type='math-block'][data-latex]:not([data-processed])");
-    const tiptapInlineElements = contentRef.current.querySelectorAll("[data-type='math-inline'][data-latex]:not([data-processed])");
-
-    // 如果没有 md-editor 格式的 KaTeX 元素，尝试处理原始 $...$ 格式
-    const needsRawProcessing =
-      katexInlineElements.length === 0 &&
-      katexBlockElements.length === 0 &&
-      tiptapBlockElements.length === 0 &&
-      tiptapInlineElements.length === 0 &&
-      (contentRef.current.innerHTML.includes("$") ||
-        contentRef.current.innerHTML.includes("\\(") ||
-        contentRef.current.innerHTML.includes("\\["));
-
-    if (
-      katexInlineElements.length === 0 &&
-      katexBlockElements.length === 0 &&
-      tiptapBlockElements.length === 0 &&
-      tiptapInlineElements.length === 0 &&
-      !needsRawProcessing
-    ) {
-      return;
-    }
-
-    // 动态导入 KaTeX 样式和库
-    await import("katex/dist/katex.min.css");
-    const katex = await import("katex").then(m => m.default);
-
-    // 渲染 md-editor 格式的行内公式
-    katexInlineElements.forEach(element => {
-      try {
-        const latex = element.textContent || "";
-        katex.render(latex, element as HTMLElement, {
-          throwOnError: false,
-          displayMode: false,
-        });
-        element.setAttribute("data-processed", "true");
-      } catch (err) {
-        console.warn("KaTeX 行内公式渲染失败:", err);
-      }
-    });
-
-    // 渲染 md-editor 格式的块级公式
-    katexBlockElements.forEach(element => {
-      try {
-        const latex = element.textContent || "";
-        katex.render(latex, element as HTMLElement, {
-          throwOnError: false,
-          displayMode: true,
-        });
-        element.setAttribute("data-processed", "true");
-      } catch (err) {
-        console.warn("KaTeX 块级公式渲染失败:", err);
-      }
-    });
-
-    // 渲染 TipTap 编辑器格式的块级公式
-    tiptapBlockElements.forEach(element => {
-      try {
-        const latex = element.getAttribute("data-latex") || "";
-        if (!latex) return;
-        katex.render(latex, element as HTMLElement, {
-          throwOnError: false,
-          displayMode: true,
-        });
-        element.setAttribute("data-processed", "true");
-      } catch (err) {
-        console.warn("KaTeX TipTap 块级公式渲染失败:", err);
-      }
-    });
-
-    // 渲染 TipTap 编辑器格式的行内公式
-    tiptapInlineElements.forEach(element => {
-      try {
-        const latex = element.getAttribute("data-latex") || "";
-        if (!latex) return;
-        katex.render(latex, element as HTMLElement, {
-          throwOnError: false,
-          displayMode: false,
-        });
-        element.setAttribute("data-processed", "true");
-      } catch (err) {
-        console.warn("KaTeX TipTap 行内公式渲染失败:", err);
-      }
-    });
-
-    // 处理原始 $...$ 和 $$...$$ 格式
-    if (needsRawProcessing) {
-      try {
-        const renderMathInElement = await import("katex/contrib/auto-render").then(m => m.default);
-        renderMathInElement(contentRef.current, {
-          delimiters: [
-            { left: "$$", right: "$$", display: true },
-            { left: "$", right: "$", display: false },
-            { left: "\\[", right: "\\]", display: true },
-            { left: "\\(", right: "\\)", display: false },
-          ],
-          throwOnError: false,
-        });
-      } catch (err) {
-        console.warn("KaTeX auto-render 失败:", err);
-      }
-    }
+    await renderKatexInElement(contentRef.current);
   }, []);
 
   /**
@@ -1611,6 +1505,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     };
 
     const images = currentContent.querySelectorAll<HTMLImageElement>("img[data-src]");
+    let lazyImageObserver: IntersectionObserver | null = null;
     if (images.length > 0) {
       const hasPlaceholder = (el: HTMLImageElement) => (el.getAttribute("src") || "").startsWith("data:image/svg+xml;base64,");
       images.forEach(img => {
@@ -1627,18 +1522,18 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
 
         const stillRemaining = currentContent.querySelectorAll<HTMLImageElement>("img[data-src]");
         if (stillRemaining.length > 0 && "IntersectionObserver" in window) {
-          const observer = new IntersectionObserver(
+          lazyImageObserver = new IntersectionObserver(
             entries => {
               entries.forEach(entry => {
                 if (entry.isIntersecting) {
                   loadImage(entry.target as HTMLImageElement);
-                  observer.unobserve(entry.target);
+                  lazyImageObserver?.unobserve(entry.target);
                 }
               });
             },
             { rootMargin: "300px" }
           );
-          stillRemaining.forEach(img => observer.observe(img));
+          stillRemaining.forEach(img => lazyImageObserver?.observe(img));
         }
       }
     }
@@ -1695,6 +1590,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
       }
       delete window.__musicPlayerToggle;
       delete window.__musicPlayerSeek;
+      lazyImageObserver?.disconnect();
       if (fancyboxModule) {
         fancyboxModule.Fancybox.unbind(currentContent);
         fancyboxModule.Fancybox.close(true);

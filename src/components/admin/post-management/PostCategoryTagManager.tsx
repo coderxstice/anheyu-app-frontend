@@ -63,7 +63,7 @@ export default function PostCategoryTagManager({ isOpen, onClose }: PostCategory
     try {
       await articleApi.updateCategory(editingCategory.id, {
         name: editingCategory.name,
-        slug: editingCategory.slug || undefined,
+        slug: editingCategory.slug?.trim() ?? "",
       });
       setEditingCategory(null);
       invalidate();
@@ -115,7 +115,7 @@ export default function PostCategoryTagManager({ isOpen, onClose }: PostCategory
     try {
       await articleApi.updateTag(editingTag.id, {
         name: editingTag.name,
-        slug: editingTag.slug || undefined,
+        slug: editingTag.slug?.trim() ?? "",
       });
       setEditingTag(null);
       invalidate();
