@@ -225,6 +225,29 @@ function wrapText(
   return currentY;
 }
 
+function truncateText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string {
+  const normalized = text.trim();
+  if (normalized === "" || maxWidth <= 0) {
+    return "";
+  }
+
+  if (ctx.measureText(normalized).width <= maxWidth) {
+    return normalized;
+  }
+
+  const ellipsis = "...";
+  if (ctx.measureText(ellipsis).width > maxWidth) {
+    return "";
+  }
+
+  let end = normalized.length;
+  while (end > 0 && ctx.measureText(`${normalized.slice(0, end)}${ellipsis}`).width > maxWidth) {
+    end--;
+  }
+
+  return end > 0 ? `${normalized.slice(0, end)}${ellipsis}` : "";
+}
+
 /**
  * 生成文章分享海报
  */
@@ -349,16 +372,24 @@ export async function generatePoster(config: PosterConfig): Promise<string> {
   const bottomAvatarSize = 50;
   const bottomTextSpacing = 14;
   const bottomSectionSpacing = 40;
+  const bottomSectionPadding = padding;
+  const bottomSectionMaxWidth = width - bottomSectionPadding * 2;
 
   ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-  const siteNameWidth = ctx.measureText(config.siteName || config.author).width;
+  const siteNameText = config.siteName || config.author;
+  const siteNameWidth = ctx.measureText(siteNameText).width;
   ctx.font = "18px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-  const subtitleWidth = config.siteSubtitle ? ctx.measureText(config.siteSubtitle).width : 0;
-  const leftTextWidth = Math.max(siteNameWidth, subtitleWidth);
+  const subtitleText = config.siteSubtitle?.trim() || "";
+  const subtitleWidth = subtitleText ? ctx.measureText(subtitleText).width : 0;
+  const leftTextMaxWidth = Math.max(
+    0,
+    bottomSectionMaxWidth - bottomAvatarSize - bottomTextSpacing - bottomSectionSpacing - qrCodeSize
+  );
+  const leftTextWidth = Math.min(Math.max(siteNameWidth, subtitleWidth), leftTextMaxWidth);
 
   const bottomSectionWidth = bottomAvatarSize + bottomTextSpacing + leftTextWidth + bottomSectionSpacing + qrCodeSize;
 
-  const bottomSectionStartX = (width - bottomSectionWidth) / 2;
+  const bottomSectionStartX = Math.max(bottomSectionPadding, (width - bottomSectionWidth) / 2);
   const qrCodeY = lineY + 20;
 
   const bottomAvatarX = bottomSectionStartX;
@@ -402,12 +433,12 @@ export async function generatePoster(config: PosterConfig): Promise<string> {
   ctx.fillStyle = textColor;
   ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
   ctx.textAlign = "left";
-  ctx.fillText(config.siteName || config.author, bottomTextX, siteNameY);
+  ctx.fillText(truncateText(ctx, siteNameText, leftTextWidth), bottomTextX, siteNameY);
 
-  if (config.siteSubtitle) {
+  if (subtitleText) {
     ctx.fillStyle = secondaryTextColor;
     ctx.font = "18px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-    ctx.fillText(config.siteSubtitle, bottomTextX, subtitleY);
+    ctx.fillText(truncateText(ctx, subtitleText, leftTextWidth), bottomTextX, subtitleY);
   }
 
   // 生成二维码
