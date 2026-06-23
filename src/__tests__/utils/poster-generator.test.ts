@@ -49,10 +49,11 @@ function createMockCanvasContext(): MockCanvasContext {
 
 describe("generatePoster", () => {
   let loadedImageSources: string[];
+  let context: MockCanvasContext;
 
   beforeEach(() => {
     loadedImageSources = [];
-    const context = createMockCanvasContext();
+    context = createMockCanvasContext();
 
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(
       context as unknown as CanvasRenderingContext2D
@@ -152,5 +153,24 @@ describe("generatePoster", () => {
     expect(loadedImageSources).toContain("blob:poster-cover");
     expect(createObjectURLSpy).toHaveBeenCalled();
     expect(revokeObjectURLSpy).toHaveBeenCalledWith("blob:poster-cover");
+  });
+
+  it("长站点副标题不会把底部二维码推出海报画布", async () => {
+    await expect(
+      generatePoster({
+        title: "恢复解梦功能",
+        description: "本文介绍了一个基于 AnHeYu 样式的解梦查询系统。",
+        author: "懒和道人",
+        siteName: "懒和道人",
+        siteSubtitle: "李想和，智者未来。书法、国画爱好者，互联网安全与前端建设者。",
+        articleUrl: "https://iicats.com/posts/dream",
+      })
+    ).resolves.toBe("data:image/png;base64,poster");
+
+    const drawImage = vi.mocked(context.drawImage);
+    const qrDraw = drawImage.mock.calls.find(call => call[3] === 120 && call[4] === 120);
+
+    expect(qrDraw).toBeDefined();
+    expect(Number(qrDraw?.[1]) + Number(qrDraw?.[3])).toBeLessThanOrEqual(710);
   });
 });
