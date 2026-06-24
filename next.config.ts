@@ -23,6 +23,19 @@ const nextConfig: NextConfig = {
       dynamic: 30,
       static: 180,
     },
+    // 将多模块包合并为单一 chunk，减少细碎 JS 请求数量
+    optimizePackageImports: [
+      "lucide-react",
+      "@heroui/react",
+      "@iconify/react",
+      "framer-motion",
+      "date-fns",
+      "react-icons",
+      "react-aria-components",
+      "clsx",
+      "tailwind-merge",
+      "sonner",
+    ],
   },
 
   // 代理配置 - 客户端请求代理到 Go 后端
