@@ -34,7 +34,6 @@ const nextConfig: NextConfig = {
       "react-aria-components",
       "clsx",
       "tailwind-merge",
-      "sonner",
     ],
   },
 
