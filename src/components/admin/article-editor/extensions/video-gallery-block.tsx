@@ -33,6 +33,19 @@ const hasKnownVideoExtension = (file: File) =>
 const isVideoFile = (file: File) => file.type.startsWith("video/") || hasKnownVideoExtension(file);
 const getVideoType = (file: File) =>
   file.type.startsWith("video/") ? file.type : VIDEO_TYPE_BY_EXTENSION[getFileExtension(file)] || FALLBACK_VIDEO_TYPE;
+const normalizeVideoGalleryRatio = (ratio: string) => {
+  const trimmed = ratio.trim();
+  const match = trimmed.match(/^(\d+(?:\.\d+)?)\s*[:/]\s*(\d+(?:\.\d+)?)$/);
+  if (!match) return trimmed;
+
+  const width = Number(match[1]);
+  const height = Number(match[2]);
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+    return trimmed;
+  }
+
+  return `${Number(((height / width) * 100).toFixed(4))}%`;
+};
 
 // ---- React NodeView 组件 ----
 function VideoGalleryBlockView({ node, updateAttributes }: NodeViewProps) {
@@ -46,6 +59,7 @@ function VideoGalleryBlockView({ node, updateAttributes }: NodeViewProps) {
   const cols = parseInt((node.attrs.cols as string) || "2", 10);
   const gap = (node.attrs.gap as string) || "10px";
   const ratio = (node.attrs.ratio as string) || "";
+  const normalizedRatio = normalizeVideoGalleryRatio(ratio);
   const itemsRaw = (node.attrs.items as string) || "[]";
 
   let items: VideoGalleryItem[] = [];
@@ -338,13 +352,25 @@ function VideoGalleryBlockView({ node, updateAttributes }: NodeViewProps) {
             className={`video-gallery-container video-gallery-cols-${cols}${countClass}`}
             style={{
               gap,
-              ...(ratio ? ({ "--video-gallery-ratio": ratio } as React.CSSProperties) : {}),
+              ...(normalizedRatio ? ({ "--video-gallery-ratio": normalizedRatio } as React.CSSProperties) : {}),
             }}
           >
             {items.map((item, i) =>
               item.poster || item.src ? (
                 <div key={i} className="video-gallery-item">
-                  {item.poster ? (
+                  {item.src ? (
+                    <div className="video-gallery-video-wrapper">
+                      <video
+                        className="video-gallery-video"
+                        controls
+                        preload="metadata"
+                        playsInline
+                        poster={item.poster || undefined}
+                      >
+                        <source src={item.src} type={item.type || FALLBACK_VIDEO_TYPE} />
+                      </video>
+                    </div>
+                  ) : (
                     <>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={item.poster} alt={item.title || ""} className="video-gallery-poster" />
@@ -356,11 +382,11 @@ function VideoGalleryBlockView({ node, updateAttributes }: NodeViewProps) {
                         </div>
                       </div>
                     </>
-                  ) : (
-                    <div className="video-gallery-video-wrapper">
-                      <video className="video-gallery-video" controls preload="metadata">
-                        <source src={item.src} type={item.type || FALLBACK_VIDEO_TYPE} />
-                      </video>
+                  )}
+                  {(item.title || item.desc) && (
+                    <div className="video-gallery-caption">
+                      {item.title && <div className="video-gallery-title">{item.title}</div>}
+                      {item.desc && <div className="video-gallery-desc">{item.desc}</div>}
                     </div>
                   )}
                 </div>
@@ -486,8 +512,14 @@ export const VideoGalleryBlock = Node.create({
             videoItems.push({
               src: source?.getAttribute("src") || video?.getAttribute("src") || "",
               poster: video?.getAttribute("poster") || "",
-              title: itemEl.querySelector(".video-gallery-item-title")?.textContent || "",
-              desc: itemEl.querySelector(".video-gallery-item-desc")?.textContent || "",
+              title:
+                itemEl.querySelector(".video-gallery-title")?.textContent ||
+                itemEl.querySelector(".video-gallery-item-title")?.textContent ||
+                "",
+              desc:
+                itemEl.querySelector(".video-gallery-desc")?.textContent ||
+                itemEl.querySelector(".video-gallery-item-desc")?.textContent ||
+                "",
               type: source?.getAttribute("type") || "video/mp4",
             });
           });
@@ -507,6 +539,7 @@ export const VideoGalleryBlock = Node.create({
     const cols = (node.attrs.cols as string) || "2";
     const gap = (node.attrs.gap as string) || "10px";
     const ratio = (node.attrs.ratio as string) || "";
+    const normalizedRatio = normalizeVideoGalleryRatio(ratio);
 
     let items: VideoGalleryItem[] = [];
     try {
@@ -517,12 +550,16 @@ export const VideoGalleryBlock = Node.create({
 
     const countClass = items.length > 0 ? ` video-gallery-count-${Math.min(items.length, 4)}` : "";
     const containerClass = `video-gallery-container video-gallery-cols-${cols}${countClass}`;
-    const containerStyle = [`gap: ${gap}`, ratio ? `--video-gallery-ratio: ${ratio}` : ""].filter(Boolean).join("; ");
+    const containerStyle = [`gap: ${gap}`, normalizedRatio ? `--video-gallery-ratio: ${normalizedRatio}` : ""]
+      .filter(Boolean)
+      .join("; ");
 
     const children = items.map(item => {
       const videoAttrs: Record<string, string> = {
+        class: "video-gallery-video",
         controls: "true",
         preload: "metadata",
+        playsinline: "true",
       };
       if (item.poster) videoAttrs.poster = item.poster;
 
@@ -532,13 +569,19 @@ export const VideoGalleryBlock = Node.create({
       };
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const itemChildren: any[] = [["video", videoAttrs, ["source", sourceAttrs]]];
+      const itemChildren: any[] = [
+        ["div", { class: "video-gallery-video-wrapper" }, ["video", videoAttrs, ["source", sourceAttrs]]],
+      ];
+      const captionChildren: typeof itemChildren = [];
 
       if (item.title) {
-        itemChildren.push(["span", { class: "video-gallery-item-title" }, item.title]);
+        captionChildren.push(["div", { class: "video-gallery-title" }, item.title]);
       }
       if (item.desc) {
-        itemChildren.push(["span", { class: "video-gallery-item-desc" }, item.desc]);
+        captionChildren.push(["div", { class: "video-gallery-desc" }, item.desc]);
+      }
+      if (captionChildren.length > 0) {
+        itemChildren.push(["div", { class: "video-gallery-caption" }, ...captionChildren]);
       }
 
       return ["div", { class: "video-gallery-item" }, ...itemChildren];

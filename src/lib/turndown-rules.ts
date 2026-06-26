@@ -4,6 +4,11 @@
  * 语法规范：块级 :::tagName params ... :::（通用）；!!!note|info|tip|success|warning|danger ... !!!（提示框），行内 {tagName params}content{/tagName}
  */
 import type TurndownService from "turndown";
+import { parseMusicPlayerData } from "@/lib/marked-extensions";
+
+function quoteTagParam(value: string): string {
+  return `"${value.replace(/"/g, "&quot;")}"`;
+}
 
 export function registerCustomRules(td: TurndownService) {
   // --- 图片（含 figcaption 时把图片描述写入 markdown title） ---
@@ -537,31 +542,21 @@ export function registerCustomRules(td: TurndownService) {
       node.nodeName === "DIV" && (node as HTMLElement).classList.contains("markdown-music-player"),
     replacement: (_content, node) => {
       const el = node as HTMLElement;
-      const neteaseId = el.getAttribute("data-music-id") || "";
+      const data = parseMusicPlayerData(el.getAttribute("data-music-data") || "");
+      const neteaseId = el.getAttribute("data-music-id") || data.neteaseId || "";
+      const name = data.name || el.querySelector(".music-name")?.textContent?.trim() || "";
+      const artist = data.artist || el.querySelector(".music-artist")?.textContent?.trim() || "";
+      const pic =
+        data.pic || el.querySelector<HTMLImageElement>(".artwork-image")?.getAttribute("src") || "";
+      const color = data.color || "";
 
-      let dataStr = el.getAttribute("data-music-data") || "";
-      if (dataStr) {
-        try {
-          dataStr = dataStr.replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&amp;/g, "&");
-          const data = JSON.parse(dataStr);
-          const name = data.name || "";
-          const artist = data.artist || "";
-          const pic = data.pic || "";
-          const color = data.color || "";
+      let params = `neteaseId=${neteaseId}`;
+      if (name) params += ` name=${quoteTagParam(name)}`;
+      if (artist) params += ` artist=${quoteTagParam(artist)}`;
+      if (pic) params += ` pic=${quoteTagParam(pic)}`;
+      if (color) params += ` color=${quoteTagParam(color)}`;
 
-          let params = `neteaseId=${neteaseId || data.neteaseId || ""}`;
-          if (name) params += ` name=${name}`;
-          if (artist) params += ` artist=${artist}`;
-          if (pic) params += ` pic=${pic}`;
-          if (color) params += ` color=${color}`;
-
-          return `{music ${params}}{/music}`;
-        } catch {
-          // fall through
-        }
-      }
-
-      return `{music id=${neteaseId}}{/music}`;
+      return `{music ${params}}{/music}`;
     },
   });
 

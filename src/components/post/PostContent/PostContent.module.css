@@ -1635,6 +1635,18 @@
   border: none;
 }
 
+.postContent :global(.video-gallery-container .video-gallery-item > video),
+.postContent :global(.video-gallery-container .video-item > video) {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  cursor: pointer;
+  background: #000;
+  border: none;
+  border-radius: 12px 12px 0 0;
+}
+
 /* 播放覆盖层 */
 .postContent :global(.video-gallery-container .video-gallery-play-overlay) {
   position: absolute;
@@ -1674,17 +1686,64 @@
   pointer-events: none;
 }
 
-.postContent :global(.video-gallery-container .video-gallery-title) {
+.postContent :global(.video-gallery-container .video-gallery-title),
+.postContent :global(.video-gallery-container .video-gallery-item-title) {
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 4px;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
-.postContent :global(.video-gallery-container .video-gallery-desc) {
+.postContent :global(.video-gallery-container .video-gallery-desc),
+.postContent :global(.video-gallery-container .video-gallery-item-desc) {
   font-size: 12px;
   opacity: 0.9;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.postContent :global(.video-gallery-container .video-gallery-item > .video-gallery-title),
+.postContent :global(.video-gallery-container .video-item > .video-gallery-title),
+.postContent :global(.video-gallery-container .video-gallery-item > .video-gallery-item-title),
+.postContent :global(.video-gallery-container .video-item > .video-gallery-item-title),
+.postContent :global(.video-gallery-container .video-gallery-item > .video-gallery-desc),
+.postContent :global(.video-gallery-container .video-item > .video-gallery-desc),
+.postContent :global(.video-gallery-container .video-gallery-item > .video-gallery-item-desc),
+.postContent :global(.video-gallery-container .video-item > .video-gallery-item-desc) {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  z-index: 1;
+  color: #fff;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.postContent :global(.video-gallery-container .video-gallery-item > .video-gallery-title),
+.postContent :global(.video-gallery-container .video-item > .video-gallery-title),
+.postContent :global(.video-gallery-container .video-gallery-item > .video-gallery-item-title),
+.postContent :global(.video-gallery-container .video-item > .video-gallery-item-title) {
+  bottom: 30px;
+}
+
+.postContent :global(.video-gallery-container .video-gallery-item > .video-gallery-desc),
+.postContent :global(.video-gallery-container .video-item > .video-gallery-desc),
+.postContent :global(.video-gallery-container .video-gallery-item > .video-gallery-item-desc),
+.postContent :global(.video-gallery-container .video-item > .video-gallery-item-desc) {
+  bottom: 12px;
+}
+
+.postContent :global(.video-gallery-container .video-gallery-item:hover > .video-gallery-title),
+.postContent :global(.video-gallery-container .video-item:hover > .video-gallery-title),
+.postContent :global(.video-gallery-container .video-gallery-item:hover > .video-gallery-item-title),
+.postContent :global(.video-gallery-container .video-item:hover > .video-gallery-item-title),
+.postContent :global(.video-gallery-container .video-gallery-item:hover > .video-gallery-desc),
+.postContent :global(.video-gallery-container .video-item:hover > .video-gallery-desc),
+.postContent :global(.video-gallery-container .video-gallery-item:hover > .video-gallery-item-desc),
+.postContent :global(.video-gallery-container .video-item:hover > .video-gallery-item-desc) {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* 兼容旧的 video-caption 样式 */
