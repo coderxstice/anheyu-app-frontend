@@ -61,4 +61,19 @@ describe("postManagementApi.uploadArticleImage", () => {
       "/api/f/favicon.png"
     );
   });
+
+  it("compresses Pro image proxy absolute URLs to same-origin paths", async () => {
+    const file = new File(["icon"], "favicon.png", { type: "image/png" });
+
+    axiosInstance.defaults.adapter = async config => {
+      return createWrappedResponse(config, {
+        url: "https://anheyu.com/api/pro/images/favicon",
+        file_id: "file-id",
+      });
+    };
+
+    await expect(postManagementApi.uploadArticleImage(file, { disableImageStyle: true })).resolves.toBe(
+      "/api/pro/images/favicon"
+    );
+  });
 });

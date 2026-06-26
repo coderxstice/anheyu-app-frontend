@@ -3,6 +3,7 @@
  * 保存文章时对 HTML 进行后处理，确保输出与 anheyu-pro 后端兼容
  * 参考 anheyu-pro useContentProcessor.ts
  */
+import { parseMusicPlayerData, renderMusicPlayerHtml } from "@/lib/marked-extensions";
 
 /**
  * 处理保存时的 HTML
@@ -13,6 +14,47 @@ export function processHtmlForSave(html: string): string {
   if (!html || typeof window === "undefined") return html;
 
   const doc = new DOMParser().parseFromString(html, "text/html");
+
+  // 0. 音乐播放器：TipTap Node 的 renderHTML 只保留属性，保存前补齐详情页需要的 DOM 结构。
+  let musicPlayerIndex = 0;
+  doc.querySelectorAll<HTMLElement>("div.markdown-music-player").forEach(player => {
+    const rawMusicData = player.getAttribute("data-music-data") || "";
+    const musicData = parseMusicPlayerData(rawMusicData);
+    const neteaseId = player.getAttribute("data-music-id") || musicData.neteaseId || "";
+    const name =
+      musicData.name ||
+      player.getAttribute("data-music-name") ||
+      player.querySelector(".music-name")?.textContent?.trim() ||
+      "";
+    const artist =
+      musicData.artist ||
+      player.getAttribute("data-music-artist") ||
+      player.querySelector(".music-artist")?.textContent?.trim() ||
+      "";
+    const pic =
+      musicData.pic ||
+      player.getAttribute("data-music-pic") ||
+      player.querySelector<HTMLImageElement>(".artwork-image")?.getAttribute("src") ||
+      "";
+    const color = musicData.color || "";
+
+    const template = doc.createElement("template");
+    template.innerHTML = renderMusicPlayerHtml({
+      neteaseId,
+      name,
+      artist,
+      pic,
+      color,
+      playerId: player.id || undefined,
+      instanceKey: musicPlayerIndex,
+    });
+    musicPlayerIndex += 1;
+
+    const nextPlayer = template.content.firstElementChild;
+    if (nextPlayer) {
+      player.replaceWith(nextPlayer);
+    }
+  });
 
   // 1. 表格包裹 div.table-container
   doc.querySelectorAll("table").forEach(table => {

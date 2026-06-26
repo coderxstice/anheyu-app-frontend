@@ -13,6 +13,7 @@ import { useSiteConfigStore } from "@/store/site-config-store";
 import { apiClient } from "@/lib/api/client";
 import { useTheme } from "@/hooks/use-theme";
 import { renderKatexInElement } from "@/lib/katex-render";
+import { parseMusicPlayerData, renderMusicPlayerHtml } from "@/lib/marked-extensions";
 
 interface ArticleCopyInfo {
   isReprint?: boolean;
@@ -970,6 +971,38 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     return url;
   }, []);
 
+  const normalizeMusicPlayerStructure = useCallback((container: HTMLElement) => {
+    let musicPlayerIndex = 0;
+    container.querySelectorAll<HTMLElement>(".markdown-music-player").forEach(player => {
+      if (player.querySelector(".music-player-container .music-audio-element")) {
+        return;
+      }
+
+      const musicData = parseMusicPlayerData(player.getAttribute("data-music-data") || "");
+      const neteaseId = player.getAttribute("data-music-id") || musicData.neteaseId || "";
+      const name = musicData.name || player.getAttribute("data-music-name") || "";
+      const artist = musicData.artist || player.getAttribute("data-music-artist") || "";
+      const pic = musicData.pic || player.getAttribute("data-music-pic") || "";
+      const color = musicData.color || "";
+      const template = document.createElement("template");
+      template.innerHTML = renderMusicPlayerHtml({
+        neteaseId,
+        name,
+        artist,
+        pic,
+        color,
+        playerId: player.id || undefined,
+        instanceKey: musicPlayerIndex,
+      });
+      musicPlayerIndex += 1;
+
+      const nextPlayer = template.content.firstElementChild;
+      if (nextPlayer) {
+        player.replaceWith(nextPlayer);
+      }
+    });
+  }, []);
+
   /**
    * 通过 API 获取音频资源
    */
@@ -1120,8 +1153,11 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     (container: HTMLElement) => {
       const musicPlayers = container.querySelectorAll(".markdown-music-player[data-music-id]");
 
-      musicPlayers.forEach(playerEl => {
+      musicPlayers.forEach((playerEl, index) => {
         const player = playerEl as HTMLElement;
+        if (!player.id) {
+          player.id = `music-player-${Date.now()}-${index}`;
+        }
         const audio = player.querySelector(".music-audio-element") as HTMLAudioElement;
 
         if (!audio || audio.dataset.eventsAttached) return;
@@ -1132,8 +1168,16 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
         const playIcon = player.querySelector(".music-play-icon") as HTMLElement;
         const pauseIcon = player.querySelector(".music-pause-icon") as HTMLElement;
         const progressFill = player.querySelector(".music-progress-fill") as HTMLElement;
+        const progressBar = player.querySelector(".music-progress-bar") as HTMLElement;
         const currentTimeEl = player.querySelector(".current-time") as HTMLElement;
         const durationEl = player.querySelector(".duration") as HTMLElement;
+
+        artworkWrapper?.addEventListener("click", () => {
+          handleMusicPlayerToggle(player.id);
+        });
+        progressBar?.addEventListener("click", event => {
+          handleMusicPlayerSeek(player.id, event);
+        });
 
         // 音频事件监听
         audio.addEventListener("play", () => {
@@ -1178,12 +1222,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
             const musicDataAttr = player.getAttribute("data-music-data");
             if (!musicDataAttr) return;
 
-            const decodedData = musicDataAttr
-              .replace(/&quot;/g, '"')
-              .replace(/&#039;/g, "'")
-              .replace(/&amp;/g, "&");
-
-            const musicData = JSON.parse(decodedData);
+            const musicData = parseMusicPlayerData(musicDataAttr);
 
             // 应用封面主色到进度条
             if (musicData.color && progressFill) {
@@ -1212,7 +1251,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
         preloadAudioMetadata();
       });
     },
-    [formatTime, fetchAudioUrl]
+    [formatTime, fetchAudioUrl, handleMusicPlayerSeek, handleMusicPlayerToggle]
   );
 
   // 初始化代码复制事件，返回清理函数
@@ -1560,6 +1599,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     // 注册全局函数（供 HTML 内联事件使用）
     window.__musicPlayerToggle = handleMusicPlayerToggle;
     window.__musicPlayerSeek = handleMusicPlayerSeek;
+    normalizeMusicPlayerStructure(currentContent);
     initMusicPlayers(currentContent);
 
     // 渲染 Mermaid 图表并初始化缩放功能
@@ -1615,6 +1655,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     initMusicPlayers,
     handleMusicPlayerToggle,
     handleMusicPlayerSeek,
+    normalizeMusicPlayerStructure,
     renderAndInitMermaid,
   ]);
 
