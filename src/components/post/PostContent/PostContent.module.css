@@ -1586,15 +1586,15 @@
 .postContent :global(.video-gallery-container .video-gallery-item),
 .postContent :global(.video-gallery-container .video-item) {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   border-radius: 12px;
-  background: var(--card);
+  background: transparent;
   transition: all 0.3s ease;
 }
 
 .postContent :global(.video-gallery-container .video-gallery-item:hover),
 .postContent :global(.video-gallery-container .video-item:hover) {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: none;
 }
 
 .postContent :global(.video-gallery-container .video-gallery-item:hover .video-gallery-play-overlay) {
@@ -1618,7 +1618,7 @@
   padding-bottom: var(--video-gallery-ratio);
   overflow: hidden;
   background: var(--card);
-  border-radius: 12px 12px 0 0;
+  border-radius: 12px;
 }
 
 .postContent :global(.video-gallery-container .video-gallery-video),
@@ -1631,7 +1631,7 @@
   height: 100%;
   object-fit: cover;
   cursor: pointer;
-  border-radius: 12px 12px 0 0;
+  border-radius: 12px;
   border: none;
 }
 
@@ -1644,7 +1644,7 @@
   cursor: pointer;
   background: #000;
   border: none;
-  border-radius: 12px 12px 0 0;
+  border-radius: 12px;
 }
 
 /* 播放覆盖层 */
@@ -1671,34 +1671,37 @@
   transition: transform 0.3s ease;
 }
 
-/* 视频标题/描述覆盖层 */
+/* 视频标题/描述：发布页按图片说明样式展示 */
 .postContent :global(.video-gallery-container .video-gallery-caption) {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 12px 16px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4), transparent);
-  color: #fff;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.3s ease;
-  pointer-events: none;
+  position: static;
+  padding: 10px 8px 0;
+  color: var(--anzhiyu-secondtext, var(--muted-foreground, #6b7280));
+  text-align: center;
+  background: transparent;
+  opacity: 1;
+  transform: none;
+  transition: color 0.3s ease;
+  pointer-events: auto;
 }
 
 .postContent :global(.video-gallery-container .video-gallery-title),
 .postContent :global(.video-gallery-container .video-gallery-item-title) {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 4px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.6;
+  color: inherit;
+  text-shadow: none;
 }
 
 .postContent :global(.video-gallery-container .video-gallery-desc),
 .postContent :global(.video-gallery-container .video-gallery-item-desc) {
-  font-size: 12px;
+  margin-top: 4px;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: inherit;
   opacity: 0.9;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  text-shadow: none;
 }
 
 .postContent :global(.video-gallery-container .video-gallery-item > .video-gallery-title),
@@ -1709,29 +1712,28 @@
 .postContent :global(.video-gallery-container .video-item > .video-gallery-desc),
 .postContent :global(.video-gallery-container .video-gallery-item > .video-gallery-item-desc),
 .postContent :global(.video-gallery-container .video-item > .video-gallery-item-desc) {
-  position: absolute;
-  left: 16px;
-  right: 16px;
-  z-index: 1;
-  color: #fff;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.3s ease;
-  pointer-events: none;
+  position: static;
+  z-index: auto;
+  color: var(--anzhiyu-secondtext, var(--muted-foreground, #6b7280));
+  text-align: center;
+  opacity: 1;
+  transform: none;
+  transition: color 0.3s ease;
+  pointer-events: auto;
 }
 
 .postContent :global(.video-gallery-container .video-gallery-item > .video-gallery-title),
 .postContent :global(.video-gallery-container .video-item > .video-gallery-title),
 .postContent :global(.video-gallery-container .video-gallery-item > .video-gallery-item-title),
 .postContent :global(.video-gallery-container .video-item > .video-gallery-item-title) {
-  bottom: 30px;
+  margin: 10px 8px 0;
 }
 
 .postContent :global(.video-gallery-container .video-gallery-item > .video-gallery-desc),
 .postContent :global(.video-gallery-container .video-item > .video-gallery-desc),
 .postContent :global(.video-gallery-container .video-gallery-item > .video-gallery-item-desc),
 .postContent :global(.video-gallery-container .video-item > .video-gallery-item-desc) {
-  bottom: 12px;
+  margin: 4px 8px 0;
 }
 
 .postContent :global(.video-gallery-container .video-gallery-item:hover > .video-gallery-title),
@@ -1748,9 +1750,11 @@
 
 /* 兼容旧的 video-caption 样式 */
 .postContent :global(.video-gallery-container .video-caption) {
-  padding: 12px;
-  background: var(--card);
-  font-size: 14px;
+  padding: 10px 8px 0;
+  color: var(--anzhiyu-secondtext, var(--muted-foreground, #6b7280));
+  background: transparent;
+  font-size: 0.95rem;
+  line-height: 1.6;
   text-align: center;
 }
 
@@ -3195,10 +3199,38 @@
   }
 
   /* Video Gallery 响应式 */
+  .postContent :global(.video-gallery-container) {
+    --video-gallery-gap: 18px;
+    margin: 1rem 0 1.25rem;
+  }
+
+  .postContent :global(.video-gallery-container.video-gallery-cols-2),
   .postContent :global(.video-gallery-container.video-gallery-cols-3),
   .postContent :global(.video-gallery-container.video-gallery-cols-4),
-  .postContent :global(.video-gallery-container.video-cols-3) {
-    grid-template-columns: repeat(2, 1fr);
+  .postContent :global(.video-gallery-container.video-cols-2),
+  .postContent :global(.video-gallery-container.video-cols-3),
+  .postContent :global(.video-gallery-container.video-gallery-count-2:not(.video-gallery-cols-1):not(.video-cols-1)),
+  .postContent :global(.video-gallery-container.video-gallery-count-3.video-gallery-cols-4),
+  .postContent :global(.video-gallery-container:not(.video-gallery-count-1):not(.video-gallery-count-2):not(.video-gallery-count-3):not(.video-gallery-count-4):not(.video-gallery-cols-1):not(.video-cols-1):has(> .video-gallery-item:nth-child(2):last-child)),
+  .postContent :global(.video-gallery-container:not(.video-gallery-count-1):not(.video-gallery-count-2):not(.video-gallery-count-3):not(.video-gallery-count-4):not(.video-gallery-cols-1):not(.video-cols-1):has(> .video-item:nth-child(2):last-child)),
+  .postContent :global(.video-gallery-container.video-gallery-cols-4:not(.video-gallery-count-1):not(.video-gallery-count-2):not(.video-gallery-count-3):not(.video-gallery-count-4):has(> .video-gallery-item:nth-child(3):last-child)),
+  .postContent :global(.video-gallery-container.video-gallery-cols-4:not(.video-gallery-count-1):not(.video-gallery-count-2):not(.video-gallery-count-3):not(.video-gallery-count-4):has(> .video-item:nth-child(3):last-child)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .postContent :global(.video-gallery-container .video-gallery-caption),
+  .postContent :global(.video-gallery-container .video-caption) {
+    padding-top: 8px;
+  }
+
+  .postContent :global(.video-gallery-container .video-gallery-title),
+  .postContent :global(.video-gallery-container .video-gallery-item-title) {
+    font-size: 0.9rem;
+  }
+
+  .postContent :global(.video-gallery-container .video-gallery-desc),
+  .postContent :global(.video-gallery-container .video-gallery-item-desc) {
+    font-size: 0.82rem;
   }
 
   /* Music Player 响应式 */

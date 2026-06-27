@@ -7,6 +7,7 @@ import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps } from "@tip
 import { useState, useRef } from "react";
 import { ImageIcon, Pencil, Upload, Video } from "lucide-react";
 import { postManagementApi } from "@/lib/api/post-management";
+import { stripVideoFirstFrameFragment, withVideoFirstFrameFragment } from "@/lib/video-gallery";
 
 // ---- 类型定义 ----
 interface VideoGalleryItem {
@@ -18,6 +19,11 @@ interface VideoGalleryItem {
 }
 
 const FALLBACK_VIDEO_TYPE = "video/mp4";
+const MOBILE_VIDEO_PLAYBACK_PROPS = {
+  "webkit-playsinline": "true",
+  "x5-playsinline": "true",
+  "x5-video-player-type": "h5",
+} as const;
 const VIDEO_TYPE_BY_EXTENSION: Record<string, string> = {
   mp4: "video/mp4",
   m4v: "video/mp4",
@@ -355,8 +361,10 @@ function VideoGalleryBlockView({ node, updateAttributes }: NodeViewProps) {
               ...(normalizedRatio ? ({ "--video-gallery-ratio": normalizedRatio } as React.CSSProperties) : {}),
             }}
           >
-            {items.map((item, i) =>
-              item.poster || item.src ? (
+            {items.map((item, i) => {
+              const playbackSrc = withVideoFirstFrameFragment(item.src, item.poster);
+
+              return item.poster || item.src ? (
                 <div key={i} className="video-gallery-item">
                   {item.src ? (
                     <div className="video-gallery-video-wrapper">
@@ -365,9 +373,11 @@ function VideoGalleryBlockView({ node, updateAttributes }: NodeViewProps) {
                         controls
                         preload="metadata"
                         playsInline
+                        {...MOBILE_VIDEO_PLAYBACK_PROPS}
+                        src={playbackSrc}
                         poster={item.poster || undefined}
                       >
-                        <source src={item.src} type={item.type || FALLBACK_VIDEO_TYPE} />
+                        <source src={playbackSrc} type={item.type || FALLBACK_VIDEO_TYPE} />
                       </video>
                     </div>
                   ) : (
@@ -444,8 +454,8 @@ function VideoGalleryBlockView({ node, updateAttributes }: NodeViewProps) {
                     </button>
                   </span>
                 </div>
-              )
-            )}
+              );
+            })}
           </div>
         ) : (
           <div
@@ -510,7 +520,7 @@ export const VideoGalleryBlock = Node.create({
             const video = itemEl.querySelector("video");
             const source = video?.querySelector("source");
             videoItems.push({
-              src: source?.getAttribute("src") || video?.getAttribute("src") || "",
+              src: stripVideoFirstFrameFragment(source?.getAttribute("src") || video?.getAttribute("src") || ""),
               poster: video?.getAttribute("poster") || "",
               title:
                 itemEl.querySelector(".video-gallery-title")?.textContent ||
@@ -555,16 +565,21 @@ export const VideoGalleryBlock = Node.create({
       .join("; ");
 
     const children = items.map(item => {
+      const playbackSrc = withVideoFirstFrameFragment(item.src || "", item.poster);
       const videoAttrs: Record<string, string> = {
         class: "video-gallery-video",
         controls: "true",
         preload: "metadata",
         playsinline: "true",
+        "webkit-playsinline": "true",
+        "x5-playsinline": "true",
+        "x5-video-player-type": "h5",
+        src: playbackSrc,
       };
       if (item.poster) videoAttrs.poster = item.poster;
 
       const sourceAttrs: Record<string, string> = {
-        src: item.src || "",
+        src: playbackSrc,
         type: item.type || "video/mp4",
       };
 

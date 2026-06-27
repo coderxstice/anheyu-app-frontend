@@ -14,6 +14,7 @@ import { apiClient } from "@/lib/api/client";
 import { useTheme } from "@/hooks/use-theme";
 import { renderKatexInElement } from "@/lib/katex-render";
 import { parseMusicPlayerData, renderMusicPlayerHtml } from "@/lib/marked-extensions";
+import { enhanceVideoGalleryFirstFrames } from "@/lib/video-gallery";
 
 interface ArticleCopyInfo {
   isReprint?: boolean;
@@ -1521,6 +1522,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
 
     // 保存 ref 的当前值，用于清理函数
     const currentContent = contentRef.current;
+    enhanceVideoGalleryFirstFrames(currentContent);
 
     // 为外部链接添加 target="_blank"
     const links = currentContent.querySelectorAll('a[href^="http"]');
