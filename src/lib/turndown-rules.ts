@@ -5,6 +5,7 @@
  */
 import type TurndownService from "turndown";
 import { parseMusicPlayerData } from "@/lib/marked-extensions";
+import { stripVideoFirstFrameFragment } from "@/lib/video-gallery";
 
 function quoteTagParam(value: string): string {
   return `"${value.replace(/"/g, "&quot;")}"`;
@@ -471,7 +472,7 @@ export function registerCustomRules(td: TurndownService) {
         const source = item.querySelector("source");
         const video = item.querySelector("video");
         if (!source) return;
-        const url = source.getAttribute("src") || "";
+        const url = stripVideoFirstFrameFragment(source.getAttribute("src") || "");
         const type = source.getAttribute("type") || "";
         const poster = video?.getAttribute("poster") || "";
         const title = item.querySelector(".video-gallery-title")?.textContent?.trim() || "";

@@ -5,6 +5,7 @@
  * 行内：{tagName params}content{/tagName}
  */
 import type { marked as Marked, Tokens } from "marked";
+import { withVideoFirstFrameFragment } from "@/lib/video-gallery";
 
 // ---------- 工具函数 ----------
 
@@ -112,7 +113,7 @@ function normalizeVideoGalleryRatio(ratio: string): string {
  * 返回 { raw, tagName, params, body } 或 null
  */
 function matchContainerBlock(src: string): { raw: string; tagName: string; params: string; body: string } | null {
-  const openMatch = src.match(/^:::(\w[\w-]*)\s*(.*)\n/);
+  const openMatch = src.match(/^:::(\w[\w-]*)[^\S\n]*(.*)\n/);
   if (!openMatch) return null;
 
   const tagName = openMatch[1];
@@ -369,6 +370,8 @@ function renderVideoGallery(body: string, params: string): string {
   const gap = extractAttr(params, "gap");
   const ratio = extractAttr(params, "ratio");
   const lines = body.trim().split("\n");
+  const mobilePlaybackAttrs =
+    ' playsinline webkit-playsinline="true" x5-playsinline="true" x5-video-player-type="h5"';
 
   let style = "";
   if (gap) style += `gap:${gap};`;
@@ -387,6 +390,8 @@ function renderVideoGallery(body: string, params: string): string {
     const title = extractAttr(trimmed, "title");
     const desc = extractAttr(trimmed, "desc");
 
+    const playbackUrl = withVideoFirstFrameFragment(url, poster);
+    const escapedUrl = escapeHtml(playbackUrl);
     const posterAttr = poster ? ` poster="${escapeHtml(poster)}"` : "";
     let caption = "";
     if (title || desc) {
@@ -395,7 +400,7 @@ function renderVideoGallery(body: string, params: string): string {
       caption = `<div class="video-gallery-caption">${titleHtml}${descHtml}</div>`;
     }
 
-    items += `<div class="video-gallery-item"><div class="video-gallery-video-wrapper"><video class="video-gallery-video" controls preload="metadata" playsinline${posterAttr}><source src="${escapeHtml(url)}" type="${escapeHtml(type)}" /></video></div>${caption}</div>`;
+    items += `<div class="video-gallery-item"><div class="video-gallery-video-wrapper"><video class="video-gallery-video" controls preload="metadata"${mobilePlaybackAttrs} src="${escapedUrl}"${posterAttr}><source src="${escapedUrl}" type="${escapeHtml(type)}" /></video></div>${caption}</div>`;
     itemCount += 1;
   }
 
