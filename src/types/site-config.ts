@@ -51,6 +51,7 @@ export interface SiteConfigData {
   APP_NAME?: string;
   APP_VERSION?: string;
   SUB_TITLE?: string;
+  SITE_DESCRIPTION?: string;
   ICP_NUMBER?: string;
   USER_AVATAR?: string;
   ABOUT_LINK?: string;

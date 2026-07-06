@@ -136,7 +136,8 @@
    ================================ */
 
 /* 文章图片基础 - 覆盖默认 img 的 box-shadow */
-.postContent :global(.article-image) {
+/* 用 [class*=] 匹配，兼容历史数据中 class 粘连的图片（如 article-imageimage-align-center） */
+.postContent :global(img[class*="article-image"]) {
   display: block;
   max-width: 100%;
   height: auto;
@@ -151,18 +152,18 @@
   border-radius: 8px;
 }
 
-/* 图片对齐 */
-.postContent :global(.image-align-left) {
+/* 图片对齐（用 [class*=] 同时兼容规范 class 与历史粘连 class，仅作用于 img 避免影响 figure） */
+.postContent :global(img[class*="image-align-left"]) {
   margin-left: 0;
   margin-right: auto;
 }
 
-.postContent :global(.image-align-center) {
+.postContent :global(img[class*="image-align-center"]) {
   margin-left: auto;
   margin-right: auto;
 }
 
-.postContent :global(.image-align-right) {
+.postContent :global(img[class*="image-align-right"]) {
   margin-left: auto;
   margin-right: 0;
 }

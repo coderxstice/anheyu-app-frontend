@@ -13,10 +13,15 @@ import type { PostCategory, PostTag } from "@/types/article";
 interface PostCategoryTagManagerProps {
   isOpen: boolean;
   onClose: () => void;
+  initialTab?: "categories" | "tags";
 }
 
-export default function PostCategoryTagManager({ isOpen, onClose }: PostCategoryTagManagerProps) {
-  const [activeTab, setActiveTab] = useState("categories");
+export default function PostCategoryTagManager({
+  isOpen,
+  onClose,
+  initialTab = "categories",
+}: PostCategoryTagManagerProps) {
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   const { data: categories = [] } = useCategories();
   const { data: tags = [] } = useTags();
@@ -155,7 +160,12 @@ export default function PostCategoryTagManager({ isOpen, onClose }: PostCategory
       <ModalBody className="pb-6">
         <Tabs
           selectedKey={activeTab}
-          onSelectionChange={k => setActiveTab(k as string)}
+          onSelectionChange={k => {
+            const nextTab = String(k);
+            if (nextTab === "categories" || nextTab === "tags") {
+              setActiveTab(nextTab);
+            }
+          }}
           variant="underlined"
           classNames={{ tabList: "gap-4" }}
         >

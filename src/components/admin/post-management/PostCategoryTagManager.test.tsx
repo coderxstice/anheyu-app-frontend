@@ -106,7 +106,9 @@ vi.mock("@heroui/react", () => ({
   ModalBody: ({ children, className }: React.PropsWithChildren<{ className?: string }>) => (
     <main className={className}>{children}</main>
   ),
-  Tabs: ({ children }: React.PropsWithChildren<Record<string, unknown>>) => <div>{children}</div>,
+  Tabs: ({ children, selectedKey }: React.PropsWithChildren<{ selectedKey?: string }>) => (
+    <div data-selected-key={selectedKey}>{children}</div>
+  ),
   Tab: ({ children, title }: React.PropsWithChildren<{ title: React.ReactNode }>) => (
     <section>
       <h2>{title}</h2>
@@ -163,6 +165,12 @@ describe("PostCategoryTagManager", () => {
       size: "2xl",
       scrollBehavior: "inside",
     });
+  });
+
+  it("can open with the tags tab selected", () => {
+    render(<PostCategoryTagManager isOpen onClose={vi.fn()} initialTab="tags" />);
+
+    expect(screen.getByText("标签 (48)").parentElement?.parentElement).toHaveAttribute("data-selected-key", "tags");
   });
 
   it("sends an empty category slug when clearing it", async () => {

@@ -61,6 +61,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
   const contentRef = useRef<HTMLDivElement>(null);
   const mermaidCleanupRef = useRef<MermaidCleanupFn>(null);
   const codeCopyCleanupRef = useRef<(() => void) | null>(null);
+  const codeWheelCleanupRef = useRef<(() => void) | null>(null);
   const copyConfig = useSiteConfigStore(useShallow(state => state.siteConfig?.post?.copy));
   const codeBlockRawConfig = useSiteConfigStore(useShallow(state => state.siteConfig?.post?.code_block));
   const appName = useSiteConfigStore(state => state.siteConfig?.APP_NAME);
@@ -1310,6 +1311,35 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     return () => cleanups.forEach(fn => fn());
   }, []);
 
+  // 修复 Safari/WebKit 下代码块吞掉鼠标垂直滚轮、导致整页无法滚动的问题。
+  // 代码块内 .md-editor-code-block 是横向滚动容器(overflow-x:auto)，Safari 会把落在其上的
+  // 垂直滚轮"锁定"在该容器却不向页面冒泡。此处仅在 Safari 手动把垂直滚轮转发给页面，
+  // 横向(deltaX 主导，如 shift+滚轮/触控板横向)仍交给代码块，保留横向滚动能力。
+  const initCodeBlockWheelFix = useCallback((): (() => void) | undefined => {
+    if (!contentRef.current) return;
+    const isAppleSafari =
+      typeof navigator !== "undefined" &&
+      /Apple/.test(navigator.vendor) &&
+      /Safari/.test(navigator.userAgent) &&
+      !/Chrome|CriOS|Chromium|Android/.test(navigator.userAgent);
+    if (!isAppleSafari) return;
+
+    // 事件委托绑定在内容容器上（该元素由 React 通过 ref 管理，稳定存在，
+    // 不会随代码块内部 DOM 被 dangerouslySetInnerHTML 重建而失效）：
+    // 当鼠标落在代码块内且以垂直滚动为主时，手动把滚动转发给页面。
+    const container = contentRef.current;
+    const onWheel = (e: WheelEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target?.closest?.(".md-editor-code")) return;
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        e.preventDefault();
+        window.scrollBy(0, e.deltaY);
+      }
+    };
+    container.addEventListener("wheel", onWheel, { passive: false });
+    return () => container.removeEventListener("wheel", onWheel);
+  }, []);
+
   /**
    * 初始化 Mermaid 图表的缩放功能
    * 模拟 md-editor-v3 的行为，动态添加 action 按钮
@@ -1594,6 +1624,10 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
       codeCopyCleanupRef.current();
     }
     codeCopyCleanupRef.current = initCodeCopyEvents() ?? null;
+    if (codeWheelCleanupRef.current) {
+      codeWheelCleanupRef.current();
+    }
+    codeWheelCleanupRef.current = initCodeBlockWheelFix() ?? null;
     initCodeHighlight(); // 代码高亮
     initKatex(); // KaTeX 数学公式渲染
 
@@ -1626,6 +1660,10 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
         codeCopyCleanupRef.current();
         codeCopyCleanupRef.current = null;
       }
+      if (codeWheelCleanupRef.current) {
+        codeWheelCleanupRef.current();
+        codeWheelCleanupRef.current = null;
+      }
       if (mermaidCleanupRef.current) {
         mermaidCleanupRef.current();
         mermaidCleanupRef.current = null;
@@ -1652,6 +1690,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
     initCodeBlockIcons,
     initCodeExpandEvents,
     initCodeCopyEvents,
+    initCodeBlockWheelFix,
     initCodeHighlight,
     initKatex,
     initMusicPlayers,
