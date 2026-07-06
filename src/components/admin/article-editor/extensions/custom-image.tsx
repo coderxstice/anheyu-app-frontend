@@ -885,7 +885,7 @@ export const CustomImage = Image.extend({
     const rotationStyle = rotation && rotation !== 0 ? `transform: rotate(${rotation}deg);` : "";
 
     const imgAttrs = mergeAttributes(HTMLAttributes, {
-      class: [`article-image`, alignClass, styleClass].filter(Boolean).join(""),
+      class: [`article-image`, alignClass, styleClass].filter(Boolean).join(" "),
       draggable: "true",
       ...(rotationStyle ? { style: rotationStyle } : {}),
     });

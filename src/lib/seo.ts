@@ -141,7 +141,7 @@ export async function fetchSiteConfigForSeo(): Promise<SiteConfigData | null> {
 
 export function resolveSeoSiteInfo(siteConfig?: SiteConfigData | null): SeoSiteInfo {
   const siteName = siteConfig?.APP_NAME || DEFAULT_SITE_NAME;
-  const description = siteConfig?.SUB_TITLE || DEFAULT_SITE_DESCRIPTION;
+  const description = siteConfig?.SITE_DESCRIPTION || siteConfig?.SUB_TITLE || DEFAULT_SITE_DESCRIPTION;
   const siteUrl = normalizeSiteUrl(siteConfig?.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL);
 
   return {

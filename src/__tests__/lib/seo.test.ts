@@ -59,6 +59,16 @@ describe("buildPageMetadata homepage title", () => {
 });
 
 describe("resolveSeoSiteInfo favicon URL", () => {
+  it("uses SITE_DESCRIPTION before SUB_TITLE for SEO descriptions", () => {
+    const site = resolveSeoSiteInfo({
+      APP_NAME: "安和鱼",
+      SUB_TITLE: "前台副标题",
+      SITE_DESCRIPTION: "后台站点描述",
+    });
+
+    expect(site.description).toBe("后台站点描述");
+  });
+
   it("preserves png favicon URLs and adds a cache-busting version", () => {
     const site = resolveSeoSiteInfo({
       ICON_URL: "https://blog.anheyu.com/api/f/ey9w6t/1782018466528632460.png",
