@@ -35,4 +35,20 @@ describe("applyAppearanceModeTokensToDocument", () => {
     });
     expect(document.documentElement.style.getPropertyValue("--primary-foreground")).toBe("");
   });
+
+  it("skips primary overrides while article primary color is active", () => {
+    const root = document.documentElement.style;
+    root.setProperty("--primary", "#123456");
+    root.setProperty("--article-primary-color", "#123456");
+
+    applyAppearanceModeTokensToDocument(FULL);
+
+    // 文章主色接管期间不覆盖主色，语义色仍同步
+    expect(root.getPropertyValue("--primary").trim().toLowerCase()).toBe("#123456");
+    expect(root.getPropertyValue("--green").trim().toLowerCase()).toBe("#57bd6a");
+
+    root.removeProperty("--article-primary-color");
+    applyAppearanceModeTokensToDocument(FULL);
+    expect(root.getPropertyValue("--primary").trim().toLowerCase()).toBe("#163bf2");
+  });
 });
