@@ -145,6 +145,16 @@ const EMPTY_STRING_DEFAULT_KEYS = new Set<string>([
 ]);
 
 /**
+ * 这些字段的空白属于配置值本身，不能沿用通用字符串 trim 规则。
+ * 否则后台会把非法值显示成合法值，而前台严格解析时却走回退逻辑。
+ */
+const STRICT_LITERAL_STRING_KEYS = new Set<string>([
+  K.KEY_DEFAULT_THEME_MODE,
+  K.KEY_THEME_LIGHT_START_TIME,
+  K.KEY_THEME_DARK_START_TIME,
+]);
+
+/**
  * 根据分类获取该分类下所有设置项的后端键
  */
 export function getKeysByCategory(categoryId: SettingCategoryId): SettingDescriptor[] {
@@ -236,7 +246,11 @@ export function parseBackendValues(
     } else if (typeof raw === "string") {
       // string/code 类型做规范化（换行符 + trim），避免与表单回传不一致导致一进页就显示「有未保存的更改」
       const s = raw;
-      const normalized = desc.type === "string" || desc.type === "code" ? normalizeStringForCompare(s) : s;
+      const shouldPreserveLiteral = STRICT_LITERAL_STRING_KEYS.has(desc.backendKey);
+      const normalized =
+        (desc.type === "string" || desc.type === "code") && !shouldPreserveLiteral
+          ? normalizeStringForCompare(s)
+          : s;
       const shouldUseDefaultValue =
         s.trim() === "" && desc.defaultValue != null && EMPTY_STRING_DEFAULT_KEYS.has(desc.backendKey);
       if (shouldUseDefaultValue) {
@@ -391,6 +405,12 @@ export function getChangedValues(
       continue;
     }
 
+    if (STRICT_LITERAL_STRING_KEYS.has(key)) {
+      if (cur === orig) continue;
+      changed[key] = cur;
+      continue;
+    }
+
     if (isEmptyVal(cur) && isEmptyVal(orig)) continue;
     if (cur === orig) continue;
     // 兜底：两值均为字符串时，规范化后相等即视为未修改
@@ -440,6 +460,8 @@ const categoryDescriptors: Record<SettingCategoryId, SettingDescriptor[]> = {
     { backendKey: K.KEY_POLICE_RECORD_ICON, type: "string" },
     { backendKey: K.KEY_ENABLE_REGISTRATION, type: "boolean", defaultValue: "false" },
     { backendKey: K.KEY_DEFAULT_THEME_MODE, type: "string", defaultValue: "light" },
+    { backendKey: K.KEY_THEME_LIGHT_START_TIME, type: "string", defaultValue: "08:00" },
+    { backendKey: K.KEY_THEME_DARK_START_TIME, type: "string", defaultValue: "20:00" },
     { backendKey: K.KEY_ABOUT_LINK, type: "string" },
     { backendKey: K.KEY_DEFAULT_THUMB_PARAM, type: "string" },
     { backendKey: K.KEY_DEFAULT_BIG_PARAM, type: "string" },

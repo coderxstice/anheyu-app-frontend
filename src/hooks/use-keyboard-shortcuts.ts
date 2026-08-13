@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { addToast } from "@heroui/react";
+import { clearAutoThemeManagement } from "@/lib/theme/scheduled-theme";
 import { useUiStore } from "@/store/ui-store";
 
 export interface Shortcut {
@@ -14,7 +15,7 @@ export interface Shortcut {
 
 export function useKeyboardShortcuts() {
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
+  const { theme, systemTheme, setTheme } = useTheme();
   const isShortcutsEnabled = useUiStore(state => state.isShortcutsEnabled);
   const useCustomContextMenu = useUiStore(state => state.useCustomContextMenu);
   const toggleShortcuts = useUiStore(state => state.toggleShortcuts);
@@ -57,7 +58,9 @@ export function useKeyboardShortcuts() {
         keys: ["Shift", "D"],
         description: "深色/浅色显示模式",
         action: () => {
-          const newTheme = theme === "dark" ? "light" : "dark";
+          const currentTheme = theme === "system" ? systemTheme : theme;
+          const newTheme = currentTheme === "dark" ? "light" : "dark";
+          clearAutoThemeManagement();
           setTheme(newTheme);
           setShowShortcutsPanel(false);
           setIsShiftPressed(false);
@@ -130,7 +133,16 @@ export function useKeyboardShortcuts() {
         },
       },
     ],
-    [isShortcutsEnabled, useCustomContextMenu, theme, router, setTheme, toggleShortcuts, toggleContextMenuMode]
+    [
+      isShortcutsEnabled,
+      useCustomContextMenu,
+      theme,
+      systemTheme,
+      router,
+      setTheme,
+      toggleShortcuts,
+      toggleContextMenuMode,
+    ]
   );
 
   // 检查是否为输入元素

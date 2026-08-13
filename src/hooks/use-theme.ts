@@ -1,6 +1,7 @@
 "use client";
 
 import { useTheme as useNextTheme } from "next-themes";
+import { clearAutoThemeManagement } from "@/lib/theme/scheduled-theme";
 import { useMounted } from "./use-mounted";
 
 export function useTheme() {
@@ -11,6 +12,7 @@ export function useTheme() {
   const isDark = currentTheme === "dark";
 
   const toggleTheme = () => {
+    clearAutoThemeManagement();
     setTheme(isDark ? "light" : "dark");
   };
 
