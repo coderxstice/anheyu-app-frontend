@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { PanelLeftClose, Search, List, X } from "lucide-react";
 import { setArticleMetaThemeColor, restoreMetaThemeColor } from "@/utils/theme-manager";
+import { applySiteAppearanceFromConfig } from "@/utils/site-theme-colors";
 import { docSeriesApi } from "@/lib/api/doc-series";
 import { usePageStore } from "@/store/page-store";
+import { useSiteConfigStore } from "@/store/site-config-store";
 import { cn } from "@/lib/utils";
 import type { Article } from "@/types/article";
 import type { DocSeriesWithArticles, DocArticleItem } from "@/types/doc-series";
@@ -26,7 +28,6 @@ export function DocDetailContent({ article }: DocDetailContentProps) {
   const [docSeries, setDocSeries] = useState<DocSeriesWithArticles | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const originalPrimaryRef = useRef<string>("");
 
   const currentDocId = article.id;
 
@@ -42,27 +43,34 @@ export function DocDetailContent({ article }: DocDetailContentProps) {
   }, [article.title, activeDocSeries?.name, setPageTitle, clearPageTitle]);
 
   useEffect(() => {
-    if (article.primary_color) {
-      originalPrimaryRef.current = getComputedStyle(document.documentElement).getPropertyValue("--primary").trim();
-      document.documentElement.style.setProperty("--primary", article.primary_color);
-      document.documentElement.style.setProperty("--article-primary-color", article.primary_color);
-      if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(article.primary_color)) {
-        document.documentElement.style.setProperty("--primary-op", `${article.primary_color}23`);
-        document.documentElement.style.setProperty("--primary-op-deep", `${article.primary_color}dd`);
-        document.documentElement.style.setProperty("--primary-op-light", `${article.primary_color}0d`);
-      }
-      setArticleMetaThemeColor(article.primary_color);
+    if (!article.primary_color) return;
+
+    // --article-primary-color 同时作为文档接管主色的标记，
+    // 深浅模式切换时 SiteThemeColorsSync 会据此跳过主色覆盖
+    document.documentElement.style.setProperty("--primary", article.primary_color);
+    document.documentElement.style.setProperty("--article-primary-color", article.primary_color);
+    if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(article.primary_color)) {
+      document.documentElement.style.setProperty("--primary-op", `${article.primary_color}23`);
+      document.documentElement.style.setProperty("--primary-op-deep", `${article.primary_color}dd`);
+      document.documentElement.style.setProperty("--primary-op-light", `${article.primary_color}0d`);
     }
+    setArticleMetaThemeColor(article.primary_color);
+
     return () => {
-      if (originalPrimaryRef.current) {
-        document.documentElement.style.setProperty("--primary", originalPrimaryRef.current);
-      } else {
-        document.documentElement.style.removeProperty("--primary");
-      }
+      // 先移除文档主色标记，再按当前亮/暗模式恢复站点主色
+      // （不能回写进入时保存的旧值：若期间切换过深浅模式，旧值属于另一模式）
       document.documentElement.style.removeProperty("--article-primary-color");
       document.documentElement.style.removeProperty("--primary-op");
       document.documentElement.style.removeProperty("--primary-op-deep");
       document.documentElement.style.removeProperty("--primary-op-light");
+
+      const { isLoaded, siteConfig } = useSiteConfigStore.getState();
+      if (isLoaded && siteConfig) {
+        applySiteAppearanceFromConfig(siteConfig, document.documentElement.classList.contains("dark"));
+      } else {
+        document.documentElement.style.removeProperty("--primary");
+      }
+
       restoreMetaThemeColor();
     };
   }, [article.primary_color]);

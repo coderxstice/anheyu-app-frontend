@@ -485,7 +485,8 @@
 }
 
 .consoleBtnItem.on button {
-  color: var(--primary-foreground);
+  /* 固定白色：深色模式下 --primary-foreground 可能为深色，橙色激活底上需保持白色图标 */
+  color: #fff;
   background: var(--orange, #e38100);
 }
 

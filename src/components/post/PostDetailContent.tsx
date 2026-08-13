@@ -11,7 +11,7 @@
  */
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import Link from "next/link";
 import { FaHashtag } from "react-icons/fa6";
 import { PostHeader } from "./PostHeader";
@@ -29,6 +29,7 @@ import { useSiteConfigStore } from "@/store/site-config-store";
 import { useUiStore } from "@/store/ui-store";
 import { usePageStore } from "@/store/page-store";
 import { setArticleMetaThemeColor, restoreMetaThemeColor } from "@/utils/theme-manager";
+import { applySiteAppearanceFromConfig } from "@/utils/site-theme-colors";
 import { resolvePostDefaultCoverUrl } from "@/utils/same-origin-media-url";
 import type { Article, RecentArticle } from "@/types/article";
 import styles from "./PostDetail.module.css";
@@ -83,41 +84,39 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
     };
   }, [article.title, setPageTitle, clearPageTitle]);
 
-  // 保存原始主题色
-  const originalPrimaryRef = useRef<string>("");
-
   // 设置文章主题色（如果有）- 全局设置 --primary 并更新 meta theme-color
   useEffect(() => {
-    if (article.primary_color) {
-      // 保存原始主题色
-      originalPrimaryRef.current = getComputedStyle(document.documentElement).getPropertyValue("--primary").trim();
+    if (!article.primary_color) return;
 
-      // 设置全局主题色
-      document.documentElement.style.setProperty("--primary", article.primary_color);
-      document.documentElement.style.setProperty("--article-primary-color", article.primary_color);
+    // 设置全局主题色（--article-primary-color 同时作为文章接管主色的标记，
+    // 深浅模式切换时 SiteThemeColorsSync 会据此跳过主色覆盖）
+    document.documentElement.style.setProperty("--primary", article.primary_color);
+    document.documentElement.style.setProperty("--article-primary-color", article.primary_color);
 
-      // 简单判断是否为 HEX 颜色以添加透明度变体
-      if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(article.primary_color)) {
-        document.documentElement.style.setProperty("--primary-op", `${article.primary_color}23`);
-        document.documentElement.style.setProperty("--primary-op-deep", `${article.primary_color}dd`);
-        document.documentElement.style.setProperty("--primary-op-light", `${article.primary_color}0d`);
-      }
-
-      // 更新浏览器 meta theme-color
-      setArticleMetaThemeColor(article.primary_color);
+    // 简单判断是否为 HEX 颜色以添加透明度变体
+    if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(article.primary_color)) {
+      document.documentElement.style.setProperty("--primary-op", `${article.primary_color}23`);
+      document.documentElement.style.setProperty("--primary-op-deep", `${article.primary_color}dd`);
+      document.documentElement.style.setProperty("--primary-op-light", `${article.primary_color}0d`);
     }
 
+    // 更新浏览器 meta theme-color
+    setArticleMetaThemeColor(article.primary_color);
+
     return () => {
-      // 恢复原始主题色
-      if (originalPrimaryRef.current) {
-        document.documentElement.style.setProperty("--primary", originalPrimaryRef.current);
-      } else {
-        document.documentElement.style.removeProperty("--primary");
-      }
+      // 先移除文章主色标记，再按当前亮/暗模式恢复站点主色
+      // （不能回写进入时保存的旧值：若期间切换过深浅模式，旧值属于另一模式）
       document.documentElement.style.removeProperty("--article-primary-color");
       document.documentElement.style.removeProperty("--primary-op");
       document.documentElement.style.removeProperty("--primary-op-deep");
       document.documentElement.style.removeProperty("--primary-op-light");
+
+      const { isLoaded, siteConfig } = useSiteConfigStore.getState();
+      if (isLoaded && siteConfig) {
+        applySiteAppearanceFromConfig(siteConfig, document.documentElement.classList.contains("dark"));
+      } else {
+        document.documentElement.style.removeProperty("--primary");
+      }
 
       // 恢复默认 meta theme-color
       restoreMetaThemeColor();

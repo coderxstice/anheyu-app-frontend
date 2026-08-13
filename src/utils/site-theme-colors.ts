@@ -88,17 +88,23 @@ export function clearSiteAppearanceOverrides() {
 
 /**
  * 将单模式令牌应用到 :root（当前亮/暗由调用方传入的已解析令牌决定）
+ *
+ * 文章/文档页会写入 --article-primary-color 并接管主色（PostDetailContent/DocDetailContent）；
+ * 深浅模式切换会重新触发本函数，此时跳过主色写入以保留文章主色，语义色仍正常同步。
  */
 export function applyAppearanceModeTokensToDocument(tokens: AppearanceModeTokens) {
   const root = document.documentElement;
-  if (!applyPrimaryWithOps(root, tokens.primary)) {
-    clearSitePrimaryAppearanceOverrides();
-  } else {
-    const fg = expandToHex6(tokens.primaryForeground);
-    if (fg) {
-      root.style.setProperty("--primary-foreground", fg);
+  const hasArticlePrimary = root.style.getPropertyValue("--article-primary-color").trim() !== "";
+  if (!hasArticlePrimary) {
+    if (!applyPrimaryWithOps(root, tokens.primary)) {
+      clearSitePrimaryAppearanceOverrides();
     } else {
-      root.style.removeProperty("--primary-foreground");
+      const fg = expandToHex6(tokens.primaryForeground);
+      if (fg) {
+        root.style.setProperty("--primary-foreground", fg);
+      } else {
+        root.style.removeProperty("--primary-foreground");
+      }
     }
   }
   setSolidOrRemove(root, "--green", tokens.success);
