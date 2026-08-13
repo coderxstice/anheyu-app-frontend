@@ -22,6 +22,7 @@ export interface PageOneImageItem {
 }
 
 export type AlbumLayoutModeConfig = "grid" | "waterfall";
+export type SiteThemeMode = "light" | "dark" | "system" | "auto";
 
 export interface AlbumWaterfallColumnCountConfig {
   large?: number | string;
@@ -72,7 +73,11 @@ export interface SiteConfigData {
   /** 按亮/暗模式覆盖颜色令牌（JSON 对象或字符串） */
   APPEARANCE_TOKENS?: string | Record<string, unknown>;
   /** 默认主题模式：light | dark | system | auto */
-  DEFAULT_THEME_MODE?: string;
+  DEFAULT_THEME_MODE?: SiteThemeMode;
+  /** 自动主题的浅色开始时间，严格 HH:mm，按访客设备本地时间 */
+  THEME_LIGHT_START_TIME?: string;
+  /** 自动主题的深色开始时间，严格 HH:mm，按访客设备本地时间 */
+  THEME_DARK_START_TIME?: string;
   /** 是否尊重系统减弱动效偏好 */
   RESPECT_REDUCED_MOTION?: boolean | string;
   /** 站点公告 HTML，展示在导航栏下方；由管理员配置 */

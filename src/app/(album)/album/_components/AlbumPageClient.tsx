@@ -7,6 +7,7 @@ import { Header, Footer } from "@/components/layout";
 import { BannerCard } from "@/components/common/BannerCard";
 import { CommentSection } from "@/components/post/Comment";
 import { albumPublicApi } from "@/lib/api/album-public";
+import { isAutoThemeManaged, notifyThemeTemporaryOverride } from "@/lib/theme/scheduled-theme";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import type { AlbumSortOrder, AlbumStatType, PublicAlbumCategory, PublicAlbumItem } from "@/types/album";
 import { parseAlbumConfig } from "../_utils/album-config";
@@ -39,11 +40,19 @@ export function AlbumPageClient() {
   // 网格模式下强制暗色模式，离开时恢复
   useEffect(() => {
     if (!isGridLayout) return;
+    const wasAutoManaged = isAutoThemeManaged();
     previousThemeRef.current = theme;
+    if (wasAutoManaged) {
+      notifyThemeTemporaryOverride(true);
+    }
     if (theme !== "dark") {
       setTheme("dark");
     }
     return () => {
+      if (wasAutoManaged) {
+        notifyThemeTemporaryOverride(false);
+        return;
+      }
       if (previousThemeRef.current && previousThemeRef.current !== "dark") {
         setTheme(previousThemeRef.current);
       }

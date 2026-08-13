@@ -19,10 +19,17 @@ import {
   KEY_POLICE_RECORD_ICON,
   KEY_ENABLE_REGISTRATION,
   KEY_DEFAULT_THEME_MODE,
+  KEY_THEME_LIGHT_START_TIME,
+  KEY_THEME_DARK_START_TIME,
   KEY_ABOUT_LINK,
   KEY_DEFAULT_THUMB_PARAM,
   KEY_DEFAULT_BIG_PARAM,
 } from "@/lib/settings/setting-keys";
+import {
+  DEFAULT_THEME_DARK_START_TIME,
+  DEFAULT_THEME_LIGHT_START_TIME,
+  isValidScheduledThemeTime,
+} from "@/lib/theme/scheduled-theme";
 
 const SITE_ANNOUNCEMENT_EXAMPLE = `<p>站点维护通知：今晚 22:00–24:00 进行升级，期间可能短暂不可用。</p>
 <p><a href="/about">查看详情</a> · <strong>感谢理解</strong></p>`;
@@ -41,6 +48,18 @@ export function SiteBasicForm({ values, onChange, loading }: SiteBasicFormProps)
       </div>
     );
   }
+
+  const themeMode = values[KEY_DEFAULT_THEME_MODE];
+  const lightStartTime = values[KEY_THEME_LIGHT_START_TIME] ?? DEFAULT_THEME_LIGHT_START_TIME;
+  const darkStartTime = values[KEY_THEME_DARK_START_TIME] ?? DEFAULT_THEME_DARK_START_TIME;
+  const scheduleError =
+    themeMode !== "auto"
+      ? undefined
+      : !isValidScheduledThemeTime(lightStartTime) || !isValidScheduledThemeTime(darkStartTime)
+        ? "请输入有效的 HH:mm 时间"
+        : lightStartTime === darkStartTime
+          ? "浅色与深色开始时间不能相同"
+          : undefined;
 
   return (
     <div className="space-y-8">
@@ -122,11 +141,33 @@ export function SiteBasicForm({ values, onChange, loading }: SiteBasicFormProps)
           value={values[KEY_DEFAULT_THEME_MODE]}
           onValueChange={v => onChange(KEY_DEFAULT_THEME_MODE, v)}
           placeholder="请选择默认主题"
-          description="新访客首次访问时的默认主题"
+          description="站点默认主题；自动模式按访客设备本地时间切换，访客手动选择后优先"
         >
           <FormSelectItem key="light">浅色模式</FormSelectItem>
           <FormSelectItem key="dark">深色模式</FormSelectItem>
+          <FormSelectItem key="auto">定时自动切换</FormSelectItem>
         </FormSelect>
+
+        {themeMode === "auto" && (
+          <SettingsFieldGroup cols={2}>
+            <FormInput
+              label="浅色开始时间"
+              type="time"
+              value={lightStartTime}
+              onValueChange={v => onChange(KEY_THEME_LIGHT_START_TIME, v)}
+              description="按访客设备本地时间，从此时刻起使用浅色模式"
+              error={scheduleError}
+            />
+            <FormInput
+              label="深色开始时间"
+              type="time"
+              value={darkStartTime}
+              onValueChange={v => onChange(KEY_THEME_DARK_START_TIME, v)}
+              description="按访客设备本地时间，从此时刻起使用深色模式"
+              error={scheduleError}
+            />
+          </SettingsFieldGroup>
+        )}
 
         <FormMonacoEditor
           label="站点公告（HTML）"
