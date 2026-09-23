@@ -56,3 +56,14 @@ describe("setting-descriptors site-basic", () => {
     });
   });
 });
+
+
+describe("optional festive settings", () => {
+  it("defaults to disabled and keeps both labels as text", () => {
+    expect(getKeysByCategory("appearance-skin")).toEqual(expect.arrayContaining([
+      { backendKey: "fireworks.enable", type: "boolean", defaultValue: "false" },
+      { backendKey: "fireworks.button_text", type: "string", defaultValue: "节日快乐" },
+      { backendKey: "fireworks.message", type: "string", defaultValue: "愿你的每一天都有新的惊喜" },
+    ]));
+  });
+});

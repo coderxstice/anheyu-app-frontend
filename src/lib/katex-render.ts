@@ -1,3 +1,5 @@
+import { getMathSource, prepareKatexSource } from "./katex-compatibility";
+
 export interface KatexRenderTargets {
   legacyInlineElements: Element[];
   legacyBlockElements: Element[];
@@ -55,7 +57,8 @@ export async function renderKatexInElement(root: HTMLElement): Promise<void> {
   const renderElement = (element: Element, displayMode: boolean, latex: string, warnLabel: string) => {
     if (!latex) return;
     try {
-      katex.render(latex, element as HTMLElement, {
+      element.setAttribute("data-latex", latex);
+      katex.render(prepareKatexSource(latex), element as HTMLElement, {
         throwOnError: false,
         displayMode,
       });
@@ -66,11 +69,11 @@ export async function renderKatexInElement(root: HTMLElement): Promise<void> {
   };
 
   targets.legacyInlineElements.forEach(element => {
-    renderElement(element, false, element.textContent || "", "KaTeX 行内公式渲染");
+    renderElement(element, false, getMathSource(element), "KaTeX 行内公式渲染");
   });
 
   targets.legacyBlockElements.forEach(element => {
-    renderElement(element, true, element.textContent || "", "KaTeX 块级公式渲染");
+    renderElement(element, true, getMathSource(element), "KaTeX 块级公式渲染");
   });
 
   targets.tiptapBlockElements.forEach(element => {
@@ -85,6 +88,7 @@ export async function renderKatexInElement(root: HTMLElement): Promise<void> {
     try {
       const renderMathInElement = await import("katex/contrib/auto-render").then(m => m.default);
       renderMathInElement(root, {
+        preProcess: prepareKatexSource,
         delimiters: [
           { left: "$$", right: "$$", display: true },
           { left: "$", right: "$", display: false },

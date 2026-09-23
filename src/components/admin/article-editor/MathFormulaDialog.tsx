@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { ModalBody, ModalFooter, Button } from "@heroui/react";
 import katex from "katex";
+import { prepareKatexSource } from "@/lib/katex-compatibility";
 import { Sigma } from "lucide-react";
 import { AdminDialog } from "@/components/admin/AdminDialog";
 
@@ -69,7 +70,7 @@ export function MathFormulaDialog({
   const { previewHtml, previewError } = useMemo(() => {
     if (!latex.trim()) return { previewHtml: "", previewError: "" };
     try {
-      const html = katex.renderToString(latex, {
+      const html = katex.renderToString(prepareKatexSource(latex), {
         displayMode: previewDisplayMode,
         throwOnError: true,
         output: "html",

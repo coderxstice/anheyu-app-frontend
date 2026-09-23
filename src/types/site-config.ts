@@ -48,6 +48,7 @@ export interface AlbumSiteConfig {
 }
 
 export interface SiteConfigData {
+  fireworks?: { enable?: boolean | string; button_text?: string; message?: string };
   // 基础配置
   APP_NAME?: string;
   APP_VERSION?: string;

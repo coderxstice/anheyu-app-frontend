@@ -69,6 +69,41 @@ describe("useMusicAPI 播放列表缓存", () => {
     });
   });
 
+  it("Meting 歌曲直接使用协议音源，不请求 Song_V1", async () => {
+    useSiteConfigStore.setState({ siteConfig: { "music.api.protocol": "meting" } });
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const { result } = renderHook(() => useMusicAPI());
+    const resources = await result.current.fetchSongResources({ ...freshSong, url: "https://audio.test/song.mp3", lrc: "[00:01]歌词", neteaseId: "meting-0" });
+    expect(resources.audioUrl).toBe("https://audio.test/song.mp3");
+    expect(resources.lyricsText).toBe("[00:01]歌词");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("Meting 缺失音源也不会回退到旧 Song_V1 协议", async () => {
+    useSiteConfigStore.setState({ siteConfig: { "music.api.protocol": "meting" } });
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const { result } = renderHook(() => useMusicAPI());
+    expect(await result.current.fetchSongResources({ ...freshSong, neteaseId: "meting-0", url: "" })).toMatchObject({ audioUrl: "", errorType: "no_resources" });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["anheyu-playlist-cache", "music.api.protocol", "meting"],
+    ["anheyu-capsule-playlist-cache", "music.api.protocol", "meting"],
+    ["anheyu-playlist-cache", "music.api.meting_server", "tencent"],
+    ["anheyu-capsule-playlist-cache", "music.api.meting_server", "tencent"],
+  ])("协议或平台变化刷新 %s (%s)", async (cacheKey, setting, value) => {
+    localStorage.setItem(cacheKey, JSON.stringify({ data: [cachedSong], playlistId: "8152976493", customPlaylistUrl: null,
+      apiBaseURL: "https://musicapi.acacia-ma.com|legacy|netease", timestamp: Date.now() }));
+    useSiteConfigStore.setState({ siteConfig: { ...useSiteConfigStore.getState().siteConfig, [setting]: value } });
+    const { result } = renderHook(() => useMusicAPI());
+    await act(async () => { await (cacheKey.includes("capsule") ? result.current.fetchCapsulePlaylist() : result.current.fetchPlaylist()); });
+    expect(getPlaylistApi).toHaveBeenCalledOnce();
+    expect(JSON.parse(localStorage.getItem(cacheKey)!).apiBaseURL).toContain(value);
+  });
+
   it("音乐 API 地址变化后刷新音乐馆缓存", async () => {
     setCachedPlaylist("anheyu-playlist-cache");
     const { result } = renderHook(() => useMusicAPI());

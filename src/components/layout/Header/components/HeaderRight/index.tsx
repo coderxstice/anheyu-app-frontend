@@ -39,7 +39,8 @@ export function HeaderRight({
 }: HeaderRightProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated, logout, isAdmin: checkIsAdmin } = useAuthStore();
+  const { user, isAuthenticated: checkIsAuthenticated, logout, isAdmin: checkIsAdmin } = useAuthStore();
+  const isAuthenticated = checkIsAuthenticated();
   const registrationEnabledRaw = useSiteConfigStore(s => s.enableRegistration());
   const siteConfig = useSiteConfigStore(s => s.siteConfig);
   const userPanelConfig = useSiteConfigStore(useShallow(s => s.userPanelConfig()));
@@ -62,7 +63,7 @@ export function HeaderRight({
   }, [isFooterVisible, scrollPercent]);
 
   // 是否为管理员
-  const isAdmin = useMemo(() => checkIsAdmin(), [checkIsAdmin]);
+  const isAdmin = checkIsAdmin();
 
   const panelAvatarUrl = useMemo(() => {
     if (!user) return `https://cravatar.cn/avatar/?s=200&d=mp`;

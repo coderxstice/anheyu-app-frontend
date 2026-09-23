@@ -16,6 +16,9 @@ import { tryParseAppearanceTokensJson } from "@/lib/theme/appearance-resolve";
 import type { AppearanceModeTokens, AppearanceTokenKey } from "@/lib/theme/appearance-types";
 import { APPEARANCE_TOKEN_KEYS } from "@/lib/theme/appearance-types";
 import { cn } from "@/lib/utils";
+import { FormSwitch } from "@/components/ui/form-switch";
+import { FormInput } from "@/components/ui/form-input";
+import { KEY_FIREWORKS_ENABLE, KEY_FIREWORKS_BUTTON_TEXT, KEY_FIREWORKS_MESSAGE } from "@/lib/settings/setting-keys";
 
 const TOKEN_LABELS: Record<AppearanceTokenKey, string> = {
   primary: "主色",
@@ -127,6 +130,15 @@ export function AppearanceSkinForm({ values, onChange, loading }: AppearanceSkin
 
   return (
     <div className="space-y-8">
+      <SettingsSection title="节庆烟花">
+        <FormSwitch label="显示烟花入口" description="默认关闭。由访客点击触发，可随时停止；减少动态效果时仅显示祝福。"
+          checked={values[KEY_FIREWORKS_ENABLE] === "true"}
+          onCheckedChange={checked => onChange(KEY_FIREWORKS_ENABLE, String(checked))} />
+        <FormInput label="按钮文案" value={values[KEY_FIREWORKS_BUTTON_TEXT] || "节日快乐"}
+          onValueChange={value => onChange(KEY_FIREWORKS_BUTTON_TEXT, value)} />
+        <FormInput label="祝福文案" value={values[KEY_FIREWORKS_MESSAGE] || ""}
+          onValueChange={value => onChange(KEY_FIREWORKS_MESSAGE, value)} />
+      </SettingsSection>
       <SettingsSection title="配色方案">
         <p className="text-sm text-muted-foreground -mt-2 mb-4 max-w-3xl leading-relaxed">
           选择内置换肤方案后，前台会按当前亮/暗模式应用对应颜色；下方「令牌覆盖」可逐项覆盖预设（留空则沿用预设）。

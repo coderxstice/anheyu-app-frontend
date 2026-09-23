@@ -9,6 +9,7 @@
  */
 import { Node, mergeAttributes, InputRule } from "@tiptap/core";
 import katex from "katex";
+import { getMathSource, prepareKatexSource } from "@/lib/katex-compatibility";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -48,6 +49,11 @@ export const MathInline = Node.create({
 
   parseHTML() {
     return [
+      {
+        tag: ".md-editor-katex-inline",
+        priority: 100,
+        getAttrs: (element: HTMLElement) => ({ latex: getMathSource(element) }),
+      },
       // 解析 KaTeX 行内输出（排除 display 模式）
       {
         tag: ".katex:not(.katex-display .katex)",
@@ -85,7 +91,7 @@ export const MathInline = Node.create({
     });
     if (latex) {
       try {
-        dom.innerHTML = katex.renderToString(latex, {
+        dom.innerHTML = katex.renderToString(prepareKatexSource(latex), {
           displayMode: false,
           throwOnError: false,
           output: "html",
@@ -116,7 +122,7 @@ export const MathInline = Node.create({
       let currentLatex = (node.attrs.latex as string) || "";
       const renderLatex = (latex: string) => {
         try {
-          dom.innerHTML = katex.renderToString(latex, {
+          dom.innerHTML = katex.renderToString(prepareKatexSource(latex), {
             displayMode: false,
             throwOnError: false,
             output: "html",

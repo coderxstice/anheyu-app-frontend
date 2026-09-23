@@ -1,4 +1,6 @@
 import dynamic from "next/dynamic";
+import { PwaRegistration } from "@/components/pwa/PwaRegistration";
+import { FestiveFireworks } from "@/components/festive/FestiveFireworks";
 import { Header, Footer, OneImageBanner, KeyboardShortcutsProvider } from "@/components/layout";
 import { IdleMount } from "@/components/common/IdleMount";
 import { ScrollInitializer } from "@/providers/scroll-initializer";
@@ -12,6 +14,8 @@ export default function FrontendLayout({ children }: { children: React.ReactNode
   return (
     <div id="frontend-layout" className="frontend-layout">
       <ScrollInitializer />
+      <PwaRegistration />
+      <FestiveFireworks />
       <ConsolePrinter />
       <ExternalLinkInterceptor />
       <KeyboardShortcutsProvider />

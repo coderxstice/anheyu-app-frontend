@@ -25,7 +25,7 @@ export function Sidebar() {
       skills: siteConfig.sidebar.author.skills || [],
       social: siteConfig.sidebar.author.social || {},
       userAvatar: siteConfig.USER_AVATAR || "",
-      ownerName: siteConfig.frontDesk?.siteOwner?.name || "",
+      ownerName: siteConfig.frontDesk?.siteOwner?.name ?? "",
       subTitle: siteConfig.SUB_TITLE || "",
     };
   }, [siteConfig]);

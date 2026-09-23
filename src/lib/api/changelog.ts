@@ -6,7 +6,7 @@ import type { Changelog, ChangelogListResponse, ChangelogQuery, ChangelogApiResp
 const CHANGELOG_API_BASE = "https://anheyuofficialwebsiteapi.anheyu.com/api/v1";
 
 export async function getChangelogList(
-  query: ChangelogQuery = {}
+  query: ChangelogQuery = {}, signal?: AbortSignal
 ): Promise<ChangelogApiResponse<ChangelogListResponse>> {
   const defaultQuery: ChangelogQuery = {
     page: 1,
@@ -26,6 +26,7 @@ export async function getChangelogList(
 
   const url = `${CHANGELOG_API_BASE}/changelog?${params.toString()}`;
   const response = await fetch(url, {
+    signal,
     method: "GET",
     headers: {
       Accept: "application/json",

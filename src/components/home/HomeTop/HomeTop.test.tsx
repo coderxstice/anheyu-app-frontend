@@ -36,6 +36,8 @@ vi.mock("@/lib/api/article", () => ({
   },
 }));
 
+vi.mock("@/hooks/queries/use-articles", () => ({ useHomeArticles: () => ({ data: [] }) }));
+
 describe("HomeTop creativity icons", () => {
   beforeEach(() => {
     useSiteConfigStore.setState({

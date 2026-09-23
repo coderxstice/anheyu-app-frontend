@@ -13,6 +13,7 @@ import { useState, useCallback, useMemo, useRef, useEffect, type KeyboardEvent }
 import { createPortal } from "react-dom";
 import { Copy, Check, ChevronDown, ChevronRight, MoreHorizontal } from "lucide-react";
 import { useSiteConfigStore } from "@/store/site-config-store";
+import { indentCodeBlock } from "./code-block-indentation";
 
 /** 超过此行数时默认折叠 */
 const COLLAPSE_THRESHOLD = 15;
@@ -703,6 +704,8 @@ export function createEnhancedCodeBlock(lowlight: unknown) {
     addKeyboardShortcuts() {
       return {
         ...this.parent?.(),
+        Tab: ({ editor }) => indentCodeBlock(editor, this.name),
+        "Shift-Tab": ({ editor }) => indentCodeBlock(editor, this.name, true),
         "Mod-a": ({ editor }) => {
           const { state } = editor;
           const { $from, from: selFrom, to: selTo } = state.selection;

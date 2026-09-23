@@ -5,15 +5,19 @@ import Link from "next/link";
 import { Button } from "@heroui/react";
 import { ExternalLink, RefreshCw, Sparkles } from "lucide-react";
 import { getVersionInfo, type VersionInfo } from "@/lib/version";
+import { checkForUpdate, type UpdateResult } from "@/lib/release-update";
 
 export function AdminVersionCard() {
   const [version, setVersion] = useState<VersionInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [update, setUpdate] = useState<UpdateResult | null>(null);
 
   const loadVersion = async (forceRefresh = false) => {
     setLoading(true);
     try {
-      setVersion(await getVersionInfo(forceRefresh));
+      const info = await getVersionInfo(forceRefresh);
+      setVersion(info);
+      setUpdate(await checkForUpdate(info.version || "", "community", forceRefresh));
     } finally {
       setLoading(false);
     }
@@ -40,6 +44,9 @@ export function AdminVersionCard() {
                 {loading ? "读取中" : version?.version || "未知版本"}
               </span>
             </div>
+            <p className="mt-1 text-xs text-muted-foreground" role="status">
+              {update?.status === "available" ? `发现新版本 ${update.version}，可查看更新日志` : update?.status === "current" ? "已是当前可获取的最新版本" : update?.status === "unavailable" ? "暂时无法检查更新，可稍后重试" : "正在检查更新"}
+            </p>
             <p className="mt-1 text-xs text-muted-foreground">
               {version?.name || "anheyu-app"} · Commit {commit} · 构建 {buildDate}
             </p>

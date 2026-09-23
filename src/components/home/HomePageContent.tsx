@@ -36,7 +36,7 @@ const itemVariants: Variants = {
 
 export function HomePageContent() {
   return (
-    <motion.div className="home-page-content" initial="hidden" animate="visible" variants={containerVariants}>
+    <motion.div className="home-page-content" initial={false} animate="visible" variants={containerVariants}>
       {/* 首页顶部区域 */}
       <motion.div className="post-home-top-container" variants={itemVariants}>
         <HomeTop />

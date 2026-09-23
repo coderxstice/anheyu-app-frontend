@@ -4,8 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Spinner, Tabs, Tab, Checkbox, Select, SelectItem } from "@heroui/react";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { postManagementApi } from "@/lib/api/post-management";
+import { adminArticleEditDetailQueryOptions, postManagementKeys } from "@/hooks/queries/use-post-management";
 import { renderKatexInElement } from "@/lib/katex-render";
 import type { ArticleHistoryListItem, ArticleHistoryDetail } from "@/types/post-management";
 
@@ -31,6 +32,32 @@ function formatHistoryTime(dateStr: string): string {
 
 export function ArticleHistoryPage({ articleId }: ArticleHistoryPageProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const restoreInFlight = useRef(false);
+  const restoreMutation = useMutation({
+    mutationFn: async (version: number) => {
+      const data = await postManagementApi.restoreArticleHistory(articleId, version);
+      return postManagementApi.updateArticle(articleId, {
+        title: data.title,
+        content_html: data.content_html,
+        content_md: data.content_md,
+      });
+    },
+    onSuccess: async () => {
+      // Prevent an older in-flight read from overwriting the restored version.
+      await queryClient.cancelQueries({ queryKey: postManagementKeys.all });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: postManagementKeys.lists(), refetchType: "all" }),
+        queryClient.invalidateQueries({ queryKey: postManagementKeys.detail(articleId), refetchType: "all" }),
+        queryClient.invalidateQueries({ queryKey: postManagementKeys.editDetail(articleId), refetchType: "none" }),
+        queryClient.invalidateQueries({ queryKey: ["article-history", articleId] }),
+      ]);
+      // The editor initializes once per article ID and does not refetch on mount.
+      // Obtain its fresh content before navigating, so it cannot initialize from stale data.
+      await queryClient.fetchQuery({ ...adminArticleEditDetailQueryOptions(articleId), staleTime: 0 });
+      router.push(`/admin/post-management/${articleId}/edit`);
+    },
+  });
 
   // 列表状态
   const [activeTab, setActiveTab] = useState("all");
@@ -87,18 +114,14 @@ export function ArticleHistoryPage({ articleId }: ArticleHistoryPageProps) {
 
   // 恢复版本
   const handleRestore = async () => {
-    if (!selectedVersion) return;
+    if (!selectedVersion || restoreInFlight.current) return;
+    restoreInFlight.current = true;
     try {
-      const data = await postManagementApi.restoreArticleHistory(articleId, selectedVersion);
-      // 恢复 = 用历史版本数据调用更新接口
-      await postManagementApi.updateArticle(articleId, {
-        title: data.title,
-        content_html: data.content_html,
-        content_md: data.content_md,
-      });
-      router.push(`/admin/post-management/${articleId}/edit`);
+      await restoreMutation.mutateAsync(selectedVersion);
     } catch {
       // 错误处理由 API 层处理
+    } finally {
+      restoreInFlight.current = false;
     }
   };
 
@@ -120,7 +143,13 @@ export function ArticleHistoryPage({ articleId }: ArticleHistoryPageProps) {
           <Button variant="bordered" size="sm" isDisabled={!selectedVersion || !versionDetail}>
             保存为版本
           </Button>
-          <Button color="success" size="sm" onPress={handleRestore} isDisabled={!selectedVersion || !versionDetail}>
+          <Button
+            color="success"
+            size="sm"
+            onPress={handleRestore}
+            isLoading={restoreMutation.isPending}
+            isDisabled={!selectedVersion || !versionDetail || restoreMutation.isPending}
+          >
             恢复此记录
           </Button>
         </div>
@@ -180,6 +209,7 @@ export function ArticleHistoryPage({ articleId }: ArticleHistoryPageProps) {
             )}
             <span className="text-sm text-muted-foreground">与</span>
             <Select
+              aria-label="对比历史版本"
               placeholder="请选择历史"
               size="sm"
               className="w-40"

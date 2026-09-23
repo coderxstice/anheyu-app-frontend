@@ -10,6 +10,7 @@
 import { Node, mergeAttributes, InputRule } from "@tiptap/core";
 import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
 import katex from "katex";
+import { getMathSource, prepareKatexSource } from "@/lib/katex-compatibility";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { Pencil } from "lucide-react";
 
@@ -68,7 +69,7 @@ function MathBlockView({ node, updateAttributes }: NodeViewProps) {
   // 渲染公式
   let renderedHtml = "";
   try {
-    renderedHtml = katex.renderToString(latex, {
+    renderedHtml = katex.renderToString(prepareKatexSource(latex), {
       displayMode: true,
       throwOnError: false,
       output: "html",
@@ -131,6 +132,11 @@ export const MathBlock = Node.create({
 
   parseHTML() {
     return [
+      {
+        tag: ".md-editor-katex-block",
+        priority: 100,
+        getAttrs: (element: HTMLElement) => ({ latex: getMathSource(element) }),
+      },
       // 解析 KaTeX display 模式输出
       {
         tag: ".katex-display",
@@ -168,7 +174,7 @@ export const MathBlock = Node.create({
     });
     if (latex) {
       try {
-        el.innerHTML = katex.renderToString(latex, {
+        el.innerHTML = katex.renderToString(prepareKatexSource(latex), {
           displayMode: true,
           throwOnError: false,
           output: "html",

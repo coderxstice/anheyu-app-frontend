@@ -478,6 +478,9 @@ const categoryDescriptors: Record<SettingCategoryId, SettingDescriptor[]> = {
     { backendKey: K.KEY_DEFAULT_GRAVATAR_TYPE, type: "string", defaultValue: "mp" },
   ],
   "appearance-skin": [
+    { backendKey: K.KEY_FIREWORKS_ENABLE, type: "boolean", defaultValue: "false" },
+    { backendKey: K.KEY_FIREWORKS_BUTTON_TEXT, type: "string", defaultValue: "节日快乐" },
+    { backendKey: K.KEY_FIREWORKS_MESSAGE, type: "string", defaultValue: "愿你的每一天都有新的惊喜" },
     { backendKey: K.KEY_APPEARANCE_SKIN, type: "string", defaultValue: "brand_blue" },
     { backendKey: K.KEY_APPEARANCE_TOKENS, type: "json", defaultValue: "{}" },
   ],
@@ -831,6 +834,8 @@ const categoryDescriptors: Record<SettingCategoryId, SettingDescriptor[]> = {
     { backendKey: K.KEY_MUSIC_PLAYER_CUSTOM_PLAYLIST, type: "string" },
     { backendKey: K.KEY_MUSIC_CAPSULE_CUSTOM_PLAYLIST, type: "string" },
     { backendKey: K.KEY_MUSIC_API_BASE_URL, type: "string" },
+    { backendKey: K.KEY_MUSIC_API_PROTOCOL, type: "string" },
+    { backendKey: K.KEY_MUSIC_METING_SERVER, type: "string" },
     { backendKey: K.KEY_MUSIC_VINYL_BACKGROUND, type: "string" },
     { backendKey: K.KEY_MUSIC_VINYL_OUTER, type: "string" },
     { backendKey: K.KEY_MUSIC_VINYL_INNER, type: "string" },
