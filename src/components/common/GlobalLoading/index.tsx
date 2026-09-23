@@ -23,9 +23,9 @@ export function GlobalLoading() {
   useEffect(() => {
     // 只执行一次：React hydration 完成后立即隐藏初始加载动画
     if (!hasHiddenRef.current) {
-      hasHiddenRef.current = true;
       // 短暂延迟确保页面渲染
       const timer = setTimeout(() => {
+        hasHiddenRef.current = true;
         document.documentElement.setAttribute("data-loaded", "true");
       }, 100);
       return () => clearTimeout(timer);

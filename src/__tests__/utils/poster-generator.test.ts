@@ -206,7 +206,7 @@ describe("generatePoster", () => {
       })
     ).resolves.toBe("data:image/png;base64,poster");
 
-    const drawImage = vi.mocked(context.drawImage);
+    const drawImage = vi.mocked(context.drawImage!);
     const qrDraw = drawImage.mock.calls.find(call => call[3] === 120 && call[4] === 120);
 
     expect(qrDraw).toBeDefined();

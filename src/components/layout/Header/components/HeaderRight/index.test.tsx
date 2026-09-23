@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { vi } from "vitest";
 import { HeaderRight } from "./index";
 
@@ -6,11 +6,7 @@ type Selector<TState, TResult = unknown> = (state: TState) => TResult;
 
 vi.mock("next/link", () => ({
   __esModule: true,
-  default: ({ href, children, ...props }: { href: string; children: React.ReactNode }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
+  default: ({ href, children }: { href: string; children: React.ReactNode }) => <a href={href}>{children}</a>,
 }));
 
 vi.mock("next/image", () => ({
@@ -65,6 +61,7 @@ vi.mock("@/store/site-config-store", () => ({
   useSiteConfigStore: (selector?: Selector<typeof siteState>) => mockUseSiteConfigStore(selector),
 }));
 
+let adminAllowed = true;
 const authState = {
   user: {
     id: "1",
@@ -79,9 +76,9 @@ const authState = {
     userGroup: { id: "1", name: "管理员", description: "" },
     status: 1,
   },
-  isAuthenticated: true,
+  isAuthenticated: vi.fn(() => true),
   logout: vi.fn(),
-  isAdmin: () => true,
+  isAdmin: () => adminAllowed,
 };
 
 const siteState = {
@@ -96,7 +93,10 @@ const siteState = {
 };
 
 describe("HeaderRight app user panel", () => {
+  afterEach(cleanup);
   beforeEach(() => {
+    adminAllowed = true;
+    authState.isAuthenticated.mockReturnValue(true);
     mockUseAuthStore.mockImplementation(selector => (selector ? selector(authState) : authState));
     mockUseSiteConfigStore.mockImplementation(selector => (selector ? selector(siteState) : siteState));
   });
@@ -119,4 +119,22 @@ describe("HeaderRight app user panel", () => {
     expect(screen.queryByText("后台管理")).not.toBeInTheDocument();
     expect(screen.queryByText("发布说说")).not.toBeInTheDocument();
   });
+  it("removes administrator actions immediately when the account loses its role", () => {
+    const props = { navConfig: { travelling: false }, isTransparent: false, scrollPercent: 50, isFooterVisible: false, isConsoleOpen: false, onToggleConsole: vi.fn() };
+    const { rerender } = render(<HeaderRight {...props} />);
+    expect(screen.getByText("发布文章")).toBeInTheDocument();
+    adminAllowed = false;
+    rerender(<HeaderRight {...props} />);
+    expect(screen.queryByText("发布文章")).toBeNull();
+    expect(screen.queryByText("后台管理")).toBeNull();
+  });
+
+  it("does not expose administrator actions while logged out", () => {
+    authState.isAuthenticated.mockReturnValue(false);
+    render(<HeaderRight navConfig={{ travelling: false }} isTransparent={false} scrollPercent={0} isFooterVisible={false} isConsoleOpen={false} onToggleConsole={vi.fn()} />);
+    expect(screen.queryByText("发布文章")).toBeNull();
+    expect(screen.queryByText("后台管理")).toBeNull();
+    expect(screen.queryByText("发布说说")).toBeNull();
+  });
+
 });

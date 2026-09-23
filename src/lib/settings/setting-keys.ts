@@ -5,6 +5,9 @@
 
 // ==================== 站点基础配置 ====================
 export const KEY_APP_NAME = "APP_NAME";
+export const KEY_FIREWORKS_ENABLE = "fireworks.enable";
+export const KEY_FIREWORKS_BUTTON_TEXT = "fireworks.button_text";
+export const KEY_FIREWORKS_MESSAGE = "fireworks.message";
 export const KEY_SUB_TITLE = "SUB_TITLE";
 export const KEY_SITE_DESCRIPTION = "SITE_DESCRIPTION";
 export const KEY_SITE_KEYWORDS = "SITE_KEYWORDS";
@@ -462,6 +465,8 @@ export const KEY_MUSIC_PLAYER_PLAYLIST_ID = "music.player.playlist_id";
 export const KEY_MUSIC_PLAYER_CUSTOM_PLAYLIST = "music.player.custom_playlist";
 export const KEY_MUSIC_CAPSULE_CUSTOM_PLAYLIST = "music.capsule.custom_playlist";
 export const KEY_MUSIC_API_BASE_URL = "music.api.base_url";
+export const KEY_MUSIC_API_PROTOCOL = "music.api.protocol";
+export const KEY_MUSIC_METING_SERVER = "music.api.meting_server";
 export const KEY_MUSIC_VINYL_BACKGROUND = "music.vinyl.background";
 export const KEY_MUSIC_VINYL_OUTER = "music.vinyl.outer";
 export const KEY_MUSIC_VINYL_INNER = "music.vinyl.inner";

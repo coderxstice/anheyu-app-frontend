@@ -70,6 +70,11 @@ export function useMusicAPI() {
     return (apiBaseURL || "https://metings.qjqq.cn").replace(/\/+$/, "");
   }, []);
 
+  const getMusicCacheIdentity = useCallback(() => {
+    const config = siteConfigRef.current;
+    return `${getMusicAPIBaseURL()}|${getConfigString(config, ["music.api.protocol", "frontDesk.home.music.api.protocol"]) || "legacy"}|${getConfigString(config, ["music.api.meting_server", "frontDesk.home.music.api.meting_server"]) || "netease"}`;
+  }, [getMusicAPIBaseURL]);
+
   // 从配置获取当前播放列表ID
   const getCurrentPlaylistId = useCallback((): string => {
     const config = siteConfigRef.current;
@@ -118,7 +123,7 @@ export function useMusicAPI() {
       const currentId = getCurrentPlaylistId();
       const currentCustomUrl = getCustomPlaylistUrl();
       const cachedCustomUrl = cache.customPlaylistUrl || null;
-      const currentAPIBaseURL = getMusicAPIBaseURL();
+      const currentAPIBaseURL = getMusicCacheIdentity();
 
       if (
         cache.playlistId !== currentId ||
@@ -134,7 +139,7 @@ export function useMusicAPI() {
       localStorage.removeItem(CACHE_KEY);
       return null;
     }
-  }, [getCurrentPlaylistId, getCustomPlaylistUrl, getMusicAPIBaseURL]);
+  }, [getCurrentPlaylistId, getCustomPlaylistUrl, getMusicCacheIdentity]);
 
   // 设置缓存
   const setPlaylistCache = useCallback(
@@ -144,7 +149,7 @@ export function useMusicAPI() {
           data,
           playlistId: getCurrentPlaylistId(),
           customPlaylistUrl: getCustomPlaylistUrl(),
-          apiBaseURL: getMusicAPIBaseURL(),
+          apiBaseURL: getMusicCacheIdentity(),
           timestamp: Date.now(),
         };
         localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
@@ -152,7 +157,7 @@ export function useMusicAPI() {
         console.error("[MUSIC_CACHE] 设置缓存失败:", error);
       }
     },
-    [getCurrentPlaylistId, getCustomPlaylistUrl, getMusicAPIBaseURL]
+    [getCurrentPlaylistId, getCustomPlaylistUrl, getMusicCacheIdentity]
   );
 
   // 清除缓存
@@ -291,7 +296,7 @@ export function useMusicAPI() {
 
       const currentCustomUrl = getCapsuleCustomPlaylistUrl();
       const cachedCustomUrl = cache.customPlaylistUrl || null;
-      const currentAPIBaseURL = getMusicAPIBaseURL();
+      const currentAPIBaseURL = getMusicCacheIdentity();
 
       if (cachedCustomUrl !== currentCustomUrl || cache.apiBaseURL !== currentAPIBaseURL) {
         localStorage.removeItem(CAPSULE_CACHE_KEY);
@@ -303,7 +308,7 @@ export function useMusicAPI() {
       localStorage.removeItem(CAPSULE_CACHE_KEY);
       return null;
     }
-  }, [getCapsuleCustomPlaylistUrl, getMusicAPIBaseURL]);
+  }, [getCapsuleCustomPlaylistUrl, getMusicCacheIdentity]);
 
   const setCapsulePlaylistCache = useCallback(
     (data: Song[]): void => {
@@ -312,7 +317,7 @@ export function useMusicAPI() {
           data,
           playlistId: getCurrentPlaylistId(),
           customPlaylistUrl: getCapsuleCustomPlaylistUrl(),
-          apiBaseURL: getMusicAPIBaseURL(),
+          apiBaseURL: getMusicCacheIdentity(),
           timestamp: Date.now(),
         };
         localStorage.setItem(CAPSULE_CACHE_KEY, JSON.stringify(cache));
@@ -320,7 +325,7 @@ export function useMusicAPI() {
         console.error("[CAPSULE_CACHE] 设置缓存失败:", error);
       }
     },
-    [getCurrentPlaylistId, getCapsuleCustomPlaylistUrl, getMusicAPIBaseURL]
+    [getCurrentPlaylistId, getCapsuleCustomPlaylistUrl, getMusicCacheIdentity]
   );
 
   // 获取音乐胶囊专用的歌单数据
@@ -451,6 +456,10 @@ export function useMusicAPI() {
       let lyricsText = "";
       if (song.lrc && song.lrc.trim()) {
         lyricsText = await fetchLyricContent(song.lrc, songName);
+      }
+
+      if (getConfigString(siteConfigRef.current, ["music.api.protocol", "frontDesk.home.music.api.protocol"]) === "meting") {
+        return { audioUrl: song.url || "", lyricsText, errorType: song.url ? undefined : "no_resources", errorMessage: song.url ? undefined : "Meting 未返回可用音源" };
       }
 
       // 如果没有网易云ID，返回现有的歌词内容

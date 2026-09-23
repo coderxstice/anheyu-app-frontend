@@ -115,6 +115,7 @@ export const adminMenuConfig: AdminMenuGroup[] = [
     icon: "ri:settings-3-line",
     rank: 6,
     items: [
+      { id: "cache", label: "缓存管理", href: "/admin/cache", icon: "ri:database-2-line", roles: ["admin"] },
       {
         id: "settings",
         label: "系统设置",

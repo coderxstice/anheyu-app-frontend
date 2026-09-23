@@ -14,6 +14,8 @@ import {
   KEY_MUSIC_PLAYER_CUSTOM_PLAYLIST,
   KEY_MUSIC_CAPSULE_CUSTOM_PLAYLIST,
   KEY_MUSIC_API_BASE_URL,
+  KEY_MUSIC_API_PROTOCOL,
+  KEY_MUSIC_METING_SERVER,
   KEY_MUSIC_VINYL_BACKGROUND,
   KEY_MUSIC_VINYL_OUTER,
   KEY_MUSIC_VINYL_INNER,
@@ -89,6 +91,13 @@ export function MusicPageForm({ values, onChange, loading }: MusicPageFormProps)
             onCheckedChange={v => onChange(KEY_MUSIC_PLAYER_ENABLE, String(v))}
           />
           <div className="mt-4 space-y-4">
+            <label className="block text-sm">音乐协议
+              <select aria-label="音乐协议" className="mt-2 w-full rounded-lg border border-border bg-background p-2" value={values[KEY_MUSIC_API_PROTOCOL] || "legacy"} onChange={event=>onChange(KEY_MUSIC_API_PROTOCOL,event.target.value)}>
+                <option value="legacy">现有 Playlist / Song_V1 协议</option><option value="meting">Meting 协议</option>
+              </select>
+            </label>
+            {values[KEY_MUSIC_API_PROTOCOL] === "meting" && <FormInput label="Meting 平台" value={values[KEY_MUSIC_METING_SERVER] || "netease"} onValueChange={v=>onChange(KEY_MUSIC_METING_SERVER,v)} description="如 netease、tencent；API 地址填写完整的 Meting 端点。" />}
+
             <FormInput
               label="API 地址"
               placeholder="音乐解析 API 基础 URL"

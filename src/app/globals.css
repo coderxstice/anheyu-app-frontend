@@ -906,6 +906,21 @@ pre {
   opacity: 1;
   transition: opacity 0.3s ease-out;
   pointer-events: none;
+  /* Let server-rendered content remain readable even when hydration fails. */
+  animation: initial-loader-dismiss 0s 3s forwards;
+}
+
+@keyframes initial-loader-dismiss {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #initial-loader {
+    display: none;
+  }
 }
 
 html.dark #initial-loader {
@@ -915,6 +930,8 @@ html.dark #initial-loader {
 /* React hydration 完成后隐藏 */
 html[data-loaded="true"] #initial-loader {
   opacity: 0;
+  visibility: hidden;
+  animation: none;
   pointer-events: none;
 }
 
