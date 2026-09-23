@@ -46,7 +46,7 @@ vi.mock("./EditorToolbar", () => ({
   EditorToolbar: () => null,
 }));
 vi.mock("./TiptapEditor", () => ({
-  TiptapEditor: () => null,
+  TiptapEditor: () => <textarea aria-label="编辑器未保存内容" defaultValue="未保存正文" />,
 }));
 vi.mock("./SourceCodeEditor", () => ({
   SourceCodeEditor: () => null,
@@ -199,6 +199,43 @@ describe("ArticleEditorPage autosave coordination", () => {
       isEditMode: true,
       isSaving: true,
     });
+  });
+
+  it.each([
+    ["新建文章 | AnHeYu", "编辑文章 | AnHeYu"],
+    ["新建文章 | 0988 | 新建文章", "编辑文章 | 0988 | 新建文章"],
+    ["新建文章", "编辑文章"],
+  ])("updates the new-page title %s in place after automatic creation", async (initialTitle, savedTitle) => {
+    document.title = initialTitle;
+    renderPage();
+    const initialEditor = mocks.useAutoSaveOptions?.editor;
+    const draft = screen.getByRole("textbox", { name: "编辑器未保存内容" }) as HTMLTextAreaElement;
+    fireEvent.change(draft, { target: { value: "尚未保存的新正文" } });
+    draft.setSelectionRange(2, 5);
+
+    await act(async () => {
+      (mocks.useAutoSaveOptions?.onArticleCreated as (id: string) => void)("created-id");
+    });
+
+    expect(document.title).toBe(savedTitle);
+    expect(window.location.pathname).toBe("/admin/post-management/created-id/edit");
+    expect(mocks.useAutoSaveOptions?.editor).toBe(initialEditor);
+    expect(screen.getByRole("textbox", { name: "编辑器未保存内容" })).toBe(draft);
+    expect(draft.value).toBe("尚未保存的新正文");
+    expect([draft.selectionStart, draft.selectionEnd]).toEqual([2, 5]);
+    expect(editor.commands.setContent).not.toHaveBeenCalled();
+    expect(mocks.push).not.toHaveBeenCalled();
+  });
+
+  it("preserves an unrelated page title during automatic creation", async () => {
+    document.title = "站点自定义编辑标题";
+    renderPage();
+
+    await act(async () => {
+      (mocks.useAutoSaveOptions?.onArticleCreated as (id: string) => void)("created-id");
+    });
+
+    expect(document.title).toBe("站点自定义编辑标题");
   });
 
   it("does not report success or leave when a new empty draft has nothing to save", async () => {
