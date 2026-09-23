@@ -203,6 +203,8 @@ export function ArticleEditorPage({ articleId }: ArticleEditorPageProps) {
     setDraftArticleId(id);
     if (typeof window !== "undefined") {
       window.history.replaceState(window.history.state, "", `/admin/post-management/${id}/edit`);
+      // 原地更新 URL 不会重新执行路由 metadata；保留站点模板后缀且不重挂载编辑器。
+      document.title = document.title.replace(/^新建文章(?= \| |$)/, "编辑文章");
     }
   }, []);
 
