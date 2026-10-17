@@ -34,7 +34,7 @@ function MailIcon({ className }: { className?: string }) {
   );
 }
 
-type Step = "check-email" | "login-password" | "confirm-register" | "register";
+type Step = "check-email" | "login-password" | "register";
 
 interface LoginFormProps {
   redirectUrl?: string;
@@ -135,7 +135,8 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
 
   const captchaRef = useRef<CaptchaWidgetRef>(null);
 
-  const [step, setStep] = useState<Step>(initialStep ?? "check-email");
+  const [currentStep, setStep] = useState<Step>(initialStep ?? "check-email");
+  const step = currentStep === "register" && !registrationEnabled ? "check-email" : currentStep;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
@@ -171,6 +172,7 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
   }, [oauthConfig, rainbowLoginMethods]);
 
   const switchStep = (targetStep: Step) => {
+    if (targetStep === "register" && !registrationEnabled) return;
     setStep(targetStep);
     setError("");
     if (targetStep === "check-email") {
@@ -182,7 +184,7 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const handleCheckEmail = async () => {
+  const handleContinueWithEmail = () => {
     if (!email) {
       setError("请输入邮箱地址");
       return;
@@ -192,29 +194,7 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
       return;
     }
 
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const response = await authService.checkEmail(email);
-      if (response.code === 200) {
-        if (response.data?.exists) {
-          switchStep("login-password");
-        } else if (registrationEnabled) {
-          switchStep("confirm-register");
-        } else {
-          setError("该账号不存在，且站点未开放注册");
-        }
-      } else {
-        addToast({ title: response.message || "检查邮箱失败", color: "danger", timeout: 3000 });
-      }
-    } catch (err) {
-      // 检查邮箱失败时，默认进入密码登录步骤
-      console.warn("检查邮箱失败:", getErrorMessage(err));
-      switchStep("login-password");
-    } finally {
-      setIsLoading(false);
-    }
+    switchStep("login-password");
   };
 
   const handleLogin = async (skipCaptcha = false) => {
@@ -257,6 +237,10 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
   };
 
   const handleRegister = async () => {
+    if (!registrationEnabled) {
+      addToast({ title: "站点已关闭注册", color: "warning", timeout: 3000 });
+      return;
+    }
     if (!email) {
       addToast({ title: "请输入邮箱地址", color: "warning", timeout: 3000 });
       return;
@@ -336,13 +320,13 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
     (e: React.KeyboardEvent) => {
       if (e.key === "Enter") {
         e.preventDefault();
-        if (step === "check-email") handleCheckEmail();
+        if (step === "check-email") handleContinueWithEmail();
         else if (step === "login-password") handleLogin();
         else if (step === "register") handleRegister();
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [step, email, password, repeatPassword, nickname]
+    [step, email, password, repeatPassword, nickname, registrationEnabled]
   );
 
   return (
@@ -394,14 +378,6 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
                     </p>
                   </>
                 )}
-                {step === "confirm-register" && (
-                  <>
-                    <h1 className="text-xl font-semibold text-foreground">登录你的账号</h1>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      你输入的账户 <span className="text-foreground font-medium">{email}</span> 不存在，是否立即注册？
-                    </p>
-                  </>
-                )}
                 {step === "register" && <h1 className="text-xl font-semibold text-foreground">创建新账号</h1>}
               </motion.div>
             </AnimatePresence>
@@ -439,7 +415,7 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
                   startAdornment={<MailIcon className="w-5 h-5" />}
                 />
 
-                <Button isLoading={isLoading} onClick={handleCheckEmail}>
+                <Button isLoading={isLoading} onClick={handleContinueWithEmail}>
                   下一步
                 </Button>
 
@@ -551,28 +527,6 @@ export function LoginForm({ redirectUrl = "/admin", initialStep }: LoginFormProp
                     )}
                   </>
                 )}
-              </motion.div>
-            )}
-
-            {/* Step: 确认注册 */}
-            {step === "confirm-register" && (
-              <motion.div
-                key="confirm-register"
-                variants={pageVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                transition={{ duration: 0.2 }}
-                className="space-y-6"
-              >
-                <div className="pt-2">
-                  <Button onClick={() => switchStep("register")}>注册账号</Button>
-                </div>
-
-                <Button variant="ghost" onClick={() => switchStep("check-email")}>
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  上一步
-                </Button>
               </motion.div>
             )}
 
