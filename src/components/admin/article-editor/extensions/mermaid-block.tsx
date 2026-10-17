@@ -6,6 +6,7 @@ import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Pencil } from "lucide-react";
+import { sanitizeMermaidSvg } from "@/lib/mermaid-security";
 
 // ---- Mermaid 渲染辅助（懒加载） ----
 let mermaidInstance: (typeof import("mermaid"))["default"] | null = null;
@@ -19,7 +20,7 @@ async function getMermaid() {
   if (!mermaidInitialized) {
     mermaidInstance.initialize({
       startOnLoad: false,
-      securityLevel: "loose",
+      securityLevel: "strict",
       theme:
         typeof document !== "undefined" && document.documentElement.classList.contains("dark") ? "dark" : "default",
       flowchart: { useMaxWidth: true, htmlLabels: true },
@@ -184,7 +185,7 @@ function MermaidBlockView({ node, updateAttributes, selected }: NodeViewProps) {
         const id = `mermaid-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
         const { svg } = await mermaid.render(id, code);
         if (!cancelled && currentId === renderIdRef.current) {
-          setRenderState({ svg, error: "", loading: false });
+          setRenderState({ svg: sanitizeMermaidSvg(svg), error: "", loading: false });
         }
       } catch (e) {
         if (!cancelled && currentId === renderIdRef.current) {

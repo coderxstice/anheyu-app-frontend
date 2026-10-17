@@ -15,6 +15,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { renderKatexInElement } from "@/lib/katex-render";
 import { parseMusicPlayerData, renderMusicPlayerHtml } from "@/lib/marked-extensions";
 import { enhanceVideoGalleryFirstFrames } from "@/lib/video-gallery";
+import { sanitizeMermaidSvg } from "@/lib/mermaid-security";
 
 interface ArticleCopyInfo {
   isReprint?: boolean;
@@ -699,7 +700,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
       if (shouldAbort?.()) return;
       mermaid.initialize({
         startOnLoad: false,
-        securityLevel: "loose",
+        securityLevel: "strict",
         theme: isDarkRef.current ? "dark" : "default",
         flowchart: { useMaxWidth: true, htmlLabels: true },
         sequence: { useMaxWidth: true },
@@ -719,7 +720,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
             // 复用旧 wrapper，保留 action div 仅替换 SVG
             const wrapper = block.element as HTMLElement;
             const actionDiv = wrapper.querySelector(".md-editor-mermaid-action");
-            wrapper.innerHTML = svg;
+            wrapper.innerHTML = sanitizeMermaidSvg(svg);
             if (actionDiv) {
               wrapper.appendChild(actionDiv);
             }
@@ -728,7 +729,7 @@ export function PostContent({ content, articleInfo, enableScripts = false }: Pos
             wrapper.className = "md-editor-mermaid";
             wrapper.setAttribute("data-processed", "");
             wrapper.setAttribute("data-mermaid-code", block.code);
-            wrapper.innerHTML = svg;
+            wrapper.innerHTML = sanitizeMermaidSvg(svg);
             block.element.replaceWith(wrapper);
           }
         } catch {
