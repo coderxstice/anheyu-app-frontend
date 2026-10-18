@@ -58,6 +58,59 @@ describe("buildPageMetadata homepage title", () => {
   });
 });
 
+describe("site keywords metadata", () => {
+  it("从 SITE_KEYWORDS 解析站点关键词，并作为页面默认 keywords", async () => {
+    const site = resolveSeoSiteInfo({
+      SITE_KEYWORDS: "李至臣,李懋和，中华道藏, 道教文化",
+    });
+
+    expect(site.keywords).toEqual(["李至臣", "李懋和", "中华道藏", "道教文化"]);
+
+    const metadata = await buildPageMetadata({
+      title: "首页",
+      path: "/",
+      absoluteTitle: true,
+      siteConfig: {
+        SITE_KEYWORDS: "李至臣,李懋和，中华道藏, 道教文化",
+      },
+    });
+
+    expect(metadata.keywords).toEqual(["李至臣", "李懋和", "中华道藏", "道教文化"]);
+  });
+
+  it("空的 SITE_KEYWORDS 不回退到框架默认关键词", async () => {
+    const site = resolveSeoSiteInfo({
+      SITE_KEYWORDS: "",
+    });
+
+    expect(site.keywords).toBeUndefined();
+
+    const metadata = await buildPageMetadata({
+      title: "首页",
+      path: "/",
+      absoluteTitle: true,
+      siteConfig: {
+        SITE_KEYWORDS: "",
+      },
+    });
+
+    expect(metadata.keywords).toBeUndefined();
+  });
+
+  it("页面显式传入的 keywords 优先于站点关键词", async () => {
+    const metadata = await buildPageMetadata({
+      title: "文章",
+      path: "/posts/demo",
+      keywords: ["文章词", "标签"],
+      siteConfig: {
+        SITE_KEYWORDS: "站点词",
+      },
+    });
+
+    expect(metadata.keywords).toEqual(["文章词", "标签"]);
+  });
+});
+
 describe("resolveSeoSiteInfo favicon URL", () => {
   it("uses SITE_DESCRIPTION before SUB_TITLE for SEO descriptions", () => {
     const site = resolveSeoSiteInfo({

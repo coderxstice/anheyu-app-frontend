@@ -33,6 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
     iconUrl: site.iconUrl,
     logoUrl: site.logoUrl,
     siteUrl: site.siteUrl,
+    keywords: site.keywords,
   });
 }
 
@@ -46,6 +47,7 @@ function createMetadata(config: {
   iconUrl?: string;
   logoUrl?: string;
   siteUrl?: string;
+  keywords?: string[];
 }): Metadata {
   const iconUrl = config.iconUrl || "/favicon.ico";
   const logoUrl = config.logoUrl || "/static/img/logo-192x192.png";
@@ -59,7 +61,7 @@ function createMetadata(config: {
       default: config.title,
     },
     description: config.description,
-    keywords: ["博客", "Next.js", "HeroUI", "React", "TypeScript"],
+    ...(config.keywords ? { keywords: config.keywords } : {}),
     alternates: {
       canonical: "/",
     },

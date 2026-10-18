@@ -165,7 +165,7 @@
     padding-left: 0;
     margin: 1em 0;
 
-    li {
+    > li {
       position: relative;
       padding-left: 1.2em;
 
@@ -194,7 +194,7 @@
       counter-reset: ol-counter;
     }
 
-    li {
+    > li {
       position: relative;
       padding-left: 1.75em;
       counter-increment: ol-counter;
