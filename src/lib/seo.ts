@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildArticleSeoKeywords } from "@/lib/article-seo-keywords";
 import type { SiteConfigData } from "@/types/site-config";
 
 const DEFAULT_SITE_NAME = "AnHeYu";
@@ -15,6 +16,7 @@ export interface SeoSiteInfo {
   siteUrl?: string;
   iconUrl: string;
   logoUrl: string;
+  keywords?: string[];
 }
 
 export interface BuildPageMetadataOptions {
@@ -150,6 +152,7 @@ export function resolveSeoSiteInfo(siteConfig?: SiteConfigData | null): SeoSiteI
     siteUrl,
     iconUrl: normalizeFaviconUrl(siteConfig?.ICON_URL),
     logoUrl: siteConfig?.LOGO_URL || siteConfig?.LOGO_URL_192x192 || DEFAULT_LOGO_URL,
+    keywords: buildArticleSeoKeywords(siteConfig?.SITE_KEYWORDS),
   };
 }
 
@@ -290,6 +293,7 @@ export async function buildPageMetadata(options: BuildPageMetadataOptions): Prom
   const canonicalPath = normalizePath(options.path);
   const description = options.description || site.description;
   const image = options.image || site.logoUrl;
+  const keywords = options.keywords ?? site.keywords;
   const noindex = Boolean(options.noindex);
   const shouldEmitCanonical = options.includeCanonical ?? !noindex;
   const ogTitle = options.absoluteTitle ? options.title : `${options.title} | ${site.siteName}`;
@@ -297,7 +301,7 @@ export async function buildPageMetadata(options: BuildPageMetadataOptions): Prom
   return {
     title: options.absoluteTitle ? { absolute: options.title } : options.title,
     description,
-    ...(options.keywords ? { keywords: options.keywords } : {}),
+    ...(keywords ? { keywords } : {}),
     ...(shouldEmitCanonical
       ? {
           alternates: {

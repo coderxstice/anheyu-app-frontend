@@ -9,7 +9,7 @@ import { useState, type ReactNode } from "react";
  *
  * 配置说明：
  * - staleTime: 数据多久后变为"陈旧"状态（5分钟）
- * - gcTime: 垃圾回收时间，数据多久后被清除（1小时）
+ * - gcTime: 浏览器缓存保留 1 小时，服务端关闭查询回收定时器
  * - refetchOnWindowFocus: 窗口聚焦时不自动刷新（避免不必要的请求）
  * - retry: 失败重试次数
  */
@@ -18,7 +18,8 @@ function makeQueryClient() {
     defaultOptions: {
       queries: {
         staleTime: 1000 * 60 * 5, // 5 分钟
-        gcTime: 1000 * 60 * 60, // 1 小时
+        // SSR 每次创建独立客户端，避免定时器把请求对象保留 1 小时。
+        gcTime: typeof window === "undefined" ? Infinity : 1000 * 60 * 60,
         refetchOnWindowFocus: false,
         retry: 1,
         // 在 SSR 时不自动获取数据
