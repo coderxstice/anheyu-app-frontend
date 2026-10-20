@@ -154,6 +154,7 @@ export interface RecentComment {
   content: string;
   article_title: string;
   article_id: string;
+  target_path: string;
   created_at: string;
   status: "approved" | "pending" | "spam";
 }

@@ -681,6 +681,7 @@ const categoryDescriptors: Record<SettingCategoryId, SettingDescriptor[]> = {
     { backendKey: K.KEY_COMMENT_LIMIT_PER_MINUTE, type: "number", defaultValue: "3" },
     { backendKey: K.KEY_COMMENT_LIMIT_LENGTH, type: "number", defaultValue: "500" },
     { backendKey: K.KEY_COMMENT_FORBIDDEN_WORDS, type: "string" },
+    { backendKey: K.KEY_COMMENT_NICKNAME_FORBIDDEN_WORDS, type: "string", defaultValue: "" },
     { backendKey: K.KEY_COMMENT_AI_DETECT_ENABLE, type: "boolean" },
     { backendKey: K.KEY_COMMENT_AI_DETECT_API_URL, type: "string" },
     { backendKey: K.KEY_COMMENT_AI_DETECT_ACTION, type: "string" },

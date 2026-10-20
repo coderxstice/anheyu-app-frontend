@@ -17,6 +17,7 @@ interface DashboardRecentProps {
     content: string;
     article_title: string;
     article_id: string | number;
+    target_path: string;
     created_at: string;
     status: "pending" | "approved" | "spam";
   }>;

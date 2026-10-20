@@ -296,6 +296,7 @@ export const recentCommentsApi = {
           content: comment.content_html || comment.content || "",
           article_title: comment.target_title || comment.target_path,
           article_id: comment.target_path.replace(/^\/(posts|article)\//, ""),
+          target_path: comment.target_path,
           created_at: comment.created_at,
           status: comment.status === 1 ? "approved" : comment.status === 2 ? "pending" : "approved",
         }));

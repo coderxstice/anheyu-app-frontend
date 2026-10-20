@@ -26,6 +26,7 @@ interface RecentComment {
   content: string;
   article_title: string;
   article_id: string | number;
+  target_path: string;
   created_at: string;
   status: CommentStatus;
 }
@@ -125,13 +126,20 @@ export function RecentComments({ comments, onApprove, onReject, className, isLoa
 
                     {/* 来源文章 */}
                     <div className="flex items-center justify-between">
-                      <Link
-                        href={`/admin/post-management/${comment.article_id}`}
-                        className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 truncate max-w-[200px]"
-                      >
-                        <Icon icon="ri:article-line" className="w-3 h-3 shrink-0" />
-                        <span className="truncate">{comment.article_title}</span>
-                      </Link>
+                      {comment.target_path ? (
+                        <Link
+                          href={comment.target_path}
+                          className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 truncate max-w-[200px]"
+                        >
+                          <Icon icon="ri:article-line" className="w-3 h-3 shrink-0" />
+                          <span className="truncate">{comment.article_title}</span>
+                        </Link>
+                      ) : (
+                        <span className="text-xs text-muted-foreground flex items-center gap-1 truncate max-w-[200px]">
+                          <Icon icon="ri:article-line" className="w-3 h-3 shrink-0" />
+                          <span className="truncate">{comment.article_title}</span>
+                        </span>
+                      )}
 
                       {/* 快速操作 */}
                       {comment.status === "pending" && (
