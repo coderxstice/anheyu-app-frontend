@@ -26,6 +26,7 @@ import {
   KEY_COMMENT_LIMIT_PER_MINUTE,
   KEY_COMMENT_LIMIT_LENGTH,
   KEY_COMMENT_FORBIDDEN_WORDS,
+  KEY_COMMENT_NICKNAME_FORBIDDEN_WORDS,
   KEY_COMMENT_AI_DETECT_ENABLE,
   KEY_COMMENT_AI_DETECT_API_URL,
   KEY_COMMENT_AI_DETECT_ACTION,
@@ -206,6 +207,14 @@ export function CommentSettingsForm({ values, onChange, loading }: CommentSettin
           onValueChange={v => onChange(KEY_COMMENT_FORBIDDEN_WORDS, v)}
           minRows={4}
           description="包含违禁词的评论将被自动拦截"
+        />
+        <FormTextarea
+          label="昵称违禁词列表"
+          placeholder="每行一个昵称违禁词"
+          value={values[KEY_COMMENT_NICKNAME_FORBIDDEN_WORDS] ?? ""}
+          onValueChange={v => onChange(KEY_COMMENT_NICKNAME_FORBIDDEN_WORDS, v)}
+          minRows={4}
+          description="每行一个词，也支持中英文逗号分隔；英文不区分大小写。昵称包含任一词将无法提交评论，留空不限制。"
         />
       </SettingsSection>
 

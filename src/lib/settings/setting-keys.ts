@@ -241,6 +241,7 @@ export const KEY_COMMENT_ALLOW_IMAGE_UPLOAD = "comment.allow_image_upload";
 export const KEY_COMMENT_LIMIT_PER_MINUTE = "comment.limit_per_minute";
 export const KEY_COMMENT_LIMIT_LENGTH = "comment.limit_length";
 export const KEY_COMMENT_FORBIDDEN_WORDS = "comment.forbidden_words";
+export const KEY_COMMENT_NICKNAME_FORBIDDEN_WORDS = "comment.nickname_forbidden_words";
 export const KEY_COMMENT_AI_DETECT_ENABLE = "comment.ai_detect_enable";
 export const KEY_COMMENT_AI_DETECT_API_URL = "comment.ai_detect_api_url";
 export const KEY_COMMENT_AI_DETECT_ACTION = "comment.ai_detect_action";

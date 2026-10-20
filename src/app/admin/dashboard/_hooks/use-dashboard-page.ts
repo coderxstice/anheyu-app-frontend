@@ -119,6 +119,7 @@ export function useDashboardPage() {
     content: string;
     article_title: string;
     article_id: string | number;
+    target_path: string;
     created_at: string;
     status: "pending" | "approved" | "spam";
   }> => {
@@ -129,6 +130,7 @@ export function useDashboardPage() {
       content: comment.content,
       article_title: comment.article_title,
       article_id: comment.article_id,
+      target_path: comment.target_path,
       created_at: comment.created_at,
       status: comment.status as "pending" | "approved" | "spam",
     }));
