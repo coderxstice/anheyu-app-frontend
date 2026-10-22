@@ -8,6 +8,7 @@ function shouldSkipPath(pathname: string): boolean {
   if (!pathname) return true;
   // 仅排除后台：/admin 与 /admin/*，避免误伤 /administrator 等前台路径
   if (pathname === "/admin" || pathname.startsWith("/admin/")) return true;
+  if (/^\/posts\/[^/]+\/preview\/?$/.test(pathname)) return true;
   if (pathname.startsWith("/_next")) return true;
   if (pathname.startsWith("/api")) return true;
   return false;
@@ -15,7 +16,7 @@ function shouldSkipPath(pathname: string): boolean {
 
 /**
  * Next.js 为客户端路由，页面请求不经过 Go；需主动 POST /api/public/statistics/visit 写入 visitor_log。
- * 后台 /admin 不统计。
+ * 后台 /admin 和管理员文章预览不统计。
  */
 export function VisitStatisticsTracker() {
   const pathname = usePathname();
