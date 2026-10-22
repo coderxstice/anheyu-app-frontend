@@ -11,6 +11,7 @@ import {
   useImportArticles,
 } from "@/hooks/queries/use-post-management";
 import { articleApi } from "@/lib/api/article";
+import { getArticlePreviewUrl } from "@/lib/article-preview";
 import type { AdminArticle, AdminArticleListParams, ArticleStatus, ReviewStatus } from "@/types/post-management";
 import { useSiteConfigStore } from "@/store/site-config-store";
 import { FALLBACK_COVER } from "@/lib/constants/admin";
@@ -156,7 +157,7 @@ export function usePostManagementPage() {
     (article: AdminArticle, key: string) => {
       switch (key) {
         case "preview":
-          window.open(`/posts/${article.abbrlink || article.id}`, "_blank");
+          window.open(getArticlePreviewUrl(article), "_blank", "noopener,noreferrer");
           break;
         case "edit":
           router.push(`/admin/post-management/${article.id}/edit`);

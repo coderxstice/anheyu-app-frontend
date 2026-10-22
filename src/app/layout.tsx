@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+// 根布局消费 Next.js 为 404 边界预加载的样式，避免正常页面出现 unused preload 警告。
+import "./not-found.module.css";
 import { Providers } from "@/providers";
 import { renderCustomBodyHtml, renderCustomHeadHtml } from "@/lib/custom-html";
 import {

@@ -11,7 +11,7 @@
  */
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
 import Link from "next/link";
 import { FaHashtag } from "react-icons/fa6";
 import { PostHeader } from "./PostHeader";
@@ -37,6 +37,7 @@ import styles from "./PostDetail.module.css";
 interface PostDetailContentProps {
   article: Article;
   recentArticles?: RecentArticle[];
+  previewNotice?: ReactNode;
 }
 
 function buildArticleContentWithCustomJS(contentHTML: string, customJS?: string): string {
@@ -51,7 +52,8 @@ function hasCustomPostHTML(value: unknown): value is string {
   return typeof value === "string" && value.trim() !== "";
 }
 
-export function PostDetailContent({ article, recentArticles = [] }: PostDetailContentProps) {
+export function PostDetailContent({ article, recentArticles = [], previewNotice }: PostDetailContentProps) {
+  const isPreview = article.is_preview === true;
   const commentConfig = useSiteConfigStore(useShallow(state => state.siteConfig?.comment));
   const appName = useSiteConfigStore(state => state.siteConfig?.APP_NAME);
   const siteOwnerName = useSiteConfigStore(state => state.siteConfig?.frontDesk?.siteOwner?.name);
@@ -64,7 +66,7 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
   const setPageTitle = usePageStore(state => state.setPageTitle);
   const isCommentBarrageVisible = useUiStore(state => state.isCommentBarrageVisible);
   const isCommentEnabled =
-    commentConfig?.enable === undefined || commentConfig?.enable === true || commentConfig?.enable === "true";
+    !isPreview && (commentConfig?.enable === undefined || commentConfig?.enable === true || commentConfig?.enable === "true");
   const isCommentBarrageEnabledBySite =
     commentConfig?.barrage_enable === undefined ||
     commentConfig?.barrage_enable === true ||
@@ -128,7 +130,7 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
   const defaultCover = useMemo(() => resolvePostDefaultCoverUrl(postDefaultCover), [postDefaultCover]);
   const customJS = article.extra_config?.custom_js;
   const hasCustomJS = !!customJS && customJS.trim() !== "";
-  const isRelatedEnabled = articleShowRelated !== false && articleShowRelated !== "false";
+  const isRelatedEnabled = !isPreview && articleShowRelated !== false && articleShowRelated !== "false";
   const contentWithCustomJS = useMemo(
     () => buildArticleContentWithCustomJS(article.content_html, customJS),
     [article.content_html, customJS]
@@ -138,6 +140,10 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
     <div className={styles.postDetailContainer}>
       {/* 文章头部 */}
       <PostHeader article={article} defaultCoverUrl={defaultCover} />
+
+      {isPreview && previewNotice && (
+        <div className="relative z-[3] mx-auto w-full max-w-[1400px] bg-background px-6 py-4">{previewNotice}</div>
+      )}
 
       {/* 主内容区域 */}
       <div className={styles.layout}>
@@ -211,7 +217,7 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
             </div>
 
             {/* 评论区 */}
-            <CommentSection targetTitle={article.title} className={styles.commentSection} />
+            {!isPreview && <CommentSection targetTitle={article.title} className={styles.commentSection} />}
           </div>
         </main>
 
@@ -229,13 +235,13 @@ export function PostDetailContent({ article, recentArticles = [] }: PostDetailCo
       </div>
 
       {/* 右下角：上一篇/下一篇浮动卡片 + 热评弹幕（受系统设置与用户开关双重控制） */}
-      <PostPaginationFloat
+      {!isPreview && <PostPaginationFloat
         prevArticle={article.prev_article}
         nextArticle={article.next_article}
         commentBarrageEnabled={
           isCommentEnabled && isCommentBarrageEnabledBySite && isCommentBarrageVisible
         }
-      />
+      />}
       {isCommentEnabled && isCommentBarrageEnabledBySite && isCommentBarrageVisible && (
         <CommentBarrage
           gravatarUrl={gravatarUrl || "https://cravatar.cn/"}

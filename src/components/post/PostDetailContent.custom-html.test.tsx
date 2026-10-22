@@ -85,4 +85,16 @@ describe("PostDetailContent custom post HTML", () => {
     expect(topHTML!.compareDocumentPosition(postContent) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(postContent.compareDocumentPosition(bottomHTML!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
+
+  it("预览复用文章头部、正文、版权和侧栏，同时不挂载评论及相关推荐", () => {
+    render(<PostDetailContent article={{ ...article, is_preview: true }} />);
+
+    for (const testId of ["post-header", "article-summary", "post-content", "post-copyright", "post-sidebar"]) {
+      expect(screen.getByTestId(testId)).toBeInTheDocument();
+    }
+    expect(screen.queryByTestId("comment-section")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("comment-barrage")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("related-posts")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("post-pagination-float")).not.toBeInTheDocument();
+  });
 });

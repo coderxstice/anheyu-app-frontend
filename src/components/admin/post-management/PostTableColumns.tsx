@@ -5,6 +5,7 @@ import Image from "next/image";
 import { User, Chip, Button } from "@heroui/react";
 import { FileText, Eye, Trash2 } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
+import { getArticlePreviewUrl } from "@/lib/article-preview";
 import { formatDateTimeParts } from "@/utils/date";
 import { FALLBACK_COVER } from "@/lib/constants/admin";
 import type { AdminArticle } from "@/types/post-management";
@@ -62,7 +63,7 @@ export function usePostRenderCell({ defaultCover, gravatarBaseUrl, onAction }: U
         }
         case "article": {
           const coverSrc = article.cover_url || defaultCover;
-          const previewUrl = `/posts/${article.abbrlink || article.id}`;
+          const previewUrl = getArticlePreviewUrl(article);
           const cat = article.post_categories?.[0];
           const tag = article.post_tags?.[0];
           // 标题为空列表展示默认文案
